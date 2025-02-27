@@ -114,8 +114,8 @@ public:
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met.
-    /// @pre Client should be logged in with the same user that created the message (ClientId of the message should match the current logged in
-    /// user).
+    /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
+    /// in user).
     CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     /// @brief Retrieves message details that are represented by this component.
@@ -140,8 +140,8 @@ public:
     /// @param Callback csp::multiplayer::ConversationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met.
-    /// @pre Client should be logged in with the same user that created the conversation (ClientId of the message should match the current logged in
-    /// user).
+    /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
+    /// in user).
     CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
 
     /// @brief Retrieves message details for a specified message in this conversation.
@@ -159,8 +159,8 @@ public:
     /// @param Callback csp::multiplayer::MessageResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met.
-    /// @pre Client should be logged in with the same user that created the message (ClientId of the message should match the current logged in
-    /// user).
+    /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
+    /// in user).
     CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
