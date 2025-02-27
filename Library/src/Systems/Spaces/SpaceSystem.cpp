@@ -150,11 +150,11 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 }
 
 /* EnterSpace Continuations */
-auto SpaceSystem::AddUserToSpaceIfNeccesary(NullResultCallback Callback, SpaceSystem& SpaceSystem)
+auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem)
 {
     return [Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNeccesary");
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNecessary");
 
         /* Once we have permissions to discover a space, attempt to enter it */
         const auto& SpaceToJoin = GetSpaceResult.GetSpace();
@@ -236,7 +236,7 @@ auto SpaceSystem::RefreshMultiplayerScopes()
  * ** EnterSpace Flow **
  * GetSpace
  * AssertRequestSuccessOrError (GetSpace Validation)
- * AddUserToSpaceIfNeccesary
+ * AddUserToSpaceIfNecessary
  * AssertRequestSuccessOrError (AddUserToSpace Validation)
  * FireEnterSpaceEvent
  * RefreshMultiplayerScopes
@@ -253,7 +253,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
             csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully discovered space.",
                 "Logged in user does not have permission to discover this space. Failed to enter space.", {}, {}, {}))
-        .then(async::inline_scheduler(), AddUserToSpaceIfNeccesary(Callback, *this))
+        .then(async::inline_scheduler(), AddUserToSpaceIfNecessary(Callback, *this))
         .then(async::inline_scheduler(),
             csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",

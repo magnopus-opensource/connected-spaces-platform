@@ -372,7 +372,7 @@ private:
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
     // EnterSpace Continuations
-    auto AddUserToSpaceIfNeccesary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
+    auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
     // Wraps RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
     auto RefreshMultiplayerScopes();
