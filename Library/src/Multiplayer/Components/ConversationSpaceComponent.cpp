@@ -35,7 +35,7 @@ namespace
         if (ConversationId.IsEmpty())
         {
             CSP_LOG_ERROR_MSG("This component does not have an associated conversation."
-                              "Call CreateConversation to crete a new conversation for this component");
+                              "Call CreateConversation to create a new conversation for this component");
             return false;
         }
 

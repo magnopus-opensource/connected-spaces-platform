@@ -344,7 +344,7 @@ void ConversationSystemInternal::GetMessageInfo(
 void ConversationSystemInternal::SetMessageInfo(const common::String& ConversationId, const common::String& MessageId,
     const multiplayer::MessageInfo& MessageData, multiplayer::MessageResultCallback Callback)
 {
-    // 1. Get message assey collection
+    // 1. Get message asset collection
     AssetCollectionResultCallback GetMessageCallback = [this, Callback, MessageId, MessageData](const AssetCollectionResult& GetMessageResult)
     {
         if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
