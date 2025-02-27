@@ -59,7 +59,6 @@ config = Config(
         ],
         ios=[
             "libConnectedSpacesPlatform.a",
-            "libConnectedSpacesPlatform_D.zip",
             "libcrypto.a",
             "libssl.a"
         ],
