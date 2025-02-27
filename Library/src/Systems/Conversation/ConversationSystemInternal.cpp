@@ -308,7 +308,7 @@ void ConversationSystemInternal::SetConversationInfo(
 
         multiplayer::MessageInfo NewConversationData(ConversationData);
 
-        // Create a timestamp if non was specified
+        // Create a timestamp if none was specified
         if (NewConversationData.EditedTimestamp.IsEmpty())
         {
             const auto CurrentConversationData

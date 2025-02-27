@@ -95,7 +95,7 @@ public:
     /// This component should now be replicated, so other clients receive the update.
     CSP_ASYNC_RESULT void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
 
-    /// @brief Deletes this conversation, including all of it's messages. This function is called internally when the component is deleted.
+    /// @brief Deletes this conversation, including all of its messages. This function is called internally when the component is deleted.
     /// @param Callback csp::systems::NullResultCallback : callback when asynchronous task finishes
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met.

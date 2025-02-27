@@ -498,7 +498,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         // Due to the way events are registered, we sometimes receive the event before the ConversationId is set,
         // which is needed to correctly register it to the system to receive events.
-        // Because of this, we re-register the callback which wil internally flush the event buffer.
+        // Because of this, we re-register the callback which will internally flush the event buffer.
         // This issue will not exist in a real-world scenario, as multiplayer events aren't received locally
         // and a system is in place to always flush the event buffer after the conversation Id is set from the patch.
         ConversationComponent->SetConversationUpdateCallback(Callback);
