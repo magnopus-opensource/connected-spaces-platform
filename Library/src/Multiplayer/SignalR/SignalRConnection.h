@@ -21,12 +21,20 @@
 #include <functional>
 #include <signalrclient/hub_connection_builder.h>
 
+CSP_START_IGNORE
+class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
+CSP_END_IGNORE
+
 namespace csp::multiplayer
 {
 
 class SignalRConnection
 {
 public:
+    /** @cond DO_NOT_DOCUMENT */
+    friend class ::CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
+    /** @endcond */
+
     typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
 
     SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient);

@@ -25,9 +25,12 @@
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
+#include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <filesystem>
+#include <tuple>
+#include <uuid_v4.h>
 
 using namespace csp::common;
 using namespace csp::systems;
@@ -1846,7 +1849,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-    const char* TestUserEmail = "testnopus.pokemon@magnopus.com";
+    // It is not possible to record pending invites and see them decrement as they are accepted,
+    // because the invites are sent by email and have to be accepted by clicking a link in them.
+    // The test suite does not have the capability to open emails and click links in them.
+    // The workaround is to test each separately.
+    // Using an email that is not associated to any existing account, only the pending invites counter increases (the accepted invites counter remains
+    // at 0).
+
+    // This test only works if the below email is not associated to any existing account.
+    const char* TestUserEmail = "non-existing.account@magnopus.com";
     const char* TestEmailLinkUrl = "https://dev.magnoverse.space/";
     const char* TestSignupUrl = "https://dev.magnoverse.space/";
 
@@ -1856,23 +1867,110 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
+    // Check that there are no pending invites before inviting a user
+    auto [GetInvitesResultBefore] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetInvitesResultBefore.GetResultCode(), csp::systems::EResultCode::Success);
+    auto& PendingInvitesBefore = GetInvitesResultBefore.GetPendingInvitesEmails();
+    EXPECT_EQ(PendingInvitesBefore.Size(), 0);
 
+    // Invite a user to the space
+    auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
+    // Check that there is one pending invite after inviting a user
     auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
-
     EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
-
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
-
     EXPECT_EQ(PendingInvites.Size(), 1);
-
     for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
 
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_ACCEPTED_INVITES_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    const char* TestEmailLinkUrl = "https://dev.magnoverse.space/";
+    const char* TestSignupUrl = "https://dev.magnoverse.space/";
+
+    // Create users
+    String SpaceCreatorUserId;
+    csp::systems::Profile SpaceCreatorUser = CreateTestUser();
+
+    String User1Id;
+    csp::systems::Profile User1 = CreateTestUser();
+    csp::systems::Profile User2 = CreateTestUser();
+
+    // It is not possible to record pending invites and see them decrement as they are accepted,
+    // because the invites are sent by email and have to be accepted by clicking a link in them.
+    // The test suite does not have the capability to open emails and click links in them.
+    // The workaround is to test each separately.
+    // Using an account that already exists, only the accepted invites counter increases (the pending invites counter remains at 0).
+    // Note that all invites are accepted at once on the test tenant.
+
+    // Log in as Space Creator and create space
+    LogIn(UserSystem, SpaceCreatorUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
+
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Check that there are no accepted invites before inviting users
+    auto [GetAcceptedInvitesResultBefore] = AWAIT_PRE(SpaceSystem, GetAcceptedUserInvites, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetAcceptedInvitesResultBefore.GetResultCode(), csp::systems::EResultCode::Success);
+    auto& AcceptedInvitesBefore = GetAcceptedInvitesResultBefore.GetAcceptedInvitesUserIds();
+    EXPECT_EQ(AcceptedInvitesBefore.Size(), 0);
+
+    // Invite User1 and User2 to the space
+    auto [ResultInviteUser1]
+        = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, User1.Email, nullptr, TestEmailLinkUrl, TestSignupUrl);
+    EXPECT_EQ(ResultInviteUser1.GetResultCode(), csp::systems::EResultCode::Success);
+    auto [ResultInviteUser2]
+        = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, User2.Email, nullptr, TestEmailLinkUrl, TestSignupUrl);
+    EXPECT_EQ(ResultInviteUser2.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Log out as Space Creator
+    LogOut(UserSystem);
+
+    // Log in as User1 and enter the space, which triggers invite acceptance on the test tenant (for all users, so including User2)
+    LogIn(UserSystem, User1Id, User1.Email, GeneratedTestAccountPassword);
+
+    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    ASSERT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Log back in as Space Creator to check the accepted invites
+    LogOut(UserSystem);
+    LogIn(UserSystem, SpaceCreatorUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
+
+    // Check the accepted invites are recorded correctly
+    auto [GetAcceptedInvitesResult] = AWAIT_PRE(SpaceSystem, GetAcceptedUserInvites, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(GetAcceptedInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
+    auto& AcceptedInvites = GetAcceptedInvitesResult.GetAcceptedInvitesUserIds();
+    EXPECT_EQ(AcceptedInvites.Size(), 2);
+    for (auto idx = 0; idx < AcceptedInvites.Size(); ++idx)
+    {
+        std::cerr << "Accepted space invite for user id: " << AcceptedInvites[idx] << std::endl;
+    }
+
+    // Clean up
     DeleteSpace(SpaceSystem, Space.Id);
 
     LogOut(UserSystem);
@@ -2953,5 +3051,359 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
     // Log out
     LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ENTER_SPACE_PERMISSIONS_MATRIX_TESTS
+namespace CSPEngine
+{
+/*
+ * Test all the permutations of EnterSpace, concerning space visibility and invite permissions.
+ * Ensure that the method returns the correct success/failure's
+ * First: The Attributes the space should be built with (gated, requiresinvite, etc)
+ * Second: The expected result code from attempting to enter the space
+ * Third: A string that is expected to be contained in stdout, (ie, what error message do we expect)
+ */
+
+class EnterSpaceWhenGuest : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+{
+};
+
+class EnterSpaceWhenUninvited : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+{
+};
+
+class EnterSpaceWhenInvited : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+{
+};
+
+class EnterSpaceWhenCreator : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+{
+};
+
+class EnterSpaceWhenBanned : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+{
+};
+
+TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
+{
+    // Conditions & Expectations
+    const SpaceAttributes SpacePermission = std::get<0>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
+    const std::string ExpectedMsg = std::get<2>(GetParam());
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    // Create a space according to param attribute
+    String SpaceOwnerUserId;
+    csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    Space CreatedSpace;
+    CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
+
+    // Log in as guest
+    String GuestUserId;
+    LogInAsGuest(UserSystem, GuestUserId);
+
+    // Attempt to enter the space and check the expected result
+    testing::internal::CaptureStderr();
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // Log out
+    LogOut(UserSystem);
+
+    // Login as owner user in order to be able to delete the test space
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    DeleteSpace(SpaceSystem, CreatedSpace.Id);
+    LogOut(UserSystem);
+}
+
+TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
+{
+    // Conditions & Expectations
+    const SpaceAttributes SpacePermission = std::get<0>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
+    const std::string ExpectedMsg = std::get<2>(GetParam());
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    // Create a space according to param attribute
+    String SpaceOwnerUserId;
+    csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    Space CreatedSpace;
+    CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
+
+    // Log in as another user who isn't invited
+    String UninvitedUserId;
+    csp::systems::Profile UninvitedUser = CreateTestUser();
+    LogIn(UserSystem, UninvitedUserId, UninvitedUser.Email, GeneratedTestAccountPassword);
+
+    // Attempt to enter the space and check the expected result
+    testing::internal::CaptureStderr();
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // Log out
+    LogOut(UserSystem);
+
+    // Login as owner user in order to be able to delete the test space
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    DeleteSpace(SpaceSystem, CreatedSpace.Id);
+    LogOut(UserSystem);
+}
+
+TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
+{
+    // Conditions & Expectations
+    const SpaceAttributes SpacePermission = std::get<0>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
+    const std::string ExpectedMsg = std::get<2>(GetParam());
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    // Create a space according to param attribute, and invite a user
+    csp::systems::Profile InvitedUser = CreateTestUser();
+
+    InviteUserRoleInfo InviteUser;
+    InviteUser.UserEmail = InvitedUser.Email;
+    InviteUser.UserRole = SpaceUserRole::User;
+    InviteUserRoleInfoCollection InviteUsers;
+    InviteUsers.InviteUserRoleInfos = { InviteUser };
+
+    String SpaceOwnerUserId;
+    csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    Space CreatedSpace;
+    CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, InviteUsers, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
+
+    // Log in as invited user
+    String InvitedUserId;
+    LogIn(UserSystem, InvitedUserId, InvitedUser.Email, GeneratedTestAccountPassword);
+
+    // Attempt to enter the space and check the expected result
+    testing::internal::CaptureStderr();
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // Log out
+    LogOut(UserSystem);
+
+    // Login as owner user in order to be able to delete the test space
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    DeleteSpace(SpaceSystem, CreatedSpace.Id);
+    LogOut(UserSystem);
+}
+
+TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
+{
+    // Conditions & Expectations
+    const SpaceAttributes SpacePermission = std::get<0>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
+    const std::string ExpectedMsg = std::get<2>(GetParam());
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    // Create a space according to param attribute
+    String SpaceOwnerUserId;
+    csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    Space CreatedSpace;
+    CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
+
+    // Attempt to enter the space and check the expected result
+    testing::internal::CaptureStderr();
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // Delete test space
+    DeleteSpace(SpaceSystem, CreatedSpace.Id);
+    LogOut(UserSystem);
+}
+
+TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
+{
+    // Conditions & Expectations
+    const SpaceAttributes SpacePermission = std::get<0>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
+    const std::string ExpectedMsg = std::get<2>(GetParam());
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    // Create a space according to param attribute, and ban a user
+    csp::systems::Profile BannedUser = CreateTestUser();
+
+    // Invite the banned user, to make sure that bans apply even if invited.
+    InviteUserRoleInfo InviteUser;
+    InviteUser.UserEmail = BannedUser.Email;
+    InviteUser.UserRole = SpaceUserRole::User;
+    InviteUserRoleInfoCollection InviteUsers;
+    InviteUsers.InviteUserRoleInfos = { InviteUser };
+
+    String SpaceOwnerUserId;
+    csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    Space CreatedSpace;
+    CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, InviteUsers, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
+
+    // Log in as banned user
+    String BannedUserId;
+    LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
+    // In order to ban the user, they have to have entered the space. (This seems like an underthought limitation)
+    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    LogOut(UserSystem);
+
+    // Log back in as owner and ban the user
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    auto [Result] = AWAIT_PRE(SpaceSystem, AddUserToSpaceBanList, RequestPredicate, CreatedSpace.Id, BannedUser.UserId);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    LogOut(UserSystem);
+
+    // Login as the banned user and attempt to enter the space and check the expected result
+    LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
+    testing::internal::CaptureStderr();
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // Log out
+    LogOut(UserSystem);
+
+    // Login as owner user in order to be able to delete the test space
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    DeleteSpace(SpaceSystem, CreatedSpace.Id);
+    LogOut(UserSystem);
+}
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenGuest,
+    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+                        "Logged in user does not have permission to join this space. Failed to add to space."),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."), // RequiresInvite == Private, although the
+                                                                                                       // name dosen't really convey it. :(
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenUninvited,
+    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+                        "Logged in user does not have permission to join this space. Failed to add to space."),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenInvited,
+    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenCreator,
+    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenBanned,
+    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+                        "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space."),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.")));
 }
 #endif

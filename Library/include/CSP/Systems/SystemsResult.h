@@ -20,6 +20,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Systems/WebService.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 
 namespace csp::multiplayer
 {
@@ -59,6 +60,10 @@ public:
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
     CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode)) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
 protected:
     CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)

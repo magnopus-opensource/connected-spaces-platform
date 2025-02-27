@@ -29,7 +29,7 @@ FogSpaceComponentScriptInterface::FogSpaceComponentScriptInterface(FogSpaceCompo
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, FogMode, int64_t, FogMode);
+DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, FogMode, int32_t, FogMode);
 
 DEFINE_SCRIPT_PROPERTY_VEC3(FogSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(FogSpaceComponent, Rotation);
