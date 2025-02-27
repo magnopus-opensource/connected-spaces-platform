@@ -46,11 +46,11 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsAutoResize);
     DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
+    DECLARE_SCRIPT_PROPERTY(int32_t, PlaybackState);
     DECLARE_SCRIPT_PROPERTY(float, CurrentPlayheadPosition);
     DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, VideoPlayerSourceType);
+    DECLARE_SCRIPT_PROPERTY(int32_t, VideoPlayerSourceType);
 
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 

@@ -52,7 +52,7 @@ Examples for each supported language are below.
 ****
  ## ©️ License
 
- [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+ [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/LICENSE)
 
 ```eval_rst
 .. toctree::

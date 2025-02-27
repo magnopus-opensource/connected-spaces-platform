@@ -123,6 +123,13 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 namespace csp::systems
 {
 
+bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
+{
+    return std::any_of(UserIds.cbegin(), UserIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || std::any_of(ModeratorIds.cbegin(), ModeratorIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || UserId == OwnerId;
+}
+
 const Space& SpaceResult::GetSpace() const { return Space; }
 
 const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }
@@ -282,6 +289,36 @@ void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiR
         for (auto idx = 0; idx < PendingInvitesArray.size(); ++idx)
         {
             PendingInvitesEmailAddresses[idx] = PendingInvitesArray[idx].GetEmail();
+        }
+    }
+}
+
+Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() { return AcceptedInvitesUserIds; }
+
+const Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() const { return AcceptedInvitesUserIds; }
+
+void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto* AcceptedInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        // Build the Dto from the response Json
+        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent());
+
+        // Extract data from response in our accepted invites array
+        std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
+        AcceptedInvitesUserIds = Array<String>(AcceptedInvitesArray.size());
+
+        for (auto idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
+        {
+            if (AcceptedInvitesArray[idx].HasId())
+            {
+                AcceptedInvitesUserIds[idx] = AcceptedInvitesArray[idx].GetId();
+            }
         }
     }
 }

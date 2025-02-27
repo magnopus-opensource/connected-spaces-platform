@@ -91,6 +91,11 @@ public:
     /// @brief Virtual destructor.
     virtual ~ResultBase() = default;
 
+    // @brief Equality operator
+    bool operator==(const ResultBase& other) const;
+    // @brief Inequality operator
+    bool operator!=(const ResultBase& other) const;
+
     /// @brief Called when progress has been updated.
     /// @param ApiResponse const ApiResponseBase* : Response received from the request
     CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);

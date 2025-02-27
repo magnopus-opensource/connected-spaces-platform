@@ -32,8 +32,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-    DECLARE_SCRIPT_PROPERTY(int64_t, CollisionShape);
-    DECLARE_SCRIPT_PROPERTY(int64_t, CollisionMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, CollisionShape);
+    DECLARE_SCRIPT_PROPERTY(int32_t, CollisionMode);
     DECLARE_SCRIPT_PROPERTY(std::string, CollisionAssetId);
     DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
 };

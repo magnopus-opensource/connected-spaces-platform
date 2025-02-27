@@ -27,8 +27,8 @@ public:
     AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
-    DECLARE_SCRIPT_PROPERTY(int64_t, AudioType);
+    DECLARE_SCRIPT_PROPERTY(int32_t, PlaybackState);
+    DECLARE_SCRIPT_PROPERTY(int32_t, AudioType);
     DECLARE_SCRIPT_PROPERTY(std::string, AudioAssetId);
     DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
     DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);

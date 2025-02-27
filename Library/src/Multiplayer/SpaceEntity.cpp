@@ -538,7 +538,7 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
                 }
             }
 
-            ComponentBase DeletionComponent(ComponentType::Invalid, const_cast<SpaceEntity*>(this));
+            ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
 
             for (i = 0; i < TransientDeletionComponentIds.Size(); ++i)
             {

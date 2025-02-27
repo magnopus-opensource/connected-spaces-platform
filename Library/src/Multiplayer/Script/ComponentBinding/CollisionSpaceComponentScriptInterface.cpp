@@ -33,8 +33,8 @@ DEFINE_SCRIPT_PROPERTY_VEC3(CollisionSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(CollisionSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_VEC3(CollisionSpaceComponent, Scale);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, csp::multiplayer::CollisionMode, int64_t, CollisionMode);
-DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, csp::multiplayer::CollisionShape, int64_t, CollisionShape);
+DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, csp::multiplayer::CollisionMode, int32_t, CollisionMode);
+DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, csp::multiplayer::CollisionShape, int32_t, CollisionShape);
 
 DEFINE_SCRIPT_PROPERTY_STRING(CollisionSpaceComponent, CollisionAssetId);
 DEFINE_SCRIPT_PROPERTY_STRING(CollisionSpaceComponent, AssetCollectionId);

@@ -34,7 +34,7 @@ To contribute code changes or bug fixes, follow these steps:
 4. Write unit tests, if applicable, to validate the changes.
 5. Commit your changes with clear and concise commit messages.
 6. Push the changes to your forked repository.
-7. Open a pull request against the repository's develop branch.
+7. Open a pull request against the repository's main branch.
 8. Provide a clear description of the changes, filling out any of the boilerplate information requested, include any related issues or feature requests.
 
 Our team will review your pull request, provide feedback, and work with you to address any necessary changes. Once approved, your changes will be merged into the repository.
