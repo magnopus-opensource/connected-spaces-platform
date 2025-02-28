@@ -20,7 +20,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
 #include <unordered_set>
@@ -90,6 +89,8 @@ public:
 
     void DeleteMessages(const csp::common::String& ConversationId, csp::common::Array<csp::systems::AssetCollection>& Messages,
         csp::systems::NullResultCallback Callback);
+
+    void GetNumberOfReplies(const common::String& ConversationId, csp::multiplayer::NumberOfRepliesResultCallback Callback);
 
     void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
     void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);

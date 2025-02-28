@@ -193,6 +193,29 @@ void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& Messa
     ConversationSystem->SetMessageInfo(ConversationId, MessageId, MessageData, Callback);
 }
 
+void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NumberOfRepliesResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetNumberOfReplies(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
+{
+    ConversationUpdateCallback = Callback;
+
+    // Flush events now that we have a callback, as we may have events stored for us.
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->FlushEvents();
+}
+
 bool ConversationSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)); }
 
 void ConversationSpaceComponent::SetIsVisible(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible), Value); }
@@ -223,15 +246,6 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
     SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
 
-void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
-{
-    ConversationUpdateCallback = Callback;
-
-    // Flush events now that we have a callback, as we may have events stored for us.
-    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->FlushEvents();
-}
-
 void ConversationSpaceComponent::SetIsActive(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value); }
 
 void ConversationSpaceComponent::SetTitle(const csp::common::String& Value)
@@ -256,12 +270,6 @@ void ConversationSpaceComponent::SetConversationCameraPosition(const csp::common
 const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPosition() const
 {
     return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
-}
-
-const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
-{
-    // TODO: Implement getNumberOfReplies - OF-1385
-    return 0;
 }
 
 void ConversationSpaceComponent::OnCreated()

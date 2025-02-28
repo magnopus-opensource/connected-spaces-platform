@@ -148,4 +148,8 @@ void ConversationResult::FillConversationInfo(const csp::systems::AssetCollectio
 
     ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
 }
+
+uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
+
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
 } // namespace csp::multiplayer

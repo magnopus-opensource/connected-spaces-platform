@@ -63,8 +63,8 @@ enum class ConversationPropertyKeys
     Num
 };
 
-/// @ingroup Conversation
-/// @brief Add a conversation with a comment thread to your space. These conversations have a spatial representation.
+/// @ingroup ConversationSpaceComponent
+/// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
 class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
 {
     CSP_START_IGNORE
@@ -163,6 +163,12 @@ public:
     /// in user).
     CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
+    /// @brief Gets the Number Of Replies in the conversation.
+    /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
+    CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
+
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.
@@ -208,9 +214,6 @@ public:
     /// @brief Gets the value for the camera position of the conversation.
     /// @return The camera view position.
     const csp::common::Vector3& GetConversationCameraPosition() const;
-
-    /// @brief Gets the Number Of Replies of the conversation.
-    const int64_t GetNumberOfReplies() const;
 
 protected:
     void OnCreated() override;

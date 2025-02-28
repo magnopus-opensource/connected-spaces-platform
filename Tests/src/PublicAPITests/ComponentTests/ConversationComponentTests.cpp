@@ -133,7 +133,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
         EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
 
         EXPECT_EQ(ConversationComponent->GetTitle(), "");
-        EXPECT_EQ(ConversationComponent->GetNumberOfReplies(), 0);
 
         ConversationComponent->SetTitle("TestTitle");
         ConversationComponent->SetResolved(true);
@@ -363,6 +362,128 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_NUMBER_OF_REPLIES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepliesTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    {
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+
+        // Create object to represent the conversation
+        csp::common::String ObjectName = "Object 1";
+        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+        // Create conversation component
+        auto* ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+
+        csp::common::String ConversationId;
+        csp::common::String MessageId;
+
+        {
+            auto [Result] = AWAIT(ConversationComponent, CreateConversation, "TestMessage");
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_TRUE(Result.GetValue() != "");
+
+            ConversationId = Result.GetValue();
+        }
+
+        // Ensure reply count is 0
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, GetNumberOfReplies, RequestPredicate);
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_EQ(Result.GetCount(), 0);
+        }
+
+        // Add a reply
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "TestReply");
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            MessageId = Result.GetMessageInfo().MessageId;
+
+            EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
+        }
+
+        // Ensure reply count is 1
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, GetNumberOfReplies, RequestPredicate);
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_EQ(Result.GetCount(), 1);
+        }
+
+        // Add another reply
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "TestReply1");
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            MessageId = Result.GetMessageInfo().MessageId;
+
+            EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
+        }
+
+        // Ensure reply count is 2
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, GetNumberOfReplies, RequestPredicate);
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_EQ(Result.GetCount(), 2);
+        }
+
+        // Delete the last message
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, DeleteMessage, RequestPredicate, MessageId);
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        }
+
+        // Ensure reply count is 1
+        {
+            auto [Result] = AWAIT_PRE(ConversationComponent, GetNumberOfReplies, RequestPredicate);
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_EQ(Result.GetCount(), 1);
+        }
+
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    };
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 {
@@ -371,6 +492,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -380,6 +502,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 
     // Create space
     csp::systems::Space Space;
+
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
@@ -442,7 +565,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
-
+    // Log out
     LogOut(UserSystem);
 }
 #endif

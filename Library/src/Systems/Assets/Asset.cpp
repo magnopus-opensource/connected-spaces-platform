@@ -174,6 +174,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         Asset.MimeType = Dto.GetMimeType();
     }
 }
+
 } // namespace csp::systems
 
 namespace csp::systems

@@ -251,8 +251,7 @@ private:
     UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
     ~UserSystem();
 
-    [[nodiscard]]
-    bool EmailCheck(const std::string& Email) const;
+    [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
     void ResetAuthenticationState();

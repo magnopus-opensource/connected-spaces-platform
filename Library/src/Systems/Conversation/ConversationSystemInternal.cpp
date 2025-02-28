@@ -444,6 +444,20 @@ void ConversationSystemInternal::DeleteMessages(
     AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
 }
 
+void ConversationSystemInternal::GetNumberOfReplies(const common::String& ConversationId, csp::multiplayer::NumberOfRepliesResultCallback Callback)
+{
+    auto GetMessageCountCallback = [Callback](const csp::systems::AssetCollectionCountResult& GetMessageResult)
+    {
+        csp::multiplayer::NumberOfRepliesResult Result(GetMessageResult);
+        Result.Count = GetMessageResult.GetCount();
+        Callback(Result);
+    };
+
+    static const csp::common::Array<csp::systems::EAssetCollectionType> PrototypeTypes = { csp::systems::EAssetCollectionType::COMMENT };
+
+    AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
+}
+
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
 {
     Components.insert(Component);

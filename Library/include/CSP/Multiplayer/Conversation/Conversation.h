@@ -259,6 +259,42 @@ private:
     MessageInfo ConvoInfo;
 };
 
+/// @ingroup Conversation
+/// @brief Data class used to contain information for GetNumberOfReplies.
+class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Gets the number of replies from the result
+    /// @return : The number of replies
+    uint64_t GetCount() const;
+
+    CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+private:
+    explicit NumberOfRepliesResult(void*) {};
+    NumberOfRepliesResult() = default;
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+
+    uint64_t Count;
+};
+
+/// @brief Callback containing number of replies.
+/// @param Result NumberOfRepliesResult : result class
+typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
+
 // callback signatures
 // Callback providing a result object with one message info object.
 typedef std::function<void(const MessageResult& Result)> MessageResultCallback;

@@ -240,4 +240,16 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
         }
     }
 }
+uint64_t AssetCollectionCountResult::GetCount() const { return Count; }
+void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    const auto* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        Count = std::stoull(Response->GetPayload().GetContent().c_str());
+    }
+}
 } // namespace csp::systems
