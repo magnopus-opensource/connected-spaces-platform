@@ -163,8 +163,10 @@ public:
     /// in user).
     CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
-    /// @brief Gets the Number Of Replies of the conversation.
-    /// @param Callback NumberOfRepliesResultCallback : callback when asynchronous task finishes
+    /// @brief Gets the Number Of Replies in the conversation.
+    /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
 
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
