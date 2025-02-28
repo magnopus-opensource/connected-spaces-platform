@@ -19,6 +19,7 @@
 #include "CLIArgs.h"
 #include "LoginRAII.h"
 #include "RunnableTests/CreateAvatar.h"
+#include "RunnableTests/CreateConversation.h"
 #include "SpaceRAII.h"
 #include "Utils.h"
 
@@ -59,6 +60,9 @@ void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_p
     {
     case TestIdentifier::CREATE_AVATAR:
         CreateAvatar::RunTest();
+        break;
+    case TestIdentifier::CREATE_CONVERSATION:
+        CreateConversation::RunTest();
         break;
     default:
         throw Utils::ExceptionWithCode(

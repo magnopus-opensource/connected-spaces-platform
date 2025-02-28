@@ -169,6 +169,10 @@ protected:
 
     virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
 
+    // Called when a component has first been created locally, or when the component
+    // is first deserialized, after it's properties have been set.
+    virtual void OnCreated();
+
     // Called whenever an entity is removed from the system.
     // Used to shutdown any behavior managed by the entity.
     virtual void OnRemove();
