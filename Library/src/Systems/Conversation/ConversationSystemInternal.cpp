@@ -449,7 +449,7 @@ void ConversationSystemInternal::GetNumberOfReplies(const common::String& Conver
     auto GetMessageCountCallback = [Callback](const csp::systems::AssetCollectionCountResult& GetMessageResult)
     {
         csp::multiplayer::NumberOfRepliesResult Result(GetMessageResult);
-        Result.SetCount(GetMessageResult.GetCount());
+        Result.Count = GetMessageResult.GetCount();
         Callback(Result);
     };
 

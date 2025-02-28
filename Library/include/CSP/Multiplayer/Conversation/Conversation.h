@@ -277,22 +277,16 @@ public:
     uint64_t GetCount() const;
 
     CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode)
-        , Count { 0 } {};
-
-protected:
-    NumberOfRepliesResult() = delete;
-    NumberOfRepliesResult(void*)
-        : Count { 0 } {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
+    explicit NumberOfRepliesResult(void*) {};
+    NumberOfRepliesResult() = default;
+
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    void SetCount(uint64_t Value);
-
     CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
-        , Count { 0 } {};
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
     uint64_t Count;
 };

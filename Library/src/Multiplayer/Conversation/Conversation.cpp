@@ -152,5 +152,4 @@ void ConversationResult::FillConversationInfo(const csp::systems::AssetCollectio
 uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
 
 void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
-void NumberOfRepliesResult::SetCount(uint64_t Value) { Count = Value; }
 } // namespace csp::multiplayer
