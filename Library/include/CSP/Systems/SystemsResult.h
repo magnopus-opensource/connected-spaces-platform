@@ -29,6 +29,12 @@ class ConversationSpaceComponent;
 
 }
 
+namespace csp::systems
+{
+
+class ConversationSystemInternal;
+}
+
 namespace csp::services
 {
 
@@ -107,6 +113,7 @@ class CSP_API StringResult : public csp::systems::ResultBase
     friend class SettingsSystem;
     friend class UserSystem;
     friend class csp::multiplayer::ConversationSpaceComponent;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

@@ -32,32 +32,50 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::systems
+{
+class ConversationSystemInternal;
+}
+
 namespace csp::multiplayer
 {
 
 class AssetCollection;
 
-/// @ingroup Conversation System
-/// @brief Data representation of a message, whether it's the start of a conversation, or a message within one.
+/// @ingroup Conversation
+/// @brief Contains information about a conversation message.
 class CSP_API MessageInfo
 {
 public:
+    /// @brief The id of the conversation.
     csp::common::String ConversationId;
+
+    /// @brief Whether this is the root message of the conversation
     bool IsConversation;
+
+    /// @brief The time the message was created
     csp::common::String CreatedTimestamp;
+
+    /// @brief The time the message was last edited
     csp::common::String EditedTimestamp;
+
+    /// @brief The user id that triggered the event
     csp::common::String UserId;
+
+    /// @brief The message contents
     csp::common::String Message;
+
+    /// @brief The unique identifier of the message
     csp::common::String MessageId;
 
     MessageInfo();
-    MessageInfo(const csp::common::String& ConversationId, const bool IsConversation, const csp::common::String& CreatedTimestamp,
+    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& CreatedTimestamp,
         const csp::common::String& EditedTimestamp, const csp::common::String& UserId, const csp::common::String& Message,
         const csp::common::String& MessageId);
     MessageInfo(const MessageInfo& MessageData);
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
 class CSP_API AnnotationData
 {
@@ -116,20 +134,23 @@ private:
 };
 
 /// @brief Enum used to specify the type of a conversation system network event.
-enum class ConversationMessageType
+enum class ConversationEventType
 {
     NewMessage,
     DeleteMessage,
     DeleteConversation,
     ConversationInformation,
-    MessageInformation
+    MessageInformation,
+    SetAnnotation,
+    DeleteAnnotation
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when a message is being retrieved
 class CSP_API MessageResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
     friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
@@ -158,11 +179,12 @@ private:
     MessageInfo MsgInfo;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a collection of messages
 class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
     friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
@@ -204,12 +226,12 @@ private:
     uint64_t ResultTotalCount = 0;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a conversation.
 class CSP_API ConversationResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
-    friend class ConversationSpaceComponent;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -236,6 +258,48 @@ private:
 
     MessageInfo ConvoInfo;
 };
+
+/// @ingroup Conversation
+/// @brief Data class used to contain information for GetNumberOfReplies.
+class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Gets the number of replies from the result
+    /// @return : The number of replies
+    uint64_t GetCount() const;
+
+    CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode)
+        , Count { 0 } {};
+
+protected:
+    NumberOfRepliesResult() = delete;
+    NumberOfRepliesResult(void*)
+        : Count { 0 } {};
+
+private:
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    void SetCount(uint64_t Value);
+
+    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
+        , Count { 0 } {};
+
+    uint64_t Count;
+};
+
+/// @brief Callback containing number of replies.
+/// @param Result NumberOfRepliesResult : result class
+typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
 
 // callback signatures
 // Callback providing a result object with one message info object.

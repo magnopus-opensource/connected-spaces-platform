@@ -18,6 +18,7 @@
 
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
+#include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
@@ -78,10 +79,10 @@ class ConversationEventDeserialiser : public EventDeserialiser
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-    const ConversationSystemParams& GetEventParams() const { return EventParams; }
+    const ConversationEventParams& GetEventParams() const { return EventParams; }
 
 private:
-    ConversationSystemParams EventParams;
+    ConversationEventParams EventParams;
 };
 
 // A specialised deserialiser for handling events triggered when a user in the space's access permissions change.

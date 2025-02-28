@@ -17,10 +17,13 @@
 
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
+#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/DateTime.h"
 #include "Debug/Logging.h"
 
+namespace csp::systems::ConversationSystemHelpers
+{
 constexpr const char* CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_CONVERSATION_CONTAINER";
 constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MESSAGE";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_EDITED = "EditedTimestamp";
@@ -28,24 +31,70 @@ constexpr const char* ASSET_COLLECTION_METADATA_KEY_EDITED = "EditedTimestamp";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION = "IsConversation";
 
-namespace csp::multiplayer
+common::String GetUniqueAssetCollectionSuffix(const common::String& SpaceId, const common::String& CreatorUserId)
 {
+    const auto NowTimepoint = std::chrono::system_clock::now();
+    const auto MillisecondsSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(NowTimepoint.time_since_epoch()).count();
 
-String ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId)
-{
-    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
-    return StringFormat("%s_%s", CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
+    // TODO: consider appending a random value too if the same user creates two messages in the same millisecond
+    return common::StringFormat("%s_%s_%llu", SpaceId.c_str(), CreatorUserId.c_str(), MillisecondsSinceEpoch);
 }
 
-String ConversationSystemHelpers::GetUniqueMessageAssetCollectionName(const String& SpaceId, const String& CreatorUserId)
+bool StringToBool(const common::String& value) { return (value == "true") ? true : false; }
+
+common::String BoolToString(bool value) { return value ? "true" : "false"; }
+
+common::String Vector3ToString(const common::Vector3& value)
 {
-    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
-    return StringFormat("%s_%s", MESSAGE_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
+    return common::StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
 }
 
-Map<String, String> ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(const MessageInfo& MessageData)
+common::Vector3 StringToVector3(const common::String& value)
 {
-    Map<String, String> MetadataMap;
+    common::List<common::String> StringList = value.Split(',');
+    return common::Vector3(std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()));
+}
+
+common::String Vector4ToString(const common::Vector4& value)
+{
+    return common::StringFormat("%s,%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str(),
+        std::to_string(value.W).c_str());
+}
+
+common::Vector4 StringToVector4(const common::String& value)
+{
+    common::List<common::String> StringList = value.Split(',');
+    return common::Vector4(
+        std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()), std::stof(StringList[3].c_str()));
+}
+
+multiplayer::SpaceTransform StringToSpaceTransform(const common::String& value)
+{
+    common::List<common::String> StringList = value.Split('|');
+    return multiplayer::SpaceTransform(StringToVector3(StringList[0]), StringToVector4(StringList[1]), StringToVector3(StringList[2]));
+}
+
+common::String SpaceTransformToString(const multiplayer::SpaceTransform& value)
+{
+    return common::StringFormat(
+        "%s|%s|%s", Vector3ToString(value.Position).c_str(), Vector4ToString(value.Rotation).c_str(), Vector3ToString(value.Scale).c_str());
+}
+
+common::String GetUniqueConversationContainerAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
+}
+
+common::String GetUniqueMessageAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", MESSAGE_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
+}
+
+common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData)
+{
+    common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = MessageData.Message;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED] = MessageData.EditedTimestamp;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(MessageData.IsConversation);
@@ -53,9 +102,9 @@ Map<String, String> ConversationSystemHelpers::GenerateMessageAssetCollectionMet
     return MetadataMap;
 }
 
-MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
+multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
 {
-    MessageInfo MsgInfo;
+    multiplayer::MessageInfo MsgInfo;
     MsgInfo.MessageId = MessageAssetCollection.Id;
     MsgInfo.ConversationId = MessageAssetCollection.ParentId;
     MsgInfo.EditedTimestamp = MessageAssetCollection.UpdatedAt;
@@ -67,7 +116,7 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
     {
-        MsgInfo.IsConversation = Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION];
+        MsgInfo.IsConversation = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION]);
     }
     else
     {
@@ -101,19 +150,34 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
     return MsgInfo;
 }
 
-Map<String, String> ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(const MessageInfo& ConversationData)
+csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
 {
-    Map<String, String> MetadataMap;
+    csp::common::Array<multiplayer::ReplicatedValue> Args(8);
+
+    Args[0] = static_cast<int64_t>(Params.MessageType);
+    Args[1] = Params.MessageInfo.ConversationId;
+    Args[2] = Params.MessageInfo.IsConversation;
+    Args[3] = Params.MessageInfo.CreatedTimestamp;
+    Args[4] = Params.MessageInfo.EditedTimestamp;
+    Args[5] = Params.MessageInfo.UserId;
+    Args[6] = Params.MessageInfo.Message;
+    Args[7] = Params.MessageInfo.MessageId;
+
+    return Args;
+}
+
+common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& ConversationData)
+{
+    common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = ConversationData.Message;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED] = ConversationData.EditedTimestamp;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(ConversationData.IsConversation);
     return MetadataMap;
 }
 
-MessageInfo ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
-    const csp::systems::AssetCollection& ConversationAssetCollection)
+multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
-    MessageInfo ConvoInfo;
+    multiplayer::MessageInfo ConvoInfo;
     ConvoInfo.ConversationId = ConversationAssetCollection.Id;
     ConvoInfo.EditedTimestamp = ConversationAssetCollection.UpdatedAt;
     ConvoInfo.UserId = ConversationAssetCollection.CreatedBy;
@@ -156,55 +220,6 @@ MessageInfo ConversationSystemHelpers::GetConversationInfoFromConversationAssetC
     }
 
     return ConvoInfo;
-}
-
-bool ConversationSystemHelpers::StringToBool(const String& value) { return (value == "true") ? true : false; }
-
-String ConversationSystemHelpers::BoolToString(const bool value) { return value ? "true" : "false"; }
-
-String ConversationSystemHelpers::Vector3ToString(const Vector3& value)
-{
-    return StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
-}
-
-Vector3 ConversationSystemHelpers::StringToVector3(const String& value)
-{
-    List<String> StringList = value.Split(',');
-    return Vector3(std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()));
-}
-
-String ConversationSystemHelpers::Vector4ToString(const Vector4& value)
-{
-    return StringFormat("%s,%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str(),
-        std::to_string(value.W).c_str());
-}
-
-Vector4 ConversationSystemHelpers::StringToVector4(const String& value)
-{
-    List<String> StringList = value.Split(',');
-    return Vector4(
-        std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()), std::stof(StringList[3].c_str()));
-}
-
-SpaceTransform ConversationSystemHelpers::StringToSpaceTransform(const String& value)
-{
-    List<String> StringList = value.Split('|');
-    return SpaceTransform(StringToVector3(StringList[0]), StringToVector4(StringList[1]), StringToVector3(StringList[2]));
-}
-
-String ConversationSystemHelpers::SpaceTransformToString(const SpaceTransform& value)
-{
-    return StringFormat(
-        "%s|%s|%s", Vector3ToString(value.Position).c_str(), Vector4ToString(value.Rotation).c_str(), Vector3ToString(value.Scale).c_str());
-}
-
-String ConversationSystemHelpers::GetUniqueAssetCollectionSuffix(const String& SpaceId, const String& CreatorUserId)
-{
-    const auto NowTimepoint = std::chrono::system_clock::now();
-    const auto MillisecondsSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds>(NowTimepoint.time_since_epoch()).count();
-
-    // TODO: consider appending a random value too if the same user creates two messages in the same millisecond
-    return StringFormat("%s_%s_%llu", SpaceId.c_str(), CreatorUserId.c_str(), MillisecondsSinceEpoch);
 }
 
 } // namespace csp::multiplayer
