@@ -106,3 +106,14 @@ CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, Comparison)
     ASSERT_GE(FutureDateTime, CurrentDateTime);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_DATE_TIME_TESTS || RUN_DATE_TIME_STRING
+CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, String)
+{
+    // Ensure test string respects ISO 8601/RFC 3339 standards
+    const csp::common::String TestTimeString = "2021-01-01T00:00:00Z";
+
+    const csp::common::DateTime TestTime(TestTimeString);
+    EXPECT_EQ(TestTime.GetUtcString(), TestTimeString);
+}
+#endif
