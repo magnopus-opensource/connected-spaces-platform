@@ -247,6 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetConversationInfo().UserId, DefaultTestUserId);
         EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
+        EXPECT_NE(Result.GetConversationInfo().CreatedTimestamp, "");
         EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
     }
 
@@ -317,6 +318,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
 
         auto [GetSecondMessageResult] = AWAIT_PRE(RetrievedConversationComponent, GetMessageInfo, RequestPredicate, SecondMessageId);
 
@@ -327,6 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     // check that the second user can retrieve the messages from the conversation using pagination
@@ -343,6 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_FALSE(Message.UserId.IsEmpty());
         EXPECT_EQ(Message.ConversationId, ConversationId);
         EXPECT_EQ(Message.Message, DefaultConversationMessage);
+        EXPECT_FALSE(Message.CreatedTimestamp.IsEmpty());
     }
 
     AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -388,6 +392,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
 
         auto [GetSecondMessageResult] = AWAIT(ConversationComponent, GetMessageInfo, SecondMessageId);
 
@@ -398,6 +403,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     // check that the default user can retrieve the messages from the conversation using pagination
@@ -414,6 +420,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
         EXPECT_FALSE(Message.UserId.IsEmpty());
         EXPECT_EQ(Message.ConversationId, ConversationId);
         EXPECT_EQ(Message.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     {

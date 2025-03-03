@@ -85,8 +85,8 @@ public:
     void UpdateMessage(const csp::common::String& ConversationId, const csp::common::String& MessageId,
         const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback);
 
-    void StoreConversationMessage(const csp::common::String& ConversationId, const csp::systems::Space& Space, const csp::common::String& UserId,
-        const csp::common::String& Message, multiplayer::MessageResultCallback Callback) const;
+    void StoreConversationMessage(
+        const multiplayer::MessageInfo& Info, const csp::systems::Space& Space, multiplayer::MessageResultCallback Callback) const;
 
     void DeleteMessages(const csp::common::String& ConversationId, csp::common::Array<csp::systems::AssetCollection>& Messages,
         csp::systems::NullResultCallback Callback);
