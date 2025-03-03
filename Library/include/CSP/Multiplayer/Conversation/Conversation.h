@@ -76,6 +76,21 @@ public:
 };
 
 /// @ingroup Conversation
+/// @brief Information used to update a message
+class CSP_API MessageUpdateParams
+{
+public:
+    /// @brief The contents of the new message
+    csp::common::String NewMessage;
+
+    /// @brief The new time the message was created
+    csp::common::String NewCreatedTimestamp;
+
+    /// @brief The new time the message was last edited
+    csp::common::String NewEditedTimestamp;
+};
+
+/// @ingroup Conversation
 /// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
 class CSP_API AnnotationData
 {

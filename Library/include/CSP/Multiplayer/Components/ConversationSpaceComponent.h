@@ -136,13 +136,13 @@ public:
     CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback Callback);
 
     /// @brief Updates information for the root message in the conversation.
-    /// @param ConversationData const csp::multiplayer::MessageInfo& : The information to update the root message with.
+    /// @param NewData const csp::multiplayer::MessageUpdateParams& : The information to update the root message with.
     /// @param Callback csp::multiplayer::ConversationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
     /// in user).
-    CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateConversation(const MessageUpdateParams& NewData, ConversationResultCallback Callback);
 
     /// @brief Retrieves message details for a specified message in this conversation.
     /// @param MessageId const csp::common::String& : The message id to retrieve information for.
@@ -155,13 +155,13 @@ public:
     /// @brief Updates information for a specified message in the conversation.
     /// @param MessageId const csp::common::String& : The message id to update information for.
     /// The id can be retreived from the result callback when the message was added.
-    /// @param MessageData const csp::multiplayer::MessageInfo& : The information to update the specified message with.
+    /// @param NewData const csp::multiplayer::MessageUpdateParams& : The information to update the specified message with.
     /// @param Callback csp::multiplayer::MessageResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     /// @pre Client should be logged in with the same user account that created the message (ClientId of the message should match the current logged
     /// in user).
-    CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
+    CSP_ASYNC_RESULT void UpdateMessage(const csp::common::String& MessageId, const MessageUpdateParams& NewData, MessageResultCallback Callback);
 
     /// @brief Gets the Number Of Replies in the conversation.
     /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.

@@ -175,9 +175,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
         }
 
         {
-            MessageInfo NewData;
-            NewData.Message = "NewTest";
-            auto [Result] = AWAIT(ConversationComponent, SetMessageInfo, MessageId, NewData);
+            MessageUpdateParams NewData;
+            NewData.NewMessage = "NewTest";
+            auto [Result] = AWAIT(ConversationComponent, UpdateMessage, MessageId, NewData);
 
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
             EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
@@ -193,12 +193,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
         }
 
         {
-            MessageInfo NewData;
+            MessageUpdateParams NewData;
             SpaceTransform CameraTransformValue(csp::common::Vector3().One(), csp::common::Vector4().One(), csp::common::Vector3().One());
-            NewData.IsConversation = true;
-            NewData.Message = "TestMessage1";
+            NewData.NewMessage = "TestMessage1";
 
-            auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, NewData);
+            auto [Result] = AWAIT(ConversationComponent, UpdateConversation, NewData);
 
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
             EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
@@ -684,10 +683,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
         static constexpr const char* NewMessage = "New Test Conversation";
-        csp::multiplayer::MessageInfo Info;
-        Info.Message = NewMessage;
+        MessageUpdateParams NewData;
+        NewData.NewMessage = NewMessage;
 
-        const auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, Info);
+        const auto [Result] = AWAIT(ConversationComponent, UpdateConversation, NewData);
 
         WaitForCallback(CallbackCalled);
         EXPECT_TRUE(CallbackCalled);
@@ -714,10 +713,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
         static constexpr const char* NewMessage = "New Test Message";
-        csp::multiplayer::MessageInfo Info;
-        Info.Message = NewMessage;
+        MessageUpdateParams NewData;
+        NewData.NewMessage = NewMessage;
 
-        const auto [Result] = AWAIT(ConversationComponent, SetMessageInfo, FirstMessageId, Info);
+        const auto [Result] = AWAIT(ConversationComponent, UpdateMessage, FirstMessageId, NewData);
 
         WaitForCallback(CallbackCalled);
         EXPECT_TRUE(CallbackCalled);
