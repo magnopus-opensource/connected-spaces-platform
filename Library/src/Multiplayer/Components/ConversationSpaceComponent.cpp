@@ -151,7 +151,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
     ConversationSystem->GetConversationInfo(ConversationId, Callback);
 }
 
-void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback)
+void ConversationSpaceComponent::UpdateConversation(const MessageUpdateParams& NewData, ConversationResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
 
@@ -162,7 +162,7 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
     }
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->SetConversationInfo(ConversationId, ConversationData, Callback);
+    ConversationSystem->UpdateConversation(ConversationId, NewData, Callback);
 }
 
 void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback)
@@ -179,7 +179,8 @@ void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& Messa
     ConversationSystem->GetMessageInfo(ConversationId, MessageId, Callback);
 }
 
-void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback)
+void ConversationSpaceComponent::UpdateMessage(
+    const csp::common::String& MessageId, const MessageUpdateParams& NewData, MessageResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
 
@@ -190,7 +191,7 @@ void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& Messa
     }
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->SetMessageInfo(ConversationId, MessageId, MessageData, Callback);
+    ConversationSystem->UpdateMessage(ConversationId, MessageId, NewData, Callback);
 }
 
 void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallback Callback)

@@ -260,12 +260,12 @@ void ConversationSystemInternal::GetConversationInfo(const common::String& Conve
     AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
 }
 
-void ConversationSystemInternal::SetConversationInfo(
-    const common::String& ConversationId, const multiplayer::MessageInfo& ConversationData, multiplayer::ConversationResultCallback Callback)
+void ConversationSystemInternal::UpdateConversation(
+    const common::String& ConversationId, const multiplayer::MessageUpdateParams& NewData, multiplayer::ConversationResultCallback Callback)
 {
     // 1. Get asset collection
     AssetCollectionResultCallback GetConversationCallback
-        = [this, Callback, ConversationId, ConversationData](const AssetCollectionResult& GetConversationResult)
+        = [this, Callback, ConversationId, NewData](const AssetCollectionResult& GetConversationResult)
     {
         if (HandleConversationResult(GetConversationResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
         {
@@ -306,15 +306,12 @@ void ConversationSystemInternal::SetConversationInfo(
             SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBus, SignalRCallback);
         };
 
-        multiplayer::MessageInfo NewConversationData(ConversationData);
+        multiplayer::MessageInfo NewConversationData
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
 
-        // Create a timestamp if none was specified
-        if (NewConversationData.EditedTimestamp.IsEmpty())
-        {
-            const auto CurrentConversationData
-                = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetConversationResult.GetAssetCollection());
-            NewConversationData.EditedTimestamp = CurrentConversationData.EditedTimestamp;
-        }
+        NewConversationData.Message = NewData.NewMessage;
+        NewConversationData.CreatedTimestamp = NewData.NewCreatedTimestamp;
+        NewConversationData.EditedTimestamp = NewData.NewEditedTimestamp;
 
         this->AssetSystem->UpdateAssetCollectionMetadata(GetConversationResult.GetAssetCollection(),
             ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData), nullptr, GetUpdatedConversationCallback);
@@ -341,11 +338,11 @@ void ConversationSystemInternal::GetMessageInfo(
     AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
 }
 
-void ConversationSystemInternal::SetMessageInfo(const common::String& ConversationId, const common::String& MessageId,
-    const multiplayer::MessageInfo& MessageData, multiplayer::MessageResultCallback Callback)
+void ConversationSystemInternal::UpdateMessage(const common::String& ConversationId, const common::String& MessageId,
+    const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback)
 {
     // 1. Get message asset collection
-    AssetCollectionResultCallback GetMessageCallback = [this, Callback, MessageId, MessageData](const AssetCollectionResult& GetMessageResult)
+    AssetCollectionResultCallback GetMessageCallback = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetMessageResult)
     {
         if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
         {
@@ -354,7 +351,7 @@ void ConversationSystemInternal::SetMessageInfo(const common::String& Conversati
 
         // 2. Update asset collections metadata
         AssetCollectionResultCallback GetUpdatedMessageCallback
-            = [this, Callback, MessageId, MessageData](const AssetCollectionResult& GetUpdatedMessageResult)
+            = [this, Callback, MessageId, NewData](const AssetCollectionResult& GetUpdatedMessageResult)
 
         {
             if (HandleConversationResult(GetUpdatedMessageResult, "The Update of Message asset collections was not successful.", Callback) == false)
@@ -367,7 +364,7 @@ void ConversationSystemInternal::SetMessageInfo(const common::String& Conversati
 
             // 3. Send multiplayer event
             const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedMessageResult, MessageData, Result](multiplayer::ErrorCode Error)
+                = [Callback, GetUpdatedMessageResult, NewData, Result](multiplayer::ErrorCode Error)
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
@@ -383,14 +380,12 @@ void ConversationSystemInternal::SetMessageInfo(const common::String& Conversati
             SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBus, SignalRCallback);
         };
 
-        multiplayer::MessageInfo NewMessageData(MessageData);
+        multiplayer::MessageInfo NewMessageData
+            = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
 
-        if (MessageData.EditedTimestamp.IsEmpty())
-        {
-            multiplayer::MessageInfo MsgInfo
-                = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
-            NewMessageData.EditedTimestamp = MsgInfo.EditedTimestamp;
-        }
+        NewMessageData.Message = NewData.NewMessage;
+        NewMessageData.CreatedTimestamp = NewData.NewCreatedTimestamp;
+        NewMessageData.EditedTimestamp = NewData.NewEditedTimestamp;
 
         this->AssetSystem->UpdateAssetCollectionMetadata(GetMessageResult.GetAssetCollection(),
             ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData), nullptr, GetUpdatedMessageCallback);

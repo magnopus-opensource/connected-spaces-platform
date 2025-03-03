@@ -36,6 +36,7 @@ CSP_END_IGNORE
 namespace csp::multiplayer
 {
 class ConversationSpaceComponent;
+class MessageUpdateParams;
 }
 
 namespace csp::systems
@@ -76,13 +77,13 @@ public:
 
     void GetConversationInfo(const csp::common::String& ConversationId, multiplayer::ConversationResultCallback Callback);
 
-    void SetConversationInfo(const csp::common::String& ConversationId, const multiplayer::MessageInfo& ConversationData,
-        multiplayer::ConversationResultCallback Callback);
+    void UpdateConversation(
+        const csp::common::String& ConversationId, const multiplayer::MessageUpdateParams& NewData, multiplayer::ConversationResultCallback Callback);
 
     void GetMessageInfo(const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::MessageResultCallback Callback);
 
-    void SetMessageInfo(const csp::common::String& ConversationId, const csp::common::String& MessageId, const multiplayer::MessageInfo& MessageData,
-        multiplayer::MessageResultCallback Callback);
+    void UpdateMessage(const csp::common::String& ConversationId, const csp::common::String& MessageId,
+        const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback);
 
     void StoreConversationMessage(const csp::common::String& ConversationId, const csp::systems::Space& Space, const csp::common::String& UserId,
         const csp::common::String& Message, multiplayer::MessageResultCallback Callback) const;
