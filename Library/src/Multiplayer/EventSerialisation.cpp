@@ -228,8 +228,14 @@ void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
 {
     EventDeserialiser::Parse(EventValues);
 
-    EventParams.MessageType = static_cast<ConversationMessageType>(EventData[0].GetInt());
-    EventParams.MessageValue = EventData[1].GetString();
+    EventParams.MessageType = static_cast<ConversationEventType>(EventData[0].GetInt());
+    EventParams.MessageInfo.ConversationId = EventData[1].GetString();
+    EventParams.MessageInfo.IsConversation = EventData[2].GetBool();
+    EventParams.MessageInfo.CreatedTimestamp = EventData[3].GetString();
+    EventParams.MessageInfo.EditedTimestamp = EventData[4].GetString();
+    EventParams.MessageInfo.UserId = EventData[5].GetString();
+    EventParams.MessageInfo.Message = EventData[6].GetString();
+    EventParams.MessageInfo.MessageId = EventData[7].GetString();
 }
 
 void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)

@@ -103,4 +103,16 @@ DateTime::DateTime(const csp::common::String& DateString)
 
 const DateTime::Clock::time_point& DateTime::GetTimePoint() const { return TimePoint; }
 
+csp::common::String DateTime::GetUtcString() const
+{
+    std::time_t Now = std::chrono::system_clock::to_time_t(TimePoint);
+    std::tm UtcTime = *std::gmtime(&Now);
+
+    std::ostringstream UtcStream;
+    UtcStream << std::put_time(&UtcTime, "%Y-%m-%dT%H:%M:%SZ");
+
+    std::string UtcString = UtcStream.str();
+    return UtcString.c_str();
+}
+
 } // namespace csp::common

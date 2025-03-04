@@ -50,10 +50,12 @@ namespace MultiplayerTestRunner::TestIdentifiers
  */
 enum class TestIdentifier
 {
-    CREATE_AVATAR //"CreateAvatar"
+    CREATE_AVATAR, //"CreateAvatar"
+    CREATE_CONVERSATION //"CreateConversation"
 };
 
-inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap { { TestIdentifier::CREATE_AVATAR, "CreateAvatar" } };
+inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap { { TestIdentifier::CREATE_AVATAR, "CreateAvatar" },
+    { TestIdentifier::CREATE_CONVERSATION, "CreateConversation" } };
 
 /*
  * Use `TestIdentifierStringMap` to convert a string to a test identifier, if valid.

@@ -25,8 +25,14 @@
 namespace csp::multiplayer
 {
 
-class ConversationSystem;
+class ConversationSpaceComponent;
 
+}
+
+namespace csp::systems
+{
+
+class ConversationSystemInternal;
 }
 
 namespace csp::services
@@ -49,7 +55,7 @@ class CSP_API NullResult : public csp::systems::ResultBase
     friend class SpaceSystem;
     friend class SettingsSystem;
     friend class UserSystem;
-    friend class csp::multiplayer::ConversationSystem;
+    friend class csp::multiplayer::ConversationSpaceComponent;
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
     CSP_END_IGNORE
@@ -106,7 +112,8 @@ class CSP_API StringResult : public csp::systems::ResultBase
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
     friend class UserSystem;
-    friend class csp::multiplayer::ConversationSystem;
+    friend class csp::multiplayer::ConversationSpaceComponent;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

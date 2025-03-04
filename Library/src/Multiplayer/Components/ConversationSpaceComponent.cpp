@@ -16,25 +16,35 @@
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 
-#include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/Users/UserSystem.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
+#include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/ResultHelpers.h"
-
-#include <msgpack/v1/object_fwd_decl.hpp>
 
 using namespace csp::systems;
 
 namespace csp::multiplayer
 {
 
+namespace
+{
+    bool EnsureValidConversationId(const csp::common::String& ConversationId)
+    {
+        if (ConversationId.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("This component does not have an associated conversation."
+                              "Call CreateConversation to create a new conversation for this component");
+            return false;
+        }
+
+        return true;
+    }
+}
+
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Conversation, Parent)
-    , ConversationSystem(csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetConversationSystem())
 {
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)] = "";
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)] = true;
@@ -42,120 +52,169 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)] = "";
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Date)] = "";
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies)] = static_cast<int64_t>(0);
+    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Resolved)] = false;
+    Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition)] = csp::common::Vector3 { 0, 0, 0 };
 
     SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
 }
 
 void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)
 {
-    if (!GetConversationId().IsEmpty())
+    const common::String& ConversationId = GetConversationId();
+
+    if (!ConversationId.IsEmpty())
     {
-        CSP_LOG_WARN_MSG("This component already has an associated conversation! No new conversation was created as a result.");
-
+        CSP_LOG_ERROR_MSG("This component already has a conversation.");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
-
         return;
     }
 
-    const StringResultCallback CreateConversationIdCallback = [=](const StringResult& StringResult)
+    const auto CreateConversationCallback = [this, Callback](const StringResult& Result)
     {
-        if (StringResult.GetResultCode() == csp::systems::EResultCode::Success)
-        {
-            SetConversationId(StringResult.GetValue());
-        }
-
-        INVOKE_IF_NOT_NULL(Callback, StringResult);
+        // Set this components conversation id from the result.
+        SetConversationId(Result.GetValue());
+        INVOKE_IF_NOT_NULL(Callback, Result);
     };
 
-    ConversationSystem->CreateConversation(Message, CreateConversationIdCallback);
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->CreateConversation(Message, CreateConversationCallback);
 }
 
-bool ConversationSpaceComponent::MoveConversationFromComponent(ConversationSpaceComponent& OtherConversationComponent)
+void ConversationSpaceComponent::DeleteConversation(systems::NullResultCallback Callback)
 {
-    if (!GetConversationId().IsEmpty())
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
     {
-        CSP_LOG_WARN_MSG("This component already has an associated conversation! The conversation was not moved as a result.");
-
-        return false;
-    }
-
-    SetConversationId(OtherConversationComponent.GetConversationId());
-    OtherConversationComponent.RemoveConversationId();
-
-    return true;
-}
-
-void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCallback Callback)
-{
-    if (GetConversationId().IsEmpty())
-    {
-        CSP_LOG_ERROR_MSG("The conversation ID passed to DeleteConversation was empty! No update to the conversation was issued as a result.");
-
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
         return;
     }
 
-    ConversationSystem->DeleteConversation(GetConversationId(), Callback);
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteConversation(ConversationId, Callback);
 }
 
 void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, MessageResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty())
-    {
-        CSP_LOG_ERROR_MSG("The conversation ID passed to AddMessage was empty! No update to the conversation was issued as a result.");
+    const common::String& ConversationId = GetConversationId();
 
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
-
         return;
     }
 
-    csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult)
-    {
-        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
-        {
-            const MessageResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
-            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-            return;
-        }
-
-        this->ConversationSystem->AddMessageToConversation(GetConversationId(), GetProfileResult.GetProfile().DisplayName, Message, Callback);
-    };
-
-    auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-    UserSystem->GetProfileByUserId(UserSystem->GetLoginState().UserId, GetProfileCallback);
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->AddMessage(ConversationId, Message, Callback);
 }
 
-void ConversationSpaceComponent::GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback)
+void ConversationSpaceComponent::DeleteMessage(const csp::common::String& MessageId, systems::NullResultCallback Callback)
 {
-    ConversationSystem->GetMessage(MessageId, Callback);
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteMessage(ConversationId, MessageId, Callback);
 }
 
-void ConversationSpaceComponent::GetAllMessages(MessageCollectionResultCallback Callback)
+void ConversationSpaceComponent::GetMessagesFromConversation(
+    const csp::common::Optional<int>& ResultsSkipNumber, const csp::common::Optional<int>& ResultsMaxNumber, MessageCollectionResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty())
-    {
-        CSP_LOG_ERROR_MSG("The conversation ID passed to GetAllMessages was empty! No update to the conversation was issued as a result.");
+    const common::String& ConversationId = GetConversationId();
 
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageCollectionResult>());
-
         return;
     }
 
-    ConversationSystem->GetMessagesFromConversation(GetConversationId(), nullptr, nullptr, Callback);
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetMessagesFromConversation(ConversationId, ResultsSkipNumber, ResultsMaxNumber, Callback);
 }
 
-void ConversationSpaceComponent::DeleteMessage(const csp::common::String& MessageId, NullResultCallback Callback)
+void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {
-    ConversationSystem->DeleteMessage(MessageId, Callback);
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetConversationInfo(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::UpdateConversation(const MessageUpdateParams& NewData, ConversationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->UpdateConversation(ConversationId, NewData, Callback);
+}
+
+void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetMessageInfo(ConversationId, MessageId, Callback);
+}
+
+void ConversationSpaceComponent::UpdateMessage(
+    const csp::common::String& MessageId, const MessageUpdateParams& NewData, MessageResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->UpdateMessage(ConversationId, MessageId, NewData, Callback);
+}
+
+void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NumberOfRepliesResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetNumberOfReplies(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
+{
+    ConversationUpdateCallback = Callback;
+
+    // Flush events now that we have a callback, as we may have events stored for us.
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->FlushEvents();
 }
 
 bool ConversationSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)); }
@@ -188,44 +247,6 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
     SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
 
-void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
-{
-    if (GetConversationId().IsEmpty())
-    {
-        CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
-
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
-
-        return;
-    }
-
-    ConversationSystem->GetConversationInformation(GetConversationId(), Callback);
-}
-
-void ConversationSpaceComponent::SetConversationInfo(const ConversationInfo& ConversationData, ConversationResultCallback Callback)
-{
-    if (GetConversationId().IsEmpty())
-    {
-        CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
-
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
-
-        return;
-    }
-
-    ConversationSystem->SetConversationInformation(GetConversationId(), ConversationData, Callback);
-}
-
-void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback)
-{
-    ConversationSystem->GetMessageInformation(MessageId, Callback);
-}
-
-void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback)
-{
-    ConversationSystem->SetMessageInformation(MessageId, MessageData, Callback);
-}
-
 void ConversationSpaceComponent::SetIsActive(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value); }
 
 void ConversationSpaceComponent::SetTitle(const csp::common::String& Value)
@@ -238,24 +259,55 @@ const csp::common::String& ConversationSpaceComponent::GetTitle() const
     return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
 }
 
-void ConversationSpaceComponent::SetDate(const csp::common::String& Value)
+void ConversationSpaceComponent::SetResolved(bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved), Value); }
+
+bool ConversationSpaceComponent::GetResolved() const { return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved)); }
+
+void ConversationSpaceComponent::SetConversationCameraPosition(const csp::common::Vector3& InValue)
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date), Value);
+    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition), InValue);
 }
 
-const csp::common::String& ConversationSpaceComponent::GetDate() const
+const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPosition() const
 {
-    return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date));
+    return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
 }
 
-void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
+void ConversationSpaceComponent::OnCreated()
 {
-    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies), Value);
+    // Register component to the ConversationSystem to receive conversation events
+    // now that the component has been created.
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->RegisterComponent(this);
 }
 
-const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
+void ConversationSpaceComponent::OnRemove()
 {
-    return GetIntegerProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
+    // Deregister component from the ConversationSystem to stop receiving conversation events
+    // now that the component has been removed.
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeregisterComponent(this);
+}
+
+void ConversationSpaceComponent::OnLocalDelete()
+{
+    // The component has been deleted by this client,
+    // also delete the conversation
+    const auto Callback = [](const NullResult& Result) {};
+    DeleteConversation(Callback);
+}
+
+void ConversationSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value)
+{
+    ComponentBase::SetPropertyFromPatch(Key, Value);
+
+    if (Key == static_cast<uint32_t>(ConversationPropertyKeys::ConversationId) && Value.GetString() != "")
+    {
+        // If the conversaiton id has been updated, flush the event buffer to send any queued events to this component, because
+        // the conversation system looks up the corrosponding events components using this id
+        auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+        ConversationSystem->FlushEvents();
+    }
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)

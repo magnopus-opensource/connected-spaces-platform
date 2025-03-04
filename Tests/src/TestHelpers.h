@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/WebService.h"
@@ -244,4 +245,12 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
     {
         printf("Test timed out - Callback wasn't called\n");
     }
+}
+
+inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::SpaceEntitySystem* EntitySystem, csp::common::String Name = "Object")
+{
+    csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, Name, ObjectTransform);
+    EXPECT_TRUE(CreatedObject != nullptr);
+    return CreatedObject;
 }

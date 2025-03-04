@@ -16,16 +16,18 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Multiplayer/conversation/ConversationSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "SpaceSystemTestHelpers.h"
+#include "Systems/Conversation/ConversationSystemHelpers.h"
+#include "Systems/Conversation/ConversationSystemInternal.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
@@ -61,17 +63,9 @@ ReplicatedValue ObjectBoolProperty;
 ReplicatedValue ObjectIntProperty;
 ReplicatedValue ObjectStringProperty;
 
+csp::common::String ConversationId;
+
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
-
-csp::multiplayer::MessageInfo AddMessageToConversation(csp::multiplayer::ConversationSystem* ConvSystem, const csp::common::String& ConversationId,
-    const csp::common::String& SenderDisplayName, const csp::common::String& Message)
-{
-    auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, SenderDisplayName, Message);
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    return Result.GetMessageInfo();
-}
-
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_CREATE_CONVERSATION_ID
@@ -108,68 +102,57 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    auto* ConvSystem = Connection->GetConversationSystem();
-    csp::common::String ConversationId;
+    // Create object to represent the conversation
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-    auto [Result] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
+    // Create conversation component
+    auto ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+
+    auto [ConversationResult] = AWAIT(ConversationComponent, CreateConversation, "DefaultConversation");
+
+    EXPECT_EQ(ConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
+    ConversationId = ConversationResult.GetValue();
+
+    auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationInfo, RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-        EXPECT_EQ(Result.GetConversationInfo().ConversationId, ConversationId);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, DefaultTestUserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, DefaultTestUserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
-    }
+    EXPECT_EQ(Result.GetConversationInfo().ConversationId, ConversationId);
+    EXPECT_EQ(Result.GetConversationInfo().UserId, DefaultTestUserId);
+    EXPECT_EQ(Result.GetConversationInfo().Message, "DefaultConversation");
+    EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 
     const auto DefaultConversationMessage = "this is a message from the tests world";
     csp::multiplayer::MessageInfo CreatedMessageInfo;
     csp::multiplayer::MessageInfo RetrievedMessageInfo;
     csp::common::String FirstMessageId;
 
-    // Add message to Convosation
+    // Add message to Conversation
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, Result.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
-        ConversationId = CreatedMessageInfo.ConversationId;
-        FirstMessageId = CreatedMessageInfo.Id;
-        EXPECT_EQ(ConversationId, Result.GetValue());
+        auto [AddMessageResult] = AWAIT(ConversationComponent, AddMessage, DefaultConversationMessage);
+
+        EXPECT_EQ(AddMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EXPECT_EQ(ConversationId, AddMessageResult.GetMessageInfo().ConversationId);
     }
 
-    // Get message From Convosation
+    // Get message From Conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, ConversationId, 0, 1);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetMessagesResult] = AWAIT(ConversationComponent, GetMessagesFromConversation, 0, 1);
 
-        auto Messages = Result.GetMessages();
+        EXPECT_EQ(GetMessagesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto& Messages = GetMessagesResult.GetMessages();
         EXPECT_EQ(Messages.Size(), 1);
         EXPECT_EQ(Messages[0].Message, DefaultConversationMessage);
     }
 
     {
-        auto [Result] = AWAIT(ConvSystem, DeleteConversation, ConversationId);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [DeleteConversationResult] = AWAIT(ConversationComponent, DeleteConversation);
+
+        EXPECT_EQ(DeleteConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -224,7 +207,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    auto* ConvSystem = Connection->GetConversationSystem();
+    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
     csp::multiplayer::MessageInfo CreatedMessageInfo;
     csp::multiplayer::MessageInfo RetrievedMessageInfo;
@@ -232,98 +215,138 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
     csp::common::String ConversationId;
     csp::common::String FirstMessageId;
     csp::common::String SecondMessageId;
-
-    const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
     const auto DefaultConversationMessage = "this is a message from the tests world";
-    auto [ResultConvo] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = ResultConvo.GetValue();
 
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    uint64_t ConversationObjectId;
+
+    // Create object to represent the conversation
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    ConversationObjectId = CreatedObject->GetId();
+
+    // Create conversation component
+    auto ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+    auto FirstConversationComponentId = ConversationComponent->GetId();
+
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    auto [ConversationResult] = AWAIT_PRE(ConversationComponent, CreateConversation, RequestPredicate, "TestMessage");
+
+    EXPECT_EQ(ConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
+    ConversationId = ConversationResult.GetValue();
+
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationInfo, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, DefaultTestUserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+        EXPECT_EQ(Result.GetConversationInfo().UserId, DefaultTestUserId);
         EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        EXPECT_NE(Result.GetConversationInfo().CreatedTimestamp, "");
+        EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
     }
 
+    // Add message to Conversation
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
+        auto [AddMessageResult] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, DefaultConversationMessage);
+
+        EXPECT_EQ(AddMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        CreatedMessageInfo = AddMessageResult.GetMessageInfo();
+
+        EXPECT_EQ(ConversationId, CreatedMessageInfo.ConversationId);
+
         ConversationId = CreatedMessageInfo.ConversationId;
-        FirstMessageId = CreatedMessageInfo.Id;
+        FirstMessageId = CreatedMessageInfo.MessageId;
     }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     LogOut(UserSystem);
 
+    // Ensure component data has been written to database by chs before entering the space again
+    std::this_thread::sleep_for(3s);
+
     // Log in with the second account
     csp::common::String SecondTestUserId;
     LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
 
+    bool EntitiesRetrieved = false;
+
     auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto SecondTestUserDisplayName = GetFullProfileByUserId(UserSystem, SecondTestUserId).DisplayName;
+    EntitySystem->SetInitialEntitiesRetrievedCallback(
+        [&EntitiesRetrieved](bool Ok)
+        {
+            if (Ok)
+            {
+                EntitiesRetrieved = true;
+            }
+        });
 
-    SecondMessageId = AddMessageToConversation(ConvSystem, ConversationId, SecondTestUserDisplayName, DefaultConversationMessage).Id;
+    while (!EntitiesRetrieved)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+
+    auto ConversationEntity = EntitySystem->FindSpaceEntityById(ConversationObjectId);
+
+    ConversationSpaceComponent* RetrievedConversationComponent
+        = (ConversationSpaceComponent*)ConversationEntity->GetComponent(FirstConversationComponentId);
+
+    auto [AddMessageResult] = AWAIT_PRE(RetrievedConversationComponent, AddMessage, RequestPredicate, DefaultConversationMessage);
+
+    EXPECT_EQ(AddMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    SecondMessageId = AddMessageResult.GetMessageInfo().MessageId;
 
     // check that the second user can retrieve both added messages
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessage, RequestPredicate, FirstMessageId);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetFirstMessageResult] = AWAIT_PRE(RetrievedConversationComponent, GetMessageInfo, RequestPredicate, FirstMessageId);
 
-        RetrievedMessageInfo = Result.GetMessageInfo();
-        EXPECT_EQ(RetrievedMessageInfo.Id, FirstMessageId);
-        EXPECT_EQ(RetrievedMessageInfo.UserID, DefaultTestUserId);
+        EXPECT_EQ(GetFirstMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RetrievedMessageInfo = GetFirstMessageResult.GetMessageInfo();
+        EXPECT_EQ(RetrievedMessageInfo.MessageId, FirstMessageId);
+        EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
 
-        auto [Result2] = AWAIT_PRE(ConvSystem, GetMessage, RequestPredicate, SecondMessageId);
-        EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetSecondMessageResult] = AWAIT_PRE(RetrievedConversationComponent, GetMessageInfo, RequestPredicate, SecondMessageId);
 
-        RetrievedMessageInfo = Result2.GetMessageInfo();
-        EXPECT_EQ(RetrievedMessageInfo.Id, SecondMessageId);
-        EXPECT_EQ(RetrievedMessageInfo.UserID, SecondTestUserId);
+        EXPECT_EQ(GetSecondMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RetrievedMessageInfo = GetSecondMessageResult.GetMessageInfo();
+        EXPECT_EQ(RetrievedMessageInfo.MessageId, SecondMessageId);
+        EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     // check that the second user can retrieve the messages from the conversation using pagination
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, ConversationId, 0, 1);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetMessagesResult] = AWAIT_PRE(RetrievedConversationComponent, GetMessagesFromConversation, RequestPredicate, 0, 1);
+        EXPECT_EQ(GetMessagesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto Messages = Result.GetMessages();
+        auto Messages = GetMessagesResult.GetMessages();
         EXPECT_EQ(Messages.Size(), 1);
-        EXPECT_EQ(Result.GetTotalCount(), 2);
+        EXPECT_EQ(GetMessagesResult.GetTotalCount(), 2);
 
         const auto Message = Messages[0];
-        EXPECT_FALSE(Message.Id.IsEmpty());
-        EXPECT_FALSE(Message.UserID.IsEmpty());
+        EXPECT_FALSE(Message.MessageId.IsEmpty());
+        EXPECT_FALSE(Message.UserId.IsEmpty());
         EXPECT_EQ(Message.ConversationId, ConversationId);
         EXPECT_EQ(Message.Message, DefaultConversationMessage);
-        EXPECT_FALSE(Message.UserDisplayName.IsEmpty());
+        EXPECT_FALSE(Message.CreatedTimestamp.IsEmpty());
     }
 
     AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -337,49 +360,73 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
     EXPECT_EQ(EnterResult3.GetResultCode(), csp::systems::EResultCode::Success);
 
+    EntitiesRetrieved = false;
+
+    EntitySystem->SetInitialEntitiesRetrievedCallback(
+        [&EntitiesRetrieved](bool Ok)
+        {
+            if (Ok)
+            {
+                EntitiesRetrieved = true;
+            }
+        });
+
+    while (!EntitiesRetrieved)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+
+    ConversationEntity = EntitySystem->FindSpaceEntityById(ConversationObjectId);
+
+    ConversationComponent = (ConversationSpaceComponent*)ConversationEntity->GetComponent(0);
+
     // check that the default user can retrieve both added messages
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessage, RequestPredicate, FirstMessageId);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetFirstMessageResult] = AWAIT(ConversationComponent, GetMessageInfo, FirstMessageId);
 
-        RetrievedMessageInfo = Result.GetMessageInfo();
-        EXPECT_EQ(RetrievedMessageInfo.Id, FirstMessageId);
-        EXPECT_EQ(RetrievedMessageInfo.UserID, DefaultTestUserId);
+        EXPECT_EQ(GetFirstMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RetrievedMessageInfo = GetFirstMessageResult.GetMessageInfo();
+        EXPECT_EQ(RetrievedMessageInfo.MessageId, FirstMessageId);
+        EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
 
-        auto [Result2] = AWAIT_PRE(ConvSystem, GetMessage, RequestPredicate, SecondMessageId);
-        EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetSecondMessageResult] = AWAIT(ConversationComponent, GetMessageInfo, SecondMessageId);
 
-        RetrievedMessageInfo = Result2.GetMessageInfo();
-        EXPECT_EQ(RetrievedMessageInfo.Id, SecondMessageId);
-        EXPECT_EQ(RetrievedMessageInfo.UserID, SecondTestUserId);
+        EXPECT_EQ(GetSecondMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RetrievedMessageInfo = GetSecondMessageResult.GetMessageInfo();
+        EXPECT_EQ(RetrievedMessageInfo.MessageId, SecondMessageId);
+        EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
         EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     // check that the default user can retrieve the messages from the conversation using pagination
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, ConversationId, 1, 1);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [GetMessagesResult] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, 1, 1);
+        EXPECT_EQ(GetMessagesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto Messages = Result.GetMessages();
+        auto Messages = GetMessagesResult.GetMessages();
         EXPECT_EQ(Messages.Size(), 1);
-        EXPECT_EQ(Result.GetTotalCount(), 2);
+        EXPECT_EQ(GetMessagesResult.GetTotalCount(), 2);
 
         const auto Message = Messages[0];
-        EXPECT_FALSE(Message.Id.IsEmpty());
-        EXPECT_FALSE(Message.UserID.IsEmpty());
+        EXPECT_FALSE(Message.MessageId.IsEmpty());
+        EXPECT_FALSE(Message.UserId.IsEmpty());
         EXPECT_EQ(Message.ConversationId, ConversationId);
         EXPECT_EQ(Message.Message, DefaultConversationMessage);
-        EXPECT_FALSE(Message.UserDisplayName.IsEmpty());
+        EXPECT_FALSE(RetrievedMessageInfo.CreatedTimestamp.IsEmpty());
     }
 
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, DeleteConversation, RequestPredicate, ConversationId);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [DeleteConversationResult] = AWAIT(ConversationComponent, DeleteConversation);
+
+        EXPECT_EQ(DeleteConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -437,92 +484,86 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    auto* ConvSystem = Connection->GetConversationSystem();
-    csp::multiplayer::MessageInfo CreatedMessageInfo;
-
     csp::common::String FirstConversationId;
     csp::common::String SecondConversationId;
 
     csp::common::String FirstMessageIdToBeDeleted;
     csp::common::String SecondMessageIdToBeDeleted;
 
-    const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
     const auto DefaultConversationMessage = "this is a message from the tests world";
 
-    auto [ResultConvo] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    FirstConversationId = ResultConvo.GetValue();
+    uint64_t ConversationObjectId;
 
-    EXPECT_EQ(ResultConvo.GetResultCode(), csp::systems::EResultCode::Success);
+    // Create object to represent the conversation
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    ConversationObjectId = CreatedObject->GetId();
+
+    // Create conversation component
+    auto ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    auto [ConversationResult] = AWAIT(ConversationComponent, CreateConversation, "Test Conversation 1 Message");
+
+    EXPECT_EQ(ConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    FirstConversationId = ConversationResult.GetValue();
+
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, FirstConversationId);
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationInfo, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
+        EXPECT_EQ(Result.GetConversationInfo().Message, "Test Conversation 1 Message");
+        EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
     }
 
+    // Add message to Conversation 1
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
+        auto [AddMessageResult] = AWAIT(ConversationComponent, AddMessage, DefaultConversationMessage);
 
-        EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
-        EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
+        EXPECT_EQ(AddMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        FirstConversationId = CreatedMessageInfo.ConversationId;
-
-        std::cerr << "Conversation created. Id: " << FirstConversationId.c_str() << std::endl;
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
-                  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
+        EXPECT_EQ(FirstConversationId, AddMessageResult.GetMessageInfo().ConversationId);
     }
 
+    // Add message to Conversation 1
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultTestUserDisplayName, DefaultConversationMessage);
+        auto [AddMessageResult] = AWAIT(ConversationComponent, AddMessage, DefaultConversationMessage);
 
-        EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
-        EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
-        EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
+        EXPECT_EQ(AddMessageResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
-                  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
+        EXPECT_EQ(FirstConversationId, AddMessageResult.GetMessageInfo().ConversationId);
 
-        FirstMessageIdToBeDeleted = CreatedMessageInfo.Id;
+        FirstMessageIdToBeDeleted = AddMessageResult.GetMessageInfo().MessageId;
     }
 
-    {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultTestUserDisplayName, DefaultConversationMessage);
+    /* {
+            CreatedMessageInfo
+                    = ConversationComponent->AddMessage(UserDisplayName, DefaultConversationMessage);
 
-        EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
-        EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
-        EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
+            EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
+            EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
+            EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
+            EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
 
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
-                  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
-    }
+            std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
+                              << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
+    }*/
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     LogOut(UserSystem);
+
+    // Ensure component data has been written to database by chs before entering the space again
+    std::this_thread::sleep_for(3s);
 
     // Log in with the second account
     csp::common::String SecondTestUserId;
@@ -534,123 +575,125 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    ConvSystem = Connection->GetConversationSystem();
+    bool EntitiesRetrieved = false;
 
-    const auto SecondTestUserDisplayName = GetFullProfileByUserId(UserSystem, SecondTestUserId).DisplayName;
+    EntitySystem->SetInitialEntitiesRetrievedCallback(
+        [&EntitiesRetrieved](bool Ok)
+        {
+            if (Ok)
+            {
+                EntitiesRetrieved = true;
+            }
+        });
 
-    // Add messages to the previous conversation
+    while (!EntitiesRetrieved)
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, SecondTestUserDisplayName, DefaultConversationMessage);
-
-        EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
-        EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
-        EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
-
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
-                  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
     }
 
+    auto* FirstConversationEntity = EntitySystem->FindSpaceEntityById(ConversationObjectId);
+
+    auto* FirstConversationComponent = (ConversationSpaceComponent*)FirstConversationEntity->GetComponent(0);
+
+    // Add message to Conversation 1
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, SecondTestUserDisplayName, DefaultConversationMessage);
+        auto [AddMessageToConversation1Result] = AWAIT(FirstConversationComponent, AddMessage, DefaultConversationMessage);
+        auto CreatedMessageInfo = AddMessageToConversation1Result.GetMessageInfo();
 
-        EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
+        EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
         EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
-
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
-                  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
     }
 
-    auto [ResultConvo2] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    SecondConversationId = ResultConvo2.GetValue();
+    // Add message to Conversation 1
+    {
+        auto [AddMessageToConversation1Result] = AWAIT(FirstConversationComponent, AddMessage, DefaultConversationMessage);
+        auto CreatedMessageInfo = AddMessageToConversation1Result.GetMessageInfo();
 
-    EXPECT_EQ(ResultConvo2.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
+        EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
+        EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
+    }
+
+    uint64_t Conversation2ObjectId;
+
+    // Create object to represent the conversation
+    csp::common::String Object2Name = "Object 2";
+    auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, Object2Name, ObjectTransform);
+
+    Conversation2ObjectId = CreatedObject2->GetId();
+
+    // Create conversation component
+    auto ConversationComponent2 = (ConversationSpaceComponent*)CreatedObject2->AddComponent(ComponentType::Conversation);
+
+    auto [Conversation2Result] = AWAIT(ConversationComponent2, CreateConversation, "Test Conversation 2 Message");
+
+    EXPECT_EQ(Conversation2Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    SecondConversationId = Conversation2Result.GetValue();
 
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, SecondConversationId);
+        auto [Result] = AWAIT_PRE(ConversationComponent2, GetConversationInfo, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, SecondTestUserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, SecondTestUserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        EXPECT_EQ(Result.GetConversationInfo().UserId, SecondTestUserId);
+        EXPECT_EQ(Result.GetConversationInfo().Message, "Test Conversation 2 Message");
+        EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
     }
 
-    // Create a new conversation
+    // Add a message to Conversation 2
     {
-        CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo2.GetValue(), SecondTestUserDisplayName, DefaultConversationMessage);
-        SecondConversationId = CreatedMessageInfo.ConversationId;
+        auto [AddMessageToConversation2Result] = AWAIT(ConversationComponent2, AddMessage, DefaultConversationMessage);
+        auto CreatedMessageInfo = AddMessageToConversation2Result.GetMessageInfo();
 
-        EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
+        EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
         EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-        EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 
-        std::cerr << "Conversation created. Id: " << SecondConversationId.c_str() << std::endl;
-        std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
-                  << " to conversation: Id: " << SecondConversationId.c_str() << std::endl;
-
-        SecondMessageIdToBeDeleted = CreatedMessageInfo.Id;
+        SecondMessageIdToBeDeleted = CreatedMessageInfo.MessageId;
     }
 
     // Retrieve all messages from first conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, FirstConversationId, nullptr, nullptr);
+        auto [Conversation1MessagesResult] = AWAIT(FirstConversationComponent, GetMessagesFromConversation, nullptr, nullptr);
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Conversation1MessagesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto& Messages = Result.GetMessages();
+        const auto& Messages = Conversation1MessagesResult.GetMessages();
 
-        EXPECT_EQ(Messages.Size(), 5);
-        EXPECT_EQ(Result.GetTotalCount(), 5);
+        EXPECT_EQ(Messages.Size(), 4);
+        EXPECT_EQ(Conversation1MessagesResult.GetTotalCount(), 4);
     }
 
     // Delete one message from first conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, DeleteMessage, RequestPredicate, FirstMessageIdToBeDeleted);
+        auto [Result] = AWAIT_PRE(FirstConversationComponent, DeleteMessage, RequestPredicate, FirstMessageIdToBeDeleted);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Retrieve again remaining messages from first conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, FirstConversationId, nullptr, nullptr);
+        auto [Conversation1MessagesResult] = AWAIT(FirstConversationComponent, GetMessagesFromConversation, nullptr, nullptr);
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Conversation1MessagesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        const auto& Messages = Result.GetMessages();
+        const auto& Messages = Conversation1MessagesResult.GetMessages();
 
-        EXPECT_EQ(Messages.Size(), 4);
-        EXPECT_EQ(Result.GetTotalCount(), 4);
+        EXPECT_EQ(Messages.Size(), 3);
+        EXPECT_EQ(Conversation1MessagesResult.GetTotalCount(), 3);
     }
 
     // Delete first conversation entirely
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, DeleteConversation, RequestPredicate, FirstConversationId);
+        auto [Result] = AWAIT_PRE(FirstConversationComponent, DeleteConversation, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Retrieve all messages from second conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, SecondConversationId, nullptr, nullptr);
+        auto [Result] = AWAIT_PRE(ConversationComponent2, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -662,14 +705,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
     // Delete the only message from the second conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, DeleteMessage, RequestPredicate, SecondMessageIdToBeDeleted);
+        auto [Result] = AWAIT_PRE(ConversationComponent2, DeleteMessage, RequestPredicate, SecondMessageIdToBeDeleted);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
     // Retrieve the messages from the second conversation
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, FirstConversationId, nullptr, nullptr);
+        auto [Result] = AWAIT_PRE(ConversationComponent2, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -681,7 +724,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
     // Delete second conversation entirely even if it doesn't contain messages anymore
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, DeleteConversation, RequestPredicate, SecondConversationId);
+        auto [Result] = AWAIT_PRE(ConversationComponent2, DeleteConversation, RequestPredicate);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
@@ -701,744 +744,192 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_NEWMESSAGE_NETWORKEVENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetworkEventTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-    // Setup Asset callback
-    bool ConversationNewMessagecallbackCalled = false;
-    csp::common::String ConversationId;
-
-    auto ConversationNewMessageCallback = [&ConversationNewMessagecallbackCalled, &ConversationId](const ConversationSystemParams& Info)
-    {
-        if (ConversationNewMessagecallbackCalled)
-        {
-            return;
-        }
-        EXPECT_EQ(Info.MessageType, ConversationMessageType::NewMessage);
-        EXPECT_EQ(Info.MessageValue, ConversationId);
-        ConversationNewMessagecallbackCalled = true;
-    };
-
-    ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
-
-    ConversationSystem->SetConversationSystemCallback(ConversationNewMessageCallback);
-
-    auto [Result] = AWAIT_PRE(ConversationSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    {
-        auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
-    }
-
-    {
-        auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-    EventBus->SendNetworkEventToClient("ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::NewMessage), ConversationId },
-        Connection->GetClientId(), [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
-
-    // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
-
-    while (!ConversationNewMessagecallbackCalled && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
-    EXPECT_TRUE(ConversationNewMessagecallbackCalled);
-
-    {
-        auto [Result] = AWAIT(ConversationSystem, DeleteConversation, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETEMESSAGE_NETWORKEVENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNetworkEventTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-    // Setup Asset callback
-    bool ConversationDeleteMessagecallbackCalled = false;
-    csp::common::String ConversationId;
-    csp::common::String MessageId;
-
-    auto ConversationDeleteMessageCallback = [&ConversationDeleteMessagecallbackCalled, &MessageId](const ConversationSystemParams& Info)
-    {
-        if (Info.MessageType == ConversationMessageType::DeleteMessage)
-        {
-            if (ConversationDeleteMessagecallbackCalled)
-            {
-                return;
-            }
-
-            EXPECT_EQ(Info.MessageValue, MessageId);
-            ConversationDeleteMessagecallbackCalled = true;
-        }
-    };
-
-    ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
-    auto [Result] = AWAIT_PRE(ConversationSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    {
-        auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
-    }
-
-    {
-        auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-        MessageId = Result.GetMessageInfo().Id;
-    }
-
-    {
-        ConversationSystem->SetConversationSystemCallback(ConversationDeleteMessageCallback);
-        auto [Result] = AWAIT(ConversationSystem, DeleteMessage, MessageId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-    EventBus->SendNetworkEventToClient("ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::DeleteMessage), MessageId },
-        Connection->GetClientId(), [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
-
-    // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
-
-    while (!ConversationDeleteMessagecallbackCalled && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
-    EXPECT_TRUE(ConversationDeleteMessagecallbackCalled);
-
-    {
-        auto [Result] = AWAIT(ConversationSystem, DeleteConversation, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETECONVERSATION_NETWORKEVENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversationNetworkEventTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-    const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-    // Setup Asset callback
-    bool ConversationDeleteConversationcallbackCalled = false;
-    csp::common::String ConversationId;
-    csp::common::String MessageId;
-
-    auto ConversationDeleteConversationCallback
-        = [&ConversationDeleteConversationcallbackCalled, &ConversationId](const ConversationSystemParams& Info)
-    {
-        if (Info.MessageType == ConversationMessageType::DeleteConversation)
-        {
-            if (ConversationDeleteConversationcallbackCalled)
-            {
-                return;
-            }
-
-            EXPECT_EQ(Info.MessageValue, ConversationId);
-
-            ConversationDeleteConversationcallbackCalled = true;
-        }
-    };
-
-    ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
-
-    auto [Result] = AWAIT_PRE(ConversationSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    {
-        auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-        SpaceTransform DefaultValue;
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
-    }
-
-    {
-        auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-        MessageId = Result.GetMessageInfo().Id;
-    }
-
-    {
-        ConversationSystem->SetConversationSystemCallback(ConversationDeleteConversationCallback);
-        auto [Result] = AWAIT(ConversationSystem, DeleteConversation, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-    EventBus->SendNetworkEventToClient("ConversationSystem",
-        { ReplicatedValue((int64_t)ConversationMessageType::DeleteConversation), ConversationId }, Connection->GetClientId(),
-        [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
-
-    // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
-
-    while (!ConversationDeleteConversationcallbackCalled && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
-    EXPECT_TRUE(ConversationDeleteConversationcallbackCalled);
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_UPDATE_CONVERSATION_INFO
-CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
+// Tests that events are correctly sent to the correct component from the conversation system
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_EVENT_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-OKO";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-OKO";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
-    const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
-    // Setup Asset callback
-    bool ConversationConversationInfocallbackCalled = false;
-    csp::common::String ConversationId;
-    csp::common::String MessageId;
-
-    auto ConversationConversationInformationCallback
-        = [&ConversationConversationInfocallbackCalled, &ConversationId](const ConversationSystemParams& Info)
-    {
-        if (ConversationConversationInfocallbackCalled)
-        {
-            return;
-        }
-        EXPECT_EQ(Info.MessageType, ConversationMessageType::ConversationInformation);
-        EXPECT_EQ(Info.MessageValue, ConversationId);
-        ConversationConversationInfocallbackCalled = true;
-    };
-
+    // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    // Create 2 objects with a conversation component each
+    csp::multiplayer::SpaceEntity* Object1 = CreateTestObject(EntitySystem, "Object1");
+    auto* ConversationComponent1 = (ConversationSpaceComponent*)Object1->AddComponent(ComponentType::Conversation);
+    ConversationComponent1->SetConversationId("TestId1");
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    csp::multiplayer::SpaceEntity* Object2 = CreateTestObject(EntitySystem, "Object2");
+    auto* ConversationComponent2 = (ConversationSpaceComponent*)Object2->AddComponent(ComponentType::Conversation);
+    ConversationComponent2->SetConversationId("TestId2");
 
-    auto* ConvSystem = Connection->GetConversationSystem();
+    Object1->QueueUpdate();
+    Object2->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
-    auto [Result] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
+    // Test that when we send an event with the first components id, that only the first component receives the event.
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
+        bool CallbackCalled1 = false;
+        bool CallbackCalled2 = false;
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
+        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled1 = true; };
+        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled2 = true; };
 
-        SpaceTransform DefaultValue;
+        ConversationComponent1->SetConversationUpdateCallback(Callback1);
+        ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
+        csp::multiplayer::ConversationEventParams Params;
+        Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
+        Params.MessageInfo.ConversationId = ConversationComponent1->GetConversationId();
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
+        bool EventSent = false;
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
+            Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
+
+        WaitForCallback(EventSent);
+        WaitForCallback(CallbackCalled1);
+        // Callback2 shouldn't be called, as the event is for Callback1.
+        // Just in case something is wrong, give a small wait time for the event to come through.
+        WaitForCallback(CallbackCalled2, 1);
+
+        // Ensure the event was sent successfully
+        EXPECT_TRUE(EventSent);
+        // The event was for ConversationComponent1, so this should be called
+        EXPECT_TRUE(CallbackCalled1);
+        // The event wasn't for ConversationComponent2, so this shouldn't be called
+        EXPECT_FALSE(CallbackCalled2);
     }
 
-    ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
-    ConversationSystem->SetConversationSystemCallback(ConversationConversationInformationCallback);
-
+    // Do the same test, but ensure it works correctly when the event is sent to ConversationComponent2
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
+        bool CallbackCalled1 = false;
+        bool CallbackCalled2 = false;
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
+        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled1 = true; };
+        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled2 = true; };
 
-        SpaceTransform DefaultValue;
+        ConversationComponent1->SetConversationUpdateCallback(Callback1);
+        ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
+        csp::multiplayer::ConversationEventParams Params;
+        Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
+        Params.MessageInfo.ConversationId = ConversationComponent2->GetConversationId();
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
+        bool EventSent = false;
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
+            Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
+
+        WaitForCallback(EventSent);
+        WaitForCallback(CallbackCalled1);
+        // Callback1 shouldn't be called, as the event is for Callback2.
+        // Just in case something is wrong, give a small wait time for the event to come through.
+        WaitForCallback(CallbackCalled2, 1);
+
+        // Ensure the event was sent successfully
+        EXPECT_TRUE(EventSent);
+        // The event was for ConversationComponent2, so this should be called
+        EXPECT_TRUE(CallbackCalled2);
+        // The event wasn't for ConversationComponent1, so this shouldn't be called
+        EXPECT_FALSE(CallbackCalled1);
     }
 
-    {
-        ConversationInfo NewData = ConversationInfo();
-        SpaceTransform CameraTransformValue
-            = SpaceTransform(csp::common::Vector3().One(), csp::common::Vector4().One(), csp::common::Vector3().One());
-        NewData.Resolved = true;
-        NewData.CameraPosition = CameraTransformValue;
-        NewData.Message = "TestMessage1";
-
-        auto [Result] = AWAIT_PRE(ConvSystem, SetConversationInformation, RequestPredicate, ConversationId, NewData);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage1");
-        EXPECT_TRUE(Result.GetConversationInfo().Edited);
-        EXPECT_TRUE(Result.GetConversationInfo().Resolved);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, CameraTransformValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, CameraTransformValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, CameraTransformValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, CameraTransformValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, CameraTransformValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, CameraTransformValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, CameraTransformValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, CameraTransformValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, CameraTransformValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, CameraTransformValue.Scale.Z);
-    }
-
-    // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-    EventBus->SendNetworkEventToClient("ConversationSystem",
-        { ReplicatedValue((int64_t)ConversationMessageType::ConversationInformation), ConversationId }, Connection->GetClientId(),
-        [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
-
-    {
-        auto [Result] = AWAIT(ConvSystem, DeleteConversation, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
-
-    while (!ConversationConversationInfocallbackCalled && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
-    EXPECT_TRUE(ConversationConversationInfocallbackCalled);
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_UPDATE_MESSAGE_INFO
-CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
+// Tests that events are correctly stored, and then sent when the corresponding component exists.
+// This can happen if a multiplayer event reaches another client before they have processed their component creation patch.
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_EVENT_DELAY_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-OKO";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-OKO";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
-    const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
-    // Setup Asset callback
-    bool ConversationMessageInfoCallbackCalled = false;
-    csp::common::String ConversationId;
-    csp::common::String MessageId;
-
-    auto ConversationMessageInformationCallback = [&ConversationMessageInfoCallbackCalled, &MessageId](const ConversationSystemParams& Info)
-    {
-        if (ConversationMessageInfoCallbackCalled || Info.MessageType == ConversationMessageType::NewMessage)
-        {
-            return;
-        }
-
-        EXPECT_EQ(Info.MessageType, ConversationMessageType::MessageInformation);
-        EXPECT_EQ(Info.MessageValue, MessageId);
-
-        ConversationMessageInfoCallbackCalled = true;
-    };
-
+    // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    static constexpr const char* TestConversationId = "New Test Message";
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    // Send an event to a yet to exist conversation component
+    csp::multiplayer::ConversationEventParams Params;
+    Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
+    Params.MessageInfo.ConversationId = TestConversationId;
 
-    auto* ConvSystem = Connection->GetConversationSystem();
+    bool EventSent = false;
 
-    auto [Result] = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
-    ConversationId = Result.GetValue();
+    EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
+        Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    WaitForCallback(EventSent);
 
+    // Sleep a bit longer to ensure we receive the event
+    std::this_thread::sleep_for(std::chrono::milliseconds { 2 });
+
+    // Create object to represent the conversation
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    auto* ConversationComponent = (ConversationSpaceComponent*)Object->AddComponent(ComponentType::Conversation);
+
+    // Ensure the conversation id is set so the event system can find the component
+    ConversationComponent->SetConversationId(TestConversationId);
+
+    Object->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    // Test that the conversation component receives the event
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
+        bool CallbackCalled = false;
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-        EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-        EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-        EXPECT_FALSE(Result.GetConversationInfo().Edited);
-        EXPECT_FALSE(Result.GetConversationInfo().Resolved);
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
 
-        SpaceTransform DefaultValue;
+        ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-        EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
     }
 
-    ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
-    ConversationSystem->SetConversationSystemCallback(ConversationMessageInformationCallback);
-
+    // Ensure the event is removed from the buffer by checking it isnt fired again when flushed
     {
-        auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, "test", "test");
+        bool CallbackCalled = false;
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
 
-        MessageId = Result.GetMessageInfo().Id;
+        ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        EXPECT_EQ(Result.GetMessageInfo().Edited, false);
+        // No need to wait, as the buffer will be flushed immediately upon seting the callback again
+        EXPECT_FALSE(CallbackCalled);
     }
 
-    {
-        auto [Result] = AWAIT_PRE(ConvSystem, GetMessageInformation, RequestPredicate, MessageId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetMessageInfo().Edited, false);
-    }
-
-    {
-        MessageInfo NewData = MessageInfo();
-        NewData.Message = "NewTest";
-
-        auto [Result] = AWAIT_PRE(ConvSystem, SetMessageInformation, RequestPredicate, MessageId, NewData);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetMessageInfo().Edited, true);
-        EXPECT_EQ(Result.GetMessageInfo().Message, NewData.Message);
-    }
-
-    // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-    EventBus->SendNetworkEventToClient("ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::MessageInformation), MessageId },
-        Connection->GetClientId(), [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
-
-    {
-        auto [Result] = AWAIT(ConvSystem, DeleteConversation, ConversationId);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Wait for message
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
-
-    while (!ConversationMessageInfoCallbackCalled && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
-    EXPECT_TRUE(ConversationMessageInfoCallbackCalled);
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }

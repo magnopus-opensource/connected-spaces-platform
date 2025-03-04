@@ -230,6 +230,8 @@ void ComponentBase::SetProperties(const csp::common::Map<uint32_t, ReplicatedVal
 
 void ComponentBase::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) { Properties[Key] = Value; }
 
+void ComponentBase::OnCreated() { }
+
 void ComponentBase::OnRemove() { }
 
 SpaceEntity* ComponentBase::GetParent() { return Parent; }
