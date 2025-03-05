@@ -41,6 +41,79 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 }
 
+/*
+    Tests that ConversationSpaceComponents default properties are correct on construction.
+    Also tests that the properties are correctly set using setters.
+*/
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_PROPERTY_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EventBus = SystemsManager.GetEventBus();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    // Test defaults
+    EXPECT_EQ(ConversationComponent->GetConversationId(), "");
+    EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
+    EXPECT_EQ(ConversationComponent->GetIsActive(), true);
+    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 0, 0, 0 }));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 0, 0, 0, 1 }));
+    EXPECT_EQ(ConversationComponent->GetTitle(), "");
+    EXPECT_EQ(ConversationComponent->GetResolved(), false);
+
+    // Set properties
+    constexpr const char* TestConversationId = "TestConversationId";
+    const bool TestVisible = false;
+    const bool TestActive = false;
+    const csp::common::Vector3 TestPosition(1, 2, 3);
+    const csp::common::Vector4 TestRotation(4, 5, 6, 7);
+    constexpr const char* TestTitle = "TestTitle";
+    const bool TestResolved = true;
+
+    ConversationComponent->SetConversationId(TestConversationId);
+    ConversationComponent->SetIsVisible(TestVisible);
+    ConversationComponent->SetIsActive(TestActive);
+    ConversationComponent->SetPosition(TestPosition);
+    ConversationComponent->SetRotation(TestRotation);
+    ConversationComponent->SetTitle(TestTitle);
+    ConversationComponent->SetResolved(TestResolved);
+
+    // Set new properties
+    EXPECT_EQ(ConversationComponent->GetConversationId(), TestConversationId);
+    EXPECT_EQ(ConversationComponent->GetIsVisible(), TestVisible);
+    EXPECT_EQ(ConversationComponent->GetIsActive(), TestActive);
+    EXPECT_TRUE((ConversationComponent->GetPosition() == TestPosition));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == TestRotation));
+    EXPECT_EQ(ConversationComponent->GetTitle(), TestTitle);
+    EXPECT_EQ(ConversationComponent->GetResolved(), TestResolved);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 {
