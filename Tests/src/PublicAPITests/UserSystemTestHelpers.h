@@ -24,8 +24,6 @@ extern csp::common::String SuperUserLoginPassword;
 const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
-void LoadTestAccountCredentials();
-
 void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, const csp::common::String& Email,
     const csp::common::String& Password, bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);

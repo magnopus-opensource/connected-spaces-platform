@@ -638,7 +638,7 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         std::nullopt, // AutoModerator
         RequiresInvite, // RequiresInvite
         IsArchived, // Archived
-        std::nullopt, // OrganizationIds
+        std::nullopt, // no longer used
         ResultsSkip, // Skip
         ResultsMax, // Limit
         ResponseHandler);
