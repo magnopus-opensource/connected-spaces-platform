@@ -77,6 +77,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 0, 0, 0, 1 }));
     EXPECT_EQ(ConversationComponent->GetTitle(), "");
     EXPECT_EQ(ConversationComponent->GetResolved(), false);
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3 { 0, 0, 0 }));
 
     // Set properties
     constexpr const char* TestConversationId = "TestConversationId";
@@ -86,6 +87,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     const csp::common::Vector4 TestRotation(4, 5, 6, 7);
     constexpr const char* TestTitle = "TestTitle";
     const bool TestResolved = true;
+    const csp::common::Vector3 TestConversationCameraPosition(8, 9, 10);
 
     ConversationComponent->SetConversationId(TestConversationId);
     ConversationComponent->SetIsVisible(TestVisible);
@@ -94,6 +96,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     ConversationComponent->SetRotation(TestRotation);
     ConversationComponent->SetTitle(TestTitle);
     ConversationComponent->SetResolved(TestResolved);
+    ConversationComponent->SetConversationCameraPosition(TestConversationCameraPosition);
 
     // Set new properties
     EXPECT_EQ(ConversationComponent->GetConversationId(), TestConversationId);
@@ -103,6 +106,82 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     EXPECT_TRUE((ConversationComponent->GetRotation() == TestRotation));
     EXPECT_EQ(ConversationComponent->GetTitle(), TestTitle);
     EXPECT_EQ(ConversationComponent->GetResolved(), TestResolved);
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == TestConversationCameraPosition));
+
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_SCRIPT_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    // Test defaults
+    EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
+    EXPECT_EQ(ConversationComponent->GetIsActive(), true);
+    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 0, 0, 0 }));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 0, 0, 0, 1 }));
+    EXPECT_EQ(ConversationComponent->GetTitle(), "");
+    EXPECT_EQ(ConversationComponent->GetResolved(), false);
+
+    Object->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    // Setup script
+    std::string ConversationScriptText = R"xx(
+			var conversation = ThisEntity.getConversationComponents()[0];
+			conversation.isVisible = false;
+			conversation.isActive = false;
+			conversation.position = [1,2,3];
+			conversation.rotation = [4,5,6,7];
+            conversation.title = "TestTitle";
+            conversation.resolved = true;
+            conversation.conversationCameraPosition = [8, 9, 10];
+		)xx";
+
+    Object->GetScript()->SetScriptSource(ConversationScriptText.c_str());
+    Object->GetScript()->Invoke();
+
+    EntitySystem->ProcessPendingEntityOperations();
+
+    // Set new properties
+    EXPECT_EQ(ConversationComponent->GetIsVisible(), false);
+    EXPECT_EQ(ConversationComponent->GetIsActive(), false);
+    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 1, 2, 3 }));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 4, 5, 6, 7 }));
+    EXPECT_EQ(ConversationComponent->GetTitle(), "TestTitle");
+    EXPECT_EQ(ConversationComponent->GetResolved(), true);
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3 { 8, 9, 10 }));
+
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -268,104 +347,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    {
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-        // Create object to represent the conversation
-        csp::common::String ObjectName = "Object 1";
-        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-        // Create conversation component
-        auto* ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
-
-        SpaceTransform DefaultTransform;
-
-        EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
-        EXPECT_EQ(ConversationComponent->GetIsActive(), true);
-
-        EXPECT_EQ(ConversationComponent->GetPosition().X, DefaultTransform.Position.X);
-        EXPECT_EQ(ConversationComponent->GetPosition().Y, DefaultTransform.Position.Y);
-        EXPECT_EQ(ConversationComponent->GetPosition().Z, DefaultTransform.Position.Z);
-
-        EXPECT_EQ(ConversationComponent->GetRotation().W, DefaultTransform.Rotation.W);
-        EXPECT_EQ(ConversationComponent->GetRotation().X, DefaultTransform.Rotation.X);
-        EXPECT_EQ(ConversationComponent->GetRotation().Y, DefaultTransform.Rotation.Y);
-        EXPECT_EQ(ConversationComponent->GetRotation().Z, DefaultTransform.Rotation.Z);
-
-        CreatedObject->QueueUpdate();
-        EntitySystem->ProcessPendingEntityOperations();
-
-        // Setup script
-        std::string ConversationScriptText = R"xx(
-			var conversation = ThisEntity.getConversationComponents()[0];
-			conversation.isVisible = false;
-			conversation.isActive = false;
-			conversation.position = [1,2,3];
-			conversation.rotation = [4,5,6,7];
-		)xx";
-
-        CreatedObject->GetScript()->SetScriptSource(ConversationScriptText.c_str());
-        CreatedObject->GetScript()->Invoke();
-
-        EntitySystem->ProcessPendingEntityOperations();
-
-        EXPECT_FALSE(ConversationComponent->GetIsVisible());
-        EXPECT_FALSE(ConversationComponent->GetIsActive());
-
-        csp::common::Vector3 NewPosition(1, 2, 3);
-
-        EXPECT_EQ(ConversationComponent->GetPosition().X, NewPosition.X);
-        EXPECT_EQ(ConversationComponent->GetPosition().Y, NewPosition.Y);
-        EXPECT_EQ(ConversationComponent->GetPosition().Z, NewPosition.Z);
-
-        csp::common::Vector4 NewRotation(4, 5, 6, 7);
-
-        EXPECT_EQ(ConversationComponent->GetRotation().W, NewRotation.W);
-        EXPECT_EQ(ConversationComponent->GetRotation().X, NewRotation.X);
-        EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
-        EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
-
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    };
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
