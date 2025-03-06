@@ -38,9 +38,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-csp::common::String SuperUserLoginEmail;
-csp::common::String SuperUserLoginPassword;
-
 csp::systems::Profile CreateTestUser()
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();

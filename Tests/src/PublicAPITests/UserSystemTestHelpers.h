@@ -18,9 +18,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
 
-extern csp::common::String SuperUserLoginEmail;
-extern csp::common::String SuperUserLoginPassword;
-
 const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
