@@ -121,6 +121,7 @@ public:
     CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     /// @brief Retrieves message details that are represented by this component.
+    /// This doesn't include the original message that created the conversation.
     /// @param ResultsSkipNumber const csp::common::Optional<int>& : Optional parameter representing the number of result entries that will be skipped
     /// from the result. For no skip pass an empty optional.
     /// @param ResultsMaxNumber const csp::common::Optional<int>& : Optional parameter representing the maximum number of result entries to be
