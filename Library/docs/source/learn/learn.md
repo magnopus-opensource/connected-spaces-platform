@@ -72,7 +72,7 @@ Key components of the layer include:
 
 * **Security & Access Control:** Ensures data security and proper access control measures.
 
-* **Groups, Organizations, and Social Connections:** Facilitates social interactions and organizational structures.
+* **Groups and Social Connections:** Facilitates social interactions and group structures.
 
 * **Referential Object Definitions and Instances:** Manages objects and their references within the platform.
 
