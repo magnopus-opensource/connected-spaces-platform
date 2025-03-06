@@ -366,11 +366,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 #endif
 
 /*
-    Ensures the ConversationComponent::GetNumberOfReplies function returns the correct number of replies
-    with a varying amount of messages.
+    Ensures the ConversationComponent::GetNumberOfReplies work with a varying amount of messages.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_NUMBER_OF_REPLIES_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepliesTest)
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_GETNUMBEROFREPLIES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRepliesTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -408,11 +407,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
     auto* ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
 
     csp::common::String ConversationId;
-    csp::common::String MessageId;
+    csp::common::String MessageId1;
+    csp::common::String MessageId2;
+
+    constexpr const char* TestConversationMessage = "TestConversation";
+    constexpr const char* TestMessage1 = "TestMessage1";
+    constexpr const char* TestMessage2 = "TestMessage2";
 
     // Create conversation
     {
-        auto [Result] = AWAIT(ConversationComponent, CreateConversation, "TestMessage");
+        auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestConversationMessage);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_TRUE(Result.GetValue() != "");
@@ -430,10 +434,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
 
     // Add a reply
     {
-        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "TestReply");
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage1);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        MessageId = Result.GetMessageInfo().MessageId;
+        MessageId1 = Result.GetMessageInfo().MessageId;
     }
 
     // Ensure reply count is 1
@@ -446,10 +450,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
 
     // Add another reply
     {
-        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "TestReply1");
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage2);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        MessageId = Result.GetMessageInfo().MessageId;
+        MessageId2 = Result.GetMessageInfo().MessageId;
     }
 
     // Ensure reply count is 2
@@ -462,7 +466,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
 
     // Delete the last message
     {
-        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteMessage, RequestPredicate, MessageId);
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteMessage, RequestPredicate, MessageId2);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
@@ -484,7 +488,169 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
 #endif
 
 /*
-    Ensures that when deleting the COnversationComponent, it internally calls DeleteConversation
+    Ensures the ConversationComponent::GetMessagesFromConversation work with a varying amount of messages.
+*/
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_GETMESSAGESFROMCONVERSATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFromConversationTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+
+    // Create object to represent the conversation
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    // Create conversation component
+    auto* ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+
+    csp::common::String ConversationId;
+    csp::common::String MessageId1;
+    csp::common::String MessageId2;
+
+    constexpr const char* TestConversationMessage = "TestConversation";
+    constexpr const char* TestMessage1 = "TestMessage1";
+    constexpr const char* TestMessage2 = "TestMessage2";
+
+    // Create conversation
+    {
+        auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestConversationMessage);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(Result.GetValue() != "");
+
+        ConversationId = Result.GetValue();
+    }
+
+    // Ensure no messages are found
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetMessages().Size(), 0);
+    }
+
+    // Add a reply
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage1);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        MessageId1 = Result.GetMessageInfo().MessageId;
+    }
+
+    // Ensure we have our reply
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetMessages().Size(), 1);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessages()[0];
+
+        EXPECT_EQ(Info.ConversationId, ConversationId);
+        EXPECT_EQ(Info.IsConversation, false);
+        EXPECT_TRUE(Info.CreatedTimestamp != "");
+        EXPECT_EQ(Info.EditedTimestamp, "");
+        EXPECT_EQ(Info.UserId, UserId);
+        EXPECT_EQ(Info.Message, TestMessage1);
+        EXPECT_EQ(Info.MessageId, MessageId1);
+    }
+
+    // Add another reply
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage2);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        MessageId2 = Result.GetMessageInfo().MessageId;
+    }
+
+    // Ensure we have both replies
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetMessages().Size(), 2);
+
+        const csp::multiplayer::MessageInfo& Info1 = Result.GetMessages()[1];
+
+        EXPECT_EQ(Info1.ConversationId, ConversationId);
+        EXPECT_EQ(Info1.IsConversation, false);
+        EXPECT_TRUE(Info1.CreatedTimestamp != "");
+        EXPECT_EQ(Info1.EditedTimestamp, "");
+        EXPECT_EQ(Info1.UserId, UserId);
+        EXPECT_EQ(Info1.Message, TestMessage1);
+        EXPECT_EQ(Info1.MessageId, MessageId1);
+
+        const csp::multiplayer::MessageInfo& Info2 = Result.GetMessages()[0];
+
+        EXPECT_EQ(Info2.ConversationId, ConversationId);
+        EXPECT_EQ(Info2.IsConversation, false);
+        EXPECT_TRUE(Info2.CreatedTimestamp != "");
+        EXPECT_EQ(Info2.EditedTimestamp, "");
+        EXPECT_EQ(Info2.UserId, UserId);
+        EXPECT_EQ(Info2.Message, TestMessage2);
+        EXPECT_EQ(Info2.MessageId, MessageId2);
+    }
+
+    // Delete the first message
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteMessage, RequestPredicate, MessageId1);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Ensure we still have our second message
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetMessages().Size(), 1);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessages()[0];
+
+        EXPECT_EQ(Info.ConversationId, ConversationId);
+        EXPECT_EQ(Info.IsConversation, false);
+        EXPECT_TRUE(Info.CreatedTimestamp != "");
+        EXPECT_EQ(Info.EditedTimestamp, "");
+        EXPECT_EQ(Info.UserId, UserId);
+        EXPECT_EQ(Info.Message, TestMessage2);
+        EXPECT_EQ(Info.MessageId, MessageId2);
+    }
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
+/*
+    Ensures that when deleting the ConversationComponent, it internally calls DeleteConversation
 */
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
