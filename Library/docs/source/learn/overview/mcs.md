@@ -24,9 +24,9 @@ User Accounts & Management handles user authentication, authorization, and profi
 
 Security & Access Control is responsible for protecting data and ensuring that only authorized users can access certain parts of the platform. This component uses various security measures, such as encryption and permissions, to safeguard sensitive information and maintain privacy.
 
-**3\. Groups, Organizations, and Social Connections**
+**3\. Groups and Social Connections**
 
-This component facilitates social interactions and organizational structures within CSP. Users can form groups, join organizations, and connect with others to collaborate and share experiences. It helps build a community and enhances user engagement.
+This component facilitates social interactions and group structures within CSP. Users can form groups and connect with others to collaborate and share experiences. It helps build a community and enhances user engagement.
 
 **4\. Referential Object Definitions and Instances**
 

@@ -102,9 +102,6 @@ public:
     // NOTE: Why is this here?
     csp::common::String Version;
 
-    // The ID of the organization which owns this asset collection
-    csp::common::String OrganizationId;
-
 private:
     // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
     // internal STL map's destructor invokes client application's deallocators when they override 'delete'

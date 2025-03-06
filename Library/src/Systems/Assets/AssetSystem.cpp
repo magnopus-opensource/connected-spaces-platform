@@ -357,7 +357,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
             std::nullopt, // PrototypeOwnerIds
             std::nullopt, // ReadAccessFilters
             std::nullopt, // WriteAccessFilters
-            std::nullopt, // OrganizationIds
+            std::nullopt, // OrganizationIds (no longer used)
             SourceSpaceId, // originalGroupId
             DestSpaceId, // newGroupId
             std::nullopt, // shallowCopy
@@ -492,7 +492,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
             std::nullopt, // PrototypeOwnerIds
             std::nullopt, // ReadAccessFilters
             std::nullopt, // WriteAccessFilters
-            std::nullopt, // OrganizationIds
+            std::nullopt, // OrganizationIds (no longer used)
             Skip, // Skip
             Limit, // Limit
             std::nullopt, // SortBy

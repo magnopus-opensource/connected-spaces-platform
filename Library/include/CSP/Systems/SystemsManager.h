@@ -42,7 +42,6 @@ class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
 class QuotaSystem;
-class OrganizationSystem;
 class SequenceSystem;
 class HotspotSequenceSystem;
 class ConversationSystemInternal;
@@ -150,10 +149,6 @@ public:
     /// @return QuotaSystem : pointer to the Quota system class
     QuotaSystem* GetQuotaSystem();
 
-    /// @brief Retrieves the Organization system.
-    /// @return OrganizationSystem : pointer to the Organization system class
-    OrganizationSystem* GetOrganizationSystem();
-
     /// @brief Retrieves the Sequence system.
     /// @return SequenceSystem : pointer to the Sequence system class
     SequenceSystem* GetSequenceSystem();
@@ -202,7 +197,6 @@ private:
     EventTicketingSystem* EventTicketingSystem;
     ECommerceSystem* ECommerceSystem;
     QuotaSystem* QuotaSystem;
-    OrganizationSystem* OrganizationSystem;
     SequenceSystem* SequenceSystem;
     HotspotSequenceSystem* HotspotSequenceSystem;
     ConversationSystemInternal* ConversationSystem;
