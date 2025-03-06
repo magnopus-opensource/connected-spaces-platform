@@ -44,42 +44,6 @@ bool StringToBool(const common::String& value) { return (value == "true") ? true
 
 common::String BoolToString(bool value) { return value ? "true" : "false"; }
 
-common::String Vector3ToString(const common::Vector3& value)
-{
-    return common::StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
-}
-
-common::Vector3 StringToVector3(const common::String& value)
-{
-    common::List<common::String> StringList = value.Split(',');
-    return common::Vector3(std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()));
-}
-
-common::String Vector4ToString(const common::Vector4& value)
-{
-    return common::StringFormat("%s,%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str(),
-        std::to_string(value.W).c_str());
-}
-
-common::Vector4 StringToVector4(const common::String& value)
-{
-    common::List<common::String> StringList = value.Split(',');
-    return common::Vector4(
-        std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()), std::stof(StringList[3].c_str()));
-}
-
-multiplayer::SpaceTransform StringToSpaceTransform(const common::String& value)
-{
-    common::List<common::String> StringList = value.Split('|');
-    return multiplayer::SpaceTransform(StringToVector3(StringList[0]), StringToVector4(StringList[1]), StringToVector3(StringList[2]));
-}
-
-common::String SpaceTransformToString(const multiplayer::SpaceTransform& value)
-{
-    return common::StringFormat(
-        "%s|%s|%s", Vector3ToString(value.Position).c_str(), Vector4ToString(value.Rotation).c_str(), Vector3ToString(value.Scale).c_str());
-}
-
 common::String GetUniqueConversationContainerAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
 {
     auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
