@@ -69,9 +69,10 @@ public:
     csp::common::String MessageId;
 
     MessageInfo();
-    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& CreatedTimestamp,
-        const csp::common::String& EditedTimestamp, const csp::common::String& UserId, const csp::common::String& Message,
-        const csp::common::String& MessageId);
+    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message);
+    MessageInfo(
+        const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId);
+
     MessageInfo(const MessageInfo& MessageData);
 };
 
