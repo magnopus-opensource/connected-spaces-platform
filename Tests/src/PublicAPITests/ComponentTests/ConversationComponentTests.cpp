@@ -194,6 +194,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 }
 #endif
 
+// TODO: Test ensures
+
 /*
     Tests that ConversationSpaceComponents can sucessfully create, update and deleted messages and components.
     Also ensures all callback values are correct.
@@ -1059,15 +1061,46 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
         EXPECT_TRUE(ConversationComponent != nullptr);
     }
 
+    csp::multiplayer::MessageInfo ReceivedInfo;
+
     // Ensure conversation created callback is called
     {
         bool CallbackCalled = false;
 
         ConversationComponent->SetConversationUpdateCallback(
-            [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; });
+            [&CallbackCalled, &ReceivedInfo](const csp::multiplayer::ConversationEventParams& Params)
+            {
+                ReceivedInfo = Params.MessageInfo;
+                CallbackCalled = true;
+            });
 
         WaitForCallbackWithUpdate(CallbackCalled, EntitySystem);
         EXPECT_TRUE(CallbackCalled);
+
+        ConversationComponent->SetConversationUpdateCallback(nullptr);
+    }
+
+    // Ensure we can get the information about the conversation
+    {
+        auto [Result] = AWAIT(ConversationComponent, GetConversationInfo);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto [Result2] = AWAIT(ConversationComponent, GetConversationInfo);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto [Result3] = AWAIT(ConversationComponent, GetConversationInfo);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetConversationInfo();
+
+        EXPECT_EQ(Info.ConversationId, ReceivedInfo.ConversationId);
+        EXPECT_EQ(Info.IsConversation, ReceivedInfo.IsConversation);
+        // Currently commenting out until CHS fix an inconsistancy with the CreatedTimestamp
+        // EXPECT_EQ(Info.CreatedTimestamp, ReceivedInfo.CreatedTimestamp);
+        EXPECT_EQ(Info.EditedTimestamp, ReceivedInfo.EditedTimestamp);
+        EXPECT_EQ(Info.UserId, ReceivedInfo.UserId);
+        EXPECT_EQ(Info.Message, ReceivedInfo.Message);
+        EXPECT_EQ(Info.MessageId, ReceivedInfo.MessageId);
     }
 
     // Just being safe here, so we dont hang forever in case of catastrophe.
