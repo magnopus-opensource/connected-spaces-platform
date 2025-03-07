@@ -27,7 +27,7 @@ class FogSpaceComponentScriptInterface : public ComponentScriptInterface
 public:
     FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent = nullptr);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, FogMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, FogMode);
 
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);

@@ -36,8 +36,8 @@ DEFINE_SCRIPT_PROPERTY_VEC3(ImageSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(ImageSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(ImageSpaceComponent, Rotation);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, csp::multiplayer::BillboardMode, int64_t, BillboardMode);
-DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, csp::multiplayer::DisplayMode, int64_t, DisplayMode);
+DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, csp::multiplayer::BillboardMode, int32_t, BillboardMode);
+DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, csp::multiplayer::DisplayMode, int32_t, DisplayMode);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsEmissive);
 DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsVisible);

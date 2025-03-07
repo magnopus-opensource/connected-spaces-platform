@@ -111,7 +111,6 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             State->RefreshToken = AuthResponse->GetRefreshToken();
             State->UserId = AuthResponse->GetUserId();
             State->DeviceId = AuthResponse->GetDeviceId();
-            State->OrganizationIds = csp::common::Convert(AuthResponse->GetOrganizationIds());
 
             const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
             const DateTime CurrentTime(DateTime::UtcTimeNow());

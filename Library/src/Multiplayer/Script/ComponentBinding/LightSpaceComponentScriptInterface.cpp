@@ -29,7 +29,7 @@ LightSpaceComponentScriptInterface::LightSpaceComponentScriptInterface(LightSpac
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, csp::multiplayer::LightType, int64_t, LightType);
+DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, csp::multiplayer::LightType, int32_t, LightType);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, float, float, Intensity);
 DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, float, float, Range);
@@ -43,6 +43,6 @@ DEFINE_SCRIPT_PROPERTY_VEC4(LightSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, bool, bool, IsVisible);
 
 DEFINE_SCRIPT_PROPERTY_STRING(LightSpaceComponent, LightCookieAssetId);
-DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, csp::multiplayer::LightCookieType, int64_t, LightCookieType);
+DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, csp::multiplayer::LightCookieType, int32_t, LightCookieType);
 
 } // namespace csp::multiplayer

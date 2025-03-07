@@ -69,7 +69,7 @@ SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t 
 {
     config = signalr_client_config();
     config.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
-    config.set_http_headers({ { "X-AssetPlatform", csp::CSPFoundation::GetClientUserAgentString().c_str() } });
+    config.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
     Connection.set_client_config(config);
 }
 

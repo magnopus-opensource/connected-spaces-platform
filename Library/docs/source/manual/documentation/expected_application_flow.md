@@ -43,7 +43,7 @@ This call also initiates the MultiplayerConnection, which will provide real time
 This call triggers a callback (provided in any above methods parameter list), which informs the client of a successful login attempt. Until this callback returns, the client cannot assume the user has logged in.
 
 ### a. Tick
-Once Login is complete, the client application should consider starting to call Tick at a regular rate. This will be required to receive any event messages, including messages relating to forced disconnects, or messages relating to Organizations, for example.
+Once Login is complete, the client application should consider starting to call Tick at a regular rate. This will be required to receive any event messages, including messages relating to forced disconnects, for example.
 
 ## 3. Set the EntityCreated Callback
 ```c++

@@ -119,8 +119,12 @@ public:
     csp::common::Array<csp::common::String> UserIds;
     csp::common::Array<csp::common::String> ModeratorIds;
     csp::common::Array<csp::common::String> BannedUserIds;
-    csp::common::String OrganizationId;
     /** @} */
+
+    /// @brief Whether or not the user is "known" to the space. That being defined by whether the userID is contained in the UserIds, ModeratorIds or
+    /// is the Creator. Banned users do not count as known.
+    /// @return Whether or not the user is known to the space
+    CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
 };
 
 /// @ingroup Space System
@@ -364,6 +368,33 @@ private:
 };
 
 /// @ingroup Space System
+/// @brief Data class used to contain the ids of the users that have accepted the space invites
+class CSP_API AcceptedInvitesResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Retrieves the stored user ids
+    /// @return csp::common::Array<csp::common::String> : reference to the user ids array
+    csp::common::Array<csp::common::String>& GetAcceptedInvitesUserIds();
+
+    /// @brief Retrieves the stored user ids
+    /// @return csp::common::Array<csp::common::String> : reference to the user ids array
+    const csp::common::Array<csp::common::String>& GetAcceptedInvitesUserIds() const;
+
+private:
+    AcceptedInvitesResult(void*) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    csp::common::Array<csp::common::String> AcceptedInvitesUserIds;
+};
+
+/// @ingroup Space System
 /// @brief Data class used to contain the outcome of space geo location operations.
 /// The result can be successful and still return no geo location if one does not exist.
 class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase
@@ -430,6 +461,7 @@ typedef std::function<void(const SpaceMetadataResult& Result)> SpaceMetadataResu
 typedef std::function<void(const SpacesMetadataResult& Result)> SpacesMetadataResultCallback;
 
 typedef std::function<void(const PendingInvitesResult& Result)> PendingInvitesResultCallback;
+typedef std::function<void(const AcceptedInvitesResult& Result)> AcceptedInvitesResultCallback;
 
 typedef std::function<void(const SpaceGeoLocationResult& Result)> SpaceGeoLocationResultCallback;
 typedef std::function<void(const SpaceGeoLocationCollectionResult& Result)> SpaceGeoLocationCollectionResultCallback;

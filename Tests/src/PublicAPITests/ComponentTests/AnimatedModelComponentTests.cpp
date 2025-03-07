@@ -252,7 +252,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_ANIMATED_MODEL_ENTER_SPACE_TEST
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceTest)
+CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceTest)
 {
     SetRandSeed();
 
@@ -334,6 +334,10 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnimatedModelTests, AnimatedModelComponentEn
         EntitySystem->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Ensure component data has been written to database by chs before entering the space again
+        // This is due to an enforced 2 second chs database write delay
+        std::this_thread::sleep_for(7s);
     }
 
     {

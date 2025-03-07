@@ -42,6 +42,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsPlaying);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVisible);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, int64_t, int64_t, AnimationIndex);
+DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, int32_t, int32_t, AnimationIndex);
 
 } // namespace csp::multiplayer

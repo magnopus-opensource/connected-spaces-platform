@@ -43,7 +43,7 @@ public:
 
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, AnimationIndex);
+    DECLARE_SCRIPT_PROPERTY(int32_t, AnimationIndex);
 };
 
 } // namespace csp::multiplayer
