@@ -39,7 +39,7 @@ void RunTest()
     constexpr const char* UniqueSpaceName = "MakeThisReallyUniqueBeforeCommit";
     constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
 
-    // Create avater
+    // Create avatar
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
