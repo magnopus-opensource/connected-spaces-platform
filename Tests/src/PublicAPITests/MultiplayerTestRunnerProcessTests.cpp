@@ -18,6 +18,7 @@
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <PublicAPITests/UserSystemTestHelpers.h>
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {
@@ -64,8 +65,12 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
 {
-    // Actually invoke the runner and make sure the future's are all set
+    // Actually invoke the runner and make sure the futures are all set
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
+    char UniqueEmail[256];
+    SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    Process.SetLoginEmail(UniqueEmail);
+    Process.SetPassword(GeneratedTestAccountPassword);
     Process.SetTimeoutInSeconds(0); // So we don't sit at ready for assertions for any real time.
 
     Process.StartProcess();

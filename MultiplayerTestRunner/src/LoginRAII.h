@@ -24,6 +24,6 @@
 class LoginRAII
 {
 public:
-    LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword);
+    LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword, bool CreateAccount = true);
     ~LoginRAII();
 };

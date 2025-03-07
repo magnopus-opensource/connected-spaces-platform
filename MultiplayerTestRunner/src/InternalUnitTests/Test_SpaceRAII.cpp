@@ -26,23 +26,7 @@
 #include <gtest/gtest.h>
 #include <optional>
 
-namespace
-{
-/* Some tests only run if there's a credentials file */
-std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
-{
-    try
-    {
-        return Utils::LoadTestAccountCredentials();
-    }
-    catch (...)
-    {
-        return {};
-    }
-}
-} // namespace
-
-/* Initialze CSP before the suite begins with a fixture */
+/* Initialize CSP before the suite begins with a fixture */
 class SpaceRAIITest : public ::testing::Test
 {
 protected:
@@ -51,16 +35,12 @@ protected:
 
 TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
     ::testing::internal::CaptureStdout();
 
     // Login
-    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
-
+    char UniqueEmail[256];
+    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
+    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
     {
         // Check the create space and joined space process descriptors are printed when we don't provide a spaceID
         SpaceRAII Space({});
@@ -108,15 +88,10 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
-
     // Login
-    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
-
+    char UniqueEmail[256];
+    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
+    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
     // Create a space
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();

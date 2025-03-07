@@ -59,10 +59,15 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
 }
 } // namespace
 
-LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword)
+LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword, bool CreateAccount /* = true */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
+
+    if (CreateAccount)
+    {
+        Utils::CreateTestUser(AccountLoginEmail, AccountPassword);
+    }
 
     LogIn(UserSystem, AccountLoginEmail.c_str(), AccountPassword.c_str(), true, csp::systems::EResultCode::Success,
         csp::systems::ERequestFailureReason::None);

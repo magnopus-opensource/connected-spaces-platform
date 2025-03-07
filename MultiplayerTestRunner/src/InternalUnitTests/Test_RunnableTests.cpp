@@ -30,23 +30,7 @@
  * Nonetheless, we should ensure they don't crash.
  */
 
-namespace
-{
-/* Some tests only run if there's a credentials file */
-std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
-{
-    try
-    {
-        return Utils::LoadTestAccountCredentials();
-    }
-    catch (...)
-    {
-        return {};
-    }
-}
-} // namespace
-
-/* Initialze CSP before the suite begins with a fixture */
+/* Initialize CSP before the suite begins with a fixture */
 class RunnableTests : public ::testing::Test
 {
 protected:
@@ -55,14 +39,10 @@ protected:
 
 TEST_F(RunnableTests, CreateAvatar)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
-
     // Login
-    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
+    char UniqueEmail[256];
+    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
+    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
     // Make a throwaway space
     SpaceRAII Space({});
 
