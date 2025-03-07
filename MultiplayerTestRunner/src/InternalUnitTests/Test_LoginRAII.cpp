@@ -35,7 +35,7 @@ TEST_F(LoginRAIITest, TestValidLogin)
     {
         // Check the process descriptor is printed.
         ::testing::internal::CaptureStdout();
-        auto TestUser = Utils::CreateTestUser();
+        auto TestUser = Utils::CreateTestUser("no-idea-how-to@retrieve.this");
         LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
         EXPECT_NE(::testing::internal::GetCapturedStdout().find(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR), std::string::npos);
         ::testing::internal::CaptureStdout(); // GetCapturedStdout stops capturing, so we want to start again for the logout descriptor

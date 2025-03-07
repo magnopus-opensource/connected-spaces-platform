@@ -40,8 +40,8 @@ inline std::string GetUniqueString()
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode ExpectedResultCode /* = Success */,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode /* = None */)
+csp::systems::Profile Utils::CreateTestUser(std::string UniqueEmail, bool AgeVerified /* = true */,
+    csp::systems::EResultCode ExpectedResultCode /* = Success */, csp::systems::ERequestFailureReason ExpectedResultFailureCode /* = None */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
@@ -53,8 +53,6 @@ csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::
     const char* TestDisplayName = "CSP-MULTIPLAYERTESTRUNNER-DISPLAY";
 
     std::string UniqueUserName = TestUserName + GetUniqueString();
-
-    std::string UniqueEmail = GeneratedTestAccountEmailFormat + GetUniqueString();
 
     UserSystem.CreateUser(UniqueUserName.c_str(), TestDisplayName, UniqueEmail.c_str(), GeneratedTestAccountPassword.c_str(), false, AgeVerified,
         nullptr, nullptr,

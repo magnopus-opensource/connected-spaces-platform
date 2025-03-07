@@ -40,7 +40,7 @@ protected:
 TEST_F(RunnableTests, CreateAvatar)
 {
     // Login
-    auto TestUser = Utils::CreateTestUser();
+    auto TestUser = Utils::CreateTestUser("no-idea-how-to@retrieve.this");
     LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
     // Make a throwaway space
     SpaceRAII Space({});

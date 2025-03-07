@@ -38,10 +38,10 @@ namespace common
 namespace Utils
 {
 
-const std::string GeneratedTestAccountEmailFormat = "multiplayertestrunnernopus.pokemon+%s@magnopus.com";
 const std::string GeneratedTestAccountPassword = "4G[j6]7H>l{P0_wK";
 
-csp::systems::Profile CreateTestUser(bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+csp::systems::Profile CreateTestUser(std::string UniqueEmail, bool AgeVerified = true,
+    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 // Assert a type is move capable

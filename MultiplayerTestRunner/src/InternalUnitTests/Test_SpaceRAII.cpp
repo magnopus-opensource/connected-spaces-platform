@@ -38,7 +38,7 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
     ::testing::internal::CaptureStdout();
 
     // Login
-    auto TestUser = Utils::CreateTestUser();
+    auto TestUser = Utils::CreateTestUser("no-idea-how-to@retrieve.this");
     LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
 
     {
@@ -89,7 +89,8 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
     // Login
-    auto TestUser = Utils::CreateTestUser();
+    auto TestUser
+        = Utils::CreateTestUser("no-idea-how-to@retrieve.this"); // FIXME OR: this should retrieve the email/password supplied on the command line
     LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
 
     // Create a space
