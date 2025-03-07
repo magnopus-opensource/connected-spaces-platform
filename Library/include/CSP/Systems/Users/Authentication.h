@@ -73,7 +73,6 @@ public:
     csp::common::String RefreshToken;
     csp::common::String UserId;
     csp::common::String DeviceId;
-    csp::common::Array<csp::common::String> OrganizationIds;
 
 private:
     void CopyStateFrom(const LoginState& OtherState);

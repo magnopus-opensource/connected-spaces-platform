@@ -38,38 +38,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-csp::common::String SuperUserLoginEmail;
-csp::common::String SuperUserLoginPassword;
-
-void LoadTestAccountCredentials()
-{
-    if (!std::filesystem::exists("test_account_creds.txt"))
-    {
-        LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
-                 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
-    }
-
-    std::ifstream CredsFile;
-    CredsFile.open("test_account_creds.txt");
-
-    std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword, _SuperUserLoginEmail,
-        _SuperUserLoginPassword;
-
-    CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
-    CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
-    CredsFile >> _SuperUserLoginEmail >> _SuperUserLoginPassword;
-
-    if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
-        || _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty())
-    {
-        LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
-                 "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
-    }
-
-    SuperUserLoginEmail = _SuperUserLoginEmail.c_str();
-    SuperUserLoginPassword = _SuperUserLoginPassword.c_str();
-}
-
 csp::systems::Profile CreateTestUser()
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();

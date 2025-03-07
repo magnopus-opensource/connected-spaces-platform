@@ -119,7 +119,6 @@ public:
     csp::common::Array<csp::common::String> UserIds;
     csp::common::Array<csp::common::String> ModeratorIds;
     csp::common::Array<csp::common::String> BannedUserIds;
-    csp::common::String OrganizationId;
     /** @} */
 
     /// @brief Whether or not the user is "known" to the space. That being defined by whether the userID is contained in the UserIds, ModeratorIds or
