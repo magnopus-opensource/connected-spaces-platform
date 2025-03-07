@@ -26,7 +26,6 @@ namespace csp::systems::ConversationSystemHelpers
 {
 constexpr const char* CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_CONVERSATION_CONTAINER";
 constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MESSAGE";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_EDITED = "EditedTimestamp";
 
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION = "IsConversation";
@@ -60,58 +59,9 @@ common::Map<common::String, common::String> GenerateMessageAssetCollectionMetada
 {
     common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = MessageData.Message;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED] = MessageData.EditedTimestamp;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(MessageData.IsConversation);
 
     return MetadataMap;
-}
-
-multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
-{
-    multiplayer::MessageInfo MsgInfo;
-    MsgInfo.MessageId = MessageAssetCollection.Id;
-    MsgInfo.ConversationId = MessageAssetCollection.ParentId;
-    MsgInfo.EditedTimestamp = MessageAssetCollection.UpdatedAt;
-    MsgInfo.UserId = MessageAssetCollection.CreatedBy;
-    MsgInfo.CreatedTimestamp = MessageAssetCollection.CreatedAt;
-    MsgInfo.IsConversation = false;
-
-    const auto Metadata = MessageAssetCollection.GetMetadataImmutable();
-
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
-    {
-        MsgInfo.IsConversation = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION]);
-    }
-    else
-    {
-        CSP_LOG_WARN_MSG("No IsConversation MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ");
-        MsgInfo.IsConversation = false;
-    }
-
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
-    {
-        MsgInfo.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
-    }
-    else
-    {
-        CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ");
-        MsgInfo.Message = "";
-    }
-
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
-    {
-        MsgInfo.EditedTimestamp = Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED];
-    }
-    else
-    {
-        CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ")
-        MsgInfo.EditedTimestamp = "";
-    }
-
-    return MsgInfo;
 }
 
 csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
@@ -134,56 +84,66 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
 {
     common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = ConversationData.Message;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED] = ConversationData.EditedTimestamp;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(ConversationData.IsConversation);
+
     return MetadataMap;
 }
 
-multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
+void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info)
 {
-    multiplayer::MessageInfo ConvoInfo;
-    ConvoInfo.ConversationId = ConversationAssetCollection.Id;
-    ConvoInfo.EditedTimestamp = ConversationAssetCollection.UpdatedAt;
-    ConvoInfo.UserId = ConversationAssetCollection.CreatedBy;
-    ConvoInfo.CreatedTimestamp = ConversationAssetCollection.CreatedAt;
-    ConvoInfo.IsConversation = true;
-
-    const auto Metadata = ConversationAssetCollection.GetMetadataImmutable();
-
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
     {
-        ConvoInfo.IsConversation = Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION];
-    }
-    else
-    {
-        CSP_LOG_WARN_MSG("No IsConversation MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ");
-        ConvoInfo.IsConversation = true;
+        Info.IsConversation = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION]);
     }
 
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
     {
-        ConvoInfo.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
+        Info.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
     }
     else
     {
-        CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ");
-        ConvoInfo.Message = "";
+        CSP_LOG_WARN_MSG("No Message MetaData found");
+        Info.Message = "";
+    }
+}
+
+multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
+{
+    multiplayer::MessageInfo Info;
+    Info.ConversationId = MessageAssetCollection.ParentId;
+    Info.CreatedTimestamp = MessageAssetCollection.CreatedAt;
+    Info.UserId = MessageAssetCollection.CreatedBy;
+    Info.MessageId = MessageAssetCollection.Id;
+
+    // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp
+    // We want this be an empty string if the conversation hasn't been modified
+    if (MessageAssetCollection.CreatedAt != MessageAssetCollection.UpdatedAt)
+    {
+        Info.EditedTimestamp = MessageAssetCollection.UpdatedAt;
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
+    PopulateMessageInfoFromMetadata(MessageAssetCollection.GetMetadataImmutable(), Info);
+
+    return Info;
+}
+
+multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
+{
+    multiplayer::MessageInfo Info;
+    Info.ConversationId = ConversationAssetCollection.Id;
+    Info.CreatedTimestamp = ConversationAssetCollection.CreatedAt;
+    Info.UserId = ConversationAssetCollection.CreatedBy;
+
+    // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp
+    // We want this be an empty string if the conversation hasn't been modified
+    if (ConversationAssetCollection.CreatedAt != ConversationAssetCollection.UpdatedAt)
     {
-        ConvoInfo.EditedTimestamp = Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED];
-    }
-    else
-    {
-        CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-                         "improvements: Default metadata has automatically been created for this space as a result. ")
-        ConvoInfo.EditedTimestamp = "";
+        Info.EditedTimestamp = ConversationAssetCollection.UpdatedAt;
     }
 
-    return ConvoInfo;
+    PopulateMessageInfoFromMetadata(ConversationAssetCollection.GetMetadataImmutable(), Info);
+
+    return Info;
 }
 
 } // namespace csp::multiplayer
