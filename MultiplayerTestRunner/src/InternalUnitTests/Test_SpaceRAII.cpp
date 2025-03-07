@@ -26,23 +26,7 @@
 #include <gtest/gtest.h>
 #include <optional>
 
-namespace
-{
-/* Some tests only run if there's a credentials file */
-std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
-{
-    try
-    {
-        return Utils::LoadTestAccountCredentials();
-    }
-    catch (...)
-    {
-        return {};
-    }
-}
-} // namespace
-
-/* Initialze CSP before the suite begins with a fixture */
+/* Initialize CSP before the suite begins with a fixture */
 class SpaceRAIITest : public ::testing::Test
 {
 protected:
@@ -51,15 +35,11 @@ protected:
 
 TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
     ::testing::internal::CaptureStdout();
 
     // Login
-    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
+    auto TestUser = Utils::CreateTestUser("no-idea-how-to@retrieve.this");
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
 
     {
         // Check the create space and joined space process descriptors are printed when we don't provide a spaceID
@@ -108,14 +88,10 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
-
     // Login
-    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
+    auto TestUser
+        = Utils::CreateTestUser("no-idea-how-to@retrieve.this"); // FIXME OR: this should retrieve the email/password supplied on the command line
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
 
     // Create a space
     auto& SystemsManager = csp::systems::SystemsManager::Get();
