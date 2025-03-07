@@ -48,6 +48,7 @@ public:
     bool RemoveContext(int64_t ContextId);
     bool BindContext(int64_t ContextId);
     bool ResetContext(int64_t ContextId);
+    ScriptContext* GetLocalContext();
     ScriptContext* GetContext(int64_t ContextId);
 
     bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
@@ -71,6 +72,9 @@ public:
     BindingList Bindings;
     ModuleSourceMap Modules;
     UrlAliasMap UrlAliases;
+
+private:
+    ScriptContext* LocalContext;
 };
 
 } // namespace csp::systems

@@ -49,6 +49,7 @@ ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
     : TheScriptSystem(InScriptSystem)
     , Runtime(CSP_NEW qjs::Runtime())
 {
+    LocalContext = CSP_NEW ScriptContext(TheScriptSystem, Runtime, 0);
 }
 
 ScriptRuntime::~ScriptRuntime()
@@ -103,6 +104,11 @@ ScriptContext* ScriptRuntime::GetContext(int64_t ContextId)
     }
 
     return nullptr;
+}
+
+ScriptContext* ScriptRuntime::GetLocalContext()
+{
+    return LocalContext;
 }
 
 bool ScriptRuntime::BindContext(int64_t ContextId)

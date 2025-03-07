@@ -170,6 +170,7 @@ bool ScriptSystem::ExistsInContext(int64_t ContextId, const csp::common::String&
 }
 
 void* ScriptSystem::GetContext(int64_t ContextId) { return (void*)TheScriptRuntime->GetContext(ContextId)->Context; }
+void* ScriptSystem::GetLocalContext() { return (void*)TheScriptRuntime->GetLocalContext()->Context; }
 
 void* ScriptSystem::GetModule(int64_t ContextId, const csp::common::String& ModuleName)
 {

@@ -81,11 +81,13 @@ public:
     
 
     bool CreateContext(int64_t ContextId);
+    bool GetLocalContext(int64_t ContextId);
     bool DestroyContext(int64_t ContextId);
     bool BindContext(int64_t ContextId);
     bool ResetContext(int64_t ContextId);
     bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
     void* GetContext(int64_t ContextId);
+    void* GetLocalContext();
     void* GetModule(int64_t ContextId, const csp::common::String& ModuleName);
     void RegisterScriptBinding(IScriptBinding* ScriptBinding);
     void UnregisterScriptBinding(IScriptBinding* ScriptBinding);

@@ -70,6 +70,7 @@ enum class ComponentType
     Text = 25,
     Hotspot = 26,
     CinematicCamera = 27,
+    LocalScript = 35,
     // spare values
     Delete = 56
 };
