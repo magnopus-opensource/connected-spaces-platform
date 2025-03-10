@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "MultiplayerTestRunnerProcess.h"
@@ -194,8 +195,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 }
 #endif
 
-// TODO: Test ensures
-
 /*
     Tests that ConversationSpaceComponents can sucessfully create, update and deleted messages and components.
     Also ensures all callback values are correct.
@@ -354,6 +353,255 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
     {
         auto [Result] = AWAIT(ConversationComponent, DeleteConversation);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_PREREQUISITES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisitesTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    static const csp::common::String NoConversationErrorLog = "This component does not have an associated conversation. "
+                                                              "Call CreateConversation to create a new conversation for this component";
+
+    // Ensure DeleteConversation errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteConversation, RequestPredicate);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    csp::common::String MessageId;
+
+    // Ensure AddMessage errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "");
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+        MessageId = Result.GetMessageInfo().MessageId;
+    }
+
+    // Ensure DeleteMessage errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteMessage, RequestPredicate, MessageId);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure GetMessagesFromConversation errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessagesFromConversation, RequestPredicate, nullptr, nullptr);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure GetConversationInfo errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationInfo, RequestPredicate);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure UpdateConversation errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, UpdateConversation, RequestPredicate, {});
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure GetMessageInfo errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetMessageInfo, RequestPredicate, MessageId);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure UpdateMessage errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, UpdateMessage, RequestPredicate, MessageId, {});
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure GetNumberOfReplies errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetNumberOfReplies, RequestPredicate);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    static const csp::common::String AlreadyHasConversationErrorLog = "This component does not have an associated conversation. "
+                                                                      "Call CreateConversation to create a new conversation for this component";
+
+    // Ensure CreateConversation errors and logs appropriately when a conversation has already been created
+    {
+        // Create the first conversation
+        auto [Result] = AWAIT_PRE(ConversationComponent, CreateConversation, RequestPredicate, "");
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(AlreadyHasConversationErrorLog, Message);
+            });
+
+        // Attempt to create the second conversation
+        auto [Result2] = AWAIT_PRE(ConversationComponent, CreateConversation, RequestPredicate, "");
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result2.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
 
     // Exit space
