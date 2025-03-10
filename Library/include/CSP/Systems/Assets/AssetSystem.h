@@ -292,6 +292,12 @@ public:
     /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
     CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
 
+    /// @brief Load all local scripts associated with the given space.
+    /// @param SpaceId const csp::common::String& : The space id the local scripts are associated with.
+    /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, NullResultCallback Callback);
+
+
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
     /// @brief Deregisters the system from listening for the named event.

@@ -349,6 +349,7 @@ public:
     /// Specifically whether the local client already owns the entity or can take ownership of the entity.
     /// @return True if the entity can be modified, False if not.
     bool IsModifiable();
+    void MarkForUpdate();
 
 private:
     class DirtyComponent
@@ -371,7 +372,6 @@ private:
     void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
     csp::multiplayer::EntityScriptInterface* GetScriptInterface();
 
-    void MarkForUpdate();
 
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
     bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);

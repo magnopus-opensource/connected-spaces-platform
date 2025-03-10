@@ -24,18 +24,10 @@
 namespace csp::multiplayer
 {
 
-/// @brief Enumerates the supported scopes of a script.
-enum class ScriptScope
-{
-    Local = 0,
-    Owner,
-    Num
-};
-
 /// @brief Enumerates the list of properties that can be replicated for a script component.
 enum class LocalScriptComponentPropertyKeys
 {
-    ScriptSource = 1,
+    ScriptAssetId = 1,
     OwnerId,
     ScriptScope,
     Num
@@ -50,13 +42,13 @@ public:
     /// @param Parent The Space entity that owns this component.
     LocalScriptSpaceComponent(SpaceEntity* Parent);
 
-    /// @brief Retrieves the source of the script of this script component.
-    /// @return The script source of this script component.
-    const csp::common::String& GetScriptSource() const;
+    /// @brief Gets the ID of the Script asset this Script component refers to.
+    /// @return The ID of the Script asset this Script component refers to.
+    const csp::common::String& GetScriptAssetId() const;
 
-    /// @brief Sets the source of the script of this script component.
-    /// @param ScriptSource The script source of this script component.
-    void SetScriptSource(const csp::common::String& ScriptSource);
+    /// @brief Sets the ID of the Script asset this Script component refers to.
+    /// @param Value The ID of the Script asset this Script component refers to.
+    void SetScriptAssetId(const csp::common::String& Value);
 
     /// @brief Gets the ID of the owner of this script component.
     /// @return The ID of the owner of this script.
@@ -65,14 +57,6 @@ public:
     /// @brief Sets the ID of the owner of this script component.
     /// @param OwnerId The ID of the owner of this script.
     void SetOwnerId(int64_t OwnerId);
-
-    /// @brief Gets the scope within which this script operates.
-    /// @return The scope of this script.
-    ScriptScope GetScriptScope() const;
-
-    /// @brief Sets the scope within which this script operates.
-    /// @param Scope The scope of this script.
-    void SetScriptScope(ScriptScope Scope);
 
 protected:
     void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;

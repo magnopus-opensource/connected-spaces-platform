@@ -17,9 +17,9 @@
 
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
+#include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
-#include "CSP/Systems/Script/localscript-libs/eventbus.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "quickjspp.hpp"
@@ -30,6 +30,7 @@ namespace csp::multiplayer
 
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
+constexpr const int64_t LocalScriptContextId = 0;
 
 LocalScriptSystem::LocalScriptSystem(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
     : ScriptSystem(csp::systems::SystemsManager::Get().GetScriptSystem())
@@ -39,6 +40,19 @@ LocalScriptSystem::LocalScriptSystem(SpaceEntity* InEntity, SpaceEntitySystem* I
     , HasBinding(false)
     , SpaceEntitySystemPtr(InSpaceEntitySystem)
 {
+    qjs::Context* context = (qjs::Context*)ScriptSystem->GetLocalContext();
+    qjs::Context::Module* CSPModule = (qjs::Context::Module*)ScriptSystem->GetModule(LocalScriptContextId, "CSP");
+
+    auto Fn = [this](const char* Str)
+    {
+        ScriptSystem->FireLocalScriptCommand(Str);
+    };
+ 
+    try {
+       CSPModule->function("sendMessage", Fn);
+    } catch (const std::exception& e) {
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "LocalScriptSystem::Exception called for %s", e.what());
+    }
 }
 
 LocalScriptSystem::~LocalScriptSystem() { Shutdown(); }
@@ -108,29 +122,6 @@ csp::common::String LocalScriptSystem::GetErrorText() { return LastError; }
 void LocalScriptSystem::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
 {
     LocalScriptSystemComponent = InEnityScriptComponent;
-    ScriptSystem->CreateContext(Entity->GetId());
-    qjs::Context* context = (qjs::Context*) ScriptSystem->GetContext(Entity->GetId());
-    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "CSP");
-
-    auto Fn = [this](const char* Str)
-    {
-        ScriptSystem->FireLocalScriptCommand(Str);
-    };
- 
-    try {
-       Module->function("sendMessage", Fn);
-    } catch (const std::exception& e) {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "LocalScriptSystem::Exception called for %s", e.what());
-    }
-    
-    qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
-    ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
-    JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
-    if (JS_IsException(module)) {
-    // Handle error
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "LocalScriptSystem::Exception called%s","");
-
-    }
 }
 
 csp::common::String LocalScriptSystem::GetScriptSource()
@@ -192,28 +183,7 @@ void LocalScriptSystem::OnSourceChanged(const csp::common::String& InScriptSourc
         HasBinding = false; // we've reset the context which means this script is no longer bound
         
         ScriptSystem->SetModuleSource(Entity->GetName(), InScriptSource); 
-        qjs::Context* context = (qjs::Context*) ScriptSystem->GetContext(Entity->GetId());
-        qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "CSP");
-
-        auto Fn = [this](const char* Str)
-        {
-            ScriptSystem->FireLocalScriptCommand(Str);
-        };
-    
-        try {
-            Module->function("sendMessage", Fn);
-        } catch (const std::exception& e) {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "LocalScriptSystem::Exception called for %s", e.what());
-        }
-        
-        qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
-        ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
-        JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
-        if (JS_IsException(module))
-        {
-            // Handle error
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "LocalScriptSystem::Exception called%s","");
-        }
+     
         Bind();
     }
 }

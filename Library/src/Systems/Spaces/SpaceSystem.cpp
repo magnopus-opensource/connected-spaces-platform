@@ -765,7 +765,7 @@ void SpaceSystem::GetAcceptedUserInvites(const String& SpaceId, AcceptedInvitesR
         = GroupAPI->CreateHandler<AcceptedInvitesResultCallback, AcceptedInvitesResult, void, csp::services::DtoArray<chs::GroupInviteDto>>(
             Callback, nullptr);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesAcceptedGet(SpaceId, ResponseHandler);
+    //static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesAcceptedGet(SpaceId, ResponseHandler);
 }
 
 void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId, SpaceResultCallback Callback)

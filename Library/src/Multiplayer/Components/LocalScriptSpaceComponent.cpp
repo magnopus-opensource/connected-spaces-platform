@@ -25,45 +25,45 @@ namespace csp::multiplayer
 LocalScriptSpaceComponent::LocalScriptSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::ScriptData, Parent)
 {
-    Properties[static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource)] = "";
+    Properties[static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptAssetId)] = "";
     Properties[static_cast<uint32_t>(LocalScriptComponentPropertyKeys::OwnerId)] = static_cast<int64_t>(0);
-    Properties[static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptScope)] = static_cast<int64_t>(ScriptScope::Owner);
+    // Properties[static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptScope)] = static_cast<int64_t>(ScriptScope::Owner);
 
     // Parent->GetScript()->SetLocalScriptSpaceComponent(this);
 }
 
-const csp::common::String& LocalScriptSpaceComponent::GetScriptSource() const
+const csp::common::String& LocalScriptSpaceComponent::GetScriptAssetId() const
 {
-    return GetStringProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource));
+    return GetStringProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptAssetId));
 }
 
-void LocalScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
+void LocalScriptSpaceComponent::SetScriptAssetId(const csp::common::String& Value)
 {
-    // CSP_LOG_WARN_FORMAT("LocalScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
-
-    SetProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource), Value);
-    Parent->GetScript()->OnSourceChanged(Value);
+    SetProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptAssetId), Value);
 }
+
+// const csp::common::String& LocalScriptSpaceComponent::GetScriptSource() const
+// {
+//     return GetStringProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource));
+// }
+
+// void LocalScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
+// {
+//     // CSP_LOG_WARN_FORMAT("LocalScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
+
+//     SetProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource), Value);
+//     Parent->GetScript()->OnSourceChanged(Value);
+// }
 
 int64_t LocalScriptSpaceComponent::GetOwnerId() const { return GetIntegerProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::OwnerId)); }
 
 void LocalScriptSpaceComponent::SetOwnerId(int64_t OwnerId) { SetProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::OwnerId), OwnerId); }
 
-ScriptScope LocalScriptSpaceComponent::GetScriptScope() const
-{
-    return static_cast<ScriptScope>(GetIntegerProperty((uint32_t)LocalScriptComponentPropertyKeys::ScriptScope));
-}
-
-void LocalScriptSpaceComponent::SetScriptScope(ScriptScope Scope)
-{
-    SetProperty(static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptScope), static_cast<int64_t>(Scope));
-}
-
 void LocalScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value)
 {
     ComponentBase::SetPropertyFromPatch(Key, Value);
 
-    if (Key == static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptSource))
+    if (Key == static_cast<uint32_t>(LocalScriptComponentPropertyKeys::ScriptAssetId))
     {
         // CSP_LOG_WARN_FORMAT("LocalScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
