@@ -28,7 +28,6 @@ constexpr const char* CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX = "ASS
 constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MESSAGE";
 
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION = "IsConversation";
 
 common::String GetUniqueAssetCollectionSuffix(const common::String& SpaceId, const common::String& CreatorUserId)
 {
