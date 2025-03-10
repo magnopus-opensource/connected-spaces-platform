@@ -50,9 +50,6 @@ public:
     /// @brief The id of the conversation.
     csp::common::String ConversationId;
 
-    /// @brief Whether this is the root message of the conversation
-    bool IsConversation;
-
     /// @brief The time the message was created
     csp::common::String CreatedTimestamp;
 
@@ -146,6 +143,7 @@ private:
 /// @brief Enum used to specify the type of a conversation system network event.
 enum class ConversationEventType
 {
+    NewConversation,
     NewMessage,
     DeleteMessage,
     DeleteConversation,

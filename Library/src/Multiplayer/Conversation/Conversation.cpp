@@ -75,7 +75,6 @@ const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
 
 MessageInfo::MessageInfo()
     : ConversationId("")
-    , IsConversation(false)
     , CreatedTimestamp("")
     , EditedTimestamp("")
     , UserId("")
@@ -86,7 +85,6 @@ MessageInfo::MessageInfo()
 
 MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message)
     : ConversationId(ConversationId)
-    , IsConversation(IsConversation)
     , Message(Message)
 {
 }
@@ -94,7 +92,6 @@ MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConve
 MessageInfo::MessageInfo(
     const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId)
     : ConversationId(ConversationId)
-    , IsConversation(IsConversation)
     , Message(Message)
     , MessageId(MessageId)
 {
@@ -102,7 +99,6 @@ MessageInfo::MessageInfo(
 
 MessageInfo::MessageInfo(const MessageInfo& MessageData)
     : ConversationId(MessageData.ConversationId)
-    , IsConversation(MessageData.IsConversation)
     , CreatedTimestamp(MessageData.CreatedTimestamp)
     , EditedTimestamp(MessageData.EditedTimestamp)
     , UserId(MessageData.UserId)

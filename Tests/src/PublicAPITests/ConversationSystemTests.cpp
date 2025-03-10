@@ -115,7 +115,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
         csp::multiplayer::ConversationEventParams Params;
-        Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
+        Params.MessageType = csp::multiplayer::ConversationEventType::NewConversation;
         Params.MessageInfo.ConversationId = ConversationComponent1->GetConversationId();
 
         bool EventSent = false;
@@ -158,10 +158,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
         WaitForCallback(EventSent);
-        WaitForCallback(CallbackCalled1);
+        WaitForCallback(CallbackCalled1, 1);
         // Callback1 shouldn't be called, as the event is for Callback2.
         // Just in case something is wrong, give a small wait time for the event to come through.
-        WaitForCallback(CallbackCalled2, 1);
+        WaitForCallback(CallbackCalled2);
 
         // Ensure the event was sent successfully
         EXPECT_TRUE(EventSent);

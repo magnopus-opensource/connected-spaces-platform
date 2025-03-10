@@ -59,23 +59,21 @@ common::Map<common::String, common::String> GenerateMessageAssetCollectionMetada
 {
     common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = MessageData.Message;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(MessageData.IsConversation);
 
     return MetadataMap;
 }
 
 csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
 {
-    csp::common::Array<multiplayer::ReplicatedValue> Args(8);
+    csp::common::Array<multiplayer::ReplicatedValue> Args(7);
 
     Args[0] = static_cast<int64_t>(Params.MessageType);
     Args[1] = Params.MessageInfo.ConversationId;
-    Args[2] = Params.MessageInfo.IsConversation;
-    Args[3] = Params.MessageInfo.CreatedTimestamp;
-    Args[4] = Params.MessageInfo.EditedTimestamp;
-    Args[5] = Params.MessageInfo.UserId;
-    Args[6] = Params.MessageInfo.Message;
-    Args[7] = Params.MessageInfo.MessageId;
+    Args[2] = Params.MessageInfo.CreatedTimestamp;
+    Args[3] = Params.MessageInfo.EditedTimestamp;
+    Args[4] = Params.MessageInfo.UserId;
+    Args[5] = Params.MessageInfo.Message;
+    Args[6] = Params.MessageInfo.MessageId;
 
     return Args;
 }
@@ -84,18 +82,12 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
 {
     common::Map<common::String, common::String> MetadataMap;
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = ConversationData.Message;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(ConversationData.IsConversation);
 
     return MetadataMap;
 }
 
 void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info)
 {
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
-    {
-        Info.IsConversation = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION]);
-    }
-
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
     {
         Info.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
