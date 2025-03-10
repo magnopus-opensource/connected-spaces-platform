@@ -33,28 +33,11 @@ class JsonDeserializer;
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj);
 
-namespace csp::services
-{
 
-class ApiResponseBase;
-
-CSP_START_IGNORE
-template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
-CSP_END_IGNORE
-
-} // namespace csp::services
 
 namespace csp::systems
 {
 
-/// @brief Defines how to alpha value is interpreted
-/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model
-enum class EAlphaMode
-{
-    Opaque,
-    Mask,
-    Blend
-};
 
 /// @ingroup Asset System
 /// @brief Data class which represents a GLTF material.
@@ -194,10 +177,11 @@ public:
     /// @param AssetId const csp::common::String& : The asset where the material info is stored
     GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
+    virtual ~GLTFMaterial() = default;
+
     GLTFMaterial();
 
 private:
-    int Version;
 
     EAlphaMode AlphaMode;
     float AlphaCutoff;
@@ -217,71 +201,5 @@ private:
     friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj);
     friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj);
 };
-
-/// @ingroup Asset System
-/// @brief Data class used to contain information when attempting to download material data.
-class CSP_API GLTFMaterialResult : public csp::systems::ResultBase
-{
-    /** @cond DO_NOT_DOCUMENT */
-    friend class AssetSystem;
-
-    CSP_START_IGNORE
-    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-    CSP_END_IGNORE
-    /** @endcond */
-
-public:
-    /// @brief Retreives the GLTFMaterial from the result.
-    const GLTFMaterial& GetGLTFMaterial() const;
-
-    CSP_NO_EXPORT GLTFMaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-
-private:
-    GLTFMaterialResult(void*) {};
-
-    void SetGLTFMaterial(const GLTFMaterial& Material);
-
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-    GLTFMaterial Material;
-};
-
-/// @ingroup Asset System
-/// @brief Data class used to contain information when attempting to download a collection of material data.
-class CSP_API GLTFMaterialsResult : public csp::systems::ResultBase
-{
-    /** @cond DO_NOT_DOCUMENT */
-    friend class AssetSystem;
-
-    CSP_START_IGNORE
-    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-    CSP_END_IGNORE
-    /** @endcond */
-
-public:
-    /// @brief Retreives the GLTFMaterial from the result.
-    const csp::common::Array<GLTFMaterial>& GetGLTFMaterials() const;
-
-    CSP_NO_EXPORT GLTFMaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-
-private:
-    GLTFMaterialsResult(void*) {};
-
-    void SetGLTFMaterials(const csp::common::Array<GLTFMaterial>& Materials);
-
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-    csp::common::Array<GLTFMaterial> Materials;
-};
-
-/// @brief Callback containing material data.
-/// @param Result GLTFMaterialResult : result class
-typedef std::function<void(const GLTFMaterialResult& Result)> GLTFMaterialResultCallback;
-
-/// @brief Callback containing a collection of material data.
-/// @param Result Array<GLTFMaterialResult> : result class
-typedef std::function<void(const GLTFMaterialsResult& Result)> GLTFMaterialsResultCallback;
 
 } // namespace csp::systems

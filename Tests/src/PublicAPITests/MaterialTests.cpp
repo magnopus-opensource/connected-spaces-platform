@@ -35,17 +35,17 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::common::String& SpaceId,
+void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::systems::EShaderType shaderType, const csp::common::String& SpaceId,
     const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
-    GLTFMaterial& OutMaterial)
+    Material& OutMaterial)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, SpaceId, Metadata, AssetTags);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const GLTFMaterial& Material = Result.GetGLTFMaterial();
+    const Material& Material = Result.GetMaterial();
     EXPECT_EQ(Material.GetName(), Name);
 
-    OutMaterial = Result.GetGLTFMaterial();
+    OutMaterial = Result.GetMaterial();
 }
 
 void UpdateMaterial(AssetSystem* AssetSystem, const GLTFMaterial& Material)
@@ -96,7 +96,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial);
 
     // Cleanup
     DeleteMaterial(AssetSystem, CreatedMaterial);
@@ -124,7 +124,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 
     // Create a material associated with the space
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial);
 
     // Ensure the material can be updated
     EXPECT_NE(CreatedMaterial.GetAlphaCutoff(), 1);
@@ -135,10 +135,10 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
     // Get the material to ensure change have been made
     // More comprehensive material setter/serialization tests exist in:
     // InternalTests/MaterialUnitTests
-    GLTFMaterial UpdatedMaterial;
+    Material UpdatedMaterial;
     GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), UpdatedMaterial);
-
-    EXPECT_EQ(UpdatedMaterial.GetAlphaCutoff(), 1);
+    GLTFMaterial UpdatedMaterialGLTF = (GLTFMaterial&)UpdatedMaterial;
+    EXPECT_EQ(UpdatedMaterialGLTF.GetAlphaCutoff(), 1);
 
     // Cleanup
     DeleteMaterial(AssetSystem, CreatedMaterial);
@@ -195,15 +195,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     // Create 3 materials
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial CreatedMaterial1;
-    CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, {}, {}, CreatedMaterial1);
+    CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial1);
 
     constexpr const char* TestMaterialName2 = "TestMaterial2";
     GLTFMaterial CreatedMaterial2;
-    CreateMaterial(AssetSystem, TestMaterialName2, Space.Id, {}, {}, CreatedMaterial2);
+    CreateMaterial(AssetSystem, TestMaterialName2, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial2);
 
     constexpr const char* TestMaterialName3 = "TestMaterial3";
     GLTFMaterial CreatedMaterial3;
-    CreateMaterial(AssetSystem, TestMaterialName3, Space.Id, {}, {}, CreatedMaterial3);
+    CreateMaterial(AssetSystem, TestMaterialName3, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial3);
 
     // Attempt to find the 3 materials that have been created
     csp::common::Array<GLTFMaterial> FoundMaterials;
@@ -273,12 +273,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Create a material associated with the space
-    GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+    Material CreatedMaterialBase;
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterialBase);
+    GLTFMaterial CreatedMaterial = (GLTFMaterial&)CreatedMaterialBase;
 
     // Get the material to ensure it can be found
-    GLTFMaterial FoundMaterial;
-    GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), FoundMaterial);
+    Material FoundMaterialBase;
+    GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), FoundMaterialBase);
+    GLTFMaterial FoundMaterial = (GLTFMaterial&)FoundMaterialBase;
+
 
     EXPECT_EQ(FoundMaterial.GetName(), CreatedMaterial.GetName());
     EXPECT_EQ(FoundMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialCollectionId());
@@ -310,7 +313,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 
     // Create a material so we have one in this space
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial);
 
     // Attempt to get an invalid material
     GLTFMaterial FoundMaterial;
@@ -412,7 +415,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         AssetSystem->SetMaterialChangedCallback(CB);
 
         // Create a material associated with the space
-        CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+        CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial);
         WaitForCallback(CallbackCalled);
 
         EXPECT_TRUE(CallbackCalled);
@@ -560,7 +563,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     EXPECT_EQ(CallbackAssetId, Asset.Id);
 
     // Create a material associated with the space
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial);
     WaitForCallback(CallbackCalled);
 
     EXPECT_TRUE(CallbackCalled);
