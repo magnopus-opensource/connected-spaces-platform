@@ -21,7 +21,7 @@
 
 namespace csp::systems
 {
-class GLTFMaterial;
+class OpacityTextureMaterial;
 }
 
 namespace csp::json
@@ -30,8 +30,8 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj);
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj);
 
 namespace csp::services
 {
@@ -50,9 +50,10 @@ namespace csp::systems
 
 /// @ingroup Asset System
 /// @brief Data class which represents a GLTF material.
-class CSP_API GLTFMaterial : public Material
+class CSP_API OpacityTextureMaterial : public Material
 {
 public:
+    // TODO make the common alpha props into an interface
     /// Sets how to alpha value is interpreted
     /// @param Mode EAlphaMode
     void SetAlphaMode(EAlphaMode Mode);
@@ -82,42 +83,6 @@ public:
     /// @return bool
     bool GetDoubleSided() const;
 
-    /// @brief Sets the factors for the base color of the material.
-    /// This value defines linear multipliers for the sampled texels of the base color texture.
-    /// @param Factor const csp::common::Vector4&
-    void SetBaseColorFactor(const csp::common::Vector4& Factor);
-
-    /// @brief Gets the factor of the base color texture
-    /// @return csp::common::Vector4&
-    const csp::common::Vector4& GetBaseColorFactor() const;
-
-    /// @brief Sets the factor for the metalness of the material.
-    /// This value defines a linear multiplier for the sampled metalness values of the metallic-roughness texture.
-    /// @param Factor float
-    void SetMetallicFactor(float Factor);
-
-    /// @brief Gets the factor of the metallic texture
-    /// @return float
-    float GetMetallicFactor() const;
-
-    /// @brief Sets the factor for the roughness of the material.
-    /// This value defines a linear multiplier for the sampled roughness values of the metallic-roughness texture.
-    /// @param Factor float
-    void SetRoughnessFactor(float Factor);
-
-    /// @brief Gets the factor of the roughness texture
-    /// @return float
-    float GetRoughnessFactor() const;
-
-    /// @brief Sets factors for the emissive color of the material.
-    /// This value defines linear multipliers for the sampled texels of the emissive texture.
-    /// @param Factor const csp::common::Vector3&
-    void SetEmissiveFactor(const csp::common::Vector3& Factor);
-
-    /// @brief Gets the factor of the emissive color texture
-    /// @return csp::common::Vector3&
-    const csp::common::Vector3& GetEmissiveFactor() const;
-
     /// @brief Sets the base color texture. The first three components (RGB) MUST be encoded with the sRGB transfer function.
     /// They specify the base color of the material.
     /// If the fourth component (A) is present, it represents the linear alpha coverage of the material.
@@ -131,42 +96,18 @@ public:
     /// @return const TextureInfo&
     const TextureInfo& GetBaseColorTexture() const;
 
-    /// @brief Sets the metallic-roughness texture.
-    /// The metalness values are sampled from the B channel.
-    /// The roughness values are sampled from the G channel.
-    /// These values MUST be encoded with a linear transfer function.
-    /// If other channels are present (R or A), they MUST be ignored for metallic-roughness calculations.
-    /// When undefined, the texture MUST be sampled as having 1.0 in G and B components.
+    /// @brief Sets the base color texture. The first three components (RGB) MUST be encoded with the sRGB transfer function.
+    /// They specify the base color of the material.
+    /// If the fourth component (A) is present, it represents the linear alpha coverage of the material.
+    /// Otherwise, the alpha coverage is equal to 1.0. The material.alphaMode property specifies how alpha is interpreted.
+    /// The stored texels MUST NOT be premultiplied.
+    /// When undefined, the texture MUST be sampled as having 1.0 in all components.
     /// @param Texture const TextureInfo&
-    void SetMetallicRoughnessTexture(const TextureInfo& Texture);
+    void SetOpacityTexture(const TextureInfo& Texture);
 
-    /// @brief Gets the metallic-roughness texture
+    /// @brief Gets the base color texture
     /// @return const TextureInfo&
-    const TextureInfo& GetMetallicRoughnessTexture() const;
-
-    /// @brief Sets the tangent space normal texture.
-    /// The texture encodes RGB components with linear transfer function.
-    /// Each texel represents the XYZ components of a normal vector in tangent space.
-    /// The normal vectors use the convention +X is right and +Y is up. +Z points toward the viewer.
-    /// If a fourth component (A) is present, it MUST be ignored. When undefined, the material does not have a tangent space normal texture.
-    /// @param Texture const TextureInfo&
-    void SetNormalTexture(const TextureInfo& Texture);
-
-    /// @brief Gets the tangent space normal texture.
-    /// @return const TextureInfo&
-    const TextureInfo& GetNormalTexture() const;
-
-    /// @brief Sets the occlusion texture.
-    /// The occlusion values are linearly sampled from the R channel.
-    /// Higher values indicate areas that receive full indirect lighting and lower values indicate no indirect lighting.
-    /// If other channels are present (GBA), they MUST be ignored for occlusion calculations.
-    /// When undefined, the material does not have an occlusion texture.
-    /// @param Texture const TextureInfo&
-    void SetOcclusionTexture(const TextureInfo& Texture);
-
-    /// @brief Gets the occlusion texture
-    /// @return const TextureInfo&
-    const TextureInfo& GetOcclusionTexture() const;
+    const TextureInfo& GetOpacityTexture() const;
 
     /// @brief Sets the emissive texture.
     /// It controls the color and intensity of the light being emitted by the material.
@@ -180,13 +121,21 @@ public:
     /// @return const TextureInfo&
     const TextureInfo& GetEmissiveTexture() const;
 
+    /// @brief Sets the color channel to read the alpha values from
+    /// @param channel EColorChannel
+    void SetReadAlphaFromChannel(EColorChannel channel);
+
+    /// @brief Gets the color channel to read the alpha values from
+    /// @return EColorChannel
+    EColorChannel GetReadAlphaFromChannel() const;
+
     /// @brief Constructor which links the material to an asset
     /// @param Name const csp::common::String& : The name of the material.
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
     /// @param AssetId const csp::common::String& : The asset where the material info is stored
-    GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+    OpacityTextureMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
-    GLTFMaterial();
+    OpacityTextureMaterial();
 
 private:
     int Version;
@@ -194,25 +143,22 @@ private:
     EAlphaMode AlphaMode;
     float AlphaCutoff;
     bool DoubleSided;
-
-    csp::common::Vector4 BaseColorFactor;
-    float MetallicFactor;
-    float RoughnessFactor;
-    csp::common::Vector3 EmissiveFactor;
+    EColorChannel ReadAlphaFromChannel;
+   // bool useDepthFade;
+    //bool useFresnel;
+    //bool useDistanceFade;
 
     TextureInfo BaseColorTexture;
-    TextureInfo MetallicRoughnessTexture;
-    TextureInfo NormalTexture;
-    TextureInfo OcclusionTexture;
+    TextureInfo OpacityTexture;
     TextureInfo EmissiveTexture;
 
-    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj);
+    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj);
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download material data.
-class CSP_API GLTFMaterialResult : public csp::systems::ResultBase
+class CSP_API OpacityTextureMaterialResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
@@ -223,25 +169,25 @@ class CSP_API GLTFMaterialResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the GLTFMaterial from the result.
-    const GLTFMaterial& GetGLTFMaterial() const;
+    /// @brief Retreives the OpacityTextureMaterial from the result.
+    const OpacityTextureMaterial& GetOpacityTextureMaterial() const;
 
-    CSP_NO_EXPORT GLTFMaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT OpacityTextureMaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    GLTFMaterialResult(void*) {};
+    OpacityTextureMaterialResult(void*) {};
 
-    void SetGLTFMaterial(const GLTFMaterial& Material);
+    void SetOpacityTextureMaterial(const OpacityTextureMaterial& Material);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    GLTFMaterial Material;
+    OpacityTextureMaterial Material;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download a collection of material data.
-class CSP_API GLTFMaterialsResult : public csp::systems::ResultBase
+class CSP_API OpacityTextureMaterialsResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
@@ -252,28 +198,28 @@ class CSP_API GLTFMaterialsResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the GLTFMaterial from the result.
-    const csp::common::Array<GLTFMaterial>& GetGLTFMaterials() const;
+    /// @brief Retreives the OpacityTextureMaterial from the result.
+    const csp::common::Array<OpacityTextureMaterial>& GetOpacityTextureMaterials() const;
 
-    CSP_NO_EXPORT GLTFMaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT OpacityTextureMaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    GLTFMaterialsResult(void*) {};
+    OpacityTextureMaterialsResult(void*) {};
 
-    void SetGLTFMaterials(const csp::common::Array<GLTFMaterial>& Materials);
+    void SetOpacityTextureMaterials(const csp::common::Array<OpacityTextureMaterial>& Materials);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::Array<GLTFMaterial> Materials;
+    csp::common::Array<OpacityTextureMaterial> Materials;
 };
 
 /// @brief Callback containing material data.
-/// @param Result GLTFMaterialResult : result class
-typedef std::function<void(const GLTFMaterialResult& Result)> GLTFMaterialResultCallback;
+/// @param Result OpacityTextureMaterialResult : result class
+typedef std::function<void(const OpacityTextureMaterialResult& Result)> OpacityTextureMaterialResultCallback;
 
 /// @brief Callback containing a collection of material data.
-/// @param Result Array<GLTFMaterialResult> : result class
-typedef std::function<void(const GLTFMaterialsResult& Result)> GLTFMaterialsResultCallback;
+/// @param Result Array<OpacityTextureMaterialResult> : result class
+typedef std::function<void(const OpacityTextureMaterialsResult& Result)> OpacityTextureMaterialsResultCallback;
 
 } // namespace csp::systems
