@@ -22,10 +22,29 @@
 
 namespace csp::systems
 {
-/// @brief Enum representing the shader type of a material. Currently not in use.
+/// @brief Enum representing the shader type of a material.
 enum class EShaderType
 {
-    Standard
+    Standard='gltf',
+    AlphaTexture='alphaTexture'
+};
+
+
+/// @brief Defines how to alpha value is interpreted
+/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model
+enum class EAlphaMode
+{
+    Opaque,
+    Mask,
+    Blend
+};
+
+enum class EColorChannel
+{
+    R,
+    G,
+    B,
+    A
 };
 
 /// @ingroup Asset System
