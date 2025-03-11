@@ -177,6 +177,11 @@ public:
     /// @return String
     static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
 
+    ///  @brief Checks if the string contains the given substring.
+    ///  @param Substring const String& : Substring to search for.
+    ///  @return bool : Returns true if the substring is found. Always returns false if the substring is empty.
+    bool Contains(const String& Substring) const;
+
 private:
     /// @brief Returns internal buffer.
     /// @return const char*
