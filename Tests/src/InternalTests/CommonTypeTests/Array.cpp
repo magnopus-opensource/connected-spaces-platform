@@ -91,48 +91,6 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTe
     FAIL();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
-{
-    constexpr int ARRAY_SIZE = 5;
-
-    try
-    {
-        int Values[] = { 1, 2, 3, 4, 5 };
-        Array<int> Instance(Values, ARRAY_SIZE);
-
-        EXPECT_FALSE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), ARRAY_SIZE);
-        EXPECT_NE(Instance.Data(), nullptr);
-
-        // All elements should match those in the provided buffer, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i)
-        {
-            EXPECT_EQ(Instance[i], Values[i]);
-            EXPECT_NE(&Instance[i], &Values[i]);
-        }
-    }
-    catch (...)
-    {
-        FAIL();
-    }
-}
-
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferNullptrInitialisationTest)
-{
-    try
-    {
-        Array<int> Instance(nullptr, 5);
-
-        EXPECT_TRUE(Instance.IsEmpty());
-        EXPECT_EQ(Instance.Size(), 0);
-        EXPECT_EQ(Instance.Data(), nullptr);
-    }
-    catch (...)
-    {
-        FAIL();
-    }
-}
-
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyInitialisationTest)
 {
     constexpr int ARRAY_SIZE = 2;
@@ -273,6 +231,48 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         {
             EXPECT_EQ(ConvertedList[i], Instance[i]);
             EXPECT_NE(&ConvertedList[i], &Instance[i]);
+        }
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToVectorTest)
+{
+    try
+    {
+        Array<String> Instance = { "asd", "fgh", "jkl", "123" };
+        const auto ConvertedVector = Instance.ToStdVector();
+        EXPECT_EQ(ConvertedVector.size(), Instance.Size());
+
+        // All elements should match those in the array, but should not have the same address
+        for (int i = 0; i < Instance.Size(); ++i)
+        {
+            EXPECT_EQ(ConvertedVector[i], Instance[i]);
+            EXPECT_NE(&ConvertedVector[i], &Instance[i]);
+        }
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayFromVectorTest)
+{
+    try
+    {
+        std::vector<String> Instance = { "asd", "fgh", "jkl", "123" };
+        const Array<String> ConvertedArray { Instance };
+        EXPECT_EQ(ConvertedArray.Size(), Instance.size());
+
+        // All elements should match those in the array, but should not have the same address
+        for (int i = 0; i < Instance.size(); ++i)
+        {
+            EXPECT_EQ(ConvertedArray[i], Instance[i]);
+            EXPECT_NE(&ConvertedArray[i], &Instance[i]);
         }
     }
     catch (...)
