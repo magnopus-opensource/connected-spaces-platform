@@ -29,6 +29,13 @@ constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_M
 
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
 
+namespace
+{
+    // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp.
+    // We want this be an empty string if the conversation hasn't been modified.
+    bool HasBeenEdited(const AssetCollection& AssetCollection) { return AssetCollection.CreatedAt != AssetCollection.UpdatedAt; }
+}
+
 common::String GetUniqueAssetCollectionSuffix(const common::String& SpaceId, const common::String& CreatorUserId)
 {
     const auto NowTimepoint = std::chrono::system_clock::now();
@@ -106,9 +113,7 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
     Info.UserId = MessageAssetCollection.CreatedBy;
     Info.MessageId = MessageAssetCollection.Id;
 
-    // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp
-    // We want this be an empty string if the conversation hasn't been modified
-    if (MessageAssetCollection.CreatedAt != MessageAssetCollection.UpdatedAt)
+    if (HasBeenEdited(MessageAssetCollection))
     {
         Info.EditedTimestamp = MessageAssetCollection.UpdatedAt;
     }
@@ -125,9 +130,7 @@ multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(cons
     Info.CreatedTimestamp = ConversationAssetCollection.CreatedAt;
     Info.UserId = ConversationAssetCollection.CreatedBy;
 
-    // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp
-    // We want this be an empty string if the conversation hasn't been modified
-    if (ConversationAssetCollection.CreatedAt != ConversationAssetCollection.UpdatedAt)
+    if (HasBeenEdited(ConversationAssetCollection))
     {
         Info.EditedTimestamp = ConversationAssetCollection.UpdatedAt;
     }
