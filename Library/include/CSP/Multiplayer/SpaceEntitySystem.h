@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
 
+#include <chrono>
 #include <deque>
 #include <functional>
 #include <list>
