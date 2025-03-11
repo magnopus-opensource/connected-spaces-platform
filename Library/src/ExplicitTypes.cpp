@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
@@ -58,6 +59,7 @@ template class CSP_API csp::common::Array<csp::systems::PointOfInterest>;
 template class CSP_API csp::common::Array<csp::systems::Site>;
 template class CSP_API csp::common::Array<csp::systems::Space>;
 template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
+template class CSP_API csp::common::Array<csp::systems::GLTFMaterial>;
 
 // csp::common::List
 template class CSP_API csp::common::List<csp::common::String>;
