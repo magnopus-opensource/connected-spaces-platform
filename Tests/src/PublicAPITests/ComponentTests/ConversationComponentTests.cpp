@@ -74,11 +74,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     EXPECT_EQ(ConversationComponent->GetConversationId(), "");
     EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
     EXPECT_EQ(ConversationComponent->GetIsActive(), true);
-    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 0, 0, 0 }));
-    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 0, 0, 0, 1 }));
+    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3::Zero()));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4::Identity()));
     EXPECT_EQ(ConversationComponent->GetTitle(), "");
     EXPECT_EQ(ConversationComponent->GetResolved(), false);
-    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3 { 0, 0, 0 }));
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3::Zero()));
 
     // Set properties
     constexpr const char* TestConversationId = "TestConversationId";
@@ -150,8 +150,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     // Test defaults
     EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
     EXPECT_EQ(ConversationComponent->GetIsActive(), true);
-    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 0, 0, 0 }));
-    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4 { 0, 0, 0, 1 }));
+    EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3::Zero()));
+    EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4::Identity()));
     EXPECT_EQ(ConversationComponent->GetTitle(), "");
     EXPECT_EQ(ConversationComponent->GetResolved(), false);
 
