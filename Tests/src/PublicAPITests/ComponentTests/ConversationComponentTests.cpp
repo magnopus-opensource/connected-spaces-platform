@@ -670,6 +670,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
     }
 
+    static constexpr const char* NewConversationMessage = "New Test Conversation";
+
     // Ensure conversation information event is fired when calling ConversationComponent::UpdateConversation
     {
         csp::multiplayer::ConversationEventParams RetrievedParams;
@@ -683,9 +685,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr const char* NewMessage = "New Test Conversation";
         MessageUpdateParams NewData;
-        NewData.NewMessage = NewMessage;
+        NewData.NewMessage = NewConversationMessage;
 
         const auto [Result] = AWAIT(ConversationComponent, UpdateConversation, NewData);
 
@@ -696,11 +697,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
         EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, true);
         EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewConversationMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
         EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
         EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
     }
+
+    static constexpr const char* NewMessage = "New Test Message";
 
     // Ensure message information event is fired when calling ConversationComponent::UpdateMessage
     {
@@ -715,7 +718,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr const char* NewMessage = "New Test Message";
         MessageUpdateParams NewData;
         NewData.NewMessage = NewMessage;
 
@@ -755,11 +757,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
         EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, false);
-        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
-        EXPECT_EQ(RetrievedParams.MessageInfo.CreatedTimestamp, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.EditedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
 
         CallbackCalled = true;
     }
@@ -785,11 +787,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteConversation);
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
         EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, true);
-        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewConversationMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.CreatedTimestamp, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.EditedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
     }
 
     // Cleanup
