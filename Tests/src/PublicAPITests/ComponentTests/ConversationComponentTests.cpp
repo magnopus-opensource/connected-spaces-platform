@@ -946,7 +946,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
     csp::systems::Profile AlternativeTestUser = CreateTestUser();
 
     uint64_t ConversationObjectId = 0;
-    csp::common::String ConversationId;
     csp::common::String MessageId;
 
     // Add the second test user to the space
@@ -973,8 +972,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
 
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
             EXPECT_TRUE(Result.GetValue() != "");
-
-            ConversationId = Result.GetValue();
 
             Object->QueueUpdate();
             EntitySystem->ProcessPendingEntityOperations();
