@@ -140,13 +140,11 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
             return;
         }
 
-        // Ensure client has correct permissions to delete the conversation
-        multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
+        AssetCollection ConversationAssetCollection = GetConversationResult.GetAssetCollection();
 
         // 2.Send multiplayer event
         const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [this, Callback, ConversationId](multiplayer::ErrorCode Error)
+            = [this, Callback, ConversationId, ConversationAssetCollection](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
@@ -157,9 +155,6 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
             }
 
             // 3. Delete the asset colleciton associated with this conversation
-            AssetCollection ConversationAssetCollection;
-            ConversationAssetCollection.Id = ConversationId;
-
             NullResultCallback DeleteAssetCollectionCallback = [Callback, this](const NullResult& DeleteAssetCollectionResult)
             {
                 if (HandleConversationResult(
@@ -175,7 +170,8 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
             this->AssetSystem->DeleteAssetCollection(ConversationAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        multiplayer::MessageInfo MessageInfo(ConversationId, true, "", "", "", "", "");
+        multiplayer::MessageInfo MessageInfo
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
         SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBus, SignalRCallback);
     };
 
@@ -226,17 +222,16 @@ void ConversationSystemInternal::AddMessage(
 void ConversationSystemInternal::DeleteMessage(const common::String& ConversationId, const common::String& MessageId, NullResultCallback Callback)
 {
     // 1. Get asset collection
-    AssetCollectionResultCallback GetConversationCallback
-        = [this, ConversationId, MessageId, Callback](const AssetCollectionResult& GetConversationResult)
+    AssetCollectionResultCallback GetMessageCallback = [this, ConversationId, MessageId, Callback](const AssetCollectionResult& GetMessageResult)
     {
-        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
+        if (HandleConversationResult(GetMessageResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
         {
             return;
         }
 
         // Ensure client has correct permissions to delete the conversation
         multiplayer::MessageInfo Info
-            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetConversationResult.GetAssetCollection());
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
 
         if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
         {
@@ -274,11 +269,12 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        multiplayer::MessageInfo MessageInfo(ConversationId, false, "", "", "", "", MessageId);
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, MessageInfo, EventBus, SignalRCallback);
+        // multiplayer::MessageInfo MessageInfo(ConversationId, false, "", "", "", "", MessageId);
+
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBus, SignalRCallback);
     };
 
-    AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+    AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
 }
 
 void ConversationSystemInternal::GetMessagesFromConversation(const common::String& ConversationId, const common::Optional<int>& ResultsSkipNumber,
