@@ -1305,7 +1305,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
         const csp::multiplayer::MessageInfo& Info = Result.GetConversationInfo();
 
         EXPECT_EQ(Info.ConversationId, ReceivedInfo.ConversationId);
-        // Currently commenting out until CHS fix an inconsistancy with the CreatedTimestamp
 
         // Currently converting to milliseconds to get around chs rounding error inconsistency
         csp::common::DateTime InfoCreatedTime(Info.CreatedTimestamp);
