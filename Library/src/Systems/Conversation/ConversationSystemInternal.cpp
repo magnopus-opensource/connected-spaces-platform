@@ -269,8 +269,6 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        // multiplayer::MessageInfo MessageInfo(ConversationId, false, "", "", "", "", MessageId);
-
         SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBus, SignalRCallback);
     };
 
