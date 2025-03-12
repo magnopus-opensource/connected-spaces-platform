@@ -187,8 +187,7 @@ void GLTFMaterial::SetEmissiveTexture(const TextureInfo& Texture) { EmissiveText
 const TextureInfo& GLTFMaterial::GetEmissiveTexture() const { return EmissiveTexture; }
 
 GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-    : Material(Name, AssetCollectionId, AssetId)
-    , Version(1)
+    : Material(Name, AssetCollectionId, AssetId, csp::systems::EShaderType::Standard, 1)
     , AlphaMode(EAlphaMode::Opaque)
     , AlphaCutoff(0.5f)
     , DoubleSided(false)
