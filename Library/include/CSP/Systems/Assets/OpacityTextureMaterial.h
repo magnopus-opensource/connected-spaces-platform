@@ -61,6 +61,15 @@ public:
     /// Gets how to alpha value is interpreted
     /// @return EAlphaMode
     EAlphaMode GetAlphaMode() const;
+        
+    // TODO make the common alpha props into an interface
+    /// Sets how to alpha value is blended
+    /// @param Mode EAlphaMode
+    void SetBlendMode(EBlendMode Mode);
+
+    /// Gets how to alpha value is blended
+    /// @return EBlendMode
+    EBlendMode GetBlendMode() const;
 
     /// @brief Sets the alpha cutoff value
     /// When alphaMode is set to MASK the alphaCutoff property specifies the cutoff threshold.
@@ -83,45 +92,33 @@ public:
     /// @return bool
     bool GetDoubleSided() const;
 
-    /// @brief Sets the base color texture. The first three components (RGB) MUST be encoded with the sRGB transfer function.
-    /// They specify the base color of the material.
+    /// @brief Sets the color texture. The first three components (RGB) MUST be encoded with the sRGB transfer function.
+    /// They specify the color of the material.
     /// If the fourth component (A) is present, it represents the linear alpha coverage of the material.
-    /// Otherwise, the alpha coverage is equal to 1.0. The material.alphaMode property specifies how alpha is interpreted.
+    /// Otherwise, the alpha coverage is equal to 1.0.
+    /// The material.alphaMode property specifies how alpha is interpreted.
+    /// The material.blendMode property defines how the alpha is blended when alphaMode is set to BLEND.
+    /// The material.readAlphaFromChannel property defines which color channel to read the alpha values from.
     /// The stored texels MUST NOT be premultiplied.
     /// When undefined, the texture MUST be sampled as having 1.0 in all components.
     /// @param Texture const TextureInfo&
-    void SetBaseColorTexture(const TextureInfo& Texture);
+    void SetColorTexture(const TextureInfo& Texture);
 
-    /// @brief Gets the base color texture
+    /// @brief Gets the color texture
     /// @return const TextureInfo&
-    const TextureInfo& GetBaseColorTexture() const;
+    const TextureInfo& GetColorTexture() const;
 
-    /// @brief Sets the base color texture. The first three components (RGB) MUST be encoded with the sRGB transfer function.
-    /// They specify the base color of the material.
-    /// If the fourth component (A) is present, it represents the linear alpha coverage of the material.
-    /// Otherwise, the alpha coverage is equal to 1.0. The material.alphaMode property specifies how alpha is interpreted.
-    /// The stored texels MUST NOT be premultiplied.
-    /// When undefined, the texture MUST be sampled as having 1.0 in all components.
-    /// @param Texture const TextureInfo&
-    void SetOpacityTexture(const TextureInfo& Texture);
+    /// @brief Sets whether the material is emissive, if not material should be lit by the scene lighting.
+    /// When this value is false, back - 
+    /// When this value is true, back - 
+    /// @param isEmissive bool
+    void SetIsEmissive(bool isEmissive);
 
-    /// @brief Gets the base color texture
-    /// @return const TextureInfo&
-    const TextureInfo& GetOpacityTexture() const;
+    /// @brief Gets whether the material is emissive, if not material should be lit by the scene lighting.
+    /// @return bool
+    bool GetIsEmissive() const;
 
-    /// @brief Sets the emissive texture.
-    /// It controls the color and intensity of the light being emitted by the material.
-    /// This texture contains RGB components encoded with the sRGB transfer function.
-    /// If a fourth component (A) is present, it MUST be ignored.
-    /// When undefined, the texture MUST be sampled as having 1.0 in RGB components.
-    /// @param Texture const TextureInfo&
-    void SetEmissiveTexture(const TextureInfo& Texture);
-
-    /// @brief Gets the emissive texture
-    /// @return const TextureInfo&
-    const TextureInfo& GetEmissiveTexture() const;
-
-    /// @brief Sets the color channel to read the alpha values from
+    /// @brief Sets the color channel to read the alpha values from.
     /// @param channel EColorChannel
     void SetReadAlphaFromChannel(EColorChannel channel);
 
@@ -139,18 +136,13 @@ public:
 
 private:
     int Version;
-
     EAlphaMode AlphaMode;
+    EBlendMode BlendMode;
     float AlphaCutoff;
     bool DoubleSided;
     EColorChannel ReadAlphaFromChannel;
-   // bool useDepthFade;
-    //bool useFresnel;
-    //bool useDistanceFade;
-
-    TextureInfo BaseColorTexture;
-    TextureInfo OpacityTexture;
-    TextureInfo EmissiveTexture;
+    bool IsEmissive;
+    TextureInfo ColorTexture;
 
     friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj);
     friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj);

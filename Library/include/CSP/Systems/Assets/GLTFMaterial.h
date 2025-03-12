@@ -33,16 +33,7 @@ class JsonDeserializer;
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj);
 
-namespace csp::services
-{
 
-class ApiResponseBase;
-
-CSP_START_IGNORE
-template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
-CSP_END_IGNORE
-
-} // namespace csp::services
 
 namespace csp::systems
 {
@@ -189,7 +180,6 @@ public:
     GLTFMaterial();
 
 private:
-    int Version;
 
     EAlphaMode AlphaMode;
     float AlphaCutoff;
