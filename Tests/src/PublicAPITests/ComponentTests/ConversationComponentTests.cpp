@@ -26,6 +26,7 @@
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/DateTime.h"
 #include "MultiplayerTestRunnerProcess.h"
 #include "TestHelpers.h"
 
@@ -1305,7 +1306,18 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
 
         EXPECT_EQ(Info.ConversationId, ReceivedInfo.ConversationId);
         // Currently commenting out until CHS fix an inconsistancy with the CreatedTimestamp
-        // EXPECT_EQ(Info.CreatedTimestamp, ReceivedInfo.CreatedTimestamp);
+
+        // Currently converting to milliseconds to get around chs rounding error inconsistency
+        csp::common::DateTime InfoCreatedTime(Info.CreatedTimestamp);
+        auto CreatedDuration = InfoCreatedTime.GetTimePoint().time_since_epoch();
+        auto CreatedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(CreatedDuration);
+
+        csp::common::DateTime ReceivedInfoCreatedTime(ReceivedInfo.CreatedTimestamp);
+        auto ReceivedDuration = ReceivedInfoCreatedTime.GetTimePoint().time_since_epoch();
+        auto ReceivedMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(ReceivedDuration);
+
+        EXPECT_EQ(CreatedMilliseconds, ReceivedMilliseconds);
+
         EXPECT_EQ(Info.EditedTimestamp, ReceivedInfo.EditedTimestamp);
         EXPECT_EQ(Info.UserId, ReceivedInfo.UserId);
         EXPECT_EQ(Info.Message, ReceivedInfo.Message);
