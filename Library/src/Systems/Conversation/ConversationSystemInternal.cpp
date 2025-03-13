@@ -9,7 +9,6 @@
 #include "Multiplayer/EventSerialisation.h"
 
 #include "CallHelpers.h"
-#include "Common/DateTime.h"
 #include "Debug/Logging.h"
 #include "Systems/ResultHelpers.h"
 
@@ -86,12 +85,9 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
     const common::String& UserId = UserSystem->GetLoginState().UserId;
     const common::String& SpaceId = CurrentSpace.Id;
 
-    const common::DateTime CurrentTime = common::DateTime::UtcTimeNow();
-    const common::String CurrentTimeString = CurrentTime.GetUtcString();
-
     // 1. Create the comment container asset collection
     const AssetCollectionResultCallback AddCommentContainerCallback
-        = [this, Callback, UserId, Message, CurrentTimeString](const AssetCollectionResult& AddCommentContainerResult)
+        = [this, Callback, UserId, Message](const AssetCollectionResult& AddCommentContainerResult)
     {
         if (HandleConversationResult(AddCommentContainerResult, "The Comment Container asset collection creation was not successful.", Callback)
             == false)
@@ -100,10 +96,8 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
         }
 
         // 2.Send multiplayer event
-        common::String ConversationId = AddCommentContainerResult.GetAssetCollection().Id;
-
         const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [this, Callback, AddCommentContainerResult, ConversationId](multiplayer::ErrorCode Error)
+            = [this, Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
@@ -114,16 +108,18 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
             }
 
             StringResult InternalResult(AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
-            InternalResult.SetValue(ConversationId);
+            InternalResult.SetValue(AddCommentContainerResult.GetAssetCollection().Id);
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         };
 
-        multiplayer::MessageInfo MessageInfo(ConversationId, true, CurrentTimeString, "", UserId, Message, "");
-        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBus, SignalRCallback);
+        multiplayer::MessageInfo MessageInfo
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(AddCommentContainerResult.GetAssetCollection());
+
+        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, EventBus, SignalRCallback);
     };
 
     const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
-    multiplayer::MessageInfo DefaultConversationInfo("", true, CurrentTimeString, "", UserId, Message, "");
+    multiplayer::MessageInfo DefaultConversationInfo("", true, Message);
 
     AssetSystem->CreateAssetCollection(SpaceId, nullptr, UniqueAssetCollectionName,
         ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(DefaultConversationInfo), EAssetCollectionType::COMMENT_CONTAINER,
@@ -210,10 +206,8 @@ void ConversationSystemInternal::AddMessage(
         SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBus, SignalRCallback);
     };
 
-    const common::DateTime CurrentTime = common::DateTime::UtcTimeNow();
-    const common::String CurrentTimeString = CurrentTime.GetUtcString();
+    multiplayer::MessageInfo MessageInfo(ConversationId, false, Message);
 
-    const multiplayer::MessageInfo MessageInfo(ConversationId, false, CurrentTimeString, "", UserId, Message, "");
     const Space CurrentSpace = SpaceSystem->GetCurrentSpace();
 
     StoreConversationMessage(MessageInfo, CurrentSpace, MessageResultCallback);
@@ -377,11 +371,7 @@ void ConversationSystemInternal::UpdateConversation(
         multiplayer::MessageInfo NewConversationData
             = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
 
-        const common::DateTime CurrentTime = common::DateTime::UtcTimeNow();
-        const common::String CurrentTimeString = CurrentTime.GetUtcString();
-
         NewConversationData.Message = NewData.NewMessage;
-        NewConversationData.EditedTimestamp = CurrentTimeString;
 
         this->AssetSystem->UpdateAssetCollectionMetadata(GetConversationResult.GetAssetCollection(),
             ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData), nullptr, GetUpdatedConversationCallback);
@@ -463,11 +453,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& Conversatio
         multiplayer::MessageInfo NewMessageData
             = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
 
-        const common::DateTime CurrentTime = common::DateTime::UtcTimeNow();
-        const common::String CurrentTimeString = CurrentTime.GetUtcString();
-
         NewMessageData.Message = NewData.NewMessage;
-        NewMessageData.EditedTimestamp = CurrentTimeString;
 
         this->AssetSystem->UpdateAssetCollectionMetadata(GetMessageResult.GetAssetCollection(),
             ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData), nullptr, GetUpdatedMessageCallback);
