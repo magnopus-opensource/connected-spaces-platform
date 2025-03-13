@@ -39,6 +39,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(std::string, Title);
     DECLARE_SCRIPT_PROPERTY(bool, Resolved);
     DECLARE_SCRIPT_PROPERTY(Vector3, ConversationCameraPosition);
+    DECLARE_SCRIPT_PROPERTY(Vector4, ConversationCameraRotation);
 };
 
 } // namespace csp::multiplayer
