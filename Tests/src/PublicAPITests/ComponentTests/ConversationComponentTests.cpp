@@ -80,8 +80,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     EXPECT_EQ(ConversationComponent->GetTitle(), "");
     EXPECT_EQ(ConversationComponent->GetResolved(), false);
     EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3::Zero()));
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraRotation() == csp::common::Vector4::Identity()));
 
-    // Set properties
+    // Set new properties
     constexpr const char* TestConversationId = "TestConversationId";
     const bool TestVisible = false;
     const bool TestActive = false;
@@ -90,6 +91,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     constexpr const char* TestTitle = "TestTitle";
     const bool TestResolved = true;
     const csp::common::Vector3 TestConversationCameraPosition(8, 9, 10);
+    const csp::common::Vector4 TestConversationCameraRotation(11, 12, 13, 14);
 
     ConversationComponent->SetConversationId(TestConversationId);
     ConversationComponent->SetIsVisible(TestVisible);
@@ -99,8 +101,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     ConversationComponent->SetTitle(TestTitle);
     ConversationComponent->SetResolved(TestResolved);
     ConversationComponent->SetConversationCameraPosition(TestConversationCameraPosition);
+    ConversationComponent->SetConversationCameraRotation(TestConversationCameraRotation);
 
-    // Set new properties
+    // Test properties are correctly set/get
     EXPECT_EQ(ConversationComponent->GetConversationId(), TestConversationId);
     EXPECT_EQ(ConversationComponent->GetIsVisible(), TestVisible);
     EXPECT_EQ(ConversationComponent->GetIsActive(), TestActive);
@@ -109,6 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     EXPECT_EQ(ConversationComponent->GetTitle(), TestTitle);
     EXPECT_EQ(ConversationComponent->GetResolved(), TestResolved);
     EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == TestConversationCameraPosition));
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraRotation() == TestConversationCameraRotation));
 
     // Exit space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -155,11 +159,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     EXPECT_TRUE((ConversationComponent->GetRotation() == csp::common::Vector4::Identity()));
     EXPECT_EQ(ConversationComponent->GetTitle(), "");
     EXPECT_EQ(ConversationComponent->GetResolved(), false);
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3::Zero()));
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraRotation() == csp::common::Vector4::Identity()));
 
     Object->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
 
-    // Setup script
+    // Setup script to set new properties
     std::string ConversationScriptText = R"xx(
 			var conversation = ThisEntity.getConversationComponents()[0];
 			conversation.isVisible = false;
@@ -169,6 +175,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
             conversation.title = "TestTitle";
             conversation.resolved = true;
             conversation.conversationCameraPosition = [8, 9, 10];
+            conversation.conversationCameraRotation = [11, 12, 13, 14];
 		)xx";
 
     Object->GetScript()->SetScriptSource(ConversationScriptText.c_str());
@@ -176,7 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
     EntitySystem->ProcessPendingEntityOperations();
 
-    // Set new properties
+    // Test scripts sets new properties
     EXPECT_EQ(ConversationComponent->GetIsVisible(), false);
     EXPECT_EQ(ConversationComponent->GetIsActive(), false);
     EXPECT_TRUE((ConversationComponent->GetPosition() == csp::common::Vector3 { 1, 2, 3 }));
@@ -184,6 +191,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     EXPECT_EQ(ConversationComponent->GetTitle(), "TestTitle");
     EXPECT_EQ(ConversationComponent->GetResolved(), true);
     EXPECT_TRUE((ConversationComponent->GetConversationCameraPosition() == csp::common::Vector3 { 8, 9, 10 }));
+    EXPECT_TRUE((ConversationComponent->GetConversationCameraRotation() == csp::common::Vector4 { 11, 12, 13, 14 }));
 
     // Exit space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
