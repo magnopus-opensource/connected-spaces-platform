@@ -24,7 +24,6 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <utility>
-#include <vector>
 
 #ifndef CSP_DISABLE_OVERFLOW_CHECKING
 #ifdef _MSC_VER
@@ -84,24 +83,6 @@ public:
             for (size_t i = 0; i < ArraySize; i++)
             {
                 ObjectArray[i] = Other.ObjectArray[i];
-            }
-        }
-    }
-
-    /// @brief Constructs an array from std::vector.
-    /// @param Vector std::Array : Elements to construct the array from. Elements are copied.
-    /// @pre T must be copyable.
-    CSP_NO_EXPORT Array(const std::vector<T>& Vector)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
-    {
-        if (Vector.size() > 0)
-        {
-            AllocArray(Vector.size());
-
-            for (size_t i = 0; i < Vector.size(); ++i)
-            {
-                ObjectArray[i] = Vector[i];
             }
         }
     }
@@ -221,10 +202,6 @@ public:
 
         return std::move(Result);
     }
-
-    /// @brief Returns a copy of this Array as a std::vector
-    /// @return List<T>
-    CSP_NO_EXPORT std::vector<T> ToStdVector() const { return std::vector<T>(begin(), end()); }
 
 private:
     /// @brief Allocates memory for the array.

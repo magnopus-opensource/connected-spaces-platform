@@ -17,6 +17,7 @@
 #include "CSP/Systems/Spaces/Space.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "Common/Convert.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -57,7 +58,7 @@ void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::
 
     if (Dto.HasTags())
     {
-        BasicSpace.Tags = Array<String> { Dto.GetTags() };
+        BasicSpace.Tags = csp::common::Convert(Dto.GetTags());
     }
 }
 
@@ -86,22 +87,22 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 
     if (Dto.HasTags())
     {
-        Space.Tags = Array<csp::common::String> { Dto.GetTags() };
+        Space.Tags = csp::common::Convert(Dto.GetTags());
     }
 
     if (Dto.HasUsers())
     {
-        Space.UserIds = Array<String> { Dto.GetUsers() };
+        Space.UserIds = csp::common::Convert(Dto.GetUsers());
     }
 
     if (Dto.HasModerators())
     {
-        Space.ModeratorIds = Array<String> { Dto.GetModerators() };
+        Space.ModeratorIds = csp::common::Convert(Dto.GetModerators());
     }
 
     if (Dto.HasBannedUsers())
     {
-        Space.BannedUserIds = Array<String> { Dto.GetBannedUsers() };
+        Space.BannedUserIds = csp::common::Convert(Dto.GetBannedUsers());
     }
 }
 

@@ -26,6 +26,7 @@
 #include "CSP/Web/HTTPResponseCodes.h"
 #include "CallHelpers.h"
 #include "Common/Continuations.h"
+#include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/ErrorCodeStrings.h"
@@ -66,7 +67,7 @@ void CreateSpace(chs::GroupApi* GroupAPI, const String& Name, const String& Desc
 
     if (Tags.HasValue())
     {
-        GroupInfo->SetTags(Tags->ToStdVector());
+        GroupInfo->SetTags(csp::common::Convert(Tags).value());
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -586,7 +587,7 @@ void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Nam
 
     if (Tags.HasValue())
     {
-        LiteGroupInfo->SetTags(Tags->ToStdVector());
+        LiteGroupInfo->SetTags(csp::common::Convert(Tags).value());
     }
 
     // Note that these are required fields from a services point of view.
@@ -638,8 +639,10 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         CSP_LOG_WARN_FORMAT("Provided value `%i` for ResultsMax exceeded max value and was reduced to `%i`.", *InResultsMax, MAX_SPACES_RESULTS);
     }
 
-    auto Tags = MustContainTags.HasValue() ? MustContainTags->ToStdVector() : std::optional<std::vector<csp::common::String>>(std::nullopt);
-    auto ExcludedTags = MustExcludeTags.HasValue() ? MustExcludeTags->ToStdVector() : std::optional<std::vector<csp::common::String>>(std::nullopt);
+    auto Tags
+        = MustContainTags.HasValue() ? csp::common::Convert(MustContainTags).value() : std::optional<std::vector<csp::common::String>>(std::nullopt);
+    auto ExcludedTags
+        = MustExcludeTags.HasValue() ? csp::common::Convert(MustExcludeTags).value() : std::optional<std::vector<csp::common::String>>(std::nullopt);
     auto MustIncludeAllTags = InMustIncludeAllTags.HasValue() ? *InMustIncludeAllTags : std::optional<bool>(std::nullopt);
 
     csp::services::ResponseHandlerPtr ResponseHandler

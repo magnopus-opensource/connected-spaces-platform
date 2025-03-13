@@ -238,47 +238,4 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         FAIL();
     }
 }
-
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToVectorTest)
-{
-    try
-    {
-        Array<String> Instance = { "asd", "fgh", "jkl", "123" };
-        const auto ConvertedVector = Instance.ToStdVector();
-        EXPECT_EQ(ConvertedVector.size(), Instance.Size());
-
-        // All elements should match those in the array, but should not have the same address
-        for (int i = 0; i < Instance.Size(); ++i)
-        {
-            EXPECT_EQ(ConvertedVector[i], Instance[i]);
-            EXPECT_NE(&ConvertedVector[i], &Instance[i]);
-        }
-    }
-    catch (...)
-    {
-        FAIL();
-    }
-}
-
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayFromVectorTest)
-{
-    try
-    {
-        std::vector<String> Instance = { "asd", "fgh", "jkl", "123" };
-        const Array<String> ConvertedArray { Instance };
-        EXPECT_EQ(ConvertedArray.Size(), Instance.size());
-
-        // All elements should match those in the array, but should not have the same address
-        for (int i = 0; i < Instance.size(); ++i)
-        {
-            EXPECT_EQ(ConvertedArray[i], Instance[i]);
-            EXPECT_NE(&ConvertedArray[i], &Instance[i]);
-        }
-    }
-    catch (...)
-    {
-        FAIL();
-    }
-}
-
 #endif
