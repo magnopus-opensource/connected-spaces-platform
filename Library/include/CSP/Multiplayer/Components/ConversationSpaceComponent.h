@@ -33,6 +33,7 @@
 
 CSP_START_IGNORE
 #ifdef CSP_TESTS
+class CSPEngine_ConversationTests_ConversationComponentPropertyTest_Test;
 class CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
 class CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
 class CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
@@ -72,6 +73,7 @@ class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositio
     friend class csp::systems::ConversationSystemInternal;
 
 #ifdef CSP_TESTS
+    friend class ::CSPEngine_ConversationTests_ConversationComponentPropertyTest_Test;
     friend class ::CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
     friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
     friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
@@ -119,6 +121,7 @@ public:
     CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     /// @brief Retrieves message details that are represented by this component.
+    /// This doesn't include the original message that created the conversation.
     /// @param ResultsSkipNumber const csp::common::Optional<int>& : Optional parameter representing the number of result entries that will be skipped
     /// from the result. For no skip pass an empty optional.
     /// @param ResultsMaxNumber const csp::common::Optional<int>& : Optional parameter representing the maximum number of result entries to be

@@ -465,7 +465,10 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsActive, "isActive")
         .PROPERTY_GET_SET(ConversationSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation");
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Title, "title")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Resolved, "resolved")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraPosition, "conversationCameraPosition");
 
     Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()

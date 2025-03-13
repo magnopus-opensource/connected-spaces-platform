@@ -75,7 +75,6 @@ const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
 
 MessageInfo::MessageInfo()
     : ConversationId("")
-    , IsConversation(false)
     , CreatedTimestamp("")
     , EditedTimestamp("")
     , UserId("")
@@ -84,14 +83,15 @@ MessageInfo::MessageInfo()
 {
 }
 
-MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& CreatedTimestamp,
-    const csp::common::String& EditedTimestamp, const csp::common::String& UserId, const csp::common::String& Message,
-    const csp::common::String& MessageId)
+MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message)
     : ConversationId(ConversationId)
-    , IsConversation(IsConversation)
-    , CreatedTimestamp(CreatedTimestamp)
-    , EditedTimestamp(EditedTimestamp)
-    , UserId(UserId)
+    , Message(Message)
+{
+}
+
+MessageInfo::MessageInfo(
+    const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId)
+    : ConversationId(ConversationId)
     , Message(Message)
     , MessageId(MessageId)
 {
@@ -99,7 +99,6 @@ MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConve
 
 MessageInfo::MessageInfo(const MessageInfo& MessageData)
     : ConversationId(MessageData.ConversationId)
-    , IsConversation(MessageData.IsConversation)
     , CreatedTimestamp(MessageData.CreatedTimestamp)
     , EditedTimestamp(MessageData.EditedTimestamp)
     , UserId(MessageData.UserId)

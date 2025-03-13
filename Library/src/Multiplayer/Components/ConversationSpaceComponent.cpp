@@ -34,8 +34,9 @@ namespace
     {
         if (ConversationId.IsEmpty())
         {
-            CSP_LOG_ERROR_MSG("This component does not have an associated conversation."
-                              "Call CreateConversation to create a new conversation for this component");
+            CSP_LOG_MSG(LogLevel::Log,
+                "This component does not have an associated conversation. "
+                "Call CreateConversation to create a new conversation for this component");
             return false;
         }
 
@@ -64,7 +65,8 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
     if (!ConversationId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("This component already has a conversation.");
+        CSP_LOG_ERROR_MSG("This component does not have an associated conversation. "
+                          "Call CreateConversation to create a new conversation for this component");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
         return;
     }
