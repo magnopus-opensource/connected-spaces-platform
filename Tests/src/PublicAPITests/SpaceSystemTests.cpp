@@ -1052,8 +1052,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetFilteredByTagInclusionSpacesTest
     std::string TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-    std::vector<std::pair<std::string, csp::common::Array<csp::common::String>>> SpacesWithTags
-        = { { TestSpaceName + "Space1", { "tag1" } }, { TestSpaceName + "Space2", { "tag2" } }, { TestSpaceName + "Space3", { "tag1", "tag2" } } };
+    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+
+    const std::string Tag1 = uuidGenerator.getUUID().str();
+    const std::string Tag2 = uuidGenerator.getUUID().str();
+    const std::string Tag3 = uuidGenerator.getUUID().str();
+
+    std::vector<std::pair<std::string, csp::common::Array<csp::common::String>>> SpacesWithTags = { { TestSpaceName + "Space1", { Tag1.c_str() } },
+        { TestSpaceName + "Space2", { Tag2.c_str() } }, { TestSpaceName + "Space3", { Tag1.c_str(), Tag2.c_str() } } };
     std::array<csp::common::String, 3> SpaceIds;
 
     for (size_t i = 0; i < SpacesWithTags.size(); ++i)
@@ -1067,7 +1073,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetFilteredByTagInclusionSpacesTest
     {
         // Query for spaces with "tag1"
         auto [SpacesWithTag1] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, nullptr, nullptr, nullptr, nullptr, 10,
-            csp::common::Array<csp::common::String> { "tag1" }, nullptr, nullptr); // Space1, Space3
+            csp::common::Array<csp::common::String> { Tag1.c_str() }, nullptr, nullptr); // Space1, Space3
 
         EXPECT_EQ(SpacesWithTag1.GetSpaces().Size(), 2);
         EXPECT_NE(std::find_if(SpacesWithTag1.GetSpaces().cbegin(), SpacesWithTag1.GetSpaces().cend(),
@@ -1080,7 +1086,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetFilteredByTagInclusionSpacesTest
     {
         // Query for spaces with "tag1" and "tag2", without needing every tag to be on the spaces
         auto [SpacesWithTags1And2WithoutEveryTag] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, nullptr, nullptr, nullptr,
-            nullptr, 10, csp::common::Array<csp::common::String> { "tag1", "tag2" }, nullptr, false); // Space1, Space2, Space3
+            nullptr, 10, csp::common::Array<csp::common::String> { Tag1.c_str(), Tag2.c_str() }, nullptr, false); // Space1, Space2, Space3
 
         EXPECT_EQ(SpacesWithTags1And2WithoutEveryTag.GetSpaces().Size(), 3);
         EXPECT_NE(std::find_if(SpacesWithTags1And2WithoutEveryTag.GetSpaces().cbegin(), SpacesWithTags1And2WithoutEveryTag.GetSpaces().cend(),
@@ -1096,7 +1102,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetFilteredByTagInclusionSpacesTest
     {
         // Query for spaces with "tag1" and "tag2", needing every tag to be on the spaces
         auto [SpacesWithTag1And2WithEveryTag] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, nullptr, nullptr, nullptr, nullptr,
-            10, csp::common::Array<csp::common::String> { "tag1", "tag2" }, nullptr, true); // Space3
+            10, csp::common::Array<csp::common::String> { Tag1.c_str(), Tag2.c_str() }, nullptr, true); // Space3
 
         EXPECT_EQ(SpacesWithTag1And2WithEveryTag.GetSpaces().Size(), 1);
         EXPECT_NE(std::find_if(SpacesWithTag1And2WithEveryTag.GetSpaces().cbegin(), SpacesWithTag1And2WithEveryTag.GetSpaces().cend(),
@@ -1106,20 +1112,20 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetFilteredByTagInclusionSpacesTest
     {
         // Query for spaces without "tag1"
         auto [SpacesWithoutTag1] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, nullptr, nullptr, nullptr, nullptr, 1, nullptr,
-            csp::common::Array<csp::common::String> { "tag1" },
-            true); // This will just be any space (in the entire database!) without "tag1", we can't guarantee which one it'll be, so we just check
+            csp::common::Array<csp::common::String> { Tag1.c_str() },
+            true); // This will just be any space (in the entire database!) without Tag1, we can't guarantee which one it'll be, so we just check
                    // that it doesn't have the tag
 
         EXPECT_EQ(SpacesWithoutTag1.GetSpaces().Size(), 1);
         // Check that "tag1" isn't in the tags.
         EXPECT_EQ(std::find_if(SpacesWithoutTag1.GetSpaces()[0].Tags.cbegin(), SpacesWithoutTag1.GetSpaces()[0].Tags.cend(),
-                      [](const csp::common::String& Tag) { return Tag.Contains("tag1"); }),
+                      [&Tag1](const csp::common::String& Tag) { return Tag.Contains(Tag1.c_str()); }),
             SpacesWithoutTag1.GetSpaces()[0].Tags.cend());
     }
     {
         // Query for spaces with "tag1" but without "tag2"
         auto [SpacesWithTag1ButWithoutTag2] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, nullptr, nullptr, nullptr, nullptr, 10,
-            csp::common::Array<csp::common::String> { "tag1" }, csp::common::Array<csp::common::String> { "tag2" }, true); // Space1
+            csp::common::Array<csp::common::String> { Tag1.c_str() }, csp::common::Array<csp::common::String> { Tag2.c_str() }, true); // Space1
 
         EXPECT_EQ(SpacesWithTag1ButWithoutTag2.GetSpaces().Size(), 1);
         EXPECT_NE(std::find_if(SpacesWithTag1ButWithoutTag2.GetSpaces().cbegin(), SpacesWithTag1ButWithoutTag2.GetSpaces().cend(),
