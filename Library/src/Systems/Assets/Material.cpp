@@ -67,15 +67,15 @@ const csp::common::String& Material::GetMaterialCollectionId() const { return Co
 
 const csp::common::String& Material::GetMaterialId() const { return Id; }
 
-const Material& MaterialResult::GetMaterial() const { return Material; }
+const Material& MaterialResult::GetMaterial() const { return *Material; }
 
-void MaterialResult::SetMaterial(const csp::systems::Material& InMaterial) { Material = InMaterial; }
+void MaterialResult::SetMaterial(csp::systems::Material& InMaterial) { Material = &InMaterial; }
 
 void MaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
-const csp::common::Array<Material>& MaterialsResult::GetMaterials() const { return Materials; }
+const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &Materials; }
 
-void MaterialsResult::SetMaterials(const csp::common::Array<Material>& InMaterials) { Materials = InMaterials; }
+void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMaterials) { Materials = InMaterials; }
 
 void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
