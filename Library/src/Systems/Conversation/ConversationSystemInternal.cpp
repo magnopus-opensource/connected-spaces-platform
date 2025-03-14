@@ -45,6 +45,25 @@ namespace
 
         return true;
     }
+
+    bool EnsureUserHasPermission(const common::String& UserId, const common::String& ConversationUserId, bool IsConversation)
+    {
+        if (UserId != ConversationUserId)
+        {
+            if (IsConversation)
+            {
+                CSP_LOG_ERROR_MSG("User does not have permission to modify this conversation.");
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("User does not have permission to modify this message.");
+            }
+
+            return false;
+        }
+
+        return true;
+    }
 }
 
 ConversationSystemInternal::ConversationSystemInternal(
@@ -109,39 +128,50 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
 
 void ConversationSystemInternal::DeleteConversation(const common::String& ConversationId, NullResultCallback Callback)
 {
-    // 1.Send multiplayer event
-    const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-        = [this, Callback, ConversationId](multiplayer::ErrorCode Error)
+    // 1. Get asset collection
+    AssetCollectionResultCallback GetConversationCallback = [this, ConversationId, Callback](const AssetCollectionResult& GetConversationResult)
     {
-        if (Error != multiplayer::ErrorCode::None)
+        if (HandleConversationResult(GetConversationResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
         {
-            CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
-
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
             return;
         }
 
-        // 2. Delete the asset colleciton associated with this conversation
-        AssetCollection ConversationAssetCollection;
-        ConversationAssetCollection.Id = ConversationId;
+        AssetCollection ConversationAssetCollection = GetConversationResult.GetAssetCollection();
 
-        NullResultCallback DeleteAssetCollectionCallback = [Callback, this](const NullResult& DeleteAssetCollectionResult)
+        // 2.Send multiplayer event
+        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
+            = [this, Callback, ConversationId, ConversationAssetCollection](multiplayer::ErrorCode Error)
         {
-            if (HandleConversationResult(
-                    DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback)
-                == false)
+            if (Error != multiplayer::ErrorCode::None)
             {
+                CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
+
+                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
                 return;
             }
 
-            Callback(DeleteAssetCollectionResult);
+            // 3. Delete the asset colleciton associated with this conversation
+            NullResultCallback DeleteAssetCollectionCallback = [Callback, this](const NullResult& DeleteAssetCollectionResult)
+            {
+                if (HandleConversationResult(
+                        DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback)
+                    == false)
+                {
+                    return;
+                }
+
+                Callback(DeleteAssetCollectionResult);
+            };
+
+            this->AssetSystem->DeleteAssetCollection(ConversationAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        this->AssetSystem->DeleteAssetCollection(ConversationAssetCollection, DeleteAssetCollectionCallback);
+        multiplayer::MessageInfo MessageInfo
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBus, SignalRCallback);
     };
 
-    multiplayer::MessageInfo MessageInfo(ConversationId, true, "");
-    SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBus, SignalRCallback);
+    AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
 }
 
 void ConversationSystemInternal::AddMessage(
@@ -185,38 +215,58 @@ void ConversationSystemInternal::AddMessage(
 
 void ConversationSystemInternal::DeleteMessage(const common::String& ConversationId, const common::String& MessageId, NullResultCallback Callback)
 {
-    // 1. Send multiplayer event
-    const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-        = [this, Callback, ConversationId, MessageId](multiplayer::ErrorCode Error)
+    // 1. Get asset collection
+    AssetCollectionResultCallback GetMessageCallback = [this, ConversationId, MessageId, Callback](const AssetCollectionResult& GetMessageResult)
     {
-        if (Error != multiplayer::ErrorCode::None)
+        if (HandleConversationResult(GetMessageResult, "The retrieval of Message asset collections was not successful.", Callback) == false)
         {
-            CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
+            return;
+        }
 
+        // Ensure client has correct permissions to delete the conversation
+        multiplayer::MessageInfo Info
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        {
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
             return;
         }
 
-        // 2. Delete the message asset collection
-        AssetCollection MessageAssetCollection;
-        MessageAssetCollection.Id = MessageId;
-
-        const NullResultCallback DeleteAssetCollectionCallback
-            = [this, Callback, ConversationId, MessageId](const NullResult& DeleteAssetCollectionResult)
+        // 2. Send multiplayer event
+        const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
+            = [this, Callback, ConversationId, MessageId](multiplayer::ErrorCode Error)
         {
-            if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback) == false)
+            if (Error != multiplayer::ErrorCode::None)
             {
+                CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
+
+                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
                 return;
             }
 
-            Callback(DeleteAssetCollectionResult);
+            // 3. Delete the message asset collection
+            AssetCollection MessageAssetCollection;
+            MessageAssetCollection.Id = MessageId;
+
+            const NullResultCallback DeleteAssetCollectionCallback
+                = [this, Callback, ConversationId, MessageId](const NullResult& DeleteAssetCollectionResult)
+            {
+                if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback) == false)
+                {
+                    return;
+                }
+
+                Callback(DeleteAssetCollectionResult);
+            };
+
+            this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBus, SignalRCallback);
     };
 
-    multiplayer::MessageInfo MessageInfo(ConversationId, false, "", MessageId);
-    SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, MessageInfo, EventBus, SignalRCallback);
+    AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
 }
 
 void ConversationSystemInternal::GetMessagesFromConversation(const common::String& ConversationId, const common::Optional<int>& ResultsSkipNumber,
@@ -271,6 +321,16 @@ void ConversationSystemInternal::UpdateConversation(
     {
         if (HandleConversationResult(GetConversationResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
         {
+            return;
+        }
+
+        // Ensure client has correct permissions to delete the conversation
+        multiplayer::MessageInfo Info
+            = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
+
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, true) == false)
+        {
+            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::ConversationResult>());
             return;
         }
 
@@ -346,6 +406,16 @@ void ConversationSystemInternal::UpdateMessage(const common::String& Conversatio
     {
         if (HandleConversationResult(GetMessageResult, "The retrieval of Conversation asset collections was not successful.", Callback) == false)
         {
+            return;
+        }
+
+        // Ensure client has correct permissions to delete the conversation
+        multiplayer::MessageInfo Info
+            = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+
+        if (EnsureUserHasPermission(UserSystem->GetLoginState().UserId, Info.UserId, false) == false)
+        {
+            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::MessageResult>());
             return;
         }
 

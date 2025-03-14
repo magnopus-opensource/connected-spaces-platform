@@ -1066,6 +1066,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
     }
 
+    static constexpr const char* NewConversationMessage = "New Test Conversation";
+
     // Ensure conversation information event is fired when calling ConversationComponent::UpdateConversation
     {
         csp::multiplayer::ConversationEventParams RetrievedParams;
@@ -1079,9 +1081,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr const char* NewMessage = "New Test Conversation";
         MessageUpdateParams NewData;
-        NewData.NewMessage = NewMessage;
+        NewData.NewMessage = NewConversationMessage;
 
         const auto [Result] = AWAIT(ConversationComponent, UpdateConversation, NewData);
 
@@ -1091,11 +1092,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
         EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::ConversationInformation);
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
         EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewConversationMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
         EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
         EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
     }
+
+    static constexpr const char* NewMessage = "New Test Message";
 
     // Ensure message information event is fired when calling ConversationComponent::UpdateMessage
     {
@@ -1110,7 +1113,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr const char* NewMessage = "New Test Message";
         MessageUpdateParams NewData;
         NewData.NewMessage = NewMessage;
 
@@ -1148,11 +1150,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
-        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
-        EXPECT_EQ(RetrievedParams.MessageInfo.CreatedTimestamp, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.EditedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
 
         CallbackCalled = true;
     }
@@ -1177,11 +1179,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
         EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteConversation);
         EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
-        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewConversationMessage);
         EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.CreatedTimestamp, "");
-        EXPECT_EQ(RetrievedParams.MessageInfo.EditedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+        EXPECT_NE(RetrievedParams.MessageInfo.EditedTimestamp, "");
     }
 
     // Cleanup
@@ -1337,4 +1339,201 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     LogOut(UserSystem);
 }
 
+#endif
+
+/*
+Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
+Other clients can still delete other conversations, as components/entities dont have any restrictions.
+*/
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATIONCOMPONENT_PERMISSIONS_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Create user
+    auto TestUser = CreateTestUser();
+
+    // Log in
+    csp::common::String UserId;
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create a second test user
+    csp::systems::Profile AlternativeTestUser = CreateTestUser();
+
+    uint64_t ConversationObjectId = 0;
+    csp::common::String MessageId;
+
+    // Add the second test user to the space
+    {
+        auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeTestUser.Email, true, "", "");
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    {
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create object to represent the conversation
+        csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+        ConversationObjectId = Object->GetId();
+        auto* ConversationComponent = (ConversationSpaceComponent*)Object->AddComponent(ComponentType::Conversation);
+
+        Object->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Create conversation
+        {
+            auto [Result] = AWAIT(ConversationComponent, CreateConversation, "TestMessage");
+
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+            EXPECT_TRUE(Result.GetValue() != "");
+
+            Object->QueueUpdate();
+            EntitySystem->ProcessPendingEntityOperations();
+        }
+
+        // Create message
+        {
+            auto [Result] = AWAIT(ConversationComponent, AddMessage, "TestMessage");
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            MessageId = Result.GetMessageInfo().MessageId;
+        }
+
+        // Logout
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        LogOut(UserSystem);
+    }
+
+    // Ensure component data has been written to database by chs before entering the space again
+    std::this_thread::sleep_for(7s);
+
+    {
+        // Log in with the second account
+        csp::common::String SecondTestUserId;
+        LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
+
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+
+        bool EntitiesRetrieved = false;
+
+        EntitySystem->SetInitialEntitiesRetrievedCallback(
+            [&EntitiesRetrieved](bool Ok)
+            {
+                if (Ok)
+                {
+                    EntitiesRetrieved = true;
+                }
+            });
+
+        WaitForCallbackWithUpdate(EntitiesRetrieved, EntitySystem);
+
+        auto* RetrievedConversationEntity = EntitySystem->FindSpaceEntityById(ConversationObjectId);
+        auto* RetrievedConversationComponent = static_cast<ConversationSpaceComponent*>(RetrievedConversationEntity->GetComponent(0));
+
+        static const csp::common::String NoConversationPermissionsErrorLog = "User does not have permission to modify this conversation.";
+        static const csp::common::String NoMessagePermissionsErrorLog = "User does not have permission to modify this message.";
+
+        // Attempt to edit the conversation
+        {
+            bool CallbackCalled = false;
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+                [&CallbackCalled](const csp::common::String& Message)
+                {
+                    CallbackCalled = true;
+                    EXPECT_EQ(NoConversationPermissionsErrorLog, Message);
+                });
+
+            auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateConversation, RequestPredicate, {});
+            EXPECT_EQ(Result.GetHttpResultCode(), 0);
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+        }
+
+        // Attempt to edit the message
+        {
+            bool CallbackCalled = false;
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+                [&CallbackCalled](const csp::common::String& Message)
+                {
+                    CallbackCalled = true;
+                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                });
+
+            auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateMessage, RequestPredicate, MessageId, {});
+            EXPECT_EQ(Result.GetHttpResultCode(), 0);
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+        }
+
+        // Attempt to delete the message
+        {
+            bool CallbackCalled = false;
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+                [&CallbackCalled](const csp::common::String& Message)
+                {
+                    CallbackCalled = true;
+                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                });
+
+            auto [Result] = AWAIT_PRE(RetrievedConversationComponent, DeleteMessage, RequestPredicate, MessageId);
+            EXPECT_EQ(Result.GetHttpResultCode(), 0);
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+            csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+        }
+
+        csp::common::String MessageId2;
+
+        // Ensure we can still add a message
+        {
+            auto [Result] = AWAIT(RetrievedConversationComponent, AddMessage, "TestMessage2");
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            MessageId2 = Result.GetMessageInfo().MessageId;
+        }
+
+        // Ensure we can still edit our own message
+        {
+            auto [Result] = AWAIT(RetrievedConversationComponent, UpdateMessage, MessageId2, {});
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        }
+
+        // Ensure we can still delete the conversation
+        {
+            auto [Result] = AWAIT(RetrievedConversationComponent, DeleteConversation);
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        }
+    }
+
+    // Exit space
+    auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Log out
+    LogOut(UserSystem);
+
+    // Log in with the space creator to delete the space
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
 #endif
