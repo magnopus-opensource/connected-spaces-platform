@@ -867,7 +867,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
                 MaterialJson = csp::json::JsonSerializer::Serialize(NewMaterial);
                 NewlyCreatedMaterial = NewMaterial;
             } else {
-                OpacityTextureMaterial NewMaterial(Name, CreatedAssetCollection.Id, CreatedAsset.Id);
+                AlphaVideoMaterial NewMaterial(Name, CreatedAssetCollection.Id, CreatedAsset.Id);
                 MaterialJson = csp::json::JsonSerializer::Serialize(NewMaterial);
                 NewlyCreatedMaterial = NewMaterial;
             }
@@ -943,7 +943,7 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             }
             else
             {
-                OpacityTextureMaterial opacityMaterial = (OpacityTextureMaterial&)Material;
+                AlphaVideoMaterial opacityMaterial = (AlphaVideoMaterial&)Material;
                 MaterialJson = json::JsonSerializer::Serialize(opacityMaterial);
             }
             const Asset& CreatedAsset = CreateAssetResult.GetAsset();
@@ -985,116 +985,7 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
     DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
-void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback)
-{
-    // 1. find asset collection for space
-    auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
-    {
-        if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
-        {
-            Callback(GLTFMaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
-        }
-
-        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
-
-        if (AssetCollections.Size() == 0)
-        {
-            // There are no asset collections for this space
-            Callback(GLTFMaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
-        }
-
-        // 2. Find material assets in collections
-        csp::common::Array<csp::common::String> AssetCollectionIds(AssetCollections.Size());
-
-        for (size_t i = 0; i < AssetCollections.Size(); ++i)
-        {
-            AssetCollectionIds[i] = AssetCollections[i].Id;
-        }
-
-        auto GetAssetsCB = [this, Callback](const AssetsResult& GetAssetsResult)
-        {
-            const auto& Assets = GetAssetsResult.GetAssets();
-            const size_t AssetsToDownload = Assets.Size();
-
-            if (AssetsToDownload == 0)
-            {
-                // There are no material assets in this space
-                Callback(GLTFMaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
-                return;
-            }
-
-            // These are shared references to prevent going out of scope between callbacks
-            // Note: The callbacks ARE called on the main thread
-            auto DownloadedMaterials = std::make_shared<csp::common::Array<GLTFMaterial>>(AssetsToDownload);
-            auto AssetsDownloaded = std::make_shared<size_t>();
-            auto Failed = std::make_shared<bool>();
-
-            // 3. Download asset data for each material asset
-            for (size_t i = 0; i < Assets.Size(); ++i)
-            {
-                csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
-                csp::common::String AssetId = Assets[i].Id;
-
-                auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials,
-                                                    AssetsDownloaded, Failed](const AssetDataResult& DownloadResult)
-                {
-                    // Return early as one of the calls has already failed
-                    if (*Failed)
-                    {
-                        return;
-                    }
-
-                    if (DownloadResult.GetResultCode() != EResultCode::Success)
-                    {
-                        if (DownloadResult.GetResultCode() == EResultCode::Failed)
-                        {
-                            *Failed = true;
-                        }
-
-                        Callback(GLTFMaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
-                        return;
-                    }
-
-                    // Convert material json to material
-                    const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
-
-                    GLTFMaterial FoundMaterial("", AssetCollectionId, AssetId);
-                    bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
-
-                    (*AssetsDownloaded)++;
-
-                    if (Deserialized == false)
-                    {
-                        CSP_LOG_ERROR_MSG("Failed to deserialize material");
-                        return;
-                    }
-
-                    (*DownloadedMaterials)[i] = FoundMaterial;
-
-                    if ((*AssetsDownloaded) >= AssetsToDownload)
-                    {
-                        // Finish
-                        GLTFMaterialsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                        Result.SetGLTFMaterials((*DownloadedMaterials));
-
-                        Callback(Result);
-                    }
-                };
-
-                DownloadAssetData(Assets[i], DownloadMaterialCallback);
-            }
-        };
-
-        GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL }, GetAssetsCB);
-    };
-
-    FindAssetCollections(
-        nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr, FindAssetCollectionsCB);
-}
-
-void AssetSystem::GetAllMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
     // 1. find asset collection for space
     auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
@@ -1190,7 +1081,7 @@ void AssetSystem::GetAllMaterials(const csp::common::String& SpaceId, MaterialsR
                     }
                     else
                     {
-                        OpacityTextureMaterial FoundMaterial("", AssetCollectionId, AssetId);
+                        AlphaVideoMaterial FoundMaterial("", AssetCollectionId, AssetId);
                         json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
                         (*DownloadedMaterials)[i] = FoundMaterial;
                     }
