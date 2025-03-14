@@ -31,21 +31,6 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVide
     // Version
     Serializer.SerializeMember("version", Obj.Version);
 
-    // Alpha Mode
-    Serializer.SerializeMember("alphaMode", static_cast<uint32_t>(Obj.AlphaMode));
-
-    // Blend Mode
-    Serializer.SerializeMember("blendMode", static_cast<uint32_t>(Obj.BlendMode));
-
-    // Alpha Cutoff
-    Serializer.SerializeMember("alphaCutoff", Obj.AlphaCutoff);
-
-    // Double Sided
-    Serializer.SerializeMember("doubleSided", Obj.DoubleSided);
-
-    // ReadAlphaFromChannel
-    Serializer.SerializeMember("readAlphafromChannel", static_cast<uint32_t>(Obj.ReadAlphaFromChannel));
-
     // Textures
     if (Obj.ColorTexture.IsSet())
     {
@@ -53,7 +38,19 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVide
     }
 
     // Double Sided
+    Serializer.SerializeMember("doubleSided", Obj.DoubleSided);
+
+    // Double Sided
     Serializer.SerializeMember("isEmissive", Obj.IsEmissive);
+
+    // ReadAlphaFromChannel
+    Serializer.SerializeMember("readAlphafromChannel", static_cast<uint32_t>(Obj.ReadAlphaFromChannel));
+
+    // Blend Mode
+    Serializer.SerializeMember("blendMode", static_cast<uint32_t>(Obj.BlendMode));
+
+    // Fresnel Factor
+    Serializer.SerializeMember("fresnelFactor", Obj.FresnelFactor);
 }
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj)
@@ -70,22 +67,16 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Alp
     // Version
     Deserializer.DeserializeMember("version", Obj.Version);
 
-    // Alpha Mode
-    uint32_t AlphaMode;
-    Deserializer.DeserializeMember("alphaMode", AlphaMode);
-    Obj.AlphaMode = static_cast<csp::systems::EAlphaMode>(AlphaMode);
-
-    // Blend Mode
-    uint32_t BlendMode;
-    Deserializer.DeserializeMember("blendMode", BlendMode);
-    Obj.BlendMode = static_cast<csp::systems::EBlendMode>(BlendMode);
-
-    // Alpha Cutoff
-    Deserializer.DeserializeMember("alphaCutoff", Obj.AlphaCutoff);
+    // Textures
+    if (Deserializer.HasProperty("colorTexture"))
+    {
+        Deserializer.DeserializeMember("colorTexture", Obj.ColorTexture);
+        Obj.ColorTexture.SetTexture(true);
+    }
 
     // Double Sided
     Deserializer.DeserializeMember("doubleSided", Obj.DoubleSided);
-
+    
     // Emissive
     Deserializer.DeserializeMember("isEmissive", Obj.IsEmissive);
 
@@ -94,12 +85,14 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Alp
     Deserializer.DeserializeMember("readAlphaFromChannel", ReadAlphaFromChannel);
     Obj.ReadAlphaFromChannel = static_cast<csp::systems::EColorChannel>(ReadAlphaFromChannel);
 
-    // Textures
-    if (Deserializer.HasProperty("colorTexture"))
-    {
-        Deserializer.DeserializeMember("colorTexture", Obj.ColorTexture);
-        Obj.ColorTexture.SetTexture(true);
-    }
+    // Blend Mode
+    uint32_t BlendMode;
+    Deserializer.DeserializeMember("blendMode", BlendMode);
+    Obj.BlendMode = static_cast<csp::systems::EBlendMode>(BlendMode);
+    
+    // Fresnel Factor
+    Deserializer.DeserializeMember("fresnelFactor", Obj.FresnelFactor);
+
 }
 
 namespace csp::systems
@@ -108,12 +101,12 @@ namespace csp::systems
 AlphaVideoMaterial::AlphaVideoMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
     : Material(Name, AssetCollectionId, AssetId)
     , Version(1)
-    , AlphaMode(EAlphaMode::Opaque)
-    , BlendMode(EBlendMode::Normal)
-    , AlphaCutoff(0.5f)
+    , ColorTexture()
     , DoubleSided(false)
     , IsEmissive(true)
-    , ColorTexture()
+    , ReadAlphaFromChannel(EColorChannel::A)
+    , BlendMode(EBlendMode::Normal)
+    , FresnelFactor(0.0f)
 {
     ColorTexture.SetTexture(false);
 }
@@ -123,17 +116,9 @@ AlphaVideoMaterial::AlphaVideoMaterial()
 {
 }
 
-void AlphaVideoMaterial::SetAlphaMode(EAlphaMode Mode) { AlphaMode = Mode; }
+void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorTexture = Texture; }
 
-EAlphaMode AlphaVideoMaterial::GetAlphaMode() const { return AlphaMode; }
-
-void AlphaVideoMaterial::SetBlendMode(EBlendMode Mode) { BlendMode = Mode; }
-
-EBlendMode AlphaVideoMaterial::GetBlendMode() const { return BlendMode; }
-
-void AlphaVideoMaterial::SetAlphaCutoff(float Mode) { AlphaCutoff = Mode; }
-
-float AlphaVideoMaterial::GetAlphaCutoff() const { return AlphaCutoff; }
+const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
 
 void AlphaVideoMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSided; }
 
@@ -147,8 +132,16 @@ void AlphaVideoMaterial::SetReadAlphaFromChannel(EColorChannel InReadSetReadAlph
 
 EColorChannel AlphaVideoMaterial::GetReadAlphaFromChannel() const { return ReadAlphaFromChannel; }
 
-void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorTexture = Texture; }
+void AlphaVideoMaterial::SetBlendMode(EBlendMode Mode) { BlendMode = Mode; }
 
-const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
+EBlendMode AlphaVideoMaterial::GetBlendMode() const { return BlendMode; }
+
+void AlphaVideoMaterial::SetFresnelFactor(float factor) { FresnelFactor = factor; }
+
+float AlphaVideoMaterial::GetFresnelFactor() const { return FresnelFactor; }
+
+
+
+
 
 } // namespace csp::systems
