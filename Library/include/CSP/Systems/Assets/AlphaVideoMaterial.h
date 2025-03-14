@@ -21,7 +21,7 @@
 
 namespace csp::systems
 {
-class OpacityTextureMaterial;
+class AlphaVideoMaterial;
 }
 
 namespace csp::json
@@ -30,8 +30,8 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj);
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj);
 
 namespace csp::services
 {
@@ -50,7 +50,7 @@ namespace csp::systems
 
 /// @ingroup Asset System
 /// @brief Data class which represents a GLTF material.
-class CSP_API OpacityTextureMaterial : public Material
+class CSP_API AlphaVideoMaterial : public Material
 {
 public:
     // TODO make the common alpha props into an interface
@@ -130,9 +130,9 @@ public:
     /// @param Name const csp::common::String& : The name of the material.
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
     /// @param AssetId const csp::common::String& : The asset where the material info is stored
-    OpacityTextureMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+    AlphaVideoMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
-    OpacityTextureMaterial();
+    AlphaVideoMaterial();
 
 private:
     int Version;
@@ -144,13 +144,13 @@ private:
     bool IsEmissive;
     TextureInfo ColorTexture;
 
-    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj);
+    friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj);
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download material data.
-class CSP_API OpacityTextureMaterialResult : public csp::systems::ResultBase
+class CSP_API AlphaVideoMaterialResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
@@ -161,25 +161,25 @@ class CSP_API OpacityTextureMaterialResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the OpacityTextureMaterial from the result.
-    const OpacityTextureMaterial& GetOpacityTextureMaterial() const;
+    /// @brief Retreives the AlphaVideoMaterial from the result.
+    const AlphaVideoMaterial& GetAlphaVideoMaterial() const;
 
-    CSP_NO_EXPORT OpacityTextureMaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT AlphaVideoMaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    OpacityTextureMaterialResult(void*) {};
+    AlphaVideoMaterialResult(void*) {};
 
-    void SetOpacityTextureMaterial(const OpacityTextureMaterial& Material);
+    void SetAlphaVideoMaterial(const AlphaVideoMaterial& Material);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    OpacityTextureMaterial Material;
+    AlphaVideoMaterial Material;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download a collection of material data.
-class CSP_API OpacityTextureMaterialsResult : public csp::systems::ResultBase
+class CSP_API AlphaVideoMaterialsResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
@@ -190,28 +190,28 @@ class CSP_API OpacityTextureMaterialsResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the OpacityTextureMaterial from the result.
-    const csp::common::Array<OpacityTextureMaterial>& GetOpacityTextureMaterials() const;
+    /// @brief Retreives the AlphaVideoMaterial from the result.
+    const csp::common::Array<AlphaVideoMaterial>& GetAlphaVideoMaterials() const;
 
-    CSP_NO_EXPORT OpacityTextureMaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT AlphaVideoMaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    OpacityTextureMaterialsResult(void*) {};
+    AlphaVideoMaterialsResult(void*) {};
 
-    void SetOpacityTextureMaterials(const csp::common::Array<OpacityTextureMaterial>& Materials);
+    void SetAlphaVideoMaterials(const csp::common::Array<AlphaVideoMaterial>& Materials);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::Array<OpacityTextureMaterial> Materials;
+    csp::common::Array<AlphaVideoMaterial> Materials;
 };
 
 /// @brief Callback containing material data.
-/// @param Result OpacityTextureMaterialResult : result class
-typedef std::function<void(const OpacityTextureMaterialResult& Result)> OpacityTextureMaterialResultCallback;
+/// @param Result AlphaVideoMaterialResult : result class
+typedef std::function<void(const AlphaVideoMaterialResult& Result)> AlphaVideoMaterialResultCallback;
 
 /// @brief Callback containing a collection of material data.
-/// @param Result Array<OpacityTextureMaterialResult> : result class
-typedef std::function<void(const OpacityTextureMaterialsResult& Result)> OpacityTextureMaterialsResultCallback;
+/// @param Result Array<AlphaVideoMaterialResult> : result class
+typedef std::function<void(const AlphaVideoMaterialsResult& Result)> AlphaVideoMaterialsResultCallback;
 
 } // namespace csp::systems
