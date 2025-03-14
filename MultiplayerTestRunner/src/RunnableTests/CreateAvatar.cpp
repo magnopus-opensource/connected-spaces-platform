@@ -16,6 +16,7 @@
 
 #include "CreateAvatar.h"
 
+#include "uuid_v4.h"
 #include <CSP/Multiplayer/SpaceEntitySystem.h>
 #include <CSP/Multiplayer/SpaceTransform.h>
 #include <CSP/Systems/Spaces/SpaceSystem.h>
@@ -36,7 +37,10 @@ void RunTest()
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
-    constexpr const char* UniqueSpaceName = "MakeThisReallyUniqueBeforeCommit";
+    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
+    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid.str();
+
     constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
 
     // Create avater
@@ -58,5 +62,8 @@ void RunTest()
     csp::multiplayer::SpaceEntity* Avatar = ResultFuture.get();
 
     EntitySystem.ProcessPendingEntityOperations();
+
+    // This is a hail mary attempt to get this to stop being flaky on CI. CHS is known to sometimes have a processing delay, which is unfortunate.
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 }
 } // namespace CreateAvatar
