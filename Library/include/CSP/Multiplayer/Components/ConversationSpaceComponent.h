@@ -61,6 +61,7 @@ enum class ConversationPropertyKeys
     NumberOfReplies_DEPRECATED,
     Resolved,
     ConversationCameraPosition,
+    ConversationCameraRotation,
     Num
 };
 
@@ -212,11 +213,18 @@ public:
     bool GetResolved() const;
 
     /// @brief Sets the value for the camera position used to view the conversation.
-    /// @param InValue The position for the camera.
+    /// @param InValue const csp::common::Vector3& : The position for the camera.
     void SetConversationCameraPosition(const csp::common::Vector3& InValue);
     /// @brief Gets the value for the camera position of the conversation.
-    /// @return The camera view position.
+    /// @return const csp::common::Vector3& : The camera view position.
     const csp::common::Vector3& GetConversationCameraPosition() const;
+
+    /// @brief Sets the value for the camera rotation used to view the conversation.
+    /// @param InValue const csp::common::Vector4& : The rotation for the camera.
+    void SetConversationCameraRotation(const csp::common::Vector4& InValue);
+    /// @brief Gets the value for the camera rotation of the conversation.
+    /// @return const csp::common::Vector4& : The camera view rotation.
+    const csp::common::Vector4& GetConversationCameraRotation() const;
 
 protected:
     void OnCreated() override;

@@ -34,5 +34,6 @@ DEFINE_SCRIPT_PROPERTY_VEC4(ConversationSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_STRING(ConversationSpaceComponent, Title);
 DEFINE_SCRIPT_PROPERTY_TYPE(ConversationSpaceComponent, bool, bool, Resolved);
 DEFINE_SCRIPT_PROPERTY_VEC3(ConversationSpaceComponent, ConversationCameraPosition);
+DEFINE_SCRIPT_PROPERTY_VEC4(ConversationSpaceComponent, ConversationCameraRotation);
 
 } // namespace csp::multiplayer

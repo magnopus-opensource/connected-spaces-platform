@@ -55,6 +55,7 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)] = "";
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Resolved)] = false;
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition)] = csp::common::Vector3 { 0, 0, 0 };
+    Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
 
     SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
 }
@@ -273,6 +274,16 @@ void ConversationSpaceComponent::SetConversationCameraPosition(const csp::common
 const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPosition() const
 {
     return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
+}
+
+void ConversationSpaceComponent::SetConversationCameraRotation(const csp::common::Vector4& InValue)
+{
+    SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation), InValue);
+}
+
+const csp::common::Vector4& ConversationSpaceComponent::GetConversationCameraRotation() const
+{
+    return GetVector4Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation));
 }
 
 void ConversationSpaceComponent::OnCreated()
