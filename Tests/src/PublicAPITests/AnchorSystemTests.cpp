@@ -140,7 +140,6 @@ void CreateAnchorResolution(
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_CREATE_ANCHOR_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 {
     SetRandSeed();
@@ -178,9 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
     DeleteAssetCollection(AssetSystem, AssetCollection);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_CREATE_ANCHOR_IN_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 {
     SetRandSeed();
@@ -241,9 +238,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_DELETE_MULTIPLE_ANCHORS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 {
     SetRandSeed();
@@ -322,9 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_GET_ANCHORS_INSIDE_CIRCULAR_AREA_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 {
     SetRandSeed();
@@ -453,9 +446,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_GETANCHORSINSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 {
     SetRandSeed();
@@ -541,9 +532,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_GETANCHORSBYASSETCOLLECTIONID_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 {
     SetRandSeed();
@@ -603,9 +592,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
     DeleteAssetCollection(AssetSystem, AssetCollection);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_CREATE_ANCHOR_RESOLUTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 {
     SetRandSeed();
@@ -668,4 +655,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
     LogOut(UserSystem);
 }
-#endif

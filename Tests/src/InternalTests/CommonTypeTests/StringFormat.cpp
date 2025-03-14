@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_STRINGFORMAT_TESTS)
-
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/List.h"
 
@@ -40,5 +38,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringFormatTests, StringFormatTest)
         FAIL();
     }
 }
-
-#endif

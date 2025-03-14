@@ -38,7 +38,6 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_VIDEO_TESTS || RUN_VIDEO_PLAYER_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 {
     SetRandSeed();
@@ -145,6 +144,5 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 } // namespace

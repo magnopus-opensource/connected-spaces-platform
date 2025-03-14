@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_ARRAY_TESTS)
-
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 
@@ -238,4 +236,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         FAIL();
     }
 }
-#endif

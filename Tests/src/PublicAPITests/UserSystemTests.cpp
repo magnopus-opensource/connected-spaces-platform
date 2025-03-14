@@ -182,7 +182,6 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_FORGOTPASSWORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -214,9 +213,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 
     EXPECT_EQ(FailResult2.GetResultCode(), csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_RESETPASSWORD_BADTOKEN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -229,9 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -248,9 +243,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINASNEWTESTUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -264,9 +257,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_AS_GUEST_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -280,9 +271,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADTOKENLOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -302,9 +291,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADLOGOUT_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadLogOutTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -315,9 +302,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadLogOutTest)
     // Log out without logging in first
     LogOut(UserSystem, csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADDUALLOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -337,9 +322,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINERROR_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -356,10 +339,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This will be updated and re-instated in OF-1533
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_REFRESH_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -380,9 +361,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 {
     SetRandSeed();
@@ -430,9 +409,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_INCLUDING_BLANK_SPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpacesTest)
 {
     SetRandSeed();
@@ -462,9 +439,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_INCLUDING_SYMBOLS_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTest)
 {
     SetRandSeed();
@@ -494,9 +469,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_PING_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PingTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -506,9 +479,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PingTest)
     auto [Result] = AWAIT_PRE(UserSystem, Ping, RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CREATE_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 {
     SetRandSeed();
@@ -562,9 +533,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DELETE_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 {
     SetRandSeed();
@@ -612,9 +581,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CREATE_USER_EMPTY_USERNAME_DISPLAYNAME_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTest)
 {
     SetRandSeed();
@@ -653,9 +620,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_SUPPORTED_PROVIDERS_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -690,9 +655,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 
     EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_GOOGLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -708,9 +671,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
     const auto& AuthoriseURL = ResGoogle.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_DISCORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -726,9 +687,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
     const auto& AuthoriseURL = Result.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_APPLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -744,12 +703,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
     const auto& AuthoriseURL = Result.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-// As the following two tests require manual actions explained inside, they are currently disabled
+// As the following three tests require manual actions explained inside, they are currently disabled
 // ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
 #if 0
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -801,9 +758,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 	// Log out
 	LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DISCORD_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -855,9 +810,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 	// Log out
 	LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_APPLE_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -910,9 +863,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 	LogOut(UserSystem);
 }
 #endif
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AGORA_USER_TOKEN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 {
     SetRandSeed();
@@ -962,9 +913,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GETPROFILEASGUEST_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 {
     SetRandSeed();
@@ -983,9 +932,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1017,11 +964,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
     LogOut(UserSystem);
 }
-#endif
 
 // Currently disabled whilst stripe testing is unavailable for OKO_TESTS
 // This test will be reviewed and reinstated as part of OF-1534.
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1044,9 +989,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 
     EXPECT_NE(Result.GetValue(), "");
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CHECKOUT_SESSION_URL_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1069,4 +1012,3 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
     EXPECT_NE(Result.GetValue(), "");
 }
-#endif

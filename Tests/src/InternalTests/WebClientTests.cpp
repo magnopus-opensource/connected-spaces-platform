@@ -125,7 +125,6 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_GET_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 {
     InitialiseFoundation();
@@ -136,9 +135,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_PUT_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 {
     InitialiseFoundation();
@@ -155,9 +152,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POST_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 {
     InitialiseFoundation();
@@ -176,9 +171,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_DELETE_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
     InitialiseFoundation();
@@ -189,7 +182,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -260,7 +252,6 @@ private:
 };
 
 // This test will be fixed and reenabled as part of OF-1536
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POLLING_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -312,7 +303,6 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -371,7 +361,6 @@ private:
     std::thread::id ThreadId;
 };
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_RETRY_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
 {
     InitialiseFoundation();
@@ -382,9 +371,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_404_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 {
     InitialiseFoundation();
@@ -395,9 +382,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_400_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 {
     InitialiseFoundation();
@@ -409,12 +394,10 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 // Current fails on wasm platform tests due to CORS policy.
 #ifndef CSP_WASM
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_USER_AGENT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
     InitialiseFoundation();
@@ -442,12 +425,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     csp::CSPFoundation::Shutdown();
 }
 #endif
-#endif
 
 #include "CSP/Systems/SystemsManager.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_403_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 {
     InitialiseFoundation();
@@ -462,4 +443,3 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif

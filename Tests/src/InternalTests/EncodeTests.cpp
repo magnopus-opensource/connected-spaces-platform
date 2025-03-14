@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#ifndef SKIP_INTERNAL_TESTS
-
 #include "Common/Encode.h"
 #include "TestHelpers.h"
 
@@ -54,5 +52,3 @@ CSP_INTERNAL_TEST(CSPEngine, EncodeTests, EncodeURI)
         EXPECT_EQ(DecodedString, OriginalURL);
     }
 }
-
-#endif

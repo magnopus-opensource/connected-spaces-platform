@@ -264,7 +264,6 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 }
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 {
     SetRandSeed();
@@ -326,9 +325,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 {
     SetRandSeed();
@@ -380,9 +377,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_KEEPALIVE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 {
     SetRandSeed();
@@ -438,9 +433,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITYREPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 {
     SetRandSeed();
@@ -520,9 +513,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SELF_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 {
     SetRandSeed();
@@ -621,9 +612,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 {
     SetRandSeed();
@@ -697,9 +686,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_CREATOR_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 {
     SetRandSeed();
@@ -773,9 +760,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_MANY_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
 {
     /*
@@ -868,9 +853,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AVATAR_MOVEMENT_DIRECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 {
     SetRandSeed();
@@ -938,9 +921,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_CREATE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 {
     SetRandSeed();
@@ -1002,9 +983,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_ADDCOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 {
     SetRandSeed();
@@ -1105,9 +1084,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 {
     SetRandSeed();
@@ -1205,9 +1182,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENTREENTERSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpace)
 {
     SetRandSeed();
@@ -1332,10 +1307,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This test currently requires manual steps and will be reviewed as part of OF-1535.
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -1414,9 +1387,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     // Log out
     Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {
     // Test for OB-1046
@@ -1489,9 +1460,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_SELECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 {
     SetRandSeed();
@@ -1557,7 +1526,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // Derived type that allows us to access protected members of SpaceEntitySystem
 class InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
@@ -1576,7 +1544,6 @@ public:
 };
 
 // Disabled by default as it can be slow
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 {
     SetRandSeed();
@@ -1672,9 +1639,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INVALID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 {
     SetRandSeed();
@@ -1735,9 +1700,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 {
     SetRandSeed();
@@ -1805,7 +1768,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentEntityReplicationTest(bool Local)
 {
@@ -2021,25 +1983,20 @@ void RunParentEntityReplicationTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityLocalReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GLOBAL_POSITION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2136,9 +2093,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_ROTATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2235,9 +2190,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_SCALE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2337,9 +2290,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_TRANSFORM_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2431,9 +2382,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_ENTER_SPACE_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2560,7 +2509,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentChildDeletionTest(bool Local)
 {
@@ -2725,25 +2673,20 @@ void RunParentChildDeletionTest(bool Local)
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_OBJECT_PARENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 {
     SetRandSeed();
@@ -2799,7 +2742,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentDeletionTest(bool Local)
 {
@@ -3027,20 +2969,16 @@ void RunParentDeletionTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(false);
 }
-#endif
