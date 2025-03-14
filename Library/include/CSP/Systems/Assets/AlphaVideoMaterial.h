@@ -96,7 +96,6 @@ public:
     /// They specify the color of the material.
     /// If the fourth component (A) is present, it represents the linear alpha coverage of the material.
     /// Otherwise, the alpha coverage is equal to 1.0.
-    /// The material.alphaMode property specifies how alpha is interpreted.
     /// The material.blendMode property defines how the alpha is blended when alphaMode is set to BLEND.
     /// The material.readAlphaFromChannel property defines which color channel to read the alpha values from.
     /// The stored texels MUST NOT be premultiplied.
@@ -109,8 +108,6 @@ public:
     const TextureInfo& GetColorTexture() const;
 
     /// @brief Sets whether the material is emissive, if not material should be lit by the scene lighting.
-    /// When this value is false, back - 
-    /// When this value is true, back - 
     /// @param isEmissive bool
     void SetIsEmissive(bool isEmissive);
 
