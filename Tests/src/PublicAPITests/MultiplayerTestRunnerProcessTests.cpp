@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_ARG_TEST
-CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
     EXPECT_EQ(Process.GetTestToRun(), MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
@@ -66,7 +66,7 @@ CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_FUTURE_TEST
-CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
 {
     // Actually invoke the runner and make sure the future's are all set
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
