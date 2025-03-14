@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_NEWFEATURE_TESTS)
-
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Map.h"
@@ -378,5 +376,3 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ValidateNewLODLevelForChainTest)
     Valid = csp::systems::ValidateNewLODLevelForChain(TestChain, 2);
     EXPECT_FALSE(Valid);
 }
-
-#endif

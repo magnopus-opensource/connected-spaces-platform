@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SKIP_INTERNAL_TESTS
 
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
@@ -329,4 +328,3 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureSetterTest)
     Texture.SetCollectionAndAssetId(TestAssetCollectionId, TestAssetId);
     EXPECT_EQ(Texture.GetSourceType(), ETextureResourceType::ImageAsset);
 }
-#endif

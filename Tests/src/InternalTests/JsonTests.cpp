@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SKIP_INTERNAL_TESTS
 
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
@@ -281,5 +280,3 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonObjectContainerObjectTest)
         EXPECT_EQ(Obj.ListMember[i].FloatMember, Obj.ListMember[i].FloatMember);
     }
 }
-
-#endif

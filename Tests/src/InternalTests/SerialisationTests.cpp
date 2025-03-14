@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#ifndef SKIP_INTERNAL_TESTS
-
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
@@ -443,5 +441,3 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
 
     csp::CSPFoundation::Shutdown();
 }
-
-#endif
