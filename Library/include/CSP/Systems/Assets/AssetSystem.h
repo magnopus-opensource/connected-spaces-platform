@@ -247,7 +247,7 @@ public:
     /// @param SpaceId const csp::common::String& : The space id this material is associated with.
     /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created material.
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
-    /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
+    /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType shaderType, const csp::common::String& SpaceId,
         const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::
         common::Array<csp::common::String>& AssetTags,
@@ -276,9 +276,9 @@ public:
     /// @brief Gets a material using its AssetCollection and Asset Id.
     /// @param AssetCollectionId const csp::common::String& : The asset collection id this material is associated with.
     /// @param AssetId const csp::common::String& : The asset id this material is associated with.
-    /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
+    /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetMaterial(
-        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback);
+        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback);
 
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
     typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;

@@ -151,16 +151,4 @@ void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorText
 
 const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
 
-const AlphaVideoMaterial& AlphaVideoMaterialResult::GetAlphaVideoMaterial() const { return Material; }
-
-void AlphaVideoMaterialResult::SetAlphaVideoMaterial(const AlphaVideoMaterial& InMaterial) { Material = InMaterial; }
-
-void AlphaVideoMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
-
-const csp::common::Array<AlphaVideoMaterial>& AlphaVideoMaterialsResult::GetAlphaVideoMaterials() const { return Materials; }
-
-void AlphaVideoMaterialsResult::SetAlphaVideoMaterials(const csp::common::Array<AlphaVideoMaterial>& InMaterials) { Materials = InMaterials; }
-
-void AlphaVideoMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
-
 } // namespace csp::systems

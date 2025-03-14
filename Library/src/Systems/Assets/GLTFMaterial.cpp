@@ -225,16 +225,4 @@ void GLTFMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSi
 
 bool GLTFMaterial::GetDoubleSided() const { return DoubleSided; }
 
-const GLTFMaterial& GLTFMaterialResult::GetGLTFMaterial() const { return Material; }
-
-void GLTFMaterialResult::SetGLTFMaterial(const GLTFMaterial& InMaterial) { Material = InMaterial; }
-
-void GLTFMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
-
-const csp::common::Array<GLTFMaterial>& GLTFMaterialsResult::GetGLTFMaterials() const { return Materials; }
-
-void GLTFMaterialsResult::SetGLTFMaterials(const csp::common::Array<GLTFMaterial>& InMaterials) { Materials = InMaterials; }
-
-void GLTFMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
-
 } // namespace csp::systems
