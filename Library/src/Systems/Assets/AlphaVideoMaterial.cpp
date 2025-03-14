@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "CSP/Systems/Assets/OpacityTextureMaterial.h"
+#include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 
 #include "CSP/Common/Array.h"
 
 #include "Json/JsonSerializer.h"
 
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTextureMaterial& Obj)
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj)
 {
     // Name
     Serializer.SerializeMember("name", Obj.Name);
@@ -56,7 +56,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::OpacityTe
     Serializer.SerializeMember("isEmissive", Obj.IsEmissive);
 }
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::OpacityTextureMaterial& Obj)
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj)
 {
     // Name
     Deserializer.DeserializeMember("name", Obj.Name);
@@ -105,7 +105,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Opa
 namespace csp::systems
 {
 
-OpacityTextureMaterial::OpacityTextureMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
+AlphaVideoMaterial::AlphaVideoMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
     : Material(Name, AssetCollectionId, AssetId)
     , Version(1)
     , AlphaMode(EAlphaMode::Opaque)
@@ -118,49 +118,49 @@ OpacityTextureMaterial::OpacityTextureMaterial(const csp::common::String& Name, 
     ColorTexture.SetTexture(false);
 }
 
-OpacityTextureMaterial::OpacityTextureMaterial()
-    : OpacityTextureMaterial("", "", "")
+AlphaVideoMaterial::AlphaVideoMaterial()
+    : AlphaVideoMaterial("", "", "")
 {
 }
 
-void OpacityTextureMaterial::SetAlphaMode(EAlphaMode Mode) { AlphaMode = Mode; }
+void AlphaVideoMaterial::SetAlphaMode(EAlphaMode Mode) { AlphaMode = Mode; }
 
-EAlphaMode OpacityTextureMaterial::GetAlphaMode() const { return AlphaMode; }
+EAlphaMode AlphaVideoMaterial::GetAlphaMode() const { return AlphaMode; }
 
-void OpacityTextureMaterial::SetBlendMode(EBlendMode Mode) { BlendMode = Mode; }
+void AlphaVideoMaterial::SetBlendMode(EBlendMode Mode) { BlendMode = Mode; }
 
-EBlendMode OpacityTextureMaterial::GetBlendMode() const { return BlendMode; }
+EBlendMode AlphaVideoMaterial::GetBlendMode() const { return BlendMode; }
 
-void OpacityTextureMaterial::SetAlphaCutoff(float Mode) { AlphaCutoff = Mode; }
+void AlphaVideoMaterial::SetAlphaCutoff(float Mode) { AlphaCutoff = Mode; }
 
-float OpacityTextureMaterial::GetAlphaCutoff() const { return AlphaCutoff; }
+float AlphaVideoMaterial::GetAlphaCutoff() const { return AlphaCutoff; }
 
-void OpacityTextureMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSided; }
+void AlphaVideoMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSided; }
 
-bool OpacityTextureMaterial::GetDoubleSided() const { return DoubleSided; }
+bool AlphaVideoMaterial::GetDoubleSided() const { return DoubleSided; }
 
-void OpacityTextureMaterial::SetIsEmissive(bool InIsEmissive) { IsEmissive = InIsEmissive; }
+void AlphaVideoMaterial::SetIsEmissive(bool InIsEmissive) { IsEmissive = InIsEmissive; }
 
-bool OpacityTextureMaterial::GetIsEmissive() const { return IsEmissive; }
+bool AlphaVideoMaterial::GetIsEmissive() const { return IsEmissive; }
 
-void OpacityTextureMaterial::SetReadAlphaFromChannel(EColorChannel InReadSetReadAlphaFromChannel) { ReadAlphaFromChannel = InReadSetReadAlphaFromChannel; }
+void AlphaVideoMaterial::SetReadAlphaFromChannel(EColorChannel InReadSetReadAlphaFromChannel) { ReadAlphaFromChannel = InReadSetReadAlphaFromChannel; }
 
-EColorChannel OpacityTextureMaterial::GetReadAlphaFromChannel() const { return ReadAlphaFromChannel; }
+EColorChannel AlphaVideoMaterial::GetReadAlphaFromChannel() const { return ReadAlphaFromChannel; }
 
-void OpacityTextureMaterial::SetColorTexture(const TextureInfo& Texture) { ColorTexture = Texture; }
+void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorTexture = Texture; }
 
-const TextureInfo& OpacityTextureMaterial::GetColorTexture() const { return ColorTexture; }
+const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
 
-const OpacityTextureMaterial& OpacityTextureMaterialResult::GetOpacityTextureMaterial() const { return Material; }
+const AlphaVideoMaterial& AlphaVideoMaterialResult::GetAlphaVideoMaterial() const { return Material; }
 
-void OpacityTextureMaterialResult::SetOpacityTextureMaterial(const OpacityTextureMaterial& InMaterial) { Material = InMaterial; }
+void AlphaVideoMaterialResult::SetAlphaVideoMaterial(const AlphaVideoMaterial& InMaterial) { Material = InMaterial; }
 
-void OpacityTextureMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void AlphaVideoMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
-const csp::common::Array<OpacityTextureMaterial>& OpacityTextureMaterialsResult::GetOpacityTextureMaterials() const { return Materials; }
+const csp::common::Array<AlphaVideoMaterial>& AlphaVideoMaterialsResult::GetAlphaVideoMaterials() const { return Materials; }
 
-void OpacityTextureMaterialsResult::SetOpacityTextureMaterials(const csp::common::Array<OpacityTextureMaterial>& InMaterials) { Materials = InMaterials; }
+void AlphaVideoMaterialsResult::SetAlphaVideoMaterials(const csp::common::Array<AlphaVideoMaterial>& InMaterials) { Materials = InMaterials; }
 
-void OpacityTextureMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void AlphaVideoMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
 } // namespace csp::systems

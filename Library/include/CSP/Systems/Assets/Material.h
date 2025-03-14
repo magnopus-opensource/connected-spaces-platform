@@ -47,7 +47,7 @@ namespace csp::systems
 enum class EShaderType
 {
     Standard = 0,
-    OpacityTexture = 1
+    AlphaVideo = 1
 };
 
 /// @brief Defines how to alpha value is interpreted
@@ -60,13 +60,15 @@ enum class EAlphaMode
 };
 
 /// @brief Defines how to alpha value is interpreted
-/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model
+/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports EColorChannel.
 enum class EBlendMode
 {
     Normal = 0,
     Additive = 1,
 };
 
+/// @brief Defines where the alpha value is read from
+/// The alpha value is usually taken from the fourth component of the base color but this allows is to be read from another channel
 enum class EColorChannel
 {
     R = 0,
