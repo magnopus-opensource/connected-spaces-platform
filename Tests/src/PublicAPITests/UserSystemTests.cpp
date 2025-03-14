@@ -15,6 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -301,6 +302,90 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EMPTY_USER_CREDENTIALS_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::Login, One of either Username or Email must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty email and username
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "", GeneratedTestAccountPassword, true).Await(RequestPredicate);
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EMPTY_PASSWORD_CREDENTIALS_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::Login, Password must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty password
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", "", true).Await(RequestPredicate);
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EMPTY_USER_CREDENTIALS_REFRESHTOKEN_LOGIN_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsRefreshTokenLoginTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::LoginWithRefreshToken, UserId must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty userId
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, "", "fakeToken");
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
 }
 #endif
 
