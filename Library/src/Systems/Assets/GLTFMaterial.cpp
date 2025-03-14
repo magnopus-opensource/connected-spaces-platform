@@ -187,8 +187,7 @@ void GLTFMaterial::SetEmissiveTexture(const TextureInfo& Texture) { EmissiveText
 const TextureInfo& GLTFMaterial::GetEmissiveTexture() const { return EmissiveTexture; }
 
 GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-    : Material(Name, AssetCollectionId, AssetId)
-    , Version(1)
+    : Material(Name, AssetCollectionId, AssetId, csp::systems::EShaderType::Standard, 1)
     , AlphaMode(EAlphaMode::Opaque)
     , AlphaCutoff(0.5f)
     , DoubleSided(false)
@@ -225,17 +224,5 @@ float GLTFMaterial::GetAlphaCutoff() const { return AlphaCutoff; }
 void GLTFMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSided; }
 
 bool GLTFMaterial::GetDoubleSided() const { return DoubleSided; }
-
-const GLTFMaterial& GLTFMaterialResult::GetGLTFMaterial() const { return Material; }
-
-void GLTFMaterialResult::SetGLTFMaterial(const GLTFMaterial& InMaterial) { Material = InMaterial; }
-
-void GLTFMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
-
-const csp::common::Array<GLTFMaterial>& GLTFMaterialsResult::GetGLTFMaterials() const { return Materials; }
-
-void GLTFMaterialsResult::SetGLTFMaterials(const csp::common::Array<GLTFMaterial>& InMaterials) { Materials = InMaterials; }
-
-void GLTFMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
 } // namespace csp::systems
