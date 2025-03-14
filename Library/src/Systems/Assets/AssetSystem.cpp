@@ -912,9 +912,11 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
 
 void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Callback)
 {
+    CSP_LOG_MSG( LogLevel::Log, "Start Update");
     // 1. Get asset collection
-    auto GetAssetCollectionCB = [this, Material, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
+    auto GetAssetCollectionCB = [this, &Material, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
     {
+    CSP_LOG_MSG( LogLevel::Log, "step 1");
         if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
             Callback(NullResult(CreateAssetCollectionResult.GetResultCode(), CreateAssetCollectionResult.GetHttpResultCode()));
@@ -924,8 +926,9 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
         // 2. Get asset
         const AssetCollection& CreatedAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto GetAssetCB = [this, Callback, Material, CreatedAssetCollection](const AssetResult& CreateAssetResult)
+        auto GetAssetCB = [this, Callback, &Material, CreatedAssetCollection](const AssetResult& CreateAssetResult)
         {
+         CSP_LOG_MSG( LogLevel::Log, "step 2");
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
                 Callback(NullResult(CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode()));
@@ -933,18 +936,26 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             }
 
             // 3. Upload material
-            auto UploadMaterialCallback = [this, Callback, Material](const UriResult& UploadResult)
+            auto UploadMaterialCallback = [this, Callback, &Material](const UriResult& UploadResult)
             { Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode())); };
             csp::common::String MaterialJson;
             if (Material.GetShaderType() == EShaderType::Standard)
             {
-                GLTFMaterial gltfMaterial = (GLTFMaterial&)Material;
-                MaterialJson = json::JsonSerializer::Serialize(gltfMaterial);
+
+                const GLTFMaterial* gltfMaterial = dynamic_cast<const GLTFMaterial*>(&Material);
+                if (gltfMaterial == nullptr)
+                {
+                    CSP_LOG_ERROR_MSG("Failed to cast material to GLTFMaterial");
+                    return;
+                }
+                 CSP_LOG_MSG( LogLevel::Log, "pre serialize");
+                MaterialJson = json::JsonSerializer::Serialize(*gltfMaterial);
+                CSP_LOG_MSG( LogLevel::Log, "post serialize");
             }
             else
             {
-                AlphaVideoMaterial opacityMaterial = (AlphaVideoMaterial&)Material;
-                MaterialJson = json::JsonSerializer::Serialize(opacityMaterial);
+                const AlphaVideoMaterial* alphaMaterial = dynamic_cast<const AlphaVideoMaterial*>(&Material);
+                MaterialJson = json::JsonSerializer::Serialize(*alphaMaterial);
             }
             const Asset& CreatedAsset = CreateAssetResult.GetAsset();
 
@@ -955,10 +966,10 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             AssetData.SetMimeType("application/json");
             AssetData.Buffer = Buffer.data();
             AssetData.BufferLength = MaterialJson.Length();
-
+                CSP_LOG_MSG( LogLevel::Log, "upload dude");
             UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
         };
-
+        CSP_LOG_MSG( LogLevel::Log, "pre get asset");
         GetAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), GetAssetCB);
     };
 

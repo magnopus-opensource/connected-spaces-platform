@@ -128,7 +128,8 @@ public:
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
     /// @param AssetId const csp::common::String& : The asset where the material info is stored
     AlphaVideoMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
-
+    
+    virtual ~AlphaVideoMaterial() = default;
     AlphaVideoMaterial();
 
 private:

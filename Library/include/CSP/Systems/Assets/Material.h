@@ -110,6 +110,8 @@ public:
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId, const EShaderType& InType, const int InVersion);
 
+    virtual ~Material() = default;
+
     Material() = default;
     csp::common::String Name;
     EShaderType Type;
