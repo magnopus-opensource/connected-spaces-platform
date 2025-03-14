@@ -1,4 +1,8 @@
-﻿using System;
+// ---------------------------------------------
+// Copyright (c) Magnopus. All Rights Reserved.
+// ---------------------------------------------
+
+using System;
 
 
 namespace Csp

@@ -1,4 +1,8 @@
-﻿namespace Csp
+﻿// ---------------------------------------------
+// Copyright (c) Magnopus. All Rights Reserved.
+// ---------------------------------------------
+
+namespace Csp
 {
     internal class Constants
     {
