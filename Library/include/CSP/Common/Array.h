@@ -68,20 +68,6 @@ public:
         }
     }
 
-    /// @brief Constructs an array from a buffer.
-    /// @param Buffer const T* : Pointer to the beginning of the buffer
-    /// @param Size size_t : Number of elements in the buffer
-    CSP_NO_EXPORT Array(const T* Buffer, size_t Size)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
-    {
-        if (Buffer != nullptr && Size > 0)
-        {
-            AllocArray(Size);
-            memcpy(ObjectArray, Buffer, Size * sizeof(T));
-        }
-    }
-
     /// @brief Copy constructor.
     /// @param Other const Array<T>& Other
     CSP_NO_EXPORT Array(const Array<T>& Other)

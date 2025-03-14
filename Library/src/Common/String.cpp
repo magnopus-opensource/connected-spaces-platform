@@ -420,6 +420,16 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
     return JoinedString;
 }
 
+bool String::Contains(const String& Substring) const
+{
+    if (Substring.Length() == 0)
+    {
+        return false;
+    }
+
+    return strstr(Get(), Substring.Get()) != nullptr;
+}
+
 String String::Join(const std::initializer_list<String>& Parts, Optional<char> Separator)
 {
     if (Parts.size() == 0)

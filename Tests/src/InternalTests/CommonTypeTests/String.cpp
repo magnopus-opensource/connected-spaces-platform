@@ -671,4 +671,20 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTes
     }
 }
 
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsTest)
+{
+    String TestStr = "TestStringOneTwoThree";
+
+    EXPECT_TRUE(TestStr.Contains("One"));
+    EXPECT_TRUE(TestStr.Contains("Two"));
+    EXPECT_TRUE(TestStr.Contains("Three"));
+    EXPECT_TRUE(TestStr.Contains("TestStringOneTwoThree"));
+
+    EXPECT_FALSE(TestStr.Contains("Four"));
+    EXPECT_FALSE(TestStr.Contains("TestStringOneTwoThree "));
+    EXPECT_FALSE(TestStr.Contains(""));
+    EXPECT_FALSE(TestStr.Contains(" "));
+    EXPECT_FALSE(TestStr.Contains("TestStringOneTwoThreeFour"));
+}
+
 #endif
