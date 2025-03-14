@@ -51,12 +51,6 @@ if not Tests then
 		
 		-- We're building LibAsync statically and need this
 		defines { "LIBASYNC_STATIC" }
-       
-        -- If we're running on a build agent, we want to run *all* the tests
-        if CSP.IsRunningOnTeamCityAgent() and not CSP.IsWebAssemblyGeneration() then
-            result = iif(CSP.IsRunningNightlyBuild(), "RUN_NIGHTLY_TESTS", "RUN_ALL_UNIT_TESTS")
-            defines { result }
-        end
         
         -- Config for platforms
         filter "platforms:x64"
@@ -67,9 +61,7 @@ if not Tests then
 
             defines {
                 "CSP_WASM",
-                "USE_STD_MALLOC=1",
-                "SKIP_INTERNAL_TESTS",
-                "RUN_PLATFORM_TESTS"    -- enable platform tests by default for wasm
+                "USE_STD_MALLOC=1"
             }
 
             buildoptions {
