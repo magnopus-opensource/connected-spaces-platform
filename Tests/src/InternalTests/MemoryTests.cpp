@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SKIP_INTERNAL_TESTS
 
 #include "CSP/CSPFoundation.h"
 #include "Memory/Memory.h"
@@ -94,5 +93,3 @@ CSP_INTERNAL_TEST(CSPEngine, MemoryTests, ReallocationTest)
     Buffer = CSP_REALLOC(Buffer, 128 * 1024);
     EXPECT_TRUE(*(uint64_t*)Buffer == 0x0123456789ABCDEF);
 }
-
-#endif

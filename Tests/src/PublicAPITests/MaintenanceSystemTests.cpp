@@ -67,8 +67,6 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GETMAINTENANCEINFO_TEST
-
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 {
     auto& SystemsManager = SystemsManager::Get();
@@ -77,9 +75,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
     auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_ISINSIDEMAINTENANCEWINDOW_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfoTest)
 {
@@ -94,9 +89,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 
     EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInfoTest)
 {
@@ -123,9 +115,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
         EXPECT_EQ(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
     }
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_SORTMAINTENANCEINFOS_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 {
@@ -154,7 +143,5 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 
     EXPECT_EQ(MaintenanceInfos2[0].Description, "Info2");
 }
-
-#endif
 
 } // namespace

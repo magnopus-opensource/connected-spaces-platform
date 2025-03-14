@@ -51,7 +51,6 @@ struct RAIIMockLogger
 };
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_REPORT_SUCCESS_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestReportSuccess)
 {
     RAIIMockLogger MockLogger {};
@@ -72,9 +71,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestReportSuccess)
 
     csp::common::continuations::ReportSuccess(MockResultCallback.AsStdFunction(), SuccessMsg.c_str())();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_LOG_ERROR_AND_CANCEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
 {
     RAIIMockLogger MockLogger {};
@@ -97,9 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
     ASSERT_ANY_THROW(csp::common::continuations::LogErrorAndCancelContinuation(
         MockResultCallback.AsStdFunction(), ErrorMsg.c_str(), ResultCode, HttpResultCode, FailureReason));
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_ASSERT_REQUEST_SUCCESS_OR_ERROR_FROM_RESULT_WHEN_SUCCESS_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromResultWhenSuccess)
 {
     RAIIMockLogger MockLogger {};
@@ -119,9 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
                   MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, LogLevel::Log)(SuccessResult),
         SuccessResult);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_ASSERT_REQUEST_SUCCESS_OR_ERROR_FROM_RESULT_WHEN_ERROR_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromResultWhenError)
 {
     RAIIMockLogger MockLogger {};
@@ -169,9 +162,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
             std::make_optional(FailureReasonExplicit), LogLevel::Log)(ExpectedFailureResult));
     }
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_ASSERT_REQUEST_SUCCESS_OR_ERROR_FROM_ERRORCODE_WHEN_SUCCESS_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromErrorCodeWhenSuccess)
 {
     RAIIMockLogger MockLogger {};
@@ -185,9 +176,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
         MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), {}, {}, {}, LogLevel::Log)({});
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_ASSERT_REQUEST_SUCCESS_OR_ERROR_FROM_ERRORCODE_WHEN_ERROR_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromErrorCodeWhenError)
 {
     RAIIMockLogger MockLogger {};
@@ -234,10 +223,8 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
             MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), {}, {}, {}, LogLevel::Log)(ErrorCode));
     }
 }
-#endif
 
 // See `Continuation.h::detail::testing` for specifics of how these tests run
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_WHEN_NO_EXCEPTION_THROWN_IN_CONTINUATION_CHAIN_THEN_HANDLER_NOT_CALLED_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenNoExceptionThrownInContinuationChainThenHandlerNotCalled)
 {
     // No exception, expect exception handler callable not called.
@@ -245,9 +232,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenNoExceptionThrownI
     EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(0);
     csp::common::continuations::detail::testing::SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_WHEN_EXCEPTION_THROWN_IN_CONTINUATION_CHAIN_THEN_HANDLER_CALLED_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenExceptionThrownInContinuationChainThenHandlerCalled)
 {
     // Exception thrown, expect exception handler callable called
@@ -255,9 +240,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenExceptionThrownInC
     EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(1);
     csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_WHEN_CONTINUATION_CHAIN_CANCELLED_THEN_HANDLER_AND_RESULTCALLBACK_CALLED_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainCancelledThenHandlerAndResultCallbackCalled)
 {
     // Exception thrown, expect exception handler callable called, as well as result callback called. (Just testing our specific way of throwing here)
@@ -268,9 +251,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainC
     csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
         MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_CALLABLE_CALLED_AND_INTERMEDIATE_NOT_WHEN_EXCEPTION_THROWN_HIGHER_IN_CHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledAndIntermediateNotWhenExceptionThrownHigherInChain)
 {
     // Exception thrown higher in chain, expect exception handler callable intermediate method not called, but exception handler callable called.
@@ -283,9 +264,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledAndInter
     csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
         MockIntermediateStepCallable.AsStdFunction(), MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GENERAL_CONTINUATIONS_TESTS || RUN_CALLABLE_CALLED_ON_SAME_THREAD_IN_CONTINUATION_CHAIN
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledOnSameThreadInContinuationChain)
 {
     // Since we're exposing callbacks to chains anyway, might as well verify the WASM requirement that
@@ -298,4 +277,3 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledOnSameTh
     // Could simply have made another detail::testing function ... but why bother when this already exists.
     csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(VerifyThread);
 }
-#endif

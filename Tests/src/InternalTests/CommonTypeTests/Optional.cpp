@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_OPTIONAL_TESTS)
-
 #include "CSP/Common/Optional.h"
 #include "Memory/Memory.h"
 
@@ -376,4 +374,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalAssignNull)
 
     EXPECT_FALSE(OptionalInstance.HasValue());
 }
-#endif

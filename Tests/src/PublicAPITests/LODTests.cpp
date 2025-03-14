@@ -54,7 +54,6 @@ void RegisterAssetToLODChain(
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_GET_EMPTY_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 {
     SetRandSeed();
@@ -98,9 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_REGISTER_ASSETS_TO_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 {
     SetRandSeed();
@@ -172,4 +169,3 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif

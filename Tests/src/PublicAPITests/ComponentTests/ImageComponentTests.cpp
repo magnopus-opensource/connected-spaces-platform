@@ -42,7 +42,6 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_IMAGE_TESTS || RUN_IMAGE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 {
     SetRandSeed();
@@ -165,9 +164,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_IMAGE_TESTS || RUN_IMAGE_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 {
     SetRandSeed();
@@ -249,6 +246,5 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 } // namespace

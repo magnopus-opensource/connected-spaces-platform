@@ -57,7 +57,6 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 /*These test are currently internal tests because they utilise that is currently only available
 through internal CSP infrastructure.*/
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
     /*Steps needed to be performed before running this test are:
@@ -149,9 +148,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_BY_VARIANT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
 {
     /*Steps needed to be performed before running this test are:
@@ -245,9 +242,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 {
     SetRandSeed();
@@ -305,9 +300,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformation
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATEANDGETCART_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 {
     SetRandSeed();
@@ -363,9 +356,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATECART_BADINPUTS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 {
     SetRandSeed();
@@ -387,9 +378,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETCART_BADINPUTS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 {
     SetRandSeed();
@@ -412,9 +401,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 {
     SetRandSeed();
@@ -502,8 +488,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     };
 }
 
-#endif
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 {
     SetRandSeed();
@@ -623,9 +607,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     };
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 {
     SetRandSeed();
@@ -737,9 +718,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
     EXPECT_EQ(DeleteCartLinesCart.TotalQuantity, 0);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDSHOPIFYSTORE_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 {
     SetRandSeed();
@@ -802,9 +780,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETSHOPIFYSTORES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 {
     SetRandSeed();
@@ -854,4 +830,3 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 
     LogOut(UserSystem);
 }
-#endif

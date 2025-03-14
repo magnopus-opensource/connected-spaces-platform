@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_VECTOR4_TESTS)
-
 #include "CSP/Common/Vector.h"
 
 #include "TestHelpers.h"
@@ -140,5 +138,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4IdentityTest)
         FAIL();
     }
 }
-
-#endif

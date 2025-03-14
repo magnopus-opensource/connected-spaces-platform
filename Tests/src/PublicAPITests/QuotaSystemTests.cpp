@@ -35,7 +35,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 {
     EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "basic");
@@ -43,9 +42,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
     EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Pro), "pro");
     EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Enterprise), "enterprise");
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
 {
     EXPECT_EQ(StringToTierNameEnum("basic"), csp::systems::TierNames::Basic);
@@ -53,9 +50,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
     EXPECT_EQ(StringToTierNameEnum("pro"), csp::systems::TierNames::Pro);
     EXPECT_EQ(StringToTierNameEnum("enterprise"), csp::systems::TierNames::Enterprise);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
 {
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::Agora), "Agora");
@@ -68,9 +63,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::TicketedSpace), "TicketedSpace");
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::TotalUploadSizeInKilobytes), "TotalUploadSizeInKilobytes");
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOTIERFEATUREENUM_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
 {
     EXPECT_EQ(StringToTierFeatureEnum("Agora"), csp::systems::TierFeatures::Agora);
@@ -83,9 +76,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
     EXPECT_EQ(StringToTierFeatureEnum("TicketedSpace"), csp::systems::TierFeatures::TicketedSpace);
     EXPECT_EQ(StringToTierFeatureEnum("TotalUploadSizeInKilobytes"), csp::systems::TierFeatures::TotalUploadSizeInKilobytes);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTOTALSPACESOWNEDBYUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -102,9 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
     EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, csp::systems::TierFeatures::SpaceOwner);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETCURRENTUSERTIER_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -121,9 +110,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
     EXPECT_EQ(Result.GetUserTierInfo().AssignToId, UserId);
     EXPECT_EQ(Result.GetUserTierInfo().AssignToType, "user");
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREPROGRESSFORUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -147,9 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
     }
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREPROGRESSFORSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -190,9 +175,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREQUOTA_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -220,9 +203,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
         EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Pro);
     }
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATURESQUOTA_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -256,9 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Period, ExpectedInfoArray[i].Period);
     }
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETCONCURRENTUSERSINSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -314,9 +293,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTOTALSPACESIZEINKILOBYTES_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -406,4 +383,3 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
 }
-#endif

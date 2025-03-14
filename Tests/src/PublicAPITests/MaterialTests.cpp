@@ -78,8 +78,6 @@ void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetColle
     OutMaterial = Result.GetGLTFMaterial();
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_CREATEMATERIAL_TEST
-
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
 {
     SetRandSeed();
@@ -106,9 +104,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_UPDATEMATERIAL_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 {
@@ -151,9 +146,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_GETEMPTYMATERIALS_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
 {
@@ -182,9 +174,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_GETMULTIPLEMATERIALS_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 {
@@ -265,9 +254,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_GETMATERIAL_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 {
@@ -304,9 +290,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_GETINVALIDMATERIAL_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 {
@@ -339,9 +322,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_DELETEMATERIAL_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 {
@@ -391,9 +371,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_MATERIALEVENTTEST_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 {
@@ -490,9 +467,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_MATERIALASSETEVENTTEST_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
 {
@@ -595,4 +569,3 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif

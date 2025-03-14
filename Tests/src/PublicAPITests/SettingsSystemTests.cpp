@@ -65,7 +65,6 @@ bool IsUriValid(const std::string& Uri, const std::string& FileName)
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_NDASTATUS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -90,9 +89,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_NEWSLETTERSTATUS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -117,9 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_RECENTSPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -146,9 +141,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_BLOCKEDSPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -179,9 +172,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_REMOVEBLOCKEDSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -315,9 +306,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_MULIBLOCKEDSPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -365,9 +354,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARPORTRAIT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 {
     SetRandSeed();
@@ -412,9 +399,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SPACESYSTEM_UPDATEAVATAR_PORTRAIT_WITH_BUFFER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTest)
 {
     SetRandSeed();
@@ -467,9 +452,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARINFOSTRING_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -502,4 +485,3 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif

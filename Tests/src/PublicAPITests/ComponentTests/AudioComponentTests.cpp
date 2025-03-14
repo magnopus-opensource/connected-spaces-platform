@@ -39,7 +39,6 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_AUDIO_TESTS || RUN_AUDIO_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 {
     SetRandSeed();
@@ -138,9 +137,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_AUDIO_TESTS || RUN_AUDIO_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 {
     SetRandSeed();
@@ -265,6 +262,5 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 } // namespace

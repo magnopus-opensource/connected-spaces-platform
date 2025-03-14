@@ -7,7 +7,6 @@
 
 using namespace oly_multiplayer;
 
-#if RUN_ALL_UNIT_TESTS || RUN_REPLICATEDVALUE_TESTS
 CSP_PUBLIC_TEST(OlympusEngine, SpaceComponentTests, ExternalLinkComponentProperties)
 {
     std::shared_ptr<SpaceEntity> TestSpaceEntity(new SpaceEntity());
@@ -64,7 +63,5 @@ CSP_PUBLIC_TEST(OlympusEngine, SpaceComponentTests, ExternalLinkComponentPropert
         EXPECT_EQ(ExpectedValue, Result);
     }
 }
-
-#endif // RUN_ALL_UNIT_TESTS || RUN_REPLICATEDVALUE_TESTS
 
 #endif // MULTIPLAYER

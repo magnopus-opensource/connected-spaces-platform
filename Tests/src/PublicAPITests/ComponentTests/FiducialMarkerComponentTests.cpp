@@ -42,7 +42,6 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_FIDUCIALMARKER_TESTS || RUN_FIDUCIALMARKER_TEST
 CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 {
     SetRandSeed();
@@ -158,9 +157,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_FIDUCIALMARKER_TESTS || RUN_FIDUCIALMARKER_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTest)
 {
     SetRandSeed();
@@ -233,6 +230,5 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 } // namespace

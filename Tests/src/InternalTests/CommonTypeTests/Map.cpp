@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_MAP_TESTS)
-
 #include "CSP/Common/Map.h"
 
 #include "CSP/Common/Optional.h"
@@ -233,5 +231,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)
 
     EXPECT_EQ(MyMap.Size(), 0);
 }
-
-#endif

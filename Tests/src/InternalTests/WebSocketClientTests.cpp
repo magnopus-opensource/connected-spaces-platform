@@ -29,7 +29,6 @@ using namespace csp::multiplayer;
 
 const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_START_STOP_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
     // Initialise
@@ -51,9 +50,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
     // Logout
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 {
     // Initialise
@@ -78,9 +75,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
     // Logout
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_RECEIVE_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 {
     // Initialise
@@ -105,4 +100,3 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
     // Logout
     LogOut(UserSystem);
 }
-#endif
