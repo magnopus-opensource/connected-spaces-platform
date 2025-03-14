@@ -81,6 +81,8 @@ public:
     /// @param Password csp::common::String
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
+    /// @pre One of either UserName or Email must not be empty.
+    /// @pre Password must not be empty.
     CSP_ASYNC_RESULT void Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
         const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
@@ -89,6 +91,7 @@ public:
     /// @param UserId csp::common::String : User ID for the previous session
     /// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
     /// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
+    /// @pre UserId must not be empty.
     CSP_ASYNC_RESULT void LoginWithRefreshToken(
         const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
 
@@ -251,8 +254,7 @@ private:
     UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
     ~UserSystem();
 
-    [[nodiscard]]
-    bool EmailCheck(const std::string& Email) const;
+    [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
     void ResetAuthenticationState();
