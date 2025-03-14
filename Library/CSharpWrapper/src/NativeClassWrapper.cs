@@ -1,3 +1,7 @@
+// ---------------------------------------------
+// Copyright (c) Magnopus. All Rights Reserved.
+// ---------------------------------------------
+
 using System;
 using System.Runtime.InteropServices;
 

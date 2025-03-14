@@ -1,3 +1,7 @@
+// ---------------------------------------------
+// Copyright (c) Magnopus. All Rights Reserved.
+// ---------------------------------------------
+
 #if UNITY_EDITOR
 
 using System.IO;
