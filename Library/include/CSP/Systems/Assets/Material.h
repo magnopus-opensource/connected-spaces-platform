@@ -148,11 +148,11 @@ public:
 private:
     MaterialResult(void*) {};
 
-    void SetMaterial(const Material& Material);
+    void SetMaterial(Material& Material);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    Material Material;
+    Material* Material;
 };
 
 /// @ingroup Asset System
@@ -169,7 +169,7 @@ class CSP_API MaterialsResult : public csp::systems::ResultBase
 
 public:
     /// @brief Retreives the Material from the result.
-    const csp::common::Array<Material>& GetMaterials() const;
+    const csp::common::Array<csp::systems::Material*>* GetMaterials() const;
 
     CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
@@ -177,11 +177,11 @@ public:
 private:
     MaterialsResult(void*) {};
 
-    void SetMaterials(const csp::common::Array<Material>& Materials);
+    void SetMaterials(const csp::common::Array<csp::systems::Material*>& Materials);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::Array<Material> Materials;
+    csp::common::Array<Material*> Materials;
 };
 
 /// @brief Callback containing material data.
