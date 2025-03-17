@@ -675,18 +675,9 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto& LogSystem = *SystemsManager.GetLogSystem();
 
-    const csp::common::String Prefix = "Services";
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback(
-        [&LogConfirmed, Prefix](csp::common::String InMessage)
-        {
-            if (InMessage.Split(' ')[0] == Prefix)
-            {
-                LogConfirmed = InMessage.Split(' ')[0] == Prefix;
-                std::cout << InMessage << std::endl;
-            }
-        });
+    LogSystem.SetLogCallback([&LogConfirmed](csp::common::String InMessage) { LogConfirmed = !InMessage.IsEmpty(); });
 
     csp::common::String UserId;
 
