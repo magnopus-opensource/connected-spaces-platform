@@ -26,7 +26,6 @@
 
 // All the analytics tests will be reviewed, and the disabled tests reenabled, as part of OF-1538.
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_METRIC_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 {
     auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
@@ -57,9 +56,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 
     AnalyticsSystem->DeregisterProvider(&Provider);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_MULTIPLE_METRIC_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 {
     auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
@@ -111,9 +108,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricT
 
     AnalyticsSystem->DeregisterProvider(&Provider);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_DEREGISTER_PROVIDER_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 {
     auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
@@ -142,9 +137,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 
     EXPECT_EQ(Metrics.size(), 0);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_MULTIPLE_THREADS_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 {
     auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
@@ -197,9 +190,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTes
 
     AnalyticsSystem->DeregisterProvider(&Provider);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_PARAMS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAParamsTest)
 {
     const csp::common::String TestClientId = "TestClientId";
@@ -218,9 +209,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAParamsTest)
 
     EXPECT_EQ(ExpectedEventString, EventString);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_INT_PARAM_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAIntParamTest)
 {
     const csp::common::String TestClientId = "TestClientId";
@@ -237,9 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAIntParamTest)
 
     EXPECT_EQ(ExpectedEventString, EventString);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_STRING_PARAM_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAStringParamTest)
 {
     const csp::common::String TestClientId = "TestClientId";
@@ -256,9 +243,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAStringParamTest)
 
     EXPECT_EQ(ExpectedEventString, EventString);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_INVALID_PARAM_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAInvalidParamTest)
 {
     const csp::common::String TestClientId = "TestClientId";
@@ -275,9 +260,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAInvalidParamTest)
 
     EXPECT_EQ(ExpectedEventString, EventString);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_TOO_MANY_PARAM_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UATooManyParamTest)
 {
     const csp::common::String TestClientId = "TestClientId";
@@ -298,4 +281,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UATooManyParamTest)
 
     EXPECT_EQ(ExpectedEventString, EventString);
 }
-#endif

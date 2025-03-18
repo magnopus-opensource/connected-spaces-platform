@@ -235,7 +235,6 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
 static constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 static constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 {
     SetRandSeed();
@@ -289,9 +288,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_INVALIDKEY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 {
     SetRandSeed();
@@ -342,9 +339,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCENOITEMS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 {
     SetRandSeed();
@@ -389,9 +384,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
 {
     SetRandSeed();
@@ -422,9 +415,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
 {
     SetRandSeed();
@@ -475,9 +466,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCE_INVALIDKEY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 {
     SetRandSeed();
@@ -527,9 +516,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_UPDATESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 {
     SetRandSeed();
@@ -580,9 +567,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_UPDATESEQUENCE_INVALIDKEY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 {
     SetRandSeed();
@@ -640,9 +625,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_RENAMESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 {
     SetRandSeed();
@@ -694,9 +677,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_RENAMESEQUENCE_INVALIDKEY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 {
     SetRandSeed();
@@ -765,9 +746,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCEBYCRITERIA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 {
     SetRandSeed();
@@ -859,9 +838,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCEBYCRITERIA_INVALIDKEY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKeyTest)
 {
     SetRandSeed();
@@ -915,9 +892,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_REGISTERSEQUENCEUPDATED_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 {
     SetRandSeed();
@@ -1018,9 +993,6 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_SEQUENCE_PERMISSIONS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 {
     SetRandSeed();
@@ -1101,9 +1073,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETALLSEQUENCESCONTAINING_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTest)
 {
     SetRandSeed();
@@ -1190,4 +1160,3 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
     // Log out
     LogOut(UserSystem);
 }
-#endif

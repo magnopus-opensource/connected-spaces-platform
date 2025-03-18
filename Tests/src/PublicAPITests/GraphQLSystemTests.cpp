@@ -32,7 +32,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -81,9 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
     // Log Out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_QUERY_BADINPUT_TEST
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -100,9 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_REQUEST_BADINPUT_TEST
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -119,4 +114,3 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 
     LogOut(UserSystem);
 }
-#endif

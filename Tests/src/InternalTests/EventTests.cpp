@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SKIP_INTERNAL_TESTS
 
 #include "CSP/CSPFoundation.h"
 #include "Events/EventSystem.h"
@@ -127,5 +126,3 @@ CSP_INTERNAL_TEST(CSPEngine, EventTests, EventSystemTest)
     OlyEvents.UnRegisterListener(kTestEventId, &TestHandler);
     OlyEvents.UnRegisterListener(kTestEventId, &AllHandler);
 }
-
-#endif

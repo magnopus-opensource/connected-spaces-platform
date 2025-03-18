@@ -41,7 +41,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
 {
     SetRandSeed();
@@ -154,9 +153,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 {
     SetRandSeed();
@@ -231,9 +228,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_ENTER_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 {
     SetRandSeed();
@@ -357,4 +352,3 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
