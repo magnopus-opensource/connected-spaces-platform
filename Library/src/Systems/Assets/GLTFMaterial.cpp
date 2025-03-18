@@ -18,131 +18,109 @@
 
 #include "CSP/Common/Array.h"
 
+#include "Debug/Logging.h"
 #include "Json/JsonSerializer.h"
+
+namespace
+{
+struct PropertyNames
+{
+    static constexpr const char* NAME = "name";
+    static constexpr const char* SHADER_TYPE = "shaderType";
+    static constexpr const char* VERSION = "version";
+    static constexpr const char* ALPHA_MODE = "alphaMode";
+    static constexpr const char* ALPHA_CUTOFF = "alphaCutoff";
+    static constexpr const char* DOUBLE_SIDED = "doubleSided";
+    static constexpr const char* BASE_COLOR_FACTOR = "baseColorFactor";
+    static constexpr const char* METALLIC_FACTOR = "metallicFactor";
+    static constexpr const char* ROUGHNESS_FACTOR = "roughnessFactor";
+    static constexpr const char* EMISSIVE_FACTOR = "emissiveFactor";
+    static constexpr const char* BASE_COLOR_TEX = "baseColorTexture";
+    static constexpr const char* METALLIC_ROUGH_TEX = "metallicRoughnessTexture";
+    static constexpr const char* NORMAL_TEX = "normalTexture";
+    static constexpr const char* OCCLUSION_TEX = "occlusionTexture";
+    static constexpr const char* EMISSIVE_TEX = "emissiveTexture";
+};
+}
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj)
 {
-    // Name
-    Serializer.SerializeMember("name", Obj.Name);
-
-    // ShaderType
-    Serializer.SerializeMember("shaderType", static_cast<uint32_t>(Obj.Type));
-
-    // Version
-    Serializer.SerializeMember("version", Obj.Version);
-
-    // Alpha Mode
-    Serializer.SerializeMember("alphaMode", static_cast<uint32_t>(Obj.AlphaMode));
-
-    // Alpha Cutoff
-    Serializer.SerializeMember("alphaCutoff", Obj.AlphaCutoff);
-
-    // Double Sided
-    Serializer.SerializeMember("doubleSided", Obj.DoubleSided);
-
-    // Base Color Factor
+    Serializer.SerializeMember(PropertyNames::NAME, Obj.Name);
+    Serializer.SerializeMember(PropertyNames::SHADER_TYPE, static_cast<uint32_t>(Obj.Type));
+    Serializer.SerializeMember(PropertyNames::VERSION, Obj.Version);
+    Serializer.SerializeMember(PropertyNames::ALPHA_MODE, static_cast<uint32_t>(Obj.AlphaMode));
+    Serializer.SerializeMember(PropertyNames::ALPHA_CUTOFF, Obj.AlphaCutoff);
+    Serializer.SerializeMember(PropertyNames::DOUBLE_SIDED, Obj.DoubleSided);
+    Serializer.SerializeMember(PropertyNames::BASE_COLOR_FACTOR,
+        csp::common::Array<float> { Obj.BaseColorFactor.X, Obj.BaseColorFactor.Y, Obj.BaseColorFactor.Z, Obj.BaseColorFactor.W });
+    Serializer.SerializeMember(PropertyNames::METALLIC_FACTOR, Obj.MetallicFactor);
+    Serializer.SerializeMember(PropertyNames::ROUGHNESS_FACTOR, Obj.RoughnessFactor);
     Serializer.SerializeMember(
-        "baseColorFactor", csp::common::Array<float> { Obj.BaseColorFactor.X, Obj.BaseColorFactor.Y, Obj.BaseColorFactor.Z, Obj.BaseColorFactor.W });
+        PropertyNames::EMISSIVE_FACTOR, csp::common::Array<float> { Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z });
 
-    // Metallic Factor
-    Serializer.SerializeMember("metallicFactor", Obj.MetallicFactor);
-
-    // Roughness Factor
-    Serializer.SerializeMember("roughnessFactor", Obj.RoughnessFactor);
-
-    // Emissive Factor
-    Serializer.SerializeMember("emissiveFactor", csp::common::Array<float> { Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z });
-
-    // Textures
     if (Obj.BaseColorTexture.IsSet())
-    {
-        Serializer.SerializeMember("baseColorTexture", Obj.BaseColorTexture);
-    }
+        Serializer.SerializeMember(PropertyNames::BASE_COLOR_TEX, Obj.BaseColorTexture);
     if (Obj.MetallicRoughnessTexture.IsSet())
-    {
-        Serializer.SerializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
-    }
+        Serializer.SerializeMember(PropertyNames::METALLIC_ROUGH_TEX, Obj.MetallicRoughnessTexture);
     if (Obj.NormalTexture.IsSet())
-    {
-        Serializer.SerializeMember("normalTexture", Obj.NormalTexture);
-    }
+        Serializer.SerializeMember(PropertyNames::NORMAL_TEX, Obj.NormalTexture);
     if (Obj.OcclusionTexture.IsSet())
-    {
-        Serializer.SerializeMember("occlusionTexture", Obj.OcclusionTexture);
-    }
+        Serializer.SerializeMember(PropertyNames::OCCLUSION_TEX, Obj.OcclusionTexture);
     if (Obj.EmissiveTexture.IsSet())
-    {
-        Serializer.SerializeMember("emissiveTexture", Obj.EmissiveTexture);
-    }
+        Serializer.SerializeMember(PropertyNames::EMISSIVE_TEX, Obj.EmissiveTexture);
 }
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj)
 {
-    // Name
-    Deserializer.DeserializeMember("name", Obj.Name);
+    Deserializer.DeserializeMember(PropertyNames::NAME, Obj.Name);
 
-    // Shader Type
     uint32_t ShaderType;
-    Deserializer.DeserializeMember("shaderType", ShaderType);
-
+    Deserializer.DeserializeMember(PropertyNames::SHADER_TYPE, ShaderType);
     Obj.Type = static_cast<csp::systems::EShaderType>(ShaderType);
 
-    // Version
-    Deserializer.DeserializeMember("version", Obj.Version);
+    Deserializer.DeserializeMember(PropertyNames::VERSION, Obj.Version);
 
-    // Alpha Mode
     uint32_t AlphaMode;
-    Deserializer.DeserializeMember("alphaMode", AlphaMode);
+    Deserializer.DeserializeMember(PropertyNames::ALPHA_MODE, AlphaMode);
     Obj.AlphaMode = static_cast<csp::systems::EAlphaMode>(AlphaMode);
 
-    // Alpha Cutoff
-    Deserializer.DeserializeMember("alphaCutoff", Obj.AlphaCutoff);
+    Deserializer.DeserializeMember(PropertyNames::ALPHA_CUTOFF, Obj.AlphaCutoff);
+    Deserializer.DeserializeMember(PropertyNames::DOUBLE_SIDED, Obj.DoubleSided);
 
-    // Double Sided
-    Deserializer.DeserializeMember("doubleSided", Obj.DoubleSided);
-
-    // Base Color Factor
     csp::common::Array<float> BaseColorFactorArray;
-    Deserializer.DeserializeMember("baseColorFactor", BaseColorFactorArray);
-
+    Deserializer.DeserializeMember(PropertyNames::BASE_COLOR_FACTOR, BaseColorFactorArray);
     Obj.BaseColorFactor = csp::common::Vector4(BaseColorFactorArray[0], BaseColorFactorArray[1], BaseColorFactorArray[2], BaseColorFactorArray[3]);
 
-    // Metallic Factor
-    Deserializer.DeserializeMember("metallicFactor", Obj.MetallicFactor);
+    Deserializer.DeserializeMember(PropertyNames::METALLIC_FACTOR, Obj.MetallicFactor);
+    Deserializer.DeserializeMember(PropertyNames::ROUGHNESS_FACTOR, Obj.RoughnessFactor);
 
-    // Roughness Factor
-    Deserializer.DeserializeMember("roughnessFactor", Obj.RoughnessFactor);
-
-    // Emissive Factor
     csp::common::Array<float> EmissiveFactorArray;
-    Deserializer.DeserializeMember("emissiveFactor", EmissiveFactorArray);
-
+    Deserializer.DeserializeMember(PropertyNames::EMISSIVE_FACTOR, EmissiveFactorArray);
     Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
 
-    // Textures
-    if (Deserializer.HasProperty("baseColorTexture"))
+    if (Deserializer.HasProperty(PropertyNames::BASE_COLOR_TEX))
     {
-        Deserializer.DeserializeMember("baseColorTexture", Obj.BaseColorTexture);
+        Deserializer.DeserializeMember(PropertyNames::BASE_COLOR_TEX, Obj.BaseColorTexture);
         Obj.BaseColorTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty("metallicRoughnessTexture"))
+    if (Deserializer.HasProperty(PropertyNames::METALLIC_ROUGH_TEX))
     {
-        Deserializer.DeserializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
+        Deserializer.DeserializeMember(PropertyNames::METALLIC_ROUGH_TEX, Obj.MetallicRoughnessTexture);
         Obj.MetallicRoughnessTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty("normalTexture"))
+    if (Deserializer.HasProperty(PropertyNames::NORMAL_TEX))
     {
-        Deserializer.DeserializeMember("normalTexture", Obj.NormalTexture);
+        Deserializer.DeserializeMember(PropertyNames::NORMAL_TEX, Obj.NormalTexture);
         Obj.NormalTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty("occlusionTexture"))
+    if (Deserializer.HasProperty(PropertyNames::OCCLUSION_TEX))
     {
-        Deserializer.DeserializeMember("occlusionTexture", Obj.OcclusionTexture);
+        Deserializer.DeserializeMember(PropertyNames::OCCLUSION_TEX, Obj.OcclusionTexture);
         Obj.OcclusionTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty("emissiveTexture"))
+    if (Deserializer.HasProperty(PropertyNames::EMISSIVE_TEX))
     {
-        Deserializer.DeserializeMember("emissiveTexture", Obj.EmissiveTexture);
+        Deserializer.DeserializeMember(PropertyNames::EMISSIVE_TEX, Obj.EmissiveTexture);
         Obj.EmissiveTexture.SetTexture(true);
     }
 }

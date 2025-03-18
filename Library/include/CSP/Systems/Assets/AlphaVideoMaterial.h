@@ -110,6 +110,38 @@ public:
     /// @return EFresnelFactor
     float GetFresnelFactor() const;
 
+    /// SetTint
+    /// @param factor float
+    void SetTint(const csp::common::Vector3& factor);
+
+    /// GetTint
+    /// @return float
+    const csp::common::Vector3& GetTint() const;
+
+    /// SetAlphaFactor
+    /// @param factor float
+    void SetAlphaFactor(float factor);
+
+    /// GetAlphaFactor
+    /// @return float
+    float GetAlphaFactor() const;
+
+    /// SetEmissiveIntensity
+    /// @param factor float
+    void SetEmissiveIntensity(float factor);
+
+    /// GetEmissiveIntensity
+    /// @return float
+    float GetEmissiveIntensity() const;
+
+    /// SetAlphaMask
+    /// @param mask float
+    void SetAlphaMask(float mask);
+
+    /// GetAlphaMask
+    /// @return float
+    float GetAlphaMask() const;
+
     /// @brief Constructor which links the material to an asset
     /// @param Name const csp::common::String& : The name of the material.
     /// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
@@ -120,13 +152,16 @@ public:
     AlphaVideoMaterial();
 
 private:
-    int Version;
     TextureInfo ColorTexture;
     bool DoubleSided;
     bool IsEmissive;
     EColorChannel ReadAlphaFromChannel;
     EBlendMode BlendMode;
     float FresnelFactor;
+    csp::common::Vector3 Tint;
+    float AlphaFactor;
+    float EmissiveIntensity;
+    float AlphaMask;
 
     friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVideoMaterial& Obj);
     friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::AlphaVideoMaterial& Obj);
