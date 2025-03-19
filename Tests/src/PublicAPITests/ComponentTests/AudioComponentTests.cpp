@@ -34,9 +34,6 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace
-{
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
@@ -262,5 +259,3 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace

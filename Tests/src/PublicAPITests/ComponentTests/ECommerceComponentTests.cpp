@@ -39,6 +39,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 {
     SetRandSeed();
@@ -172,5 +174,3 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace

@@ -31,7 +31,12 @@ using namespace csp::systems;
 
 // These tests currently require manual steps and will be reviewed as part of OF-1535.
 
+namespace
+{
+
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+} // namespace
 
 csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {

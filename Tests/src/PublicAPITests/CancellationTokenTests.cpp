@@ -21,9 +21,6 @@
 
 #include "gtest/gtest.h"
 
-namespace
-{
-
 CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, ConstructionAndDestructionTest) { EXPECT_NO_THROW(csp::common::CancellationToken()); }
 
 CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CancelStateTest)
@@ -46,5 +43,3 @@ CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CopyMoveTest)
     ASSERT_FALSE(std::is_copy_assignable_v<csp::common::CancellationToken>);
     ASSERT_FALSE(std::is_move_assignable_v<csp::common::CancellationToken>);
 }
-
-} // namespace

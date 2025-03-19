@@ -39,15 +39,17 @@
 
 using namespace csp::multiplayer;
 
-namespace
-{
-
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 
 void OnUserCreated(SpaceEntity* InUser);
 
+namespace
+{
+
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+} // namespace
 
 void OnUserCreated(SpaceEntity* InUser)
 {
@@ -1275,5 +1277,3 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace
