@@ -40,6 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 {
     SetRandSeed();
@@ -229,5 +231,3 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace

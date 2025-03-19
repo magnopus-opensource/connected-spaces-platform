@@ -37,6 +37,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+} // namespace
+
 csp::common::String CreateTimeString(system_clock::time_point tp)
 {
     std::time_t now_c = std::chrono::system_clock::to_time_t(tp);
@@ -143,5 +145,3 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 
     EXPECT_EQ(MaintenanceInfos2[0].Description, "Info2");
 }
-
-} // namespace

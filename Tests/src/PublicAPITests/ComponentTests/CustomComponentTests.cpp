@@ -40,6 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
@@ -278,5 +280,3 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace

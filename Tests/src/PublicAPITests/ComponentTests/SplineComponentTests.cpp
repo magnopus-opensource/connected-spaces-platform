@@ -39,6 +39,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 {
     SetRandSeed();
@@ -206,5 +208,3 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-
-} // namespace
