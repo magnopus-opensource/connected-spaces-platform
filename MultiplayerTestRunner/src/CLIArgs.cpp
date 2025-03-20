@@ -33,18 +33,11 @@ constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
  * For optional arguments, if empty data is provided, will populate them with defaults.
  * SpaceId will not be defaulted, and will be left empty if empty, in the expectation a space is about to be created and the value set externally.
  */
-CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier, std::optional<std::string> LoginEmail,
-    std::optional<std::string> LoginPassword, const std::optional<std::string>& Endpoint, const std::optional<std::string>& SpaceId,
-    const std::optional<int>& TimeoutInSeconds)
+CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier, std::string LoginEmail, std::string LoginPassword,
+    const std::optional<std::string>& Endpoint, const std::optional<std::string>& SpaceId, const std::optional<int>& TimeoutInSeconds)
 {
-    if (!LoginEmail.has_value() || !LoginPassword.has_value())
-    {
-        // If only one of the email/password pair has been provided, error out
-        throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR, "Both email and password must be provided together.");
-    }
-
     CLIArgs::RunnerSettings settings;
-    // Test identifiers need to be valid, and are not optional. An incorrect one is grounds to abort.
+    // Test identifier, emails and passwords need to be valid, and are not optional. An incorrect one is grounds to abort.
     try
     {
         settings.TestIdentifier = MultiplayerTestRunner::TestIdentifiers::StringToTestIdentifier(TestIdentifier);
@@ -54,7 +47,15 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
         // The reason this rethrow is here is an annoying quirk of `StringToTestIdentifier` being a public method.
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::INVALID_TEST_SPECIFIER, exception.what());
     }
-    settings.LoginEmailAndPassword = std::make_pair(LoginEmail.value(), LoginPassword.value());
+    try
+    {
+        settings.LoginEmailAndPassword = std::make_pair(LoginEmail, LoginPassword);
+    }
+    catch (std::exception& exception)
+    {
+        // If the email/password pair has not been provided, error out
+        throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::INVALID_LOGIN_PASSWORD, exception.what());
+    }
     settings.Endpoint = Endpoint.value_or(DEFAULT_TEST_ENDPOINT);
     settings.TimeoutInSeconds = TimeoutInSeconds.value_or(DEFAULT_TIMEOUT_IN_SECONDS);
     settings.SpaceId = SpaceId; // This value is not defaulted, as an empty value means a space is about to be created, and this value will be set
@@ -81,8 +82,12 @@ RunnerSettings ProcessCLI(int argc, char* argv[])
     std::optional<std::string> Endpoint, SpaceId;
 
     App.add_option("-t,--test", TestIdentifier, "The test to run. See `include/TestIdentifiers.h` for available options.")->required();
-    App.add_option("-e,--email", LoginEmail, "Login email for the test CHS account.`")->required();
-    App.add_option("-p,--password", LoginPassword, "Password for the test CHS account.")->required();
+    App.add_option(
+           "-e,--email", LoginEmail, "Login email for the test CHS account. The account must already exist. If it does not exist, errors out.`")
+        ->required();
+    App.add_option(
+           "-p,--password", LoginPassword, "Password for the test CHS account. The account must already exist. If it does not exist, errors out.")
+        ->required();
     App.add_option("-s,--space", SpaceId,
         "SpaceId to use in the invoked test. If none is provided, creates a random space. If a space id is provided, the space is assumed "
         "to already exist, and will not be cleaned up.");
