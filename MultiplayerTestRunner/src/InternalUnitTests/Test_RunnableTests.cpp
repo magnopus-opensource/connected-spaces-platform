@@ -40,9 +40,8 @@ protected:
 TEST_F(RunnableTests, CreateAvatar)
 {
     // Login
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
-    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser();
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
     // Make a throwaway space
     SpaceRAII Space({});
 

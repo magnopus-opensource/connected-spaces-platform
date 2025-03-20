@@ -39,8 +39,8 @@ std::string Utils::GetUniqueString()
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile Utils::CreateTestUser(std::string UniqueEmail, std::string Password, bool AgeVerified /* = true */,
-    csp::systems::EResultCode ExpectedResultCode /* = Success */, csp::systems::ERequestFailureReason ExpectedResultFailureCode /* = None */)
+csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode ExpectedResultCode /* = Success */,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode /* = None */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
@@ -48,7 +48,8 @@ csp::systems::Profile Utils::CreateTestUser(std::string UniqueEmail, std::string
     std::promise<csp::systems::ProfileResult> ResultPromise;
     std::future<csp::systems::ProfileResult> ResultFuture = ResultPromise.get_future();
 
-    UserSystem.CreateUser(nullptr, nullptr, UniqueEmail.c_str(), Password.c_str(), false, AgeVerified, nullptr, nullptr,
+    std::string UniqueEmail = "testnopus.pokemon+" + GetUniqueString() + "@magnopus.com";
+    UserSystem.CreateUser(nullptr, nullptr, UniqueEmail.c_str(), GeneratedTestAccountPassword, false, AgeVerified, nullptr, nullptr,
         [&ResultPromise](csp::systems::ProfileResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets

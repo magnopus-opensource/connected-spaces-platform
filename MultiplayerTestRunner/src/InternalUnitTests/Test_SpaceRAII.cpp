@@ -38,9 +38,8 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
     ::testing::internal::CaptureStdout();
 
     // Login
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
-    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser();
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
     {
         // Check the create space and joined space process descriptors are printed when we don't provide a spaceID
         SpaceRAII Space({});
@@ -89,9 +88,8 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
     // Login
-    char UniqueEmail[256];
-    SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
-    LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
+    auto TestUser = Utils::CreateTestUser();
+    LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
     // Create a space
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();

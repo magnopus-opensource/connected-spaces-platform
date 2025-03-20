@@ -800,21 +800,20 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    char UniqueEmail1[256], UniqueEmail2[256];
-    SPRINTF(UniqueEmail1, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
-    SPRINTF(UniqueEmail2, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+    auto TestUser1 = CreateTestUser();
+    auto TestUser2 = CreateTestUser();
 
     MultiplayerTestRunnerProcess CreateAvatarRunner
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
               .SetSpaceId(Space.Id.c_str())
-              .SetLoginEmail(UniqueEmail1)
+              .SetLoginEmail(TestUser1.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
               .SetTimeoutInSeconds(60);
 
     MultiplayerTestRunnerProcess CreateAvatarRunner2
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
               .SetSpaceId(Space.Id.c_str())
-              .SetLoginEmail(UniqueEmail2)
+              .SetLoginEmail(TestUser2.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
               .SetTimeoutInSeconds(60);
 

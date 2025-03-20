@@ -53,21 +53,16 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
     else
     {
         const std::string msg = "Failed to login to service, got result code " + std::to_string(static_cast<uint8_t>(LoginResult.GetResultCode()))
-            + "\n Response Body: " + LoginResult.GetResponseBody().c_str();
+            + ". Have you created the user account?" + "\n Response Body: " + LoginResult.GetResponseBody().c_str();
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::FAILED_TO_LOGIN, msg);
     }
 }
 } // namespace
 
-LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword, bool CreateAccount /* = true */)
+LoginRAII::LoginRAII(const std::string& AccountLoginEmail, const std::string& AccountPassword)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
-
-    if (CreateAccount)
-    {
-        Utils::CreateTestUser(AccountLoginEmail, AccountPassword);
-    }
 
     LogIn(UserSystem, AccountLoginEmail.c_str(), AccountPassword.c_str(), true, csp::systems::EResultCode::Success,
         csp::systems::ERequestFailureReason::None);

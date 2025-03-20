@@ -35,9 +35,8 @@ TEST_F(LoginRAIITest, TestValidLogin)
     {
         // Check the process descriptor is printed.
         ::testing::internal::CaptureStdout();
-        char UniqueEmail[256];
-        SPRINTF(UniqueEmail, Utils::GeneratedTestAccountEmailFormat, Utils::GetUniqueString().c_str());
-        LoginRAII login { UniqueEmail, Utils::GeneratedTestAccountPassword };
+        auto TestUser = Utils::CreateTestUser();
+        LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
         EXPECT_NE(::testing::internal::GetCapturedStdout().find(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR), std::string::npos);
         ::testing::internal::CaptureStdout(); // GetCapturedStdout stops capturing, so we want to start again for the logout descriptor
     }
@@ -50,7 +49,7 @@ TEST_F(LoginRAIITest, TestInvalidLogin)
     ::testing::internal::CaptureStdout();
     try
     {
-        LoginRAII login { "FakeName", "FakePassword", false };
+        LoginRAII login { "FakeName", "FakePassword" };
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {

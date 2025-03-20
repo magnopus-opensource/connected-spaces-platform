@@ -38,19 +38,11 @@ namespace common
 namespace Utils
 {
 
-#if defined CSP_WINDOWS
-#define SPRINTF sprintf_s
-#else
-#define SPRINTF sprintf
-#endif
-
 std::string GetUniqueString();
 
-const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
-csp::systems::Profile CreateTestUser(std::string UniqueEmail, std::string Password, bool AgeVerified = true,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+csp::systems::Profile CreateTestUser(bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 // Assert a type is move capable
