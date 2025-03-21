@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <CSP/Systems/Users/Profile.h>
+
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -35,6 +37,14 @@ namespace common
 
 namespace Utils
 {
+
+std::string GetUniqueString();
+
+const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
+
+csp::systems::Profile CreateTestUser(bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
+
 // Assert a type is move capable
 #define ASSERT_MOVE_CAPABLE(Type)                                                                                                                    \
     static_assert(std::is_move_constructible_v<Type>, #Type " must be move constructible");                                                          \
@@ -55,26 +65,7 @@ struct ExceptionWithCode : public std::runtime_error
 };
 
 /*
- * Credentials struct for storing the credentials read from `test_account_creds.txt`, in the case that Login/Password are not provided via the CLI.
- */
-struct TestAccountCredentials
-{
-    std::string DefaultLoginEmail;
-    std::string DefaultLoginPassword;
-    std::string AlternativeLoginEmail;
-    std::string AlternativeLoginPassword;
-    std::string SuperUserLoginEmail;
-    std::string SuperUserLoginPassword;
-};
-ASSERT_MOVE_CAPABLE(TestAccountCredentials);
-
-/*
- * Load a `TestAccountCredentials` from `test_account_creds.txt`, in the case that Login/Password are not provided via the CLI.
- */
-TestAccountCredentials LoadTestAccountCredentials();
-
-/*
- * For the moment, this uses the known test header info so CHS dosen't reject us
+ * For the moment, this uses the known test header info so CHS doesn't reject us
  * In the future, it may become prudent to allow some or all of this information
  * to be passed as arguments.
  */

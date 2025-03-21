@@ -23,23 +23,7 @@
 #include <gtest/gtest.h>
 #include <optional>
 
-namespace
-{
-/* Some tests only run if there's a credentials file */
-std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
-{
-    try
-    {
-        return Utils::LoadTestAccountCredentials();
-    }
-    catch (...)
-    {
-        return {};
-    }
-}
-} // namespace
-
-/* Initialze CSP before the suite begins with a fixture */
+/* Initialize CSP before the suite begins with a fixture */
 class LoginRAIITest : public ::testing::Test
 {
 protected:
@@ -48,16 +32,11 @@ protected:
 
 TEST_F(LoginRAIITest, TestValidLogin)
 {
-    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value())
-    {
-        GTEST_SKIP() << "No credentials file found, Skipping Test.";
-    }
-
     {
         // Check the process descriptor is printed.
         ::testing::internal::CaptureStdout();
-        LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
+        auto TestUser = Utils::CreateTestUser();
+        LoginRAII login { TestUser.Email.c_str(), Utils::GeneratedTestAccountPassword };
         EXPECT_NE(::testing::internal::GetCapturedStdout().find(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR), std::string::npos);
         ::testing::internal::CaptureStdout(); // GetCapturedStdout stops capturing, so we want to start again for the logout descriptor
     }

@@ -73,8 +73,8 @@ public:
     /* Getters. Mostly for testing, but handy.
        Return null optionals if values have not been set. */
     MultiplayerTestRunner::TestIdentifiers::TestIdentifier GetTestToRun() const;
-    std::optional<std::string> GetLoginEmail() const;
-    std::optional<std::string> GetPassword() const;
+    std::string GetLoginEmail() const;
+    std::string GetPassword() const;
     std::optional<std::string> GetSpaceId() const;
     std::optional<int> GetTimeoutInSeconds() const;
     std::optional<std::string> GetEndpoint() const;
@@ -111,10 +111,10 @@ private:
 
     // The test we are telling the multiplayer test runner to invoke. Set on construction. Non-optional.
     MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun;
+    std::string LoginEmail;
+    std::string Password;
 
     // Optional parameters, MultiplayerTestRunner has default behaviour if not set
-    std::optional<std::string> LoginEmail;
-    std::optional<std::string> Password;
     std::optional<std::string> SpaceId;
     std::optional<int> TimeoutInSeconds;
     std::optional<std::string> Endpoint;

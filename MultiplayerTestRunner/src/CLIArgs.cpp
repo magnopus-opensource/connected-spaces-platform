@@ -28,32 +28,16 @@ constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 
 /*
  * Take the raw input from the CLI, validate, and convert to structured data.
- * If Login or Password not provided, this will attempt to read `test_account_creds.txt`, and throw if it cannot.
- * TestIdentifier is the only mandatory arg, this will validate that the string provided is an actual identifier.
+ * If Login and Password are not provided, this will throw an error.
+ * TestIdentifier is also a mandatory arg, this will validate that the string provided is an actual identifier.
  * For optional arguments, if empty data is provided, will populate them with defaults.
  * SpaceId will not be defaulted, and will be left empty if empty, in the expectation a space is about to be created and the value set externally.
  */
-CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier, std::optional<std::string> LoginEmail,
-    std::optional<std::string> LoginPassword, const std::optional<std::string>& Endpoint, const std::optional<std::string>& SpaceId,
-    const std::optional<int>& TimeoutInSeconds)
+CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier, std::string LoginEmail, std::string LoginPassword,
+    const std::optional<std::string>& Endpoint, const std::optional<std::string>& SpaceId, const std::optional<int>& TimeoutInSeconds)
 {
-    if (!LoginEmail.has_value() && !LoginPassword.has_value())
-    {
-        std::cout << "Credentials not provided, attempting to find credentials file.\n";
-        Utils::TestAccountCredentials credentials = Utils::LoadTestAccountCredentials();
-        LoginEmail = credentials.DefaultLoginEmail;
-        LoginPassword = credentials.DefaultLoginPassword;
-    }
-    else if (!LoginEmail.has_value() || !LoginPassword.has_value())
-    {
-        // If only one of the email/password pair has been provided, error out entirely, it's probably a mistake
-        throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR,
-            "Both email and password must be provided together. Missing one likely indicates a mistake. Omit both if you "
-            "wish to use the credentials file.");
-    }
-
     CLIArgs::RunnerSettings settings;
-    // Test identifiers need to be valid, and are not optional. An incorrect one is grounds to abort.
+    // Test identifier, emails and passwords need to be valid, and are not optional. An incorrect one is grounds to abort.
     try
     {
         settings.TestIdentifier = MultiplayerTestRunner::TestIdentifiers::StringToTestIdentifier(TestIdentifier);
@@ -63,7 +47,15 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
         // The reason this rethrow is here is an annoying quirk of `StringToTestIdentifier` being a public method.
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::INVALID_TEST_SPECIFIER, exception.what());
     }
-    settings.LoginEmailAndPassword = std::make_pair(LoginEmail.value(), LoginPassword.value());
+    try
+    {
+        settings.LoginEmailAndPassword = std::make_pair(LoginEmail, LoginPassword);
+    }
+    catch (std::exception& exception)
+    {
+        // If the email/password pair has not been provided, error out
+        throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::INVALID_LOGIN_PASSWORD, exception.what());
+    }
     settings.Endpoint = Endpoint.value_or(DEFAULT_TEST_ENDPOINT);
     settings.TimeoutInSeconds = TimeoutInSeconds.value_or(DEFAULT_TIMEOUT_IN_SECONDS);
     settings.SpaceId = SpaceId; // This value is not defaulted, as an empty value means a space is about to be created, and this value will be set
@@ -85,17 +77,17 @@ RunnerSettings ProcessCLI(int argc, char* argv[])
     App.description(AppDescription);
 
     // These raw CLI variables populated in CLI11_PARSE, and then converted into validated and structured data below in `ValidateInvocationArgs`.
-    std::string TestIdentifier;
+    std::string TestIdentifier, LoginEmail, LoginPassword;
     std::optional<int> TimeoutInSeconds;
-    std::optional<std::string> Endpoint, LoginEmail, LoginPassword, SpaceId;
+    std::optional<std::string> Endpoint, SpaceId;
 
     App.add_option("-t,--test", TestIdentifier, "The test to run. See `include/TestIdentifiers.h` for available options.")->required();
-    App.add_option("-e,--email", LoginEmail,
-        "Login email for the test CHS account. If not set, the application will attempt to source this from a `test_account_creds.txt` "
-        "next to the binary.");
-    App.add_option("-p,--password", LoginPassword,
-        "Password for the test CHS account. If not set, the application will attempt to source this from a `test_account_creds.txt` next "
-        "to the binary.");
+    App.add_option(
+           "-e,--email", LoginEmail, "Login email for the test CHS account. The account must already exist. If it does not exist, errors out.`")
+        ->required();
+    App.add_option(
+           "-p,--password", LoginPassword, "Password for the test CHS account. The account must already exist. If it does not exist, errors out.")
+        ->required();
     App.add_option("-s,--space", SpaceId,
         "SpaceId to use in the invoked test. If none is provided, creates a random space. If a space id is provided, the space is assumed "
         "to already exist, and will not be cleaned up.");
