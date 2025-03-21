@@ -38,7 +38,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 {
     SetRandSeed();
@@ -290,9 +291,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_MOVE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 {
     SetRandSeed();
@@ -436,9 +435,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 {
     SetRandSeed();
@@ -535,6 +532,3 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

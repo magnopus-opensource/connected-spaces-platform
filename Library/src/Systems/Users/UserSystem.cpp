@@ -26,6 +26,7 @@
 #include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
+#include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
 
 #include <CallHelpers.h>
@@ -118,6 +119,19 @@ void UserSystem::SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback C
 void UserSystem::Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
     const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
 {
+    if (UserName.IsEmpty() && Email.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::Login, One of either Username or Email must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+    if (Password.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::Login, Password must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+
     if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
     {
         CurrentLoginState.State = ELoginState::LoginRequested;
@@ -180,6 +194,13 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
 
 void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
 {
+    if (UserId.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::LoginWithRefreshToken, UserId must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+
     if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
     {
         CurrentLoginState.State = ELoginState::LoginRequested;

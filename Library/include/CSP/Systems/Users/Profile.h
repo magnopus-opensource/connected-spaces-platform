@@ -40,7 +40,6 @@ public:
     csp::common::String UserName;
     csp::common::String DisplayName;
     csp::common::String AvatarId;
-    csp::common::String LastPlatform;
 };
 
 /// @brief Data structure for a full user profile, which incudes user email, roles, and data for creation and update history.

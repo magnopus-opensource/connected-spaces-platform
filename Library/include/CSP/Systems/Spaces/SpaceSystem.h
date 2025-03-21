@@ -145,10 +145,11 @@ public:
     /// @param Description csp::common::Optional<csp::common::String> : if a new description is provided it will be used to update the Space
     /// description
     /// @param Type csp::common::Optional<csp::systems::SpaceType> : if a new type is provided it will be used to update the Space type
+    /// @param Tags csp::common::Optional<csp::common::Array<csp::common::String>> : If new tags are provided they will be used to update the Space
     /// @param Callback BasicSpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& SpaceId, const csp::common::Optional<csp::common::String>& Name,
         const csp::common::Optional<csp::common::String>& Description, const csp::common::Optional<SpaceAttributes>& Type,
-        BasicSpaceResultCallback Callback);
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, BasicSpaceResultCallback Callback);
 
     /// @brief Deletes a given space and the corresponding UserService group.
     /// @param Space Space : space to delete
@@ -167,10 +168,17 @@ public:
     /// @param ResultsSkip csp::common::Optional<int> : number of result entries that will be skipped from the result. For no skip pass nullptr.
     /// @param ResultsMax csp::common::Optional<int> : maximum number of result entries to be retrieved. For all available result entries pass
     /// nullptr.
+    /// @param MustContainTags csp::common::Optional<csp::common::Array<csp::common::String>> : Array of tags that must be present in retrieved
+    /// spaces. For no mandatory tags pass nullptr.
+    /// @param MustExcludeTags csp::common::Optional<csp::common::Array<csp::common::String>> : Array of tags that must not be present in retrieved
+    /// spaces. For no excluded tags pass nullptr.
+    /// @param MustIncludeAllTags csp::common::Optional<bool> : Whether all tags in @param MustContainTags must be present in retrieved spaces.
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetSpacesByAttributes(const csp::common::Optional<bool>& IsDiscoverable, const csp::common::Optional<bool>& IsArchived,
         const csp::common::Optional<bool>& RequiresInvite, const csp::common::Optional<int>& ResultsSkip,
-        const csp::common::Optional<int>& ResultsMax, BasicSpacesResultCallback Callback);
+        const csp::common::Optional<int>& ResultsMax, const csp::common::Optional<csp::common::Array<csp::common::String>>& MustContainTags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& MustExcludeTags, const csp::common::Optional<bool>& MustIncludeAllTags,
+        BasicSpacesResultCallback Callback);
 
     /// @brief Retrieves space details corresponding to the provided Space IDs
     /// @param RequestedSpaceIDs csp::common::Array<csp::common::String> : array of Space IDs for which the space details will be retrieved
@@ -263,12 +271,9 @@ public:
     /// @brief Updates the Space metadata information with the new one provided
     /// @param SpaceId csp::common::String : ID of Space for which the metadata will be updated
     /// @param NewMetadata csp::common::String : New metadata information that will replace the previous one
-    /// @param Tags csp::common::Array<csp::common::String> : Array of strings that will replace the tags on the space. If unset, the existing tags on
-    /// the AssetCollection will be unmodified.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& SpaceId,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, NullResultCallback Callback);
+        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata, NullResultCallback Callback);
 
     /// @brief Retrieves Spaces metadata information
     /// @param Spaces csp::common::Array<Space> : Spaces for which metadata will be retrieved
@@ -357,8 +362,8 @@ private:
     // Space Metadata
     void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
     void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-    void AddMetadata(const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, NullResultCallback Callback);
+    void AddMetadata(
+        const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata, NullResultCallback Callback);
     void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     // Space Thumbnail

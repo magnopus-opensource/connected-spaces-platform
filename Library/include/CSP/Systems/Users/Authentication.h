@@ -102,6 +102,9 @@ class CSP_API LoginStateResult : public ResultBase
 
 public:
     [[nodiscard]] const LoginState& GetLoginState() const;
+    CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode)
+        , State(nullptr) {};
 
 private:
     LoginStateResult();

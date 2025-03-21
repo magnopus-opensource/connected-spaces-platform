@@ -40,7 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_PROPERTY_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
@@ -54,9 +55,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 
     EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 {
     SetRandSeed();
@@ -281,6 +280,3 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

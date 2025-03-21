@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SKIP_INTERNAL_TESTS
 
 #include "MultiplayerTestRunnerProcess.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_ARG_TEST
-CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
     EXPECT_EQ(Process.GetTestToRun(), MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
@@ -63,10 +61,8 @@ CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
         (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password",
             "Hunter2", "--space", "MyFakeSpaceId", "--timeout", "5", "--endpoint", "https://www.website.com" }));
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_TESTS || RUN_MULTIPLAYER_TEST_RUNNER_PROCESS_FUTURE_TEST
-CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
 {
     // Actually invoke the runner and make sure the future's are all set
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
@@ -90,6 +86,3 @@ CSP_INTERNAL_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
     auto LoggedOutFutureStatus = Process.LoggedOutFuture().wait_for(std::chrono::seconds(20));
     EXPECT_EQ(LoggedOutFutureStatus, std::future_status::ready);
 }
-#endif
-
-#endif

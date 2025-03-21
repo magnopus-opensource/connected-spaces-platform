@@ -41,7 +41,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 {
     SetRandSeed();
@@ -128,9 +129,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 {
     SetRandSeed();
@@ -214,6 +213,3 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

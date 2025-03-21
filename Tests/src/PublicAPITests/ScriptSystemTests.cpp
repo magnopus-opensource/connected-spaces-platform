@@ -39,15 +39,17 @@
 
 using namespace csp::multiplayer;
 
-namespace
-{
-
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 
 void OnUserCreated(SpaceEntity* InUser);
 
+namespace
+{
+
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+} // namespace
 
 void OnUserCreated(SpaceEntity* InUser)
 {
@@ -60,7 +62,6 @@ void OnUserCreated(SpaceEntity* InUser)
     std::cerr << "OnUserCreated" << std::endl;
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPTSYSTEM_SCRIPT_BINDING_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -110,9 +111,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
     ScriptSystem.DestroyContext(ContextId);
     ScriptSystem.Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_CREATE_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 {
     SetRandSeed();
@@ -193,9 +192,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 {
     SetRandSeed();
@@ -330,9 +327,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_AVATAR_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 {
     SetRandSeed();
@@ -427,9 +421,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_LOG_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 {
     SetRandSeed();
@@ -504,9 +496,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_DELETE_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 {
     SetRandSeed();
@@ -612,9 +602,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_DELETE_AND_CHANGE_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 {
     // Test for: OB-864
@@ -722,9 +710,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_ADD_SECOND_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 {
     // Test for OB-1407
@@ -884,9 +870,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_DELTA_TIME_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 {
     SetRandSeed();
@@ -982,9 +966,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_CUSTOM_COMPONENT_SCRIPT_INTERFACE_SUBSCRIPTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubscriptionTest)
 {
     SetRandSeed();
@@ -1115,9 +1096,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MULTIPLE_SCRIPT_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 {
     SetRandSeed();
@@ -1193,10 +1172,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This test will be fixed and re-instated as part of OF-1539
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MODIFY_EXISTING_SCRIPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 {
     SetRandSeed();
@@ -1300,6 +1277,3 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

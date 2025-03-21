@@ -158,7 +158,6 @@ TestSystem* TestSystem2;
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_EMPTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 {
     SetRandSeed();
@@ -250,9 +249,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_MULTITYPE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 {
     SetRandSeed();
@@ -357,9 +354,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_CALLBACKS_SYSTEMS_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 {
     SetRandSeed();
@@ -568,9 +563,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_SETCALLBACKBEFORECONNECTED_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
 {
     SetRandSeed();
@@ -682,4 +675,3 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
