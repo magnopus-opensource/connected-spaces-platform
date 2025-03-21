@@ -56,6 +56,50 @@ TEST(CLITest, TestIdentifierRequired)
     }
 }
 
+TEST(CLITest, LoginEmailRequired)
+{
+    using namespace MultiplayerTestRunner::TestIdentifiers;
+    std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
+    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--password", "password123", "--space", "space-id-123", "--timeout",
+        "60", "--endpoint", "https://example.com" };
+
+    try
+    {
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
+        EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
+        EXPECT_EQ(std::string(Exception.what()), std::string("--email is required"));
+    }
+    catch (...)
+    {
+        FAIL() << "Unexpected exception type thrown";
+    }
+}
+
+TEST(CLITest, PasswordRequired)
+{
+    using namespace MultiplayerTestRunner::TestIdentifiers;
+    std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
+    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "ergeqrheh", "--space",
+        "space-id-123", "--timeout", "60", "--endpoint", "https://example.com" };
+
+    try
+    {
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
+        EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
+        EXPECT_EQ(std::string(Exception.what()), std::string("--password is required"));
+    }
+    catch (...)
+    {
+        FAIL() << "Unexpected exception type thrown";
+    }
+}
+
 TEST(CLITest, WhenInvalidTestIdentiferThenExceptionThrow)
 {
     std::vector<char*> args
@@ -89,46 +133,4 @@ TEST(CLITest, DefaultsSet)
     EXPECT_EQ(Settings.Endpoint, "https://ogs-internal.magnopus-dev.cloud");
     EXPECT_EQ(Settings.TimeoutInSeconds, 30);
     EXPECT_FALSE(Settings.SpaceId.has_value());
-}
-
-TEST(CLITest, WhenNoEmailThenError)
-{
-    using namespace MultiplayerTestRunner::TestIdentifiers;
-    std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--password", "password123" };
-
-    try
-    {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
-    }
-    catch (const Utils::ExceptionWithCode& Exception)
-    {
-        EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
-        EXPECT_EQ(std::string(Exception.what()), std::string("Both email and password must be provided together."));
-    }
-    catch (...)
-    {
-        FAIL() << "Unexpected exception type thrown";
-    }
-}
-
-TEST(CLITest, WhenNoPasswordThenError)
-{
-    using namespace MultiplayerTestRunner::TestIdentifiers;
-    std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
-    std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com" };
-
-    try
-    {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
-    }
-    catch (const Utils::ExceptionWithCode& Exception)
-    {
-        EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
-        EXPECT_EQ(std::string(Exception.what()), std::string("Both email and password must be provided together."));
-    }
-    catch (...)
-    {
-        FAIL() << "Unexpected exception type thrown";
-    }
 }
