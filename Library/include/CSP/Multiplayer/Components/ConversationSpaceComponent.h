@@ -177,7 +177,7 @@ public:
 
     /// @brief Sets a callback for when the conversation is updated by another client.
     /// @param Callback ConversationUpdateCallbackHandler: Callback to receive data for the conversation that has been changed.
-    CSP_ASYNC_RESULT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback);
+    CSP_EVENT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback);
 
     /// \addtogroup IPositionComponent
     /// @{
