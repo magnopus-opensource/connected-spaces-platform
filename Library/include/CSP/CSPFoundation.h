@@ -107,6 +107,11 @@ public:
     /// @return const EndpointURIs& : The EndpointURIs class with current endpoint data
     static const EndpointURIs& GetEndpoints();
 
+    /// @brief Create an EndpointsURIs object containing URIs to the various services needed by CSP.
+    /// @param EndpointRootURI URI to the root of the cloud services.
+    /// @return EndpointURIs class with deduced endpoint URIs.
+    static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI);
+
     /// @brief Sets a class containing all relevant Client info currently set for Foundation.
     /// Used internally to generate ClientUserAgentString.
     /// @param The Client Info class with current Client Info data

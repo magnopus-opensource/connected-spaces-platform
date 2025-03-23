@@ -100,3 +100,100 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
     // Logout
     LogOut(UserSystem);
 }
+
+/*
+ * These tests test the POCO client specifically.
+ * The motive was that we added the ability for the POCO client to point to localhost in order
+ * to allow local testing, so there's logic to test there, mostly around port extraction.
+ */
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, RegularMultiplayerServiceURI)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://ogs-internal.magnopus-dev.cloud");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "https://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
+
+    CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
+        = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str());
+
+    EXPECT_EQ(ParsedURI.Protocol, "https");
+    EXPECT_EQ(ParsedURI.Domain, "ogs-multiplayer-internal.magnopus-dev.cloud");
+    EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Port, 443);
+    EXPECT_EQ(ParsedURI.Endpoint, "https://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalMultiplayerServiceURI)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://localhost:8081");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "https://localhost:8081/mag-multiplayer/hubs/v1/multiplayer");
+
+    CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
+        = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str());
+
+    EXPECT_EQ(ParsedURI.Protocol, "https");
+    EXPECT_EQ(ParsedURI.Domain, "localhost");
+    EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Port, 8081);
+    EXPECT_EQ(ParsedURI.Endpoint, "https://localhost:8081/mag-multiplayer/hubs/v1/multiplayer");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalMultiplayerServiceURIHttp)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("http://localhost");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "http://localhost/mag-multiplayer/hubs/v1/multiplayer");
+
+    CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
+        = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str());
+
+    EXPECT_EQ(ParsedURI.Protocol, "http");
+    EXPECT_EQ(ParsedURI.Domain, "localhost");
+    EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Port, 80);
+    EXPECT_EQ(ParsedURI.Endpoint, "http://localhost/mag-multiplayer/hubs/v1/multiplayer");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalVariantMultiplayerServiceURI)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://127.0.0.1:8081");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "https://127.0.0.1:8081/mag-multiplayer/hubs/v1/multiplayer");
+
+    CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
+        = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str());
+
+    EXPECT_EQ(ParsedURI.Protocol, "https");
+    EXPECT_EQ(ParsedURI.Domain, "127.0.0.1");
+    EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Port, 8081);
+    EXPECT_EQ(ParsedURI.Endpoint, "https://127.0.0.1:8081/mag-multiplayer/hubs/v1/multiplayer");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalMultiplayerServiceURINoScheme)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("localhost:8081");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "localhost:8081/mag-multiplayer/hubs/v1/multiplayer");
+
+    EXPECT_THROW(CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str()), std::runtime_error);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalNoPortMultiplayerServiceURI)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://localhost");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "https://localhost/mag-multiplayer/hubs/v1/multiplayer");
+
+    CSPWebSocketClientPOCO::ParsedURIInfo ParsedURI
+        = CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str());
+
+    EXPECT_EQ(ParsedURI.Protocol, "https");
+    EXPECT_EQ(ParsedURI.Domain, "localhost");
+    EXPECT_EQ(ParsedURI.Path, "/mag-multiplayer/hubs/v1/multiplayer");
+    EXPECT_EQ(ParsedURI.Port, 443);
+    EXPECT_EQ(ParsedURI.Endpoint, "https://localhost/mag-multiplayer/hubs/v1/multiplayer");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, LocalMalformedMultiplayerServiceURI)
+{
+    const csp::EndpointURIs Endpoints = csp::CSPFoundation::CreateEndpointsFromRoot("https://localhost:notanumber");
+    ASSERT_EQ(Endpoints.MultiplayerServiceURI, "https://localhost:notanumber/mag-multiplayer/hubs/v1/multiplayer");
+
+    EXPECT_THROW(CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(Endpoints.MultiplayerServiceURI.c_str()), Poco::SyntaxException);
+}
