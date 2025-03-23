@@ -18,7 +18,9 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #include "PlatformTestUtils.h"
+#include "Poco/Exception.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -26,8 +28,6 @@
 using namespace csp::multiplayer;
 
 // The WebSocketClientTests will be reviewed as part of OF-1532.
-
-const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
@@ -42,7 +42,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI);
 
     // Stop
     WebSocketStop(WebSocket);
@@ -64,7 +64,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI);
 
     // Send
     WebSocketSend(WebSocket, "test");
@@ -89,7 +89,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI);
 
     // Receive
     WebSocketSendReceive(WebSocket);
