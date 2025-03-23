@@ -2469,6 +2469,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     // Log out
     LogOut(UserSystem);
 
+    std::this_thread::sleep_for(std::chrono::seconds(7));
+
     // Log in again
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
