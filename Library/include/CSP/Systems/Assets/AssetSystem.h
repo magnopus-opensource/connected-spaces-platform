@@ -28,6 +28,7 @@
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
 
 namespace csp::services
 {
@@ -295,7 +296,7 @@ public:
     /// @brief Load all local scripts associated with the given space.
     /// @param SpaceId const csp::common::String& : The space id the local scripts are associated with.
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, LocalScriptsResultCallback Callback);
 
 
     /// @brief Registers the system to listen for the named event.

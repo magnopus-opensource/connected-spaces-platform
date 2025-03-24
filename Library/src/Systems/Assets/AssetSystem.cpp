@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
 
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
@@ -25,6 +26,7 @@
 #include "Web/RemoteFileManager.h"
 
 #include "Json/JsonSerializer.h"
+#include "Debug/Logging.h"
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
@@ -1136,29 +1138,33 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
-void AssetSystem::LoadScripts(const csp::common::String& SpaceId, NullResultCallback Callback)
+void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::LocalScriptsResultCallback Callback)
 {
+    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Loading scripts");
+
     // 1. find asset collection for space
     auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
-    {
+    {   
         if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(NullResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            Callback(LocalScriptsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
             return;
         }
 
         const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
-
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "Fetch asset collections");
+        
         if (AssetCollections.Size() == 0)
         {
             // There are no asset collections for this space
-            Callback(NullResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            Callback(LocalScriptsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Find local script assets in collections
         csp::common::Array<csp::common::String> AssetCollectionIds(AssetCollections.Size());
-
+        
+      
         for (size_t i = 0; i < AssetCollections.Size(); ++i)
         {
             AssetCollectionIds[i] = AssetCollections[i].Id;
@@ -1168,17 +1174,17 @@ void AssetSystem::LoadScripts(const csp::common::String& SpaceId, NullResultCall
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
-
+            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Got assets");
             if (AssetsToDownload == 0)
             {
                 // There are no material assets in this space
-                Callback(NullResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+                Callback(LocalScriptsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
                 return;
             }
 
             // These are shared references to prevent going out of scope between callbacks
             // Note: The callbacks ARE called on the main thread
-            auto DownloadedScripts = std::make_shared<csp::common::Array<const char*>>(AssetsToDownload);
+            auto DownloadedScripts = std::make_shared<csp::common::Map<csp::common::String, csp::common::String>>();
             auto AssetsDownloaded = std::make_shared<size_t>();
             auto Failed = std::make_shared<bool>();
 
@@ -1189,7 +1195,7 @@ void AssetSystem::LoadScripts(const csp::common::String& SpaceId, NullResultCall
                 csp::common::String AssetId = Assets[i].Id;
 
                 auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedScripts,
-                                                    AssetsDownloaded, Failed](const AssetDataResult& DownloadResult)
+                                                    AssetsDownloaded, Failed, Assets](const AssetDataResult& DownloadResult)
                 {
                     // Return early as one of the calls has already failed
                     if (*Failed)
@@ -1204,32 +1210,33 @@ void AssetSystem::LoadScripts(const csp::common::String& SpaceId, NullResultCall
                             *Failed = true;
                         }
 
-                        Callback(NullResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+                        Callback(LocalScriptsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
                         return;
                     }
-
+                    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Downloaded asset");
                     // Convert material json to material
                     const char* ScriptData = static_cast<const char*>(DownloadResult.GetData());
 
-                    
-
                     (*AssetsDownloaded)++;
 
-                    
-
-                    (*DownloadedScripts)[i] = ScriptData;
+                    (*DownloadedScripts)[Assets[i].Name] = CSP_TEXT(ScriptData);
 
                     if ((*AssetsDownloaded) >= AssetsToDownload)
                     {
                         CSP_LOG_ERROR_FORMAT("Found %d scripts", static_cast<int>(AssetsToDownload));
-                        Callback(NullResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+                        // Finish
+                        csp::systems::LocalScriptsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
+                        Result.SetLocalScripts((*DownloadedScripts));
+
+                        Callback(Result);
                     }
                 };
-
+                
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Download assets");
                 DownloadAssetData(Assets[i], DownloadMaterialCallback);
-            }
+            };
         };
-
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "GetAssetsByCriteria");
         GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::SCRIPT_LIBRARY }, LoadScriptsCb);
     };
 

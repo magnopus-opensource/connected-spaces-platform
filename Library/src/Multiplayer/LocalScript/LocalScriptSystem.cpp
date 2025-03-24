@@ -16,29 +16,24 @@
 #include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 
 #include "CSP/Common/StringFormat.h"
-#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "quickjspp.hpp"
 
 
-namespace csp::multiplayer
+namespace csp::systems
 {
 
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
-constexpr const int64_t LocalScriptContextId = 0;
+constexpr const int64_t LocalScriptContextId = 6666666666;
 
-LocalScriptSystem::LocalScriptSystem(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
+LocalScriptSystem::LocalScriptSystem()
     : ScriptSystem(csp::systems::SystemsManager::Get().GetScriptSystem())
-    , Entity(InEntity)
-    , LocalScriptSystemComponent(nullptr)
     , HasLastError(false)
     , HasBinding(false)
-    , SpaceEntitySystemPtr(InSpaceEntitySystem)
 {
     qjs::Context* context = (qjs::Context*)ScriptSystem->GetLocalContext();
     qjs::Context::Module* CSPModule = (qjs::Context::Module*)ScriptSystem->GetModule(LocalScriptContextId, "CSP");
@@ -59,143 +54,140 @@ LocalScriptSystem::~LocalScriptSystem() { Shutdown(); }
 
 bool LocalScriptSystem::Invoke()
 {
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "LocalScriptSystem::Invoke called for %s", Entity->GetName().c_str());
+    //CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "LocalScriptSystem::Invoke called for %s", "LocalScriptSystem".c_str());
 
     CheckBinding();
 
     HasLastError = false;
     LastError = "Unknown Error";
 
-    if (LocalScriptSystemComponent == nullptr)
-    {
-        HasLastError = true;
-        LastError = SCRIPT_ERROR_NO_COMPONENT;
-    }
-    else
-    {
-        const csp::common::String& ScriptSource = LocalScriptSystemComponent->GetScriptSource();
+    // if (LocalScriptSystemComponent == nullptr)
+    // {
+    //     HasLastError = true;
+    //     LastError = SCRIPT_ERROR_NO_COMPONENT;
+    // }
+    // else
+    // {
+    //     const csp::common::String& ScriptSource = LocalScriptSystemComponent->GetScriptSource();
 
-        if (!ScriptSource.IsEmpty())
-        {
-            HasLastError = !ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
-        }
-        else
-        {
-            HasLastError = true;
-            LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
-        }
-    }
+    //     if (!ScriptSource.IsEmpty())
+    //     {
+    //         HasLastError = !ScriptSystem->RunScript("LocalScriptSystem");", ScriptSource);
+    //     }
+    //     else
+    //     {
+    //         HasLastError = true;
+    //         LastError = SCRIPT_ERROR_EMPTY_SCRIPT;
+    //     }
+    // }
 
-    if (HasLastError)
-    {
-        CSP_LOG_ERROR_FORMAT("Script Error: %s", LastError.c_str());
-    }
+    // if (HasLastError)
+    // {
+    //     CSP_LOG_ERROR_FORMAT("Script Error: %s", LastError.c_str());
+    // }
 
     return !HasLastError;
 }
 
 void LocalScriptSystem::RunScript(const csp::common::String& ScriptSource)
 {
-    ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
+    ScriptSystem->RunScript(LocalScriptContextId, ScriptSource);
 }
 
 void LocalScriptSystem::SetScriptSource(const csp::common::String& InScriptSource)
 {
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "LocalScriptSystem::SetScriptSource called for %s\nSource:", Entity->GetName().c_str(),
-        InScriptSource.c_str());
-    CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "--EndScriptSource--");
+    // CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "LocalScriptSystem::SetScriptSource called for %s\nSource:", "LocalScriptSystem".c_str(),
+    //     InScriptSource.c_str());
+    
+    // (csp::systems::LogLevel::VeryVerbose, "--EndScriptSource--");
 
-    if (LocalScriptSystemComponent == nullptr)
-    {
-        LocalScriptSystemComponent = (ScriptSpaceComponent*)(Entity->AddComponent(ComponentType::ScriptData));
-    }
+    // if (LocalScriptSystemComponent == nullptr)
+    // {
+    //     LocalScriptSystemComponent = (ScriptSpaceComponent*)(Entity->AddComponent(ComponentType::ScriptData));
+    // }
 
-    LocalScriptSystemComponent->SetScriptSource(InScriptSource);
+    // LocalScriptSystemComponent->SetScriptSource(InScriptSource);
 
-    Entity->MarkForUpdate();
+    // Entity->MarkForUpdate();
 }
 
 bool LocalScriptSystem::HasError() { return HasLastError; }
 
 csp::common::String LocalScriptSystem::GetErrorText() { return LastError; }
 
-void LocalScriptSystem::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
-{
-    LocalScriptSystemComponent = InEnityScriptComponent;
-}
-
 csp::common::String LocalScriptSystem::GetScriptSource()
 {
-    if (LocalScriptSystemComponent == nullptr)
-    {
-        return csp::common::String();
-    }
+    // if (LocalScriptSystemComponent == nullptr)
+    // {
+    //     return csp::common::String();
+    // }
 
-    return LocalScriptSystemComponent->GetScriptSource();
+    // return LocalScriptSystemComponent->GetScriptSource();
+    return csp::common::String();
 }
 
 void LocalScriptSystem::RegisterSourceAsModule()
 {
-    if (LocalScriptSystemComponent != nullptr)
-    {
-        ScriptSystem->SetModuleSource(Entity->GetName(), GetScriptSource());
-    }
+    // if (LocalScriptSystemComponent != nullptr)
+    // {
+    //     ScriptSystem->SetModuleSource("LocalScriptSystem", GetScriptSource());
+    // }
 }
 
 void LocalScriptSystem::SetOwnerId(uint64_t ClientId)
 {
-    if (LocalScriptSystemComponent != nullptr)
-    {
-        if (GetOwnerId() != ClientId)
-        {
-            LocalScriptSystemComponent->SetOwnerId(ClientId);
-            Entity->MarkForUpdate();
-        }
-    }
+    // if (LocalScriptSystemComponent != nullptr)
+    // {
+    //     if (GetOwnerId() != ClientId)
+    //     {
+    //         LocalScriptSystemComponent->SetOwnerId(ClientId);
+    //         Entity->MarkForUpdate();
+    //     }
+    // }
 }
 
 uint64_t LocalScriptSystem::GetOwnerId() const
 {
-    if (LocalScriptSystemComponent != nullptr)
-    {
-        return LocalScriptSystemComponent->GetOwnerId();
-    }
+    // if (LocalScriptSystemComponent != nullptr)
+    // {
+    //     return LocalScriptSystemComponent->GetOwnerId();
+    // }
 
     return 0;
 }
 
 void LocalScriptSystem::Shutdown()
 {
-    ScriptSystem->ClearModuleSource(Entity->GetName());
-    ScriptSystem->DestroyContext(Entity->GetId());
+    // ScriptSystem->ClearModuleSource("LocalScriptSystem");
+    // ScriptSystem->DestroyContext("LocalScriptSystem");
 }
 
 void LocalScriptSystem::OnSourceChanged(const csp::common::String& InScriptSource)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "OnSourceChanged: %s\n", InScriptSource.c_str());
 
-    if (LocalScriptSystemComponent != nullptr)
-    {
-        MessageMap.clear();
-        PropertyMap.clear();
+    // if (LocalScriptSystemComponent != nullptr)
+    // {
+    //     MessageMap.clear();
+    //     PropertyMap.clear();
 
-        ScriptSystem->ResetContext(Entity->GetId());
-        HasBinding = false; // we've reset the context which means this script is no longer bound
+    //     ScriptSystem->ResetContext("LocalScriptSystem"););
+    //     HasBinding = false; // we've reset the context which means this script is no longer bound
         
-        ScriptSystem->SetModuleSource(Entity->GetName(), InScriptSource); 
+    //     ScriptSystem->SetModuleSource("LocalScriptSystem", InScriptSource); 
      
-        Bind();
-    }
+    //     Bind();
+    // }
 }
 
 // Called when an entity has been created
 void LocalScriptSystem::Bind()
 {
-    if (LocalScriptSystemComponent != nullptr)
-    {
-        ScriptSystem->BindContext(Entity->GetId());
-        HasBinding = true;
-    }
+    // if (LocalScriptSystemComponent != nullptr)
+    // {
+    //     ScriptSystem->BindContext("LocalScriptSystem");;
+    //     HasBinding = true;
+    // }
 }
 
 void LocalScriptSystem::CheckBinding()
@@ -249,23 +241,23 @@ void LocalScriptSystem::SubscribeToMessage(const csp::common::String Message, co
 
 void LocalScriptSystem::PostMessageToScript(const csp::common::String Message, const csp::common::String MessageParamsJson)
 {
-    SubscribedMessageMap::iterator It = MessageMap.find(Message);
+    // SubscribedMessageMap::iterator It = MessageMap.find(Message);
 
-    if (It != MessageMap.end())
-    {
-        const csp::common::String& OnMessageCallback = It->second;
+    // if (It != MessageMap.end())
+    // {
+    //     const csp::common::String& OnMessageCallback = It->second;
 
-        // Generate a call to the callback with the correct parameters
-        csp::common::String ScriptText
-            = csp::common::StringFormat("%s('%s','%s')", OnMessageCallback.c_str(), Message.c_str(), MessageParamsJson.c_str());
+    //     // Generate a call to the callback with the correct parameters
+    //     csp::common::String ScriptText
+    //         = csp::common::StringFormat("%s('%s','%s')", OnMessageCallback.c_str(), Message.c_str(), MessageParamsJson.c_str());
 
-        if (Message != SCRIPT_MSG_ENTITY_TICK)
-        {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "PostMessageToScript: %s\n", ScriptText.c_str());
-        }
+    //     if (Message != SCRIPT_MSG_ENTITY_TICK)
+    //     {
+    //         CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "PostMessageToScript: %s\n", ScriptText.c_str());
+    //     }
 
-        RunScript(ScriptText.c_str());
-    }
+    //     RunScript(ScriptText.c_str());
+    // }
 }
 
 } // namespace csp::multiplayer

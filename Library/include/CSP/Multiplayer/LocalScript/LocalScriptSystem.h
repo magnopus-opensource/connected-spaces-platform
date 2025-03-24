@@ -16,33 +16,40 @@
 #pragma once
 
 #include "CSP/Common/String.h"
+#include "CSP/Common/Map.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 
 #include <map>
 #include <string>
 
 namespace csp::systems
 {
-class ScriptSystem;
+class LocalScriptSystem;
+class LocalScriptsResult;
 }
 
-/// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer
+namespace csp::services
 {
-class SpaceEntitySystem;
 
-class SpaceEntity;
-class ScriptSpaceComponent;
+class ApiResponseBase;
 
-/// @brief Manages the script attached to an Entity.
+CSP_START_IGNORE
+template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
+CSP_END_IGNORE
+
+} // namespace csp::services
+
+/// @brief Namespace that encompasses everything in the multiplayer system
+namespace csp::systems
+{
+
+/// @brief Manages the local script system
 ///
 /// Provides functions for setting the script source, subscribing to property changes and messages and other script management.
 class CSP_API LocalScriptSystem
 {
-    CSP_START_IGNORE
-    /** @cond DO_NOT_DOCUMENT */
-    friend class SpaceEntity;
-    /** @endcond */
-    CSP_END_IGNORE
+
 
 public:
     /// @brief Destroy the instance of LocalScriptSystem.
@@ -75,10 +82,6 @@ public:
     /// @return The source as a string.
     csp::common::String GetScriptSource();
 
-    /// @brief Sets the related component for this script.
-    /// @param InEnityScriptComponent ScriptSpaceComponent : The component related to this script.
-    void SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent);
-
     /// @brief Called when a component property changes so that a message can be passed to the script if a subscription has been setup.
     /// @param ComponentId int32_t : ID of the component that changed.
     /// @param PropertyKey int32_t : Key of the property that changed.
@@ -108,7 +111,7 @@ public:
     /// @brief Registers the script source for the related entity in the script system.
     void RegisterSourceAsModule();
 
-    /// @brief Binds the related entity in the script system.
+    /// @brief Binds
     void Bind();
 
     /// @brief Sets the owner of the script.
@@ -123,13 +126,11 @@ public:
     void Shutdown();
 
 private:
-    LocalScriptSystem(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem);
+    LocalScriptSystem();
 
     void CheckBinding();
 
     csp::systems::ScriptSystem* ScriptSystem;
-    SpaceEntity* Entity;
-    ScriptSpaceComponent* LocalScriptSystemComponent;
 
     bool HasLastError;
     csp::common::String LastError;
@@ -142,8 +143,9 @@ private:
     SubscribedMessageMap MessageMap;
 
     bool HasBinding;
-
-    SpaceEntitySystem* SpaceEntitySystemPtr;
 };
 
-} // namespace csp::multiplayer
+
+
+}
+
