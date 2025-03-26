@@ -961,6 +961,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
+
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -969,6 +973,13 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+
+    TestMsg1 = "AgoraUserTokenResult invalid";
+    TestMsg2 = "AgoraUserTokenResult doesn't contain expected member: token";
 
     csp::systems::AgoraUserTokenParams Params;
     Params.AgoraUserId = UserId;
@@ -985,6 +996,81 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName[256];
+    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+    TestMsg1 = "PostServiceProxyResult invalid";
+    TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
+
+    csp::systems::TokenInfoParams Params;
+    Params.ServiceName = "Agora";
+    Params.OperationName = "getUserToken";
+    Params.SetHelp = false;
+    Params.Parameters["userId"] = UserId;
+    Params.Parameters["channelName"] = Space.Id;
+    Params.Parameters["referenceId"] = Space.Id;
+    Params.Parameters["lifespan"] = std::to_string(10000).c_str();
+    Params.Parameters["readOnly"] = "true";
+    Params.Parameters["shareAudio"] = "false";
+    Params.Parameters["shareVideo"] = "false";
+    Params.Parameters["shareScreen"] = "false";
+
+    // Get agora token through PostServiceProxy
+    auto [Result] = AWAIT_PRE(UserSystem, PostServiceProxy, RequestPredicate, Params);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
