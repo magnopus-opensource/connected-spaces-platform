@@ -25,6 +25,7 @@
 #include "Multiplayer/ErrorCodeStrings.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
+#include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
@@ -707,6 +708,29 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ExternalServiceProxyApi->CreateHandler<StringResultCallback, AgoraUserTokenResult, void, chs_aggregation::ServiceResponse>(
+            Callback, nullptr);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
+}
+
+void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
+{
+    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
+    TokenInfo->SetServiceName(Params.ServiceName);
+    TokenInfo->SetOperationName(Params.OperationName);
+    TokenInfo->SetHelp(Params.SetHelp);
+    std::map<csp::common::String, csp::common::String> ParamsMap;
+    auto* Keys = Params.Parameters.Keys();
+    for (auto idx = 0; idx < Keys->Size(); ++idx)
+    {
+        auto Key = Keys->operator[](idx);
+        auto Value = Params.Parameters.operator[](Key);
+        // This conversion is necessary because TokenInfoParams uses csp::common::Map for the Wrapper Generator, and SetParameters expects a std::map.
+        ParamsMap.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
+    }
+    TokenInfo->SetParameters(ParamsMap);
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
             Callback, nullptr);
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
 }

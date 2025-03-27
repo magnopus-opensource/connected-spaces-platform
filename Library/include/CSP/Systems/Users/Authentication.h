@@ -167,6 +167,23 @@ public:
     bool ShareScreen;
 };
 
+/// @brief Data structure for a custom service proxy posting, giving service name, operation name, set help and parameters
+class CSP_API TokenInfoParams
+{
+public:
+    /// @brief The service name for the requested token.
+    csp::common::String ServiceName;
+
+    /// @brief The operation name for the requested token.
+    csp::common::String OperationName;
+
+    /// @brief Whether to set help.
+    bool SetHelp;
+
+    /// @brief Map of parameters required for the operation on the service
+    csp::common::Map<csp::common::String, csp::common::String> Parameters;
+};
+
 typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;
 typedef std::function<void(const NullResult& Result)> NullResultCallback;
 typedef std::function<void(const LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;

@@ -57,6 +57,23 @@ private:
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
+/// @brief @brief Data class used to contain information posting a service proxy
+class CSP_API PostServiceProxyResult : public StringResult
+{
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
+
+private:
+    PostServiceProxyResult() = default;
+    PostServiceProxyResult(void*) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+};
+
 /// @brief Result url for a tier checkout session request
 class CSP_API CheckoutSessionUrlResult : public StringResult
 {
