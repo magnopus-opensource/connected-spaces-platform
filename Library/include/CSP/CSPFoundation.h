@@ -108,7 +108,7 @@ public:
     static const EndpointURIs& GetEndpoints();
 
     /// @brief Create an EndpointsURIs object containing URIs to the various services needed by CSP.
-    /// @param EndpointRootURI URI to the root of the cloud services.
+    /// @param EndpointRootURI csp::common::String: URI to the root of the cloud services.
     /// @return EndpointURIs class with deduced endpoint URIs.
     static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI);
 
