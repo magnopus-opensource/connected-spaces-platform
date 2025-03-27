@@ -46,7 +46,8 @@ Material::Material(const csp::common::String& Name, const csp::common::String& I
 {
 }
 
-Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId, const EShaderType& InType, const int InVersion)
+Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId,
+    const EShaderType& InType, const int InVersion)
     : Name(Name)
     , Type(InType)
     , CollectionId(InAssetCollectionId)
@@ -54,8 +55,6 @@ Material::Material(const csp::common::String& Name, const csp::common::String& I
     , Version(InVersion)
 {
 }
-
-
 
 const csp::common::String& Material::GetName() const { return Name; }
 
@@ -67,13 +66,17 @@ const csp::common::String& Material::GetMaterialCollectionId() const { return Co
 
 const csp::common::String& Material::GetMaterialId() const { return Id; }
 
-const Material& MaterialResult::GetMaterial() const { return *Material; }
+const Material* MaterialResult::GetMaterial() const { return Material; }
+
+Material* MaterialResult::GetMaterial() { return Material; }
 
 void MaterialResult::SetMaterial(csp::systems::Material& InMaterial) { Material = &InMaterial; }
 
 void MaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
 const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &Materials; }
+
+csp::common::Array<Material*>* MaterialsResult::GetMaterials() { return &Materials; }
 
 void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMaterials) { Materials = InMaterials; }
 
