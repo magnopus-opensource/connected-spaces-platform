@@ -22,10 +22,10 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Systems/Assets/AlphaVideoMaterial.h" // Ensure this header defines AlphaVideoMaterialResultCallback
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
-#include "CSP/Systems/Assets/AlphaVideoMaterial.h" // Ensure this header defines AlphaVideoMaterialResultCallback
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
@@ -248,11 +248,9 @@ public:
     /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created material.
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType shaderType, const csp::common::String& SpaceId,
-        const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::
-        common::Array<csp::common::String>& AssetTags,
-        MaterialResultCallback Callback);
-
+    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType,
+        const csp::common::String& SpaceId, csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+        const csp::common::Array<csp::common::String>& AssetTags, MaterialResultCallback Callback);
 
     /// @brief Updates an existing material's properties.
     /// The material should be retrieved through GetMaterials or GetMaterial.

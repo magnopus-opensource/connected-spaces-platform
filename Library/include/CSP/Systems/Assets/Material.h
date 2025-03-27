@@ -16,19 +16,20 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
-#include "CSP/Common/Array.h"
-#include "CSP/Systems/WebService.h"
 #include "CSP/Systems/Assets/TextureInfo.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::systems
 {
+
 class Material;
 
 }
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj);
 
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj);
 
 namespace csp::services
 {
@@ -60,7 +61,8 @@ enum class EAlphaMode
 };
 
 /// @brief Defines how to alpha value is interpreted
-/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports EColorChannel.
+/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports
+/// EColorChannel.
 enum class EBlendMode
 {
     Normal = 0,
@@ -76,7 +78,6 @@ enum class EColorChannel
     B = 2,
     A = 3
 };
-
 
 /// @ingroup Asset System
 /// @brief Base class for a material.
@@ -108,9 +109,13 @@ public:
     /// @param MaterialCollectionId const csp::common::String& : The asset collection where the material info is stored
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
-    Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId, const EShaderType& InType, const int InVersion);
+    Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId,
+        const EShaderType& InType, const int InVersion);
 
     virtual ~Material() = default;
+
+    // TODO
+    // make copy ctor and copy assignment and move ctor and move assignment protected. make them default
 
     Material() = default;
     csp::common::String Name;
@@ -118,15 +123,22 @@ public:
     int Version;
 
 protected:
+    // Copy assignment
+    Material& operator=(const Material& other) = default;
+    // copy ctor
+    Material(const Material& other) = default;
+
+    // Move assignment
+    Material& operator=(Material&& other) = default;
+    // Move ctor
+    Material(Material&& other) = default;
+
     csp::common::String CollectionId;
     csp::common::String Id;
 
 private:
     friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Material& Obj);
 };
-
-
-
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download material data.
@@ -142,7 +154,9 @@ class CSP_API MaterialResult : public csp::systems::ResultBase
 
 public:
     /// @brief Retreives the Material from the result.
-    const Material& GetMaterial() const;
+    const Material* GetMaterial() const;
+
+    Material* GetMaterial();
 
     CSP_NO_EXPORT MaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
@@ -171,7 +185,12 @@ class CSP_API MaterialsResult : public csp::systems::ResultBase
 
 public:
     /// @brief Retreives the Material from the result.
+    /// @return Asset : const ref Array Material class pointers.
     const csp::common::Array<csp::systems::Material*>* GetMaterials() const;
+
+    /// @brief Retreives the Material from the result.
+    /// @return Asset : ref Array Material class pointers.
+    csp::common::Array<csp::systems::Material*>* GetMaterials();
 
     CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
