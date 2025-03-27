@@ -43,6 +43,8 @@ constexpr const char* MATERIAL_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_
 constexpr const char* MATERIAL_ASSET_NAME_PREFIX = "ASSET_MATERIAL_";
 constexpr const char* MATERIAL_FILE_NAME_PREFIX = "ASSET_MATERIAL_FILE_";
 
+constexpr const char* MATERIAL_SHADERTYPE_METADATA_KEY = "ShaderType";
+
 String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCollectionType)
 {
     if (AssetCollectionType == systems::EAssetCollectionType::DEFAULT)
@@ -90,6 +92,36 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
     {
         assert(false && "Unsupported Asset Type!");
         return "Image";
+    }
+}
+
+String ConvertShaderTypeToString(systems::EShaderType ShaderType)
+{
+    if (ShaderType == systems::EShaderType::AlphaVideo)
+        return "AlphaVideo";
+    else if (ShaderType == systems::EShaderType::Standard)
+        return "Standard";
+    else
+    {
+        assert(false && "Unsupported Shader Type!");
+        return "Standard";
+    }
+}
+
+systems::EShaderType ConvertStringToShaderType(const csp::common::String& ShaderType)
+{
+    if (ShaderType == "AlphaVideo")
+    {
+        return systems::EShaderType::AlphaVideo;
+    }
+    else if (ShaderType == "Standard")
+    {
+        return systems::EShaderType::Standard;
+    }
+    else
+    {
+        assert(false && "Unsupported Shader Type!");
+        return systems::EShaderType::Standard;
     }
 }
 
@@ -164,6 +196,53 @@ csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name
 
 namespace csp::systems
 {
+
+void InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const csp::common::String& Name, const csp::common::String& AssetCollectionId,
+    const csp::common::String& AssetId, Material** OutMaterial)
+{
+    if (ShaderType == EShaderType::AlphaVideo)
+    {
+        AlphaVideoMaterial* NewMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
+        *OutMaterial = static_cast<Material*>(NewMaterial);
+    }
+    else if (ShaderType == EShaderType::Standard)
+    {
+        GLTFMaterial* NewMaterial = CSP_NEW GLTFMaterial(Name, AssetCollectionId, AssetId);
+        *OutMaterial = static_cast<Material*>(NewMaterial);
+    }
+}
+
+bool DeserializeIntoMaterialOfType(const char* MaterialData, csp::systems::EShaderType ShaderType, Material** Material)
+{
+    bool Deserialized = false;
+
+    if (ShaderType == EShaderType::AlphaVideo)
+    {
+        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(*Material);
+        Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
+    }
+    else if (ShaderType == EShaderType::Standard)
+    {
+        GLTFMaterial* NewGLTFMaterial = static_cast<GLTFMaterial*>(*Material);
+        Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewGLTFMaterial);
+    }
+
+    return Deserialized;
+}
+
+void SerializeMaterialOfType(EShaderType ShaderType, const Material& Material, csp::common::String& OutMaterialJson)
+{
+    if (ShaderType == EShaderType::AlphaVideo)
+    {
+        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(&Material);
+        OutMaterialJson = json::JsonSerializer::Serialize(*NewAlphaVideoMaterial);
+    }
+    else if (ShaderType == EShaderType::Standard)
+    {
+        const GLTFMaterial* NewGLTFMaterial = static_cast<const GLTFMaterial*>(&Material);
+        OutMaterialJson = json::JsonSerializer::Serialize(*NewGLTFMaterial);
+    }
+}
 
 AssetSystem::AssetSystem()
     : SystemBase(nullptr, nullptr)
@@ -834,12 +913,12 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
     GetAssetsByCriteria({ InAsset.AssetCollectionId }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, GetAssetsCallback);
 }
 
-void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType shaderType, const csp::common::String& SpaceId,
-    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
+void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::systems::EShaderType ShaderType, const csp::common::String& SpaceId,
+    csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
     MaterialResultCallback Callback)
 {
     // 1. Create asset collection
-    auto CreateAssetCollectionCB = [this, Callback, Name, SpaceId, shaderType](const AssetCollectionResult& CreateAssetCollectionResult)
+    auto CreateAssetCollectionCB = [this, Callback, Name, SpaceId, ShaderType](const AssetCollectionResult& CreateAssetCollectionResult)
     {
         if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
         {
@@ -850,7 +929,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
         // 2. Create asset
         const AssetCollection& CreatedAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-        auto CreateAssetCB = [this, Callback, CreatedAssetCollection, SpaceId, Name, shaderType](const AssetResult& CreateAssetResult)
+        auto CreateAssetCB = [this, Callback, CreatedAssetCollection, SpaceId, Name, ShaderType](const AssetResult& CreateAssetResult)
         {
             if (CreateAssetResult.GetResultCode() != EResultCode::Success)
             {
@@ -858,25 +937,22 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
                 return;
             }
 
+            ////
+
             // 3. Upload default material
             Asset CreatedAsset = CreateAssetResult.GetAsset();
             csp::common::String MaterialJson;
-            Material* NewlyCreatedMaterial;
-            if (shaderType == EShaderType::Standard) {
-                GLTFMaterial* NewMaterial = CSP_NEW GLTFMaterial(Name, CreatedAssetCollection.Id, CreatedAsset.Id);
-                MaterialJson = csp::json::JsonSerializer::Serialize(*NewMaterial);
-                NewlyCreatedMaterial = NewMaterial;
-            } else {
-                AlphaVideoMaterial* NewMaterial = CSP_NEW AlphaVideoMaterial(Name, CreatedAssetCollection.Id, CreatedAsset.Id);
-                MaterialJson = csp::json::JsonSerializer::Serialize(*NewMaterial);
-                NewlyCreatedMaterial = NewMaterial;
-            }
+            Material* NewlyCreatedMaterial = nullptr;
+
+            // Create material of the specific derived type.
+            InstantiateMaterialOfType(ShaderType, Name, CreatedAssetCollection.Id, CreatedAsset.Id, &NewlyCreatedMaterial);
+
+            SerializeMaterialOfType(ShaderType, *NewlyCreatedMaterial, MaterialJson);
 
             auto UploadMaterialCallback = [this, Callback, NewlyCreatedMaterial, SpaceId, Name](const UriResult& UploadResult)
             {
-                if (UploadResult.GetResultCode() != EResultCode::Success)
+                if (UploadResult.GetResultCode() == EResultCode::InProgress)
                 {
-                    Callback(MaterialResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode()));
                     return;
                 }
 
@@ -907,6 +983,8 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
 
     const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
 
+    Metadata.operator[](MATERIAL_SHADERTYPE_METADATA_KEY) = ConvertShaderTypeToString(ShaderType);
+
     CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, Metadata, EAssetCollectionType::DEFAULT, AssetTags, CreateAssetCollectionCB);
 }
 
@@ -935,7 +1013,11 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             // 3. Upload material
             auto UploadMaterialCallback = [this, Callback, &Material](const UriResult& UploadResult)
             { Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode())); };
+
             csp::common::String MaterialJson;
+
+            SerializeMaterialOfType(Material.GetShaderType(), Material, MaterialJson);
+
             if (Material.GetShaderType() == EShaderType::Standard)
             {
 
@@ -950,8 +1032,14 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             else
             {
                 const AlphaVideoMaterial* alphaMaterial = dynamic_cast<const AlphaVideoMaterial*>(&Material);
+                if (alphaMaterial == nullptr)
+                {
+                    CSP_LOG_ERROR_MSG("Failed to cast material to AlphaVideoMaterial");
+                    return;
+                }
                 MaterialJson = json::JsonSerializer::Serialize(*alphaMaterial);
             }
+
             const Asset& CreatedAsset = CreateAssetResult.GetAsset();
 
             // Create a new string to prevent const casting
@@ -961,6 +1049,7 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             AssetData.SetMimeType("application/json");
             AssetData.Buffer = Buffer.data();
             AssetData.BufferLength = MaterialJson.Length();
+
             UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
         };
         GetAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), GetAssetCB);
@@ -1000,9 +1089,9 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             return;
         }
 
-        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
+        auto AssetCollections = std::make_shared<csp::common::Array<csp::systems::AssetCollection>>(FindAssetCollectionsResult.GetAssetCollections());
 
-        if (AssetCollections.Size() == 0)
+        if ((*AssetCollections).Size() == 0)
         {
             // There are no asset collections for this space
             Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
@@ -1010,14 +1099,14 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         }
 
         // 2. Find material assets in collections
-        csp::common::Array<csp::common::String> AssetCollectionIds(AssetCollections.Size());
+        csp::common::Array<csp::common::String> AssetCollectionIds((*AssetCollections).Size());
 
-        for (size_t i = 0; i < AssetCollections.Size(); ++i)
+        for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
         {
-            AssetCollectionIds[i] = AssetCollections[i].Id;
+            AssetCollectionIds[i] = (*AssetCollections)[i].Id;
         }
 
-        auto GetAssetsCB = [this, Callback](const AssetsResult& GetAssetsResult)
+        auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
@@ -1040,8 +1129,27 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             {
                 csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
                 csp::common::String AssetId = Assets[i].Id;
+                csp::systems::EShaderType ShaderType = csp::systems::EShaderType::Standard;
 
-                auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials,
+                // Todo: Do we need to add a bool to confirm that we have found an assetcollection with the corrct Id?
+                for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
+                {
+                    if ((*AssetCollections)[i].Id == AssetCollectionId)
+                    {
+                        const auto Metadata = (*AssetCollections)[i].GetMetadataImmutable();
+                        if (!Metadata.HasKey(MATERIAL_SHADERTYPE_METADATA_KEY))
+                        {
+                            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialsResult>());
+
+                            return;
+                        }
+
+                        ShaderType = ConvertStringToShaderType(Metadata.operator[](MATERIAL_SHADERTYPE_METADATA_KEY));
+                        break;
+                    }
+                }
+
+                auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, ShaderType, DownloadedMaterials,
                                                     AssetsDownloaded, Failed](const AssetDataResult& DownloadResult)
                 {
                     // Return early as one of the calls has already failed
@@ -1050,45 +1158,41 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                         return;
                     }
 
-                    if (DownloadResult.GetResultCode() != EResultCode::Success)
+                    if (DownloadResult.GetResultCode() == EResultCode::InProgress)
                     {
-                        if (DownloadResult.GetResultCode() == EResultCode::Failed)
-                        {
-                            *Failed = true;
-                        }
+                        return;
+                    }
+
+                    if (DownloadResult.GetResultCode() == EResultCode::Failed)
+                    {
+                        *Failed = true;
 
                         Callback(MaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
                         return;
                     }
 
-                    // Convert material json to material
                     const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-                    Material FoundBaseMaterial("", AssetCollectionId, AssetId);
-                    
-                    bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundBaseMaterial);
-                    
-                    
-                    (*AssetsDownloaded)++;
+                    Material* FoundMaterial = nullptr;
+
+                    // Create material of the specific derived type.
+                    InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId, &FoundMaterial);
+
+                    // Deserialse material data.
+                    bool Deserialized = DeserializeIntoMaterialOfType(MaterialData, ShaderType, &FoundMaterial);
 
                     if (Deserialized == false)
                     {
                         CSP_LOG_ERROR_MSG("Failed to deserialize material");
+
+                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialsResult>());
+
                         return;
                     }
 
-                    if (FoundBaseMaterial.GetShaderType() == EShaderType::Standard)
-                    {
-                    GLTFMaterial* FoundMaterial = CSP_NEW GLTFMaterial("", AssetCollectionId, AssetId);
-                        json::JsonDeserializer::Deserialize(MaterialData, *FoundMaterial);
-                        (*DownloadedMaterials)[i] = FoundMaterial;
-                    }
-                    else
-                    {
-                        AlphaVideoMaterial* FoundMaterial = CSP_NEW AlphaVideoMaterial("", AssetCollectionId, AssetId);
-                        json::JsonDeserializer::Deserialize(MaterialData, *FoundMaterial);
-                        (*DownloadedMaterials)[i] = FoundMaterial;
-                    }
+                    (*DownloadedMaterials)[i] = FoundMaterial;
+
+                    (*AssetsDownloaded)++;
 
                     if ((*AssetsDownloaded) >= AssetsToDownload)
                     {
@@ -1146,18 +1250,35 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 
                 const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-                // TODO support AlphaVideoMaterial, fix pointers
-                // Convert material json to material
-                GLTFMaterial FoundMaterial("", FoundAssetCollection.Id, FoundAsset.Id);
-                bool Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
+                const auto Metadata = FoundAssetCollection.GetMetadataImmutable();
+                if (!Metadata.HasKey(MATERIAL_SHADERTYPE_METADATA_KEY))
+                {
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+
+                    return;
+                }
+
+                csp::systems::EShaderType ShaderType = ConvertStringToShaderType(Metadata.operator[](MATERIAL_SHADERTYPE_METADATA_KEY));
+
+                Material* FoundMaterial = nullptr;
+
+                // Create material of the specific derived type.
+                InstantiateMaterialOfType(ShaderType, "", FoundAssetCollection.Id, FoundAsset.Id, &FoundMaterial);
+
+                // Deserialse material data.
+                bool Deserialized = DeserializeIntoMaterialOfType(MaterialData, ShaderType, &FoundMaterial);
 
                 if (Deserialized == false)
                 {
                     CSP_LOG_ERROR_MSG("Failed to deserialize material");
+
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+
+                    return;
                 }
 
                 MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                Result.SetMaterial(FoundMaterial);
+                Result.SetMaterial(*FoundMaterial);
 
                 Callback(Result);
             };
