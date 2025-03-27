@@ -267,12 +267,6 @@ Map<String, Map<String, String>> GetAndAssertSpacesMetadata(::SpaceSystem* Space
 
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
-    // check that Uri starts with something valid
-    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0)
-    {
-        return false;
-    }
-
     // check that the correct filename is present in the Uri
     const auto PosLastSlash = Uri.rfind('/');
     const auto UriFileName = Uri.substr(PosLastSlash + 1, FileName.size());

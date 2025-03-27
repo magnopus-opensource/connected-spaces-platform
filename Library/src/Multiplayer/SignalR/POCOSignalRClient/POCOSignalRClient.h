@@ -23,7 +23,6 @@
 #include <signalrclient/hub_exception.h>
 #include <signalrclient/signalr_client_config.h>
 #include <thread>
-
 namespace csp::multiplayer
 {
 
@@ -37,6 +36,17 @@ public:
     void Stop(CallbackHandler Callback) override;
     void Send(const std::string& Message, CallbackHandler Callback) override;
     void Receive(ReceiveHandler Callback) override;
+
+    struct ParsedURIInfo
+    {
+        std::string Endpoint;
+        std::string Protocol;
+        std::string Domain;
+        std::string Path;
+        unsigned short Port;
+    };
+
+    static ParsedURIInfo ParseMultiplayerServiceUriEndPoint(const std::string& MultiplayerServiceUriEndpoint);
 
 private:
     void ReceiveThreadFunc();

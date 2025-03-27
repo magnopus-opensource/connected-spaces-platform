@@ -276,6 +276,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 
+    std::this_thread::sleep_for(std::chrono::seconds(7));
+
     {
         // Re-enter space
         bool EntitiesCreated = false;

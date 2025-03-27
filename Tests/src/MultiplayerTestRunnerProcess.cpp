@@ -209,7 +209,7 @@ void MultiplayerTestRunnerProcess::StartProcess()
         {
             // STDOUT
             std::string StdOutStr = std::string(bytes, n);
-            // You might want to put std::cout << StdOutStr << std::endl; here when debugging.
+            std::cout << StdOutStr << std::endl;
 
             if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR))
             {

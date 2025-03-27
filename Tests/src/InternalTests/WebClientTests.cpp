@@ -439,7 +439,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 
     HttpPayload Payload;
     RunWebClientTest<RetryResponseReceiver>(
-        "https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
+        (std::string(EndpointBaseURI()) + "/mag-user/appsettings").c_str(), ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
 
     csp::CSPFoundation::Shutdown();
 }

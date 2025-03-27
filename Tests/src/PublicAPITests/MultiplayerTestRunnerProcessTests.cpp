@@ -16,6 +16,7 @@
 
 #include "MultiplayerTestRunnerProcess.h"
 #include "TestHelpers.h"
+#include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
 #include <PublicAPITests/UserSystemTestHelpers.h>
@@ -64,7 +65,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
     Process.SetLoginEmail(TestUser.Email.c_str());
     Process.SetPassword(GeneratedTestAccountPassword);
     Process.SetTimeoutInSeconds(0); // So we don't sit at ready for assertions for any real time.
-
+    Process.SetEndpoint(EndpointBaseURI());
     Process.StartProcess();
 
     // We need to spin up a process, login, create a space, join it, ... so we're a bit permissive with the timeouts to try and prevent flakiness.

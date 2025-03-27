@@ -808,14 +808,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser1.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     MultiplayerTestRunnerProcess CreateAvatarRunner2
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser2.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     std::array<MultiplayerTestRunnerProcess, 2> Runners = { CreateAvatarRunner, CreateAvatarRunner2 };
     std::array<std::future<void>, 2> ReadyForAssertionsFutures = { Runners[0].ReadyForAssertionsFuture(), Runners[1].ReadyForAssertionsFuture() };
@@ -2466,6 +2468,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
     // Log out
     LogOut(UserSystem);
+
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 
     // Log in again
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
