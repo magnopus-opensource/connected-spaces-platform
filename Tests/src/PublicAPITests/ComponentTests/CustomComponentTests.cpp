@@ -188,13 +188,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 
+    std::this_thread::sleep_for(std::chrono::seconds(7));
+
     // Re-Enter space and verify contents
     {
-        // Reload the space and verify the contents match
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
         // Retrieve all entities
         auto GotAllEntities = false;
         SpaceEntity* LoadedObject;
@@ -209,6 +206,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
                 }
             });
 
+        // Reload the space and verify the contents match
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
         // Wait until loaded
         auto Start = std::chrono::steady_clock::now();
         auto Current = std::chrono::steady_clock::now();
@@ -222,7 +223,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
             TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
         }
 
-        EXPECT_TRUE(GotAllEntities);
+        ASSERT_TRUE(GotAllEntities);
 
         const auto& Components = *LoadedObject->GetComponents();
 
