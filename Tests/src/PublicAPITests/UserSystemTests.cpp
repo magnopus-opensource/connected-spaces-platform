@@ -951,9 +951,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1018,9 +1018,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
