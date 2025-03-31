@@ -21,6 +21,7 @@
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
+#include "Common/Convert.h"
 #include "Common/UUIDGenerator.h"
 #include "Multiplayer/ErrorCodeStrings.h"
 #include "Multiplayer/EventSerialisation.h"
@@ -718,16 +719,7 @@ void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCal
     TokenInfo->SetServiceName(Params.ServiceName);
     TokenInfo->SetOperationName(Params.OperationName);
     TokenInfo->SetHelp(Params.SetHelp);
-    std::map<csp::common::String, csp::common::String> ParamsMap;
-    auto* Keys = Params.Parameters.Keys();
-    for (auto idx = 0; idx < Keys->Size(); ++idx)
-    {
-        auto Key = Keys->operator[](idx);
-        auto Value = Params.Parameters.operator[](Key);
-        // This conversion is necessary because TokenInfoParams uses csp::common::Map for the Wrapper Generator, and SetParameters expects a std::map.
-        ParamsMap.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
-    }
-    TokenInfo->SetParameters(ParamsMap);
+    TokenInfo->SetParameters(Convert(Params.Parameters));
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
