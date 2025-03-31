@@ -998,7 +998,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     EXPECT_FALSE(Result.GetValue().IsEmpty());
     WaitForCallback(LogConfirmed1);
     EXPECT_FALSE(LogConfirmed1);
-    WaitForCallback(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
     EXPECT_FALSE(LogConfirmed2);
 
     LogSystem.ClearAllCallbacks();
@@ -1067,7 +1067,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
     EXPECT_FALSE(Result.GetValue().IsEmpty());
     WaitForCallback(LogConfirmed1);
     EXPECT_FALSE(LogConfirmed1);
-    WaitForCallback(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
     EXPECT_FALSE(LogConfirmed2);
 
     LogSystem.ClearAllCallbacks();
