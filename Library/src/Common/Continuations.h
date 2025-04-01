@@ -59,11 +59,12 @@ using namespace csp::systems;
  * Print an error with provided error context objects, and throw a cancellation error.
  * Calls the main callback as an error before throwing.
  */
-inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::string ErrorMsg, EResultCode ResultCode,
+template <typename ErrorResultT>
+inline void LogErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
     csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
-    NullResult FailureResult(ResultCode, HttpResultCode, FailureReason);
+    ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     INVOKE_IF_NOT_NULL(Callback, FailureResult);
     throw async::task_canceled(); // Cancels the continuation chain.
 }
@@ -74,8 +75,8 @@ inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::stri
  * Otherwise, logs a success message and continues, forwarding the result to the next continuation.
  * Error context objects are optional, if unset, the values from the result object will be used.
  */
-template <typename ResultT>
-inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, std::string SuccessMsg, std::string ErrorMsg,
+template <typename ResultT, typename ErrorResultT>
+inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg, std::string ErrorMsg,
     std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
@@ -88,7 +89,8 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
             auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
             auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
             auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
-            LogErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
+            LogErrorAndCancelContinuation<ErrorResultT>(
+                Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
         }
         else
         {
@@ -129,14 +131,25 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback
 }
 
 /* Print a success message and report a successfull result via the callback */
-inline auto ReportSuccess(NullResultCallback Callback, std::string SuccessMsg)
+template <typename ResultT> inline auto ReportSuccess(std::function<void(const ResultT&)> Callback, std::string SuccessMsg)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg)]()
     {
-        /* We joined the space and refreshed the multiplayer connection to change scopes. We're done! */
+        /* Continuation was a success. We're done! */
         CSP_LOG_MSG(LogLevel::Log, SuccessMsg.c_str());
-        NullResult SuccessResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+        ResultT SuccessResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
         INVOKE_IF_NOT_NULL(Callback, SuccessResult);
+    };
+}
+
+/* Print a success message and report and send a result via the callback */
+template <typename ResultT> inline auto SendResult(std::function<void(const ResultT&)> Callback, std::string SuccessMsg)
+{
+    return [Callback, SuccessMsg = std::move(SuccessMsg)](const ResultT& Result)
+    {
+        /* Continuation was a success. We're done! */
+        CSP_LOG_MSG(LogLevel::Log, SuccessMsg.c_str());
+        INVOKE_IF_NOT_NULL(Callback, Result);
     };
 }
 
