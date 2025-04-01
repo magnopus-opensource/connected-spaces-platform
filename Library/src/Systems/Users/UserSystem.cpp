@@ -21,10 +21,12 @@
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
+#include "Common/Convert.h"
 #include "Common/UUIDGenerator.h"
 #include "Multiplayer/ErrorCodeStrings.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
+#include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
@@ -707,6 +709,20 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ExternalServiceProxyApi->CreateHandler<StringResultCallback, AgoraUserTokenResult, void, chs_aggregation::ServiceResponse>(
+            Callback, nullptr);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
+}
+
+void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
+{
+    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
+    TokenInfo->SetServiceName(Params.ServiceName);
+    TokenInfo->SetOperationName(Params.OperationName);
+    TokenInfo->SetHelp(Params.SetHelp);
+    TokenInfo->SetParameters(Convert(Params.Parameters));
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
             Callback, nullptr);
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
 }
