@@ -59,7 +59,9 @@ enum class EAssetType
     HOLOCAP_AUDIO,
     AUDIO,
     GAUSSIAN_SPLAT,
-    MATERIAL
+    MATERIAL,
+    ANNOTATION,
+    ANNOTATION_THUMBNAIL
 };
 
 enum class EAssetPlatform
