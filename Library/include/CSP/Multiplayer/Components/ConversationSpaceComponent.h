@@ -173,6 +173,32 @@ public:
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
 
+    /// @brief Gets an annotation associated with a message.
+    /// @param MessageId const csp::common::String& : The message id the annotation is associated with.
+    /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
+    /// TODO: Log pre condition for seting an annotation first (will see how this should be handled when testing)
+    CSP_ASYNC_RESULT void GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback);
+
+    /// @brief Associates an annotation with a message.
+    /// If an annotation already exists on the message, it will be overwritten.
+    /// @param MessageId const csp::common::String& : The message id to attach an annotation to.
+    /// @param AnnotationData const AnnotationData& : The annotation data for this annotation.
+    /// @param Annotation const systems::BufferAssetDataSource& : The annotation image data for this annotation.
+    /// @param AnnotationThumbnail const systems::BufferAssetDataSource& : The annotation thumbnail image data for this annotation.
+    /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
+    CSP_ASYNC_RESULT void SetAnnotation(const csp::common::String& MessageId, const AnnotationData& AnnotationData,
+        const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
+        AnnotationResultCallback Callback);
+
+    /// @brief Deletes an annotation associated with a message.
+    /// @param MessageId const csp::common::String& : The message id whos annotation to delete.
+    /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback);
+
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.

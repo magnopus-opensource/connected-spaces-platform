@@ -211,6 +211,49 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
     ConversationSystem->GetNumberOfReplies(ConversationId, Callback);
 }
 
+void ConversationSpaceComponent::GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetAnnotation(ConversationId, MessageId, Callback);
+}
+
+void ConversationSpaceComponent::SetAnnotation(const csp::common::String& MessageId, const AnnotationData& AnnotationData,
+    const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail, AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->SetAnnotation(ConversationId, MessageId, AnnotationData, Annotation, AnnotationThumbnail, Callback);
+}
+
+void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteAnnotation(ConversationId, MessageId, Callback);
+}
+
 void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
 {
     ConversationUpdateCallback = Callback;
