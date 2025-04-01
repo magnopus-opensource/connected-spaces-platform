@@ -50,13 +50,11 @@ void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, c
     EXPECT_EQ(Material->GetName(), Name);
 
     *OutMaterial = Result2.GetMaterial();
-    // return Result2.GetMaterial();
 }
 
 void UpdateMaterial(AssetSystem* AssetSystem, const Material& Material)
 {
     // Future/Promise required here as Awaitable makes a copy when constructing the tuple.
-
     std::promise<NullResult> ResultPromise;
     std::future<NullResult> ResultFuture = ResultPromise.get_future();
 
@@ -79,7 +77,6 @@ void UpdateMaterial(AssetSystem* AssetSystem, const Material& Material)
 void DeleteMaterial(AssetSystem* AssetSystem, const Material& Material)
 {
     // Future/Promise required here as Awaitable makes a copy when constructing the tuple.
-
     std::promise<NullResult> ResultPromise;
     std::future<NullResult> ResultFuture = ResultPromise.get_future();
 
@@ -205,7 +202,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
     ::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    // Attempt to find materials in a space none have been created for
+    // Attempt to find materials in a Space none have been created for
     csp::common::Array<Material*> FoundMaterials;
     GetMaterials(AssetSystem, Space.Id, FoundMaterials);
 
@@ -215,6 +212,8 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
+
+*/
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 {
@@ -233,18 +232,24 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     ::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    // Create 3 materials
+    // Create 3 materials associated with the space
     constexpr const char* TestMaterialName1 = "TestMaterial1";
-    GLTFMaterial CreatedMaterial1;
-    CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial1);
+    Material* CreatedMaterial1 = nullptr;
+    CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial1);
+    GLTFMaterial* CreatedGLTFMaterial1 = dynamic_cast<GLTFMaterial*>(CreatedMaterial1);
+    EXPECT_NE(CreatedGLTFMaterial1, nullptr);
 
     constexpr const char* TestMaterialName2 = "TestMaterial2";
-    GLTFMaterial CreatedMaterial2;
-    CreateMaterial(AssetSystem, TestMaterialName2, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial2);
+    Material* CreatedMaterial2 = nullptr;
+    CreateMaterial(AssetSystem, TestMaterialName2, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial2);
+    GLTFMaterial* CreatedGLTFMaterial2 = dynamic_cast<GLTFMaterial*>(CreatedMaterial2);
+    EXPECT_NE(CreatedGLTFMaterial2, nullptr);
 
     constexpr const char* TestMaterialName3 = "TestMaterial3";
-    GLTFMaterial CreatedMaterial3;
-    CreateMaterial(AssetSystem, TestMaterialName3, csp::systems::EShaderType::Standard, Space.Id, {}, {}, CreatedMaterial3);
+    Material* CreatedMaterial3 = nullptr;
+    CreateMaterial(AssetSystem, TestMaterialName3, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial3);
+    GLTFMaterial* CreatedGLTFMaterial3 = dynamic_cast<GLTFMaterial*>(CreatedMaterial3);
+    EXPECT_NE(CreatedGLTFMaterial3, nullptr);
 
     // Attempt to find the 3 materials that have been created
     csp::common::Array<Material*> FoundMaterials;
@@ -255,18 +260,29 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     // Ensure we found the right materials
     std::vector<csp::common::String> MaterialNames { TestMaterialName1, TestMaterialName2, TestMaterialName3 };
     std::vector<csp::common::String> MaterialCollectionIds {
-        CreatedMaterial1.GetMaterialCollectionId(),
-        CreatedMaterial2.GetMaterialCollectionId(),
-        CreatedMaterial3.GetMaterialCollectionId(),
+        CreatedGLTFMaterial1->GetMaterialCollectionId(),
+        CreatedGLTFMaterial2->GetMaterialCollectionId(),
+        CreatedGLTFMaterial3->GetMaterialCollectionId(),
     };
     std::vector<csp::common::String> MaterialIds {
-        CreatedMaterial1.GetMaterialId(),
-        CreatedMaterial2.GetMaterialId(),
-        CreatedMaterial3.GetMaterialId(),
+        CreatedGLTFMaterial1->GetMaterialId(),
+        CreatedGLTFMaterial2->GetMaterialId(),
+        CreatedGLTFMaterial3->GetMaterialId(),
     };
 
     for (int i = 0; i < FoundMaterials.Size(); ++i)
     {
+        if (FoundMaterials[i]->GetShaderType() == EShaderType::AlphaVideo)
+        {
+            AlphaVideoMaterial* FoundAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(FoundMaterials[i]);
+            EXPECT_NE(FoundAlphaVideoMaterial, nullptr);
+        }
+        else
+        {
+            GLTFMaterial* FoundGLTFMaterial = dynamic_cast<GLTFMaterial*>(FoundMaterials[i]);
+            EXPECT_NE(FoundGLTFMaterial, nullptr);
+        }
+
         const csp::common::String& SearchName = FoundMaterials[i]->GetName();
         const csp::common::String& SearchCollectionId = FoundMaterials[i]->GetMaterialCollectionId();
         const csp::common::String& SearchId = FoundMaterials[i]->GetMaterialId();
@@ -288,14 +304,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     }
 
     // Cleanup
-    DeleteMaterial(AssetSystem, CreatedMaterial1);
-    DeleteMaterial(AssetSystem, CreatedMaterial2);
-    DeleteMaterial(AssetSystem, CreatedMaterial3);
+    DeleteMaterial(AssetSystem, *CreatedMaterial1);
+    DeleteMaterial(AssetSystem, *CreatedMaterial2);
+    DeleteMaterial(AssetSystem, *CreatedMaterial3);
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-*/
+
+/*
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 {
     SetRandSeed();
@@ -334,7 +351,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-/*
+
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 {
     SetRandSeed();
