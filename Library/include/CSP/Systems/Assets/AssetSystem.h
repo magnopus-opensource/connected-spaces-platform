@@ -29,6 +29,14 @@
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::services
 {
 
@@ -87,10 +95,16 @@ public:
         const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, const EAssetCollectionType Type,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AssetCollectionResultCallback Callback);
 
+    CSP_NO_EXPORT async::task<AssetCollectionResult> CreateAssetCollection(const csp::common::Optional<csp::common::String>& SpaceId,
+        const csp::common::Optional<csp::common::String>& ParentAssetCollectionId, const csp::common::String& AssetCollectionName,
+        const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, const EAssetCollectionType Type,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+
     /// @brief Deletes a given asset collection.
     /// @param AssetCollection AssectCollection : asset collection to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
+    CSP_NO_EXPORT async::task<NullResult> DeleteAssetCollection(const AssetCollection& AssetCollection);
 
     /// @brief Deletes a given array of asset collections.
     /// @param AssetCollections csp::common::Array<AssetCollection> : The array of asset collections to delete
@@ -111,6 +125,7 @@ public:
     /// @param AssetCollectionId csp::common::String : asset collection to delete
     /// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetAssetCollectionById(const csp::common::String& AssetCollectionId, AssetCollectionResultCallback Callback);
+    CSP_NO_EXPORT async::task<AssetCollectionResult> GetAssetCollectionById(const csp::common::String& AssetCollectionId);
 
     /// @brief Finds an asset collection by its Name.
     /// @param AssetCollectionName csp::common::String : name of the asset collection to be retrieved
@@ -171,6 +186,10 @@ public:
         const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
         const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type, AssetResultCallback Callback);
 
+    CSP_NO_EXPORT async::task<AssetResult> CreateAsset(const AssetCollection& AssetCollection, const csp::common::String& Name,
+        const csp::common::Optional<csp::common::String>& ThirdPartyPackagedAssetIdentifier,
+        const csp::common::Optional<csp::systems::EThirdPartyPlatform>& ThirdPartyPlatform, EAssetType Type);
+
     /// @brief Update a given asset.
     /// @param Asset Asset : asset to update
     /// @param Callback AssetResultCallback : callback when asynchronous task finishes
@@ -211,6 +230,11 @@ public:
         const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
         const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes, AssetsResultCallback Callback);
 
+    CSP_NO_EXPORT async::task<AssetsResult> GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
+        const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes);
+
     /// @brief Uploads data for the given asset to CHS from the given source.
     /// @param AssetCollection AssetCollection : collection the asset is associated to
     /// @param Asset Asset : asset to upload data for
@@ -229,6 +253,9 @@ public:
     /// @param Callback UriResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT_WITH_PROGRESS void UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset,
         const AssetDataSource& AssetDataSource, csp::common::CancellationToken& CancellationToken, UriResultCallback Callback);
+
+    CSP_NO_EXPORT async::task<UriResult> UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset,
+        const AssetDataSource& AssetDataSource, csp::common::CancellationToken& CancellationToken);
 
     /// @brief Downloads data for a given Asset from CHS.
     /// @param Asset Asset : asset to download data for
