@@ -12,6 +12,8 @@
 #include "Debug/Logging.h"
 #include "Systems/ResultHelpers.h"
 
+#include "Common/Continuations.h"
+
 namespace csp::systems
 {
 
@@ -63,6 +65,86 @@ namespace
         }
 
         return true;
+    }
+
+    auto CreateAnnotationAssetCollection(AssetSystem* AssetSystem, const csp::common::String& SpaceId, const csp::common::String& Name,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+    {
+        return [AssetSystem, &SpaceId, &Name, &Metadata](const AssetCollectionResult& Result)
+        {
+            auto Task = AssetSystem->CreateAssetCollection(
+                SpaceId, Result.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
+            return Task;
+        };
+    }
+
+    auto SetAnnotationAssetCollection(AssetCollection& OutAssetCollection)
+    {
+        return [&OutAssetCollection](const AssetCollectionResult& Result)
+        {
+            OutAssetCollection = Result.GetAssetCollection();
+            return OutAssetCollection;
+        };
+    }
+
+    auto CreateAnnotationAsset(AssetSystem* AssetSystem, const AssetCollection& Parent, const csp::common::String& Name)
+    {
+        return [AssetSystem, &Parent, &Name]() { return AssetSystem->CreateAsset(Parent, Name, nullptr, nullptr, EAssetType::ANNOTATION); };
+    }
+
+    auto CreateAnnotationThumbnailAsset(AssetSystem* AssetSystem, const AssetCollection& Parent, const csp::common::String& Name)
+    {
+        return [AssetSystem, &Parent, &Name]() { return AssetSystem->CreateAsset(Parent, Name, nullptr, nullptr, EAssetType::ANNOTATION_THUMBNAIL); };
+    }
+
+    auto UploadAnnotationAssetData(AssetSystem* AssetSystem, const AssetCollection& Collection, const systems::BufferAssetDataSource& Data)
+    {
+        return [AssetSystem, &Data, &Collection](const AssetResult& Result)
+        { return AssetSystem->UploadAssetDataEx(Collection, Result.GetAsset(), Data, csp::common::CancellationToken::Dummy()); };
+    }
+
+    auto CreateAnnotationResult(const AssetCollection& AnnotationAssetCollection, const Asset& AnnotationAsset, const Asset& AnnotationThumbnailAsset)
+    {
+        return [&AnnotationAssetCollection, &AnnotationAsset, &AnnotationThumbnailAsset]()
+        {
+            multiplayer::AnnotationResult Result(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+            Result.ParseAnnotationAssetData(AnnotationAssetCollection);
+            Result.SetAnnotationAsset(AnnotationAsset);
+            Result.SetAnnotationThumbnailAsset(AnnotationThumbnailAsset);
+            return Result;
+        };
+    }
+
+    auto GetAnnotationAsset(AssetSystem* AssetSystem, const AssetCollection& Collection)
+    {
+        return [AssetSystem, &Collection]()
+        { return AssetSystem->GetAssetsByCriteria({ Collection.Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION }); };
+    }
+
+    auto GetAnnotationThumbnailAsset(AssetSystem* AssetSystem, const AssetCollection& Collection)
+    {
+        return [AssetSystem, &Collection]()
+        { return AssetSystem->GetAssetsByCriteria({ Collection.Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
+    }
+
+    auto SetAnnotationAsset(Asset& OutAsset)
+    {
+        return [&OutAsset](const AssetsResult& Result)
+        {
+            csp::common::Array<Asset> Assets(Result.GetAssets().Size());
+
+            if (Result.GetAssets().Size() == 1)
+            {
+                OutAsset = Result.GetAssets()[0];
+            }
+
+            return Result;
+        };
+    }
+
+    auto DeleteAnnotationAssetCollection(AssetSystem* AssetSystem)
+    {
+        return [AssetSystem](const AssetCollectionResult& Result) { return AssetSystem->DeleteAssetCollection(Result.GetAssetCollection()); };
     }
 }
 
@@ -512,11 +594,118 @@ void ConversationSystemInternal::GetNumberOfReplies(const common::String& Conver
     AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
 }
 
+void ConversationSystemInternal::GetAnnotation(
+    const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::AnnotationResultCallback Callback)
+{
+    AssetCollection AnnotationAssetCollection;
+    Asset AnnotationAsset;
+    Asset AnnotationThumbnailAsset;
+
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "ConversationSystemInternal::GetAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+        .then(async::inline_scheduler(), SetAnnotationAssetCollection(AnnotationAssetCollection))
+        // 2. Get annotation asset
+        .then(async::inline_scheduler(), GetAnnotationAsset(AssetSystem, AnnotationAssetCollection))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+                "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(async::inline_scheduler(), SetAnnotationAsset(AnnotationAsset))
+        // 3. Get annotation thumbnail asset
+        .then(async::inline_scheduler(), GetAnnotationThumbnailAsset(AssetSystem, AnnotationAssetCollection))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+                "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
+                "Failed to get annotation thumbnail asset.", {}, {}, {}))
+        .then(async::inline_scheduler(), SetAnnotationAsset(AnnotationThumbnailAsset))
+        // 4. Process result
+        .then(async::inline_scheduler(), CreateAnnotationResult(AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(async::inline_scheduler(), csp::common::continuations::SendResult(Callback, "Successfully retrieved annotation."));
+}
+
+void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
+    const multiplayer::AnnotationData& AnnotationData, const systems::BufferAssetDataSource& Annotation,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+{
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+
+    const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
+    const auto AnnotationMetadata = ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(AnnotationData);
+    const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+
+    AssetCollection AnnotationAssetCollection;
+    Asset AnnotationAsset;
+    Asset AnnotationThumbnailAsset;
+
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+        // 2. Create annotation asset collection
+        .then(async::inline_scheduler(), CreateAnnotationAssetCollection(this->AssetSystem, SpaceId, UniqueAssetCollectionName, AnnotationMetadata))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully created annotation asset collection", "Failed to create asset collection.",
+                {}, {}, {}))
+        .then(async::inline_scheduler(), SetAnnotationAssetCollection(AnnotationAssetCollection))
+        // 3. Create Annotation asset
+        .then(async::inline_scheduler(), CreateAnnotationAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationAssetName))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
+        // 4. Upload Annotation asset data
+        .then(async::inline_scheduler(), UploadAnnotationAssetData(AssetSystem, AnnotationAssetCollection, Annotation))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.",
+                {}, {}, {}))
+        // 6. Create Annotation thumbnail asset
+        .then(async::inline_scheduler(), CreateAnnotationThumbnailAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationThumbnailAssetName))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
+                "Failed to create annotation thumbnail asset.", {}, {}, {}))
+        // 7. Upload Annotation thumbnail asset data
+        .then(async::inline_scheduler(), UploadAnnotationAssetData(AssetSystem, AnnotationAssetCollection, AnnotationThumbnail))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+                "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
+                "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
+        // 8. Process result
+        .then(async::inline_scheduler(), CreateAnnotationResult(AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(async::inline_scheduler(), csp::common::continuations::SendResult(Callback, "Successfully set annotation."));
+}
+
+void ConversationSystemInternal::DeleteAnnotation(
+    const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback)
+{
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {},
+                {}))
+        // 2. Delete annoation asset collection
+        .then(async::inline_scheduler(), DeleteAnnotationAssetCollection(this->AssetSystem))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+                "ConversationSystemInternal::DeleteAnnotation, successfully deleted annotation asset collection.",
+                "Failed to delete annotation asset collection.", {}, {}, {}))
+        // 3. Process result
+        .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."));
+}
+
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
 {
     Components.insert(Component);
     FlushEvents();
 }
+
 void ConversationSystemInternal::DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component) { Components.erase(Component); }
 
 void ConversationSystemInternal::RegisterSystemCallback()

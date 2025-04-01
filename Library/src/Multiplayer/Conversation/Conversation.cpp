@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Conversation/Conversation.h"
+#include "CSP/Systems/Assets/Asset.h"
 
 #include "Systems/Conversation/ConversationSystemHelpers.h"
 #include "Web/HttpResponse.h"
@@ -49,15 +50,15 @@ AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
 {
 }
 
-csp::common::String AnnotationData::GetAnnotationThumbnailId() { return AnnotationThumbnailId; }
+csp::common::String AnnotationData::GetAnnotationThumbnailId() const { return AnnotationThumbnailId; }
 
-csp::common::String AnnotationData::GetAnnotationId() { return AnnotationId; }
+csp::common::String AnnotationData::GetAnnotationId() const { return AnnotationId; }
 
-uint16_t AnnotationData::GetVerticalFov() { return VerticalFov; }
+uint16_t AnnotationData::GetVerticalFov() const { return VerticalFov; }
 
-csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() { return AuthorCameraPosition; }
+csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() const { return AuthorCameraPosition; }
 
-csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() { return AuthorCameraRotation; }
+csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() const { return AuthorCameraRotation; }
 
 void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId) { AnnotationThumbnailId = InAnnotationThumbnailId; }
 
@@ -151,4 +152,13 @@ void ConversationResult::FillConversationInfo(const csp::systems::AssetCollectio
 uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
 
 void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+
+void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& AssetCollection)
+{
+    SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+
+    Data = systems::ConversationSystemHelpers::GetAnnotationDataFromAnnoationAssetCollection(AssetCollection);
+}
+
+void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 } // namespace csp::multiplayer
