@@ -26,14 +26,51 @@ namespace csp::systems::ConversationSystemHelpers
 {
 constexpr const char* CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_CONVERSATION_CONTAINER";
 constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MESSAGE";
+constexpr const char* ANNOTATION_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_ANNOTATION";
+constexpr const char* ANNOTATION_ASSET_NAME_PREFIX = "ASSET_ANNOTATION";
+constexpr const char* ANNOTATION_THUMBNAIL_ASSET_NAME_PREFIX = "ASSET_ANNOTATION_THUMBNAIL";
 
+// Comment keys
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
+// Annotation keys
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID = "ThumbnailId";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID = "AnnotationId";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV = "VerticalFovId";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION = "CameraPosition";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION = "CameraRotation";
 
 namespace
 {
     // When an asset collection hasn't been edited, the UpdatedAt timestamp is the same as the CreatedAt timestamp.
     // We want this be an empty string if the conversation hasn't been modified.
     bool HasBeenEdited(const AssetCollection& AssetCollection) { return AssetCollection.CreatedAt != AssetCollection.UpdatedAt; }
+
+    bool StringToBool(const common::String& Value) { return (Value == "true") ? true : false; }
+    common::String BoolToString(bool Value) { return Value ? "true" : "false"; }
+
+    common::String Vector3ToString(const common::Vector3& value)
+    {
+        return common::StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
+    }
+
+    common::Vector3 StringToVector3(const common::String& value)
+    {
+        common::List<common::String> StringList = value.Split(',');
+        return common::Vector3(std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()));
+    }
+
+    common::String Vector4ToString(const common::Vector4& value)
+    {
+        return common::StringFormat("%s,%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str(),
+            std::to_string(value.W).c_str());
+    }
+
+    common::Vector4 StringToVector4(const common::String& value)
+    {
+        common::List<common::String> StringList = value.Split(',');
+        return common::Vector4(
+            std::stof(StringList[0].c_str()), std::stof(StringList[1].c_str()), std::stof(StringList[2].c_str()), std::stof(StringList[3].c_str()));
+    }
 }
 
 common::String GetUniqueAssetCollectionSuffix(const common::String& SpaceId, const common::String& CreatorUserId)
@@ -45,20 +82,34 @@ common::String GetUniqueAssetCollectionSuffix(const common::String& SpaceId, con
     return common::StringFormat("%s_%s_%llu", SpaceId.c_str(), CreatorUserId.c_str(), MillisecondsSinceEpoch);
 }
 
-bool StringToBool(const common::String& value) { return (value == "true") ? true : false; }
-
-common::String BoolToString(bool value) { return value ? "true" : "false"; }
-
 common::String GetUniqueConversationContainerAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
 {
-    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
     return common::StringFormat("%s_%s", CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
 }
 
 common::String GetUniqueMessageAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
 {
-    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
     return common::StringFormat("%s_%s", MESSAGE_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
+}
+
+common::String GetUniqueAnnotationAssetName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", ANNOTATION_ASSET_NAME_PREFIX, Suffix.c_str());
+}
+
+common::String GetUniqueAnnotationThumbnailAssetName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_NAME_PREFIX, Suffix.c_str());
+}
+
+common::String GetUniqueAnnotationAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", ANNOTATION_ASSET_COLLECTION_NAME_PREFIX, Suffix.c_str());
 }
 
 common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData)
@@ -92,6 +143,18 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
     return MetadataMap;
 }
 
+common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData)
+{
+    common::Map<common::String, common::String> MetadataMap;
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID] = AnnotationData.GetAnnotationThumbnailId();
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID] = AnnotationData.GetAnnotationId();
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV] = std::to_string(AnnotationData.GetVerticalFov()).c_str();
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.GetAuthorCameraPosition());
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.GetAuthorCameraRotation());
+
+    return MetadataMap;
+}
+
 void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info)
 {
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
@@ -121,6 +184,20 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
     PopulateMessageInfoFromMetadata(MessageAssetCollection.GetMetadataImmutable(), Info);
 
     return Info;
+}
+
+multiplayer::AnnotationData GetAnnotationDataFromAnnoationAssetCollection(const AssetCollection& AnnotationAssetCollection)
+{
+    multiplayer::AnnotationData Data;
+    const auto& MetadataMap = AnnotationAssetCollection.GetMetadataImmutable();
+
+    Data.SetAnnotationThumbnailId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID]);
+    Data.SetAnnotationId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID]);
+    Data.SetVerticalFov(std::stoi(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str()));
+    Data.SetAuthorCameraPosition(StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]));
+    Data.SetAuthorCameraRotation(StringToVector4(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION]));
+
+    return Data;
 }
 
 multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)

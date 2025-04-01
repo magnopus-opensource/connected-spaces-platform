@@ -28,7 +28,7 @@ namespace csp::multiplayer
 {
 
 class MessageInfo;
-
+class AnnotationData;
 }
 
 namespace csp::systems
@@ -40,10 +40,15 @@ namespace ConversationSystemHelpers
 {
     common::String GetUniqueConversationContainerAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
     common::String GetUniqueMessageAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
+    common::String GetUniqueAnnotationAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId);
+    common::String GetUniqueAnnotationAssetName(const common::String& SpaceId, const common::String& CreatorUserId);
+    common::String GetUniqueAnnotationThumbnailAssetName(const common::String& SpaceId, const common::String& CreatorUserId);
     common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData);
     common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& ConversationData);
+    common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData);
     multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& ConversationAssetCollection);
     multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
+    multiplayer::AnnotationData GetAnnotationDataFromAnnoationAssetCollection(const AssetCollection& AnnotationAssetCollection);
 
     csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params);
 }
