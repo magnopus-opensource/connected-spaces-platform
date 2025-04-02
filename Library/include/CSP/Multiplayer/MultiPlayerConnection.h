@@ -148,6 +148,16 @@ public:
     /// @return True if self messaging is allowed, false otherwise.
     bool GetAllowSelfMessagingFlag() const;
 
+    /// @brief Parse a SignalR multiplayer error. Unpacks the exception and forwards to @ref ParseMultiplayerError
+    /// @param std::exception_ptr Exception : Pointer to the exception to parse.
+    /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerErrorFromExceptionPtr(std::exception_ptr Exception);
+
+    /// @brief Parse a SignalR multiplayer error.
+    /// @param const std::exception& Exception : The exception to parse
+    /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerError(const std::exception& Exception);
+
     /// @brief Create a default SignalRConnection configured to the configured MultiplayerServiceURI
     /// @return ISignalRConnection* Pointer to SignalR connection. The caller should take ownership of the pointer.
     CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection();

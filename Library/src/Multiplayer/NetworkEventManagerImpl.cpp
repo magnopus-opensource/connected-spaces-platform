@@ -30,8 +30,6 @@
 namespace csp::multiplayer
 {
 
-extern ErrorCode ParseError(std::exception_ptr Exception);
-
 constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
@@ -58,7 +56,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
     {
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
+            auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
             return;

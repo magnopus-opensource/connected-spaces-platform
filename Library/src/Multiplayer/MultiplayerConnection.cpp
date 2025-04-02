@@ -57,20 +57,31 @@ namespace csp::multiplayer
 
 static std::map<std::string, ErrorCode> ErrorCodeMap = { { "Scopes_ConcurrentUsersQuota", ErrorCode::SpaceUserLimitExceeded } };
 
-ErrorCode ParseError(std::exception_ptr Exception)
+// First - The parsed error code (always ConcurrentUsersQuota or unknown ...), Second - the full error message.
+std::pair<ErrorCode, std::string> MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(std::exception_ptr Exception)
 {
-    std::string ErrorMessage;
-
     try
     {
         rethrow_exception(Exception);
     }
     catch (const std::exception& e)
     {
-        ErrorMessage = e.what();
-
-        CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
+        return ParseMultiplayerError(e);
     }
+
+    return { ErrorCode::Unknown, "MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr, Unexpectedly no exception was thrown." };
+}
+
+std::pair<ErrorCode, std::string> MultiplayerConnection::ParseMultiplayerError(const std::exception& Exception)
+{
+    /* E.M: This is a strange function
+     * Whilst it does make sense to parse the errors that come out of the SignalR interaction,
+     * this function is concerned with only the Scopes_ConcurrentUsersQuota error,
+     * (an error that may not even be fired anymore, since it's an unspecified CHS behaviour).
+     * We should either make this parse meaningful, or remove it entirely imo.
+     */
+
+    const std::string ErrorMessage = Exception.what();
 
     constexpr const char* ERROR_CODE_KEY = "error code:";
     constexpr size_t ERROR_CODE_KEY_LENGTH = std::char_traits<char>::length(ERROR_CODE_KEY);
@@ -79,7 +90,7 @@ ErrorCode ParseError(std::exception_ptr Exception)
 
     if (Index == std::string::npos)
     {
-        return ErrorCode::Unknown;
+        return { ErrorCode::Unknown, ErrorMessage };
     }
 
     Index += ERROR_CODE_KEY_LENGTH;
@@ -103,14 +114,35 @@ ErrorCode ParseError(std::exception_ptr Exception)
 
     if (ErrorCodeMap.count(ErrorCodeString))
     {
-        return ErrorCodeMap[ErrorCodeString];
+        return { ErrorCodeMap[ErrorCodeString], ErrorMessage };
     }
 
-    return ErrorCode::Unknown;
+    return { ErrorCode::Unknown, ErrorMessage };
 }
 
-constexpr const uint64_t ALL_ENTITIES_ID = std::numeric_limits<uint64_t>::max();
-constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
+namespace
+{
+
+    constexpr const uint64_t ALL_ENTITIES_ID = std::numeric_limits<uint64_t>::max();
+    constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
+
+    // Exception type used for internal chaining in response to signalR exceptions
+    class ErrorCodeException : public std::runtime_error
+    {
+    public:
+        explicit ErrorCodeException(ErrorCode Code, const std::string& Message)
+            : std::runtime_error(Message)
+            , m_Code(Code)
+        {
+        }
+
+        ErrorCode Code() const noexcept { return m_Code; }
+
+    private:
+        ErrorCode m_Code;
+    };
+}
+
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
     return CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
@@ -274,17 +306,15 @@ void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reas
 {
     const ExceptionCallbackHandler StopHandler = [this, Callback, Reason](const std::exception_ptr& Except)
     {
+        ErrorCode Error = ErrorCode::None;
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
-
-            return;
+            auto [ExceptionError, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
+            Error = ExceptionError;
         }
 
         Connected = false;
-
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+        INVOKE_IF_NOT_NULL(Callback, Error);
         INVOKE_IF_NOT_NULL(DisconnectionCallback, Reason);
     };
 
@@ -415,7 +445,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
     {
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
+            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
             return;
@@ -449,7 +479,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
     {
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
+            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
             return;
@@ -504,7 +534,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
     {
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
+            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
             return;
@@ -548,7 +578,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
     {
         if (Except != nullptr)
         {
-            auto Error = ParseError(Except);
+            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
             return;
