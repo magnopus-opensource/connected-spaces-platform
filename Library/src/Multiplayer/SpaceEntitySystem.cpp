@@ -18,6 +18,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
@@ -34,7 +35,6 @@
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
 
 #ifdef CSP_WASM
@@ -633,7 +633,7 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
         });
 }
 
-void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
+void SpaceEntitySystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection)
 {
     Connection = InConnection;
 
@@ -1128,7 +1128,7 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
     PendingAdds->emplace_back(EntityToAdd);
 }
 
-void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
+void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
 {
     const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {

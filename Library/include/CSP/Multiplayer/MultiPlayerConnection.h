@@ -58,7 +58,7 @@ class ReplicatedValue;
 class SpaceEntitySystem;
 class ConversationSystem;
 class ClientElectionManager;
-class SignalRConnection;
+class ISignalRConnection;
 class IWebSocketClient;
 class EventBus;
 
@@ -148,6 +148,17 @@ public:
     /// @return True if self messaging is allowed, false otherwise.
     bool GetAllowSelfMessagingFlag() const;
 
+    /// @brief Create a default SignalRConnection configured to the configured MultiplayerServiceURI
+    /// @return ISignalRConnection* Pointer to SignalR connection. The caller should take ownership of the pointer.
+    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection();
+
+    /// @brief Start the connection and register to start receiving updates from the server.
+    /// Connect should be called after LogIn and before EnterSpace.
+    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
+    /// ownership of this pointer.
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection);
+
 private:
     MultiplayerConnection();
     ~MultiplayerConnection();
@@ -186,7 +197,7 @@ private:
 
     void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
 
-    class csp::multiplayer::SignalRConnection* Connection;
+    class csp::multiplayer::ISignalRConnection* Connection;
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     ConversationSystem* ConversationSystemPtr;

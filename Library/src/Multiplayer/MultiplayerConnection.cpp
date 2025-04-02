@@ -29,6 +29,7 @@
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -110,6 +111,11 @@ ErrorCode ParseError(std::exception_ptr Exception)
 
 constexpr const uint64_t ALL_ENTITIES_ID = std::numeric_limits<uint64_t>::max();
 constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
+ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
+{
+    return CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+        std::make_shared<csp::multiplayer::CSPWebsocketClient>());
+}
 
 /// @brief MultiplayerConnection
 MultiplayerConnection::MultiplayerConnection()
@@ -161,6 +167,7 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
 }
 
 void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection)
 {
     if (Connection != nullptr)
     {
@@ -181,8 +188,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
-    Connection = CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
-        std::make_shared<csp::multiplayer::CSPWebsocketClient>());
+    Connection = SignalRConnection;
     NetworkEventManager->SetConnection(Connection);
     ConversationSystemPtr->SetConnection(Connection);
     csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);

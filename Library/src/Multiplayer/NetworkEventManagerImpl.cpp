@@ -21,10 +21,11 @@
 #include "CallHelpers.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/SignalR/SignalRConnection.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #include <iostream>
 #include <limits>
+#include <signalrclient/signalr_value.h>
 
 namespace csp::multiplayer
 {
@@ -39,7 +40,7 @@ NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultip
 {
 }
 
-void NetworkEventManagerImpl::SetConnection(csp::multiplayer::SignalRConnection* InConnection) { Connection = InConnection; }
+void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection* InConnection) { Connection = InConnection; }
 
 void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Arguments,
     uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
@@ -51,7 +52,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
         return;
     }
 
-    csp::multiplayer::SignalRConnection* SignalRConnectionPtr = static_cast<csp::multiplayer::SignalRConnection*>(Connection);
+    csp::multiplayer::ISignalRConnection* ISignalRConnectionPtr = static_cast<csp::multiplayer::ISignalRConnection*>(Connection);
 
     std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
@@ -164,7 +165,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
     std::vector<signalr::value> InvokeArguments;
     InvokeArguments.push_back(EventMessage);
 
-    SignalRConnectionPtr->Invoke("SendEventMessage", InvokeArguments, LocalCallback);
+    ISignalRConnectionPtr->Invoke("SendEventMessage", InvokeArguments, LocalCallback);
 }
 
 } // namespace csp::multiplayer
