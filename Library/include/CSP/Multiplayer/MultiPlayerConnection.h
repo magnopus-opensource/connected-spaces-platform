@@ -32,6 +32,13 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
 CSP_END_IGNORE
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::systems
 {
 
@@ -177,23 +184,25 @@ private:
 
     typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
 
-    /// @brief Start the connection and register to start receiving updates from the server.
-    /// Connect should be called after LogIn and before EnterSpace.
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    void Connect(ErrorCodeCallbackHandler Callback);
+    void Start(ExceptionCallbackHandler Callback) const;
+
+    //<void> template tags not supported in wrapper generator. (Why we're even wrapping private methods is a mystery to me though)
+    CSP_START_IGNORE
+    async::task<void> Start() const;
+    /* Connect Continuations */
+    // Delete the entity specified by the EntityId. std::numeric_limits<uint64_t>::max() means ALL_ENTITIES_ID, and deletes everything.s
+    auto DeleteEntities(uint64_t EntityId) const;
+    // Get the client ID and return it (does not set it locally)
+    auto RequestClientId();
+    // Invoke "StartListening" on already created Connection
+    std::function<async::task<void>()> StartListening();
+    CSP_END_IGNORE
 
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     void Disconnect(ErrorCodeCallbackHandler Callback);
-
-    void Start(ExceptionCallbackHandler Callback) const;
     void Stop(ExceptionCallbackHandler Callback) const;
-
-    void StartListening(ErrorCodeCallbackHandler Callback);
     void StopListening(ErrorCodeCallbackHandler Callback);
-
-    void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
-    void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
 
     /// @brief Subscribes the connected user to the specified space's scope.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
@@ -202,8 +211,6 @@ private:
     /// @brief Clears the connected user's subscription to their current set of scopes.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     void ResetScopes(ErrorCodeCallbackHandler Callback);
-
-    void RequestClientId(ErrorCodeCallbackHandler Callback);
 
     void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
 
