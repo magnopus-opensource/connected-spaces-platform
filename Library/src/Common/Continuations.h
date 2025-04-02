@@ -65,7 +65,7 @@ inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::stri
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
     NullResult FailureResult(ResultCode, HttpResultCode, FailureReason);
     INVOKE_IF_NOT_NULL(Callback, FailureResult);
-    throw async::task_canceled(); // Cancels the continuation chain.
+    throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
 /*
@@ -148,8 +148,9 @@ inline auto ReportSuccess(NullResultCallback Callback, std::string SuccessMsg)
  */
 template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable)
 {
-    static_assert(std::is_invocable_v<Callable>,
-        "InvokeIfExceptionCallable must be invocable with zero arguments, if you need state, try passing a capturing lambda.");
+    static_assert(std::is_invocable_v<Callable, const std::exception&>,
+        "InvokeIfExceptionCallable must be invocable with a single const std::exception& arg, if you need other state, try passing a capturing "
+        "lambda.");
 
     return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable)](async::task<void> ExceptionTask)
     {
@@ -157,10 +158,10 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         {
             ExceptionTask.get();
         }
-        catch (...)
+        catch (const std::exception& exception)
         {
             CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
-            InvokeIfExceptionCallable();
+            InvokeIfExceptionCallable(exception);
         }
     };
 }

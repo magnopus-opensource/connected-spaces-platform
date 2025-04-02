@@ -228,25 +228,25 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenNoExceptionThrownInContinuationChainThenHandlerNotCalled)
 {
     // No exception, expect exception handler callable not called.
-    ::testing::MockFunction<void()> MockExceptionHandlerCallable;
-    EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(0);
+    ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
+    EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(0);
     csp::common::continuations::detail::testing::SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenExceptionThrownInContinuationChainThenHandlerCalled)
 {
     // Exception thrown, expect exception handler callable called
-    ::testing::MockFunction<void()> MockExceptionHandlerCallable;
-    EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(1);
+    ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
+    EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainCancelledThenHandlerAndResultCallbackCalled)
 {
     // Exception thrown, expect exception handler callable called, as well as result callback called. (Just testing our specific way of throwing here)
-    ::testing::MockFunction<void()> MockExceptionHandlerCallable;
+    ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
-    EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(1);
+    EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
     csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
         MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
@@ -256,10 +256,10 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledAndInter
 {
     // Exception thrown higher in chain, expect exception handler callable intermediate method not called, but exception handler callable called.
     ::testing::MockFunction<void()> MockIntermediateStepCallable;
-    ::testing::MockFunction<void()> MockExceptionHandlerCallable;
+    ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
     EXPECT_CALL(MockIntermediateStepCallable, Call()).Times(0);
-    EXPECT_CALL(MockExceptionHandlerCallable, Call()).Times(1);
+    EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
     csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
         MockIntermediateStepCallable.AsStdFunction(), MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
@@ -272,7 +272,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledOnSameTh
     // testing the library now...).
 
     const auto ThisThreadId = std::this_thread::get_id();
-    auto VerifyThread = [ThisThreadId]() { ASSERT_EQ(ThisThreadId, std::this_thread::get_id()); };
+    auto VerifyThread = [ThisThreadId](const std::exception& /*Except*/) { ASSERT_EQ(ThisThreadId, std::this_thread::get_id()); };
     // Just use the exception handler to serve as a general purpose way to call a callable in tests.
     // Could simply have made another detail::testing function ... but why bother when this already exists.
     csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(VerifyThread);

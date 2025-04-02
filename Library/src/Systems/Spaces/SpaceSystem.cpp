@@ -271,8 +271,9 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed,
                 csp::web::EResponseCodes::ResponseInternalServerError, ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
         .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully entered space."))
-        .then(
-            async::inline_scheduler(), csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace]() { CurrentSpace = {}; }));
+        .then(async::inline_scheduler(),
+            csp::common::continuations::InvokeIfExceptionInChain(
+                [&CurrentSpace = CurrentSpace](const std::exception& /*Except*/) { CurrentSpace = {}; }));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
