@@ -91,7 +91,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
     // This throws a async++::task_cancelled exception, but we don't want to link that lib in the tests, so just expect any exception.
-    ASSERT_ANY_THROW(csp::common::continuations::LogErrorAndCancelContinuation(
+    ASSERT_ANY_THROW(csp::common::continuations::LogHTTPErrorAndCancelContinuation(
         MockResultCallback.AsStdFunction(), ErrorMsg.c_str(), ResultCode, HttpResultCode, FailureReason));
 }
 
@@ -248,7 +248,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainC
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
-    csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
+    csp::common::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(
         MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
 
@@ -261,7 +261,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledAndInter
     EXPECT_CALL(MockIntermediateStepCallable, Call()).Times(0);
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
-    csp::common::continuations::detail::testing::SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
+    csp::common::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
         MockIntermediateStepCallable.AsStdFunction(), MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
 
