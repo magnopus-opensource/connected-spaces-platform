@@ -142,4 +142,6 @@ void SignalRConnection::Send(const std::string& MethodName, const signalr::value
     Connection.send(MethodName, Arguments, Callback);
 }
 
+const std::map<std::string, std::string>& SignalRConnection::HTTPHeaders() const { return config.get_http_headers(); }
+
 } // namespace csp::multiplayer

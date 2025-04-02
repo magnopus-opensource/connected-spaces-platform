@@ -359,7 +359,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
     InitialiseTestingConnection();
 
-    auto Headers = Connection->Connection->config.get_http_headers();
+    auto Headers = Connection->Connection->HTTPHeaders();
     ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
 
     // Enter space

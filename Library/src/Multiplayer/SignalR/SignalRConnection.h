@@ -59,6 +59,7 @@ public:
         const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
         std::function<void(std::exception_ptr)> Callback = [](std::exception_ptr) {}) override;
 
+    const std::map<std::string, std::string>& HTTPHeaders() const override;
 
 private:
     signalr::hub_connection Connection;
