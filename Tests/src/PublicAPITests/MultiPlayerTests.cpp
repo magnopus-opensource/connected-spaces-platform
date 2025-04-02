@@ -45,6 +45,10 @@
 #include <filesystem>
 #include <thread>
 
+#include <async++.h>
+
+#include "Mocks/SignalRConnectionMock.h"
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
@@ -2917,4 +2921,232 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentDeletionTest)
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(false);
+}
+
+namespace
+{
+class MockMultiplayerErrorCallback
+{
+public:
+    MOCK_METHOD(void, Call, (csp::multiplayer::ErrorCode), ());
+};
+
+class MockConnectionCallback
+{
+public:
+    MOCK_METHOD(void, Call, (const csp::common::String&), ());
+};
+
+void StartAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Start).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+void StopAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Stop).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<SignalRConnectionMock> SignalRMock = std::make_unique<SignalRConnectionMock>();
+
+    // The start function will throw internally
+    EXPECT_CALL(*SignalRMock, Start)
+        .WillOnce([](std::function<void(std::exception_ptr)> Callback) { Callback(std::make_exception_ptr(std::runtime_error("mock exception"))); });
+
+    // Then the error callback we be called with an unknown error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::Unknown));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::Start, Error when starting SignalR connection.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock.release());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<SignalRConnectionMock> SignalRMock = std::make_unique<SignalRConnectionMock>();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    // Invoke function for delete objects errors
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillOnce([](const std::string& DeleteObjectsMethodName, const signalr::value& DeleteEntityMessage,
+                      std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            { Callback(signalr::value("Irrelevant value from DeleteObjects"), std::make_exception_ptr(std::runtime_error("mock exception"))); });
+
+    // Then the error callback we be called with an no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback,
+        Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock.release());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<SignalRConnectionMock> SignalRMock = std::make_unique<SignalRConnectionMock>();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Fail getting client Id
+                    Callback(signalr::value("Irrelevant value from GetClientId"), std::make_exception_ptr(std::runtime_error("mock exception")));
+                }
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(
+        MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock.release());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<SignalRConnectionMock> SignalRMock = std::make_unique<SignalRConnectionMock>();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+                else if (HubMethodName == "StartListening")
+                {
+                    // Fail to start listening
+                    Callback(signalr::value(std::uint64_t(0)), std::make_exception_ptr(std::runtime_error("mock exception")));
+                }
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock.release());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<SignalRConnectionMock> SignalRMock = std::make_unique<SignalRConnectionMock>();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+                else if (HubMethodName == "StartListening")
+                {
+                    // Succeed starting listening
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+            });
+
+    // Then the error callback will be called with no error
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(ErrorCode::None));
+
+    // And the connection callback with be called
+    MockConnectionCallback MockSuccessConnectionCallback;
+    EXPECT_CALL(MockSuccessConnectionCallback, Call(csp::common::String("Successfully connected to SignalR hub.")));
+
+    // And the disconnection callback will not be called
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
+
+    Connection->SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock.release());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // ParseMultiplayerError is odd, it seems only concerned with understanding this "Scopes_ConcurrentUsersQuota error"
+    // I'm actually not sure if CHS even still throws this format of errors, this could be completely redundant...
+    auto [ErrorCodeTooManyUsers, MsgTooManyUsers] = Connection->ParseMultiplayerError(std::runtime_error("error code: Scopes_ConcurrentUsersQuota"));
+    EXPECT_EQ(ErrorCodeTooManyUsers, csp::multiplayer::ErrorCode::SpaceUserLimitExceeded);
+    EXPECT_EQ(MsgTooManyUsers, "error code: Scopes_ConcurrentUsersQuota");
+
+    auto [ErrorCodeUnknown, MsgUnknown] = Connection->ParseMultiplayerError(std::runtime_error("Some unknown error"));
+    EXPECT_EQ(ErrorCodeUnknown, csp::multiplayer::ErrorCode::Unknown);
+    EXPECT_EQ(MsgUnknown, "Some unknown error");
 }
