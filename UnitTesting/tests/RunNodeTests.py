@@ -44,14 +44,15 @@ def main():
         )
 
     # Copy CSP WASM bin and JS wrapper code into dummy package
-    shutil.copy("../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.js", dummy_package_bin_path)
-    shutil.copy("../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.wasm", dummy_package_bin_path)
-    shutil.copy("../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.worker.js", dummy_package_bin_path)
+    output_path =  os.path.join("..", "..", "Tools", "WrapperGenerator", "Output", "TypeScript", "connected-spaces-platform.web")
+    shutil.copy(os.path.join(output_path, "debug", "ConnectedSpacesPlatform_WASM.js"), dummy_package_bin_path)
+    shutil.copy(os.path.join(output_path, "debug", "ConnectedSpacesPlatform_WASM.wasm"), dummy_package_bin_path)
+    shutil.copy(os.path.join(output_path, "debug", "ConnectedSpacesPlatform_WASM.worker.js"), dummy_package_bin_path)
 
-    shutil.copy("../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.js", dummy_package_path)
-    shutil.copy("../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.js.map", dummy_package_path)
-    shutil.copy("../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.d.ts", dummy_package_path)
-    shutil.copy("../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.ts", dummy_package_path)
+    shutil.copy(os.path.join(output_path, "connectedspacesplatform.js"), dummy_package_path)
+    shutil.copy(os.path.join(output_path, "connectedspacesplatform.js.map"), dummy_package_path)
+    shutil.copy(os.path.join(output_path, "connectedspacesplatform.d.ts"), dummy_package_path)
+    shutil.copy(os.path.join(output_path, "connectedspacesplatform.ts"), dummy_package_path)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--test_output_path", default=os.path.join(current_directory, "node_test_results.xml"))

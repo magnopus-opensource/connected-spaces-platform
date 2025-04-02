@@ -29,7 +29,7 @@ def get_arguments_commandline():
                         default="Library\\Binaries\\wasm")
     parser.add_argument('--relative_typescript_path',
                         help="Enter the relative path from root/teamcity for typescript.",
-                        default="Tools\\WrapperGenerator\\Output\\TypeScript")
+                        default="Tools\\WrapperGenerator\\Output\\TypeScript\\connected-spaces-platform.web")
     parser.add_argument('--license',
                         help="Enter the license required for the Connected Spaces Platform package.",
                         default="Apache-2.0")

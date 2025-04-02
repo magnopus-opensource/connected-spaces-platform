@@ -10,6 +10,31 @@ if [ -z "$1" ]
 fi
 
 docker run -w /src -v `pwd`:/src --rm emscripten/emsdk:$emsdk_version emmake make -j 8 config="$1"_wasm
+if [ $? -ne 0 ]
+  then
+    cd Tools/Emscripten
+    echo ERROR: Build failed. Have you started the docker engine?
+	exit 1
+fi
 
 python3 Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
-cd Tools/Emscripten
+if [ $? -ne 0 ]
+  then
+    cd Tools/Emscripten
+    echo ERROR: Generate TypeScript failed.
+	exit 1
+fi
+
+cp -r Library/Binaries/WASM/"$1" Tools/WrapperGenerator/Output/TypeScript/connected-spaces-platform.web/
+if [ $? -ne 0 ]
+  then
+    cd Tools/Emscripten
+    echo ERROR: Copy failed.
+	exit 1
+  else
+    cd Tools/Emscripten
+    echo Success! Build located in: ..\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web
+    exit 0
+fi
+
+
