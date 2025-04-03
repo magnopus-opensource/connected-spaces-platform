@@ -244,7 +244,7 @@ if not Project then
                 "crypto"
             }
         filter "platforms:wasm"
-            rtti("On")
+            rtti("Off")
 
             defines {
                 "CSP_WASM",
