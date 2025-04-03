@@ -138,6 +138,21 @@ public:
     }
 
     /// @brief Should be called within custom FromJson function
+    /// This will safely deserialize a member with the given key by first checking that the member exists
+    /// If the member is another custom type, this was internally call FromJson on that type
+    /// @param Key const char* : The key which references this member
+    /// @param Val T& : The member to deserialize to
+    template <typename T> bool SafeDeserializeMember(const char* Key, T& Val) const
+    {
+        if (HasProperty(Key))
+        {
+            DeserializeMember(Key, Val);
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Should be called within custom FromJson function
     /// This will return true if the given key exists
     /// @param Key const char* : The key to check
     /// @return bool : Returns true if the key exists in this object
