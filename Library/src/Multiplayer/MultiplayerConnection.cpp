@@ -403,7 +403,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
             {
                 // Success
                 INVOKE_IF_NOT_NULL(ConnectionCallback, "Successfully connected to SignalR hub.");
-                INVOKE_IF_NOT_NULL(Callback, ErrorCode::None); // ????
+                INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
             })
         .then(async::inline_scheduler(),
             csp::common::continuations::InvokeIfExceptionInChain(
