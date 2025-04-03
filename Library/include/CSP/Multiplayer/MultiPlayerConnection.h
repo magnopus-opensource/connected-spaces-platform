@@ -190,7 +190,7 @@ private:
     CSP_START_IGNORE
     async::task<void> Start() const;
     /* Connect Continuations */
-    // Delete the entity specified by the EntityId. std::numeric_limits<uint64_t>::max() means ALL_ENTITIES_ID, and deletes everything.s
+    // Delete the entity specified by the EntityId. std::numeric_limits<uint64_t>::max() means ALL_ENTITIES_ID, and deletes everything.
     auto DeleteEntities(uint64_t EntityId) const;
     // Get the client ID and return it (does not set it locally)
     auto RequestClientId();
