@@ -21,106 +21,102 @@
 #include "Debug/Logging.h"
 #include "Json/JsonSerializer.h"
 
-namespace
+namespace GLTFMaterialProperties
 {
-struct PropertyNames
-{
-    static constexpr const char* NAME = "name";
-    static constexpr const char* SHADER_TYPE = "shaderType";
-    static constexpr const char* VERSION = "version";
-    static constexpr const char* ALPHA_MODE = "alphaMode";
-    static constexpr const char* ALPHA_CUTOFF = "alphaCutoff";
-    static constexpr const char* DOUBLE_SIDED = "doubleSided";
-    static constexpr const char* BASE_COLOR_FACTOR = "baseColorFactor";
-    static constexpr const char* METALLIC_FACTOR = "metallicFactor";
-    static constexpr const char* ROUGHNESS_FACTOR = "roughnessFactor";
-    static constexpr const char* EMISSIVE_FACTOR = "emissiveFactor";
-    static constexpr const char* BASE_COLOR_TEX = "baseColorTexture";
-    static constexpr const char* METALLIC_ROUGH_TEX = "metallicRoughnessTexture";
-    static constexpr const char* NORMAL_TEX = "normalTexture";
-    static constexpr const char* OCCLUSION_TEX = "occlusionTexture";
-    static constexpr const char* EMISSIVE_TEX = "emissiveTexture";
-};
+static constexpr const char* Name = "name";
+static constexpr const char* ShaderType = "shaderType";
+static constexpr const char* Version = "version";
+static constexpr const char* AlphaMode = "alphaMode";
+static constexpr const char* AlphaCutoff = "alphaCutoff";
+static constexpr const char* DoubleSided = "doubleSided";
+static constexpr const char* BaseColorFactor = "baseColorFactor";
+static constexpr const char* MetallicFactor = "metallicFactor";
+static constexpr const char* RoughnessFactor = "roughnessFactor";
+static constexpr const char* EmissiveFactor = "emissiveFactor";
+static constexpr const char* BaseColorTex = "baseColorTexture";
+static constexpr const char* MetallicRoughTex = "metallicRoughnessTexture";
+static constexpr const char* NormalTex = "normalTexture";
+static constexpr const char* OcclusionTex = "occlusionTexture";
+static constexpr const char* EmissiveTex = "emissiveTexture";
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMaterial& Obj)
 {
-    Serializer.SerializeMember(PropertyNames::NAME, Obj.Name);
-    Serializer.SerializeMember(PropertyNames::SHADER_TYPE, static_cast<uint32_t>(Obj.Type));
-    Serializer.SerializeMember(PropertyNames::VERSION, Obj.Version);
-    Serializer.SerializeMember(PropertyNames::ALPHA_MODE, static_cast<uint32_t>(Obj.AlphaMode));
-    Serializer.SerializeMember(PropertyNames::ALPHA_CUTOFF, Obj.AlphaCutoff);
-    Serializer.SerializeMember(PropertyNames::DOUBLE_SIDED, Obj.DoubleSided);
-    Serializer.SerializeMember(PropertyNames::BASE_COLOR_FACTOR,
+    Serializer.SerializeMember(GLTFMaterialProperties::Name, Obj.Name);
+    Serializer.SerializeMember(GLTFMaterialProperties::ShaderType, static_cast<uint32_t>(Obj.Type));
+    Serializer.SerializeMember(GLTFMaterialProperties::Version, Obj.Version);
+    Serializer.SerializeMember(GLTFMaterialProperties::AlphaMode, static_cast<uint32_t>(Obj.AlphaMode));
+    Serializer.SerializeMember(GLTFMaterialProperties::AlphaCutoff, Obj.AlphaCutoff);
+    Serializer.SerializeMember(GLTFMaterialProperties::DoubleSided, Obj.DoubleSided);
+    Serializer.SerializeMember(GLTFMaterialProperties::BaseColorFactor,
         csp::common::Array<float> { Obj.BaseColorFactor.X, Obj.BaseColorFactor.Y, Obj.BaseColorFactor.Z, Obj.BaseColorFactor.W });
-    Serializer.SerializeMember(PropertyNames::METALLIC_FACTOR, Obj.MetallicFactor);
-    Serializer.SerializeMember(PropertyNames::ROUGHNESS_FACTOR, Obj.RoughnessFactor);
+    Serializer.SerializeMember(GLTFMaterialProperties::MetallicFactor, Obj.MetallicFactor);
+    Serializer.SerializeMember(GLTFMaterialProperties::RoughnessFactor, Obj.RoughnessFactor);
     Serializer.SerializeMember(
-        PropertyNames::EMISSIVE_FACTOR, csp::common::Array<float> { Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z });
+        GLTFMaterialProperties::EmissiveFactor, csp::common::Array<float> { Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z });
 
     if (Obj.BaseColorTexture.IsSet())
-        Serializer.SerializeMember(PropertyNames::BASE_COLOR_TEX, Obj.BaseColorTexture);
+        Serializer.SerializeMember(GLTFMaterialProperties::BaseColorTex, Obj.BaseColorTexture);
     if (Obj.MetallicRoughnessTexture.IsSet())
-        Serializer.SerializeMember(PropertyNames::METALLIC_ROUGH_TEX, Obj.MetallicRoughnessTexture);
+        Serializer.SerializeMember(GLTFMaterialProperties::MetallicRoughTex, Obj.MetallicRoughnessTexture);
     if (Obj.NormalTexture.IsSet())
-        Serializer.SerializeMember(PropertyNames::NORMAL_TEX, Obj.NormalTexture);
+        Serializer.SerializeMember(GLTFMaterialProperties::NormalTex, Obj.NormalTexture);
     if (Obj.OcclusionTexture.IsSet())
-        Serializer.SerializeMember(PropertyNames::OCCLUSION_TEX, Obj.OcclusionTexture);
+        Serializer.SerializeMember(GLTFMaterialProperties::OcclusionTex, Obj.OcclusionTexture);
     if (Obj.EmissiveTexture.IsSet())
-        Serializer.SerializeMember(PropertyNames::EMISSIVE_TEX, Obj.EmissiveTexture);
+        Serializer.SerializeMember(GLTFMaterialProperties::EmissiveTex, Obj.EmissiveTexture);
 }
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj)
 {
-    Deserializer.DeserializeMember(PropertyNames::NAME, Obj.Name);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::Name, Obj.Name);
 
     uint32_t ShaderType;
-    Deserializer.DeserializeMember(PropertyNames::SHADER_TYPE, ShaderType);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::ShaderType, ShaderType);
     Obj.Type = static_cast<csp::systems::EShaderType>(ShaderType);
 
-    Deserializer.DeserializeMember(PropertyNames::VERSION, Obj.Version);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::Version, Obj.Version);
 
     uint32_t AlphaMode;
-    Deserializer.DeserializeMember(PropertyNames::ALPHA_MODE, AlphaMode);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::AlphaMode, AlphaMode);
     Obj.AlphaMode = static_cast<csp::systems::EAlphaMode>(AlphaMode);
 
-    Deserializer.DeserializeMember(PropertyNames::ALPHA_CUTOFF, Obj.AlphaCutoff);
-    Deserializer.DeserializeMember(PropertyNames::DOUBLE_SIDED, Obj.DoubleSided);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::AlphaCutoff, Obj.AlphaCutoff);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::DoubleSided, Obj.DoubleSided);
 
     csp::common::Array<float> BaseColorFactorArray;
-    Deserializer.DeserializeMember(PropertyNames::BASE_COLOR_FACTOR, BaseColorFactorArray);
-    Obj.BaseColorFactor = csp::common::Vector4(BaseColorFactorArray[0], BaseColorFactorArray[1], BaseColorFactorArray[2], BaseColorFactorArray[3]);
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::BaseColorFactor, BaseColorFactorArray))
+    {
+        Obj.BaseColorFactor
+            = csp::common::Vector4(BaseColorFactorArray[0], BaseColorFactorArray[1], BaseColorFactorArray[2], BaseColorFactorArray[3]);
+    }
 
-    Deserializer.DeserializeMember(PropertyNames::METALLIC_FACTOR, Obj.MetallicFactor);
-    Deserializer.DeserializeMember(PropertyNames::ROUGHNESS_FACTOR, Obj.RoughnessFactor);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::MetallicFactor, Obj.MetallicFactor);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::RoughnessFactor, Obj.RoughnessFactor);
 
     csp::common::Array<float> EmissiveFactorArray;
-    Deserializer.DeserializeMember(PropertyNames::EMISSIVE_FACTOR, EmissiveFactorArray);
-    Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
-
-    if (Deserializer.HasProperty(PropertyNames::BASE_COLOR_TEX))
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::EmissiveFactor, EmissiveFactorArray))
     {
-        Deserializer.DeserializeMember(PropertyNames::BASE_COLOR_TEX, Obj.BaseColorTexture);
+        Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
+    }
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::BaseColorTex, Obj.BaseColorTexture))
+    {
         Obj.BaseColorTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty(PropertyNames::METALLIC_ROUGH_TEX))
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::MetallicRoughTex, Obj.MetallicRoughnessTexture))
     {
-        Deserializer.DeserializeMember(PropertyNames::METALLIC_ROUGH_TEX, Obj.MetallicRoughnessTexture);
         Obj.MetallicRoughnessTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty(PropertyNames::NORMAL_TEX))
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::NormalTex, Obj.NormalTexture))
     {
-        Deserializer.DeserializeMember(PropertyNames::NORMAL_TEX, Obj.NormalTexture);
         Obj.NormalTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty(PropertyNames::OCCLUSION_TEX))
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::OcclusionTex, Obj.OcclusionTexture))
     {
-        Deserializer.DeserializeMember(PropertyNames::OCCLUSION_TEX, Obj.OcclusionTexture);
         Obj.OcclusionTexture.SetTexture(true);
     }
-    if (Deserializer.HasProperty(PropertyNames::EMISSIVE_TEX))
+    if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::EmissiveTex, Obj.EmissiveTexture))
     {
-        Deserializer.DeserializeMember(PropertyNames::EMISSIVE_TEX, Obj.EmissiveTexture);
         Obj.EmissiveTexture.SetTexture(true);
     }
 }
