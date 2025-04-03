@@ -285,14 +285,6 @@ public:
     /// @return The id of the leader.
     uint64_t GetLeaderId() const;
 
-    /// @brief Finds a component by the given id.
-    ///
-    /// Searchs through all components of all entites so should be used sparingly.
-    ///
-    /// @param Id The id of the component to find.
-    /// @return A pointer to the found component which can be nullptr if the component is not found.
-    ComponentBase* FindComponentById(uint16_t Id);
-
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
     const bool GetEntityPatchRateLimitEnabled() const;

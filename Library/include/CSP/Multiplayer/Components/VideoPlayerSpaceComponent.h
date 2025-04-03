@@ -224,12 +224,6 @@ public:
     /// @param Value The type of video source used by this component.
     void SetVideoPlayerSourceType(VideoPlayerSourceType Value);
 
-    /// @brief Gets the Id of the mesh component that the video should be rendered to
-    uint16_t GetMeshComponentId() const;
-
-    /// @brief Sets the Id of the mesh component that the video should be rendered to
-    void SetMeshComponentId(uint16_t Id);
-
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()

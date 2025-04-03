@@ -1041,24 +1041,6 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
     }
 }
 
-ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
-{
-    // Search for component id across all entites
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ComponentBase* Component = Entities[i]->GetComponents()->operator[](Id);
-
-        if (Component)
-        {
-            return Component;
-        }
-    }
-
-    CSP_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
-
-    return nullptr;
-}
-
 const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
