@@ -141,7 +141,7 @@ public:
 
 private:
     TextureInfo ColorTexture;
-    bool DoubleSided;
+    bool IsDoubleSided;
     bool IsEmissive;
     EColorChannel ReadAlphaFromChannel;
     EBlendMode BlendMode;

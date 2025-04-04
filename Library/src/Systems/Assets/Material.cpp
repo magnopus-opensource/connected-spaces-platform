@@ -47,12 +47,12 @@ Material::Material(const csp::common::String& Name, const csp::common::String& I
 }
 
 Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId,
-    const EShaderType& InType, const int InVersion)
+    EShaderType InType, const int InVersion)
     : Name(Name)
     , Type(InType)
+    , Version(InVersion)
     , CollectionId(InAssetCollectionId)
     , Id(InAssetId)
-    , Version(InVersion)
 {
 }
 

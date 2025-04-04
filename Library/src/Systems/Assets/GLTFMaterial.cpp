@@ -47,7 +47,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMater
     Serializer.SerializeMember(GLTFMaterialProperties::Version, Obj.Version);
     Serializer.SerializeMember(GLTFMaterialProperties::AlphaMode, static_cast<uint32_t>(Obj.AlphaMode));
     Serializer.SerializeMember(GLTFMaterialProperties::AlphaCutoff, Obj.AlphaCutoff);
-    Serializer.SerializeMember(GLTFMaterialProperties::DoubleSided, Obj.DoubleSided);
+    Serializer.SerializeMember(GLTFMaterialProperties::DoubleSided, Obj.IsDoubleSided);
     Serializer.SerializeMember(GLTFMaterialProperties::BaseColorFactor,
         csp::common::Array<float> { Obj.BaseColorFactor.X, Obj.BaseColorFactor.Y, Obj.BaseColorFactor.Z, Obj.BaseColorFactor.W });
     Serializer.SerializeMember(GLTFMaterialProperties::MetallicFactor, Obj.MetallicFactor);
@@ -82,7 +82,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLT
     Obj.AlphaMode = static_cast<csp::systems::EAlphaMode>(AlphaMode);
 
     Deserializer.SafeDeserializeMember(GLTFMaterialProperties::AlphaCutoff, Obj.AlphaCutoff);
-    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::DoubleSided, Obj.DoubleSided);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::DoubleSided, Obj.IsDoubleSided);
 
     csp::common::Array<float> BaseColorFactorArray;
     if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::BaseColorFactor, BaseColorFactorArray))
@@ -164,7 +164,7 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::S
     : Material(Name, AssetCollectionId, AssetId, csp::systems::EShaderType::Standard, 1)
     , AlphaMode(EAlphaMode::Opaque)
     , AlphaCutoff(0.5f)
-    , DoubleSided(false)
+    , IsDoubleSided(false)
     , BaseColorFactor(1.f, 1.f, 1.f, 1.f)
     , MetallicFactor(1.f)
     , RoughnessFactor(1.f)
@@ -195,8 +195,8 @@ void GLTFMaterial::SetAlphaCutoff(float Mode) { AlphaCutoff = Mode; }
 
 float GLTFMaterial::GetAlphaCutoff() const { return AlphaCutoff; }
 
-void GLTFMaterial::SetDoubleSided(bool InDoubleSided) { DoubleSided = InDoubleSided; }
+void GLTFMaterial::SetDoubleSided(bool DoubleSided) { IsDoubleSided = DoubleSided; }
 
-bool GLTFMaterial::GetDoubleSided() const { return DoubleSided; }
+bool GLTFMaterial::GetDoubleSided() const { return IsDoubleSided; }
 
 } // namespace csp::systems
