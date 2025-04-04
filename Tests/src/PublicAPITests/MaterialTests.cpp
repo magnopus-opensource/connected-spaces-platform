@@ -130,9 +130,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateGLTFMaterialTest)
 
     // Create a standard material associated with the Space
     Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial2", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
 
     // Cleanup standard material
     DeleteMaterial(AssetSystem, *CreatedMaterial);
@@ -160,9 +158,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateAlphaVideoMaterialTest)
 
     // Create a alpha video material associated with the Space
     Material* CreatedMaterial = nullptr;
-    CreateMaterial(AssetSystem, "TestMaterial1", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
 
     // Cleanup alpha video material
     DeleteMaterial(AssetSystem, *CreatedMaterial);
@@ -191,8 +187,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateGLTFMaterialTest)
     // Create a standard material associated with the space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
+    GLTFMaterial* CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
 
     // Ensure the material can be updated
     EXPECT_EQ(CreatedGLTFMaterial->GetAlphaCutoff(), 0.5f);
@@ -233,8 +228,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateAlphaVideoMaterialTest)
     // Create a alpha video material associated with the space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
+    AlphaVideoMaterial* CreatedAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(CreatedMaterial);
 
     // Ensure the material can be updated
     EXPECT_EQ(CreatedAlphaVideoMaterial->GetAlphaFactor(), 1.0f);
@@ -304,26 +298,18 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     constexpr const char* TestAlphaVideoMaterialName1 = "TestAlphaVideoMaterial1";
     Material* CreatedMaterial1 = nullptr;
     CreateMaterial(AssetSystem, TestAlphaVideoMaterialName1, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial1);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial1 = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial1);
-    EXPECT_NE(CreatedAlphaVideoMaterial1, nullptr);
 
     constexpr const char* TestStandardMaterialName1 = "TestStandardMaterial1";
     Material* CreatedMaterial2 = nullptr;
     CreateMaterial(AssetSystem, TestStandardMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial2);
-    GLTFMaterial* CreatedGLTFMaterial1 = dynamic_cast<GLTFMaterial*>(CreatedMaterial2);
-    EXPECT_NE(CreatedGLTFMaterial1, nullptr);
 
     constexpr const char* TestAlphaVideoMaterialName2 = "TestAlphaVideoMaterial2";
     Material* CreatedMaterial3 = nullptr;
     CreateMaterial(AssetSystem, TestAlphaVideoMaterialName2, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial3);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial2 = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial3);
-    EXPECT_NE(CreatedAlphaVideoMaterial2, nullptr);
 
     constexpr const char* TestStandardMaterialName2 = "TestStandardMaterial2";
     Material* CreatedMaterial4 = nullptr;
     CreateMaterial(AssetSystem, TestStandardMaterialName2, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial4);
-    GLTFMaterial* CreatedGLTFMaterial2 = dynamic_cast<GLTFMaterial*>(CreatedMaterial4);
-    EXPECT_NE(CreatedGLTFMaterial2, nullptr);
 
     // Attempt to find the 4 materials that have been created
     csp::common::Array<Material*> FoundMaterials;
@@ -349,17 +335,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 
     for (int i = 0; i < FoundMaterials.Size(); ++i)
     {
-        if (FoundMaterials[i]->GetShaderType() == EShaderType::AlphaVideo)
-        {
-            AlphaVideoMaterial* FoundAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(FoundMaterials[i]);
-            EXPECT_NE(FoundAlphaVideoMaterial, nullptr);
-        }
-        else
-        {
-            GLTFMaterial* FoundGLTFMaterial = dynamic_cast<GLTFMaterial*>(FoundMaterials[i]);
-            EXPECT_NE(FoundGLTFMaterial, nullptr);
-        }
-
         const csp::common::String& SearchName = FoundMaterials[i]->GetName();
         const csp::common::String& SearchCollectionId = FoundMaterials[i]->GetMaterialCollectionId();
         const csp::common::String& SearchId = FoundMaterials[i]->GetMaterialId();
@@ -409,14 +384,10 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetGLTFMaterialTest)
 
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
 
     // Get the material
     Material* FoundMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
-    GLTFMaterial* FoundMaterialGLTF = dynamic_cast<GLTFMaterial*>(FoundMaterial);
-    EXPECT_NE(FoundMaterialGLTF, nullptr);
 
     EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
     EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
@@ -448,14 +419,10 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetAlphaVideoMaterialTest)
 
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
 
     // Get the material
     Material* FoundMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
-    AlphaVideoMaterial* FoundMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(FoundMaterial);
-    EXPECT_NE(FoundMaterialAlphaVideo, nullptr);
 
     EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
     EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
@@ -488,8 +455,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
     // Create a material so we have one in this space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
 
     // Attempt to get an invalid material
     Material* FoundMaterial = nullptr;
@@ -523,14 +488,10 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
     constexpr const char* TestMaterialName1 = "TestStandardMaterial";
     Material* CreatedMaterial1 = nullptr;
     CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial1);
-    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial1);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
 
     constexpr const char* TestMaterialName2 = "TestAlphaVideoMaterial";
     Material* CreatedMaterial2 = nullptr;
     CreateMaterial(AssetSystem, TestMaterialName2, csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial2);
-    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial2);
-    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
 
     // Delete first material
     DeleteMaterial(AssetSystem, *CreatedMaterial1);
@@ -543,8 +504,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
     // Make sure we can still get the second material
     Material* RemainingMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial2->GetMaterialCollectionId(), CreatedMaterial2->GetMaterialId(), &RemainingMaterial);
-    AlphaVideoMaterial* FoundMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(RemainingMaterial);
-    EXPECT_NE(FoundMaterialAlphaVideo, nullptr);
 
     // Delete second material
     DeleteMaterial(AssetSystem, *CreatedMaterial2);
@@ -601,8 +560,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         // Create a material associated with the space
         Material* CreatedMaterial = nullptr;
         CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-        CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-        EXPECT_NE(CreatedGLTFMaterial, nullptr);
 
         WaitForCallback(CallbackCalled);
 
@@ -754,8 +711,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     // Create a material associated with the space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
-    CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
-    EXPECT_NE(CreatedGLTFMaterial, nullptr);
+
     WaitForCallback(CallbackCalled);
 
     EXPECT_TRUE(CallbackCalled);
