@@ -39,6 +39,16 @@
 
 #pragma once
 
+#define LIBASYNC_CUSTOM_DEFAULT_SCHEDULER 1;
+
+// Declare async::default_scheduler with csp_scheduler
+class csp_scheduler;
+
+namespace async
+{
+csp_scheduler& default_scheduler();
+}
+
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
@@ -49,6 +59,24 @@
 #include <optional>
 #include <string>
 #include <type_traits>
+
+// Custom version of the async::inline_scheduler.
+class csp_scheduler
+{
+public:
+    static void schedule(async::task_run_handle t) { t.run(); }
+};
+
+// Set our custom scheduler as the default,
+// so we dont have to repeat async::inline_scheduler() in each .then() call.
+namespace async
+{
+inline csp_scheduler& default_scheduler()
+{
+    static csp_scheduler s;
+    return s;
+}
+}
 
 namespace csp::common::continuations
 {
@@ -177,6 +205,7 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
     };
 }
+
 //"Private" namespace for testing, to allow us not to link async++ in tests,
 // for the few tests where we want to stricly test mechanisms.
 namespace detail
@@ -191,40 +220,39 @@ namespace detail
         template <typename ExceptionHandlerCallable>
         inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
-            async::spawn(async::inline_scheduler(), []() { return; })
-                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+            async::spawn([]() { return; }).then(InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename ExceptionHandlerCallable>
         inline void SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
-            async::spawn(async::inline_scheduler(), []() { throw std::runtime_error(""); })
-                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+            async::spawn([]() { throw std::runtime_error(""); })
+                .then(InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename ExceptionHandlerCallable>
         inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
             ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
-            async::spawn(async::inline_scheduler(),
+            async::spawn(
                 [ResultCallback]() {
                     LogErrorAndCancelContinuation(
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
-                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
         inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
             IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
-            async::spawn(async::inline_scheduler(),
+            async::spawn(
                 [ResultCallback]() {
                     LogErrorAndCancelContinuation(
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
-                .then(async::inline_scheduler(), std::forward<IntermediateStepCallable>(IntermediateStep))
-                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(std::forward<IntermediateStepCallable>(IntermediateStep))
+                .then(InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
     }
 }
