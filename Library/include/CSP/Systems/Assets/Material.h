@@ -51,8 +51,8 @@ enum class EShaderType
     AlphaVideo = 1
 };
 
-/// @brief Defines how to alpha value is interpreted
-/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model
+/// @brief Defines how to alpha value is interpreted.
+/// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model.
 enum class EAlphaMode
 {
     Opaque,
@@ -60,8 +60,8 @@ enum class EAlphaMode
     Blend
 };
 
-/// @brief Defines how to alpha value is interpreted
-/// The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports
+/// @brief Defines how to alpha value is interpreted.
+/// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports
 /// EColorChannel.
 enum class EBlendMode
 {
@@ -69,8 +69,8 @@ enum class EBlendMode
     Additive = 1,
 };
 
-/// @brief Defines where the alpha value is read from
-/// The alpha value is usually taken from the fourth component of the base color but this allows is to be read from another channel
+/// @brief Defines where the alpha value is read from.
+/// @details The alpha value is usually taken from the fourth component of the base color but this allows is to be read from another channel.
 enum class EColorChannel
 {
     R = 0,
@@ -79,43 +79,47 @@ enum class EColorChannel
     A = 3
 };
 
-/// @ingroup Asset System
+/// @ingroup Asset System.
 /// @brief Base class for a material.
 class CSP_API Material
 {
 public:
-    /// @brief Gets the user-defined name of the material
-    /// @return csp::common::String&
+    /// @brief Gets the user-defined name of the material.
+    ///  @return const common::String& : Returns the material name.
     const csp::common::String& GetName() const;
 
-    /// @brief Gets the shader type of the material
-    /// @return csp::systems::EShaderType
+    /// @brief Gets the shader type of the material.
+    /// @return csp::systems::EShaderType : Returns the shader type.
     const csp::systems::EShaderType GetShaderType() const;
 
-    /// @brief Gets the version of the material
-    /// @return int
+    /// @brief Gets the version of the material.
+    /// @return int : Returns the version of the material.
     const int GetVersion() const;
 
-    /// @brief Gets the collection id for the material
-    /// @return const csp::common::String&
+    /// @brief Gets the collection id for the material.
+    /// @return const csp::common::String& : Returns the collection id.
     const csp::common::String& GetMaterialCollectionId() const;
 
-    /// @brief Gets the id for the material
-    /// @return const csp::common::String&
+    /// @brief Gets the id for the material.
+    /// @return const csp::common::String& : Returns the material id.
     const csp::common::String& GetMaterialId() const;
 
-    /// @brief Constructor which links the material to an asset
+    /// @brief Constructor which links the material to an asset.
     /// @param Name const csp::common::String& : The name of the material.
-    /// @param MaterialCollectionId const csp::common::String& : The asset collection where the material info is stored
-    /// @param MaterialId const csp::common::String& : The asset where the material info is stored
+    /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
+    /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
+
+    /// @brief Constructor which links a versioned material of a given type to an asset.
+    /// @param Name const csp::common::String& : The name of the material.
+    /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
+    /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
+    /// @param InType EShaderType : The material shader type.
+    /// @param InVersion const int : The material version.
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId,
         const EShaderType& InType, const int InVersion);
 
     virtual ~Material() = default;
-
-    // TODO
-    // make copy ctor and copy assignment and move ctor and move assignment protected. make them default
 
     Material() = default;
     csp::common::String Name;
@@ -141,7 +145,7 @@ private:
 };
 
 /// @ingroup Asset System
-/// @brief Data class used to contain information when attempting to download material data.
+/// @brief Result data class that contains downloaded material data.
 class CSP_API MaterialResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
@@ -153,9 +157,12 @@ class CSP_API MaterialResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the Material from the result.
+    /// @brief Retrieves the Material from the result.
+    /// @return const Material* : Returns a pointer to the Material object. The caller should take ownership of the pointer.
     const Material* GetMaterial() const;
 
+    /// @brief Retrieves the Material from the result.
+    /// @return Material* : Returns a pointer to the Material object. The caller should take ownership of the pointer.
     Material* GetMaterial();
 
     CSP_NO_EXPORT MaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
@@ -172,7 +179,7 @@ private:
 };
 
 /// @ingroup Asset System
-/// @brief Data class used to contain information when attempting to download a collection of material data.
+/// @brief Result data class that contains a collection of downloaded material data.
 class CSP_API MaterialsResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
@@ -184,12 +191,13 @@ class CSP_API MaterialsResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the Material from the result.
-    /// @return Asset : const ref Array Material class pointers.
+    /// @brief Retreives an Array of Materials from the result.
+    /// @return const Array<Material*>* : Returns a const pointer to an Array of Material class pointers. The caller should take ownership of the
+    /// pointer.
     const csp::common::Array<csp::systems::Material*>* GetMaterials() const;
 
-    /// @brief Retreives the Material from the result.
-    /// @return Asset : ref Array Material class pointers.
+    /// @brief Retreives an Array of Materials from the result.
+    /// @return Array<Material*>* : Returns a pointer to an Array of Material class pointers. The caller should take ownership of the pointer.
     csp::common::Array<csp::systems::Material*>* GetMaterials();
 
     CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
@@ -205,12 +213,12 @@ private:
     csp::common::Array<Material*> Materials;
 };
 
-/// @brief Callback containing material data.
-/// @param Result MaterialResult : result class
+/// @brief Callback containing requested material data.
+/// @param Result const MaterialResult& : Material result class.
 typedef std::function<void(const MaterialResult& Result)> MaterialResultCallback;
 
-/// @brief Callback containing a collection of material data.
-/// @param Result Array<MaterialResult> : result class
+/// @brief Callback containing a collection of requested material data.
+/// @param Result const MaterialsResult& : Material result class containing a collection of materials.
 typedef std::function<void(const MaterialsResult& Result)> MaterialsResultCallback;
 
 } // namespace csp::systems
