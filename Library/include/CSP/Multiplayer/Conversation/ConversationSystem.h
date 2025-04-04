@@ -127,8 +127,8 @@ public:
     /// Note that this is already called in MultiplayerConnection::Connect, so this shouldn't need to be called anywhere else.
     /// This should not be called by client code directly, marked as No Export.
     ///
-    /// @param InConnection csp::multiplayer::SignalRConnection : The connection to be used by the conversation system.
-    CSP_NO_EXPORT void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
+    /// @param InConnection csp::multiplayer::ISignalRConnection : The connection to be used by the conversation system.
+    CSP_NO_EXPORT void SetConnection(csp::multiplayer::ISignalRConnection* InConnection);
 
     // Callback to receive ConversationSystem Data when a message is sent.
     typedef std::function<void(const csp::multiplayer::ConversationSystemParams&)> ConversationSystemCallbackHandler;
@@ -152,7 +152,7 @@ private:
 
     void DeleteMessages(const csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 
-    SignalRConnection* Connection;
+    ISignalRConnection* Connection;
 
     ConversationSystemCallbackHandler ConversationSystemCallback;
 };

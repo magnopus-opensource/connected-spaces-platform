@@ -134,23 +134,27 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
                         CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
                     }
 
-                    MultiplayerConnection->StartListening(
-                        [this, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
-                        {
-                            if (Error != csp::multiplayer::ErrorCode::None)
+                    MultiplayerConnection->StartListening()()
+                        .then(async::inline_scheduler(),
+                            [this, RefreshMultiplayerContinuationEvent]()
                             {
-                                RefreshMultiplayerContinuationEvent->set(Error);
-                                return;
-                            }
+                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
-                            CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
+                                // TODO: Support getting errors from RetrieveAllEntities
+                                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
 
-                            // TODO: Support getting errors from RetrieveAllEntities
-                            csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
-
-                            // Success!
-                            RefreshMultiplayerContinuationEvent->set({});
-                        });
+                                // Success!
+                                RefreshMultiplayerContinuationEvent->set({});
+                            })
+                        .then(async::inline_scheduler(),
+                            csp::common::continuations::InvokeIfExceptionInChain(
+                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                                {
+                                    // Error case
+                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                    RefreshMultiplayerContinuationEvent->set(Error);
+                                    return;
+                                }));
                 });
         });
 }
@@ -174,7 +178,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSy
         /* If we need permissions, check that the user has permission to enter this specific space */
         if (JoiningSpaceRequiresInvite && !UserIsRecognizedBySpace)
         {
-            csp::common::continuations::LogErrorAndCancelContinuation(Callback,
+            csp::common::continuations::LogHTTPErrorAndCancelContinuation(Callback,
                 "Logged in user does not have permission to join this space. Failed to add to space.", EResultCode::Failed,
                 csp::web::EResponseCodes::ResponseForbidden, ERequestFailureReason::UserSpaceAccessDenied);
         }
@@ -271,8 +275,9 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed,
                 csp::web::EResponseCodes::ResponseInternalServerError, ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
         .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully entered space."))
-        .then(
-            async::inline_scheduler(), csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace]() { CurrentSpace = {}; }));
+        .then(async::inline_scheduler(),
+            csp::common::continuations::InvokeIfExceptionInChain(
+                [&CurrentSpace = CurrentSpace](const std::exception& /*Except*/) { CurrentSpace = {}; }));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)

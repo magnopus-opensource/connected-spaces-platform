@@ -42,7 +42,7 @@ ConversationSystem::ConversationSystem(MultiplayerConnection* Connection)
 
 ConversationSystem::~ConversationSystem() { DeregisterSystemCallback(); }
 
-void ConversationSystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection) { Connection = InConnection; }
+void ConversationSystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection) { Connection = InConnection; }
 
 void ConversationSystem::StoreConversationMessage(const csp::common::String& ConversationId, const csp::systems::Space& Space,
     const csp::common::String& UserId, const csp::common::String& SenderDisplayName, const csp::common::String& Message,
