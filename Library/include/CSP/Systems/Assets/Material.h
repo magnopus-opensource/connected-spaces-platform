@@ -117,7 +117,7 @@ public:
     /// @param InType EShaderType : The material shader type.
     /// @param InVersion const int : The material version.
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId,
-        const EShaderType& InType, const int InVersion);
+        EShaderType InType, const int InVersion);
 
     virtual ~Material() = default;
 

@@ -1021,22 +1021,12 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             if (Material.GetShaderType() == EShaderType::Standard)
             {
 
-                const GLTFMaterial* gltfMaterial = dynamic_cast<const GLTFMaterial*>(&Material);
-                if (gltfMaterial == nullptr)
-                {
-                    CSP_LOG_ERROR_MSG("Failed to cast material to GLTFMaterial");
-                    return;
-                }
+                const GLTFMaterial* gltfMaterial = static_cast<const GLTFMaterial*>(&Material);
                 MaterialJson = json::JsonSerializer::Serialize(*gltfMaterial);
             }
             else
             {
-                const AlphaVideoMaterial* alphaMaterial = dynamic_cast<const AlphaVideoMaterial*>(&Material);
-                if (alphaMaterial == nullptr)
-                {
-                    CSP_LOG_ERROR_MSG("Failed to cast material to AlphaVideoMaterial");
-                    return;
-                }
+                const AlphaVideoMaterial* alphaMaterial = static_cast<const AlphaVideoMaterial*>(&Material);
                 MaterialJson = json::JsonSerializer::Serialize(*alphaMaterial);
             }
 
