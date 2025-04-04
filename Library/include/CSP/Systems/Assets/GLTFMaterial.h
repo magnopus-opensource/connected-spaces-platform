@@ -181,7 +181,7 @@ public:
 private:
     EAlphaMode AlphaMode;
     float AlphaCutoff;
-    bool DoubleSided;
+    bool IsDoubleSided;
 
     csp::common::Vector4 BaseColorFactor;
     float MetallicFactor;

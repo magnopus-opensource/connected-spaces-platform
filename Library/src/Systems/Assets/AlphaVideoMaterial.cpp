@@ -49,7 +49,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AlphaVide
         Serializer.SerializeMember(AlphaVideoMaterialProperties::ColorTexture, Obj.ColorTexture);
     }
 
-    Serializer.SerializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.DoubleSided);
+    Serializer.SerializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.IsDoubleSided);
     Serializer.SerializeMember(AlphaVideoMaterialProperties::IsEmissive, Obj.IsEmissive);
     Serializer.SerializeMember(AlphaVideoMaterialProperties::ReadAlphaFromChannel, static_cast<uint32_t>(Obj.ReadAlphaFromChannel));
     Serializer.SerializeMember(AlphaVideoMaterialProperties::BlendMode, static_cast<uint32_t>(Obj.BlendMode));
@@ -76,7 +76,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Alp
         Obj.ColorTexture.SetTexture(true);
     }
 
-    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.DoubleSided);
+    Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::DoubleSided, Obj.IsDoubleSided);
     Deserializer.SafeDeserializeMember(AlphaVideoMaterialProperties::IsEmissive, Obj.IsEmissive);
 
     uint32_t ReadAlphaFromChannel;
@@ -107,7 +107,7 @@ AlphaVideoMaterial::AlphaVideoMaterial(
     const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
     : Material(Name, AssetCollectionId, AssetId, EShaderType::AlphaVideo, 1)
     , ColorTexture()
-    , DoubleSided(false)
+    , IsDoubleSided(false)
     , IsEmissive(true)
     , ReadAlphaFromChannel(EColorChannel::A)
     , BlendMode(EBlendMode::Normal)
@@ -129,11 +129,11 @@ void AlphaVideoMaterial::SetColorTexture(const TextureInfo& Texture) { ColorText
 
 const TextureInfo& AlphaVideoMaterial::GetColorTexture() const { return ColorTexture; }
 
-void AlphaVideoMaterial::SetDoubleSided(bool DoubleSided) { DoubleSided = DoubleSided; }
+void AlphaVideoMaterial::SetDoubleSided(bool DoubleSided) { IsDoubleSided = DoubleSided; }
 
-bool AlphaVideoMaterial::GetDoubleSided() const { return DoubleSided; }
+bool AlphaVideoMaterial::GetDoubleSided() const { return IsDoubleSided; }
 
-void AlphaVideoMaterial::SetIsEmissive(bool IsEmissive) { IsEmissive = IsEmissive; }
+void AlphaVideoMaterial::SetIsEmissive(bool Emissive) { IsEmissive = Emissive; }
 
 bool AlphaVideoMaterial::GetIsEmissive() const { return IsEmissive; }
 
