@@ -57,6 +57,8 @@ String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCol
         return "Comment";
     else if (AssetCollectionType == systems::EAssetCollectionType::SPACE_THUMBNAIL)
         return "SpaceThumbnail";
+    else if (AssetCollectionType == systems::EAssetCollectionType::ANNOTATION)
+        return "Annotation";
     else
     {
         assert(false && "Unsupported AssetCollection Type!");
@@ -88,6 +90,10 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
         return "GaussianSplat";
     else if (AssetType == systems::EAssetType::MATERIAL)
         return "Material";
+    else if (AssetType == systems::EAssetType::ANNOTATION)
+        return "Annotation";
+    else if (AssetType == systems::EAssetType::ANNOTATION_THUMBNAIL)
+        return "AnnotationThumbnail";
     else
     {
         assert(false && "Unsupported Asset Type!");
@@ -263,7 +269,7 @@ async::task<AssetCollectionResult> AssetSystem::CreateAssetCollection(const csp:
 
     const services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesPost(PrototypeInfo, ResponseHandler);
 
@@ -434,7 +440,7 @@ async::task<AssetCollectionResult> AssetSystem::GetAssetCollectionById(const csp
 
     services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
-            {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdGet(AssetCollectionId, ResponseHandler);
 
@@ -563,6 +569,130 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
             std::nullopt, // SortBy
             std::nullopt, // SortDirection
             ResponseHandler);
+}
+
+async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+    const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+    const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,
+    const csp::common::Optional<int>& ResultsMaxNumber)
+{
+    async::event_task<AssetCollectionsResult> OnCompleteEvent;
+    async::task<AssetCollectionsResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+    typedef std::optional<std::vector<String>> StringVec;
+
+    StringVec PrototypeIds;
+
+    if (Ids.HasValue())
+    {
+        std::vector<String> Vals;
+
+        for (size_t i = 0; i < Ids->Size(); ++i)
+        {
+            Vals.push_back(Ids->operator[](i));
+        }
+
+        PrototypeIds = std::move(Vals);
+    }
+
+    std::optional<String> ParentPrototypeId;
+
+    if (ParentId.HasValue())
+    {
+        ParentPrototypeId = *ParentId;
+    }
+
+    StringVec PrototypeNames;
+
+    if (Names.HasValue())
+    {
+        std::vector<String> Vals;
+
+        for (size_t i = 0; i < Names->Size(); ++i)
+        {
+            Vals.push_back(Names->operator[](i));
+        }
+
+        PrototypeNames = std::move(Vals);
+    }
+
+    StringVec PrototypeTypes;
+
+    if (Types.HasValue())
+    {
+        std::vector<String> Vals;
+
+        for (size_t i = 0; i < Types->Size(); ++i)
+        {
+            Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+        }
+
+        PrototypeTypes = std::move(Vals);
+    }
+
+    StringVec PrototypeTags;
+
+    if (Tags.HasValue())
+    {
+        std::vector<String> Vals;
+
+        for (size_t i = 0; i < Tags->Size(); ++i)
+        {
+            Vals.push_back(Tags->operator[](i));
+        }
+
+        PrototypeTags = std::move(Vals);
+    }
+
+    StringVec GroupIds;
+
+    if (SpaceIds.HasValue())
+    {
+        std::vector<String> Vals;
+
+        for (size_t i = 0; i < SpaceIds->Size(); ++i)
+        {
+            Vals.push_back(SpaceIds->operator[](i));
+        }
+
+        GroupIds = std::move(Vals);
+    }
+
+    int32_t Skip = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
+    int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
+
+    services::ResponseHandlerPtr ResponseHandler
+        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(
+            [](const AssetCollectionsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+        ->apiV1PrototypesGet(PrototypeTags, // Tags
+            std::nullopt, // ExcludedTags
+            std::nullopt, // TagsAll
+            PrototypeIds, // Ids
+            PrototypeNames, // Names
+            std::nullopt, // PartialNames
+            std::nullopt, // ExcludedIds
+            std::nullopt, // PointOfInterestIds
+            ParentPrototypeId, // ParentId
+            GroupIds, // GroupIds
+            PrototypeTypes, // Types
+            std::nullopt, // HasGroup
+            std::nullopt, // CreatedBy
+            std::nullopt, // CreatedAfter
+            std::nullopt, // PrototypeOwnerIds
+            std::nullopt, // ReadAccessFilters
+            std::nullopt, // WriteAccessFilters
+            std::nullopt, // OrganizationIds (no longer used)
+            Skip, // Skip
+            Limit, // Limit
+            std::nullopt, // SortBy
+            std::nullopt, // SortDirection
+            ResponseHandler);
+
+    return OnCompleteTask;
 }
 
 void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection, const Map<String, String>& NewMetadata,
@@ -719,7 +849,7 @@ async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& AssetCo
     AssetInfo->SetSupportedPlatforms(Platform);
 
     services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
-        {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
+        [](const AssetResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->apiV1PrototypesPrototypeIdAssetDetailsPost(AssetCollection.Id, AssetInfo, ResponseHandler);
 
@@ -935,7 +1065,7 @@ async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Ar
 
     services::ResponseHandlerPtr ResponseHandler
         = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(
-            {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+            [](const AssetsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
         ->apiV1PrototypesAssetDetailsGet(AssetDetailIds, // Ids
@@ -1048,7 +1178,7 @@ async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& Ass
     AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
 
     services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<UriResultCallback, UriResult, void, services::NullDto>(
-        {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+        [](const UriResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
         ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(

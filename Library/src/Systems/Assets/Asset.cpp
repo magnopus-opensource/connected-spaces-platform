@@ -52,6 +52,10 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
     else if (DTOAssetDetailType == "Material")
         return csp::systems::EAssetType::MATERIAL;
+    else if (DTOAssetDetailType == "Annotation")
+        return csp::systems::EAssetType::ANNOTATION;
+    else if (DTOAssetDetailType == "AnnotationThumbnail")
+        return csp::systems::EAssetType::ANNOTATION_THUMBNAIL;
     else
     {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");

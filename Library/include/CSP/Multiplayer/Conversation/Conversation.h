@@ -89,17 +89,9 @@ class CSP_API AnnotationData
 {
 public:
     AnnotationData();
-    AnnotationData(const csp::common::String& InAnnotationThumbnailId, const csp::common::String& InAnnotationId, const uint16_t InVerticalFov,
-        const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
+    AnnotationData(
+        const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
-
-    /// @brief Get the Annotation Thumbnail AssetCollection ID
-    /// @return a string representing the thumbnail AssetCollection ID
-    csp::common::String GetAnnotationThumbnailId() const;
-
-    /// @brief Get the Annotation AssetCollection ID
-    /// @return a string representing the annotation AssetCollection ID
-    csp::common::String GetAnnotationId() const;
 
     /// @brief Get the vertical FOV
     /// @return a uint16_t representing the vertical FOV
@@ -112,14 +104,6 @@ public:
     /// @brief Get the AuthorCameraRotation
     /// @return a Vector4 representing the AuthorCameraRotation
     csp::common::Vector4 GetAuthorCameraRotation() const;
-
-    /// @brief Set the AnnotationThumbnailId
-    /// @param InAnnotationThumbnailId
-    void SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId);
-
-    /// @brief Set the AnnotationId
-    /// @param InAnnotationId
-    void SetAnnotationId(const csp::common::String& InAnnotationId);
 
     /// @brief Set the VerticalFov
     /// @param InVerticalFov
@@ -134,8 +118,6 @@ public:
     void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
 
 private:
-    csp::common::String AnnotationThumbnailId;
-    csp::common::String AnnotationId;
     uint16_t VerticalFov;
     csp::common::Vector3 AuthorCameraPosition;
     csp::common::Vector4 AuthorCameraRotation;
@@ -300,7 +282,7 @@ private:
     uint64_t Count;
 };
 
-class AnnotationResult : public csp::systems::ResultBase
+class CSP_API AnnotationResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::systems::ConversationSystemInternal;
@@ -318,10 +300,13 @@ public:
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
-    void ParseAnnotationAssetData(const systems::AssetCollection& AssetCollection);
+    CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& AssetCollection);
+    CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
+    CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
 
-    void SetAnnotationAsset(const systems::Asset& Asset) { AnnotationAsset = Asset; }
-    void SetAnnotationThumbnailAsset(const systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
+    const AnnotationData& GetAnnotationData() const;
+    const csp::systems::Asset& GetAnnotationAsset() const;
+    const csp::systems::Asset& GetAnnotationThumbnailAsset() const;
 
 private:
     explicit AnnotationResult(void*) {};

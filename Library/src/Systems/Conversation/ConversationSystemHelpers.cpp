@@ -30,6 +30,9 @@ constexpr const char* ANNOTATION_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTIO
 constexpr const char* ANNOTATION_ASSET_NAME_PREFIX = "ASSET_ANNOTATION";
 constexpr const char* ANNOTATION_THUMBNAIL_ASSET_NAME_PREFIX = "ASSET_ANNOTATION_THUMBNAIL";
 
+constexpr const char* ANNOTATION_ASSET_FILENAME_PREFIX = "ASSET_FILE_ANNOTATION";
+constexpr const char* ANNOTATION_THUMBNAIL_ASSET_FILENAME_PREFIX = "ASSET_FILE_ANNOTATION_THUMBNAIL";
+
 // Comment keys
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
 // Annotation keys
@@ -106,6 +109,18 @@ common::String GetUniqueAnnotationThumbnailAssetName(const common::String& Space
     return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_NAME_PREFIX, Suffix.c_str());
 }
 
+common::String GetUniqueAnnotationAssetFileName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", ANNOTATION_ASSET_FILENAME_PREFIX, Suffix.c_str()) + ".json";
+}
+
+common::String GetUniqueAnnotationThumbnailFileName(const common::String& SpaceId, const common::String& CreatorUserId)
+{
+    const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
+    return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_FILENAME_PREFIX, Suffix.c_str()) + ".json";
+}
+
 common::String GetUniqueAnnotationAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)
 {
     const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
@@ -146,8 +161,6 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
 common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData)
 {
     common::Map<common::String, common::String> MetadataMap;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID] = AnnotationData.GetAnnotationThumbnailId();
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID] = AnnotationData.GetAnnotationId();
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV] = std::to_string(AnnotationData.GetVerticalFov()).c_str();
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.GetAuthorCameraPosition());
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.GetAuthorCameraRotation());
@@ -191,8 +204,6 @@ multiplayer::AnnotationData GetAnnotationDataFromAnnoationAssetCollection(const 
     multiplayer::AnnotationData Data;
     const auto& MetadataMap = AnnotationAssetCollection.GetMetadataImmutable();
 
-    Data.SetAnnotationThumbnailId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID]);
-    Data.SetAnnotationId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID]);
     Data.SetVerticalFov(std::stoi(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str()));
     Data.SetAuthorCameraPosition(StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]));
     Data.SetAuthorCameraRotation(StringToVector4(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION]));

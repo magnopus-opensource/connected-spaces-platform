@@ -191,13 +191,13 @@ public:
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void SetAnnotation(const csp::common::String& MessageId, const AnnotationData& AnnotationData,
-        const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
+        const csp::systems::BufferAssetDataSource& Annotation, const csp::systems::BufferAssetDataSource& AnnotationThumbnail,
         AnnotationResultCallback Callback);
 
     /// @brief Deletes an annotation associated with a message.
     /// @param MessageId const csp::common::String& : The message id whos annotation to delete.
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 

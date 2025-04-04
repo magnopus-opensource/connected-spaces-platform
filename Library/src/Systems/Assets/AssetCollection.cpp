@@ -41,6 +41,8 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
         return csp::systems::EAssetCollectionType::COMMENT;
     else if (DTOPrototypeType == "SpaceThumbnail")
         return csp::systems::EAssetCollectionType::SPACE_THUMBNAIL;
+    else if (DTOPrototypeType == "Annotation")
+        return csp::systems::EAssetCollectionType::ANNOTATION;
     else
     {
         assert(false && "Unsupported Prototype Type!");

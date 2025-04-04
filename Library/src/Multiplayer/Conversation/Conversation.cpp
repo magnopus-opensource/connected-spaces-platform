@@ -23,46 +23,32 @@ namespace csp::multiplayer
 {
 
 AnnotationData::AnnotationData()
-    : AnnotationThumbnailId("")
-    , AnnotationId("")
-    , VerticalFov(0)
+    : VerticalFov(0)
     , AuthorCameraPosition()
     , AuthorCameraRotation()
 {
 }
 
-AnnotationData::AnnotationData(const csp::common::String& InAnnotationThumbnailId, const csp::common::String& InAnnotationId,
+AnnotationData::AnnotationData(
     const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
-    : AnnotationThumbnailId(InAnnotationThumbnailId)
-    , AnnotationId(InAnnotationId)
-    , VerticalFov(InVerticalFov)
+    : VerticalFov(InVerticalFov)
     , AuthorCameraPosition(InAuthorCameraPosition)
     , AuthorCameraRotation(InAuthorCameraRotation)
 {
 }
 
 AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
-    : AnnotationThumbnailId(InAnnotationData.AnnotationThumbnailId)
-    , AnnotationId(InAnnotationData.AnnotationId)
-    , VerticalFov(InAnnotationData.VerticalFov)
+    : VerticalFov(InAnnotationData.VerticalFov)
     , AuthorCameraPosition(InAnnotationData.AuthorCameraPosition)
     , AuthorCameraRotation(InAnnotationData.AuthorCameraRotation)
 {
 }
-
-csp::common::String AnnotationData::GetAnnotationThumbnailId() const { return AnnotationThumbnailId; }
-
-csp::common::String AnnotationData::GetAnnotationId() const { return AnnotationId; }
 
 uint16_t AnnotationData::GetVerticalFov() const { return VerticalFov; }
 
 csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() const { return AuthorCameraPosition; }
 
 csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() const { return AuthorCameraRotation; }
-
-void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId) { AnnotationThumbnailId = InAnnotationThumbnailId; }
-
-void AnnotationData::SetAnnotationId(const csp::common::String& InAnnotationId) { AnnotationId = InAnnotationId; }
 
 void AnnotationData::SetVerticalFov(const uint16_t InVerticalFov) { VerticalFov = InVerticalFov; }
 
@@ -160,5 +146,11 @@ void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& 
     Data = systems::ConversationSystemHelpers::GetAnnotationDataFromAnnoationAssetCollection(AssetCollection);
 }
 
-void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+const AnnotationData& AnnotationResult::GetAnnotationData() const { return Data; }
+
+const csp::systems::Asset& AnnotationResult::GetAnnotationAsset() const { return AnnotationAsset; }
+
+const csp::systems::Asset& AnnotationResult::GetAnnotationThumbnailAsset() const { return AnnotationThumbnailAsset; }
+
+void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
 } // namespace csp::multiplayer
