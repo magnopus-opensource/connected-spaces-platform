@@ -16,8 +16,6 @@
 
 #include "CSP/Common/CancellationToken.h"
 
-#include "Memory/Memory.h"
-
 #include <atomic>
 
 namespace csp::common
@@ -42,11 +40,11 @@ private:
 };
 
 CancellationToken::CancellationToken()
-    : ImplPtr(CSP_NEW Impl())
+    : ImplPtr(new Impl())
 {
 }
 
-CancellationToken::~CancellationToken() { CSP_DELETE(ImplPtr); }
+CancellationToken::~CancellationToken() { delete (ImplPtr); }
 
 void CancellationToken::Cancel() { ImplPtr->Cancel(); }
 
