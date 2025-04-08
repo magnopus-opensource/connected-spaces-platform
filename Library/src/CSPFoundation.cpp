@@ -299,12 +299,12 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
         return false;
     }
 
-    Tenant = CSP_NEW csp::common::String(InTenant);
+    Tenant = new csp::common::String(InTenant);
 
-    Endpoints = CSP_NEW EndpointURIs(CreateEndpointsFromRoot(EndpointRootURI));
-    ClientUserAgentInfo = CSP_NEW ClientUserAgent();
-    DeviceId = CSP_NEW csp::common::String("");
-    ClientUserAgentString = CSP_NEW csp::common::String("");
+    Endpoints = new EndpointURIs(CreateEndpointsFromRoot(EndpointRootURI));
+    ClientUserAgentInfo = new ClientUserAgent();
+    DeviceId = new csp::common::String("");
+    ClientUserAgentString = new csp::common::String("");
 
     csp::systems::SystemsManager::Instantiate();
 
@@ -339,11 +339,11 @@ bool CSPFoundation::Shutdown()
     csp::events::EventSystem::Get().UnRegisterAllListeners();
     csp::systems::SystemsManager::Destroy();
 
-    CSP_DELETE(Tenant);
-    CSP_DELETE(Endpoints);
-    CSP_DELETE(ClientUserAgentInfo);
-    CSP_DELETE(DeviceId);
-    CSP_DELETE(ClientUserAgentString);
+    delete (Tenant);
+    delete (Endpoints);
+    delete (ClientUserAgentInfo);
+    delete (DeviceId);
+    delete (ClientUserAgentString);
 
     return true;
 }
@@ -412,7 +412,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
         GetClientUserAgentInfo().ClientOS.c_str());
 }
 
-void Free(void* Pointer) { CSP_FREE(Pointer); }
+void Free(void* Pointer) { delete Pointer; }
 
 void* ModuleHandle = nullptr;
 

@@ -18,7 +18,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
 namespace
@@ -53,7 +53,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)] = static_cast<int64_t>(0);
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)] = true;
 
-    SetScriptInterface(CSP_NEW VideoPlayerSpaceComponentScriptInterface(this));
+    SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const

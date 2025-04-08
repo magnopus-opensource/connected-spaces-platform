@@ -15,8 +15,6 @@
  */
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 
-#include "Memory/Memory.h"
-
 namespace csp::systems
 {
 
@@ -69,7 +67,7 @@ AnalyticsEvent::AnalyticsEvent(const csp::common::String& Tag)
 {
 }
 
-AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag) { return CSP_NEW AnalyticsEvent(Tag); }
+AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag) { return new AnalyticsEvent(Tag); }
 
-void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event) { CSP_DELETE(Event); }
+void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event) { delete (Event); }
 } // namespace csp::systems

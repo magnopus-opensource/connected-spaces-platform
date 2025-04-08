@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -35,7 +35,7 @@ ButtonSpaceComponent::ButtonSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled)] = true;
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW ButtonSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ButtonSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ButtonSpaceComponent::GetLabelText() const

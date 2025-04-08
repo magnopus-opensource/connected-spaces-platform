@@ -17,7 +17,6 @@
 
 #include "Common/Queue.h"
 #include "Events/EventDispatcher.h"
-#include "Memory/Memory.h"
 
 #include <unordered_map>
 
@@ -62,9 +61,7 @@ public:
 private:
     csp::Queue<const Event*> EventQueue;
 
-    // Define eastl map using above defined hasher and our custom allocator
-    using DispatcherMap = std::unordered_map<EventId, EventDispatcher, std::hash<EventId>, std::equal_to<EventId>,
-        csp::memory::StlAllocator<std::pair<const EventId, EventDispatcher>>>;
+    using DispatcherMap = std::unordered_map<EventId, EventDispatcher, std::hash<EventId>, std::equal_to<EventId>>;
 
     DispatcherMap Dispatchers;
 };
@@ -115,7 +112,7 @@ void EventSystemImpl::ProcessEvents()
         const EventId& Id = QueuedEvent->GetId();
         GetDispatcher(Id).Dispatch(*QueuedEvent);
 
-        CSP_DELETE(QueuedEvent);
+        delete (QueuedEvent);
     }
 }
 
@@ -128,13 +125,13 @@ EventSystem& EventSystem::Get()
 }
 
 EventSystem::EventSystem()
-    : Impl(CSP_NEW EventSystemImpl())
+    : Impl(new EventSystemImpl())
 {
 }
 
-EventSystem::~EventSystem() { CSP_DELETE(Impl); }
+EventSystem::~EventSystem() { delete (Impl); }
 
-Event* EventSystem::AllocateEvent(const EventId& Id) { return CSP_NEW Event(Id); }
+Event* EventSystem::AllocateEvent(const EventId& Id) { return new Event(Id); }
 
 void EventSystem::EnqueueEvent(const Event* InEvent)
 {

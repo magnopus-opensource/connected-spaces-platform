@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -38,7 +38,7 @@ TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW TextSpaceComponentScriptInterface(this));
+    SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
 
 /* ITransformComponent */

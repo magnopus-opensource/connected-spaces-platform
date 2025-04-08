@@ -17,7 +17,7 @@
 
 #include "CSP/Common/String.h"
 #include "Common/StlString.h"
-#include "Memory/StlAllocator.h"
+
 #include "Web/Json.h"
 
 #include <map>
@@ -30,8 +30,7 @@ namespace csp::web
 class HttpPayload
 {
 public:
-    using HeadersMap = std::map<csp::StlString, csp::StlString, std::less<csp::StlString>,
-        csp::memory::StlAllocator<std::pair<const csp::StlString, csp::StlString>>>;
+    using HeadersMap = std::map<csp::StlString, csp::StlString, std::less<csp::StlString>>;
 
     HttpPayload();
     HttpPayload(const char* InContent);
