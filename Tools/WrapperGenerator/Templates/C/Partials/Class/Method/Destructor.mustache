@@ -7,6 +7,6 @@
 {{ unique_name }}({{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.name }}* inst)
 {{/ parent_class.is_template_instance }}
 {
-    CSP_DELETE(inst);
+    delete inst;
 }
 {{/ is_private }}
