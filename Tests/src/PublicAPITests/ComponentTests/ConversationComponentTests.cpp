@@ -1547,7 +1547,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
 #endif
 
 /*
-Tests that events related to annotations are correctly sent and received
+Tests that annotations can be correctly get, set and deleted
 */
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotationTest)
 {
@@ -1643,6 +1643,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
     }
 
+    csp::common::String AnnotationAssetId;
+    csp::common::String AnnotationThumbnailAssetId;
+
     // Get annotation and ensure data still matches
     {
         auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotation, RequestPredicate, MessageId);
@@ -1661,6 +1664,36 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        AnnotationAssetId = Result.GetAnnotationAsset().Id;
+        AnnotationThumbnailAssetId = Result.GetAnnotationThumbnailAsset().Id;
+    }
+
+    // Delete annotation and ensure collection and assets are deleted
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteAnnotation, RequestPredicate, MessageId);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Attempt to get the deleted annotation
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                if (Message == "Failed to get annotation asset.")
+                {
+                    CallbackCalled = true;
+                }
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotation, RequestPredicate, MessageId);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        EXPECT_TRUE(CallbackCalled);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
 
     // Delete space
@@ -1817,12 +1850,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 }
 
 // test annotations cant be attached to blank messages
-// test annotations cant be attached to invalid message ids
-// test annotations can be updated
+// ensure annotations cant be created on an invalid message id (not parented to conversation)
+// test annotations can be updated and annotation collecitons/assets are overwritten and not duplicated
 // test annotations that are updated delete the old ones
 // test annotations can be deleted
 // test annotation assets are deleted with parent?
 // test anotation is deleted with message
+
 // test getting 0 thumbnails
 // test getting multiple thumbnails
-// ensure annotations cant be created on an invalid message id (not parented to conversation)

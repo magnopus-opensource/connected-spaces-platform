@@ -182,6 +182,41 @@ namespace
         };
     }
 
+    auto GetOrCreateAnnotationAssetCollection(AssetSystem* AssetSystem, const csp::common::String& SpaceId, const csp::common::String& Name,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+    {
+        return [AssetSystem, SpaceId, Name, Metadata](const AssetCollectionResult& Parent)
+        {
+            FindAnnotationAssetCollection(AssetSystem, Parent.GetAssetCollection().Id, SpaceId)()
+                .then([AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result) { return Result; })
+                .then(
+                    [AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result)
+                    {
+                        if (Result.GetTotalCount() == 0)
+                        {
+                            return AssetSystem->CreateAssetCollection(
+                                SpaceId, Parent.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
+                        }
+                        else if (Result.GetTotalCount() == 1)
+                        {
+                            async::event_task<AssetCollectionResult> OnCompleteEvent;
+                            async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+                            AssetCollectionResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
+                            NewResult.SetAssetCollection(Result.GetAssetCollections()[0]);
+                            OnCompleteEvent.set(NewResult);
+
+                            return OnCompleteTask;
+                        }
+                        else
+                        {
+                            // TODO: throw
+                            return async::task<AssetCollectionResult>();
+                        }
+                    });
+        };
+    };
+
     auto SendConversationEvent(
         multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection, multiplayer::EventBus* EventBus)
     {
@@ -694,13 +729,14 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     // 1. Get message asset collection
     AssetSystem->GetAssetCollectionById(MessageId)
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-            "ConversationSystemInternal::SetAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+            "ConversationSystemInternal::SetAnnotation, successfully retrieved asset collection", "Failed to get message asset collection.", {}, {},
+            {}))
         .then(SetAnnotationAssetCollection(MessageAssetCollection))
         // 2. Create annotation asset collection
         .then(CreateAnnotationAssetCollection(this->AssetSystem, SpaceId, UniqueAssetCollectionName, AnnotationMetadata))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-            "ConversationSystemInternal::SetAnnotation, successfully created annotation asset collection", "Failed to create asset collection.", {},
-            {}, {}))
+            "ConversationSystemInternal::SetAnnotation, successfully created annotation asset collection",
+            "Failed to create annotation asset collection.", {}, {}, {}))
         .then(SetAnnotationAssetCollection(AnnotationAssetCollection))
         // 3. Create Annotation asset
         .then(CreateAnnotationAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationAssetName))
@@ -836,5 +872,4 @@ bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::Conversati
 
     return false;
 }
-
 }
