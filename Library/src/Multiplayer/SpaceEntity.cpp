@@ -43,7 +43,7 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
@@ -97,12 +97,12 @@ SpaceEntity::SpaceEntity()
     , SelectedId(0)
     , Parent(nullptr)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, nullptr))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(new EntityScript(this, nullptr))
+    , ScriptInterface(new EntityScriptInterface(this))
+    , EntityLock(new std::mutex)
+    , ComponentsLock(new std::mutex)
+    , PropertiesLock(new std::mutex)
+    , RefCount(new std::atomic_int(0))
     , TimeOfLastPatch(0)
 {
 }
@@ -122,12 +122,12 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , SelectedId(0)
     , Parent(nullptr)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, InEntitySystem))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(new EntityScript(this, InEntitySystem))
+    , ScriptInterface(new EntityScriptInterface(this))
+    , EntityLock(new std::mutex)
+    , ComponentsLock(new std::mutex)
+    , PropertiesLock(new std::mutex)
+    , RefCount(new std::atomic_int(0))
     , TimeOfLastPatch(0)
 {
 }
@@ -139,16 +139,16 @@ SpaceEntity::~SpaceEntity()
     auto i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
-        CSP_DELETE(Components[Keys[i]]);
+        delete (Components[Keys[i]]);
     }
 
-    CSP_DELETE(Script);
-    CSP_DELETE(ScriptInterface);
+    delete (Script);
+    delete (ScriptInterface);
 
-    CSP_DELETE(EntityLock);
-    CSP_DELETE(ComponentsLock);
-    CSP_DELETE(PropertiesLock);
-    CSP_DELETE(RefCount);
+    delete (EntityLock);
+    delete (ComponentsLock);
+    delete (PropertiesLock);
+    delete (RefCount);
 }
 
 uint64_t SpaceEntity::GetId() const { return Id; }
@@ -546,7 +546,7 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
                 SerialiseComponent(Serialiser, &DeletionComponent);
             }
 
-            CSP_DELETE(&DirtyComponentKeys);
+            delete (&DirtyComponentKeys);
         }
         Serialiser.EndComponents();
     }
@@ -587,7 +587,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
                 SerialiseComponent(Serialiser, Component);
             }
 
-            CSP_DELETE(&DirtyComponentKeys);
+            delete (&DirtyComponentKeys);
         }
         Serialiser.EndComponents();
     }
@@ -901,7 +901,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             DirtyComponents.Clear();
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
 
         if (DirtyProperties.Size() > 0)
         {
@@ -946,7 +946,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             DirtyProperties.Clear();
-            CSP_DELETE(DirtyViewKeys);
+            delete (DirtyViewKeys);
         }
 
         if (TransientDeletionComponentIds.Size() > 0)
@@ -971,7 +971,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             TransientDeletionComponentIds.Clear();
-            CSP_DELETE(DirtyComponentKeys);
+            delete (DirtyComponentKeys);
         }
 
         if (ShouldUpdateParent)
@@ -1017,73 +1017,73 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
     switch (Type)
     {
     case ComponentType::StaticModel:
-        Component = CSP_NEW StaticModelSpaceComponent(this);
+        Component = new StaticModelSpaceComponent(this);
         break;
     case ComponentType::AnimatedModel:
-        Component = CSP_NEW AnimatedModelSpaceComponent(this);
+        Component = new AnimatedModelSpaceComponent(this);
         break;
     case ComponentType::VideoPlayer:
-        Component = CSP_NEW VideoPlayerSpaceComponent(this);
+        Component = new VideoPlayerSpaceComponent(this);
         break;
     case ComponentType::Image:
-        Component = CSP_NEW ImageSpaceComponent(this);
+        Component = new ImageSpaceComponent(this);
         break;
     case ComponentType::ExternalLink:
-        Component = CSP_NEW ExternalLinkSpaceComponent(this);
+        Component = new ExternalLinkSpaceComponent(this);
         break;
     case ComponentType::AvatarData:
-        Component = CSP_NEW AvatarSpaceComponent(this);
+        Component = new AvatarSpaceComponent(this);
         break;
     case ComponentType::Light:
-        Component = CSP_NEW LightSpaceComponent(this);
+        Component = new LightSpaceComponent(this);
         break;
     case ComponentType::ScriptData:
-        Component = CSP_NEW ScriptSpaceComponent(this);
+        Component = new ScriptSpaceComponent(this);
         break;
     case ComponentType::Button:
-        Component = CSP_NEW ButtonSpaceComponent(this);
+        Component = new ButtonSpaceComponent(this);
         break;
     case ComponentType::Custom:
-        Component = CSP_NEW CustomSpaceComponent(this);
+        Component = new CustomSpaceComponent(this);
         break;
     case ComponentType::Portal:
-        Component = CSP_NEW PortalSpaceComponent(this);
+        Component = new PortalSpaceComponent(this);
         break;
     case ComponentType::Conversation:
-        Component = CSP_NEW ConversationSpaceComponent(this);
+        Component = new ConversationSpaceComponent(this);
         break;
     case ComponentType::Audio:
-        Component = CSP_NEW AudioSpaceComponent(this);
+        Component = new AudioSpaceComponent(this);
         break;
     case ComponentType::Spline:
-        Component = CSP_NEW SplineSpaceComponent(this);
+        Component = new SplineSpaceComponent(this);
         break;
     case ComponentType::Collision:
-        Component = CSP_NEW CollisionSpaceComponent(this);
+        Component = new CollisionSpaceComponent(this);
         break;
     case ComponentType::Reflection:
-        Component = CSP_NEW ReflectionSpaceComponent(this);
+        Component = new ReflectionSpaceComponent(this);
         break;
     case ComponentType::Fog:
-        Component = CSP_NEW FogSpaceComponent(this);
+        Component = new FogSpaceComponent(this);
         break;
     case ComponentType::ECommerce:
-        Component = CSP_NEW ECommerceSpaceComponent(this);
+        Component = new ECommerceSpaceComponent(this);
         break;
     case ComponentType::CinematicCamera:
-        Component = CSP_NEW CinematicCameraSpaceComponent(this);
+        Component = new CinematicCameraSpaceComponent(this);
         break;
     case ComponentType::FiducialMarker:
-        Component = CSP_NEW FiducialMarkerSpaceComponent(this);
+        Component = new FiducialMarkerSpaceComponent(this);
         break;
     case ComponentType::GaussianSplat:
-        Component = CSP_NEW GaussianSplatSpaceComponent(this);
+        Component = new GaussianSplatSpaceComponent(this);
         break;
     case ComponentType::Text:
-        Component = CSP_NEW TextSpaceComponent(this);
+        Component = new TextSpaceComponent(this);
         break;
     case ComponentType::Hotspot:
-        Component = CSP_NEW HotspotSpaceComponent(this);
+        Component = new HotspotSpaceComponent(this);
         break;
     default:
     {
@@ -1222,7 +1222,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
         }
     }
 
-    CSP_DELETE(ComponentKeys);
+    delete (ComponentKeys);
 
     if (LocatedComponent == nullptr && SearchDirtyComponents)
     {
@@ -1239,7 +1239,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
             }
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
     }
 
     return LocatedComponent;

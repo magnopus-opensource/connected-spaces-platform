@@ -17,7 +17,8 @@
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+#include <memory>
+
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -38,7 +39,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
 
-    SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
+    SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */
@@ -71,7 +72,7 @@ csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceCompo
 
     csp::common::Map<csp::common::String, csp::common::String> Overrides;
 
-    auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
+    auto Deleter = [](const common::Array<common::String>* Ptr) { delete (Ptr); };
 
     std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
         const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()), Deleter);

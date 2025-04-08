@@ -357,18 +357,18 @@ AssetSystem::AssetSystem()
 AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
     : SystemBase(InWebClient, InEventBus)
 {
-    PrototypeAPI = CSP_NEW chs::PrototypeApi(InWebClient);
-    AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
+    PrototypeAPI = new chs::PrototypeApi(InWebClient);
+    AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
 
-    FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+    FileManager = new web::RemoteFileManager(InWebClient);
 }
 
 AssetSystem::~AssetSystem()
 {
-    CSP_DELETE(FileManager);
+    delete (FileManager);
 
-    CSP_DELETE(AssetDetailAPI);
-    CSP_DELETE(PrototypeAPI);
+    delete (AssetDetailAPI);
+    delete (PrototypeAPI);
 
     DeregisterSystemCallback();
 }

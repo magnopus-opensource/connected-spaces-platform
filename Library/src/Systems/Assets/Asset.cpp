@@ -18,7 +18,7 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/Convert.h"
-#include "Memory/Memory.h"
+
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/AssetFileDto.h"
 #include "Services/PrototypeService/Dto.h"

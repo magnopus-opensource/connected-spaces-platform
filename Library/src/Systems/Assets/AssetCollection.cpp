@@ -120,7 +120,7 @@ AssetCollection::AssetCollection()
     : Type(EAssetCollectionType::DEFAULT)
     , IsUnique(false)
 {
-    Metadata = CSP_NEW csp::common::Map<csp::common::String, csp::common::String>();
+    Metadata = new csp::common::Map<csp::common::String, csp::common::String>();
 }
 
 AssetCollection::AssetCollection(const AssetCollection& Other)
@@ -129,7 +129,7 @@ AssetCollection::AssetCollection(const AssetCollection& Other)
     *this = Other;
 }
 
-AssetCollection::~AssetCollection() { CSP_DELETE(Metadata); }
+AssetCollection::~AssetCollection() { delete (Metadata); }
 
 AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
 {

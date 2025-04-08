@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "tinysplinecxx.h"
 
@@ -27,7 +27,7 @@ SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent)
 {
     Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
 
-    SetScriptInterface(CSP_NEW SplineSpaceComponentScriptInterface(this));
+    SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
 
 csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)

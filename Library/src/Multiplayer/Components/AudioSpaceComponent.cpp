@@ -17,7 +17,7 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
 namespace
@@ -46,7 +46,7 @@ AudioSpaceComponent::AudioSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)] = true;
     Properties[static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef)] = "";
 
-    SetScriptInterface(CSP_NEW AudioSpaceComponentScriptInterface(this));
+    SetScriptInterface(new AudioSpaceComponentScriptInterface(this));
 }
 
 const csp::common::Vector3& AudioSpaceComponent::GetPosition() const

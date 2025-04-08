@@ -17,7 +17,7 @@
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -34,7 +34,7 @@ ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)] = static_cast<int64_t>(ReflectionShape::UnitBox);
     Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
 
-    SetScriptInterface(CSP_NEW ReflectionSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() const

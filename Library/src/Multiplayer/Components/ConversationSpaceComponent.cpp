@@ -21,7 +21,7 @@
 #include "CSP/Web/HTTPResponseCodes.h"
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Systems/ResultHelpers.h"
 
@@ -45,7 +45,7 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::Date)] = "";
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies)] = static_cast<int64_t>(0);
 
-    SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ConversationSpaceComponentScriptInterface(this));
 }
 
 void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)

@@ -18,7 +18,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Json.h"
-#include "Memory/Memory.h"
+
 #include "Services/ApiBase/ApiBase.h"
 
 #include <chrono>
@@ -164,7 +164,7 @@ void WebClient::RefreshIfExpired()
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
     csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
 {
-    auto* Request = CSP_NEW csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+    auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
 
 #ifdef CSP_WASM
     RefreshIfExpired();
@@ -366,7 +366,7 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 
     if (Request->DecRefCount() == 0)
     {
-        CSP_DELETE(Request);
+        delete (Request);
     }
 }
 #endif

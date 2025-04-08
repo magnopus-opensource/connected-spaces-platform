@@ -19,7 +19,7 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "Memory/Memory.h"
+
 #include "Systems/Assets/LODHelpers.h"
 
 #include "PublicTestBase.h"
@@ -117,7 +117,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Keys.Size() == 1);
             EXPECT_TRUE(Keys[0] == 42);
 
-            CSP_DELETE(_Keys);
+            delete (_Keys);
 
             auto* _Values = Map.Values();
             auto& Values = *_Values;
@@ -125,7 +125,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Values.Size() == 1);
             EXPECT_TRUE(Values[0] == "asd");
 
-            CSP_DELETE(_Values);
+            delete (_Values);
         }
         {
             csp::common::Map<csp::common::String, int> Map;
@@ -141,7 +141,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Keys.Size() == 1);
             EXPECT_TRUE(Keys[0] == "asd");
 
-            CSP_DELETE(_Keys);
+            delete (_Keys);
 
             auto* _Values = Map.Values();
             auto& Values = *_Values;
@@ -149,7 +149,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Values.Size() == 1);
             EXPECT_TRUE(Values[0] == 42);
 
-            CSP_DELETE(_Values);
+            delete (_Values);
         }
         {
             csp::common::Map<int, csp::common::String> Map;
@@ -226,13 +226,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, OptionalAssignmentOperatorTest)
 
     // Test Optional<T*> constructors
     {
-        auto Instance = (MyCoolClass*)CSP_ALLOC(sizeof(MyCoolClass));
-        new (Instance) MyCoolClass();
-        csp::common::Optional<MyCoolClass> OptionalInstance(Instance);
-    }
-
-    {
-        auto Instance = CSP_NEW MyCoolClass();
+        auto Instance = new MyCoolClass();
         csp::common::Optional<MyCoolClass> OptionalInstance(Instance);
     }
 

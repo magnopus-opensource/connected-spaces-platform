@@ -17,7 +17,7 @@
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -42,7 +42,7 @@ CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent
     Properties[static_cast<uint32_t>(CinematicCameraPropertyKeys::IsViewerCamera)] = false;
     Properties[static_cast<uint32_t>(CinematicCameraPropertyKeys::ThirdPartyComponentRef)] = "";
 
-    SetScriptInterface(CSP_NEW CinematicCameraSpaceComponentScriptInterface(this));
+    SetScriptInterface(new CinematicCameraSpaceComponentScriptInterface(this));
 }
 
 float CinematicCameraSpaceComponent::GetFov() const

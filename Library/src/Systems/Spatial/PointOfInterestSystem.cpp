@@ -40,10 +40,10 @@ PointOfInterestSystem::PointOfInterestSystem()
 PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    POIApiPtr = CSP_NEW chs::PointOfInterestApi(InWebClient);
+    POIApiPtr = new chs::PointOfInterestApi(InWebClient);
 }
 
-PointOfInterestSystem::~PointOfInterestSystem() { CSP_DELETE(POIApiPtr); }
+PointOfInterestSystem::~PointOfInterestSystem() { delete (POIApiPtr); }
 
 CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String& Title, const csp::common::String& Description,
     const csp::common::String& Name, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, EPointOfInterestType Type,

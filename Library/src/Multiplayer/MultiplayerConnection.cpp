@@ -39,7 +39,7 @@
 #endif
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Web/Uri.h"
 
 #include <algorithm>
@@ -147,7 +147,7 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
-    return CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
@@ -155,12 +155,12 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 MultiplayerConnection::MultiplayerConnection()
     : Connection(nullptr)
     , WebSocketClient(nullptr)
-    , NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
+    , NetworkEventManager(new NetworkEventManagerImpl(this))
     , ClientId(0)
     , Connected(false)
 {
-    EventBusPtr = CSP_NEW EventBus(this);
-    ConversationSystemPtr = CSP_NEW ConversationSystem(this);
+    EventBusPtr = new EventBus(this);
+    ConversationSystemPtr = new ConversationSystem(this);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -178,11 +178,11 @@ MultiplayerConnection::~MultiplayerConnection()
             shutdownFuture.wait();
         }
 
-        CSP_DELETE(Connection);
-        CSP_DELETE(WebSocketClient);
-        CSP_DELETE(NetworkEventManager);
-        CSP_DELETE(ConversationSystemPtr);
-        CSP_DELETE(EventBusPtr);
+        delete (Connection);
+        delete (WebSocketClient);
+        delete (NetworkEventManager);
+        delete (ConversationSystemPtr);
+        delete (EventBusPtr);
     }
 }
 
@@ -359,13 +359,13 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
             return;
         }
 
-        CSP_DELETE(Connection);
+        delete (Connection);
     }
 
 #ifdef CSP_WASM
-    WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientEmscripten();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
 #else
-    WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientPOCO();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 

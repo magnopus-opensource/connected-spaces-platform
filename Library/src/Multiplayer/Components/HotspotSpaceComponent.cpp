@@ -19,7 +19,7 @@
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -36,7 +36,7 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW HotspotSpaceComponentScriptInterface(this));
+    SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& HotspotSpaceComponent::GetName() const

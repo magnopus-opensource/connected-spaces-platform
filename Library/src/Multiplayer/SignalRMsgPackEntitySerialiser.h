@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/Multiplayer/IEntitySerialiser.h"
-#include "Memory/Memory.h"
+
 #include "MultiplayerConstants.h"
 
 #include <msgpack/pack.hpp>
