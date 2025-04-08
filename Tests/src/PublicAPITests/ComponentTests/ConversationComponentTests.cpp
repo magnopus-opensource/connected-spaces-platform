@@ -976,7 +976,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 #endif
 
 /*
-Tests that all conversation multiplayer events are correctly sent to their componenets,
+Tests that all conversation multiplayer events are correctly sent to their componenets
 */
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_EVENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
@@ -1546,6 +1546,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
 }
 #endif
 
+/*
+Tests that events related to annotations are correctly sent and received
+*/
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotationTest)
 {
     SetRandSeed();
@@ -1667,6 +1670,152 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
     LogOut(UserSystem);
 }
 
+/*
+Tests that all annotation multiplayer events are correctly sent to their componenets,
+*/
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEventTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    // Allow us to receive and test our own conversation messages
+    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+
+    // Create object to represent the conversation
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    auto* ConversationComponent = (ConversationSpaceComponent*)Object->AddComponent(ComponentType::Conversation);
+
+    Object->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    // Create conversation
+    {
+        // We test conversation creation in another test.
+        // However, we still need this callback to flush the original creation event
+        bool CallbackCalled = false;
+
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr const char* ConversationMessage = "Test Conversation";
+        const auto [Result] = AWAIT(ConversationComponent, CreateConversation, ConversationMessage);
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+    }
+
+    csp::common::String FirstMessageId = "";
+    static constexpr const char* Message = "Test Message";
+    // Ensure message created event is fired when calling ConversationComponent::AddMessage
+    {
+        bool CallbackCalled = false;
+
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        const auto [Result] = AWAIT(ConversationComponent, AddMessage, Message);
+        FirstMessageId = Result.GetMessageInfo().MessageId;
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+    }
+
+    // Ensure anntation set event is fired when calling ConversationComponent::SetAnnotation
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr char* TestAnnotationData = "Test";
+        static constexpr char* TestAnnotationThumbnailData = "Test2";
+
+        AnnotationData Data;
+        Data.SetAuthorCameraPosition({ 1.f, 2.f, 3.f });
+        Data.SetAuthorCameraRotation({ 4.f, 5.f, 6.f, 7.f });
+        Data.SetVerticalFov(90);
+
+        csp::systems::BufferAssetDataSource AnnotationBufferData;
+        AnnotationBufferData.Buffer = TestAnnotationData;
+        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
+        AnnotationBufferData.SetMimeType("application/json");
+
+        csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
+        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
+        AnnotationThumbnailBufferData.SetMimeType("application/json");
+
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetAnnotation, RequestPredicate, FirstMessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::SetAnnotation);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, Message);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+    }
+
+    // Ensure anntation delete event is fired when calling ConversationComponent::DeleteAnnotation
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, DeleteAnnotation, RequestPredicate, FirstMessageId);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        WaitForCallback(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteAnnotation);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, Message);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
+        EXPECT_NE(RetrievedParams.MessageInfo.CreatedTimestamp, "");
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 // test annotations cant be attached to blank messages
 // test annotations cant be attached to invalid message ids
 // test annotations can be updated
@@ -1676,5 +1825,4 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 // test anotation is deleted with message
 // test getting 0 thumbnails
 // test getting multiple thumbnails
-// Test multiplayer events
 // ensure annotations cant be created on an invalid message id (not parented to conversation)
