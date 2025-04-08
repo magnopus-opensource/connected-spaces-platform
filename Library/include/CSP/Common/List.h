@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <cassert>
 #include <cstring>
@@ -335,33 +334,26 @@ private:
     /// @param Size size_t : Number of elements in the list
     void AllocList(const size_t Size)
     {
-        ObjectArray = (T*)csp::memory::DllAlloc(sizeof(T) * Size);
+        ObjectArray = new T[Size];
         MaximumSize = Size;
     }
 
-    /// @brief Reallocates memory for the list.
-    /// @param Size const size_t : Number of elements in the list
     void ReallocList(const size_t Size)
     {
-        ObjectArray = (T*)csp::memory::DllRealloc(ObjectArray, sizeof(T) * Size);
+        T* NewArray = new T[Size];
+        if (ObjectArray)
+        {
+            std::copy(ObjectArray, ObjectArray + std::min(MaximumSize, Size), NewArray);
+            delete[] ObjectArray;
+        }
+        ObjectArray = NewArray;
         MaximumSize = Size;
     }
 
     /// @brief Frees memory for the list.
     void FreeList()
     {
-        if (ObjectArray == nullptr)
-        {
-            return;
-        }
-
-        for (size_t i = 0; i < CurrentSize; ++i)
-        {
-            T* ObjectPtr = &ObjectArray[i];
-            ObjectPtr->~T();
-        }
-
-        csp::memory::DllFree(ObjectArray);
+        delete[] ObjectArray;
         ObjectArray = nullptr;
         CurrentSize = 0;
         MaximumSize = 0;

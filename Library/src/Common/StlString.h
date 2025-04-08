@@ -15,13 +15,11 @@
  */
 #pragma once
 
-#include "Memory/StlAllocator.h"
-
 #include <string>
 
 namespace csp
 {
 
-using StlString = std::basic_string<char, std::char_traits<char>, csp::memory::StlAllocator<char>>;
+using StlString = std::basic_string<char, std::char_traits<char>>;
 
 } // namespace csp
