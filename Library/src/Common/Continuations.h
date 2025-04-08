@@ -135,8 +135,9 @@ inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const Error
  * Otherwise, logs a success message and continues. Does not pass anything to the next continuation.
  * Error context objects are optional, if unset, default values Failed, 500, and Unknown are used
  */
-inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback, std::string SuccessMsg, std::optional<EResultCode> ResultCode,
-    std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
+template <typename ErrorResultT>
+inline auto AssertRequestSuccessOrErrorFromErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
+    std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](

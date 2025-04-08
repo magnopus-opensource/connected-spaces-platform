@@ -35,6 +35,7 @@ CSP_START_IGNORE
 #ifdef CSP_TESTS
 class CSPEngine_ConversationTests_ConversationComponentPropertyTest_Test;
 class CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
+class CSPEngine_ConversationTests_ConversationComponentAnnotationEventTest_Test;
 class CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
 class CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
 #endif
@@ -76,6 +77,7 @@ class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositio
 #ifdef CSP_TESTS
     friend class ::CSPEngine_ConversationTests_ConversationComponentPropertyTest_Test;
     friend class ::CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
+    friend class ::CSPEngine_ConversationTests_ConversationComponentAnnotationEventTest_Test;
     friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
     friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
 #endif
