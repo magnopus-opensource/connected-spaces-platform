@@ -17,13 +17,14 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
+#include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "Json/JsonSerializer.h"
 
 using namespace csp::json;
 using namespace csp::systems;
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialConstructorTest)
 {
     constexpr const char* TestName = "TestName";
     constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
@@ -51,7 +52,34 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialConstructorTest)
     EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), false);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialSetterTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialConstructorTest)
+{
+    constexpr const char* TestName = "TestName";
+    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* TestAssetId = "TestAssetId";
+
+    AlphaVideoMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+
+    // Test constructor params
+    EXPECT_EQ(Material.GetMaterialCollectionId(), TestAssetCollectionId);
+    EXPECT_EQ(Material.GetMaterialId(), TestAssetId);
+
+    // Test defaults
+    EXPECT_EQ(Material.GetName(), TestName);
+    EXPECT_EQ(Material.GetDoubleSided(), false);
+    EXPECT_EQ(Material.GetIsEmissive(), true);
+    EXPECT_EQ(Material.GetReadAlphaFromChannel(), EColorChannel::A);
+    EXPECT_EQ(Material.GetBlendMode(), EBlendMode::Normal);
+    EXPECT_EQ(Material.GetFresnelFactor(), 0.f);
+    EXPECT_EQ(Material.GetTint(), csp::common::Vector3(1.f, 1.f, 1.f));
+    EXPECT_EQ(Material.GetAlphaFactor(), 1.f);
+    EXPECT_EQ(Material.GetEmissiveIntensity(), 1.f);
+    EXPECT_EQ(Material.GetAlphaMask(), 0.02f);
+
+    EXPECT_EQ(Material.GetColorTexture().IsSet(), false);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialSetterTest)
 {
     constexpr const char* TestName = "TestName";
     constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
@@ -84,7 +112,49 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialSetterTest)
     EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialJsonSerializationTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialSetterTest)
+{
+    constexpr const char* TestName = "TestName";
+    constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* TestAssetId = "TestAssetId";
+
+    bool TestDoubleSided = true;
+    bool TestIsEmissive = false;
+    EColorChannel TestReadAlphaFromChannel = EColorChannel::R;
+    EBlendMode TestBlendMode = EBlendMode::Additive;
+    float TestFresnelFactor = 1.f;
+    csp::common::Vector3 TestTint(0.f, 0.f, 0.f);
+    float TestAlphaFactor = 0.f;
+    float TestEmissiveIntensity = 0.f;
+    float TestAlphaMask = 0.05f;
+
+    AlphaVideoMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
+
+    // Set new values
+    Material.SetDoubleSided(TestDoubleSided);
+    Material.SetIsEmissive(TestIsEmissive);
+    Material.SetReadAlphaFromChannel(TestReadAlphaFromChannel);
+    Material.SetBlendMode(TestBlendMode);
+    Material.SetFresnelFactor(TestFresnelFactor);
+    Material.SetTint(TestTint);
+    Material.SetAlphaFactor(TestAlphaFactor);
+    Material.SetEmissiveIntensity(TestEmissiveIntensity);
+    Material.SetAlphaMask(TestAlphaMask);
+
+    // Test values are set correctly
+    EXPECT_EQ(Material.GetName(), TestName);
+    EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
+    EXPECT_EQ(Material.GetIsEmissive(), TestIsEmissive);
+    EXPECT_EQ(Material.GetReadAlphaFromChannel(), TestReadAlphaFromChannel);
+    EXPECT_EQ(Material.GetBlendMode(), TestBlendMode);
+    EXPECT_EQ(Material.GetFresnelFactor(), TestFresnelFactor);
+    EXPECT_EQ(Material.GetTint(), TestTint);
+    EXPECT_EQ(Material.GetAlphaFactor(), TestAlphaFactor);
+    EXPECT_EQ(Material.GetEmissiveIntensity(), TestEmissiveIntensity);
+    EXPECT_EQ(Material.GetAlphaMask(), TestAlphaMask);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTest)
 {
     // Material vars
     constexpr const char* TestName = "TestName";
@@ -238,6 +308,79 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialJsonSerializationTest)
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().IsSet(), true);
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().IsSet(), true);
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().IsSet(), true);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, AlphaVideoMaterialJsonSerializationTest)
+{
+    // Material vars
+    constexpr const char* TestName = "TestName";
+    constexpr const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
+    constexpr const char* TestMaterialAssetId = "TestAssetId";
+
+    bool TestDoubleSided = true;
+    bool TestIsEmissive = false;
+    EColorChannel TestReadAlphaFromChannel = EColorChannel::R;
+    EBlendMode TestBlendMode = EBlendMode::Additive;
+    float TestFresnelFactor = 1.f;
+    csp::common::Vector3 TestTint(0.f, 0.f, 0.f);
+    float TestAlphaFactor = 0.f;
+    float TestEmissiveIntensity = 0.f;
+    float TestAlphaMask = 0.05f;
+
+    AlphaVideoMaterial Material(TestName, TestMaterialAssetCollectionId, TestMaterialAssetId);
+
+    // Set new values
+    Material.SetDoubleSided(TestDoubleSided);
+    Material.SetIsEmissive(TestIsEmissive);
+    Material.SetReadAlphaFromChannel(TestReadAlphaFromChannel);
+    Material.SetBlendMode(TestBlendMode);
+    Material.SetFresnelFactor(TestFresnelFactor);
+    Material.SetTint(TestTint);
+    Material.SetAlphaFactor(TestAlphaFactor);
+    Material.SetEmissiveIntensity(TestEmissiveIntensity);
+    Material.SetAlphaMask(TestAlphaMask);
+
+    // Base colour texture vars
+    const char* TestColorTextureAssetCollectionId = "TestAssetCollectionId";
+    const char* TestColorTextureAssetId = "TestAssetId";
+    const csp::common::Vector2 TestColorTextureUVOffset(1.f, 1.f);
+    float TestColorTextureRotation = 1.f;
+    const csp::common::Vector2 TestColorTextureUVScale(2.f, 2.f);
+    const int TestColorTextureTexCoord = 2;
+
+    TextureInfo ColorTexture(TestColorTextureAssetCollectionId, TestColorTextureAssetId);
+    ColorTexture.SetUVOffset(TestColorTextureUVOffset);
+    ColorTexture.SetUVRotation(TestColorTextureRotation);
+    ColorTexture.SetUVScale(TestColorTextureUVScale);
+    ColorTexture.SetTexCoord(TestColorTextureTexCoord);
+
+    Material.SetColorTexture(ColorTexture);
+
+    csp::common::String JsonData = JsonSerializer::Serialize(Material);
+
+    AlphaVideoMaterial DeserializedMaterial;
+    JsonDeserializer::Deserialize(JsonData, DeserializedMaterial);
+
+    EXPECT_EQ(DeserializedMaterial.GetName(), TestName);
+    EXPECT_EQ(DeserializedMaterial.GetDoubleSided(), TestDoubleSided);
+    EXPECT_EQ(DeserializedMaterial.GetIsEmissive(), TestIsEmissive);
+    EXPECT_EQ(DeserializedMaterial.GetReadAlphaFromChannel(), TestReadAlphaFromChannel);
+    EXPECT_EQ(DeserializedMaterial.GetBlendMode(), TestBlendMode);
+    EXPECT_EQ(DeserializedMaterial.GetFresnelFactor(), TestFresnelFactor);
+    EXPECT_EQ(DeserializedMaterial.GetTint(), TestTint);
+    EXPECT_EQ(DeserializedMaterial.GetAlphaFactor(), TestAlphaFactor);
+    EXPECT_EQ(DeserializedMaterial.GetEmissiveIntensity(), TestEmissiveIntensity);
+    EXPECT_EQ(DeserializedMaterial.GetAlphaMask(), TestAlphaMask);
+
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetAssetCollectionId(), TestColorTextureAssetCollectionId);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetAssetId(), TestColorTextureAssetId);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetSourceType(), ETextureResourceType::ImageAsset);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVOffset(), TestColorTextureUVOffset);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVRotation(), TestColorTextureRotation);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetUVScale(), TestColorTextureUVScale);
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().GetTexCoord(), TestColorTextureTexCoord);
+
+    EXPECT_EQ(DeserializedMaterial.GetColorTexture().IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoDefaultConstructorTest)
