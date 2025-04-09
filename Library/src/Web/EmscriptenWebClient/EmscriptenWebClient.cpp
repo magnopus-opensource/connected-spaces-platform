@@ -32,7 +32,7 @@ namespace
 void GetResponseHeaders(emscripten_fetch_t* Fetch, csp::common::Map<csp::common::String, csp::common::String>& OutHeadersMap)
 {
     auto Length = emscripten_fetch_get_response_headers_length(Fetch);
-    auto Buf = CSP_NEW char[Length + 1];
+    auto Buf = new char[Length + 1];
     emscripten_fetch_get_response_headers(Fetch, Buf, Length + 1);
     auto Headers = emscripten_fetch_unpack_response_headers(Buf);
 
@@ -75,12 +75,12 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
         Payload.AddHeader(Key, Value);
     }
 
-    CSP_DELETE(Keys);
+    delete Keys;
 
     Request->GetCallback()->OnHttpResponse(Response);
     // DO NOT DO THIS! This will delete Payload.Content twice
     // CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
-    CSP_DELETE(Request);
+    delete Request;
     emscripten_fetch_close(Fetch);
 }
 
@@ -228,18 +228,18 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
         auto& Payload = Request.GetPayload();
         auto& Headers = Payload.GetHeaders();
         int i = 0;
-        auto** HeadersBuf = CSP_NEW char * [Headers.size() * 2 + 1];
+        auto** HeadersBuf = new char*[Headers.size() * 2 + 1];
 
         for (auto& Header : Headers)
         {
             auto Len = Header.first.size();
-            auto* Key = CSP_NEW char[Len + 1];
+            auto* Key = new char[Len + 1];
             strcpy(Key, Header.first.c_str());
 
             HeadersBuf[i++] = Key;
 
             Len = Header.second.size();
-            auto* Val = CSP_NEW char[Len + 1];
+            auto* Val = new char[Len + 1];
             strcpy(Val, Header.second.c_str());
 
             HeadersBuf[i++] = Val;
