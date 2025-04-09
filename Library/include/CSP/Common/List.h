@@ -267,12 +267,17 @@ public:
     {
         assert(Index < CurrentSize);
 
-        T* ObjectPtr = &ObjectArray[Index];
-        ObjectPtr->~T();
+        if constexpr (std::is_pointer<T>::value)
+        {
+            delete ObjectArray[Index];
+        }
 
+        // Shift everything left
+        for (size_t i = Index; i < CurrentSize - 1; ++i)
+        {
+            ObjectArray[i] = ObjectArray[i + 1];
+        }
         --CurrentSize;
-        auto Remaining = CurrentSize - Index;
-        std::memmove(ObjectArray + Index, ObjectArray + (Index + 1), sizeof(T) * Remaining);
     }
 
     /// @brief Removes the given element from the list.
