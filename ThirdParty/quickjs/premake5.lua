@@ -15,7 +15,9 @@ function QuickJS.AddProject()
         "_HAS_EXCEPTIONS=0", 
     }
 
-    warnings "Off"
+    warnings "Off" -- this seems like it's not working
+    --disablewarnings { "4702" -- Ignore unreachable code warnings -- this is not working either
+    --}
 
     filter "platforms:x64"
         defines { 

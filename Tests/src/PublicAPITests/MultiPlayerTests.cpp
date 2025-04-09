@@ -63,7 +63,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem);
 std::atomic_bool IsTestComplete;
 std::atomic_bool IsDisconnected;
 std::atomic_bool IsReadyForUpdate;
-SpaceEntity* TestUser;
+SpaceEntity* TestSpaceEntity;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit = 20000;
@@ -85,7 +85,7 @@ void InitialiseTestingConnection()
     IsTestComplete = false;
     IsDisconnected = false;
     IsReadyForUpdate = false;
-    TestUser = nullptr;
+    TestSpaceEntity = nullptr;
 
     WaitForTestTimeoutCountMs = 0;
     ReceivedEntityUpdatesCount = 0;
@@ -168,8 +168,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
 
-    TestUser = InUser;
-    TestUser->SetUpdateCallback(
+    TestSpaceEntity = InUser;
+    TestSpaceEntity->SetUpdateCallback(
         [InUser](SpaceEntity* UpdatedUser, SpaceEntityUpdateFlags InUpdateFlags, csp::common::Array<ComponentUpdateInfo> InComponentUpdateInfoArray)
         {
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_NAME)
@@ -246,14 +246,14 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                 }
             }
 
-            if (InUser == TestUser)
+            if (InUser == TestSpaceEntity)
             {
                 ReceivedEntityUpdatesCount++;
                 IsReadyForUpdate = true;
             }
         });
 
-    TestUser->SetDestroyCallback(
+    TestSpaceEntity->SetDestroyCallback(
         [](bool Ok)
         {
             if (Ok)
@@ -275,7 +275,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -337,7 +336,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -389,8 +387,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -445,8 +441,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -493,13 +487,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
         {
             if (IsReadyForUpdate)
             {
-                SetRandomProperties(TestUser, EntitySystem);
+                SetRandomProperties(TestSpaceEntity, EntitySystem);
             }
         }
         else if (ReceivedEntityUpdatesCount == NumberOfEntityUpdateTicks && IsReadyForUpdate) // Send a final update that doesn't change the data
         {
             IsReadyForUpdate = false;
-            EntitySystem->QueueEntityUpdate(TestUser);
+            EntitySystem->QueueEntityUpdate(TestSpaceEntity);
         }
         else
         {
@@ -525,7 +519,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -624,7 +617,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -698,7 +690,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -779,7 +770,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -867,7 +857,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -935,8 +924,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -997,7 +984,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1098,7 +1084,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1196,7 +1181,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1324,7 +1308,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -1377,7 +1360,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     {
         std::this_thread::sleep_for(50ms);
 
-        SetRandomProperties(TestUser, EntitySystem);
+        SetRandomProperties(TestSpaceEntity, EntitySystem);
 
         Current = std::chrono::steady_clock::now();
         TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
@@ -1406,7 +1389,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1438,17 +1420,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
     auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent = (ImageSpaceComponent*)CreatedObject->AddComponent(ComponentType::Image);
     CreatedObject->QueueUpdate();
 
     // Create object 2
     auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent2 = (ImageSpaceComponent*)CreatedObject2->AddComponent(ComponentType::Image);
     CreatedObject2->QueueUpdate();
 
     // Create object 3
     auto [CreatedObject3] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent3 = (ImageSpaceComponent*)CreatedObject3->AddComponent(ComponentType::Image);
     CreatedObject3->QueueUpdate();
 
     // Destroy Entites
@@ -1474,7 +1453,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1557,14 +1535,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1653,14 +1627,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1682,7 +1652,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    bool AssetDetailBlobChangedCallbackCalled = false;
     csp::common::String CallbackAssetId;
 
     const csp::common::String ObjectName = "Object 1";
@@ -1691,8 +1660,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     const csp::common::String ModelAssetId = "NotARealId";
-
-    auto* LightSpaceComponentInstance = (LightSpaceComponent*)Object->AddComponent(ComponentType::Invalid);
 
     // Process component creation
     Object->QueueUpdate();
@@ -1944,8 +1911,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -1981,9 +1946,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
-
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
 
     bool ChildEntityUpdated = false;
 
@@ -2041,8 +2003,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2078,9 +2038,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
-
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
 
     bool ChildEntityUpdated = false;
 
@@ -2138,8 +2095,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2178,9 +2133,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
-
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
 
     bool ChildEntityUpdated = false;
 
@@ -2238,8 +2190,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2275,9 +2225,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
-
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
 
     bool ChildEntityUpdated = false;
 
@@ -2330,8 +2277,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2634,8 +2579,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in

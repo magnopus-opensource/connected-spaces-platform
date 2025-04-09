@@ -48,7 +48,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -68,9 +67,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 
     const csp::common::String UserName = "Player 1";
     const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String UserAvatarId = "MyCoolAvatar";
-    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
     {
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -142,7 +139,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";

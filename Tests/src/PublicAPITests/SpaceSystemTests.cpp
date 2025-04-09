@@ -1163,7 +1163,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
     auto& SystemsManager = ::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // Get alt account user ID
     String AltUserId;
@@ -1921,7 +1920,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
     auto& SystemsManager = ::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1960,11 +1958,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
     // Exit and re-enter space to verify its OK to always add self to public space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     {
-        auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        auto [Result2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Log back in with default user so space can be deleted
@@ -2233,7 +2231,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
     auto& SystemsManager = ::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -2289,7 +2286,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
     auto& SystemsManager = ::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -2332,7 +2328,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
     auto& SystemsManager = ::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";

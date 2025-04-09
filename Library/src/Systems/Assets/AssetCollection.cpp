@@ -75,8 +75,8 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 
         for (auto& Pair : Metadata)
         {
-            auto& Metadata = AssetCollection.GetMetadataMutable();
-            Metadata[Pair.first] = Pair.second;
+            auto& MetadataMutable = AssetCollection.GetMetadataMutable();
+            MetadataMutable[Pair.first] = Pair.second;
         }
     }
 

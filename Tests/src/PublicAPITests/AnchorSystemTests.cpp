@@ -147,11 +147,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
     char UniqueAssetCollectionName[256];
@@ -187,7 +184,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -248,7 +244,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -327,7 +322,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -456,7 +450,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -540,7 +533,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     char UniqueSpaceName[256];
@@ -602,7 +594,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";

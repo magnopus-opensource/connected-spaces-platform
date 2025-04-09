@@ -47,7 +47,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -94,8 +93,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
     EXPECT_EQ(VideoComponent->GetIsVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
-
-    auto* ModelComponent = static_cast<VideoPlayerSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();

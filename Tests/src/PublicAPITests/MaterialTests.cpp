@@ -380,7 +380,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // Log in
     csp::common::String UserId;
@@ -476,7 +475,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";

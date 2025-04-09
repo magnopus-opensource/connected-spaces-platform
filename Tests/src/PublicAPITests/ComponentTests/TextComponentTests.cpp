@@ -49,7 +49,6 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -163,7 +162,6 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
