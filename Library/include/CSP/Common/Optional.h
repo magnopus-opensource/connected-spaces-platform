@@ -89,7 +89,7 @@ public:
     /// @param InValue T&& : Rvalue reference to construct optional with
     Optional(T&& InValue)
     {
-        Value = new T(std::forward<T>(InValue));
+        Value = new T(std::move(InValue));
         ValueDestructor = DefaultDestructor<T>;
     }
 
