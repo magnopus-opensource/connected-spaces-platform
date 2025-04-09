@@ -262,9 +262,9 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 
         WebClient* Client;
 #ifdef CSP_WASM
-        Client = CSP_NEW csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-        Client = CSP_NEW TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
         EXPECT_TRUE(Client != nullptr);
 
@@ -405,7 +405,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     HttpPayload Payload;
     ResponseReceiver Receiver;
 
-    auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP);
     EXPECT_TRUE(WebClient != nullptr);
 
     WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);

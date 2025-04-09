@@ -15,8 +15,6 @@
  */
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
-#include "Memory/Memory.h"
-
 namespace csp::multiplayer
 {
 static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();

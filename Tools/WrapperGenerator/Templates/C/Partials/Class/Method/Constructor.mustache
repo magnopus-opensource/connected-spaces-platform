@@ -4,10 +4,10 @@
 {
     return NativePointer {
         {{# parent_class.is_template_instance }}
-        CSP_NEW {{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{^ is_last }}, {{/ is_last }}{{/ parent_class.template_arguments }}>(
+        new {{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{^ is_last }}, {{/ is_last }}{{/ parent_class.template_arguments }}>(
         {{/ parent_class.is_template_instance }}
         {{^ parent_class.is_template_instance }}
-        CSP_NEW {{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.name }}(
+        new {{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.name }}(
         {{/ parent_class.is_template_instance }}
             {{# parameters }}
             {{# type.is_string }}csp::common::String({{/ type.is_string }}{{^ type.is_string }}{{# type.is_reference }}*{{/ type.is_reference }}{{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{^ is_last }}, {{/ is_last }}

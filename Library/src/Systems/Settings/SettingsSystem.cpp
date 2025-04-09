@@ -52,10 +52,10 @@ SettingsSystem::SettingsSystem()
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    SettingsAPI = CSP_NEW chs::SettingsApi(InWebClient);
+    SettingsAPI = new chs::SettingsApi(InWebClient);
 }
 
-SettingsSystem::~SettingsSystem() { CSP_DELETE(SettingsAPI); }
+SettingsSystem::~SettingsSystem() { delete (SettingsAPI); }
 
 void SettingsSystem::SetSettingValue(const String& InContext, const String& InKey, const String& InValue, NullResultCallback Callback) const
 {
