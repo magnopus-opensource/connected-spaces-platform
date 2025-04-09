@@ -269,7 +269,8 @@ public:
 
         if constexpr (std::is_pointer<T>::value)
         {
-            delete ObjectArray[Index];
+            // I dont think the list owns any pointers that are in it. That seems weird, because it _will_ destruct value types
+            // delete ObjectArray[Index];
         }
 
         // Shift everything left
