@@ -560,6 +560,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         // Create a material associated with the space
         Material* CreatedMaterial = nullptr;
         CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+        CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
 
         WaitForCallback(CallbackCalled);
 
@@ -711,6 +712,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     // Create a material associated with the space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, TestMaterialName1, csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+    CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
 
     WaitForCallback(CallbackCalled);
 
