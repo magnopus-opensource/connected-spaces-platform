@@ -412,7 +412,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
         GetClientUserAgentInfo().ClientOS.c_str());
 }
 
-void Free(void* Pointer) { delete Pointer; }
+void Free(void* Pointer) { std::free(Pointer); }
 
 void* ModuleHandle = nullptr;
 
