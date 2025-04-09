@@ -67,15 +67,6 @@ namespace
         return true;
     }
 
-    auto CreateAnnotationAssetCollection(AssetSystem* AssetSystem, const csp::common::String& SpaceId, const csp::common::String& Name,
-        const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
-    {
-        return [AssetSystem, SpaceId, Name, Metadata](const AssetCollectionResult& Result) {
-            return AssetSystem->CreateAssetCollection(
-                SpaceId, Result.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
-        };
-    }
-
     auto SetAnnotationAssetCollection(std::shared_ptr<systems::AssetCollection> OutAssetCollection)
     {
         return [OutAssetCollection](const AssetCollectionResult& Result) mutable
@@ -89,24 +80,48 @@ namespace
     {
         return [OutAssetCollection](const AssetCollectionsResult& Result) mutable
         {
+            AssetCollectionResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
             if (Result.GetAssetCollections().Size() == 1)
             {
                 *OutAssetCollection = Result.GetAssetCollections()[0];
+                NewResult.SetAssetCollection(*OutAssetCollection);
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("Result didn't contain a valid asset collection.");
+                throw async::task_canceled();
             }
 
-            // TODO: error if non found
-            return *OutAssetCollection;
+            return NewResult;
         };
     }
 
-    auto CreateAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Parent, const csp::common::String& Name)
+    auto SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
     {
-        return [AssetSystem, Parent, Name]() { return AssetSystem->CreateAsset(*Parent, Name, nullptr, nullptr, EAssetType::ANNOTATION); };
+        return [OutAsset](const systems::AssetResult& Result) mutable
+        {
+            *OutAsset = Result.GetAsset();
+            return Result;
+        };
     }
 
-    auto CreateAnnotationThumbnailAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Parent, const csp::common::String& Name)
+    auto SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
     {
-        return [AssetSystem, Parent, Name]() { return AssetSystem->CreateAsset(*Parent, Name, nullptr, nullptr, EAssetType::ANNOTATION_THUMBNAIL); };
+        return [OutAsset](const systems::AssetsResult& Result) mutable
+        {
+            if (Result.GetAssets().Size() == 1)
+            {
+                *OutAsset = Result.GetAssets()[0];
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("Result didn't contain a valid asset.");
+                throw async::task_canceled();
+            }
+
+            return *OutAsset;
+        };
     }
 
     auto UploadAnnotationAssetData(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection,
@@ -145,23 +160,9 @@ namespace
         { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
     }
 
-    auto SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
+    auto DeleteAnnotationAssetCollection(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
     {
-        return [OutAsset](const systems::AssetsResult& Result) mutable
-        {
-            if (Result.GetAssets().Size() == 1)
-            {
-                auto ResultAsset = Result.GetAssets()[0];
-                *OutAsset = Result.GetAssets()[0];
-            }
-
-            return Result;
-        };
-    }
-
-    auto DeleteAnnotationAssetCollection(AssetSystem* AssetSystem)
-    {
-        return [AssetSystem](const AssetCollection& Collection) { return AssetSystem->DeleteAssetCollection(Collection); };
+        return [AssetSystem, Collection]() { return AssetSystem->DeleteAssetCollection(*Collection); };
     }
 
     auto SetAssetUri(std::shared_ptr<Asset> Asset)
@@ -187,35 +188,72 @@ namespace
     {
         return [AssetSystem, SpaceId, Name, Metadata](const AssetCollectionResult& Parent)
         {
-            FindAnnotationAssetCollection(AssetSystem, Parent.GetAssetCollection().Id, SpaceId)()
-                .then([AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result) { return Result; })
-                .then(
-                    [AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result)
+            return FindAnnotationAssetCollection(AssetSystem, Parent.GetAssetCollection().Id, SpaceId)().then(
+                [AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result)
+                {
+                    if (Result.GetTotalCount() == 0)
                     {
-                        if (Result.GetTotalCount() == 0)
+                        CSP_LOG_MSG(csp::systems::LogLevel::Log,
+                            "ConversationSystemInternal::SetAnnotation, asset collection didn't previously exist, so creating");
+
+                        return AssetSystem->CreateAssetCollection(
+                            SpaceId, Parent.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
+                    }
+                    else if (Result.GetTotalCount() == 1)
+                    {
+                        CSP_LOG_MSG(
+                            csp::systems::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset collection already exists, so updating");
+
+                        return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollections()[0], Metadata, nullptr);
+                    }
+                    else
+                    {
+                        CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
+
+                        throw async::task_canceled();
+                        return async::task<AssetCollectionResult>();
+                    }
+                });
+        };
+    };
+
+    auto GetOrCreateAnnotationAsset(
+        AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type)
+    {
+        return [AssetSystem, Collection, Name, Type]()
+        {
+            return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { Type })
+                .then(
+                    [AssetSystem, Collection, Name, Type](const AssetsResult& Result)
+                    {
+                        if (Result.GetAssets().Size() == 0)
                         {
-                            return AssetSystem->CreateAssetCollection(
-                                SpaceId, Parent.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
+                            return AssetSystem->CreateAsset(*Collection, Name, nullptr, nullptr, Type);
                         }
-                        else if (Result.GetTotalCount() == 1)
+                        else if (Result.GetAssets().Size() == 1)
                         {
-                            async::event_task<AssetCollectionResult> OnCompleteEvent;
-                            async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+                            CSP_LOG_MSG(
+                                csp::systems::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
 
-                            AssetCollectionResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
-                            NewResult.SetAssetCollection(Result.GetAssetCollections()[0]);
+                            async::event_task<AssetResult> OnCompleteEvent;
+                            async::task<AssetResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+                            AssetResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
+                            NewResult.SetAsset(Result.GetAssets()[0]);
+
                             OnCompleteEvent.set(NewResult);
-
                             return OnCompleteTask;
                         }
                         else
                         {
-                            // TODO: throw
-                            return async::task<AssetCollectionResult>();
+                            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation assets exist for this message");
+
+                            throw async::task_canceled();
+                            return async::task<AssetResult>();
                         }
                     });
         };
-    };
+    }
 
     auto SendConversationEvent(
         multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection, multiplayer::EventBus* EventBus)
@@ -686,23 +724,28 @@ void ConversationSystemInternal::GetAnnotation(
     // TODO: ensure messages parent is conversation
     // 1. Find annotation asset collection
     FindAnnotationAssetCollection(AssetSystem, MessageId, SpaceId)()
+
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(Callback,
-            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset result", "Failed to get annotation asset result.", {},
+            {}, {}))
         .then(SetAnnotationAssetCollectionFromCollections(AnnotationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
         // 2. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, AnnotationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(SetAnnotationAsset(AnnotationAsset))
+        .then(SetAnnotationAssetFromAssets(AnnotationAsset))
         // 3. Get annotation thumbnail asset
         .then(GetAnnotationThumbnailAsset(AssetSystem, AnnotationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
             "Failed to get annotation thumbnail asset.", {}, {}, {}))
-        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
         // 4. Process result
         .then(CreateAnnotationResult(AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."));
+        .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain([Callback]() { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
@@ -733,13 +776,14 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             {}))
         .then(SetAnnotationAssetCollection(MessageAssetCollection))
         // 2. Create annotation asset collection
-        .then(CreateAnnotationAssetCollection(this->AssetSystem, SpaceId, UniqueAssetCollectionName, AnnotationMetadata))
+        .then(GetOrCreateAnnotationAssetCollection(this->AssetSystem, SpaceId, UniqueAssetCollectionName, AnnotationMetadata))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset collection",
             "Failed to create annotation asset collection.", {}, {}, {}))
+
         .then(SetAnnotationAssetCollection(AnnotationAssetCollection))
         // 3. Create Annotation asset
-        .then(CreateAnnotationAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationAssetName))
+        .then(GetOrCreateAnnotationAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
         // 4. Upload Annotation asset data
@@ -749,7 +793,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             {}, {}))
         .then(SetAssetUri(AnnotationAsset))
         // 6. Create Annotation thumbnail asset
-        .then(CreateAnnotationThumbnailAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationThumbnailAssetName))
+        .then(GetOrCreateAnnotationAsset(AssetSystem, AnnotationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
@@ -765,7 +809,8 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             Callback, "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
         // 9. Process result
         .then(CreateAnnotationResult(AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
-        .then(common::continuations::SendResult(Callback, "Successfully set annotation."));
+        .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain([Callback]() { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::DeleteAnnotation(
@@ -781,22 +826,24 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
         .then(SetAnnotationAssetCollection(MessageAssetCollection))
-        // 2. Send multiplayer event
+        // 2. Find annotation asset collection
+        .then(FindAnnotationAssetCollection(AssetSystem, MessageId, SpaceId))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(Callback,
+            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved annotation asset collection result",
+            "Failed to get annotation asset collection result.", {}, {}, {}))
+        .then(SetAnnotationAssetCollectionFromCollections(AnnotationAssetCollection))
+        // 3. Send multiplayer event
         .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBus))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
             Callback, "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
-        // 3. Find annotation asset collection
-        .then(FindAnnotationAssetCollection(AssetSystem, MessageId, SpaceId))
-        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(Callback,
-            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
-        .then(SetAnnotationAssetCollectionFromCollections(AnnotationAssetCollection))
         // 4. Delete annoation asset collection
-        .then(DeleteAnnotationAssetCollection(this->AssetSystem))
+        .then(DeleteAnnotationAssetCollection(this->AssetSystem, AnnotationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully deleted annotation asset collection.",
             "Failed to delete annotation asset collection.", {}, {}, {}))
         // 5. Process result
-        .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."));
+        .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain([Callback]() { Callback(MakeInvalid<NullResult>()); }));
 }
 
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)

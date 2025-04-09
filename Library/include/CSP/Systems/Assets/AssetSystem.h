@@ -169,6 +169,10 @@ public:
         const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, AssetCollectionResultCallback Callback);
 
+    CSP_NO_EXPORT async::task<AssetCollectionResult> UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
+        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+
     /// @brief Retrieves the number asset collections based on the specified search criteria.
     /// @param ParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
     /// @param Names csp::common::Optional<csp::common::Array<csp::common::String>> : optional array of asset collection names

@@ -129,6 +129,11 @@ public:
     /// @return AssetCollection : const ref of asset collection class
     const AssetCollection& GetAssetCollection() const;
 
+    CSP_NO_EXPORT void SetAssetCollection(const csp::systems::AssetCollection& Collection);
+
+    CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
     AssetCollectionResult(void*) {};
 

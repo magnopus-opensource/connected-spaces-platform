@@ -707,6 +707,25 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
 }
 
+async::task<AssetCollectionResult> AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
+    const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
+{
+    async::event_task<AssetCollectionResult> OnCompleteEvent;
+    async::task<AssetCollectionResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+    auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata,
+        AssetCollection.Type, Tags.HasValue() ? Tags : AssetCollection.Tags);
+
+    services::ResponseHandlerPtr ResponseHandler
+        = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
+            [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
+
+    return OnCompleteTask;
+}
+
 void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
     const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
     const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,

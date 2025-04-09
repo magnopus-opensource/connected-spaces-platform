@@ -199,6 +199,11 @@ public:
     /// @return Asset : const ref of asset class.
     const Asset& GetAsset() const;
 
+    CSP_NO_EXPORT void SetAsset(const csp::systems::Asset& Asset);
+
+    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 protected:
     AssetResult() = delete;
     AssetResult(void*) {};

@@ -162,6 +162,8 @@ AssetCollection& AssetCollectionResult::GetAssetCollection() { return AssetColle
 
 const AssetCollection& AssetCollectionResult::GetAssetCollection() const { return AssetCollection; }
 
+void AssetCollectionResult::SetAssetCollection(const systems::AssetCollection& Collection) { AssetCollection = Collection; }
+
 void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
