@@ -425,8 +425,6 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
         auto Callback = ReceiveCallback;
         Callback(CallbackMessage, true);
     }
-
-    StopFlag = false;
 }
 
 void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)

@@ -78,17 +78,18 @@ csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator*(con
     const auto TRS2 = T2 * R2 * S2;
     const auto ComposedTRS = TRS1 * TRS2;
 
-    glm::vec3 Scale;
-    glm::quat Rotation;
+    glm::vec3 TransformScale;
+    glm::quat TransformRotation;
     glm::vec3 Translation;
     glm::vec3 Skew;
     glm::vec4 Perspective;
-    glm::decompose(ComposedTRS, Scale, Rotation, Translation, Skew, Perspective);
+    glm::decompose(ComposedTRS, TransformScale, TransformRotation, Translation, Skew, Perspective);
     // We're ignoring skew and perspective, as TRS composition should not have introduced any,
     // provided inputs are normalized.
     // Note, if you're getting confusing outputs for rotation when you have negative scales, you're
     // probably flipping the rotation, which is _fine_, but hard to understand without visualization.
 
-    return SpaceTransform(
-        { Translation.x, Translation.y, Translation.z }, { Rotation.x, Rotation.y, Rotation.z, Rotation.w }, { Scale.x, Scale.y, Scale.z });
+    return SpaceTransform({ Translation.x, Translation.y, Translation.z },
+        { TransformRotation.x, TransformRotation.y, TransformRotation.z, TransformRotation.w },
+        { TransformScale.x, TransformScale.y, TransformScale.z });
 }

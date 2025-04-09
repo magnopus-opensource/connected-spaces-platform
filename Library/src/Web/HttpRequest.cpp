@@ -87,9 +87,9 @@ void HttpRequest::WriteResponseData(size_t Offset, const char* Data, size_t Data
     Response.GetMutablePayload().WriteContent(Offset, Data, DataLength);
 }
 
-void HttpRequest::SetResponseProgress(float Progress)
+void HttpRequest::SetResponseProgress(float ReponseProgress)
 {
-    Response.GetProgress().SetProgressPercentage(Progress);
+    Response.GetProgress().SetProgressPercentage(ReponseProgress);
 
     if (Callback)
     {

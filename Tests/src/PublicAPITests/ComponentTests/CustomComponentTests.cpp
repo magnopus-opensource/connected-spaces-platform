@@ -63,14 +63,12 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
     const char* TestSpaceName2 = "OLY-UNITTEST-SPACE-REWIND-2";
-    const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
 
     const csp::common::String ObjectName = "Object 1";
     const csp::common::String ApplicationOrigin = "Application Origin 1";

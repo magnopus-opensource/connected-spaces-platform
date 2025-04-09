@@ -84,7 +84,12 @@ if not CSP then
         cppdialect "C++17"
 		
 		flags {"FatalWarnings"}
+                warnings "Extra" -- corresponds to level /W4
 		externalwarnings "Off"
+		disablewarnings {
+		"4100",  -- Ignore unreferenced formal parameter warnings, to be fixed in OF-XXXX
+		--"4702"   -- Ignore unreachable code (for quickjspp) -- this is the only one that works, though it seems overkill because it suppresses them everywhere, not just in quickjs.
+		}
 			
         -- Standard debug/release config settings
         filter "configurations:*Debug*"

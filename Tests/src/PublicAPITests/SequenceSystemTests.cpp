@@ -232,9 +232,6 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
 }
 } // namespace
 
-static constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-static constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 {
     SetRandSeed();
@@ -297,8 +294,6 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
 
     // Log in
     csp::common::String UserId;
@@ -348,8 +343,6 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
 
     // Log in
     csp::common::String UserId;
@@ -391,7 +384,6 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
 
     // Log in
@@ -424,6 +416,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -475,6 +469,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -901,8 +897,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* SequenceSystem = SystemsManager.GetSequenceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;

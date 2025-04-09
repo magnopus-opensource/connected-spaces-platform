@@ -136,7 +136,7 @@ public:
         return Avatars;
     }
 
-    int32_t GetIndexOfEntity(int64_t EntityId)
+    int32_t GetIndexOfEntity(uint64_t EntityId)
     {
         int32_t IndexOfEntity = -1;
 
@@ -160,7 +160,7 @@ public:
         return IndexOfEntity;
     }
 
-    EntityScriptInterface* GetEntityById(int64_t EntityId)
+    EntityScriptInterface* GetEntityById(uint64_t EntityId)
     {
         EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
