@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <initializer_list>

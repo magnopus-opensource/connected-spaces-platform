@@ -25,6 +25,7 @@
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/URI.h>
+#include <algorithm>
 #include <chrono>
 #include <stdexcept>
 #include <thread>
