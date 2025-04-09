@@ -22,7 +22,7 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Systems/Assets/AlphaVideoMaterial.h" // Ensure this header defines AlphaVideoMaterialResultCallback
+#include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
