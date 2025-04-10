@@ -59,11 +59,8 @@ def get_arguments_commandline():
 
 def create_output_path(output_path):
     try:
-        if not os.path.exists(os.path.dirname(output_path)):
-            os.mkdir(os.path.dirname(output_path))
-
         if not os.path.exists(output_path):
-            os.mkdir(output_path)
+            os.makedirs(output_path)
     except IOError as e:
         print("Issue changing folder, Error code (%s)." % e)
 
