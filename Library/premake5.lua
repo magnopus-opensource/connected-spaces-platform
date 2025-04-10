@@ -296,7 +296,7 @@ if not Project then
             links {
                 "websocket.js"
             }
-        filter { "platforms:wasm", "configurations:*Debug*" }
+        filter { "platforms:wasm", "configurations:*debug*" }
             buildoptions {
                 "-gdwarf-5",
                 "-gseparate-dwarf"  -- preserve debug information (DWARF)
@@ -307,8 +307,8 @@ if not Project then
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
                 "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
             }
-        filter { "platforms:wasm", "configurations:*Release*" }
-            -- We want to reduce the size of Release builds as much as possible
+        filter { "platforms:wasm", "configurations:*release*" }
+            -- We want to reduce the size of release builds as much as possible
             buildoptions {
                 "-Os",
                 "-flto"
@@ -352,10 +352,10 @@ if not Project then
             filter {}
         end
 
-        -- Debug/Release config settings
-        filter "configurations:*Debug*"
+        -- Debug/Release/debug/release config settings
+        filter "configurations:*ebug*"
             targetname( "ConnectedSpacesPlatform_D" )
-        filter "configurations:*Release*"
+        filter "configurations:*elease*"
             targetname( "ConnectedSpacesPlatform" )
         filter "platforms:wasm"
             targetname( "ConnectedSpacesPlatform_WASM.js" )

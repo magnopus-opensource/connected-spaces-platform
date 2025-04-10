@@ -20,7 +20,7 @@ solution( "ConnectedSpacesPlatform" )
     if CSP.HasCommandLineArgument("DLLOnly") then
         configurations { "DebugDLL", "ReleaseDLL", "DebugDLL-CSharp", "ReleaseDLL-CSharp" }
     elseif CSP.IsWebAssemblyGeneration() then
-        configurations { "Debug", "Release" }
+        configurations { "debug", "release" }
     else
         configurations { "DebugStatic", "ReleaseStatic", "DebugDLL", "ReleaseDLL", "DebugDLL-CSharp", "ReleaseDLL-CSharp" }
     end

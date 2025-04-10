@@ -12,16 +12,21 @@ for /f "delims=" %%x in (emsdk_version.txt) do (
 
 cd ../..
 
-if "%~1"=="" (goto ArgError) else (goto ArgOk)
+if "%~1"=="" (goto ArgNone) else (goto ArgCheck)
 
-:ArgError
+:ArgNone
 echo No configuration name provided
+exit /b 1
+
+:ArgCheck
+for %%a in ("debug" "release") do if "%~1"==%%a (goto ArgOk)
+echo Unsupported configuration "%~1". Supported configurations are "debug" and "release". Please try again.
 exit /b 1
 
 :ArgOk
 docker run -w /src -v %cd%:/src --rm emscripten/emsdk:%emsdk_version% emmake make -j 8 config=%~1_wasm
 if %ERRORLEVEL% NEQ 0 (goto Error)
-xcopy /y /s /e Library\Binaries\WASM\%~1\ Tools\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web\%~1\
+xcopy /y /s /e Library\Binaries\wasm\%~1\ Tools\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web\%~1\
 if %ERRORLEVEL% NEQ 0 (goto Error) else (goto Success)
 
 :Error

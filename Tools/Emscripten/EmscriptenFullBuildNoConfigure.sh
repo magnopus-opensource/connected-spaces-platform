@@ -9,6 +9,12 @@ if [ -z "$1" ]
 	exit
 fi
 
+if [ "$1" != "debug" ] && [ "$1" != "release" ]
+  then
+    echo Unsupported configuration "$1". Supported configurations are "debug" and "release". Please try again.
+    exit
+fi
+
 docker run -w /src -v `pwd`:/src --rm emscripten/emsdk:$emsdk_version emmake make -j 8 config="$1"_wasm
 if [ $? -ne 0 ]
   then
@@ -25,7 +31,7 @@ if [ $? -ne 0 ]
 	exit 1
 fi
 
-cp -r Library/Binaries/WASM/"$1" Tools/WrapperGenerator/Output/TypeScript/connected-spaces-platform.web/
+cp -r Library/Binaries/wasm/"$1" Tools/WrapperGenerator/Output/TypeScript/connected-spaces-platform.web/
 if [ $? -ne 0 ]
   then
     cd Tools/Emscripten
