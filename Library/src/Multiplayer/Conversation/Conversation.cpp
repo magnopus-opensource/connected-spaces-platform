@@ -153,4 +153,11 @@ const csp::systems::Asset& AnnotationResult::GetAnnotationAsset() const { return
 const csp::systems::Asset& AnnotationResult::GetAnnotationThumbnailAsset() const { return AnnotationThumbnailAsset; }
 
 void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+
+const csp::common::Map<csp::common::String, csp::systems::Asset>& AnnotationThumbnailCollectionResult::GetAnnotationThumbnailAssetsMap() const
+{
+    return AnnotationThumbnailAssetsMap;
+}
+
+uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return AnnotationThumbnailAssetsMap.Size(); }
 } // namespace csp::multiplayer

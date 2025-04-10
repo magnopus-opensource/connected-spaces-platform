@@ -201,6 +201,9 @@ public:
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
+    // TODO: comment
+    void GetAnnotationThumbnailsForConversation(multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.

@@ -322,6 +322,32 @@ private:
     systems::Asset AnnotationThumbnailAsset;
 };
 
+class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    const csp::common::Map<csp::common::String, csp::systems::Asset>& GetAnnotationThumbnailAssetsMap() const;
+
+    uint64_t GetTotalCount() const;
+
+private:
+    csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
+};
+
 /// @brief Callback containing number of replies.
 /// @param Result NumberOfRepliesResult : result class
 typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
@@ -338,5 +364,8 @@ typedef std::function<void(const ConversationResult& Result)> ConversationResult
 
 // Callback providing a result object with a annotations result object representing the conversation.
 typedef std::function<void(const AnnotationResult& Result)> AnnotationResultCallback;
+
+// Callback providing a result object with a annotations thumbnail collection result object .
+typedef std::function<void(const AnnotationThumbnailCollectionResult& Result)> AnnotationThumbnailCollectionResultCallback;
 
 } // namespace csp::multiplayer

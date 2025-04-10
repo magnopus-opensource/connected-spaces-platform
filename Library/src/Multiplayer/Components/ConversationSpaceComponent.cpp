@@ -254,6 +254,20 @@ void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& Mes
     ConversationSystem->DeleteAnnotation(ConversationId, MessageId, Callback);
 }
 
+void ConversationSpaceComponent::GetAnnotationThumbnailsForConversation(multiplayer::AnnotationThumbnailCollectionResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationThumbnailCollectionResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetAnnotationThumbnailsForConversation(ConversationId, Callback);
+}
+
 void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
 {
     ConversationUpdateCallback = Callback;

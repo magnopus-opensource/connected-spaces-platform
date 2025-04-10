@@ -866,6 +866,11 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(common::continuations::InvokeIfExceptionInChain([Callback]() { Callback(MakeInvalid<NullResult>()); }));
 }
 
+void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
+    const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback)
+{
+}
+
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
 {
     Components.insert(Component);

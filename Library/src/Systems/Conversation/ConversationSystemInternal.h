@@ -102,6 +102,9 @@ public:
 
     void DeleteAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
 
+    void GetAnnotationThumbnailsForConversation(
+        const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+
     void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
     void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
 
