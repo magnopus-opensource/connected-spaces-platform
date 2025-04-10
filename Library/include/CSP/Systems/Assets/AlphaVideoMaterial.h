@@ -57,8 +57,8 @@ public:
     const TextureInfo& GetColorTexture() const;
 
     /// @brief Sets the doubleSided property which specifies whether the material is double sided.
-    /// @details When this value is false, back - face culling is enabled, i.e., only front-facing triangles are rendered.
-    /// When this value is true, back - face culling is disabled and double sided lighting is enabled.
+    /// @details When this value is false, back-face culling is enabled, i.e., only front-facing triangles are rendered.
+    /// When this value is true, back-face culling is disabled and double sided lighting is enabled.
     /// @param DoubleSided bool : The double sided value.
     void SetDoubleSided(bool DoubleSided);
 
