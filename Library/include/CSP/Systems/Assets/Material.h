@@ -114,10 +114,10 @@ public:
     /// @param Name const csp::common::String& : The name of the material.
     /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
-    /// @param InType EShaderType : The material shader type.
-    /// @param InVersion const int : The material version.
+    /// @param Type EShaderType : The material shader type.
+    /// @param Version const int : The material version.
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId,
-        EShaderType InType, const int InVersion);
+        EShaderType Type, const int Version);
 
     virtual ~Material() = default;
 
