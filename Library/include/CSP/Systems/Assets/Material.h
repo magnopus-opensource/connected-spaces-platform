@@ -85,7 +85,7 @@ class CSP_API Material
 {
 public:
     /// @brief Gets the user-defined name of the material.
-    ///  @return const common::String& : Returns the material name.
+    /// @return const common::String& : Returns the material name.
     const csp::common::String& GetName() const;
 
     /// @brief Gets the shader type of the material.
