@@ -2048,6 +2048,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
 
         auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotation, RequestPredicate, "");
 
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
 
@@ -2099,6 +2103,30 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
             });
 
         auto [Result] = AWAIT_PRE(ConversationComponent, DeleteAnnotation, RequestPredicate, "");
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+    }
+
+    // Ensure GetAnnotationThumbnailsForConversation errors and logs appropriately when a conversation hasn't been created
+    {
+        bool CallbackCalled = false;
+
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+            [&CallbackCalled](const csp::common::String& Message)
+            {
+                CallbackCalled = true;
+                EXPECT_EQ(NoConversationErrorLog, Message);
+            });
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotationThumbnailsForConversation, RequestPredicate);
+
+        EXPECT_TRUE(CallbackCalled);
+        EXPECT_EQ(Result.GetHttpResultCode(), 0);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
