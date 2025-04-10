@@ -307,8 +307,8 @@ if not Project then
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
                 "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
             }
-        filter { "platforms:wasm", "configurations:*release*" }
-            -- We want to reduce the size of release builds as much as possible
+        filter { "platforms:wasm", "configurations:*Release*" }
+            -- We want to reduce the size of Release builds as much as possible
             buildoptions {
                 "-Os",
                 "-flto"

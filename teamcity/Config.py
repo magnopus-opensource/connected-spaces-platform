@@ -45,7 +45,7 @@ config = Config(
         visionos="Library/Binaries/visionos/ReleaseStatic",
         android="ARMv7/ReleaseDLL Android",
         android64="ARM64/ReleaseDLL Android",
-        wasm="Library/Binaries/wasm/release",
+        wasm="Library/Binaries/wasm/Release",
         csharp=["Library/CSharpWrapper/src", "Tools/WrapperGenerator/Output/CSharp"],
     ),
     default_output_directory="package",
