@@ -22,4 +22,4 @@ To run the Emscripten server locally call the python script: `Tools/Emscripten/S
 
 ## Where is the file output?
 
-After the build is successful the local files will appear in `Tools/WrapperGenerator/Output/TypeScript/connected-spaces-platform.web`.
+After the build is successful the local files will appear in `Library\Binaries\package\wasm\connected-spaces-platform.web`.

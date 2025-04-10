@@ -25,16 +25,25 @@ exit /b 1
 
 :ArgOk
 docker run -w /src -v %cd%:/src --rm emscripten/emsdk:%emsdk_version% emmake make -j 8 config=%~1_wasm
+if %ERRORLEVEL% NEQ 0 (goto DockerError)
+
+python .\teamcity\GenerateReadMeWithLink.py
 if %ERRORLEVEL% NEQ 0 (goto Error)
-xcopy /y /s /e Library\Binaries\wasm\%~1\ Tools\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web\%~1\
+
+python .\teamcity\BuildNPMWebPackage.py --npm_publish_flag=False
 if %ERRORLEVEL% NEQ 0 (goto Error) else (goto Success)
 
-:Error
-cd Tools/Emscripten
+:DockerError
+cd Tools\Emscripten
 echo ERROR: Build failed. Have you started the docker engine?
 exit /b 1
 
+:Error
+cd Tools\Emscripten
+echo ERROR: Build failed: failed to generate package.
+exit /b 1
+
 :Success
-cd Tools/Emscripten
-echo Success! Build located in: ..\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web
+cd Tools\Emscripten
+echo Success! Build located in: ..\Library\Binaries\package\wasm\connected-spaces-platform.web
 exit /b 0

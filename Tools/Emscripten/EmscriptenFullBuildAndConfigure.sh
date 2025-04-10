@@ -48,14 +48,15 @@ if [ $? -ne 0 ]
 	exit 1
 fi
 
-cp -r Library/Binaries/wasm/"$1" Tools/WrapperGenerator/Output/TypeScript/connected-spaces-platform.web/
+python ./teamcity/GenerateReadMeWithLink.py
+python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
 if [ $? -ne 0 ]
   then
     cd Tools/Emscripten
-    echo ERROR: Copy failed.
+    echo ERROR: Package generation failed.
 	exit 1
   else
     cd Tools/Emscripten
-    echo Success! Build located in: ..\WrapperGenerator\Output\TypeScript\connected-spaces-platform.web
+    echo Success! Build located in: ../Library/Binaries/package/wasm/connected-spaces-platform.web
     exit 0
 fi

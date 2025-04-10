@@ -86,12 +86,12 @@ if not CSP then
 		flags {"FatalWarnings"}
 		externalwarnings "Off"
 			
-        -- Standard Debug/Release/debug/release config settings
-        filter "configurations:*ebug*"
+        -- Standard debug/release config settings
+        filter "configurations:*Debug*"
             defines { "DEBUG" }
             symbols "Full"
             optimize "Off"
-        filter "configurations:*elease*"
+        filter "configurations:*Release*"
             defines { "NDEBUG" }
             symbols "Off"
             optimize "On"

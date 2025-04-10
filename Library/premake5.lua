@@ -296,7 +296,7 @@ if not Project then
             links {
                 "websocket.js"
             }
-        filter { "platforms:wasm", "configurations:*debug*" }
+        filter { "platforms:wasm", "configurations:*Debug*" }
             buildoptions {
                 "-gdwarf-5",
                 "-gseparate-dwarf"  -- preserve debug information (DWARF)
@@ -352,10 +352,10 @@ if not Project then
             filter {}
         end
 
-        -- Debug/Release/debug/release config settings
-        filter "configurations:*ebug*"
+        -- Debug/Release config settings
+        filter "configurations:*Debug*"
             targetname( "ConnectedSpacesPlatform_D" )
-        filter "configurations:*elease*"
+        filter "configurations:*Release*"
             targetname( "ConnectedSpacesPlatform" )
         filter "platforms:wasm"
             targetname( "ConnectedSpacesPlatform_WASM.js" )

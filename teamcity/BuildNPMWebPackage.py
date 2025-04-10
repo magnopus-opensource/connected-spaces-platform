@@ -29,7 +29,7 @@ def get_arguments_commandline():
                         default="Library\\Binaries\\wasm")
     parser.add_argument('--relative_typescript_path',
                         help="Enter the relative path from root/teamcity for typescript.",
-                        default="Tools\\WrapperGenerator\\Output\\TypeScript\\connected-spaces-platform.web")
+                        default="Tools\\WrapperGenerator\\Output\\TypeScript")
     parser.add_argument('--license',
                         help="Enter the license required for the Connected Spaces Platform package.",
                         default="Apache-2.0")
@@ -42,9 +42,6 @@ def get_arguments_commandline():
     parser.add_argument('--registry',
                         help="This is the upstream location of the package.",
                         default="https://npm.pkg.github.io/@magnopus-opensource")
-    parser.add_argument('--generation_folder',
-                        help="This is the package generation location.",
-                        default="package_gen")
     parser.add_argument('--release_mode',
                         help="NPM release command, pack and publish are available.",
                         default="pack")
@@ -156,7 +153,7 @@ def generate_final_package(input_args, generation_folder):
 
 def main():
     input_args = get_arguments_commandline()
-    generation_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_destination_path, input_args.generation_folder)
+    generation_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_destination_path, input_args.name)
     create_output_path(generation_folder)
     package_dir_valid = copy_packages_in(input_args, generation_folder)
 

@@ -23,7 +23,7 @@ from TypeScriptWrapperGenerator_Jinja2 import TypeScriptWrapperGenerator_Jinja2
 class TypeScriptWrapperGenerator:
     __TEMPLATE_DIRECTORY = config["template_directory"] + "TypeScript/"
     __PARTIALS_DIRECTORY = __TEMPLATE_DIRECTORY + "Partials/"
-    __OUTPUT_DIRECTORY = config["output_directory"] + "TypeScript/connected-spaces-platform.web/"
+    __OUTPUT_DIRECTORY = config["output_directory"] + "TypeScript/"
 
     NAMESPACE_TRANSLATIONS = {
         "csp": None,
@@ -552,7 +552,7 @@ class TypeScriptWrapperGenerator:
 
         # Compile output to Javascript
         if not Path(f"{self.__OUTPUT_DIRECTORY}/ConnectedSpacesPlatform_WASM.d.ts").is_file():
-            shutil.copy2(f"{self.__OUTPUT_DIRECTORY}../../../ConnectedSpacesPlatform_WASM.d.ts", self.__OUTPUT_DIRECTORY)
+            shutil.copy2(f"{self.__OUTPUT_DIRECTORY}../../ConnectedSpacesPlatform_WASM.d.ts", self.__OUTPUT_DIRECTORY)
 
         subprocess.run(
             f'npx --package typescript tsc "{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts" -d -m es2020 -t es2020 --sourceMap',
