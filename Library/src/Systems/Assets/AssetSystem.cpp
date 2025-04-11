@@ -1003,7 +1003,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
 
                 // 4. Return created material
                 MaterialResult FinalResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
-                FinalResult.SetMaterial(*NewlyCreatedMaterial);
+                FinalResult.SetMaterial(NewlyCreatedMaterial);
 
                 Callback(FinalResult);
             };
@@ -1279,7 +1279,7 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
                 }
 
                 MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                Result.SetMaterial(*FoundMaterial);
+                Result.SetMaterial(FoundMaterial);
 
                 Callback(Result);
             };

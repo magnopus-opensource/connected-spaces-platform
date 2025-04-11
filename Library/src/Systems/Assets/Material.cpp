@@ -70,7 +70,7 @@ const Material* MaterialResult::GetMaterial() const { return Material; }
 
 Material* MaterialResult::GetMaterial() { return Material; }
 
-void MaterialResult::SetMaterial(csp::systems::Material& InMaterial) { Material = &InMaterial; }
+void MaterialResult::SetMaterial(csp::systems::Material* InMaterial) { Material = InMaterial; }
 
 void MaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
 
