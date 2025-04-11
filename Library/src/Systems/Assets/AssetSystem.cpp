@@ -57,8 +57,6 @@ String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCol
         return "Comment";
     else if (AssetCollectionType == systems::EAssetCollectionType::SPACE_THUMBNAIL)
         return "SpaceThumbnail";
-    else if (AssetCollectionType == systems::EAssetCollectionType::ANNOTATION)
-        return "Annotation";
     else
     {
         assert(false && "Unsupported AssetCollection Type!");

@@ -190,49 +190,6 @@ namespace
         };
     }
 
-    auto FindAnnotationAssetCollection(AssetSystem* AssetSystem, const common::String& ParentId, const common::String& SpaceId)
-    {
-        return [AssetSystem, ParentId, SpaceId]()
-        {
-            return AssetSystem->FindAssetCollections(
-                nullptr, ParentId, nullptr, common::Array { EAssetCollectionType::ANNOTATION }, nullptr, common::Array { SpaceId }, nullptr, nullptr);
-        };
-    }
-
-    auto GetOrCreateAnnotationAssetCollection(AssetSystem* AssetSystem, const csp::common::String& SpaceId, const csp::common::String& Name,
-        const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
-    {
-        return [AssetSystem, SpaceId, Name, Metadata](const AssetCollectionResult& Parent)
-        {
-            return FindAnnotationAssetCollection(AssetSystem, Parent.GetAssetCollection().Id, SpaceId)().then(
-                [AssetSystem, SpaceId, Name, Metadata, Parent](const AssetCollectionsResult& Result)
-                {
-                    if (Result.GetTotalCount() == 0)
-                    {
-                        CSP_LOG_MSG(csp::systems::LogLevel::Log,
-                            "ConversationSystemInternal::SetAnnotation, asset collection didn't previously exist, so creating");
-
-                        return AssetSystem->CreateAssetCollection(
-                            SpaceId, Parent.GetAssetCollection().Id, Name, Metadata, EAssetCollectionType::ANNOTATION, nullptr);
-                    }
-                    else if (Result.GetTotalCount() == 1)
-                    {
-                        CSP_LOG_MSG(
-                            csp::systems::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset collection already exists, so updating");
-
-                        return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollections()[0], Metadata, nullptr);
-                    }
-                    else
-                    {
-                        CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
-
-                        throw async::task_canceled();
-                        return async::task<AssetCollectionResult>();
-                    }
-                });
-        };
-    };
-
     auto AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
     {
         return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)

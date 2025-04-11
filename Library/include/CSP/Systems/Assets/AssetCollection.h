@@ -43,8 +43,7 @@ enum class EAssetCollectionType
     FOUNDATION_INTERNAL,
     COMMENT_CONTAINER,
     COMMENT,
-    SPACE_THUMBNAIL,
-    ANNOTATION
+    SPACE_THUMBNAIL
 };
 
 /// @ingroup Asset System

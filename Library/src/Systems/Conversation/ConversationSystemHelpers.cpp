@@ -170,9 +170,6 @@ common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMet
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.AuthorCameraPosition);
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.AuthorCameraRotation);
 
-    // constexpr const char* ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID = "ThumbnailId";
-    constexpr const char* ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID = "AnnotationId";
-
     return MetadataMap;
 }
 
