@@ -21,6 +21,11 @@
 #include "Debug/Logging.h"
 #include "Json/JsonSerializer.h"
 
+namespace
+{
+constexpr int InitialMaterialVersion = 1;
+}
+
 namespace GLTFMaterialProperties
 {
 static constexpr const char* Name = "name";
@@ -161,7 +166,7 @@ void GLTFMaterial::SetEmissiveTexture(const TextureInfo& Texture) { EmissiveText
 const TextureInfo& GLTFMaterial::GetEmissiveTexture() const { return EmissiveTexture; }
 
 GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-    : Material(Name, AssetCollectionId, AssetId, csp::systems::EShaderType::Standard, 1)
+    : Material(Name, AssetCollectionId, AssetId, csp::systems::EShaderType::Standard, InitialMaterialVersion)
     , AlphaMode(EAlphaMode::Opaque)
     , AlphaCutoff(0.5f)
     , IsDoubleSided(false)
