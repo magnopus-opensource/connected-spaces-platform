@@ -1141,6 +1141,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
     auto [SpaceEntity] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
+    // Attempt to add 2 script components
+    SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
+    SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
+
     SpaceEntity->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
 
