@@ -88,8 +88,11 @@ public:
 class CSP_API AnnotationUpdateParams
 {
 public:
+    /// @brief The vertical fov of the camera when the annotation is created
     uint16_t VerticalFov;
+    /// @brief The position of the camera when the annotation is created
     csp::common::Vector3 AuthorCameraPosition;
+    /// @brief The rotation of the camera when the annotation is created
     csp::common::Vector4 AuthorCameraRotation;
 };
 
