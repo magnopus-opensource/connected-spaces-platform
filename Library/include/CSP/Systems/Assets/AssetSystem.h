@@ -257,19 +257,19 @@ public:
     /// The material should be retrieved through GetMaterials or GetMaterial.
     /// If the material doesn't exist, EResultCode::Failed will be returned.
     /// If the material hasn't changed, EResultCode::Success will still be returned.
-    /// @param Material const GLTFMaterial& : The material to update
+    /// @param Material const Material& : The material to update
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void UpdateMaterial(const Material& Material, NullResultCallback Callback);
 
     /// @brief Deletes a given material.
     /// The material should be retrieved through GetMaterials or GetMaterial.
-    /// @param Material const GLTFMaterial& : The material to delete
+    /// @param Material const Material& : The material to delete
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void DeleteMaterial(const Material& Material, NullResultCallback Callback);
 
     /// @brief Gets all materials associated with the given space.
     /// @param SpaceId const csp::common::String& : The space id the material is associated with.
-    /// @param Callback GLTFMaterialsResultCallback : Callback when asynchronous task finishes.
+    /// @param Callback MaterialsResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback);
 
     /// @brief Gets a material using its AssetCollection and Asset Id.
