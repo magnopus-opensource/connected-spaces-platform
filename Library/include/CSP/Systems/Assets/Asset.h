@@ -59,7 +59,9 @@ enum class EAssetType
     HOLOCAP_AUDIO,
     AUDIO,
     GAUSSIAN_SPLAT,
-    MATERIAL
+    MATERIAL,
+    ANNOTATION,
+    ANNOTATION_THUMBNAIL
 };
 
 enum class EAssetPlatform
@@ -196,6 +198,11 @@ public:
     /// @brief Retrieves the asset result.
     /// @return Asset : const ref of asset class.
     const Asset& GetAsset() const;
+
+    CSP_NO_EXPORT void SetAsset(const csp::systems::Asset& Asset);
+
+    CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 protected:
     AssetResult() = delete;
