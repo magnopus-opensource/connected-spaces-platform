@@ -245,16 +245,16 @@ std::pair<bool, Material*> DeserializeIntoMaterialOfType(
     return Result;
 }
 
-void SerializeMaterialOfType(EShaderType ShaderType, const Material& Material, csp::common::String& OutMaterialJson)
+void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, csp::common::String& OutMaterialJson)
 {
     if (ShaderType == EShaderType::AlphaVideo)
     {
-        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(&Material);
+        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(Material);
         OutMaterialJson = json::JsonSerializer::Serialize(*NewAlphaVideoMaterial);
     }
     else if (ShaderType == EShaderType::Standard)
     {
-        const GLTFMaterial* NewGLTFMaterial = static_cast<const GLTFMaterial*>(&Material);
+        const GLTFMaterial* NewGLTFMaterial = static_cast<const GLTFMaterial*>(Material);
         OutMaterialJson = json::JsonSerializer::Serialize(*NewGLTFMaterial);
     }
     else
@@ -998,7 +998,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
             Material* NewlyCreatedMaterial = InstantiateMaterialOfType(ShaderType, Name, CreatedAssetCollection.Id, CreatedAsset.Id);
 
             // Serialse material data.
-            SerializeMaterialOfType(ShaderType, *NewlyCreatedMaterial, MaterialJson);
+            SerializeMaterialOfType(ShaderType, NewlyCreatedMaterial, MaterialJson);
 
             auto UploadMaterialCallback = [this, Callback, NewlyCreatedMaterial, SpaceId, Name](const UriResult& UploadResult)
             {
@@ -1069,7 +1069,7 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             csp::common::String MaterialJson;
 
             // Serialse material data.
-            SerializeMaterialOfType(Material.GetShaderType(), Material, MaterialJson);
+            SerializeMaterialOfType(Material.GetShaderType(), &Material, MaterialJson);
 
             const Asset& CreatedAsset = CreateAssetResult.GetAsset();
 
