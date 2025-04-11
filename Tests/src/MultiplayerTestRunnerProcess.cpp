@@ -95,33 +95,33 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(Multiplaye
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string LoginEmail)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string SetLoginEmail)
 {
-    this->LoginEmail = std::move(LoginEmail);
+    this->LoginEmail = std::move(SetLoginEmail);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string Password)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string SetPassword)
 {
-    this->Password = std::move(Password);
+    this->Password = std::move(SetPassword);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string SpaceId)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string SetSpaceId)
 {
-    this->SpaceId = std::move(SpaceId);
+    this->SpaceId = std::move(SetSpaceId);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int TimeoutInSeconds)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int SetTimeoutInSeconds)
 {
-    this->TimeoutInSeconds = TimeoutInSeconds;
+    this->TimeoutInSeconds = SetTimeoutInSeconds;
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string Endpoint)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string SetEndpoint)
 {
-    this->Endpoint = std::move(Endpoint);
+    this->Endpoint = std::move(SetEndpoint);
     return *this;
 }
 
