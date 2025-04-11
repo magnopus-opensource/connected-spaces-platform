@@ -136,7 +136,7 @@ public:
         return Avatars;
     }
 
-    int32_t GetIndexOfEntity(uint64_t EntityId)
+    int32_t GetIndexOfEntity(int64_t EntityId)
     {
         int32_t IndexOfEntity = -1;
 
@@ -147,7 +147,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (static_cast<int32_t>(Entity->GetId()) == EntityId)
                 {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
@@ -160,7 +160,7 @@ public:
         return IndexOfEntity;
     }
 
-    EntityScriptInterface* GetEntityById(uint64_t EntityId)
+    EntityScriptInterface* GetEntityById(int64_t EntityId)
     {
         EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
@@ -170,7 +170,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (static_cast<int32_t>(Entity->GetId()) == EntityId)
                 {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;
