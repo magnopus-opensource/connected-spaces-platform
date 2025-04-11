@@ -48,9 +48,12 @@ namespace ConversationSystemHelpers
     common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData);
     common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& ConversationData);
     common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData);
+    common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection);
     multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& ConversationAssetCollection);
     multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
-    multiplayer::AnnotationData GetAnnotationDataFromAnnoationAssetCollection(const AssetCollection& AnnotationAssetCollection);
+    multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
+
+    bool HasAnnotationMetaData(const AssetCollection& MessageAssetCollection);
 
     csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params);
 }

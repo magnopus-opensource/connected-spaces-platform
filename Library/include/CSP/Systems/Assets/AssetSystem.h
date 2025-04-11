@@ -212,6 +212,7 @@ public:
     /// @param Asset Asset : asset to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset, NullResultCallback Callback);
+    CSP_NO_EXPORT async::task<NullResult> DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset);
 
     /// @brief Retrieves all assets in a given asset collection.
     /// @param AssetCollection AssetCollection : collection to get all assets from

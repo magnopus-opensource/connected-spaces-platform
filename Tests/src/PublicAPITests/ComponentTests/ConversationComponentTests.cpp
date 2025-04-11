@@ -1462,13 +1462,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoConversationPermissionsErrorLog, Message);
+                    if (Message == NoConversationPermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateConversation, RequestPredicate, {});
+
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
@@ -1480,13 +1484,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                    if (Message == NoMessagePermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateMessage, RequestPredicate, MessageId, {});
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
@@ -1498,13 +1505,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                    if (Message == NoMessagePermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, DeleteMessage, RequestPredicate, MessageId);
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
@@ -1685,7 +1695,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
             [&CallbackCalled](const csp::common::String& Message)
             {
-                if (Message == "Result didn't contain a valid asset collection.")
+                if (Message == "Message asset collection doesn't contain annotation data.")
                 {
                     CallbackCalled = true;
                 }
@@ -1942,18 +1952,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         static constexpr const uint16_t TestFov2 = 100;
         static constexpr char* TestAnnotationData2 = "Test3";
         static constexpr char* TestAnnotationThumbnailData2 = "Test4";
-
-        bool CollectionOverwriteLogCalled = false;
         bool AssetOverwriteLogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CollectionOverwriteLogCalled, &AssetOverwriteLogCalled](const csp::common::String& Message)
+            [&AssetOverwriteLogCalled](const csp::common::String& Message)
             {
-                if (Message == "ConversationSystemInternal::SetAnnotation, asset collection already exists, so updating")
-                {
-                    CollectionOverwriteLogCalled = true;
-                }
-
                 if (Message == "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating")
                 {
                     AssetOverwriteLogCalled = true;
@@ -1979,7 +1982,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EXPECT_TRUE(CollectionOverwriteLogCalled);
         EXPECT_TRUE(AssetOverwriteLogCalled);
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();

@@ -168,6 +168,16 @@ common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMet
     return MetadataMap;
 }
 
+common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection)
+{
+    auto MetadataMap = MessageAssetCollection.GetMetadataImmutable();
+    MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV);
+    MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION);
+    MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION);
+
+    return MetadataMap;
+}
+
 void PopulateMessageInfoFromMetadata(const csp::common::Map<csp::common::String, csp::common::String>& Metadata, multiplayer::MessageInfo& Info)
 {
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
@@ -199,10 +209,17 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
     return Info;
 }
 
-multiplayer::AnnotationData GetAnnotationDataFromAnnoationAssetCollection(const AssetCollection& AnnotationAssetCollection)
+bool HasAnnotationMetaData(const AssetCollection& MessageAssetCollection)
+{
+    const auto& MetadataMap = MessageAssetCollection.GetMetadataImmutable();
+
+    return MetadataMap.HasKey(ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV);
+}
+
+multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection)
 {
     multiplayer::AnnotationData Data;
-    const auto& MetadataMap = AnnotationAssetCollection.GetMetadataImmutable();
+    const auto& MetadataMap = MessageAssetCollection.GetMetadataImmutable();
 
     Data.SetVerticalFov(std::stoi(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str()));
     Data.SetAuthorCameraPosition(StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]));

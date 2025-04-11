@@ -909,6 +909,23 @@ void AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asse
     DeleteAssetById(AssetCollection.Id, Asset.Id, Callback);
 }
 
+async::task<NullResult> AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset)
+{
+    std::shared_ptr<async::event_task<NullResult>> OnCompleteEvent = std::make_shared<async::event_task<NullResult>>();
+    async::task<NullResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    DeleteAssetById(AssetCollection.Id, Asset.Id,
+        [OnCompleteEvent](const NullResult& Result)
+        {
+            if (Result.GetResultCode() == EResultCode::Success || Result.GetResultCode() == EResultCode::Failed)
+            {
+                OnCompleteEvent->set(Result);
+            }
+        });
+
+    return OnCompleteTask;
+}
+
 void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, AssetsResultCallback Callback)
 {
     std::vector<String> PrototypeIds = { AssetCollection.Id };

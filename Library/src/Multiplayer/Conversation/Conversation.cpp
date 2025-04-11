@@ -143,7 +143,7 @@ void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& 
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    Data = systems::ConversationSystemHelpers::GetAnnotationDataFromAnnoationAssetCollection(AssetCollection);
+    Data = systems::ConversationSystemHelpers::GetAnnotationDataFromMessageAssetCollection(AssetCollection);
 }
 
 const AnnotationData& AnnotationResult::GetAnnotationData() const { return Data; }
