@@ -197,45 +197,52 @@ csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name
 namespace csp::systems
 {
 
-void InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const csp::common::String& Name, const csp::common::String& AssetCollectionId,
-    const csp::common::String& AssetId, Material** OutMaterial)
+Material* InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const csp::common::String& Name,
+    const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
 {
+    Material* NewMaterial = nullptr;
+
     if (ShaderType == EShaderType::AlphaVideo)
     {
-        AlphaVideoMaterial* NewMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
-        *OutMaterial = static_cast<Material*>(NewMaterial);
+        AlphaVideoMaterial* NewAlphaVideoMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
+        NewMaterial = static_cast<Material*>(NewAlphaVideoMaterial);
     }
     else if (ShaderType == EShaderType::Standard)
     {
-        GLTFMaterial* NewMaterial = CSP_NEW GLTFMaterial(Name, AssetCollectionId, AssetId);
-        *OutMaterial = static_cast<Material*>(NewMaterial);
+        GLTFMaterial* NewGLTFMaterial = CSP_NEW GLTFMaterial(Name, AssetCollectionId, AssetId);
+        NewMaterial = static_cast<Material*>(NewGLTFMaterial);
     }
     else
     {
         assert(false && "Unable to instantiate material. Unsupported Shader Type.");
     }
+
+    return NewMaterial;
 }
 
-bool DeserializeIntoMaterialOfType(const char* MaterialData, csp::systems::EShaderType ShaderType, Material** OutMaterial)
+std::pair<bool, Material*> DeserializeIntoMaterialOfType(
+    const char* MaterialData, csp::systems::EShaderType ShaderType, Material* MaterialToDeserialize)
 {
-    bool Deserialized = false;
+    std::pair<bool, Material*> Result = { false, nullptr };
 
     if (ShaderType == EShaderType::AlphaVideo)
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(*OutMaterial);
-        Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
+        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(MaterialToDeserialize);
+        Result.first = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
+        Result.second = MaterialToDeserialize;
     }
     else if (ShaderType == EShaderType::Standard)
     {
-        GLTFMaterial* NewGLTFMaterial = static_cast<GLTFMaterial*>(*OutMaterial);
-        Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewGLTFMaterial);
+        GLTFMaterial* NewGLTFMaterial = static_cast<GLTFMaterial*>(MaterialToDeserialize);
+        Result.first = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewGLTFMaterial);
+        Result.second = MaterialToDeserialize;
     }
     else
     {
         assert(false && "Unable to deserialize material. Unsupported Shader Type.");
     }
 
-    return Deserialized;
+    return Result;
 }
 
 void SerializeMaterialOfType(EShaderType ShaderType, const Material& Material, csp::common::String& OutMaterialJson)
@@ -986,10 +993,9 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
             // 3. Upload default material
             Asset CreatedAsset = CreateAssetResult.GetAsset();
             csp::common::String MaterialJson;
-            Material* NewlyCreatedMaterial = nullptr;
 
             // Create material of the specific derived type.
-            InstantiateMaterialOfType(ShaderType, Name, CreatedAssetCollection.Id, CreatedAsset.Id, &NewlyCreatedMaterial);
+            Material* NewlyCreatedMaterial = InstantiateMaterialOfType(ShaderType, Name, CreatedAssetCollection.Id, CreatedAsset.Id);
 
             // Serialse material data.
             SerializeMaterialOfType(ShaderType, *NewlyCreatedMaterial, MaterialJson);
@@ -1182,15 +1188,13 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
 
                     const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-                    Material* FoundMaterial = nullptr;
-
                     // Create material of the specific derived type.
-                    InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId, &FoundMaterial);
+                    Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId);
 
                     // Deserialse material data.
-                    bool Deserialized = DeserializeIntoMaterialOfType(MaterialData, ShaderType, &FoundMaterial);
+                    auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
 
-                    if (Deserialized == false)
+                    if (DeserializationResult.first == false)
                     {
                         CSP_LOG_ERROR_MSG("Failed to deserialize material");
 
@@ -1199,7 +1203,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                         return;
                     }
 
-                    (*DownloadedMaterials)[i] = FoundMaterial;
+                    (*DownloadedMaterials)[i] = DeserializationResult.second;
 
                     (*AssetsDownloaded)++;
 
@@ -1261,15 +1265,13 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 
                 csp::systems::EShaderType ShaderType = GetShaderTypeFromMaterialCollection(FoundAssetCollection);
 
-                Material* FoundMaterial = nullptr;
-
                 // Create material of the specific derived type.
-                InstantiateMaterialOfType(ShaderType, "", FoundAssetCollection.Id, FoundAsset.Id, &FoundMaterial);
+                Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", FoundAssetCollection.Id, FoundAsset.Id);
 
                 // Deserialse material data.
-                bool Deserialized = DeserializeIntoMaterialOfType(MaterialData, ShaderType, &FoundMaterial);
+                auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
 
-                if (Deserialized == false)
+                if (DeserializationResult.first == false)
                 {
                     CSP_LOG_ERROR_MSG("Failed to deserialize material");
 
@@ -1279,7 +1281,7 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
                 }
 
                 MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                Result.SetMaterial(FoundMaterial);
+                Result.SetMaterial(DeserializationResult.second);
 
                 Callback(Result);
             };
