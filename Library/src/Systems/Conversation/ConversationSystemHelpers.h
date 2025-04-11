@@ -47,7 +47,8 @@ namespace ConversationSystemHelpers
     common::String GetUniqueAnnotationThumbnailFileName(const common::String& SpaceId, const common::String& CreatorUserId);
     common::Map<common::String, common::String> GenerateMessageAssetCollectionMetadata(const multiplayer::MessageInfo& MessageData);
     common::Map<common::String, common::String> GenerateConversationAssetCollectionMetadata(const multiplayer::MessageInfo& ConversationData);
-    common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData);
+    common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationUpdateParams& AnnotationData,
+        const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId);
     common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection);
     multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(const AssetCollection& ConversationAssetCollection);
     multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);

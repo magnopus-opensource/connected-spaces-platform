@@ -233,11 +233,11 @@ namespace
         };
     };
 
-    auto AppendCommentMetadata(AssetSystem* AssetSystem, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+    auto AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
     {
-        return [AssetSystem, Metadata](const AssetCollectionResult& Result)
+        return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
         {
-            auto NewMetadata = Result.GetAssetCollection().GetMetadataImmutable();
+            auto NewMetadata = MessageCollection->GetMetadataImmutable();
             auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
 
             std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
@@ -248,7 +248,7 @@ namespace
                 NewMetadata[(*Keys)[i]] = Metadata[(*Keys)[i]];
             }
 
-            return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollection(), NewMetadata, nullptr);
+            return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
         };
     }
 
@@ -375,6 +375,13 @@ namespace
             ThumbnailResult.ParseAssets(Result);
             return ThumbnailResult;
         };
+    }
+
+    auto GenerateAnnotationMetadata(
+        const multiplayer::AnnotationUpdateParams& NewData, std::shared_ptr<Asset> AnnotationAsset, std::shared_ptr<Asset> AnnotationThumbnailAsset)
+    {
+        return [NewData, AnnotationAsset, AnnotationThumbnailAsset]()
+        { return ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(NewData, AnnotationAsset->Id, AnnotationThumbnailAsset->Id); };
     }
 }
 
@@ -861,14 +868,13 @@ void ConversationSystemInternal::GetAnnotation(
 }
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
-    const multiplayer::AnnotationData& AnnotationData, const systems::BufferAssetDataSource& Annotation,
+    const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
     const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
 {
     const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
     const csp::common::String UserId = UserSystem->GetLoginState().UserId;
 
     const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
-    const auto AnnotationMetadata = ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(AnnotationData);
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
@@ -885,38 +891,42 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "ConversationSystemInternal::SetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
             {}, {}, {}))
         .then(ValidateMessageAssetCollection(ConversationId))
-        // 2. Update asset collection metadata
-        .then(AppendCommentMetadata(AssetSystem, AnnotationMetadata))
-        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-            "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",
-            "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(MessageAssetCollection))
-        // 3. Create Annotation asset
+        // 2. Create Annotation asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
-        // 4. Upload Annotation asset data
+        .then(SetAnnotationAsset(AnnotationAsset))
+        // 3. Upload Annotation asset data
         .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, Annotation, UniqueAnnotationAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.", {},
             {}, {}))
         .then(SetAssetUri(AnnotationAsset))
-        // 6. Create Annotation thumbnail asset
+        // 4. Create Annotation thumbnail asset
         .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
-        // 7. Upload Annotation thumbnail asset data
+        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        // 5. Upload Annotation thumbnail asset data
         .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
         .then(SetAssetUri(AnnotationThumbnailAsset))
-        // 8. Send multiplayer event
+        // 6. Update asset collection metadata
+        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationAsset))
+        .then(AppendCommentMetadata(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",
+            "Failed to update message asset collection metadata.", {}, {}, {}))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
+        // 7. Send multiplayer event
         .then(SendConversationEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBus))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
             Callback, "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
-        // 9. Process result
+        // 8. Process result
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain([Callback]() { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));

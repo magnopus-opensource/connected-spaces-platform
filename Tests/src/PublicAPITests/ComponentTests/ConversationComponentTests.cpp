@@ -1622,10 +1622,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
     // Create annotation attached to message
     {
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition(TestAuthorCameraPosition);
-        Data.SetAuthorCameraRotation(TestAuthorCameraRotation);
-        Data.SetVerticalFov(TestFov);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = TestAuthorCameraPosition;
+        Data.AuthorCameraRotation = TestAuthorCameraRotation;
+        Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = TestAnnotationData;
@@ -1799,10 +1799,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         static constexpr char* TestAnnotationData = "Test";
         static constexpr char* TestAnnotationThumbnailData = "Test2";
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition({ 1.f, 2.f, 3.f });
-        Data.SetAuthorCameraRotation({ 4.f, 5.f, 6.f, 7.f });
-        Data.SetVerticalFov(90);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 1.f, 2.f, 3.f };
+        Data.AuthorCameraRotation = { 4.f, 5.f, 6.f, 7.f };
+        Data.VerticalFov = 90;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = TestAnnotationData;
@@ -1925,10 +1925,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         static constexpr char* TestAnnotationData = "Test";
         static constexpr char* TestAnnotationThumbnailData = "Test2";
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition(TestAuthorCameraPosition);
-        Data.SetAuthorCameraRotation(TestAuthorCameraRotation);
-        Data.SetVerticalFov(TestFov);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = TestAuthorCameraPosition;
+        Data.AuthorCameraRotation = TestAuthorCameraRotation;
+        Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = TestAnnotationData;
@@ -1947,11 +1947,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
 
     // Overwrite annotation
     {
-        static const csp::common::Vector3 TestAuthorCameraPosition2 { 8.f, 9.f, 10.f };
-        static const csp::common::Vector4 TestAuthorCameraRotation2 { 11.f, 12.f, 13.f, 14.f };
-        static constexpr const uint16_t TestFov2 = 100;
-        static constexpr char* TestAnnotationData2 = "Test3";
-        static constexpr char* TestAnnotationThumbnailData2 = "Test4";
+        static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
+        static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
+        static constexpr const uint16_t TestFov = 100;
+        static constexpr char* TestAnnotationData = "Test3";
+        static constexpr char* TestAnnotationThumbnailData = "Test4";
         bool AssetOverwriteLogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
@@ -1963,19 +1963,19 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
                 }
             });
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition(TestAuthorCameraPosition2);
-        Data.SetAuthorCameraRotation(TestAuthorCameraRotation2);
-        Data.SetVerticalFov(TestFov2);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = TestAuthorCameraPosition;
+        Data.AuthorCameraRotation = TestAuthorCameraRotation;
+        Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData2;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData2);
+        AnnotationBufferData.Buffer = TestAnnotationData;
+        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
         AnnotationBufferData.SetMimeType("application/json");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData2;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData2);
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
+        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
         auto [Result]
@@ -1986,17 +1986,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestAuthorCameraPosition2));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestAuthorCameraRotation2));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestFov2);
+        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationData2, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+        EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationThumbnailData2, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+        EXPECT_TRUE(strcmp(TestAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
@@ -2068,10 +2068,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
                 EXPECT_EQ(NoConversationErrorLog, Message);
             });
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition({ 0.f, 0.f, 0.f });
-        Data.SetAuthorCameraRotation({ 0.f, 0.f, 0.f, 0.f });
-        Data.SetVerticalFov(0);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 0.f, 0.f, 0.f };
+        Data.AuthorCameraRotation = { 0.f, 0.f, 0.f, 0.f };
+        Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
@@ -2206,10 +2206,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
                 }
             });
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition({ 0.f, 0.f, 0.f });
-        Data.SetAuthorCameraRotation({ 0.f, 0.f, 0.f, 0.f });
-        Data.SetVerticalFov(0);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 0.f, 0.f, 0.f };
+        Data.AuthorCameraRotation = { 0.f, 0.f, 0.f, 0.f };
+        Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
@@ -2307,10 +2307,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
                 }
             });
 
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition({ 0.f, 0.f, 0.f });
-        Data.SetAuthorCameraRotation({ 0.f, 0.f, 0.f, 0.f });
-        Data.SetVerticalFov(0);
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 0.f, 0.f, 0.f };
+        Data.AuthorCameraRotation = { 0.f, 0.f, 0.f, 0.f };
+        Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
@@ -2373,6 +2373,70 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
 
     // Log out
     LogOut(UserSystem);
+}
+
+/*
+Tests annotation thumbnails can be retrieved
+*/
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThumbnailsTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    // Create the conversation
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, CreateConversation, RequestPredicate, "TestMessage");
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    csp::common::String MessageId;
+
+    // Create a message on the first conversation
+    {
+        static constexpr const char* TestMessage = "TestMessage";
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessageInfo();
+        MessageId = Info.MessageId;
+    }
+
+    // Add a message to the conversation
+    {
+        AnnotationData Data;
+        Data.SetAuthorCameraPosition({ 0.f, 0.f, 0.f });
+        Data.SetAuthorCameraRotation({ 0.f, 0.f, 0.f, 0.f });
+        Data.SetVerticalFov(0);
+
+        csp::systems::BufferAssetDataSource AnnotationBufferData;
+        AnnotationBufferData.Buffer = "";
+        AnnotationBufferData.BufferLength = 0;
+        AnnotationBufferData.SetMimeType("application/json");
+
+        csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
+        AnnotationThumbnailBufferData.Buffer = "";
+        AnnotationThumbnailBufferData.BufferLength = 0;
+        AnnotationThumbnailBufferData.SetMimeType("application/json");
+    }
 }
 
 // test getting 0 thumbnails

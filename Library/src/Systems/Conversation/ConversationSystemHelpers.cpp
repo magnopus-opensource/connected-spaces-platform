@@ -158,14 +158,15 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
     return MetadataMap;
 }
 
-common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData)
+common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationUpdateParams& AnnotationData,
+    const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId)
 {
     common::Map<common::String, common::String> MetadataMap;
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID] = AnnotationData.GetAnnotationId();
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID] = AnnotationData.GetAnnotationThumbnailId();
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV] = std::to_string(AnnotationData.GetVerticalFov()).c_str();
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.GetAuthorCameraPosition());
-    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.GetAuthorCameraRotation());
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID] = AnnotationId;
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID] = AnnotationThumbnailId;
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV] = std::to_string(AnnotationData.VerticalFov).c_str();
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.AuthorCameraPosition);
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.AuthorCameraRotation);
 
     // constexpr const char* ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID = "ThumbnailId";
     constexpr const char* ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID = "AnnotationId";

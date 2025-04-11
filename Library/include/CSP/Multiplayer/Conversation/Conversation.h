@@ -84,6 +84,16 @@ public:
 };
 
 /// @ingroup Conversation
+/// @brief Information used to update an annotation
+class CSP_API AnnotationUpdateParams
+{
+public:
+    uint16_t VerticalFov;
+    csp::common::Vector3 AuthorCameraPosition;
+    csp::common::Vector4 AuthorCameraRotation;
+};
+
+/// @ingroup Conversation
 /// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
 class CSP_API AnnotationData
 {
