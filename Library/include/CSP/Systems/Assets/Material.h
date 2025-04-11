@@ -126,9 +126,6 @@ public:
     virtual ~Material() = default;
 
     Material() = default;
-    csp::common::String Name;
-    EShaderType Type;
-    int Version;
 
 protected:
     // Copy assignment
@@ -141,6 +138,9 @@ protected:
     // Move ctor
     Material(Material&& other) = default;
 
+    csp::common::String Name;
+    EShaderType Type;
+    int Version;
     csp::common::String CollectionId;
     csp::common::String Id;
 
