@@ -344,7 +344,17 @@ namespace
     auto GetAnnotationAssetIdsFromCollections()
     {
         return [](const AssetCollectionsResult& Result)
-        { return ConversationSystemHelpers::GetAnnotationThumbnailAssetIdsFromCollectionResult(Result); };
+        {
+            auto ThumbnailIds = ConversationSystemHelpers::GetAnnotationThumbnailAssetIdsFromCollectionResult(Result);
+
+            if (ThumbnailIds.size() == 0)
+            {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "No Thumbnails exist.");
+                throw async::task_canceled();
+            }
+
+            return ThumbnailIds;
+        };
     }
 
     auto GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
@@ -916,7 +926,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
         .then(SetAssetUri(AnnotationThumbnailAsset))
         // 6. Update asset collection metadata
-        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationAsset))
+        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
         .then(AppendCommentMetadata(AssetSystem, MessageAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",

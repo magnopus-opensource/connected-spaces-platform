@@ -2386,6 +2386,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     // Login
     csp::common::String UserId;
@@ -2408,6 +2409,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
     }
 
     csp::common::String MessageId;
+    csp::common::String MessageId2;
 
     // Create a message on the first conversation
     {
@@ -2420,25 +2422,109 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         MessageId = Info.MessageId;
     }
 
-    // Add a message to the conversation
+    // Create a message on the first conversation
     {
-        AnnotationData Data;
-        Data.SetAuthorCameraPosition({ 0.f, 0.f, 0.f });
-        Data.SetAuthorCameraRotation({ 0.f, 0.f, 0.f, 0.f });
-        Data.SetVerticalFov(0);
+        static constexpr const char* TestMessage = "TestMessage2";
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessageInfo();
+        MessageId2 = Info.MessageId;
+    }
+
+    // Try and get thumbnails before any have been added
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotationThumbnailsForConversation, RequestPredicate);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetTotalCount(), 0);
+    }
+
+    static constexpr char* TestAnnotationData = "AnnotationTest";
+    static constexpr char* TestAnnotationData2 = "AnnotationTest2";
+    static constexpr char* TestThumbnailData = "ThumbnailTest";
+    static constexpr char* TestThumbnailData2 = "ThumbnailTest2";
+
+    // Add annotation to the first message
+    {
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 0.f, 0.f, 0.f };
+        Data.AuthorCameraRotation = { 0.f, 0.f, 0.f, 0.f };
+        Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = "";
-        AnnotationBufferData.BufferLength = 0;
+        AnnotationBufferData.Buffer = TestAnnotationData;
+        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
         AnnotationBufferData.SetMimeType("application/json");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = "";
-        AnnotationThumbnailBufferData.BufferLength = 0;
+        AnnotationThumbnailBufferData.Buffer = TestThumbnailData;
+        AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
-    }
-}
 
-// test getting 0 thumbnails
-// test getting multiple thumbnails
-// test thumbnails are only retrieved for 1 component
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Try and get thumbnails after one has been added
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotationThumbnailsForConversation, RequestPredicate);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetTotalCount(), 1);
+
+        // Ensure the data matches
+        auto [DownloadAnnotationResult]
+            = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId]);
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(strcmp(TestThumbnailData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+    }
+
+    // Add annotation to the second message
+    {
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = { 0.f, 0.f, 0.f };
+        Data.AuthorCameraRotation = { 0.f, 0.f, 0.f, 0.f };
+        Data.VerticalFov = 0;
+
+        csp::systems::BufferAssetDataSource AnnotationBufferData;
+        AnnotationBufferData.Buffer = TestAnnotationData;
+        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
+        AnnotationBufferData.SetMimeType("application/json");
+
+        csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
+        AnnotationThumbnailBufferData.Buffer = TestThumbnailData2;
+        AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData2);
+        AnnotationThumbnailBufferData.SetMimeType("application/json");
+
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetAnnotation, RequestPredicate, MessageId2, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Try and get thumbnails after two have been added
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotationThumbnailsForConversation, RequestPredicate);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetTotalCount(), 2);
+
+        // Ensure the data matches
+        auto [DownloadAnnotationResult1]
+            = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId]);
+        EXPECT_EQ(DownloadAnnotationResult1.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(strcmp(TestThumbnailData, static_cast<const char*>(DownloadAnnotationResult1.GetData())) == 0);
+
+        auto [DownloadAnnotationResult2]
+            = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId2]);
+        EXPECT_EQ(DownloadAnnotationResult2.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(strcmp(TestThumbnailData2, static_cast<const char*>(DownloadAnnotationResult2.GetData())) == 0);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}

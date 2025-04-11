@@ -177,7 +177,7 @@ void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResul
 
     for (size_t i = 0; i < Assets.Size(); ++i)
     {
-        AnnotationThumbnailAssetsMap[Assets[i].AssetCollectionId], Assets[i];
+        AnnotationThumbnailAssetsMap[Assets[i].AssetCollectionId] = Assets[i];
     }
 }
 } // namespace csp::multiplayer
