@@ -202,7 +202,7 @@ public:
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     // TODO: comment
-    void GetAnnotationThumbnailsForConversation(multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+    void GetAnnotationThumbnailsForConversation(csp::multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
 
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 

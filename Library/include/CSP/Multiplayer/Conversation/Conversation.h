@@ -89,9 +89,13 @@ class CSP_API AnnotationData
 {
 public:
     AnnotationData();
-    AnnotationData(
-        const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
+    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, const uint16_t InVerticalFov,
+        const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
+
+    csp::common::String GetAnnotationId() const;
+
+    csp::common::String GetAnnotationThumbnailId() const;
 
     /// @brief Get the vertical FOV
     /// @return a uint16_t representing the vertical FOV
@@ -104,6 +108,10 @@ public:
     /// @brief Get the AuthorCameraRotation
     /// @return a Vector4 representing the AuthorCameraRotation
     csp::common::Vector4 GetAuthorCameraRotation() const;
+
+    void SetAnnotationId(const csp::common::String& Id);
+
+    void SetAnnotationThumbnailId(const csp::common::String& Id);
 
     /// @brief Set the VerticalFov
     /// @param InVerticalFov
@@ -118,6 +126,8 @@ public:
     void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
 
 private:
+    csp::common::String AnnotationId;
+    csp::common::String AnnotationThumbnailId;
     uint16_t VerticalFov;
     csp::common::Vector3 AuthorCameraPosition;
     csp::common::Vector4 AuthorCameraRotation;
@@ -344,7 +354,12 @@ public:
 
     uint64_t GetTotalCount() const;
 
+    CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
+
 private:
+    explicit AnnotationThumbnailCollectionResult(void*) {};
+    AnnotationThumbnailCollectionResult() = default;
+
     csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
 };
 

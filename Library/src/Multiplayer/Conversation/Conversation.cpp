@@ -29,9 +29,11 @@ AnnotationData::AnnotationData()
 {
 }
 
-AnnotationData::AnnotationData(
+AnnotationData::AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId,
     const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
-    : VerticalFov(InVerticalFov)
+    : AnnotationId(AnnotationId)
+    , AnnotationThumbnailId(AnnotationThumbnailId)
+    , VerticalFov(InVerticalFov)
     , AuthorCameraPosition(InAuthorCameraPosition)
     , AuthorCameraRotation(InAuthorCameraRotation)
 {
@@ -44,11 +46,19 @@ AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
 {
 }
 
+csp::common::String AnnotationData::GetAnnotationId() const { return AnnotationId; }
+
+csp::common::String AnnotationData::GetAnnotationThumbnailId() const { return AnnotationThumbnailId; }
+
 uint16_t AnnotationData::GetVerticalFov() const { return VerticalFov; }
 
 csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() const { return AuthorCameraPosition; }
 
 csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() const { return AuthorCameraRotation; }
+
+void AnnotationData::SetAnnotationId(const csp::common::String& Id) { AnnotationId = Id; }
+
+void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& Id) { AnnotationThumbnailId = Id; }
 
 void AnnotationData::SetVerticalFov(const uint16_t InVerticalFov) { VerticalFov = InVerticalFov; }
 
@@ -160,4 +170,14 @@ const csp::common::Map<csp::common::String, csp::systems::Asset>& AnnotationThum
 }
 
 uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return AnnotationThumbnailAssetsMap.Size(); }
+
+void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& Result)
+{
+    common::Array<systems::Asset> Assets = Result.GetAssets();
+
+    for (size_t i = 0; i < Assets.Size(); ++i)
+    {
+        AnnotationThumbnailAssetsMap[Assets[i].AssetCollectionId], Assets[i];
+    }
+}
 } // namespace csp::multiplayer

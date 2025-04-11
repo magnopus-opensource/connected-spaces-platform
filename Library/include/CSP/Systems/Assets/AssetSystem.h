@@ -152,9 +152,8 @@ public:
         const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,
         const csp::common::Optional<int>& ResultsMaxNumber, AssetCollectionsResultCallback Callback);
 
-    CSP_ASYNC_RESULT async::task<AssetCollectionsResult> FindAssetCollections(
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids, const csp::common::Optional<csp::common::String>& ParentId,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+    CSP_NO_EXPORT async::task<AssetCollectionsResult> FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+        const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
         const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, const csp::common::Optional<int>& ResultsSkipNumber,

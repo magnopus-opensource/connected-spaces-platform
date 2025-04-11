@@ -161,9 +161,14 @@ common::Map<common::String, common::String> GenerateConversationAssetCollectionM
 common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMetadata(const multiplayer::AnnotationData& AnnotationData)
 {
     common::Map<common::String, common::String> MetadataMap;
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID] = AnnotationData.GetAnnotationId();
+    MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID] = AnnotationData.GetAnnotationThumbnailId();
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV] = std::to_string(AnnotationData.GetVerticalFov()).c_str();
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION] = Vector3ToString(AnnotationData.GetAuthorCameraPosition());
     MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION] = Vector4ToString(AnnotationData.GetAuthorCameraRotation());
+
+    // constexpr const char* ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID = "ThumbnailId";
+    constexpr const char* ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID = "AnnotationId";
 
     return MetadataMap;
 }
@@ -171,6 +176,8 @@ common::Map<common::String, common::String> GenerateAnnotationAssetCollectionMet
 common::Map<common::String, common::String> RemoveAnnotationMetadata(const AssetCollection& MessageAssetCollection)
 {
     auto MetadataMap = MessageAssetCollection.GetMetadataImmutable();
+    MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID);
+    MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID);
     MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV);
     MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION);
     MetadataMap.Remove(ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION);
@@ -209,11 +216,28 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
     return Info;
 }
 
-bool HasAnnotationMetaData(const AssetCollection& MessageAssetCollection)
+bool HasAnnotationMetadata(const AssetCollection& MessageAssetCollection)
 {
     const auto& MetadataMap = MessageAssetCollection.GetMetadataImmutable();
+    return MetadataMap.HasKey(ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID);
+}
 
-    return MetadataMap.HasKey(ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV);
+std::map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(const AssetCollectionsResult& Result)
+{
+    std::map<std::string, std::string> ThumbnailAssetIds;
+
+    for (const auto& Collection : Result.GetAssetCollections())
+    {
+        auto Metadata = Collection.GetMetadataImmutable();
+        bool HasThumbnail = Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID);
+
+        if (HasThumbnail)
+        {
+            ThumbnailAssetIds[Collection.Id.c_str()] = Metadata[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID].c_str();
+        }
+    }
+
+    return ThumbnailAssetIds;
 }
 
 multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection)
@@ -221,6 +245,8 @@ multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const As
     multiplayer::AnnotationData Data;
     const auto& MetadataMap = MessageAssetCollection.GetMetadataImmutable();
 
+    Data.SetAnnotationId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID]);
+    Data.SetAnnotationThumbnailId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID]);
     Data.SetVerticalFov(std::stoi(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str()));
     Data.SetAuthorCameraPosition(StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]));
     Data.SetAuthorCameraRotation(StringToVector4(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION]));
