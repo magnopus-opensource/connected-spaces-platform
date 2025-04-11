@@ -45,6 +45,7 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 /// @brief Enum representing the shader type of a material.
+/// @details This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
 enum class EShaderType
 {
     Standard = 0,
@@ -53,6 +54,7 @@ enum class EShaderType
 
 /// @brief Defines how to alpha value is interpreted.
 /// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model.
+/// This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
 enum class EAlphaMode
 {
     Opaque,
@@ -63,6 +65,7 @@ enum class EAlphaMode
 /// @brief Defines how to alpha value is interpreted.
 /// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports
 /// EColorChannel.
+/// This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
 enum class EBlendMode
 {
     Normal = 0,
@@ -71,6 +74,7 @@ enum class EBlendMode
 
 /// @brief Defines where the alpha value is read from.
 /// @details The alpha value is usually taken from the fourth component of the base color but this allows is to be read from another channel.
+/// This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
 enum class EColorChannel
 {
     R = 0,
