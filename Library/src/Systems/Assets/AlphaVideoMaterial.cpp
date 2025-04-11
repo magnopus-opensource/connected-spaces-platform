@@ -21,6 +21,11 @@
 #include "Debug/Logging.h"
 #include "Json/JsonSerializer.h"
 
+namespace
+{
+constexpr int InitialMaterialVersion = 1;
+}
+
 namespace AlphaVideoMaterialProperties
 {
 static constexpr const char* Name = "name";
@@ -105,7 +110,7 @@ namespace csp::systems
 
 AlphaVideoMaterial::AlphaVideoMaterial(
     const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-    : Material(Name, AssetCollectionId, AssetId, EShaderType::AlphaVideo, 1)
+    : Material(Name, AssetCollectionId, AssetId, EShaderType::AlphaVideo, InitialMaterialVersion)
     , ColorTexture()
     , IsDoubleSided(false)
     , IsEmissive(true)
