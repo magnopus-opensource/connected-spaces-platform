@@ -38,8 +38,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(std::string, CustomAvatarUrl);
     DECLARE_SCRIPT_PROPERTY(bool, IsHandIKEnabled);
     DECLARE_SCRIPT_PROPERTY(Vector3, TargetHandIKTargetLocation);
-    DECLARE_SCRIPT_PROPERTY(Vector3, HandRotation);
-    DECLARE_SCRIPT_PROPERTY(Vector3, HeadRotation);
+    DECLARE_SCRIPT_PROPERTY(Vector4, HandRotation);
+    DECLARE_SCRIPT_PROPERTY(Vector4, HeadRotation);
     DECLARE_SCRIPT_PROPERTY(float, WalkRunBlendPercentage);
     DECLARE_SCRIPT_PROPERTY(float, TorsoTwistAlpha);
     DECLARE_SCRIPT_PROPERTY(int32_t, AvatarPlayMode);
