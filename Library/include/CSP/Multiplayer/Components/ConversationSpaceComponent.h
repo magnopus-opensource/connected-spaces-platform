@@ -180,7 +180,8 @@ public:
     /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
-    /// TODO: Log pre condition for seting an annotation first (will see how this should be handled when testing)
+    /// @pre The message must have a valid annotation attached.
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback);
 
     /// @brief Associates an annotation with a message.
@@ -204,7 +205,10 @@ public:
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
-    // TODO: comment
+    /// @brief Gets all thumbnails in the conversation.
+    /// @param Callback csp::multiplayer::AnnotationThumbnailCollectionResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
 
     typedef std::function<void(const ConversationEventParams&)> ConversationUpdateCallbackHandler;

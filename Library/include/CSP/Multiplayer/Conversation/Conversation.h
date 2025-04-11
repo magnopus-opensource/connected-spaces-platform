@@ -103,8 +103,12 @@ public:
         const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
 
+    /// @brief Get the annotation id
+    /// @return csp::common::String
     csp::common::String GetAnnotationId() const;
 
+    /// @brief Get the annotation collection id
+    /// @return csp::common::String
     csp::common::String GetAnnotationThumbnailId() const;
 
     /// @brief Get the vertical FOV
@@ -119,8 +123,12 @@ public:
     /// @return a Vector4 representing the AuthorCameraRotation
     csp::common::Vector4 GetAuthorCameraRotation() const;
 
+    /// @brief Set the annotation id
+    /// @param Id const csp::common::String& Id
     void SetAnnotationId(const csp::common::String& Id);
 
+    /// @brief Set the annotation collection id
+    /// @param Id const csp::common::String& Id
     void SetAnnotationThumbnailId(const csp::common::String& Id);
 
     /// @brief Set the VerticalFov
