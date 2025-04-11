@@ -244,6 +244,7 @@ public:
 
     /// @brief Creates a new material backed by an AssetCollection/Asset.
     /// @param Name const csp::common::String& : The name of the new material.
+    /// @param ShaderType const csp::systems::EShaderType : The type of shader model the material is associated with.
     /// @param SpaceId const csp::common::String& : The space id this material is associated with.
     /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created material.
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
