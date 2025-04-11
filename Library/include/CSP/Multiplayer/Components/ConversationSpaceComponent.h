@@ -188,12 +188,15 @@ public:
     /// @param MessageId const csp::common::String& : The message id to attach an annotation to.
     /// @param UpdateParams const AnnotationUpdateParams& : The annotation data for this annotation.
     /// @param Annotation const systems::BufferAssetDataSource& : The annotation image data for this annotation.
+    /// @param AnnotationFileExtension const csp::common::String& : The file extension for the annotation data file (should not include ".").
     /// @param AnnotationThumbnail const systems::BufferAssetDataSource& : The annotation thumbnail image data for this annotation.
+    /// @param ThumbnailFileExtension const csp::common::String& : The file extension for the thumbnail data file (should not include ".").
     /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void SetAnnotation(const csp::common::String& MessageId, const AnnotationUpdateParams& UpdateParams,
-        const csp::systems::BufferAssetDataSource& Annotation, const csp::systems::BufferAssetDataSource& AnnotationThumbnail,
+        const csp::systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+        const csp::systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
         AnnotationResultCallback Callback);
 
     /// @brief Deletes an annotation associated with a message.
@@ -202,9 +205,9 @@ public:
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     // TODO: comment
-    void GetAnnotationThumbnailsForConversation(csp::multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+    void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
 
-    typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
+    typedef std::function<void(const ConversationEventParams&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.
     /// @param Callback ConversationUpdateCallbackHandler: Callback to receive data for the conversation that has been changed.

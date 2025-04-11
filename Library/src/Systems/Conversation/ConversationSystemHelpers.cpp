@@ -109,16 +109,18 @@ common::String GetUniqueAnnotationThumbnailAssetName(const common::String& Space
     return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_NAME_PREFIX, Suffix.c_str());
 }
 
-common::String GetUniqueAnnotationAssetFileName(const common::String& SpaceId, const common::String& CreatorUserId)
+common::String GetUniqueAnnotationAssetFileName(
+    const common::String& SpaceId, const common::String& CreatorUserId, const csp::common::String& Extension)
 {
     const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
-    return common::StringFormat("%s_%s", ANNOTATION_ASSET_FILENAME_PREFIX, Suffix.c_str()) + ".json";
+    return common::StringFormat("%s_%s", ANNOTATION_ASSET_FILENAME_PREFIX, Suffix.c_str()) + "." + Extension;
 }
 
-common::String GetUniqueAnnotationThumbnailFileName(const common::String& SpaceId, const common::String& CreatorUserId)
+common::String GetUniqueAnnotationThumbnailFileName(
+    const common::String& SpaceId, const common::String& CreatorUserId, const csp::common::String& Extension)
 {
     const auto Suffix = GetUniqueAssetCollectionSuffix(SpaceId, CreatorUserId);
-    return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_FILENAME_PREFIX, Suffix.c_str()) + ".json";
+    return common::StringFormat("%s_%s", ANNOTATION_THUMBNAIL_ASSET_FILENAME_PREFIX, Suffix.c_str()) + "." + Extension;
 }
 
 common::String GetUniqueAnnotationAssetCollectionName(const common::String& SpaceId, const common::String& CreatorUserId)

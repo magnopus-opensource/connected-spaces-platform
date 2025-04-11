@@ -98,7 +98,8 @@ public:
 
     void SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
         const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-        const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback);
+        const csp::common::String& AnnotationFileExtension, const systems::BufferAssetDataSource& AnnotationThumbnail,
+        const csp::common::String& ThumbnailFileExtension, multiplayer::AnnotationResultCallback Callback);
 
     void DeleteAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
 

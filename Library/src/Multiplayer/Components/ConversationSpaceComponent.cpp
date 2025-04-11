@@ -225,8 +225,10 @@ void ConversationSpaceComponent::GetAnnotation(const csp::common::String& Messag
     ConversationSystem->GetAnnotation(ConversationId, MessageId, Callback);
 }
 
-void ConversationSpaceComponent::SetAnnotation(const csp::common::String& MessageId, const AnnotationUpdateParams& UpdateParams,
-    const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail, AnnotationResultCallback Callback)
+void ConversationSpaceComponent::SetAnnotation(const csp::common::String& MessageId, const multiplayer::AnnotationUpdateParams& UpdateParams,
+    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    multiplayer::AnnotationResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
 
@@ -237,7 +239,8 @@ void ConversationSpaceComponent::SetAnnotation(const csp::common::String& Messag
     }
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->SetAnnotation(ConversationId, MessageId, UpdateParams, Annotation, AnnotationThumbnail, Callback);
+    ConversationSystem->SetAnnotation(
+        ConversationId, MessageId, UpdateParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
 }
 
 void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback)

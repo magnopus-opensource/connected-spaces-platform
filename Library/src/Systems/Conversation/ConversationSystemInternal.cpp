@@ -879,7 +879,8 @@ void ConversationSystemInternal::GetAnnotation(
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
     const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+    const csp::common::String& AnnotationFileExtension, const systems::BufferAssetDataSource& AnnotationThumbnail,
+    const csp::common::String& ThumbnailFileExtension, multiplayer::AnnotationResultCallback Callback)
 {
     const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
     const csp::common::String UserId = UserSystem->GetLoginState().UserId;
@@ -888,8 +889,10 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
-    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationAssetFileName
+        = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId, AnnotationFileExtension);
+    const csp::common::String UniqueAnnotationThumbnailAssetFileName
+        = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId, ThumbnailFileExtension);
 
     auto MessageAssetCollection = std::make_shared<AssetCollection>();
     auto AnnotationAsset = std::make_shared<Asset>();
