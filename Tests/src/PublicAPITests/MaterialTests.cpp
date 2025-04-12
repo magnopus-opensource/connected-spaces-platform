@@ -39,10 +39,17 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::systems::EShaderType shaderType,
     const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-    const csp::common::Array<csp::common::String>& AssetTags, Material** OutMaterial)
+    const csp::common::Array<csp::common::String>& AssetTags, Material** OutMaterial,
+    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, shaderType, SpaceId, Metadata, AssetTags);
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+    {
+        *OutMaterial = nullptr;
+        return;
+    }
 
     csp::systems::MaterialResult Result2 = Result;
 
@@ -91,10 +98,16 @@ void DeleteMaterial(AssetSystem* AssetSystem, const Material& Material)
     ResultFuture.wait();
 }
 
-void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, csp::common::Array<Material*>& OutMaterials)
+void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, csp::common::Array<Material*>& OutMaterials,
+    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, GetMaterials, RequestPredicate, SpaceId);
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+    {
+        return;
+    }
 
     OutMaterials = *(Result.GetMaterials());
 }
@@ -105,6 +118,12 @@ void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetColle
 {
     auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+    {
+        *OutMaterial = nullptr;
+        return;
+    }
 
     csp::systems::MaterialResult Result2 = Result;
 
@@ -131,6 +150,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateGLTFMaterialTest)
     // Create a standard material associated with the Space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    GLTFMaterial* CreatedGLTFMaterial = dynamic_cast<GLTFMaterial*>(CreatedMaterial);
+    EXPECT_NE(CreatedGLTFMaterial, nullptr);
+#endif
 
     // Cleanup standard material
     DeleteMaterial(AssetSystem, *CreatedMaterial);
@@ -159,9 +183,43 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateAlphaVideoMaterialTest)
     // Create a alpha video material associated with the Space
     Material* CreatedMaterial = nullptr;
     CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::AlphaVideo, Space.Id, {}, {}, &CreatedMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    AlphaVideoMaterial* CreatedAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(CreatedMaterial);
+    EXPECT_NE(CreatedAlphaVideoMaterial, nullptr);
+#endif
 
     // Cleanup alpha video material
     DeleteMaterial(AssetSystem, *CreatedMaterial);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateIncorrectMaterialTypeTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space to associate a material with
+    ::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    csp::systems::EShaderType IncorrectShaderType = static_cast<csp::systems::EShaderType>(3);
+
+    // Attempt to create a material with an incorrect type
+    Material* CreatedMaterial = nullptr;
+    CreateMaterial(AssetSystem, "TestMaterial", IncorrectShaderType, Space.Id, {}, {}, &CreatedMaterial, csp::systems::EResultCode::Failed);
+
+    EXPECT_EQ(CreatedMaterial, nullptr);
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
@@ -198,8 +256,12 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateGLTFMaterialTest)
     // Get the material to ensure change have been made
     Material* UpdatedMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &UpdatedMaterial);
-    GLTFMaterial* UpdatedMaterialGLTF = static_cast<GLTFMaterial*>(UpdatedMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    GLTFMaterial* UpdatedMaterialGLTF = dynamic_cast<GLTFMaterial*>(UpdatedMaterial);
+    EXPECT_NE(UpdatedMaterialGLTF, nullptr);
     EXPECT_EQ(UpdatedMaterialGLTF->GetAlphaCutoff(), 1.0f);
+#endif
 
     // Cleanup
     DeleteMaterial(AssetSystem, *CreatedMaterial);
@@ -235,12 +297,17 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateAlphaVideoMaterialTest)
 
     CreatedAlphaVideoMaterial->SetAlphaFactor(0.5f);
     UpdateMaterial(AssetSystem, *CreatedMaterial);
+    EXPECT_EQ(CreatedAlphaVideoMaterial->GetAlphaFactor(), 0.5f);
 
     // Get the material to ensure change have been made
     Material* UpdatedMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &UpdatedMaterial);
-    AlphaVideoMaterial* UpdatedMaterialAlphaVideo = static_cast<AlphaVideoMaterial*>(UpdatedMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    AlphaVideoMaterial* UpdatedMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(UpdatedMaterial);
+    EXPECT_NE(UpdatedMaterialAlphaVideo, nullptr);
     EXPECT_EQ(UpdatedMaterialAlphaVideo->GetAlphaFactor(), 0.5f);
+#endif
 
     // Cleanup
     DeleteMaterial(AssetSystem, *CreatedMaterial);
@@ -335,6 +402,20 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 
     for (int i = 0; i < FoundMaterials.Size(); ++i)
     {
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+        if (FoundMaterials[i]->GetShaderType() == EShaderType::AlphaVideo)
+        {
+            AlphaVideoMaterial* FoundMaterialAlphaVideo = dynamic_cast<AlphaVideoMaterial*>(FoundMaterials[i]);
+            EXPECT_NE(FoundMaterialAlphaVideo, nullptr);
+        }
+        else if (FoundMaterials[i]->GetShaderType() == EShaderType::Standard)
+        {
+            GLTFMaterial* FoundMaterialGLTF = dynamic_cast<GLTFMaterial*>(FoundMaterials[i]);
+            EXPECT_NE(FoundMaterialGLTF, nullptr);
+        }
+#endif
+
         const csp::common::String& SearchName = FoundMaterials[i]->GetName();
         const csp::common::String& SearchCollectionId = FoundMaterials[i]->GetMaterialCollectionId();
         const csp::common::String& SearchId = FoundMaterials[i]->GetMaterialId();
@@ -388,7 +469,13 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetGLTFMaterialTest)
     // Get the material
     Material* FoundMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    GLTFMaterial* FoundGLTFMaterial = dynamic_cast<GLTFMaterial*>(FoundMaterial);
+    EXPECT_NE(FoundGLTFMaterial, nullptr);
+#endif
 
+    EXPECT_EQ(FoundMaterial->GetShaderType(), CreatedMaterial->GetShaderType());
     EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
     EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
     EXPECT_EQ(FoundMaterial->GetMaterialId(), CreatedMaterial->GetMaterialId());
@@ -423,10 +510,107 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetAlphaVideoMaterialTest)
     // Get the material
     Material* FoundMaterial = nullptr;
     GetMaterial(AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial);
+// Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
+#if defined CSP_WINDOWS
+    AlphaVideoMaterial* FoundAlphaVideoMaterial = dynamic_cast<AlphaVideoMaterial*>(FoundMaterial);
+    EXPECT_NE(FoundAlphaVideoMaterial, nullptr);
+#endif
 
+    EXPECT_EQ(FoundMaterial->GetShaderType(), CreatedMaterial->GetShaderType());
     EXPECT_EQ(FoundMaterial->GetName(), CreatedMaterial->GetName());
     EXPECT_EQ(FoundMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialCollectionId());
     EXPECT_EQ(FoundMaterial->GetMaterialId(), CreatedMaterial->GetMaterialId());
+
+    // Cleanup
+    DeleteMaterial(AssetSystem, *CreatedMaterial);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialWithIncorrectShaderTypeTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space to associate a material with
+    ::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    Material* CreatedMaterial = nullptr;
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+
+    auto [Result1] = AWAIT_PRE(AssetSystem, GetAssetCollectionById, RequestPredicate, CreatedMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
+
+    AssetCollection OutAssetCollection = Result1.GetAssetCollection();
+
+    // Create metadata for MaterialCollection with an invalid shader type
+    csp::common::Map<csp::common::String, csp::common::String> InMetaData;
+    InMetaData["ShaderType"] = "InvalidShaderType";
+
+    auto [Result2] = AWAIT_PRE(AssetSystem, UpdateAssetCollectionMetadata, RequestPredicate, OutAssetCollection, InMetaData, nullptr);
+    EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Get the material
+    Material* FoundMaterial = nullptr;
+    GetMaterial(
+        AssetSystem, CreatedMaterial->GetMaterialCollectionId(), CreatedMaterial->GetMaterialId(), &FoundMaterial, csp::systems::EResultCode::Failed);
+
+    EXPECT_EQ(FoundMaterial, nullptr);
+
+    // Cleanup
+    DeleteMaterial(AssetSystem, *CreatedMaterial);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialsWithIncorrectShaderTypeTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space to associate a material with
+    ::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    Material* CreatedMaterial = nullptr;
+    CreateMaterial(AssetSystem, "TestMaterial", csp::systems::EShaderType::Standard, Space.Id, {}, {}, &CreatedMaterial);
+
+    auto [Result1] = AWAIT_PRE(AssetSystem, GetAssetCollectionById, RequestPredicate, CreatedMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
+
+    AssetCollection OutAssetCollection = Result1.GetAssetCollection();
+
+    // Create metadata for MaterialCollection with an invalid shader type
+    csp::common::Map<csp::common::String, csp::common::String> InMetaData;
+    InMetaData["ShaderType"] = "InvalidShaderType";
+
+    auto [Result2] = AWAIT_PRE(AssetSystem, UpdateAssetCollectionMetadata, RequestPredicate, OutAssetCollection, InMetaData, nullptr);
+    EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Get the material using the GetMaterials method
+    csp::common::Array<Material*> FoundMaterials;
+    GetMaterials(AssetSystem, Space.Id, FoundMaterials, csp::systems::EResultCode::Failed);
+
+    EXPECT_EQ(FoundMaterials.Size(), 0);
 
     // Cleanup
     DeleteMaterial(AssetSystem, *CreatedMaterial);
