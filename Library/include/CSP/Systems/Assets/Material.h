@@ -52,7 +52,7 @@ enum class EShaderType
     AlphaVideo = 1
 };
 
-/// @brief Defines how to alpha value is interpreted.
+/// @brief Defines how the alpha value of a material is interpreted.
 /// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model.
 /// This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
 enum class EAlphaMode
@@ -62,7 +62,7 @@ enum class EAlphaMode
     Blend
 };
 
-/// @brief Defines how to alpha value is interpreted.
+/// @brief Defines how the alpha value of a material is interpreted.
 /// @details The alpha value is taken from the fourth component of the base color for metallic-roughness material model, unless the shader supports
 /// EColorChannel.
 /// This enum is to be used in conjunction with materials, which are managed via the AssetSystem.
@@ -108,15 +108,15 @@ public:
     /// @return const csp::common::String& : Returns the material id.
     const csp::common::String& GetMaterialId() const;
 
-    /// @brief Constructor which links the material to an asset.
+    /// @brief Constructs a material bound to an AssetCollection and Asset.
     /// @param Name const csp::common::String& : The name of the material.
-    /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
+    /// @param MaterialCollectionId const csp::common::String& : The asset collection which references the associated material asset.
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
     Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
 
-    /// @brief Constructor which links a versioned material of a given type to an asset.
+    /// @brief Constructs a versioned material bound to an AssetCollection and Asset.
     /// @param Name const csp::common::String& : The name of the material.
-    /// @param MaterialCollectionId const csp::common::String& : The asset collection which holds the associated material asset.
+    /// @param MaterialCollectionId const csp::common::String& : The asset collection which references the associated material asset.
     /// @param MaterialId const csp::common::String& : The asset where the material info is stored.
     /// @param Type EShaderType : The material shader type.
     /// @param Version const int : The material version.
