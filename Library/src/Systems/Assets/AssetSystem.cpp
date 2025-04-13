@@ -47,51 +47,57 @@ constexpr const char* MATERIAL_SHADERTYPE_METADATA_KEY = "ShaderType";
 
 String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCollectionType)
 {
-    if (AssetCollectionType == systems::EAssetCollectionType::DEFAULT)
+    switch (AssetCollectionType)
+    {
+    case systems::EAssetCollectionType::DEFAULT:
         return "Default";
-    else if (AssetCollectionType == systems::EAssetCollectionType::FOUNDATION_INTERNAL)
+    case systems::EAssetCollectionType::FOUNDATION_INTERNAL:
         return "FoundationInternal";
-    else if (AssetCollectionType == systems::EAssetCollectionType::COMMENT_CONTAINER)
+    case systems::EAssetCollectionType::COMMENT_CONTAINER:
         return "CommentContainer";
-    else if (AssetCollectionType == systems::EAssetCollectionType::COMMENT)
+    case systems::EAssetCollectionType::COMMENT:
         return "Comment";
-    else if (AssetCollectionType == systems::EAssetCollectionType::SPACE_THUMBNAIL)
+    case systems::EAssetCollectionType::SPACE_THUMBNAIL:
         return "SpaceThumbnail";
-    else
+    default:
     {
         assert(false && "Unsupported AssetCollection Type!");
         return "Default";
+    }
     }
 }
 
 String ConvertAssetTypeToString(systems::EAssetType AssetType)
 {
-    if (AssetType == systems::EAssetType::IMAGE)
+    switch (AssetType)
+    {
+    case systems::EAssetType::IMAGE:
         return "Image";
-    else if (AssetType == systems::EAssetType::THUMBNAIL)
+    case systems::EAssetType::THUMBNAIL:
         return "Thumbnail";
-    else if (AssetType == systems::EAssetType::SIMULATION)
+    case systems::EAssetType::SIMULATION:
         return "Simulation";
-    else if (AssetType == systems::EAssetType::MODEL)
+    case systems::EAssetType::MODEL:
         return "Model";
-    else if (AssetType == systems::EAssetType::VIDEO)
+    case systems::EAssetType::VIDEO:
         return "Video";
-    else if (AssetType == systems::EAssetType::SCRIPT_LIBRARY)
+    case systems::EAssetType::SCRIPT_LIBRARY:
         return "ScriptLibrary";
-    else if (AssetType == systems::EAssetType::HOLOCAP_VIDEO)
+    case systems::EAssetType::HOLOCAP_VIDEO:
         return "HolocapVideo";
-    else if (AssetType == systems::EAssetType::HOLOCAP_AUDIO)
+    case systems::EAssetType::HOLOCAP_AUDIO:
         return "HolocapAudio";
-    else if (AssetType == systems::EAssetType::AUDIO)
+    case systems::EAssetType::AUDIO:
         return "Audio";
-    else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
+    case systems::EAssetType::GAUSSIAN_SPLAT:
         return "GaussianSplat";
-    else if (AssetType == systems::EAssetType::MATERIAL)
+    case systems::EAssetType::MATERIAL:
         return "Material";
-    else
+    default:
     {
         assert(false && "Unsupported Asset Type!");
         return "Image";
+    }
     }
 }
 
@@ -99,19 +105,25 @@ bool ConvertShaderTypeToString(systems::EShaderType ShaderType, String& OutShade
 {
     bool Result = false;
 
-    if (ShaderType == systems::EShaderType::AlphaVideo)
+    switch (ShaderType)
+    {
+    case systems::EShaderType::Standard:
+    {
+        OutShaderType = "Standard";
+        Result = true;
+        break;
+    }
+    case systems::EShaderType::AlphaVideo:
     {
         OutShaderType = "AlphaVideo";
         Result = true;
+        break;
     }
-    else if (ShaderType == systems::EShaderType::Standard)
+    default:
     {
         OutShaderType = "Standard";
-        Result = true;
+        break;
     }
-    else
-    {
-        OutShaderType = "Standard";
     }
 
     return Result;
@@ -216,19 +228,25 @@ Material* InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const 
 {
     Material* NewMaterial = nullptr;
 
-    if (ShaderType == EShaderType::AlphaVideo)
+    switch (ShaderType)
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
-        NewMaterial = static_cast<Material*>(NewAlphaVideoMaterial);
-    }
-    else if (ShaderType == EShaderType::Standard)
+    case EShaderType::Standard:
     {
         GLTFMaterial* NewGLTFMaterial = CSP_NEW GLTFMaterial(Name, AssetCollectionId, AssetId);
         NewMaterial = static_cast<Material*>(NewGLTFMaterial);
+        break;
     }
-    else
+    case EShaderType::AlphaVideo:
+    {
+        AlphaVideoMaterial* NewAlphaVideoMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
+        NewMaterial = static_cast<Material*>(NewAlphaVideoMaterial);
+        break;
+    }
+    default:
     {
         assert(false && "Unable to instantiate material. Unsupported Shader Type.");
+        break;
+    }
     }
 
     return NewMaterial;
@@ -239,21 +257,27 @@ std::pair<bool, Material*> DeserializeIntoMaterialOfType(
 {
     std::pair<bool, Material*> Result = { false, nullptr };
 
-    if (ShaderType == EShaderType::AlphaVideo)
+    switch (ShaderType)
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(MaterialToDeserialize);
-        Result.first = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
-        Result.second = MaterialToDeserialize;
-    }
-    else if (ShaderType == EShaderType::Standard)
+    case csp::systems::EShaderType::Standard:
     {
         GLTFMaterial* NewGLTFMaterial = static_cast<GLTFMaterial*>(MaterialToDeserialize);
         Result.first = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewGLTFMaterial);
         Result.second = MaterialToDeserialize;
+        break;
     }
-    else
+    case csp::systems::EShaderType::AlphaVideo:
+    {
+        AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<AlphaVideoMaterial*>(MaterialToDeserialize);
+        Result.first = csp::json::JsonDeserializer::Deserialize(MaterialData, *NewAlphaVideoMaterial);
+        Result.second = MaterialToDeserialize;
+        break;
+    }
+    default:
     {
         assert(false && "Unable to deserialize material. Unsupported Shader Type.");
+        break;
+    }
     }
 
     return Result;
@@ -261,19 +285,25 @@ std::pair<bool, Material*> DeserializeIntoMaterialOfType(
 
 void SerializeMaterialOfType(EShaderType ShaderType, const Material* Material, csp::common::String& OutMaterialJson)
 {
-    if (ShaderType == EShaderType::AlphaVideo)
+    switch (ShaderType)
     {
-        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(Material);
-        OutMaterialJson = json::JsonSerializer::Serialize(*NewAlphaVideoMaterial);
-    }
-    else if (ShaderType == EShaderType::Standard)
+    case csp::systems::EShaderType::Standard:
     {
         const GLTFMaterial* NewGLTFMaterial = static_cast<const GLTFMaterial*>(Material);
         OutMaterialJson = json::JsonSerializer::Serialize(*NewGLTFMaterial);
+        break;
     }
-    else
+    case csp::systems::EShaderType::AlphaVideo:
+    {
+        const AlphaVideoMaterial* NewAlphaVideoMaterial = static_cast<const AlphaVideoMaterial*>(Material);
+        OutMaterialJson = json::JsonSerializer::Serialize(*NewAlphaVideoMaterial);
+        break;
+    }
+    default:
     {
         assert(false && "Unable to serialize material. Unsupported Shader Type.");
+        break;
+    }
     }
 }
 
