@@ -37,7 +37,7 @@ namespace csp::systems
 {
 
 /// @ingroup Asset System
-/// @brief Data class which represents a Alpha Video material.
+/// @brief Data class which represents an Alpha Video material.
 class CSP_API AlphaVideoMaterial : public Material
 {
 public:
@@ -48,8 +48,8 @@ public:
     /// The material.blendMode property defines how the alpha is blended when alphaMode is set to BLEND.
     /// The material.readAlphaFromChannel property defines which color channel to read the alpha values from.
     /// The stored texels MUST NOT be premultiplied.
-    /// When undefined, the texture MUST be sampled as having 1.0 in all components.
     /// @param Texture const TextureInfo& : The material color texture.
+    /// @pre If the fourth component (A) is undefined, the texture MUST be sampled as having 1.0 in all components.
     void SetColorTexture(const TextureInfo& Texture);
 
     /// @brief Gets the color texture.
