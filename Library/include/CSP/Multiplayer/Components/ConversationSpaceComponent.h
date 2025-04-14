@@ -175,14 +175,14 @@ public:
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
 
-    CSP_ASYNC_RESULT void GetConversationAnnotation(multiplayer::AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void GetConversationAnnotation(AnnotationResultCallback Callback);
 
-    CSP_ASYNC_RESULT void SetConversationAnnotation(const multiplayer::AnnotationUpdateParams& AnnotationParams,
-        const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
-        const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
-        multiplayer::AnnotationResultCallback Callback);
+    CSP_ASYNC_RESULT void SetConversationAnnotation(const AnnotationUpdateParams& AnnotationParams,
+        const csp::systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+        const csp::systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+        AnnotationResultCallback Callback);
 
-    CSP_ASYNC_RESULT void DeleteConversationAnnotation(systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteConversationAnnotation(csp::systems::NullResultCallback Callback);
 
     /// @brief Gets an annotation associated with a message.
     /// @param MessageId const csp::common::String& : The message id the annotation is associated with.
