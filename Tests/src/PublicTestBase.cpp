@@ -42,10 +42,6 @@ void PublicTestBase::TearDown()
 {
     ::testing::Test::TearDown();
 
-    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-
-    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
-
     if (!csp::CSPFoundation::GetIsInitialised())
     {
         fprintf(stderr, "%s\n",

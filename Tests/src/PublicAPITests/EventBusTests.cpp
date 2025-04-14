@@ -640,7 +640,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     // Check Connection callback was called
     WaitForCallback(ConnectionCallbackCalled);
     EXPECT_TRUE(ConnectionCallbackCalled);
-    EXPECT_EQ(ConnectionMessage, "Success");
+    EXPECT_EQ(ConnectionMessage, "Successfully connected to SignalR hub.");
     EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Connected);
 
     // Create space

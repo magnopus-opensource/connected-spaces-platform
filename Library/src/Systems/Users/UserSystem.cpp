@@ -171,7 +171,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -231,7 +231,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else
             {
@@ -319,7 +319,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else
             {
@@ -444,7 +444,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
             };
 
             auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(ErrorCallback);
+            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
         }
         else
         {
