@@ -129,7 +129,7 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
         csp::common::String Reason(InEvent.GetString("Reason"));
 
         auto Done = false;
-        Connection->DisconnectWithReason(Reason, [&Done](ErrorCode Error) { Done = true; });
+        Connection->DisconnectWithReason(Reason, [&Done]([[maybe_unused]] ErrorCode Error) { Done = true; });
 
         int TimeoutCounter = 2000;
 
@@ -684,7 +684,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
 
-        if (CurrentEntityCount < ItemTotalCount)
+        if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
         {
             GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount));
         }
@@ -721,7 +721,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
         {
-            DestroyEntity(Entity, [](auto Ok) {});
+            DestroyEntity(Entity, []([[maybe_unused]] bool Ok) {});
         }
         // Otherwise we clear up all all locally represented entities
         else
@@ -1041,7 +1041,7 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
     }
 }
 
-const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
+bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
@@ -1148,7 +1148,7 @@ void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::co
     SignalRMsgPackEntitySerialiser Serialiser;
     std::vector<signalr::value> ObjectPatches;
 
-    for (int i = 0; i < PendingEntities.Size(); ++i)
+    for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
         PendingEntities[i]->SerialisePatch(Serialiser);
         auto SerialisedEntity = Serialiser.Finalise();
@@ -1241,7 +1241,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
             SendPatches(Connection, PendingEntities);
 
             // Loop through and apply local patches from generated list
-            for (int i = 0; i < PendingEntities.Size(); ++i)
+            for (size_t i = 0; i < PendingEntities.Size(); ++i)
             {
                 PendingEntities[i]->ApplyLocalPatch(true);
             }
@@ -1465,7 +1465,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
         if (Destroy)
         {
             // Deletion
-            for (int i = 0; i < Entities.Size(); ++i)
+            for (size_t i = 0; i < Entities.Size(); ++i)
             {
                 SpaceEntity* Entity = Entities[i];
 
@@ -1479,7 +1479,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
                         // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                         // This covers disconnected clients as their avatar gets cleaned up after timing out.
-                        for (int j = 0; j < Entities.Size(); ++j)
+                        for (size_t j = 0; j < Entities.Size(); ++j)
                         {
                             if (Entities[j]->GetSelectingClientID() == EntityID)
                             {
@@ -1498,7 +1498,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
             bool EntityFound = false;
 
             // Update
-            for (int i = 0; i < Entities.Size(); ++i)
+            for (size_t i = 0; i < Entities.Size(); ++i)
             {
                 if (Entities[i]->GetId() == EntityID)
                 {
