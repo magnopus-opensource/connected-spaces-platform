@@ -60,7 +60,7 @@ HttpRequest::~HttpRequest()
     }
 }
 
-const ERequestVerb HttpRequest::GetVerb() const { return Verb; }
+ERequestVerb HttpRequest::GetVerb() const { return Verb; }
 
 const csp::web::Uri& HttpRequest::GetUri() const { return Uri; }
 
@@ -176,7 +176,7 @@ uint32_t HttpRequest::GetRetryCount() const { return RetryCount; }
 
 void HttpRequest::SetSendDelay(const std::chrono::milliseconds InSendDelay) { SendDelay = InSendDelay; }
 
-const std::chrono::milliseconds HttpRequest::GetSendDelay() { return SendDelay; }
+std::chrono::milliseconds HttpRequest::GetSendDelay() { return SendDelay; }
 
 void HttpRequest::EnableAutoRetry(bool Enable) { IsAutoRetryEnabled = Enable; }
 
