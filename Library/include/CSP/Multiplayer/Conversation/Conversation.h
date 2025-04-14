@@ -164,7 +164,9 @@ enum class ConversationEventType
     ConversationInformation,
     MessageInformation,
     SetAnnotation,
-    DeleteAnnotation
+    DeleteAnnotation,
+    SetConversationAnnotation,
+    DeleteConversationAnnotation
 };
 
 /// @ingroup Conversation

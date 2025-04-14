@@ -211,6 +211,52 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
     ConversationSystem->GetNumberOfReplies(ConversationId, Callback);
 }
 
+void ConversationSpaceComponent::GetConversationAnnotation(multiplayer::AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetConversationAnnotation(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::AnnotationUpdateParams& AnnotationParams,
+    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    multiplayer::AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->SetConversationAnnotation(
+        ConversationId, AnnotationParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
+}
+
+void ConversationSpaceComponent::DeleteConversationAnnotation(systems::NullResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteConversationAnnotation(ConversationId, Callback);
+}
+
 void ConversationSpaceComponent::GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
