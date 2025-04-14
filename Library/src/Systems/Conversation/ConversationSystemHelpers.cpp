@@ -48,9 +48,6 @@ namespace
     // We want this be an empty string if the conversation hasn't been modified.
     bool HasBeenEdited(const AssetCollection& AssetCollection) { return AssetCollection.CreatedAt != AssetCollection.UpdatedAt; }
 
-    bool StringToBool(const common::String& Value) { return (Value == "true") ? true : false; }
-    common::String BoolToString(bool Value) { return Value ? "true" : "false"; }
-
     common::String Vector3ToString(const common::Vector3& value)
     {
         return common::StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
