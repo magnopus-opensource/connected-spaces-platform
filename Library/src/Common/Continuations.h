@@ -39,6 +39,16 @@
 
 #pragma once
 
+#define LIBASYNC_CUSTOM_DEFAULT_SCHEDULER 1;
+
+// Declare async::default_scheduler with csp_scheduler
+class csp_scheduler;
+
+namespace async
+{
+csp_scheduler& default_scheduler();
+}
+
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
@@ -46,9 +56,28 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/ErrorCodeStrings.h"
 #include <async++.h>
+#include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
+
+// Custom version of the async::inline_scheduler.
+class csp_scheduler
+{
+public:
+    static void schedule(async::task_run_handle t) { t.run(); }
+};
+
+// Set our custom scheduler as the default,
+// so we dont have to repeat async::inline_scheduler() in each .then() call.
+namespace async
+{
+inline csp_scheduler& default_scheduler()
+{
+    static csp_scheduler s;
+    return s;
+}
+}
 
 namespace csp::common::continuations
 {
@@ -59,11 +88,12 @@ using namespace csp::systems;
  * Print an error with provided error context objects and HTTP request status information, and throw a cancellation error.
  * Calls the main callback as an error before throwing.
  */
-inline void LogHTTPErrorAndCancelContinuation(NullResultCallback Callback, std::string ErrorMsg, EResultCode ResultCode,
+template <typename ErrorResultT>
+inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
     csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
-    NullResult FailureResult(ResultCode, HttpResultCode, FailureReason);
+    ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     INVOKE_IF_NOT_NULL(Callback, FailureResult);
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
@@ -83,8 +113,8 @@ inline void LogErrorAndCancelContinuation(std::string ErrorMsg, csp::systems::Lo
  * Otherwise, logs a success message and continues, forwarding the result to the next continuation.
  * Error context objects are optional, if unset, the values from the result object will be used.
  */
-template <typename ResultT>
-inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, std::string SuccessMsg, std::string ErrorMsg,
+template <typename ResultT, typename ErrorResultT>
+inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg, std::string ErrorMsg,
     std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
@@ -97,7 +127,8 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
             auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
             auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
             auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
-            LogHTTPErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
+            LogHTTPErrorAndCancelContinuation<ErrorResultT>(
+                Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
         }
         else
         {
@@ -114,8 +145,9 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
  * Otherwise, logs a success message and continues. Does not pass anything to the next continuation.
  * Error context objects are optional, if unset, default values Failed, 500, and Unknown are used
  */
-inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback, std::string SuccessMsg, std::optional<EResultCode> ResultCode,
-    std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
+template <typename ErrorResultT>
+inline auto AssertRequestSuccessOrErrorFromErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
+    std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](
@@ -125,7 +157,7 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback
         {
             // Error Case. We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            LogHTTPErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
+            LogHTTPErrorAndCancelContinuation<ErrorResultT>(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
                 HttpResultCode.value_or(csp::web::EResponseCodes::ResponseInternalServerError),
                 FailureReason.value_or(ERequestFailureReason::Unknown), LogLevel);
         }
@@ -138,7 +170,7 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback
 }
 
 /* Print a success message and report a successfull result via the callback */
-inline auto ReportSuccess(NullResultCallback Callback, std::string SuccessMsg)
+template <typename ResultT> inline auto ReportSuccess(std::function<void(const ResultT&)> Callback, std::string SuccessMsg)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg)]()
     {
@@ -174,6 +206,17 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
     };
 }
+
+/* Stores the result in a shared pointer for access outside of continuation */
+template <typename ResultT> inline auto GetResultFromContinuation(std::shared_ptr<ResultT>& Ptr)
+{
+    return [Ptr](const ResultT& Result)
+    {
+        *Ptr = Result;
+        return Result;
+    };
+}
+
 //"Private" namespace for testing, to allow us not to link async++ in tests,
 // for the few tests where we want to stricly test mechanisms.
 namespace detail
