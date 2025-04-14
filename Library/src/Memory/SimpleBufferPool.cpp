@@ -25,7 +25,7 @@ SimpleBufferPool::SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize)
 {
     Buffers.reserve(InitialPoolSize);
 
-    for (int i = 0; i < InitialPoolSize; ++i)
+    for (size_t i = 0; i < InitialPoolSize; ++i)
     {
         Buffers[i] = CSP_NEW unsigned char[BufferSize];
     }
