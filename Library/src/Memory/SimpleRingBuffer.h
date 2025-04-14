@@ -30,7 +30,7 @@ public:
 
     inline bool IsDataAvailable() { return AvailableDataLength > 0; }
 
-    inline const size_t GetAvailableDataLength() { return AvailableDataLength; }
+    inline size_t GetAvailableDataLength() { return AvailableDataLength; }
 
     size_t Read(void* OutBuffer, size_t Length);
     void Write(const void* InBuffer, size_t Length);
