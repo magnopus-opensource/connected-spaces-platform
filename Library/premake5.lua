@@ -215,7 +215,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init -W4"
+				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wextra"
 			}
 
             links { 
@@ -236,7 +236,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init -W4"
+				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wextra"
 			}
 
             links {
