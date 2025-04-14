@@ -39,7 +39,7 @@ public:
     virtual void Deallocate(void* Ptr) = 0;
     virtual void Deallocate(void* Ptr, size_t Bytes) = 0;
 
-    virtual const size_t GetAllocatedBytes() const = 0;
+    virtual size_t GetAllocatedBytes() const = 0;
 };
 
 } // namespace csp::memory

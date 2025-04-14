@@ -80,7 +80,7 @@ public:
     void Deallocate(void* Ptr) override;
     void Deallocate(void* Ptr, size_t Bytes) override;
 
-    const size_t GetAllocatedBytes() const override;
+    size_t GetAllocatedBytes() const override;
 
 private:
     std::atomic<size_t> AllocatedBytes;
@@ -191,6 +191,6 @@ template <typename TLockTrait> void StandardAllocator<TLockTrait>::Deallocate(vo
     }
 }
 
-template <typename TLockTrait> const size_t StandardAllocator<TLockTrait>::GetAllocatedBytes() const { return AllocatedBytes; }
+template <typename TLockTrait> size_t StandardAllocator<TLockTrait>::GetAllocatedBytes() const { return AllocatedBytes; }
 
 } // namespace csp::memory
