@@ -154,11 +154,6 @@ namespace
         { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
     }
 
-    auto DeleteAnnotationAssetCollection(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
-    {
-        return [AssetSystem, Collection]() { return AssetSystem->DeleteAssetCollection(*Collection); };
-    }
-
     auto DeleteAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
     {
         return [AssetSystem, Collection](const AssetsResult& Result)
@@ -207,12 +202,6 @@ namespace
 
             return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
         };
-    }
-
-    auto SetCommentMetadata(AssetSystem* AssetSystem, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
-    {
-        return [AssetSystem, Metadata](const AssetCollectionResult& Result)
-        { return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollection(), Metadata, nullptr); };
     }
 
     auto RemoveAnnotationMetadata(AssetSystem* AssetSystem)
