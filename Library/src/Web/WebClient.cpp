@@ -29,7 +29,7 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, [[maybe_unused]] const ETransferProtocol Tp, bool AutoRefresh)
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, bool AutoRefresh)
     : RootPort(InPort)
     , UserSystem(nullptr)
     , LoginState(nullptr)

@@ -68,8 +68,7 @@ void CSPWebsocketClient::stop(std::function<void(std::exception_ptr)> callback)
     CSPWebSocketClientPtr->Stop(LocalCallback);
 }
 
-void CSPWebsocketClient::send(
-    const std::string& payload, [[maybe_unused]] signalr::transfer_format format, std::function<void(std::exception_ptr)> callback)
+void CSPWebsocketClient::send(const std::string& payload, signalr::transfer_format /*format*/, std::function<void(std::exception_ptr)> callback)
 {
     IWebSocketClient::CallbackHandler LocalCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Stop Error"))); };
@@ -154,7 +153,7 @@ CSPHttpClient::CSPHttpClient()
 }
 
 void CSPHttpClient::send(
-    [[maybe_unused]] const std::string& url, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
+    const std::string& /*url*/, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
 {
     CSP_PROFILE_SCOPED();
 
