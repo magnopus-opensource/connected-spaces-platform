@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@ namespace csp::json
 class JsonSerializer
 {
 public:
-    /// @brief Generates a json string from an object
-    /// A global ToJson function in the root namespace should be created to work with this function:
+    /// @brief Generates a json string from an object.
+    /// @details A global ToJson function in the root namespace should be created to work with this function:
     /// void ToJson(csp::json::JsonSerializer& Serializer, const T& Value);
-    /// @param Object const T& : The object to serialize
-    /// @return String : The serialized json string
+    /// @param Object const T& : The object to serialize.
+    /// @return String : The serialized json string.
+    /// @return common::String : Returns the serialized string.
     template <typename T> static common::String Serialize(const T& Object)
     {
         JsonSerializer Serializer;
@@ -54,11 +55,11 @@ public:
         return Serializer.Buffer.GetString();
     }
 
-    /// @brief Should be called within custom ToJson function
-    /// This will serialize a member
-    /// If the member is another custom type, this was internally call ToJson on that type
-    /// @param Key const char * Key : The key to reference the item
-    /// @param Value const T& : The value to serialize
+    /// @brief Should be called within custom ToJson function.
+    /// @details This will serialize a member.
+    /// If the member is another custom type, this was internally call ToJson on that type.
+    /// @param Key const char * Key : The key to reference the item.
+    /// @param Value const T& : The value to serialize.
     template <typename T> void SerializeMember(const char* Key, const T& Value)
     {
         Writer.String(Key);
@@ -101,11 +102,12 @@ private:
 class JsonDeserializer
 {
 public:
-    /// @brief Converts a given Json string into the specified object
-    /// A global FromJson function in the root namespace should be created to work with this function:
+    /// @brief Converts a given Json string into the specified object.
+    /// @details A global FromJson function in the root namespace should be created to work with this function:
     /// void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Value);
-    /// @param Data const char* : The json string to deserialize
-    /// @param Object T& : The object to convert to
+    /// @param Data const char* : The json string to deserialize.
+    /// @param Object T& : The object to convert to.
+    /// @return bool : Returns true if the Deserializer RapidJson Document has no errors.
     template <typename T> static bool Deserialize(const char* Data, T& Object)
     {
         JsonDeserializer Deserializer { Data };
@@ -125,11 +127,11 @@ public:
         return true;
     }
 
-    /// @brief Should be called within custom FromJson function
-    /// This will deserialize a member with the given key
-    /// If the member is another custom type, this was internally call FromJson on that type
-    /// @param Key const char* : The key which references this member
-    /// @param Val T& : The member to deserialize to
+    /// @brief Should be called within custom FromJson function.
+    /// @details This will deserialize a member with the given key.
+    /// If the member is another custom type, this was internally call FromJson on that type.
+    /// @param Key const char* : The key which references this member.
+    /// @param Val T& : The member to deserialize to.
     template <typename T> const void DeserializeMember(const char* Key, T& Val) const
     {
         ValueStack.push(&(*ValueStack.top())[Key]);
@@ -137,10 +139,26 @@ public:
         ValueStack.pop();
     }
 
-    /// @brief Should be called within custom FromJson function
-    /// This will return true if the given key exists
-    /// @param Key const char* : The key to check
-    /// @return bool : Returns true if the key exists in this object
+    /// @brief Should be called within custom FromJson function.
+    /// @details This will safely deserialize a member with the given key by first checking that the member exists.
+    /// If the member is another custom type, this was internally call FromJson on that type.
+    /// @param Key const char* : The key which references this member.
+    /// @param Val T& : The member to deserialize to.
+    /// @return bool : Returns true if the key exists in this object and the member has been deserialized.
+    template <typename T> bool SafeDeserializeMember(const char* Key, T& Val) const
+    {
+        if (HasProperty(Key))
+        {
+            DeserializeMember(Key, Val);
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Should be called within custom FromJson function.
+    /// @details This will return true if the given key exists
+    /// @param Key const char* : The key to check.
+    /// @return bool : Returns true if the key exists in this object.
     bool HasProperty(const char* Key) const { return ValueStack.top()->HasMember(Key); }
 
 private:
