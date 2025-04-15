@@ -114,7 +114,7 @@ void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl), Value);
 }
 
-const bool AvatarSpaceComponent::GetIsHandIKEnabled() const
+bool AvatarSpaceComponent::GetIsHandIKEnabled() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled));
 }

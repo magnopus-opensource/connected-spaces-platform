@@ -72,7 +72,7 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
     return InvalidValue;
 }
 
-const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
+bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 

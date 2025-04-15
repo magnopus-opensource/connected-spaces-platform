@@ -208,7 +208,7 @@ public:
 
     /// @brief Gets the ticketed status of the space from the result.
     /// @return A bool describing if the space is ticketed.
-    const bool GetIsTicketedEvent() const;
+    bool GetIsTicketedEvent() const;
 
 private:
     SpaceIsTicketedResult(void*)

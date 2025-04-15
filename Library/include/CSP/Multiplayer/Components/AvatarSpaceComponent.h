@@ -160,7 +160,7 @@ public:
     /// @brief Checks if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
     /// @return True if the avatar uses IK, false otherwise.
-    const bool GetIsHandIKEnabled() const;
+    bool GetIsHandIKEnabled() const;
 
     /// @brief Sets if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
