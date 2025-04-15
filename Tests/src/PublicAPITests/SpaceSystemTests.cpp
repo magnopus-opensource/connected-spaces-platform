@@ -648,7 +648,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
 
     bool SpaceFound = false;
 
-    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    for (size_t i = 0; i < ResultSpaces.Size(); ++i)
     {
         if (ResultSpaces[i].Name == UniqueSpaceName)
         {
@@ -740,7 +740,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesByIdsTest)
     bool PrivateSpaceFound = false;
     bool PublicSpaceFound = false;
 
-    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    for (size_t i = 0; i < ResultSpaces.Size(); ++i)
     {
         if (ResultSpaces[i].Name == UniquePrivateSpaceName)
         {
@@ -786,7 +786,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -810,7 +810,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    for (size_t i = 0; i < ResultSpaces.Size(); ++i)
     {
         const auto& Space = ResultSpaces[i];
 
@@ -824,7 +824,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
     // Clean up
     LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
@@ -853,7 +853,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -871,7 +871,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    for (size_t i = 0; i < ResultSpaces.Size(); ++i)
     {
         const auto& Space = ResultSpaces[i];
 
@@ -880,7 +880,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
@@ -909,7 +909,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -927,7 +927,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    for (size_t i = 0; i < ResultSpaces.Size(); ++i)
     {
         const auto& Space = ResultSpaces[i];
 
@@ -936,7 +936,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
@@ -965,7 +965,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -992,7 +992,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i)
+    for (size_t i = 0; i < SPACE_COUNT; ++i)
     {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
@@ -2430,7 +2430,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Location.Longitude, InitialGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Orientation, InitialOrientation);
 
-    for (auto i = 0; i < AddGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    for (size_t i = 0; i < AddGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
     {
         EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, InitialGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, InitialGeoFence[i].Longitude);
@@ -2471,7 +2471,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Orientation, SecondOrientation);
 
-    for (auto i = 0; i < UpdateGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    for (size_t i = 0; i < UpdateGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
     {
         EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, SecondGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, SecondGeoFence[i].Longitude);
@@ -2485,7 +2485,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Orientation, SecondOrientation);
 
-    for (auto i = 0; i < GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    for (size_t i = 0; i < GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
     {
         EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, SecondGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, SecondGeoFence[i].Longitude);

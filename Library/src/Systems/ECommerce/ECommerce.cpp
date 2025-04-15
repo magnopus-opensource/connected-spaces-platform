@@ -47,7 +47,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
         auto VariantProductInformation = Dto.GetVariants();
         ProductInfo.Variants = common::Array<ProductVariantInfo>(VariantProductInformation.size());
 
-        for (int i = 0; i < VariantProductInformation.size(); ++i)
+        for (size_t i = 0; i < VariantProductInformation.size(); ++i)
         {
             ProductInfo.Variants[i].Id = VariantProductInformation[i]->GetId();
             ProductInfo.Variants[i].Title = VariantProductInformation[i]->GetTitle();
@@ -149,7 +149,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
         ProductInfo.Tags = common::Array<common::String>(TagsProductInformation.size());
 
-        for (int i = 0; i < TagsProductInformation.size(); ++i)
+        for (size_t i = 0; i < TagsProductInformation.size(); ++i)
         {
             ProductInfo.Tags[i] = TagsProductInformation[i];
         }
@@ -165,7 +165,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
         ProductInfo.Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
 
-        for (int i = 0; i < MediaProductInformation.size(); ++i)
+        for (size_t i = 0; i < MediaProductInformation.size(); ++i)
         {
             if (MediaProductInformation[i]->HasAlt())
             {
@@ -406,7 +406,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
         auto DtoLines = CartDto.GetLines();
         Cart.CartLines = csp::common::Array<csp::systems::CartLine>(DtoLines.size());
 
-        for (auto i = 0; i < DtoLines.size(); ++i)
+        for (size_t i = 0; i < DtoLines.size(); ++i)
         {
             auto CartLineDto = *DtoLines[i];
 
@@ -506,7 +506,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
     const std::vector<chs_aggregation::ShopifyStorefrontDto>& StoreDtos, csp::common::Array<csp::systems::ShopifyStoreInfo>& Stores)
 {
-    for (int i = 0; i < StoreDtos.size(); i++)
+    for (size_t i = 0; i < StoreDtos.size(); i++)
     {
         const chs_aggregation::ShopifyStorefrontDto& StoreDto = StoreDtos[i];
         csp::systems::ShopifyStoreInfo& Store = Stores[i];

@@ -386,7 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
     bool Found1 = false, Found2 = false;
 
-    for (int i = 0; i < AssetCollections.Size(); ++i)
+    for (size_t i = 0; i < AssetCollections.Size(); ++i)
     {
         auto& AssetCollection = AssetCollections[i];
 
@@ -668,7 +668,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
     bool Found1 = false, Found2 = false, Found3 = false;
 
-    for (int i = 0; i < Assets.Size(); ++i)
+    for (size_t i = 0; i < Assets.Size(); ++i)
     {
         auto& Asset = Assets[i];
 

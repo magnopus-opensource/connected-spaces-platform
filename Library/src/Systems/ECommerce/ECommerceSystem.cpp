@@ -206,7 +206,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
         auto CartLinesUpdate = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
         auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
 
-        for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
+        for (size_t i = 0; i < CartInformation.CartLines.Size(); ++i)
         {
 
             csp::common::String CartLineId = CartInformation.CartLines[i].CartLineId;

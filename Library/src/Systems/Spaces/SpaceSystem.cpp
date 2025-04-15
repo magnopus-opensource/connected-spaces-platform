@@ -1009,7 +1009,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
             Map<String, Array<String>> SpacesTags;
             const auto& AssetCollections = Result.GetAssetCollections();
 
-            for (int i = 0; i < AssetCollections.Size(); ++i)
+            for (size_t i = 0; i < AssetCollections.Size(); ++i)
             {
                 const auto& AssetCollection = AssetCollections[i];
 
@@ -1841,7 +1841,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         std::vector<String> GroupIds;
         GroupIds.reserve(MemberGroupIds->Size());
 
-        for (int i = 0; i < MemberGroupIds->Size(); ++i)
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
         {
             GroupIds.push_back(MemberGroupIds->operator[](i));
         }

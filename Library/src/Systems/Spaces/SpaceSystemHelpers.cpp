@@ -131,7 +131,7 @@ namespace SpaceSystemHelpers
     {
         bool IdFound = false;
 
-        for (int i = 0; i < Ids.Size(); ++i)
+        for (size_t i = 0; i < Ids.Size(); ++i)
         {
             if (Ids[i] == UserId)
             {
@@ -175,7 +175,7 @@ namespace SpaceSystemHelpers
         std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
         GroupInvites.reserve(InviteUsers.Size());
 
-        for (auto i = 0; i < InviteUsers.Size(); ++i)
+        for (size_t i = 0; i < InviteUsers.Size(); ++i)
         {
             auto InviteUser = InviteUsers[i];
 

@@ -580,7 +580,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            for (int i = 0; i < DirtyComponentKeys.Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 auto* Component = DirtyComponents[DirtyComponentKeys[i]].Component;
 
@@ -644,7 +644,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
                         {
                             Components[ComponentId] = Component;
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -776,7 +776,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                         {
                             auto* Component = Components[ComponentKey];
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -793,7 +793,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                             // if Component != nullptr component has not been Instantiate, so is skipped.
                             if (Component != nullptr)
                             {
-                                for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                                for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                                 {
                                     uint64_t PropertyKey;
                                     auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -854,7 +854,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
 
-            for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
             {
                 uint16_t ComponentKey = DirtyComponentKeys->operator[](i);
 
@@ -907,7 +907,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             const csp::common::Array<uint16_t>* DirtyViewKeys = DirtyProperties.Keys();
 
-            for (int i = 0; i < DirtyViewKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyViewKeys->Size(); ++i)
             {
                 uint16_t PropertyKey = DirtyViewKeys->operator[](i);
                 switch (PropertyKey)
@@ -953,7 +953,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             DirtyComponentKeys = DirtyComponents.Keys();
 
-            for (int i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+            for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
             {
                 if (Components.HasKey(TransientDeletionComponentIds[i]))
                 {
@@ -1212,7 +1212,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
     const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
     ComponentBase* LocatedComponent = nullptr;
 
-    for (int i = 0; i < ComponentKeys->Size(); ++i)
+    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         ComponentBase* Component = Components[ComponentKeys->operator[](i)];
 
@@ -1229,7 +1229,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
     {
         const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
 
-        for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
         {
             const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
 

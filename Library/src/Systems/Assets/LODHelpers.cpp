@@ -62,7 +62,7 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
     }
     else
     {
-        for (int i = 0; i < Assets.Size(); ++i)
+        for (size_t i = 0; i < Assets.Size(); ++i)
         {
             const csp::systems::Asset& Asset = Assets[i];
             int LODLevel = csp::systems::GetLODLevelFromStylesArray(Asset.Styles);
@@ -76,7 +76,7 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
 
     Chain.LODAssets = csp::common::Array<LODAsset>(AssetList.Size());
 
-    for (int i = 0; i < Chain.LODAssets.Size(); ++i)
+    for (size_t i = 0; i < Chain.LODAssets.Size(); ++i)
     {
         Chain.LODAssets[i] = std::move(AssetList[i]);
     }

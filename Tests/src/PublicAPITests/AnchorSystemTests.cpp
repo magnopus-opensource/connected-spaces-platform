@@ -565,7 +565,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 
         bool Found1 = false, Found2 = false;
 
-        for (auto i = 0; i < Anchors.Size(); ++i)
+        for (size_t i = 0; i < Anchors.Size(); ++i)
         {
             if (Anchors[i].Id == Anchor1.Id)
             {

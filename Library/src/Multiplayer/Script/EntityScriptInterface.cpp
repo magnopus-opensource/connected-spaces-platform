@@ -232,7 +232,7 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
         const csp::common::Map<uint16_t, ComponentBase*>& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
-        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < ComponentKeys->Size(); ++i)
         {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 

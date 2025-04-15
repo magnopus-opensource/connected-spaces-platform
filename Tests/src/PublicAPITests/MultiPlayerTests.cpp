@@ -191,7 +191,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS)
             {
-                for (int i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
+                for (size_t i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
                 {
                     uint16_t ComponentID = InComponentUpdateInfoArray[i].ComponentId;
 

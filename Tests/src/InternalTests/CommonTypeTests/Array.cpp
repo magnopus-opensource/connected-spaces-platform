@@ -225,7 +225,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         EXPECT_EQ(ConvertedList.Size(), Instance.Size());
 
         // All elements should match those in the array, but should not have the same address
-        for (int i = 0; i < Instance.Size(); ++i)
+        for (size_t i = 0; i < Instance.Size(); ++i)
         {
             EXPECT_EQ(ConvertedList[i], Instance[i]);
             EXPECT_NE(&ConvertedList[i], &Instance[i]);

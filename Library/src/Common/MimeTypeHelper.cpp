@@ -38,7 +38,7 @@ String& MimeTypeHelper::GetMimeType(const String& FilePath)
 
     auto LowerChars = std::make_unique<char[]>(Length);
 
-    for (auto i = 0; i < Length; ++i)
+    for (size_t i = 0; i < Length; ++i)
     {
         LowerChars[i] = static_cast<char>(std::tolower(Chars[i]));
     }

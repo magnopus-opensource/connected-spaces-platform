@@ -131,7 +131,7 @@ template <typename T, typename std::enable_if_t<!std::is_integral_v<T>>*> inline
         auto BufferSize = *(size_t*)RealPointer;
         auto Count = BufferSize / sizeof(T);
 
-        for (int i = 0; i < Count; ++i)
+        for (unsigned long long i = 0; i < Count; ++i)
         {
             (Ptr + i)->~T();
         }

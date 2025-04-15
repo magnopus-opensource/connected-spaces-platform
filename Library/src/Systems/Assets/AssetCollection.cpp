@@ -63,7 +63,7 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
         auto& Tags = Dto.GetTags();
         AssetCollection.Tags = csp::common::Array<csp::common::String>(Tags.size());
 
-        for (int i = 0; i < Tags.size(); ++i)
+        for (size_t i = 0; i < Tags.size(); ++i)
         {
             AssetCollection.Tags[i] = Tags[i];
         }
