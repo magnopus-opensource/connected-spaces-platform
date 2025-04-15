@@ -88,7 +88,7 @@ DateTime::DateTime(const csp::common::String& DateString)
         &OffsetHours, &OffsetMinutes);
 #endif
 
-    std::tm TM = { Second, Minute, Hour, Day, Month - 1, Year - 1900 };
+    std::tm TM = { Second, Minute, Hour, Day, Month - 1, Year - 1900, 0, 0 };
     TM.tm_isdst = -1;
 
     if (OffsetModifier == '-')
