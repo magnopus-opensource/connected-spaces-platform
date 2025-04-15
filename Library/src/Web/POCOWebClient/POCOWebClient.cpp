@@ -396,7 +396,7 @@ void POCOWebClient::ProcessResponseAsync(
 }
 
 void POCOWebClient::ProcessRequestAsync(
-    Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPRequest& PocoRequest, std::ostream& RequestStream, HttpRequest& Request)
+    Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPRequest& /*PocoRequest*/, std::ostream& RequestStream, HttpRequest& Request)
 {
     CSP_PROFILE_SCOPED();
 
@@ -469,7 +469,7 @@ void POCOWebClient::SetFileUploadContentFromString(HttpPayload* Payload, const c
 
 // This function is deliberately written this way to reduce the number of allocations and string copying. Do not change it!
 void POCOWebClient::SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
-    const char* Version, const csp::common::String& MediaType)
+    const char* /*Version*/, const csp::common::String& MediaType)
 {
     constexpr const char Boundary[] = "MIME_boundary_FileFromBuffer";
     constexpr size_t BoundaryLen = CStringLength(Boundary);
