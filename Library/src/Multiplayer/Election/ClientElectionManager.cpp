@@ -88,7 +88,7 @@ ClientElectionManager::~ClientElectionManager()
     }
 }
 
-void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
 
@@ -149,25 +149,25 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
     }
 }
 
-void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars)
+void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnClientAdd called : ClientId=%d", ClientAvatar->GetOwnerId());
     AddClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars)
+void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnClientRemove called : ClientId=%d", ClientAvatar->GetOwnerId());
     RemoveClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
     // @Todo - This event allows us to track individual object ownership
 }
 
-void ClientElectionManager::OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
     // @Todo - This event allows us to track individual object ownership
@@ -483,10 +483,10 @@ void ClientElectionManager::BindNetworkEvents()
     EventBus* EventBus = SystemsManager.GetEventBus();
 
     EventBus->ListenNetworkEvent(
-        ClientElectionMessage, [this](bool ok, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
+        ClientElectionMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
 
     EventBus->ListenNetworkEvent(
-        RemoteRunScriptMessage, [this](bool ok, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
+        RemoteRunScriptMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()

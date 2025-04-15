@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
@@ -320,7 +320,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         csp::common::String ObjectName1 = "Object 1";
         csp::common::String ObjectName2 = "Object 2";
@@ -459,7 +459,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Create object to represent the conversation
         csp::common::String ObjectName = "Object 1";

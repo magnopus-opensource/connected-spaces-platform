@@ -113,8 +113,8 @@ void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, 
 }
 
 void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, Material** OutMaterial,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success/*,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode*/)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);

@@ -182,7 +182,7 @@ void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetColl
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset)
+void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& /*AssetCollection*/, csp::systems::Asset& Asset)
 {
     auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Asset).Await(RequestPredicate);
 
@@ -1979,7 +1979,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2066,7 +2066,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;

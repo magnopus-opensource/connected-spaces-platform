@@ -301,7 +301,7 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
             }
         }
 
-        auto CB = [](const systems::NullResult& Res) {
+        auto CB = [](const systems::NullResult& /*Res*/) {
 
         };
 

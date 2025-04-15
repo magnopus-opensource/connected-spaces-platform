@@ -133,7 +133,7 @@ void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     }
 }
 
-void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem, const csp::common::Array<csp::common::String>& GroupNames,
+void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem, const csp::common::Array<csp::common::String>& /*GroupNames*/,
     csp::common::Array<csp::systems::HotspotGroup>& Groups, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
@@ -668,7 +668,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -678,7 +678,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
     bool ComponentAdded = false;
 
     CreatedObject->SetUpdateCallback(
-        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
+        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags /*Flags*/,
             csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
         {
             if (Entity->GetName() == ObjectName)
@@ -810,7 +810,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -820,7 +820,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
     bool ComponentAdded = false;
 
     CreatedObject->SetUpdateCallback(
-        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
+        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags /*Flags*/,
             csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
         {
             if (Entity->GetName() == ObjectName)
@@ -892,7 +892,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 
         HotspotSystem->SetHotspotSequenceChangedCallback(CB);
 
-        CreatedObject->Destroy([](bool Success) {});
+        CreatedObject->Destroy([](bool /*Success*/) {});
 
         WaitForCallbackWithUpdate(SequencesUpdated, EntitySystem);
     }
@@ -950,7 +950,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -960,7 +960,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
     bool ComponentAdded = false;
 
     CreatedObject->SetUpdateCallback(
-        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
+        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags /*Flags*/,
             csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
         {
             if (Entity->GetName() == ObjectName)

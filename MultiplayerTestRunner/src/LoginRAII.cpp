@@ -28,7 +28,7 @@ namespace
 {
 /* Login to CHS. Return the userID on success */
 csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::common::String& Email, const csp::common::String& Password,
-    bool AgeVerified, csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+    bool AgeVerified, csp::systems::EResultCode /*ExpectedResultCode*/, csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/)
 {
     std::promise<csp::systems::LoginStateResult> ResultPromise;
     std::future<csp::systems::LoginStateResult> ResultFuture = ResultPromise.get_future();
