@@ -318,7 +318,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Tags = common::Array<common::String>(TagsProductInformation.size());
 
-                    for (int j = 0; j < TagsProductInformation.size(); ++j)
+                    for (size_t j = 0; j < TagsProductInformation.size(); ++j)
                     {
                         ProductInfoCollection[TotalVariantIndex].Tags[j] = TagsProductInformation[j];
                     }
@@ -334,7 +334,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
 
-                    for (int j = 0; j < MediaProductInformation.size(); ++j)
+                    for (size_t j = 0; j < MediaProductInformation.size(); ++j)
                     {
                         if (MediaProductInformation[j]->HasAlt())
                         {

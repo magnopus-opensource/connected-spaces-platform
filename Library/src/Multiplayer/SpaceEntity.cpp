@@ -136,7 +136,7 @@ SpaceEntity::~SpaceEntity()
 {
     auto& Keys = *Components.Keys();
 
-    auto i = 0;
+    size_t i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
         CSP_DELETE(Components[Keys[i]]);
@@ -338,7 +338,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
     }
 }
 
-const csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
+csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -523,7 +523,7 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            int i = 0;
+            size_t i = 0;
             for (i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 if (DirtyComponents[DirtyComponentKeys[i]].Component != nullptr)
@@ -881,7 +881,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     /*const csp::common::Map<uint32_t, ReplicatedValue> DirtyComponentProperties = DirtyComponents[i].Component->DirtyProperties;
                     const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys			  = DirtyComponentProperties.Keys();
 
-                    for (int j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
+                    for (size_t j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
                     {
                             uint32_t PropertyKey							  = DirtyComponentPropertyKeys->operator[](j);
                             Components[ComponentKey]->Properties[PropertyKey] = DirtyComponentProperties[PropertyKey];
@@ -1105,7 +1105,7 @@ void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBas
         auto& Properties = Component->Properties;
         const auto& Keys = Properties.Keys();
 
-        for (int j = 0; j < Keys->Size(); ++j)
+        for (size_t j = 0; j < Keys->Size(); ++j)
         {
             auto& Key = Keys->operator[](j);
             auto& Property = Properties[Key];
