@@ -315,7 +315,7 @@ void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& I
 
 void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
 
-const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
+bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
 
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return GeoLocation; }
 
