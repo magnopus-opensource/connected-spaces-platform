@@ -979,7 +979,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 #endif
 
 /*
-Tests that all conversation multiplayer events are correctly sent to their componenets
+Tests that all conversation multiplayer events are correctly sent to their components
 */
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_EVENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)

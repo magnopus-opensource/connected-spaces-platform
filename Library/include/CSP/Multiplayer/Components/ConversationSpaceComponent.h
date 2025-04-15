@@ -210,7 +210,7 @@ public:
         AnnotationResultCallback Callback);
 
     /// @brief Deletes an annotation associated with a message.
-    /// @param MessageId const csp::common::String& : The message id whos annotation to delete.
+    /// @param MessageId const csp::common::String& : The message id whose annotation to delete.
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
