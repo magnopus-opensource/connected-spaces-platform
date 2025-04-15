@@ -99,7 +99,8 @@ DateTime::DateTime(const csp::common::String& DateString)
         0, // tm_yday
         -1, // tm_isdst
 #ifndef CSP_WINDOWS
-        0 // tm_gmtoff
+        0, // tm_gmtoff
+        "" // tm_zone
 #endif
     };
 
