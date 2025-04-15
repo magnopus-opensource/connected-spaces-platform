@@ -101,7 +101,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
                 ProductInfo.Variants[i].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
 
-                for (int n = 0; n < VariantOptionInformation.size(); ++n)
+                for (size_t n = 0; n < VariantOptionInformation.size(); ++n)
                 {
                     ProductInfo.Variants[i].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
                     ProductInfo.Variants[i].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
@@ -204,13 +204,13 @@ void ProductInfoDtoToProductInfoVariantCollection(
     ProductInfoCollection = common::Array<csp::systems::ProductInfo>(ProductInfoCollection.Size());
     int TotalVariantIndex = 0; // Count the total number of variants included in the product Dto's
 
-    for (int DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
+    for (size_t DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
     {
         const chs_aggregation::ShopifyProductDto& Dto = DtoArray[DtoCount];
 
         if (Dto.HasVariants()) // if there are no variants, we don't process the dto (shouldn't happen)
         {
-            for (int VariantCount = 0; VariantCount < Dto.GetVariants().size();
+            for (size_t VariantCount = 0; VariantCount < Dto.GetVariants().size();
                  VariantCount++) // Loop each variant in the product dto and store the info into the indexed output array
             {
                 auto VariantProductInformation = Dto.GetVariants()[VariantCount];
@@ -273,7 +273,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Variants[0].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
 
-                    for (int n = 0; n < VariantOptionInformation.size(); ++n)
+                    for (size_t n = 0; n < VariantOptionInformation.size(); ++n)
                     {
                         ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
                         ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();

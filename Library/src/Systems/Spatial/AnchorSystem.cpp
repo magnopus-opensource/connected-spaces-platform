@@ -85,7 +85,7 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
     {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);
@@ -162,7 +162,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
     {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);

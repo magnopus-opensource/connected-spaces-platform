@@ -175,7 +175,7 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 
         auto* Keys = Metadata->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = Metadata->operator[](Key);

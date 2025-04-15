@@ -189,7 +189,7 @@ void GetSpaceSites(::SpaceSystem* SpaceSystem, const String& SpaceId, Array<Site
     const auto& ResultSites = Result.GetSites();
     OutSites = Array<Site>(ResultSites.Size());
 
-    for (int idx = 0; idx < ResultSites.Size(); ++idx)
+    for (size_t idx = 0; idx < ResultSites.Size(); ++idx)
     {
         OutSites[idx] = ResultSites[idx];
     }
@@ -230,7 +230,7 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
     const auto& ReturnedRolesInfo = Result.GetUsersRoles();
     OutUsersRoles = Array<UserRoleInfo>(ReturnedRolesInfo.Size());
 
-    for (int idx = 0; idx < ReturnedRolesInfo.Size(); ++idx)
+    for (size_t idx = 0; idx < ReturnedRolesInfo.Size(); ++idx)
     {
         OutUsersRoles[idx] = ReturnedRolesInfo[idx];
     }
@@ -401,7 +401,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
     EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    for (size_t idx = 0; idx < PendingInvites.Size(); ++idx)
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
@@ -506,7 +506,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
     EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    for (size_t idx = 0; idx < PendingInvites.Size(); ++idx)
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
@@ -1043,7 +1043,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 
     EXPECT_EQ(RetrievedUserRoles.Size(), 2);
 
-    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
+    for (size_t idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
     {
         if (RetrievedUserRoles[idx].UserId == SpaceOwnerUserId)
         {
@@ -1132,7 +1132,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
     bool Site1Found = false;
     bool Site2Found = false;
 
-    for (int idx = 0; idx < SpaceSites.Size(); ++idx)
+    for (size_t idx = 0; idx < SpaceSites.Size(); ++idx)
     {
         if (SpaceSites[idx].Name == SiteInfo1.Name)
         {
@@ -1236,7 +1236,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
     EXPECT_EQ(RetrievedUserRoles.Size(), 2);
 
-    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
+    for (size_t idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
     {
         if (RetrievedUserRoles[idx].UserId == DefaultUserId)
         {
@@ -1777,7 +1777,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
     EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
     EXPECT_EQ(PendingInvites.Size(), 1);
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    for (size_t idx = 0; idx < PendingInvites.Size(); ++idx)
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
@@ -1858,7 +1858,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
     EXPECT_EQ(GetAcceptedInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
     auto& AcceptedInvites = GetAcceptedInvitesResult.GetAcceptedInvitesUserIds();
     EXPECT_EQ(AcceptedInvites.Size(), 2);
-    for (auto idx = 0; idx < AcceptedInvites.Size(); ++idx)
+    for (size_t idx = 0; idx < AcceptedInvites.Size(); ++idx)
     {
         std::cerr << "Accepted space invite for user id: " << AcceptedInvites[idx] << std::endl;
     }
@@ -1903,7 +1903,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 
     EXPECT_EQ(PendingInvites.Size(), 4);
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    for (size_t idx = 0; idx < PendingInvites.Size(); ++idx)
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }

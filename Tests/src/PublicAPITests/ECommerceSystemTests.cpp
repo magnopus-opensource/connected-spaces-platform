@@ -238,7 +238,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
         EXPECT_EQ(Variant.Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Variant.Options.Size(); ++n)
+        for (size_t n = 0; n < Variant.Options.Size(); ++n)
         {
             EXPECT_EQ(Variant.Options[n].Name, OptionsName);
             EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);

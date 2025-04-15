@@ -226,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
         const auto& ResultPOIs = Result.GetPOIs();
         POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
 
-        for (int idx = 0; idx < ResultPOIs.Size(); ++idx)
+        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
         {
             POICollection[idx] = ResultPOIs[idx];
         }
@@ -237,7 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     bool POIFound = false;
 
-    for (int idx = 0; idx < POICollection.Size(); ++idx)
+    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
     {
         if (POICollection[idx].Name == PointOfInterest.Name)
         {

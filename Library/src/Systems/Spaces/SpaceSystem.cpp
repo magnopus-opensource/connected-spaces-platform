@@ -687,7 +687,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
     std::vector<String> SpaceIds;
     SpaceIds.reserve(RequestedSpaceIDs.Size());
 
-    for (auto idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
     {
         SpaceIds.push_back(RequestedSpaceIDs[idx]);
     }
@@ -1275,7 +1275,7 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
-    for (auto item = 0; item < SpaceIds.Size(); ++item)
+    for (size_t item = 0; item < SpaceIds.Size(); ++item)
     {
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
