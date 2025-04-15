@@ -175,13 +175,30 @@ public:
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
 
+    /// @brief Gets the annotation for the root message in the conversation.
+    /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetConversationAnnotation(AnnotationResultCallback Callback);
 
+    /// @brief Associates an annotation with the root message in the conversation.
+    /// If an annotation already exists on the conversation, it will be overwritten.
+    /// @param UpdateParams const AnnotationUpdateParams& : The annotation data for this annotation.
+    /// @param Annotation const systems::BufferAssetDataSource& : The annotation image data for this annotation.
+    /// @param AnnotationFileExtension const csp::common::String& : The file extension for the annotation data file (should not include ".").
+    /// @param AnnotationThumbnail const systems::BufferAssetDataSource& : The annotation thumbnail image data for this annotation.
+    /// @param ThumbnailFileExtension const csp::common::String& : The file extension for the thumbnail data file (should not include ".").
+    /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     CSP_ASYNC_RESULT void SetConversationAnnotation(const AnnotationUpdateParams& AnnotationParams,
         const csp::systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
         const csp::systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
         AnnotationResultCallback Callback);
 
+    /// @brief Deletes an annotation associated with the root message in the conversation.
+    /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void DeleteConversationAnnotation(csp::systems::NullResultCallback Callback);
 
     /// @brief Gets an annotation associated with a message.
@@ -212,6 +229,8 @@ public:
     /// @brief Deletes an annotation associated with a message.
     /// @param MessageId const csp::common::String& : The message id whose annotation to delete.
     /// @param Callback csp::systems::NullResultCallback : Callback when asynchronous task finishes.
+    /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void DeleteAnnotation(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     /// @brief Gets all thumbnails in the conversation.
