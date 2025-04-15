@@ -47,7 +47,7 @@ public:
     {
     }
 
-    virtual void onPrivateKeyRequested(const void* pSender, std::string& privateKey) override { }
+    virtual void onPrivateKeyRequested(const void* /*pSender*/, std::string& /*privateKey*/) override { }
 };
 
 class POCOWebClient : public WebClient
