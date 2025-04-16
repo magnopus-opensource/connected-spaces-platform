@@ -216,7 +216,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers"
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
 			}
 
             links { 
@@ -237,7 +237,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers"
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
 			}
 
             links {
