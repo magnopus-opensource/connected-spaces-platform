@@ -55,5 +55,5 @@ void JsonDeserializer::DeserializeValue(double& Value) const { Value = ValueStac
 
 void JsonDeserializer::DeserializeValue(csp::common::String& Value) const { Value = ValueStack.top()->GetString(); }
 
-void JsonDeserializer::DeserializeValue(const char* Value) const { Value = ValueStack.top()->GetString(); }
+void JsonDeserializer::DeserializeValue([[maybe_unused]] const char* Value) const { Value = ValueStack.top()->GetString(); }
 } // namespace csp::json
