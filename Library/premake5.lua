@@ -172,8 +172,6 @@ if not Project then
 			
 			buildoptions {
 				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
-				"-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
-                                "-Wno-missing-field-initializers", -- Don't warn against missing field initializers (because of the wrapper generator)
 				"-Wno-error=unused-lambda-capture", --This shouldn't be disabled, we just had to rush to unblock android builds. Take all the this captures out and remove.
 				"-Wno-unknown-pragmas", --Also not the greatest. This is to try and suppress a signalR warning, even though the signalR project dosen't emit warnings (I think this error is a bit unique cause of preprocessor stuff)
 				"-Wno-error=nonportable-include-path", --Include paths dont match file structure. Should get around to fixing
@@ -257,8 +255,6 @@ if not Project then
                 "-pthread",             -- enable threading
                 "-fwasm-exceptions",    -- enable native wasm exceptions
 	        "-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
-		"-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
-                "-Wno-missing-field-initializers" -- Don't warn against missing field initializers (because of the wrapper generator)
             }
 
             linkoptions { 
