@@ -812,6 +812,7 @@ class Parser:
                 word = reader.next_word()
         elif word != ';':
             error_in_file(filename, reader.current_line, 'WTF is going on here?')
+            error_in_file(filename, reader.current_line, f'Could not understand word: {word}')
 
         _function.has_parameters = len(parameters) > 0
         _function.parameters = parameters

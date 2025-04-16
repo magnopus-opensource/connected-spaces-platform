@@ -171,7 +171,7 @@
               {{/ is_static }}
 
               {{^ is_static }}
-                CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+                new {{# return_type }}{{> Type }}{{/ return_type }}(
               {{/ is_static }}
             {{/ return_type.is_reference }}
         {{/ return_type.is_string }}
@@ -181,7 +181,7 @@
     {{^ return_type.is_pointer_or_reference }}
       {{# return_type.is_class_or_interface }}
         NativePointer {
-          CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+          new {{# return_type }}{{> Type }}{{/ return_type }}(
       {{/ return_type.is_class_or_interface }}
     {{/ return_type.is_pointer_or_reference }}
   {{/ has_return }}
@@ -227,14 +227,14 @@
         ) {
           {{# parameters }}
             {{# type.is_string }}
-              auto _{{ name }} = (char*)csp::memory::DllAlloc({{ name }}.Length() + 1);
+              auto _{{ name }} = new char[{{ name }}.Length() + 1];
               std::memcpy(_{{ name }}, {{ name }}.c_str(), {{ name }}.Length());
               _{{ name }}[{{ name }}.Length()] = '\0';
             {{/ type.is_string }}
             {{^ type.is_string }}
               {{# type.is_reference }}
                 auto* _{{ name }} =
-                  CSP_NEW {{# type.namespace }}{{ type.namespace }}::{{/ type.namespace }}{{ type.name }}({{ name }});
+                  new {{# type.namespace }}{{ type.namespace }}::{{/ type.namespace }}{{ type.name }}({{ name }});
               {{/ type.is_reference }}
             {{/ type.is_string }}
           {{/ parameters }}
@@ -395,7 +395,7 @@
           auto _cstr = _result.c_str();
         {{/ is_pointer }}
 
-        auto _resultCopy = (char*)CSP_ALLOC(_result.Length() + 1);
+        auto _resultCopy = new char[_result.Length() + 1];
         std::memcpy(_resultCopy, _cstr, _result.Length());
         _resultCopy[_result.Length()] = '\0';
 

@@ -15,7 +15,6 @@
  */
 #include "SignalRMsgPackEntitySerialiser.h"
 
-#include "Memory/Memory.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerConstants.h"
 
@@ -78,7 +77,7 @@ namespace
             ValueType = ItemComponentData::STRING_DICTIONARY;
             auto MValue = Value.GetStringMap();
 
-            auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
+            auto Deleter = [](const common::Array<common::String>* Ptr) { delete (Ptr); };
 
             std::map<std::string, signalr::value> Map;
             std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(

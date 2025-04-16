@@ -38,11 +38,11 @@ MaintenanceSystem::MaintenanceSystem()
 MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    MaintenanceAPI = CSP_NEW chs::MaintenanceApi(InWebClient);
+    MaintenanceAPI = new chs::MaintenanceApi(InWebClient);
     AllowMaintenanceInfoRequests = true;
 }
 
-MaintenanceSystem::~MaintenanceSystem() { CSP_DELETE(MaintenanceAPI); }
+MaintenanceSystem::~MaintenanceSystem() { delete (MaintenanceAPI); }
 
 void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback)
 {

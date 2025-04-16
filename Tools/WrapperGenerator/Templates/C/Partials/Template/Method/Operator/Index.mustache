@@ -53,7 +53,7 @@
         {{ name }}{{> Comma }}
 {{/ parameters }}
     );
-    _Value = CSP_NEW char[_Element.Length() + 1];
+    _Value = new char[_Element.Length() + 1];
     std::memcpy(_Value, _Element.c_str(), _Element.Length());
     _Value[_Element.Length()] = '\0';
 {{/ type.is_string }}
@@ -89,7 +89,7 @@
     _Value = _Element;
 {{/ type.is_pointer }}
 {{^ type.is_pointer }}
-    _Value = CSP_NEW {{# type }}{{> Type }}{{/ type }}(*_Element);
+    _Value = new {{# type }}{{> Type }}{{/ type }}(*_Element);
 {{/ type.is_pointer }}
 {{/ type.is_class_or_interface }}
 {{^ type.is_class_or_interface }}

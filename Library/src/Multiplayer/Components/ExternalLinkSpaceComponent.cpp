@@ -15,7 +15,6 @@
  */
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 
 #include <Debug/Logging.h>
@@ -36,7 +35,7 @@ ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW ExternalLinkSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ExternalLinkSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetName() const

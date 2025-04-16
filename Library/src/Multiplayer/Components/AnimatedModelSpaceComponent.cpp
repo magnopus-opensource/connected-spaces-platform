@@ -17,7 +17,8 @@
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+#include <memory>
+
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -41,7 +42,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)] = true;
 
-    SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
+    SetScriptInterface(new AnimatedModelSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */
@@ -147,7 +148,7 @@ csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceCom
 
     csp::common::Map<common::String, common::String> Overrides;
 
-    auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
+    auto Deleter = [](const common::Array<common::String>* Ptr) { delete (Ptr); };
 
     std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
         const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()), Deleter);

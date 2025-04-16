@@ -27,7 +27,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "SpaceSystemTestHelpers.h"
@@ -366,8 +366,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    TestSystem1 = CSP_NEW TestSystem(EventBus);
-    TestSystem2 = CSP_NEW TestSystem(EventBus);
+    TestSystem1 = new TestSystem(EventBus);
+    TestSystem2 = new TestSystem(EventBus);
 
     auto& LogSystem = *SystemsManager.GetLogSystem();
     std::atomic_bool LogConfirmed = false;
@@ -575,7 +575,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    TestSystem1 = CSP_NEW TestSystem(EventBus);
+    TestSystem1 = new TestSystem(EventBus);
 
     auto& LogSystem = *SystemsManager.GetLogSystem();
     std::atomic_bool LogConfirmed = false;

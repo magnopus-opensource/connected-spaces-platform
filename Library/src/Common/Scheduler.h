@@ -16,8 +16,6 @@
 #pragma once
 
 #include "Common/DateTime.h"
-#include "Memory/Memory.h"
-#include "Memory/StlAllocator.h"
 
 #include <assert.h>
 #include <chrono>
@@ -76,7 +74,7 @@ public:
     {
         assert(Thread == nullptr);
         ShouldExit = false;
-        Thread = CSP_NEW std::thread([this]() { ThreadLoop(); });
+        Thread = new std::thread([this]() { ThreadLoop(); });
     }
 
     void Shutdown()
@@ -85,7 +83,7 @@ public:
         {
             ShouldExit = true;
             Thread->join();
-            CSP_DELETE(Thread);
+            delete (Thread);
             Thread = nullptr;
         }
     }
@@ -179,7 +177,7 @@ private:
 
 private:
     std::mutex ListLock;
-    std::list<FunctionTimer, csp::memory::StlAllocator<FunctionTimer>> Tasks;
+    std::list<FunctionTimer> Tasks;
     std::thread* Thread;
     std::atomic_uint32_t IdCounter;
     bool ShouldExit;
