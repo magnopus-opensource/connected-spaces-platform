@@ -84,7 +84,7 @@ void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode), static_cast<int64_t>(Value));
 }
 
-const int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
+int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
 {
     return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
 }

@@ -86,7 +86,7 @@ bool ComponentBase::GetBooleanProperty(uint32_t Key) const
     return false;
 }
 
-const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
+int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 

@@ -128,7 +128,7 @@ public:
     /// @brief Gets the ID of the mesh of the avatar of this component.
     /// @note  Used to establish which mesh this avatar should use among a collection of predefined meshes.
     /// @return The ID of the mesh of the avatar of this component.
-    const int64_t GetAvatarMeshIndex() const;
+    int64_t GetAvatarMeshIndex() const;
 
     /// @brief Sets the ID of the mesh of the avatar of this component.
     /// @note Used to establish which mesh this avatar should use among a collection of predefined meshes.

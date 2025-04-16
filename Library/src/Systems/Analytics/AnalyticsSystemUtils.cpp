@@ -52,7 +52,7 @@ void AnalyticsEvent::AddBool(csp::common::String Key, bool Value)
     Parameters[Key] = Metric;
 }
 
-const int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameters[Key].GetInt(); }
+int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameters[Key].GetInt(); }
 
 const csp::common::String& AnalyticsEvent::GetString(csp::common::String Key) const { return Parameters[Key].GetString(); }
 

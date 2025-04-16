@@ -253,7 +253,7 @@ void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
     SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies), Value);
 }
 
-const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
+int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 {
     return GetIntegerProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
 }
