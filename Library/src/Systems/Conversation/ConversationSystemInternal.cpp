@@ -68,7 +68,7 @@ namespace
         return true;
     }
 
-    auto ValidateMessageAssetCollection(common::String ConversationId)
+    std::function<AssetCollectionResult(const AssetCollectionResult& Result)> ValidateMessageAssetCollection(common::String ConversationId)
     {
         return [ConversationId](const AssetCollectionResult& Result) mutable
         {
@@ -82,7 +82,8 @@ namespace
         };
     }
 
-    auto SetMessageAssetCollection(std::shared_ptr<systems::AssetCollection> OutAssetCollection)
+    std::function<AssetCollectionResult(const AssetCollectionResult& Result)> SetMessageAssetCollection(
+        std::shared_ptr<systems::AssetCollection> OutAssetCollection)
     {
         return [OutAssetCollection](const AssetCollectionResult& Result) mutable
         {
@@ -91,7 +92,7 @@ namespace
         };
     }
 
-    auto SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
+    std::function<AssetResult(const AssetResult& Result)> SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
     {
         return [OutAsset](const systems::AssetResult& Result) mutable
         {
@@ -100,7 +101,7 @@ namespace
         };
     }
 
-    auto SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
+    std::function<Asset(const AssetsResult& Result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
     {
         return [OutAsset](const systems::AssetsResult& Result) mutable
         {
@@ -118,8 +119,8 @@ namespace
         };
     }
 
-    auto UploadAnnotationAssetData(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection,
-        const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadAnnotationAssetData(AssetSystem* AssetSystem,
+        std::shared_ptr<systems::AssetCollection> Collection, const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
     {
         return [AssetSystem, Data, Collection, FileName](const AssetResult& Result)
         {
@@ -129,8 +130,8 @@ namespace
         };
     }
 
-    auto CreateAnnotationResult(std::shared_ptr<systems::AssetCollection> AnnotationAssetCollection, std::shared_ptr<systems::Asset> AnnotationAsset,
-        std::shared_ptr<systems::Asset> AnnotationThumbnailAsset)
+    std::function<multiplayer::AnnotationResult()> CreateAnnotationResult(std::shared_ptr<systems::AssetCollection> AnnotationAssetCollection,
+        std::shared_ptr<systems::Asset> AnnotationAsset, std::shared_ptr<systems::Asset> AnnotationThumbnailAsset)
     {
         return [AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset]()
         {
@@ -142,19 +143,20 @@ namespace
         };
     }
 
-    auto GetAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection)
+    std::function<async::task<AssetsResult>()> GetAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection)
     {
         return [AssetSystem, Collection]()
         { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION }); };
     }
 
-    auto GetAnnotationThumbnailAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+    std::function<async::task<AssetsResult>()> GetAnnotationThumbnailAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
     {
         return [AssetSystem, Collection]()
         { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
     }
 
-    auto DeleteAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+    std::function<async::task<NullResult>(const AssetsResult&)> DeleteAnnotationAsset(
+        AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
     {
         return [AssetSystem, Collection](const AssetsResult& Result)
         {
@@ -176,7 +178,7 @@ namespace
         };
     }
 
-    auto SetAssetUri(std::shared_ptr<Asset> Asset)
+    std::function<UriResult(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> Asset)
     {
         return [Asset](const UriResult& Result)
         {
@@ -185,7 +187,8 @@ namespace
         };
     }
 
-    auto AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
+    std::function<async::task<AssetCollectionResult>(const csp::common::Map<csp::common::String, csp::common::String>& Metadata)>
+    AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
     {
         return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
         {
@@ -204,7 +207,7 @@ namespace
         };
     }
 
-    auto RemoveAnnotationMetadata(AssetSystem* AssetSystem)
+    std::function<async::task<AssetCollectionResult>(const AssetCollectionResult&)> RemoveAnnotationMetadata(AssetSystem* AssetSystem)
     {
         return [AssetSystem](const AssetCollectionResult& Result)
         {
@@ -213,7 +216,7 @@ namespace
         };
     }
 
-    auto GetOrCreateAnnotationAsset(
+    std::function<async::task<AssetResult>()> GetOrCreateAnnotationAsset(
         AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type)
     {
         return [AssetSystem, Collection, Name, Type]()
@@ -251,7 +254,7 @@ namespace
         };
     }
 
-    auto SendConversationEvent(
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(
         multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::EventBus* EventBus)
     {
         return [EventType, ConersationCollection, EventBus]()
@@ -263,7 +266,7 @@ namespace
         };
     }
 
-    auto SendConversationMessageEvent(
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationMessageEvent(
         multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection, multiplayer::EventBus* EventBus)
     {
         return [EventType, MessageCollection, EventBus]()
@@ -274,7 +277,8 @@ namespace
         };
     }
 
-    auto FindMessageAssetCollections(AssetSystem* AssetSystem, const common::String& ConversationId, const common::String& SpaceId)
+    std::function<async::task<AssetCollectionsResult>()> FindMessageAssetCollections(
+        AssetSystem* AssetSystem, const common::String& ConversationId, const common::String& SpaceId)
     {
         return [AssetSystem, ConversationId, SpaceId]()
         {
@@ -283,7 +287,7 @@ namespace
         };
     }
 
-    auto ValidateAnnotationMetadata()
+    std::function<AssetCollectionResult(const AssetCollectionResult&)> ValidateAnnotationMetadata()
     {
         return [](const AssetCollectionResult& Result)
         {
@@ -299,7 +303,7 @@ namespace
         };
     }
 
-    auto GetAnnotationAssetIdsFromCollections()
+    std::function<std::map<std::string, std::string>(const AssetCollectionsResult&)> GetAnnotationAssetIdsFromCollections()
     {
         return [](const AssetCollectionsResult& Result)
         {
@@ -315,7 +319,7 @@ namespace
         };
     }
 
-    auto GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
+    std::function<async::task<AssetsResult>(const std::map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
     {
         return [AssetSystem](const std::map<std::string, std::string>& Result)
         {
@@ -334,7 +338,7 @@ namespace
         };
     }
 
-    auto CreateAnnotationThumbnailCollectionResult()
+    std::function<multiplayer::AnnotationThumbnailCollectionResult(const AssetsResult&)> CreateAnnotationThumbnailCollectionResult()
     {
         return [](const AssetsResult& Result)
         {
@@ -345,7 +349,7 @@ namespace
         };
     }
 
-    auto GenerateAnnotationMetadata(
+    std::function<common::Map<common::String, common::String>()> GenerateAnnotationMetadata(
         const multiplayer::AnnotationUpdateParams& NewData, std::shared_ptr<Asset> AnnotationAsset, std::shared_ptr<Asset> AnnotationThumbnailAsset)
     {
         return [NewData, AnnotationAsset, AnnotationThumbnailAsset]()
