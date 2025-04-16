@@ -459,40 +459,9 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 {
     typedef std::optional<std::vector<String>> StringVec;
 
-    StringVec PrototypeIds;
-
-    if (Ids.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Ids->Size(); ++i)
-        {
-            Vals.push_back(Ids->operator[](i));
-        }
-
-        PrototypeIds = std::move(Vals);
-    }
-
-    std::optional<String> ParentPrototypeId;
-
-    if (ParentId.HasValue())
-    {
-        ParentPrototypeId = *ParentId;
-    }
-
-    StringVec PrototypeNames;
-
-    if (Names.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Names->Size(); ++i)
-        {
-            Vals.push_back(Names->operator[](i));
-        }
-
-        PrototypeNames = std::move(Vals);
-    }
+    StringVec PrototypeIds = Convert(Ids);
+    std::optional<String> ParentPrototypeId = Convert(ParentId);
+    StringVec PrototypeNames = Convert(Names);
 
     StringVec PrototypeTypes;
 
@@ -508,33 +477,8 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
         PrototypeTypes = std::move(Vals);
     }
 
-    StringVec PrototypeTags;
-
-    if (Tags.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Tags->Size(); ++i)
-        {
-            Vals.push_back(Tags->operator[](i));
-        }
-
-        PrototypeTags = std::move(Vals);
-    }
-
-    StringVec GroupIds;
-
-    if (SpaceIds.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < SpaceIds->Size(); ++i)
-        {
-            Vals.push_back(SpaceIds->operator[](i));
-        }
-
-        GroupIds = std::move(Vals);
-    }
+    StringVec PrototypeTags = Convert(Tags);
+    StringVec GroupIds = Convert(SpaceIds);
 
     int32_t Skip = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
     int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
@@ -581,40 +525,9 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
 
     typedef std::optional<std::vector<String>> StringVec;
 
-    StringVec PrototypeIds;
-
-    if (Ids.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Ids->Size(); ++i)
-        {
-            Vals.push_back(Ids->operator[](i));
-        }
-
-        PrototypeIds = std::move(Vals);
-    }
-
-    std::optional<String> ParentPrototypeId;
-
-    if (ParentId.HasValue())
-    {
-        ParentPrototypeId = *ParentId;
-    }
-
-    StringVec PrototypeNames;
-
-    if (Names.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Names->Size(); ++i)
-        {
-            Vals.push_back(Names->operator[](i));
-        }
-
-        PrototypeNames = std::move(Vals);
-    }
+    StringVec PrototypeIds = Convert(Ids);
+    std::optional<String> ParentPrototypeId = Convert(ParentId);
+    StringVec PrototypeNames = Convert(Names);
 
     StringVec PrototypeTypes;
 
@@ -630,33 +543,8 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
         PrototypeTypes = std::move(Vals);
     }
 
-    StringVec PrototypeTags;
-
-    if (Tags.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < Tags->Size(); ++i)
-        {
-            Vals.push_back(Tags->operator[](i));
-        }
-
-        PrototypeTags = std::move(Vals);
-    }
-
-    StringVec GroupIds;
-
-    if (SpaceIds.HasValue())
-    {
-        std::vector<String> Vals;
-
-        for (size_t i = 0; i < SpaceIds->Size(); ++i)
-        {
-            Vals.push_back(SpaceIds->operator[](i));
-        }
-
-        GroupIds = std::move(Vals);
-    }
+    StringVec PrototypeTags = Convert(Tags);
+    StringVec GroupIds = Convert(SpaceIds);
 
     int32_t Skip = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
     int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
