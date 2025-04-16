@@ -177,7 +177,7 @@ private:
     void DeserializeValue(float& Value) const;
     void DeserializeValue(double& Value) const;
     void DeserializeValue(csp::common::String& Value) const;
-    void DeserializeValue(const char*& Value) const;
+    void DeserializeValue(const char* Value) const;
 
     template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
     template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
