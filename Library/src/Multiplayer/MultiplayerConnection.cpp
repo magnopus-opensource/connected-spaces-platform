@@ -286,9 +286,6 @@ auto MultiplayerConnection::RequestClientId()
         auto ClientIdRequestedEvent = std::make_shared<async::event_task<uint64_t>>();
         auto ClientIdRequestedContinuation = ClientIdRequestedEvent->get_task();
 
-        async::event_task<uint64_t> OnCompleteEvent;
-        async::task<uint64_t> OnCompleteTask = OnCompleteEvent.get_task();
-
         if (Connection == nullptr || !Connected)
         {
             throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::RequestClientId, Error not connected.");
@@ -465,21 +462,22 @@ async::task<void> MultiplayerConnection::Start() const
         csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.");
     }
 
-    async::event_task<void> OnCompleteEvent;
-    async::task<void> OnCompleteTask = OnCompleteEvent.get_task();
+    // Shared pointer to keep alive in local callback
+    auto OnCompleteEvent = std::make_shared<async::event_task<void>>();
+    async::task<void> OnCompleteTask = OnCompleteEvent->get_task();
 
     Connection->Start(
-        [&OnCompleteEvent](std::exception_ptr exception)
+        [OnCompleteEvent](std::exception_ptr exception)
         {
             if (exception)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(exception);
-                OnCompleteEvent.set_exception(
+                OnCompleteEvent->set_exception(
                     std::make_exception_ptr(ErrorCodeException(Error, "MultiplayerConnection::Start, Error when starting SignalR connection.")));
                 return;
             }
 
-            OnCompleteEvent.set();
+            OnCompleteEvent->set();
         });
 
     return OnCompleteTask;
