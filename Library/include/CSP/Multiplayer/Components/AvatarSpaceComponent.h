@@ -229,7 +229,7 @@ public:
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
     ///       When 0 the avatar is fully walking, when 100 the avatar is fully running.
     /// @return The percentage of the blending between walk and run states.
-    const float GetWalkRunBlendPercentage() const;
+    float GetWalkRunBlendPercentage() const;
 
     /// @brief Sets blending between walk and run states expressed in percentage.
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
@@ -243,7 +243,7 @@ public:
     ///       The greater the difference, the further the torso should be twisted.
     ///       Positive value if the torso is turning right, negative if avatar is turning left.
     /// @return The angle to use to twist the avatar's torso.
-    const float GetTorsoTwistAlpha() const;
+    float GetTorsoTwistAlpha() const;
 
     /// @brief Sets the angle to use to twist the avatar's torso.
     /// @note To calculate the twist of the avatar torso, it is convention to evaluate the

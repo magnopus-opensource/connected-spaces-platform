@@ -151,7 +151,7 @@ void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation), Value);
 }
 
-const float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
+float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
 {
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage));
 }
@@ -161,7 +161,7 @@ void AvatarSpaceComponent::SetWalkRunBlendPercentage(float Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage), Value);
 }
 
-const float AvatarSpaceComponent::GetTorsoTwistAlpha() const
+float AvatarSpaceComponent::GetTorsoTwistAlpha() const
 {
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha));
 }

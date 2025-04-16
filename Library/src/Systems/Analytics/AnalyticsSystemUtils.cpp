@@ -56,7 +56,7 @@ int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameter
 
 const csp::common::String& AnalyticsEvent::GetString(csp::common::String Key) const { return Parameters[Key].GetString(); }
 
-const float AnalyticsEvent::GetFloat(csp::common::String Key) const { return Parameters[Key].GetFloat(); }
+float AnalyticsEvent::GetFloat(csp::common::String Key) const { return Parameters[Key].GetFloat(); }
 
 bool AnalyticsEvent::GetBool(csp::common::String Key) const { return Parameters[Key].GetBool(); }
 

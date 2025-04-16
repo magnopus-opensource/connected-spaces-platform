@@ -100,7 +100,7 @@ int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
     return 0;
 }
 
-const float ComponentBase::GetFloatProperty(uint32_t Key) const
+float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 

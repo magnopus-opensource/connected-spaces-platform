@@ -36,7 +36,7 @@ public:
 
     int64_t GetInt(csp::common::String Key) const;
     const csp::common::String& GetString(csp::common::String Key) const;
-    const float GetFloat(csp::common::String Key) const;
+    float GetFloat(csp::common::String Key) const;
     bool GetBool(csp::common::String Key) const;
 
     const csp::common::String& GetTag() const;
