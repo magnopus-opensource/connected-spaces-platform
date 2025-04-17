@@ -82,28 +82,19 @@ namespace
         };
     }
 
-    std::function<AssetCollectionResult(const AssetCollectionResult& Result)> SetMessageAssetCollection(
-        std::shared_ptr<systems::AssetCollection> OutAssetCollection)
+    std::function<void(const AssetCollectionResult& Result)> SetMessageAssetCollection(std::shared_ptr<systems::AssetCollection> OutAssetCollection)
     {
-        return [OutAssetCollection](const AssetCollectionResult& Result) mutable
-        {
-            *OutAssetCollection = Result.GetAssetCollection();
-            return Result;
-        };
+        return [OutAssetCollection](const AssetCollectionResult& Result) { *OutAssetCollection = Result.GetAssetCollection(); };
     }
 
-    std::function<AssetResult(const AssetResult& Result)> SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
+    std::function<void(const AssetResult& Result)> SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
     {
-        return [OutAsset](const systems::AssetResult& Result) mutable
-        {
-            *OutAsset = Result.GetAsset();
-            return Result;
-        };
+        return [OutAsset](const systems::AssetResult& Result) { *OutAsset = Result.GetAsset(); };
     }
 
-    std::function<Asset(const AssetsResult& Result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
+    std::function<void(const AssetsResult& Result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
     {
-        return [OutAsset](const systems::AssetsResult& Result) mutable
+        return [OutAsset](const systems::AssetsResult& Result)
         {
             if (Result.GetAssets().Size() == 1)
             {
@@ -114,19 +105,16 @@ namespace
                 CSP_LOG_ERROR_MSG("Result didn't contain a valid asset.");
                 throw async::task_canceled();
             }
-
-            return *OutAsset;
         };
     }
 
-    std::function<async::task<UriResult>(const AssetResult& Result)> UploadAnnotationAssetData(AssetSystem* AssetSystem,
-        std::shared_ptr<systems::AssetCollection> Collection, const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
+    std::function<async::task<UriResult>()> UploadAnnotationAssetData(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection,
+        std::shared_ptr<systems::Asset> Asset, const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
     {
-        return [AssetSystem, Data, Collection, FileName](const AssetResult& Result)
+        return [AssetSystem, Collection, Asset, Data, FileName]()
         {
-            Asset UploadAsset = Result.GetAsset();
-            UploadAsset.FileName = FileName;
-            return AssetSystem->UploadAssetDataEx(*Collection, UploadAsset, Data, csp::common::CancellationToken::Dummy());
+            Asset->FileName = FileName;
+            return AssetSystem->UploadAssetDataEx(*Collection, *Asset, Data, csp::common::CancellationToken::Dummy());
         };
     }
 
@@ -178,13 +166,9 @@ namespace
         };
     }
 
-    std::function<UriResult(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> Asset)
+    std::function<void(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> Asset)
     {
-        return [Asset](const UriResult& Result)
-        {
-            Asset->Uri = Result.GetUri();
-            return Result;
-        };
+        return [Asset](const UriResult& Result) { Asset->Uri = Result.GetUri(); };
     }
 
     std::function<async::task<AssetCollectionResult>(const csp::common::Map<csp::common::String, csp::common::String>& Metadata)>
@@ -817,10 +801,10 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved message asset collection",
             "Failed to get message asset collection.", {}, {}, {}))
         .then(ValidateAnnotationMetadata())
-        .then(SetMessageAssetCollection(ConversationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
             {}, {}))
+
         // 3. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
@@ -873,7 +857,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             {}, {}))
         .then(SetAnnotationAsset(AnnotationAsset))
         // 3. Upload Annotation asset data
-        .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, Annotation, UniqueAnnotationAssetFileName))
+        .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation asset data",
             "Failed to upload annotation asset data.", {}, {}, {}))
@@ -885,7 +869,8 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
         .then(SetAnnotationAsset(AnnotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
-        .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+        .then(UploadAnnotationAssetData(
+            AssetSystem, ConversationAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation thumbnail asset data",
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
@@ -962,9 +947,9 @@ void ConversationSystemInternal::GetAnnotation(
             {}, {}, {}))
         .then(ValidateMessageAssetCollection(ConversationId))
         .then(ValidateAnnotationMetadata())
-        .then(SetMessageAssetCollection(MessageAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
@@ -1016,7 +1001,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
         .then(SetAnnotationAsset(AnnotationAsset))
         // 3. Upload Annotation asset data
-        .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, Annotation, UniqueAnnotationAssetFileName))
+        .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.", {},
             {}, {}))
@@ -1028,7 +1013,8 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "Failed to create annotation thumbnail asset.", {}, {}, {}))
         .then(SetAnnotationAsset(AnnotationThumbnailAsset))
         // 5. Upload Annotation thumbnail asset data
-        .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+        .then(UploadAnnotationAssetData(
+            AssetSystem, MessageAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
             "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
