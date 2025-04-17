@@ -381,8 +381,12 @@ public:
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
+    /// @brief gets the annotation thumbnails that exist within the conversation.
+    /// @return const csp::common::Map<csp::common::String, csp::systems::Asset>&
     const csp::common::Map<csp::common::String, csp::systems::Asset>& GetAnnotationThumbnailAssetsMap() const;
 
+    /// @brief Gets the number of asset thumbnails returned from GetAnnotationThumbnailAssetsMap.
+    /// @return uint64_t
     uint64_t GetTotalCount() const;
 
     CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
