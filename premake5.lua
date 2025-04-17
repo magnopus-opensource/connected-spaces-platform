@@ -8,7 +8,7 @@ include "Library/premake5.lua"
 -- The root premake script for CSP.
 -- Windows and Android builds require a Windows workstation.
 -- iOS, VisionOS and MacOS require a MacOS workstation.
--- Just Testing 1
+-- Just Testing 2
 --Custom build options
 newoption {
     trigger     = "generate_wasm",
