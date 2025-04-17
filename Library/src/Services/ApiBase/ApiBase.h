@@ -232,8 +232,6 @@ public:
         csp::web::EResponseCodes InValidResponseCode = csp::web::EResponseCodes::ResponseOK,
         async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
     {
-        // TODO: Ensure InCallback is a callable type with the correct arguments
-
         // This gets owned by the HttpRequest and gets deleted in it's destructor once the request is complete
         ResponseHandlerPtr Handler = CSP_NEW ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
             InCallback, InDepend, InValidResponseCode, std::move(InOnResponseEventTask));
