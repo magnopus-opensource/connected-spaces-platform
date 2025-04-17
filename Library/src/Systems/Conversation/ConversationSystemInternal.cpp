@@ -303,7 +303,7 @@ namespace
         };
     }
 
-    std::function<std::map<std::string, std::string>(const AssetCollectionsResult&)> GetAnnotationAssetIdsFromCollections()
+    std::function<std::unordered_map<std::string, std::string>(const AssetCollectionsResult&)> GetAnnotationAssetIdsFromCollections()
     {
         return [](const AssetCollectionsResult& Result)
         {
@@ -319,9 +319,9 @@ namespace
         };
     }
 
-    std::function<async::task<AssetsResult>(const std::map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
+    std::function<async::task<AssetsResult>(const std::unordered_map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
     {
-        return [AssetSystem](const std::map<std::string, std::string>& Result)
+        return [AssetSystem](const std::unordered_map<std::string, std::string>& Result)
         {
             csp::common::Array<csp::common::String> MessageIds(Result.size());
             csp::common::Array<csp::common::String> AssetIds(Result.size());

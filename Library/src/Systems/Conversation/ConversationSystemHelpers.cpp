@@ -219,9 +219,9 @@ bool HasAnnotationMetadata(const AssetCollection& MessageAssetCollection)
     return MetadataMap.HasKey(ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID);
 }
 
-std::map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(const AssetCollectionsResult& Result)
+std::unordered_map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(const AssetCollectionsResult& Result)
 {
-    std::map<std::string, std::string> ThumbnailAssetIds;
+    std::unordered_map<std::string, std::string> ThumbnailAssetIds;
 
     for (const auto& Collection : Result.GetAssetCollections())
     {

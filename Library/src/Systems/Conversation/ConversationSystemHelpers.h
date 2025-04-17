@@ -56,7 +56,8 @@ namespace ConversationSystemHelpers
     multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
     multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const AssetCollection& MessageAssetCollection);
     bool HasAnnotationMetadata(const AssetCollection& MessageAssetCollection);
-    CSP_NO_EXPORT std::map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(const AssetCollectionsResult& Result);
+    CSP_NO_EXPORT std::unordered_map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(
+        const AssetCollectionsResult& Result);
 
     csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params);
 }
