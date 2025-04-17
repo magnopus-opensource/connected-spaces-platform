@@ -111,7 +111,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnection->StopListening(
-        [this, MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        [MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
             {
@@ -121,7 +121,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
             CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [this, MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
                 {
                     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
@@ -136,7 +136,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
                     MultiplayerConnection->StartListening()()
                         .then(async::inline_scheduler(),
-                            [this, RefreshMultiplayerContinuationEvent]()
+                            [RefreshMultiplayerContinuationEvent]()
                             {
                                 CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
@@ -1599,7 +1599,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     return;
                 }
 
-                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult, AssetSystem](const NullResult& DeleteAssetCollResult)
+                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
                 {
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::InProgress)
                     {

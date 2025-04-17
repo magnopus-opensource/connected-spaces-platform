@@ -253,7 +253,7 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 
     const MessageResultCallback MessageResultCallback = [Callback, ConversationId, this](const MessageResult& MessageResultCallbackResult)
     {
-        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error)
+        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult](ErrorCode Error)
         {
             if (Error != ErrorCode::None)
             {

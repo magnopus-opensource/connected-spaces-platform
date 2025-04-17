@@ -339,7 +339,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 {
     const auto& Children = Entity->ChildEntities;
 
-    const std::function LocalCallback = [this, Callback, Children](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
+    const std::function LocalCallback = [Callback](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
     {
         try
         {
@@ -623,7 +623,7 @@ void SpaceEntitySystem::BindOnRequestToSendObject()
 void SpaceEntitySystem::BindOnRequestToDisconnect() const
 {
     Connection->On("OnRequestToDisconnect",
-        [this](const signalr::value& Params)
+        [](const signalr::value& Params)
         {
             const std::string Reason = Params.as_array()[0].as_string();
 
