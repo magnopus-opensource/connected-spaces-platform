@@ -8,9 +8,15 @@ let CHS_ENDPOINT_ROOT = "https://ogs-internal.magnopus-dev.cloud";
 let TENANT = "OKO_TESTS";
 
 //Initialize CSPFoundation before the tests run
-let USE_DEBUG_CSP = true
+//True if USE_RELEASE_CSP is not set, false otherwise. Idea here is we want debug to be the default mode.
+const USE_DEBUG_CSP: boolean = process.env.USE_RELEASE_CSP === undefined;
 
 test.before(async () => {
+  console.log(
+      USE_DEBUG_CSP
+        ? "Running with Debug CSP"
+        : "Running with Release CSP"
+    );
   await ready(USE_DEBUG_CSP);
 });
 
