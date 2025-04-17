@@ -179,6 +179,8 @@ public:
     /// @param Callback csp::multiplayer::NumberOfRepliesResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
+    /// @pre The conversation must have an annotation previously attached using SetConversationAnnotation.
+    /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetConversationAnnotation(AnnotationResultCallback Callback);
 
     /// @brief Associates an annotation with the root message in the conversation.
@@ -206,7 +208,7 @@ public:
     /// @param Callback csp::multiplayer::AnnotationResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
-    /// @pre The message must have a valid annotation attached.
+    /// @pre The message must have an annotation previously attached using SetAnnotation.
     /// A CSP error will be logged if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback);
 
