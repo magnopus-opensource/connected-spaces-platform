@@ -24,6 +24,8 @@
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
+#include <unordered_map>
+
 namespace csp::multiplayer
 {
 
