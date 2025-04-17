@@ -211,6 +211,112 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
     ConversationSystem->GetNumberOfReplies(ConversationId, Callback);
 }
 
+void ConversationSpaceComponent::GetConversationAnnotation(multiplayer::AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetConversationAnnotation(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::AnnotationUpdateParams& AnnotationParams,
+    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    multiplayer::AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->SetConversationAnnotation(
+        ConversationId, AnnotationParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
+}
+
+void ConversationSpaceComponent::DeleteConversationAnnotation(systems::NullResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteConversationAnnotation(ConversationId, Callback);
+}
+
+void ConversationSpaceComponent::GetAnnotation(const csp::common::String& MessageId, AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetAnnotation(ConversationId, MessageId, Callback);
+}
+
+void ConversationSpaceComponent::SetAnnotation(const csp::common::String& MessageId, const multiplayer::AnnotationUpdateParams& UpdateParams,
+    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    multiplayer::AnnotationResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->SetAnnotation(
+        ConversationId, MessageId, UpdateParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
+}
+
+void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeleteAnnotation(ConversationId, MessageId, Callback);
+}
+
+void ConversationSpaceComponent::GetAnnotationThumbnailsForConversation(multiplayer::AnnotationThumbnailCollectionResultCallback Callback)
+{
+    const common::String& ConversationId = GetConversationId();
+
+    if (EnsureValidConversationId(ConversationId) == false)
+    {
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationThumbnailCollectionResult>());
+        return;
+    }
+
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->GetAnnotationThumbnailsForConversation(ConversationId, Callback);
+}
+
 void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
 {
     ConversationUpdateCallback = Callback;
