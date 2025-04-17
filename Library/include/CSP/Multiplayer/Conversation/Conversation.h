@@ -337,8 +337,16 @@ public:
     CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
     CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
 
+    /// @brief Gets the information about the annotation.
+    /// @return const AnnotationData&
     const AnnotationData& GetAnnotationData() const;
+
+    /// @brief Gets the asset containing the annotation data.
+    /// @return const csp::systems::Asset&
     const csp::systems::Asset& GetAnnotationAsset() const;
+
+    /// @brief Gets the asset containing the annotation thumbnail data.
+    /// @return const csp::systems::Asset&
     const csp::systems::Asset& GetAnnotationThumbnailAsset() const;
 
 private:
