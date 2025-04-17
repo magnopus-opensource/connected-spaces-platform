@@ -804,7 +804,7 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
             {}, {}))
-
+        .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Get annotation asset
         .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
         .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
