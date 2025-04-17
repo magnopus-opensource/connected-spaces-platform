@@ -70,7 +70,7 @@ namespace
 
     std::function<AssetCollectionResult(const AssetCollectionResult& Result)> ValidateMessageAssetCollection(common::String ConversationId)
     {
-        return [ConversationId](const AssetCollectionResult& Result) mutable
+        return [ConversationId](const AssetCollectionResult& Result)
         {
             if (Result.GetAssetCollection().ParentId != ConversationId)
             {
