@@ -198,9 +198,9 @@ namespace
             std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
                 const_cast<common::Array<common::String>*>(Metadata.Keys()), Deleter);
 
-            for (int i = 0; i < Keys->Size(); ++i)
+            for (const auto& Key : *Keys)
             {
-                NewMetadata[(*Keys)[i]] = Metadata[(*Keys)[i]];
+                NewMetadata[Key] = Metadata[Key];
             }
 
             return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
