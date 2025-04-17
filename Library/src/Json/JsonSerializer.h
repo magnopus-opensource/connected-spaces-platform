@@ -132,7 +132,7 @@ public:
     /// If the member is another custom type, this was internally call FromJson on that type.
     /// @param Key const char* : The key which references this member.
     /// @param Val T& : The member to deserialize to.
-    template <typename T> const void DeserializeMember(const char* Key, T& Val) const
+    template <typename T> void DeserializeMember(const char* Key, T& Val) const
     {
         ValueStack.push(&(*ValueStack.top())[Key]);
         DeserializeValue(Val);
@@ -177,7 +177,6 @@ private:
     void DeserializeValue(float& Value) const;
     void DeserializeValue(double& Value) const;
     void DeserializeValue(csp::common::String& Value) const;
-    void DeserializeValue(const char* Value) const;
 
     template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
     template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;

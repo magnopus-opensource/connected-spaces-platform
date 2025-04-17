@@ -136,7 +136,7 @@ SpaceEntity::~SpaceEntity()
 {
     auto& Keys = *Components.Keys();
 
-    auto i = 0;
+    size_t i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
         CSP_DELETE(Components[Keys[i]]);
@@ -338,7 +338,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
     }
 }
 
-const csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
+csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -420,11 +420,11 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
+ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
     std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
 
-    if (Type == ComponentType::ScriptData)
+    if (AddType == ComponentType::ScriptData)
     {
         ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData, true);
 
@@ -438,7 +438,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
     }
 
     auto ComponentId = GenerateComponentId();
-    auto* Component = InstantiateComponent(ComponentId, Type);
+    auto* Component = InstantiateComponent(ComponentId, AddType);
 
     // If Component is null, component has not been instantiated, so is skipped.
     if (Component != nullptr)
@@ -523,7 +523,7 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            int i = 0;
+            size_t i = 0;
             for (i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 if (DirtyComponents[DirtyComponentKeys[i]].Component != nullptr)
@@ -580,7 +580,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            for (int i = 0; i < DirtyComponentKeys.Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 auto* Component = DirtyComponents[DirtyComponentKeys[i]].Component;
 
@@ -633,18 +633,18 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
             {
                 Deserialiser.EnterComponent(ComponentId, _ComponentType);
                 {
-                    auto Type = (ComponentType)_ComponentType;
+                    auto CompType = (ComponentType)_ComponentType;
 
-                    if (Type != ComponentType::Invalid)
+                    if (CompType != ComponentType::Invalid)
                     {
-                        auto* Component = InstantiateComponent(ComponentId, Type);
+                        auto* Component = InstantiateComponent(ComponentId, CompType);
 
                         // if Component == nullptr component has not been instantiated, so is skipped.
                         if (Component != nullptr)
                         {
                             Components[ComponentId] = Component;
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -776,7 +776,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                         {
                             auto* Component = Components[ComponentKey];
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -793,7 +793,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                             // if Component != nullptr component has not been Instantiate, so is skipped.
                             if (Component != nullptr)
                             {
-                                for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                                for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                                 {
                                     uint64_t PropertyKey;
                                     auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -854,7 +854,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
 
-            for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
             {
                 uint16_t ComponentKey = DirtyComponentKeys->operator[](i);
 
@@ -881,7 +881,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     /*const csp::common::Map<uint32_t, ReplicatedValue> DirtyComponentProperties = DirtyComponents[i].Component->DirtyProperties;
                     const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys			  = DirtyComponentProperties.Keys();
 
-                    for (int j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
+                    for (size_t j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
                     {
                             uint32_t PropertyKey							  = DirtyComponentPropertyKeys->operator[](j);
                             Components[ComponentKey]->Properties[PropertyKey] = DirtyComponentProperties[PropertyKey];
@@ -907,7 +907,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             const csp::common::Array<uint16_t>* DirtyViewKeys = DirtyProperties.Keys();
 
-            for (int i = 0; i < DirtyViewKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyViewKeys->Size(); ++i)
             {
                 uint16_t PropertyKey = DirtyViewKeys->operator[](i);
                 switch (PropertyKey)
@@ -953,7 +953,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             DirtyComponentKeys = DirtyComponents.Keys();
 
-            for (int i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+            for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
             {
                 if (Components.HasKey(TransientDeletionComponentIds[i]))
                 {
@@ -990,31 +990,31 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 
 uint16_t SpaceEntity::GenerateComponentId()
 {
-    auto Id = NextComponentId;
+    auto NextId = NextComponentId;
 
     for (;;)
     {
-        if (!Components.HasKey(Id) && !DirtyComponents.HasKey(Id))
+        if (!Components.HasKey(NextId) && !DirtyComponents.HasKey(NextId))
         {
-            NextComponentId = Id + 1;
+            NextComponentId = NextId + 1;
 
-            return Id;
+            return NextId;
         }
 
-        ++Id;
+        ++NextId;
 
-        if (Id == COMPONENT_KEY_END_COMPONENTS)
+        if (NextId == COMPONENT_KEY_END_COMPONENTS)
         {
-            Id = COMPONENT_KEY_START_COMPONENTS;
+            NextId = COMPONENT_KEY_START_COMPONENTS;
         }
     }
 }
 
-ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type)
+ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, ComponentType InstantiateType)
 {
     ComponentBase* Component;
 
-    switch (Type)
+    switch (InstantiateType)
     {
     case ComponentType::StaticModel:
         Component = CSP_NEW StaticModelSpaceComponent(this);
@@ -1087,12 +1087,13 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
         break;
     default:
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning, csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
+        CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+            csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
         return nullptr;
     }
     }
 
-    Component->Id = Id;
+    Component->Id = InstantiateId;
 
     return Component;
 }
@@ -1104,7 +1105,7 @@ void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBas
         auto& Properties = Component->Properties;
         const auto& Keys = Properties.Keys();
 
-        for (int j = 0; j < Keys->Size(); ++j)
+        for (size_t j = 0; j < Keys->Size(); ++j)
         {
             auto& Key = Keys->operator[](j);
             auto& Property = Properties[Key];
@@ -1206,16 +1207,16 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents) const
+ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, bool SearchDirtyComponents) const
 {
     const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
     ComponentBase* LocatedComponent = nullptr;
 
-    for (int i = 0; i < ComponentKeys->Size(); ++i)
+    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         ComponentBase* Component = Components[ComponentKeys->operator[](i)];
 
-        if (Component->GetComponentType() == Type)
+        if (Component->GetComponentType() == FindType)
         {
             LocatedComponent = Component;
             break;
@@ -1228,11 +1229,11 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
     {
         const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
 
-        for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
         {
             const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
 
-            if (Component.UpdateType != ComponentUpdateType::Delete && Component.Component->GetComponentType() == Type)
+            if (Component.UpdateType != ComponentUpdateType::Delete && Component.Component->GetComponentType() == FindType)
             {
                 LocatedComponent = Component.Component;
                 break;

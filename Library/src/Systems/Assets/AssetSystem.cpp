@@ -175,7 +175,7 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 
         auto* Keys = Metadata->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = Metadata->operator[](Key);
@@ -848,7 +848,7 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
     std::vector<String> Ids;
 
-    for (int i = 0; i < AssetCollectionIds.Size(); ++i)
+    for (size_t i = 0; i < AssetCollectionIds.Size(); ++i)
     {
         Ids.push_back(AssetCollectionIds[i]);
     }
@@ -995,13 +995,13 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
         }
 
         // UpdateAsset
-        auto UpdateAssetCallback = [this, AssetCollection, Callback, Assets](const AssetResult& Result) { INVOKE_IF_NOT_NULL(Callback, Result); };
+        auto UpdateAssetCallback = [AssetCollection, Callback, Assets](const AssetResult& Result) { INVOKE_IF_NOT_NULL(Callback, Result); };
 
         // Add new LOD style
         Asset NewAsset = InAsset;
         Array<String> NewStyles(NewAsset.Styles.Size() + 1);
 
-        for (int i = 0; i < NewAsset.Styles.Size(); ++i)
+        for (size_t i = 0; i < NewAsset.Styles.Size(); ++i)
         {
             NewStyles[i] = NewAsset.Styles[i];
         }
@@ -1049,7 +1049,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::sys
             // Serialse material data.
             SerializeMaterialOfType(ShaderType, NewlyCreatedMaterial, MaterialJson);
 
-            auto UploadMaterialCallback = [this, Callback, NewlyCreatedMaterial, SpaceId, Name](const UriResult& UploadResult)
+            auto UploadMaterialCallback = [Callback, NewlyCreatedMaterial, SpaceId, Name](const UriResult& UploadResult)
             {
                 if (UploadResult.GetResultCode() == EResultCode::InProgress)
                 {
@@ -1122,8 +1122,8 @@ void AssetSystem::UpdateMaterial(const Material& Material, NullResultCallback Ca
             }
 
             // 3. Upload material
-            auto UploadMaterialCallback = [this, Callback, &Material](const UriResult& UploadResult)
-            { Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode())); };
+            auto UploadMaterialCallback
+                = [Callback](const UriResult& UploadResult) { Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode())); };
 
             csp::common::String MaterialJson;
 
@@ -1160,7 +1160,7 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
         }
 
         // 2. Delete asset collection
-        auto DeleteAssetCollectionCB = [this, Callback](const NullResult& DeleteAssetCollectionResult) { Callback(DeleteAssetCollectionResult); };
+        auto DeleteAssetCollectionCB = [Callback](const NullResult& DeleteAssetCollectionResult) { Callback(DeleteAssetCollectionResult); };
 
         DeleteAssetCollectionById(Material.GetMaterialCollectionId(), DeleteAssetCollectionCB);
     };
@@ -1229,7 +1229,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                     return;
                 }
 
-                auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, ShaderType, DownloadedMaterials,
+                auto DownloadMaterialCallback = [Callback, AssetsToDownload, i, AssetCollectionId, AssetId, ShaderType, DownloadedMaterials,
                                                     AssetsDownloaded, Failed](const AssetDataResult& DownloadResult)
                 {
                     // Return early as one of the calls has already failed
@@ -1318,7 +1318,7 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
             // 3. Download material
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
 
-            auto DownloadMaterialCallback = [this, Callback, FoundAssetCollection, FoundAsset](const AssetDataResult& DownloadResult)
+            auto DownloadMaterialCallback = [Callback, FoundAssetCollection, FoundAsset](const AssetDataResult& DownloadResult)
             {
                 if (DownloadResult.GetResultCode() != EResultCode::Success)
                 {

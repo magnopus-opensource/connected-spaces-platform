@@ -506,7 +506,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     bool FoundSecond = false;
     bool FoundUnexpected = false;
 
-    for (auto i = 0; i < Events.Size(); ++i)
+    for (size_t i = 0; i < Events.Size(); ++i)
     {
         auto Event = Result.GetTicketedEvents()[i];
 
@@ -590,7 +590,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     bool FoundSecond = false;
     bool FoundUnexpected = false;
 
-    for (auto i = 0; i < Events.Size(); ++i)
+    for (size_t i = 0; i < Events.Size(); ++i)
     {
         auto Event = Result.GetTicketedEvents()[i];
 

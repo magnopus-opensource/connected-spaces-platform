@@ -80,7 +80,7 @@ public:
     void Deallocate(void* Ptr) override;
     void Deallocate(void* Ptr, size_t Bytes) override;
 
-    const size_t GetAllocatedBytes() const override;
+    size_t GetAllocatedBytes() const override;
 
 private:
     std::atomic<size_t> AllocatedBytes;
@@ -97,7 +97,7 @@ template <typename TLockTrait> StandardAllocator<TLockTrait>::~StandardAllocator
 
 template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n) { return Allocate(n, CSP_ALLOCATOR_MIN_ALIGNMENT); }
 
-template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n, std::align_val_t alignment)
+template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n, [[maybe_unused]] std::align_val_t alignment)
 {
     AllocatedBytes += n;
 
@@ -135,7 +135,7 @@ template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(v
     return Reallocate(p, n, CSP_ALLOCATOR_MIN_ALIGNMENT);
 }
 
-template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(void* p, size_t n, std::align_val_t alignment)
+template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(void* p, size_t n, [[maybe_unused]] std::align_val_t alignment)
 {
     // TODO increment with the difference between the old allocation and the new one
     // AllocatedBytes += n;
@@ -191,6 +191,6 @@ template <typename TLockTrait> void StandardAllocator<TLockTrait>::Deallocate(vo
     }
 }
 
-template <typename TLockTrait> const size_t StandardAllocator<TLockTrait>::GetAllocatedBytes() const { return AllocatedBytes; }
+template <typename TLockTrait> size_t StandardAllocator<TLockTrait>::GetAllocatedBytes() const { return AllocatedBytes; }
 
 } // namespace csp::memory

@@ -158,7 +158,7 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 
 void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys, const Optional<String>& InKeyRegex,
     const Optional<String>& InReferenceType, const Array<String>& InReferenceIds,
-    const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequencesResultCallback Callback)
+    const csp::common::Map<csp::common::String, csp::common::String>& /*MetaData*/, SequencesResultCallback Callback)
 {
     Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
     for (size_t i = 0; i < InSequenceKeys.Size(); i++)

@@ -56,7 +56,7 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
         const auto& Tags = Dto.GetTags();
         POI.Tags = csp::common::Array<csp::common::String>(Tags.size());
 
-        for (int idx = 0; idx < Tags.size(); ++idx)
+        for (size_t idx = 0; idx < Tags.size(); ++idx)
         {
             POI.Tags[idx] = Tags[idx];
         }

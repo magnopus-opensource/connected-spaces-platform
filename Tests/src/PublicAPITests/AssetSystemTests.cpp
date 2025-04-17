@@ -39,8 +39,6 @@ using namespace csp::multiplayer;
 
 namespace
 {
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -184,7 +182,7 @@ void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetColl
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset)
+void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& /*AssetCollection*/, csp::systems::Asset& Asset)
 {
     auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Asset).Await(RequestPredicate);
 
@@ -313,7 +311,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
@@ -389,7 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
     bool Found1 = false, Found2 = false;
 
-    for (int i = 0; i < AssetCollections.Size(); ++i)
+    for (size_t i = 0; i < AssetCollections.Size(); ++i)
     {
         auto& AssetCollection = AssetCollections[i];
 
@@ -429,7 +426,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -490,12 +486,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -552,7 +546,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
     const char* TestExternalUri = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb";
     const char* TestExternalMimeType = "model/gltf-binary";
     char UniqueSpaceName[256];
@@ -675,7 +668,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
     bool Found1 = false, Found2 = false, Found3 = false;
 
-    for (int i = 0; i < Assets.Size(); ++i)
+    for (size_t i = 0; i < Assets.Size(); ++i)
     {
         auto& Asset = Assets[i];
 
@@ -811,7 +804,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 
         const auto& RetrievedAssetCollections = Result.GetAssetCollections();
 
-        for (int idx = 0; idx < RetrievedAssetCollections.Size(); ++idx)
+        for (size_t idx = 0; idx < RetrievedAssetCollections.Size(); ++idx)
         {
             auto& CurrentAsset = RetrievedAssetCollections[idx];
 
@@ -927,7 +920,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
         const auto& RetrievedAssets = Result.GetAssets();
 
-        for (int idx = 0; idx < RetrievedAssets.Size(); ++idx)
+        for (size_t idx = 0; idx < RetrievedAssets.Size(); ++idx)
         {
             auto& CurrentAsset = RetrievedAssets[idx];
 
@@ -1216,7 +1209,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
     auto FilePath = std::filesystem::absolute("assets/Incorrect_File.jpg");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
-    const csp::common::String& FileMimeType = "image/jpeg";
 
     // Upload data
     auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
@@ -1760,7 +1752,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     csp::common::Array<csp::common::String> Tags = { "tag-test" };
@@ -1958,8 +1949,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1990,7 +1979,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2077,7 +2066,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;

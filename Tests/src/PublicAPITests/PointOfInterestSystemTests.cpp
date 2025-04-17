@@ -226,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
         const auto& ResultPOIs = Result.GetPOIs();
         POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
 
-        for (int idx = 0; idx < ResultPOIs.Size(); ++idx)
+        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
         {
             POICollection[idx] = ResultPOIs[idx];
         }
@@ -237,7 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     bool POIFound = false;
 
-    for (int idx = 0; idx < POICollection.Size(); ++idx)
+    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
     {
         if (POICollection[idx].Name == PointOfInterest.Name)
         {
@@ -315,7 +315,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
     const char* TestSpaceName = "CSP-TEST-SPACE";
     const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
-    const char* TestAssetCollectionName = "CSP-TEST-ASSETCOLLECTION";
 
     // The default POI we will be using during the test.
     csp::systems::PointOfInterest DefaultPOI;

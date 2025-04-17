@@ -270,7 +270,7 @@ void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiR
         std::vector<chs_users::GroupInviteDto>& PendingInvitesArray = PendingInvitesResponse->GetArray();
         PendingInvitesEmailAddresses = Array<String>(PendingInvitesArray.size());
 
-        for (auto idx = 0; idx < PendingInvitesArray.size(); ++idx)
+        for (size_t idx = 0; idx < PendingInvitesArray.size(); ++idx)
         {
             PendingInvitesEmailAddresses[idx] = PendingInvitesArray[idx].GetEmail();
         }
@@ -297,7 +297,7 @@ void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* Api
         std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
         AcceptedInvitesUserIds = Array<String>(AcceptedInvitesArray.size());
 
-        for (auto idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
+        for (size_t idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
         {
             if (AcceptedInvitesArray[idx].HasId())
             {
@@ -315,7 +315,7 @@ void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& I
 
 void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
 
-const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
+bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
 
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return GeoLocation; }
 
@@ -336,7 +336,7 @@ void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, 
         const auto& GeoFence = Dto.GetGeofence();
         GeoLocation.GeoFence = csp::common::Array<csp::systems::GeoLocation>(GeoFence.size());
 
-        for (int idx = 0; idx < GeoFence.size(); ++idx)
+        for (size_t idx = 0; idx < GeoFence.size(); ++idx)
         {
             csp::systems::GeoLocation GeoFenceLocation;
             GeoFenceLocation.Latitude = GeoFence[idx]->GetLatitude();
@@ -381,7 +381,7 @@ void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiRespon
         std::vector<chs_spatial::PointOfInterestDto>& POIDtos = GeoLocationPOIsResponse->GetArray();
         GeoLocations = Array<SpaceGeoLocation>(POIDtos.size());
 
-        for (auto idx = 0; idx < POIDtos.size(); ++idx)
+        for (size_t idx = 0; idx < POIDtos.size(); ++idx)
         {
             SpaceGeoLocation GeoLocation;
             GeoLocation.Id = POIDtos[idx].GetId();

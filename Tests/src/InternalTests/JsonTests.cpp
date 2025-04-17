@@ -30,7 +30,6 @@ struct TestObjectProps
     float FloatMember = 0.f;
     float DoubleMember = 0.0;
     csp::common::String StringMember = "";
-    const char* CharPtrMember = "";
 };
 
 void ToJson(JsonSerializer& Serializer, const TestObjectProps& Obj)
@@ -42,7 +41,6 @@ void ToJson(JsonSerializer& Serializer, const TestObjectProps& Obj)
     Serializer.SerializeMember("floatMember", Obj.FloatMember);
     Serializer.SerializeMember("doubleMember", Obj.DoubleMember);
     Serializer.SerializeMember("stringMember", Obj.StringMember);
-    Serializer.SerializeMember("charPtrMember", Obj.CharPtrMember);
 }
 
 void FromJson(const JsonDeserializer& Deserializer, TestObjectProps& Obj)
@@ -54,7 +52,6 @@ void FromJson(const JsonDeserializer& Deserializer, TestObjectProps& Obj)
     Deserializer.DeserializeMember("floatMember", Obj.FloatMember);
     Deserializer.DeserializeMember("doubleMember", Obj.DoubleMember);
     Deserializer.DeserializeMember("stringMember", Obj.StringMember);
-    Deserializer.DeserializeMember("charPtrMember", Obj.CharPtrMember);
 }
 
 struct TestOptionalPropObject
@@ -148,7 +145,6 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonPropertiesTest)
     Obj.FloatMember = 5.f;
     Obj.DoubleMember = 6.0;
     Obj.StringMember = "Test";
-    Obj.CharPtrMember = "Test2";
 
     const csp::common::String result = JsonSerializer::Serialize(Obj);
 
@@ -162,7 +158,6 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonPropertiesTest)
     EXPECT_EQ(Obj.FloatMember, Obj2.FloatMember);
     EXPECT_EQ(Obj.DoubleMember, Obj2.DoubleMember);
     EXPECT_EQ(Obj.StringMember, Obj2.StringMember);
-    EXPECT_TRUE(strcmp(Obj.CharPtrMember, Obj2.CharPtrMember));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonOptionalPropertyTest)

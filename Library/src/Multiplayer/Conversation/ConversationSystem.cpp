@@ -102,7 +102,7 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
     std::shared_ptr<size_t> DeletionCounter(CSP_NEW size_t, DeletionCounterDeleter);
     *DeletionCounter = 0;
 
-    for (auto idx = 0; idx < MessagesCount; ++idx)
+    for (size_t idx = 0; idx < MessagesCount; ++idx)
     {
         const csp::systems::NullResultCallback DeleteCommentCallback = [=](const csp::systems::NullResult& DeleteCommentResult)
         {
@@ -253,7 +253,7 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 
     const MessageResultCallback MessageResultCallback = [Callback, ConversationId, this](const MessageResult& MessageResultCallbackResult)
     {
-        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error)
+        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult](ErrorCode Error)
         {
             if (Error != ErrorCode::None)
             {

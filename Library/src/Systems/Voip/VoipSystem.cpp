@@ -22,7 +22,7 @@ VoipSystem::VoipSystem() { }
 
 VoipSystem::~VoipSystem() { }
 
-void VoipSystem::MuteLocalUser(bool IsMuted)
+void VoipSystem::MuteLocalUser(bool /*IsMuted*/)
 {
     // Not implemented
 }

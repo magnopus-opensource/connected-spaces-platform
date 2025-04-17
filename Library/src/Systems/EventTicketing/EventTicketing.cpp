@@ -274,7 +274,7 @@ void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiRespo
 
 bool SpaceIsTicketedResult::GetIsTicketedEvent() { return SpaceIsTicketed; }
 
-const bool SpaceIsTicketedResult::GetIsTicketedEvent() const { return SpaceIsTicketed; }
+bool SpaceIsTicketedResult::GetIsTicketedEvent() const { return SpaceIsTicketed; }
 
 void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

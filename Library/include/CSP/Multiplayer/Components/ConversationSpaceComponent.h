@@ -147,7 +147,7 @@ public:
     /// @param Value - The new Number Of Replies.
     void SetNumberOfReplies(const int64_t Value);
     /// @brief Gets the Number Of Replies of the conversation.
-    const int64_t GetNumberOfReplies() const;
+    int64_t GetNumberOfReplies() const;
 
 private:
     ConversationSystem* ConversationSystem;

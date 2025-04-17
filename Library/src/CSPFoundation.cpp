@@ -281,15 +281,15 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
 
     const std::string MultiplayerServiceURI = TranslateEndpointRootURIToMultiplayerServiceUri(RootURI);
 
-    EndpointURIs Endpoints;
-    Endpoints.UserServiceURI = CSP_TEXT(UserServiceURI.c_str());
-    Endpoints.PrototypeServiceURI = CSP_TEXT(PrototypeServiceURI.c_str());
-    Endpoints.SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
-    Endpoints.MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
-    Endpoints.AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
-    Endpoints.TrackingServiceURI = CSP_TEXT(TrackingServiceURI.c_str());
+    EndpointURIs EndpointsURI;
+    EndpointsURI.UserServiceURI = CSP_TEXT(UserServiceURI.c_str());
+    EndpointsURI.PrototypeServiceURI = CSP_TEXT(PrototypeServiceURI.c_str());
+    EndpointsURI.SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
+    EndpointsURI.MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
+    EndpointsURI.AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
+    EndpointsURI.TrackingServiceURI = CSP_TEXT(TrackingServiceURI.c_str());
 
-    return Endpoints;
+    return EndpointsURI;
 }
 
 bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
@@ -416,7 +416,7 @@ void Free(void* Pointer) { CSP_FREE(Pointer); }
 
 void* ModuleHandle = nullptr;
 
-void* GetFunctionAddress(const csp::common::String& Name)
+void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
 {
 #if defined(CSP_WASM)
     return nullptr;

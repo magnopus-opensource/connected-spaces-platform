@@ -358,7 +358,7 @@ String String::ToLower() const
     auto Length = Copy.ImplPtr->Length;
     auto Text = Copy.ImplPtr->Text;
 
-    for (int i = 0; i < Length; ++i)
+    for (size_t i = 0; i < Length; ++i)
     {
         Text[i] = static_cast<char>(std::tolower(Text[i]));
     }
@@ -375,7 +375,7 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
 
     size_t Length = 0;
 
-    for (int i = 0; i < Parts.Size(); ++i)
+    for (size_t i = 0; i < Parts.Size(); ++i)
     {
         Length += Parts[i].Length();
     }
@@ -439,7 +439,7 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 
     size_t Length = 0;
 
-    for (int i = 0; i < Parts.size(); ++i)
+    for (size_t i = 0; i < Parts.size(); ++i)
     {
         Length += (Parts.begin() + i)->Length();
     }

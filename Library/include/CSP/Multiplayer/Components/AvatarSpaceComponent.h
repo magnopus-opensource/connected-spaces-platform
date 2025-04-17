@@ -128,7 +128,7 @@ public:
     /// @brief Gets the ID of the mesh of the avatar of this component.
     /// @note  Used to establish which mesh this avatar should use among a collection of predefined meshes.
     /// @return The ID of the mesh of the avatar of this component.
-    const int64_t GetAvatarMeshIndex() const;
+    int64_t GetAvatarMeshIndex() const;
 
     /// @brief Sets the ID of the mesh of the avatar of this component.
     /// @note Used to establish which mesh this avatar should use among a collection of predefined meshes.
@@ -160,7 +160,7 @@ public:
     /// @brief Checks if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
     /// @return True if the avatar uses IK, false otherwise.
-    const bool GetIsHandIKEnabled() const;
+    bool GetIsHandIKEnabled() const;
 
     /// @brief Sets if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
@@ -229,7 +229,7 @@ public:
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
     ///       When 0 the avatar is fully walking, when 100 the avatar is fully running.
     /// @return The percentage of the blending between walk and run states.
-    const float GetWalkRunBlendPercentage() const;
+    float GetWalkRunBlendPercentage() const;
 
     /// @brief Sets blending between walk and run states expressed in percentage.
     /// @note Used to calculate a smooth transition between an avatar walking and an avatar running.
@@ -243,7 +243,7 @@ public:
     ///       The greater the difference, the further the torso should be twisted.
     ///       Positive value if the torso is turning right, negative if avatar is turning left.
     /// @return The angle to use to twist the avatar's torso.
-    const float GetTorsoTwistAlpha() const;
+    float GetTorsoTwistAlpha() const;
 
     /// @brief Sets the angle to use to twist the avatar's torso.
     /// @note To calculate the twist of the avatar torso, it is convention to evaluate the

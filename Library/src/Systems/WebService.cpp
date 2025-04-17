@@ -87,9 +87,9 @@ void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
     }
 }
 
-const EResultCode ResultBase::GetResultCode() const { return Result; }
+EResultCode ResultBase::GetResultCode() const { return Result; }
 
-const uint16_t ResultBase::GetHttpResultCode() const { return HttpResponseCode; }
+uint16_t ResultBase::GetHttpResultCode() const { return HttpResponseCode; }
 
 const csp::common::String& ResultBase::GetResponseBody() const { return ResponseBody; }
 

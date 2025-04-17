@@ -35,7 +35,7 @@ public:
 
     ~AnalyticsSystemImpl() { }
 
-    void OnEvent(const csp::events::Event& InEvent) override
+    void OnEvent(const csp::events::Event& /*InEvent*/) override
     {
         /* std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
 
@@ -53,7 +53,7 @@ public:
         }*/
     }
 
-    void Log(AnalyticsEvent* Event)
+    void Log(AnalyticsEvent* /*Event*/)
     {
         /* if (Provider)
         {
@@ -63,7 +63,7 @@ public:
 
     void RegisterProvider(IAnalyticsProvider* InProvider) { Provider = InProvider; }
 
-    void DeregisterProvider(IAnalyticsProvider* InProvider)
+    void DeregisterProvider(IAnalyticsProvider* /*InProvider*/)
     {
         /* if (Provider == InProvider)
         {
