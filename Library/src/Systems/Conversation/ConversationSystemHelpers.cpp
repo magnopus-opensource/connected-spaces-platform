@@ -53,6 +53,7 @@ namespace
         return common::StringFormat("%s,%s,%s", std::to_string(value.X).c_str(), std::to_string(value.Y).c_str(), std::to_string(value.Z).c_str());
     }
 
+    // Should only be used if string was created using Vector3ToString, or we can guarantee the string is in the format "X,Y,Z".
     common::Vector3 StringToVector3(const common::String& value)
     {
         common::List<common::String> StringList = value.Split(',');
@@ -65,6 +66,7 @@ namespace
             std::to_string(value.W).c_str());
     }
 
+    // Should only be used if string was created using Vector4ToString, or we can guarantee the string is in the format "X,Y,Z,W".
     common::Vector4 StringToVector4(const common::String& value)
     {
         common::List<common::String> StringList = value.Split(',');
