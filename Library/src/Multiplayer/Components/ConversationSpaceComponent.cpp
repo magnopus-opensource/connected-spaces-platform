@@ -226,8 +226,7 @@ void ConversationSpaceComponent::GetConversationAnnotation(multiplayer::Annotati
 }
 
 void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::AnnotationUpdateParams& AnnotationParams,
-    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
-    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
     multiplayer::AnnotationResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
@@ -239,8 +238,7 @@ void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::An
     }
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->SetConversationAnnotation(
-        ConversationId, AnnotationParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
+    ConversationSystem->SetConversationAnnotation(ConversationId, AnnotationParams, Annotation, AnnotationThumbnail, Callback);
 }
 
 void ConversationSpaceComponent::DeleteConversationAnnotation(systems::NullResultCallback Callback)
@@ -272,8 +270,7 @@ void ConversationSpaceComponent::GetAnnotation(const csp::common::String& Messag
 }
 
 void ConversationSpaceComponent::SetAnnotation(const csp::common::String& MessageId, const multiplayer::AnnotationUpdateParams& UpdateParams,
-    const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
-    const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+    const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
     multiplayer::AnnotationResultCallback Callback)
 {
     const common::String& ConversationId = GetConversationId();
@@ -285,8 +282,7 @@ void ConversationSpaceComponent::SetAnnotation(const csp::common::String& Messag
     }
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
-    ConversationSystem->SetAnnotation(
-        ConversationId, MessageId, UpdateParams, Annotation, AnnotationFileExtension, AnnotationThumbnail, ThumbnailFileExtension, Callback);
+    ConversationSystem->SetAnnotation(ConversationId, MessageId, UpdateParams, Annotation, AnnotationThumbnail, Callback);
 }
 
 void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& MessageId, systems::NullResultCallback Callback)

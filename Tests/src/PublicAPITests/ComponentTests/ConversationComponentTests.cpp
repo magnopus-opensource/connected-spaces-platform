@@ -1626,8 +1626,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         AnnotationThumbnailBufferData.BufferLength = strlen(TestConversationAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
@@ -1726,8 +1726,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
@@ -1881,8 +1881,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         WaitForCallback(CallbackCalled);
@@ -1972,8 +1972,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, FirstMessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetAnnotation, RequestPredicate, FirstMessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         WaitForCallback(CallbackCalled);
@@ -2098,8 +2098,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
@@ -2136,8 +2136,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         EXPECT_TRUE(AssetOverwriteLogCalled);
@@ -2261,8 +2261,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(
-            ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, "json", AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_TRUE(CallbackCalled);
         EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -2297,8 +2297,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_TRUE(CallbackCalled);
         EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -2455,8 +2455,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(
-            ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, "json", AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_TRUE(LogCalled);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
@@ -2556,8 +2556,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent2, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent2, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_TRUE(LogCalled);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
@@ -2696,8 +2696,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
@@ -2732,8 +2732,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData2);
         AnnotationThumbnailBufferData.SetMimeType("application/json");
 
-        auto [Result] = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId2, Data, AnnotationBufferData, "json",
-            AnnotationThumbnailBufferData, "json");
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetAnnotation, RequestPredicate, MessageId2, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }

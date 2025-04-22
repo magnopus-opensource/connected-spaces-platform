@@ -96,8 +96,7 @@ public:
     void GetConversationAnnotation(const csp::common::String& ConversationId, multiplayer::AnnotationResultCallback Callback);
 
     void SetConversationAnnotation(const csp::common::String& ConversationId, const multiplayer::AnnotationUpdateParams& AnnotationParams,
-        const systems::BufferAssetDataSource& Annotation, const csp::common::String& AnnotationFileExtension,
-        const systems::BufferAssetDataSource& AnnotationThumbnail, const csp::common::String& ThumbnailFileExtension,
+        const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
         multiplayer::AnnotationResultCallback Callback);
 
     void DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback);
@@ -107,8 +106,7 @@ public:
 
     void SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
         const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
-        const csp::common::String& AnnotationFileExtension, const systems::BufferAssetDataSource& AnnotationThumbnail,
-        const csp::common::String& ThumbnailFileExtension, multiplayer::AnnotationResultCallback Callback);
+        const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback);
 
     void DeleteAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
 
