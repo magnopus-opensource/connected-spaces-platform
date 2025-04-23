@@ -92,7 +92,6 @@ private:
     void SerializeValue(float Value);
     void SerializeValue(double Value);
     void SerializeValue(const csp::common::String& Value);
-    void SerializeValue(const char* Value);
     void SerializeValue(std::nullptr_t Value);
 
     template <typename T> void SerializeValue(const csp::common::Array<T>& Value);
@@ -177,7 +176,6 @@ private:
     void DeserializeValue(float& Value) const;
     void DeserializeValue(double& Value) const;
     void DeserializeValue(csp::common::String& Value) const;
-    void DeserializeValue(const char* Value) const;
 
     template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
     template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
