@@ -34,14 +34,11 @@ void RunTest()
     csp::systems::Space Space;
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
     UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
     const UUIDv4::UUID uuid = uuidGenerator.getUUID();
     std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid.str();
-
-    constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
 
     // Create avater
     csp::common::String UserName = "Player 1";
@@ -58,8 +55,6 @@ void RunTest()
 
     EntitySystem.CreateAvatar(UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
         [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
-
-    csp::multiplayer::SpaceEntity* Avatar = ResultFuture.get();
 
     EntitySystem.ProcessPendingEntityOperations();
 

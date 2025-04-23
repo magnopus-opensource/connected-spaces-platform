@@ -159,9 +159,6 @@ void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::Hot
     }
 }
 
-static constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-static constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
 CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 {
     SetRandSeed();
@@ -193,7 +190,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
     // Validate sequence creation events.
     bool CallbackCalled = false;
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     HotspotSystem->SetHotspotSequenceChangedCallback(
         [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
         {
@@ -242,6 +238,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -310,8 +308,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
     csp::common::Array<csp::common::String> NewItems { "Hotspot3" };
     csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
-    const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
-
     csp::systems::HotspotGroup HotspotGroup1;
     csp::systems::HotspotGroup HotspotGroup2;
 
@@ -364,8 +360,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
     csp::common::String OldTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG1";
     csp::common::String NewTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG2";
 
-    const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
-
     csp::systems::HotspotGroup HotspotGroup;
 
     CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
@@ -373,8 +367,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
     bool ReceivedUpdateCallback = false;
     bool ReceivedRenameCallback = false;
-
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     HotspotSystem->SetHotspotSequenceChangedCallback(
         [&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
@@ -442,8 +434,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
     csp::common::String OldTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG1";
     csp::common::String NewTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG2";
 
-    const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
-
     csp::systems::HotspotGroup HotspotGroup;
 
     csp::common::String expectedName = SpaceSystem->GetCurrentSpace().Id + ":" + NewTestGroupName;
@@ -468,6 +458,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -508,6 +500,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -573,6 +567,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotNoGroupTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
 
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -607,6 +603,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -648,8 +646,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
 
@@ -792,8 +788,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
 
@@ -934,8 +928,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
 

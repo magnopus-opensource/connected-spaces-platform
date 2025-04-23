@@ -565,7 +565,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
     const char* TestUserName = "CSP-TEST-NAME";
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
@@ -619,10 +618,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
     const char* TestUserName = "CSP-TEST-NAME";
-    const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
     char UniqueUserName[256];
     SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
@@ -667,8 +664,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-
-    const char* TestUserName = "CSP-TEST-NAME";
 
     char UniqueEmail[256];
     SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());

@@ -709,7 +709,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // Log in
     csp::common::String UserId;
@@ -809,7 +808,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
     const char* TestAssetName = "CSP-UNITTEST-ASSET";

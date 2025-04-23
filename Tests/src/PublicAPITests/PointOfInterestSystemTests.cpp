@@ -315,7 +315,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
     const char* TestSpaceName = "CSP-TEST-SPACE";
     const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
-    const char* TestAssetCollectionName = "CSP-TEST-ASSETCOLLECTION";
 
     // The default POI we will be using during the test.
     csp::systems::PointOfInterest DefaultPOI;
