@@ -84,6 +84,7 @@ if not CSP then
         cppdialect "C++17"
 		
 		flags {"FatalWarnings"}
+		warnings "Extra" -- corresponds to level /W4
 		externalwarnings "Off"
 			
         -- Standard debug/release config settings
