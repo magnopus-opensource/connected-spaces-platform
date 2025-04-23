@@ -63,7 +63,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem);
 std::atomic_bool IsTestComplete;
 std::atomic_bool IsDisconnected;
 std::atomic_bool IsReadyForUpdate;
-SpaceEntity* TestUser;
+SpaceEntity* TestSpaceEntity;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit = 20000;
@@ -85,7 +85,7 @@ void InitialiseTestingConnection()
     IsTestComplete = false;
     IsDisconnected = false;
     IsReadyForUpdate = false;
-    TestUser = nullptr;
+    TestSpaceEntity = nullptr;
 
     WaitForTestTimeoutCountMs = 0;
     ReceivedEntityUpdatesCount = 0;
@@ -168,8 +168,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
 
-    TestUser = InUser;
-    TestUser->SetUpdateCallback(
+    TestSpaceEntity = InUser;
+    TestSpaceEntity->SetUpdateCallback(
         [InUser](SpaceEntity* UpdatedUser, SpaceEntityUpdateFlags InUpdateFlags, csp::common::Array<ComponentUpdateInfo> InComponentUpdateInfoArray)
         {
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_NAME)
@@ -246,14 +246,14 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                 }
             }
 
-            if (InUser == TestUser)
+            if (InUser == TestSpaceEntity)
             {
                 ReceivedEntityUpdatesCount++;
                 IsReadyForUpdate = true;
             }
         });
 
-    TestUser->SetDestroyCallback(
+    TestSpaceEntity->SetDestroyCallback(
         [](bool Ok)
         {
             if (Ok)
@@ -494,13 +494,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
         {
             if (IsReadyForUpdate)
             {
-                SetRandomProperties(TestUser, EntitySystem);
+                SetRandomProperties(TestSpaceEntity, EntitySystem);
             }
         }
         else if (ReceivedEntityUpdatesCount == NumberOfEntityUpdateTicks && IsReadyForUpdate) // Send a final update that doesn't change the data
         {
             IsReadyForUpdate = false;
-            EntitySystem->QueueEntityUpdate(TestUser);
+            EntitySystem->QueueEntityUpdate(TestSpaceEntity);
         }
         else
         {
@@ -1367,7 +1367,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     {
         std::this_thread::sleep_for(50ms);
 
-        SetRandomProperties(TestUser, EntitySystem);
+        SetRandomProperties(TestSpaceEntity, EntitySystem);
 
         Current = std::chrono::steady_clock::now();
         TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();

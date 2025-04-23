@@ -1320,37 +1320,37 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
     CSP_DELETE(EntityToRemove);
 }
 
-void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
+void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
 {
     if (ElectionManager != nullptr)
     {
         // Note we are assuming Avatar==Client,
         // which is true now but may not be in the future
-        ElectionManager->OnClientAdd(Avatar, Avatars);
+        ElectionManager->OnClientAdd(Avatar, AddedAvatars);
     }
 }
 
-void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
+void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
 {
     if (ElectionManager != nullptr)
     {
-        ElectionManager->OnClientRemove(Avatar, Avatars);
+        ElectionManager->OnClientRemove(Avatar, RemovedAvatars);
     }
 }
 
-void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Objects)
+void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
 {
     if (ElectionManager != nullptr)
     {
-        ElectionManager->OnObjectAdd(Object, Objects);
+        ElectionManager->OnObjectAdd(Object, AddedObjects);
     }
 }
 
-void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Objects)
+void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
 {
     if (ElectionManager != nullptr)
     {
-        ElectionManager->OnObjectRemove(Object, Objects);
+        ElectionManager->OnObjectRemove(Object, RemovedObjects);
     }
 }
 

@@ -269,7 +269,7 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
 
 void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback /*Callback*/)
 {
-    systems::SpaceSystem* SpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
+    systems::SpaceSystem* MySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
     csp::common::String ItemCopy = ItemName;
 
@@ -310,7 +310,7 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
     };
 
     // Find all sequences containing this name
-    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { SpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
+    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { MySpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
 }
 
 HotspotSequenceSystem::HotspotSequenceSystem()
