@@ -94,11 +94,11 @@ public:
 
     /// @brief Gets the shader type of the material.
     /// @return csp::systems::EShaderType : Returns the shader type.
-    const csp::systems::EShaderType GetShaderType() const;
+    csp::systems::EShaderType GetShaderType() const;
 
     /// @brief Gets the version of the material.
     /// @return int : Returns the version of the material.
-    const int GetVersion() const;
+    int GetVersion() const;
 
     /// @brief Gets the collection id for the material.
     /// @return const csp::common::String& : Returns the collection id.

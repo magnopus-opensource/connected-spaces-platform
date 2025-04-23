@@ -58,9 +58,9 @@ Material::Material(const csp::common::String& Name, const csp::common::String& I
 
 const csp::common::String& Material::GetName() const { return Name; }
 
-const csp::systems::EShaderType Material::GetShaderType() const { return Type; }
+csp::systems::EShaderType Material::GetShaderType() const { return Type; }
 
-const int Material::GetVersion() const { return Version; }
+int Material::GetVersion() const { return Version; }
 
 const csp::common::String& Material::GetMaterialCollectionId() const { return CollectionId; }
 

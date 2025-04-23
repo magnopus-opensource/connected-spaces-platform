@@ -72,7 +72,7 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
     return InvalidValue;
 }
 
-const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
+bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
@@ -86,7 +86,7 @@ const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
     return false;
 }
 
-const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
+int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
@@ -100,7 +100,7 @@ const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
     return 0;
 }
 
-const float ComponentBase::GetFloatProperty(uint32_t Key) const
+float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 

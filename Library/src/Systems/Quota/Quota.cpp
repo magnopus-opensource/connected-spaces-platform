@@ -270,8 +270,7 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
     // return a default/invalid value if no matching feature was found
     return "Invalid";
 }
-
-const TierNames StringToTierNameEnum(const csp::common::String& Value)
+TierNames StringToTierNameEnum(const csp::common::String& Value)
 {
     if (Value == "basic")
     {
@@ -297,7 +296,7 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value)
     return TierNames::Invalid;
 }
 
-const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
+TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 {
     if (Value == "Agora")
     {

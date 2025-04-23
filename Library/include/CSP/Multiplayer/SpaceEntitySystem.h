@@ -287,7 +287,7 @@ public:
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
-    const bool GetEntityPatchRateLimitEnabled() const;
+    bool GetEntityPatchRateLimitEnabled() const;
 
     /// @brief Set the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     ///
