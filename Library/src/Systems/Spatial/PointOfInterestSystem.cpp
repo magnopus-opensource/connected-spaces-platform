@@ -72,7 +72,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
         std::vector<csp::common::String> DTOTags;
         DTOTags.reserve(Tags->Size());
 
-        for (int idx = 0; idx < Tags->Size(); idx++)
+        for (size_t idx = 0; idx < Tags->Size(); idx++)
         {
             DTOTags.push_back((*Tags)[idx]);
         }

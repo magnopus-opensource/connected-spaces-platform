@@ -67,7 +67,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     std::map<uint64_t, signalr::value> Components;
 
-    for (int i = 0; i < Arguments.Size(); ++i)
+    for (size_t i = 0; i < Arguments.Size(); ++i)
     {
         switch (Arguments[i].GetReplicatedValueType())
         {

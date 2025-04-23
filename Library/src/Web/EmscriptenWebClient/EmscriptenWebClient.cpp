@@ -67,7 +67,7 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
     auto& Payload = Response.GetMutablePayload();
     auto* Keys = Headers.Keys();
 
-    for (int i = 0; i < Keys->Size(); ++i)
+    for (rapidjson::SizeType i = 0; i < Keys->Size(); ++i)
     {
         auto Key = Keys->operator[](i).ToLower();
         auto Value = Headers[Key].ToLower();

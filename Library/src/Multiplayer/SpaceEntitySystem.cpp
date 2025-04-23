@@ -684,7 +684,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
 
-        if (CurrentEntityCount < ItemTotalCount)
+        if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
         {
             GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount));
         }
@@ -1147,7 +1147,7 @@ void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::co
     SignalRMsgPackEntitySerialiser Serialiser;
     std::vector<signalr::value> ObjectPatches;
 
-    for (int i = 0; i < PendingEntities.Size(); ++i)
+    for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
         PendingEntities[i]->SerialisePatch(Serialiser);
         auto SerialisedEntity = Serialiser.Finalise();
@@ -1240,7 +1240,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
             SendPatches(Connection, PendingEntities);
 
             // Loop through and apply local patches from generated list
-            for (int i = 0; i < PendingEntities.Size(); ++i)
+            for (size_t i = 0; i < PendingEntities.Size(); ++i)
             {
                 PendingEntities[i]->ApplyLocalPatch(true);
             }
@@ -1464,7 +1464,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
         if (Destroy)
         {
             // Deletion
-            for (int i = 0; i < Entities.Size(); ++i)
+            for (size_t i = 0; i < Entities.Size(); ++i)
             {
                 SpaceEntity* Entity = Entities[i];
 
@@ -1478,7 +1478,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
                         // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                         // This covers disconnected clients as their avatar gets cleaned up after timing out.
-                        for (int j = 0; j < Entities.Size(); ++j)
+                        for (size_t j = 0; j < Entities.Size(); ++j)
                         {
                             if (Entities[j]->GetSelectingClientID() == EntityID)
                             {
@@ -1497,7 +1497,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
             bool EntityFound = false;
 
             // Update
-            for (int i = 0; i < Entities.Size(); ++i)
+            for (size_t i = 0; i < Entities.Size(); ++i)
             {
                 if (Entities[i]->GetId() == EntityID)
                 {

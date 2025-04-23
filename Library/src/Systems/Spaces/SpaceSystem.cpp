@@ -687,7 +687,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
     std::vector<String> SpaceIds;
     SpaceIds.reserve(RequestedSpaceIDs.Size());
 
-    for (auto idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
     {
         SpaceIds.push_back(RequestedSpaceIDs[idx]);
     }
@@ -1009,7 +1009,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
             Map<String, Array<String>> SpacesTags;
             const auto& AssetCollections = Result.GetAssetCollections();
 
-            for (int i = 0; i < AssetCollections.Size(); ++i)
+            for (size_t i = 0; i < AssetCollections.Size(); ++i)
             {
                 const auto& AssetCollection = AssetCollections[i];
 
@@ -1275,7 +1275,7 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
-    for (auto item = 0; item < SpaceIds.Size(); ++item)
+    for (size_t item = 0; item < SpaceIds.Size(); ++item)
     {
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
@@ -1841,7 +1841,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         std::vector<String> GroupIds;
         GroupIds.reserve(MemberGroupIds->Size());
 
-        for (int i = 0; i < MemberGroupIds->Size(); ++i)
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
         {
             GroupIds.push_back(MemberGroupIds->operator[](i));
         }

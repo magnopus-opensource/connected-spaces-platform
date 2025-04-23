@@ -179,7 +179,7 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 
         auto* Keys = Metadata->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = Metadata->operator[](Key);
@@ -1199,7 +1199,7 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
     std::vector<String> Ids;
 
-    for (int i = 0; i < AssetCollectionIds.Size(); ++i)
+    for (size_t i = 0; i < AssetCollectionIds.Size(); ++i)
     {
         Ids.push_back(AssetCollectionIds[i]);
     }
@@ -1379,7 +1379,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
         Asset NewAsset = InAsset;
         Array<String> NewStyles(NewAsset.Styles.Size() + 1);
 
-        for (int i = 0; i < NewAsset.Styles.Size(); ++i)
+        for (size_t i = 0; i < NewAsset.Styles.Size(); ++i)
         {
             NewStyles[i] = NewAsset.Styles[i];
         }

@@ -55,7 +55,7 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
             EXPECT_EQ(Sequence.MetaData[(*Keys)[i]], MetaData[(*Keys)[i]]);
         }
 
-        for (int i = 0; i < Sequence.Items.Size(); ++i)
+        for (size_t i = 0; i < Sequence.Items.Size(); ++i)
         {
             EXPECT_EQ(Sequence.Items[i], Items[i]);
         }
@@ -120,7 +120,7 @@ void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
         EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
         EXPECT_EQ(Sequence.Items.Size(), Items.Size());
 
-        for (int i = 0; i < Sequence.Items.Size(); ++i)
+        for (size_t i = 0; i < Sequence.Items.Size(); ++i)
         {
             EXPECT_EQ(Sequence.Items[i], Items[i]);
         }
@@ -225,7 +225,7 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
     EXPECT_EQ(S1.ReferenceId, S2.ReferenceId);
     EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
 
-    for (int i = 0; i < S1.Items.Size(); ++i)
+    for (size_t i = 0; i < S1.Items.Size(); ++i)
     {
         EXPECT_EQ(S1.Items[i], S2.Items[i]);
     }

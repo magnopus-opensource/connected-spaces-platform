@@ -52,7 +52,7 @@ void CreateHotspotgroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
         EXPECT_EQ(group.Name, GroupName);
         EXPECT_EQ(group.Items.Size(), Items.Size());
 
-        for (int i = 0; i < group.Items.Size(); ++i)
+        for (size_t i = 0; i < group.Items.Size(); ++i)
         {
             EXPECT_EQ(group.Items[i], Items[i]);
         }
@@ -104,7 +104,7 @@ void UpdateHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
         EXPECT_EQ(group.Name, GroupName);
         EXPECT_EQ(group.Items.Size(), Items.Size());
 
-        for (int i = 0; i < group.Items.Size(); ++i)
+        for (size_t i = 0; i < group.Items.Size(); ++i)
         {
             EXPECT_EQ(group.Items[i], Items[i]);
         }
@@ -152,7 +152,7 @@ void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::Hot
     EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
     if (S1.Items.Size() == S2.Items.Size())
     {
-        for (int i = 0; i < S1.Items.Size(); ++i)
+        for (size_t i = 0; i < S1.Items.Size(); ++i)
         {
             EXPECT_EQ(S1.Items[i], S2.Items[i]);
         }

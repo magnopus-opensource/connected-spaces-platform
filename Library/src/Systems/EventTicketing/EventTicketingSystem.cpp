@@ -101,7 +101,7 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
     std::vector<csp::common::String> RequestSpaceIds;
     RequestSpaceIds.reserve(SpaceIds.Size());
 
-    for (auto i = 0; i < SpaceIds.Size(); ++i)
+    for (size_t i = 0; i < SpaceIds.Size(); ++i)
     {
         RequestSpaceIds.push_back(SpaceIds[i]);
     }

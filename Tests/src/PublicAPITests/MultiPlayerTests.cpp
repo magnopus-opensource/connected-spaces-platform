@@ -191,7 +191,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS)
             {
-                for (int i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
+                for (size_t i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
                 {
                     uint16_t ComponentID = InComponentUpdateInfoArray[i].ComponentId;
 
@@ -202,7 +202,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                         const csp::common::Map<uint32_t, ReplicatedValue>& Properties = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
                         const csp::common::Array<uint32_t>* PropertyKeys = Properties.Keys();
 
-                        for (int j = 0; j < PropertyKeys->Size(); ++j)
+                        for (size_t j = 0; j < PropertyKeys->Size(); ++j)
                         {
                             if (j >= 3) // We only randomise the first 3 properties, so we don't really need to print any more
                             {

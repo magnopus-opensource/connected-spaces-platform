@@ -209,7 +209,7 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     // Handshake needs to be handled differently as it is in JSON format
     if (!ReceivedHandshake)
     {
-        int Idx;
+        uint32_t Idx;
         for (Idx = 0; Idx < NumRecvBytes; ++Idx)
         {
             // JSON messages are terminated with the 0x1E character
@@ -229,8 +229,8 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     }
     else
     {
-        auto Length = 0;
-        int Idx;
+        uint32_t Length = 0;
+        uint32_t Idx;
 
         for (Idx = 0; Idx < 5; ++Idx)
         {

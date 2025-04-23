@@ -298,7 +298,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
             std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
 
-            for (int i = 0; i < Data.Size(); ++i)
+            for (size_t i = 0; i < Data.Size(); ++i)
             {
                 if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
                 {

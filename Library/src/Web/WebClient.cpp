@@ -458,7 +458,7 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     }
     else
     {
-        for (auto i = 0; i < Errors.Size(); ++i)
+        for (size_t i = 0; i < Errors.Size(); ++i)
         {
             CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
                 Response.GetRequest()->GetUri().GetAsString(), ResponseCode, Errors[i].c_str());

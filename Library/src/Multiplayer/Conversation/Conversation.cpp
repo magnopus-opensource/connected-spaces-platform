@@ -127,7 +127,7 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 
     MessageInfo MsgInfo;
 
-    for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
+    for (size_t idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
     {
         MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
         ConversationMessages[idx] = MsgInfo;

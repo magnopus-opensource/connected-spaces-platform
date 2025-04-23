@@ -35,7 +35,7 @@ namespace UserRolesHelpers
             return true;
         }
 
-        for (auto idx = 0; idx < Space.ModeratorIds.Size(); ++idx)
+        for (size_t idx = 0; idx < Space.ModeratorIds.Size(); ++idx)
         {
             if (UserId == Space.ModeratorIds[idx])
             {
@@ -44,7 +44,7 @@ namespace UserRolesHelpers
             }
         }
 
-        for (auto idx = 0; idx < Space.UserIds.Size(); ++idx)
+        for (size_t idx = 0; idx < Space.UserIds.Size(); ++idx)
         {
             if (UserId == Space.UserIds[idx])
             {
@@ -68,7 +68,7 @@ void UserRoleCollectionResult::FillUsersRoles(const Space& Space, const csp::com
 
     UserRoles = csp::common::Array<UserRoleInfo>(RequestedUserIds.Size());
 
-    for (auto idx = 0; idx < RequestedUserIds.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedUserIds.Size(); ++idx)
     {
         auto& currentUserId = RequestedUserIds[idx];
         UserRoleInfo currentRoleInfo;

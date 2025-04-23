@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
         CreatedMaterial4->GetMaterialId(),
     };
 
-    for (int i = 0; i < FoundMaterials.Size(); ++i)
+    for (size_t i = 0; i < FoundMaterials.Size(); ++i)
     {
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS

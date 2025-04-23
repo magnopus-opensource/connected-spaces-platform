@@ -103,7 +103,7 @@ void DeleteAnchors(csp::systems::AnchorSystem* AnchorSystem, const csp::common::
 
     if (Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        for (int idx = 0; idx < AnchorIDs.Size(); idx++)
+        for (size_t idx = 0; idx < AnchorIDs.Size(); idx++)
         {
             std::cerr << "Anchor Deleted: "
                       << "Id=" << AnchorIDs[idx] << std::endl;
@@ -391,7 +391,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
         const auto& ResultAnchors = Result.GetAnchors();
         AnchorCollection = csp::common::Array<csp::systems::Anchor>(ResultAnchors.Size());
 
-        for (int idx = 0; idx < ResultAnchors.Size(); ++idx)
+        for (size_t idx = 0; idx < ResultAnchors.Size(); ++idx)
         {
             AnchorCollection[idx] = ResultAnchors[idx];
         }
@@ -573,7 +573,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 
         bool Found1 = false, Found2 = false;
 
-        for (auto i = 0; i < Anchors.Size(); ++i)
+        for (size_t i = 0; i < Anchors.Size(); ++i)
         {
             if (Anchors[i].Id == Anchor1.Id)
             {

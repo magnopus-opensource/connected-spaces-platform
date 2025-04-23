@@ -712,7 +712,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
     bool FoundGoogle = false;
     bool FoundDiscord = false;
     bool FoundApple = false;
-    for (auto idx = 0; idx < SupportedProviders.Size(); ++idx)
+    for (size_t idx = 0; idx < SupportedProviders.Size(); ++idx)
     {
         if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google)
         {
