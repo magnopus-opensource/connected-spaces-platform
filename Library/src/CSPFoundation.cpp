@@ -416,7 +416,7 @@ void Free(void* Pointer) { CSP_FREE(Pointer); }
 
 void* ModuleHandle = nullptr;
 
-void* GetFunctionAddress(const csp::common::String& Name)
+void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
 {
 #if defined(CSP_WASM)
     return nullptr;

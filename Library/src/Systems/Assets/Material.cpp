@@ -72,7 +72,7 @@ Material* MaterialResult::GetMaterial() { return Material; }
 
 void MaterialResult::SetMaterial(csp::systems::Material* InMaterial) { Material = InMaterial; }
 
-void MaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void MaterialResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
 const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &Materials; }
 
@@ -80,6 +80,6 @@ csp::common::Array<Material*>* MaterialsResult::GetMaterials() { return &Materia
 
 void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMaterials) { Materials = InMaterials; }
 
-void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
 } // namespace csp::systems

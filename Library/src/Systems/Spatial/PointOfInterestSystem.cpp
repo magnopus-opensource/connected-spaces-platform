@@ -46,7 +46,7 @@ PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient)
 PointOfInterestSystem::~PointOfInterestSystem() { CSP_DELETE(POIApiPtr); }
 
 CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String& Title, const csp::common::String& Description,
-    const csp::common::String& Name, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, EPointOfInterestType Type,
+    const csp::common::String& Name, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, EPointOfInterestType /*Type*/,
     const csp::common::String& Owner, const csp::systems::GeoLocation& Location, const AssetCollection& AssetCollection, POIResultCallback Callback)
 {
     auto POIInfo = std::make_shared<chs::PointOfInterestDto>();

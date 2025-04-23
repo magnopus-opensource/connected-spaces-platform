@@ -116,7 +116,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -256,7 +256,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -396,7 +396,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -536,7 +536,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -675,7 +675,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -812,7 +812,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 

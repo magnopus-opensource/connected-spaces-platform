@@ -267,7 +267,7 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
     DeregisterSystemCallback();
 }
 
-void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback)
+void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback /*Callback*/)
 {
     systems::SpaceSystem* SpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
@@ -301,7 +301,7 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
             }
         }
 
-        auto CB = [](const systems::NullResult& Res) {
+        auto CB = [](const systems::NullResult& /*Res*/) {
 
         };
 

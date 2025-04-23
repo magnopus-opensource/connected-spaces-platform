@@ -69,7 +69,7 @@ CSPWebSocketClientPOCO::ParsedURIInfo CSPWebSocketClientPOCO::ParseMultiplayerSe
     return Out;
 }
 
-void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callback)
+void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler Callback)
 {
     CSP_PROFILE_SCOPED();
 

@@ -142,7 +142,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // we'll be using this in a few places below as part of the test, so we declare it upfront
     const std::string ScriptText = R"xx(
@@ -221,7 +221,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -240,7 +240,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -292,7 +292,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     // Create an AnimatedModelComponent and have the script update it's position
     {
-        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -357,7 +357,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -452,7 +452,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -526,7 +526,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -634,7 +634,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -739,7 +739,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -758,7 +758,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -813,7 +813,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     bool PatchPending = true;
-    CreatedObject->SetPatchSentCallback([&PatchPending](bool ok) { PatchPending = false; });
+    CreatedObject->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
 
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
@@ -901,7 +901,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -993,7 +993,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -1012,7 +1012,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -1128,7 +1128,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -1240,7 +1240,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
     bool EntityHasBeenRecreated = false;
     // we're gonna wanna wait till the entity is created before we can do our test
-    EntitySystem->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* Object) { EntityHasBeenRecreated = true; });
+    EntitySystem->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* /*Object*/) { EntityHasBeenRecreated = true; });
 
     // spin till we recreate the entity from phase 1 locally, having received it back from CHS
     while (EntityHasBeenRecreated == false)

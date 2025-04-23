@@ -120,20 +120,20 @@ EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProto
     std::srand(std::time(nullptr));
 }
 
-std::string EmscriptenWebClient::MD5Hash(const void* Data, const size_t Size)
+std::string EmscriptenWebClient::MD5Hash(const void* /*Data*/, const size_t /*Size*/)
 {
     assert(false && "Not implemented!");
     return "MD5Hash Not Implemented";
 }
 
 void EmscriptenWebClient::SetFileUploadContentFromFile(
-    HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
+    HttpPayload* /*Payload*/, const char* /*FilePath*/, const char* /*Version*/, const csp::common::String& /*MediaType*/)
 {
     assert(false && "Not implemented!");
 }
 
 void EmscriptenWebClient::SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource,
-    const csp::common::String& FileName, const char* Version, const csp::common::String& MediaType)
+    const csp::common::String& FileName, const char* /*Version*/, const csp::common::String& MediaType)
 {
     std::ostringstream strm;
     strm << "MIME_boundary_" << std::rand();
@@ -151,7 +151,7 @@ void EmscriptenWebClient::SetFileUploadContentFromString(HttpPayload* Payload, c
 
 // This function is deliberately written this way to reduce the number of allocations and string copying. Do not change it!
 void EmscriptenWebClient::SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength,
-    const csp::common::String& FileName, const char* Version, const csp::common::String& MediaType)
+    const csp::common::String& FileName, const char* /*Version*/, const csp::common::String& MediaType)
 {
     constexpr const char Boundary[] = "MIME_boundary_FileFromBuffer";
     constexpr size_t BoundaryLen = CStringLength(Boundary);

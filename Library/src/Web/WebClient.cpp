@@ -29,7 +29,7 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, bool AutoRefresh)
     : RootPort(InPort)
     , UserSystem(nullptr)
     , LoginState(nullptr)
@@ -187,7 +187,7 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 #endif
 }
 
-void WebClient::AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay)
+void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {
     RefreshIfExpired();
 

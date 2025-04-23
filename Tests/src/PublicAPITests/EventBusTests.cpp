@@ -195,7 +195,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("TestEvent",
         [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -289,7 +289,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("MultiTypeEvent",
         [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Set up Log callback
     LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
@@ -410,7 +410,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -424,7 +424,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     };
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback2
-        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -616,7 +616,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -655,7 +655,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Check system callback was called
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);

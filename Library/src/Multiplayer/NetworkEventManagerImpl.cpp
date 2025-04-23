@@ -52,7 +52,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     csp::multiplayer::ISignalRConnection* ISignalRConnectionPtr = static_cast<csp::multiplayer::ISignalRConnection*>(Connection);
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {

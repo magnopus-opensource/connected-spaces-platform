@@ -39,8 +39,8 @@ std::string Utils::GetUniqueString()
 }
 
 /* Create a new user. Return the profile on success */
-csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode ExpectedResultCode /* = Success */,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode /* = None */)
+csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
+    csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ /* = None */)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();

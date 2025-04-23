@@ -37,7 +37,7 @@ void JsonSerializer::SerializeValue(const csp::common::String& Value) { Writer.S
 
 void JsonSerializer::SerializeValue(const char* Value) { Writer.String(Value); }
 
-void JsonSerializer::SerializeValue(std::nullptr_t Value) { Writer.Null(); }
+void JsonSerializer::SerializeValue(std::nullptr_t /*Value*/) { Writer.Null(); }
 
 void JsonDeserializer::DeserializeValue(int32_t& Value) const { Value = ValueStack.top()->GetInt(); }
 

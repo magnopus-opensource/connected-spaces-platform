@@ -97,7 +97,7 @@ template <typename TLockTrait> StandardAllocator<TLockTrait>::~StandardAllocator
 
 template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n) { return Allocate(n, CSP_ALLOCATOR_MIN_ALIGNMENT); }
 
-template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n, std::align_val_t alignment)
+template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Allocate(size_t n, [[maybe_unused]] std::align_val_t alignment)
 {
     AllocatedBytes += n;
 
@@ -135,7 +135,7 @@ template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(v
     return Reallocate(p, n, CSP_ALLOCATOR_MIN_ALIGNMENT);
 }
 
-template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(void* p, size_t n, std::align_val_t alignment)
+template <typename TLockTrait> void* StandardAllocator<TLockTrait>::Reallocate(void* p, size_t n, [[maybe_unused]] std::align_val_t alignment)
 {
     // TODO increment with the difference between the old allocation and the new one
     // AllocatedBytes += n;

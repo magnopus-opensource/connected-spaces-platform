@@ -129,7 +129,7 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
         csp::common::String Reason(InEvent.GetString("Reason"));
 
         auto Done = false;
-        Connection->DisconnectWithReason(Reason, [&Done](ErrorCode Error) { Done = true; });
+        Connection->DisconnectWithReason(Reason, [&Done](ErrorCode /*Error*/) { Done = true; });
 
         int TimeoutCounter = 2000;
 
@@ -721,7 +721,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
         {
-            DestroyEntity(Entity, [](auto Ok) {});
+            DestroyEntity(Entity, [](bool /*Ok*/) {});
         }
         // Otherwise we clear up all all locally represented entities
         else

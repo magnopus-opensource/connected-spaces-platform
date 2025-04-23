@@ -24,7 +24,7 @@ namespace chs = csp::services::generated::trackingservice;
 
 namespace csp::systems
 {
-FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn)
+FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool /*AllowReductionsIn*/)
     : FeatureName(FeatureNameIn)
     , TierName(TierNameIn)
     , Limit(LimitIn)
