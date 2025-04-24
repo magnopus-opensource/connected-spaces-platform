@@ -37,6 +37,7 @@ class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
+class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -92,6 +93,17 @@ enum SpaceEntityUpdateFlags
     UPDATE_FLAGS_THIRD_PARTY_REF = 64,
     UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
     UPDATE_FLAGS_PARENT = 256,
+    UPDATE_FLAGS_LOCK_TYPE = 512,
+};
+
+/// @brief Enum used to specify a lock type that has been added to an entity.
+/// Upon creation, entities have the 'None' lock type.
+enum class LockType : uint64_t
+{
+    /// @brief The entity doesn't have a lock.
+    None,
+    /// @brief The Entity cannot be mutated by anyone. Anyone can remove the lock.
+    UserAgnostic
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -111,6 +123,8 @@ class CSP_API SpaceEntity
     friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRSerialisationTest_Test;
     friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
     friend class ::CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
+    friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -348,7 +362,25 @@ public:
     /// @brief Checks if the entity can be modified.
     /// Specifically whether the local client already owns the entity or can take ownership of the entity.
     /// @return True if the entity can be modified, False if not.
-    bool IsModifiable();
+    bool IsModifiable() const;
+
+    /// @brief Locks the entity if it hasn't been locked already.
+    /// @pre The entity must not already be locked.
+    /// A CSP error will be sent to the LogSystem if this condition is not met.
+    /// @post This internally sets the lock type as a dirty property.
+    /// This entity should now be replicated, to process the change.
+    void Lock();
+
+    /// @brief Unlocks the entity if the entity is locked
+    /// @pre The entity must not already be locked.
+    /// A CSP error will be sent to the LogSystem if this condition is not met.
+    /// @post This internally sets the lock type as a dirty property.
+    /// This entity should now be replicated, to process the change.
+    void Unlock();
+
+    /// @brief Checks if the entity has a lock type other than LockType::None, set by calling SpaceEntity::Lock.
+    /// @return bool
+    bool IsLocked() const;
 
 private:
     class DirtyComponent
@@ -404,6 +436,8 @@ private:
     SpaceEntity* Parent;
     csp::common::List<SpaceEntity*> ChildEntities;
 
+    LockType EntityLock;
+
     UpdateCallback EntityUpdateCallback;
     DestroyCallback EntityDestroyCallback;
     CallbackHandler EntityPatchSentCallback;
@@ -416,7 +450,7 @@ private:
     csp::multiplayer::EntityScript* Script;
     csp::multiplayer::EntityScriptInterface* ScriptInterface;
 
-    std::mutex* EntityLock;
+    std::mutex* EntityMutexLock;
     std::mutex* ComponentsLock;
     std::mutex* PropertiesLock;
 

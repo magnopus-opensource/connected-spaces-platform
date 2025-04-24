@@ -266,6 +266,13 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     SetRandomProperties(InUser, EntitySystem);
 }
+
+struct RAIIMockLogger
+{
+    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
+    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
+    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
+};
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
@@ -3154,4 +3161,242 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
     auto [ErrorCodeUnknown, MsgUnknown] = Connection->ParseMultiplayerError(std::runtime_error("Some unknown error"));
     EXPECT_EQ(ErrorCodeUnknown, csp::multiplayer::ErrorCode::Unknown);
     EXPECT_EQ(MsgUnknown, "Some unknown error");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    SpaceEntity Entity { nullptr };
+
+    // Ensure the lock error message is called when we try and lock an entity that is already locked
+    const csp::common::String LockErrorMsg = "Entity is already locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
+
+    // Set the entity as locked first
+    Entity.EntityLock = LockType::UserAgnostic;
+    // Check that we error if we try to lock again
+    Entity.Lock();
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    SpaceEntity Entity { nullptr };
+
+    // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
+    const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(UnlockErrorMsg)).Times(1);
+
+    Entity.Unlock();
+}
+
+void RunEntityLockTest(bool Local)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+    EntitySystem->SetEntityPatchRateLimitEnabled(false);
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // If local is false, test DeserialiseFromPatch functionality
+    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+
+    {
+        // Create Entity
+        const csp::common::String EntityName = "Entity";
+        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+        // New entity should default to unlocked
+        EXPECT_FALSE(CreatedEntity->IsLocked());
+
+        // Test entity locks correctly
+        {
+            bool EntityUpdated = false;
+
+            CreatedEntity->SetUpdateCallback(
+                [&EntityUpdated, CreatedEntity](
+                    SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    {
+                        EntityUpdated = true;
+                    }
+                });
+
+            // Lock Entity
+            CreatedEntity->Lock();
+
+            // Entity shouldn't be locked until we apply our patch
+            EXPECT_FALSE(CreatedEntity->IsLocked());
+
+            // Apply patch
+            CreatedEntity->QueueUpdate();
+            EntitySystem->ProcessPendingEntityOperations();
+
+            WaitForCallbackWithUpdate(EntityUpdated, EntitySystem);
+            EXPECT_TRUE(EntityUpdated);
+
+            // Entity should be locked now
+            EXPECT_TRUE(CreatedEntity->IsLocked());
+        }
+
+        // Test entity unlocks correctly
+        {
+            bool EntityUpdated = false;
+
+            CreatedEntity->SetUpdateCallback(
+                [&EntityUpdated, CreatedEntity](
+                    SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    {
+                        EntityUpdated = true;
+                    }
+                });
+
+            // Unlock Entity
+            CreatedEntity->Unlock();
+
+            // Entity should still be locked until we apply our patch
+            EXPECT_TRUE(CreatedEntity->IsLocked());
+
+            // Apply patch
+            CreatedEntity->QueueUpdate();
+            EntitySystem->ProcessPendingEntityOperations();
+
+            WaitForCallbackWithUpdate(EntityUpdated, EntitySystem);
+            EXPECT_TRUE(EntityUpdated);
+
+            // Entity shouldn't be locked now
+            EXPECT_FALSE(CreatedEntity->IsLocked());
+        }
+    }
+
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockLocalTest)
+{
+    // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
+    // for EntityLock property
+    RunEntityLockTest(true);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockTest)
+{
+    // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+    // for EntityLock property
+    RunEntityLockTest(false);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+    EntitySystem->SetEntityPatchRateLimitEnabled(false);
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        const csp::common::String EntityName = "Entity";
+        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+    }
+
+    // Re-enter space to ensure updates were made to the server
+    {
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Log out
+        LogOut(UserSystem);
+
+        // Log in again
+        LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+        // Enter space
+        bool EntitiesCreated = false;
+
+        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+        {
+            EntitiesCreated = true;
+            EXPECT_TRUE(Success);
+        };
+
+        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+        EXPECT_TRUE(EntitiesCreated);
+    }
+
+    // Ensure Entity is still locked
+    {
+        SpaceEntity* Entity = EntitySystem->GetEntityByIndex(0);
+        EXPECT_TRUE(Entity->IsLocked());
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
 }
