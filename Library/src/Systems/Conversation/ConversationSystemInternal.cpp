@@ -114,7 +114,7 @@ namespace
     {
         return [AssetSystem, Collection, Asset, Data, FileName]()
         {
-            Asset->FileName = FileName + SpaceSystemHelpers::GetAssetFileExtension(Asset->MimeType);
+            Asset->FileName = FileName;
             return AssetSystem->UploadAssetDataEx(*Collection, *Asset, Data, csp::common::CancellationToken::Dummy());
         };
     }
@@ -835,8 +835,10 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
-    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
 
     auto ConversationAssetCollection = std::make_shared<AssetCollection>();
     auto AnnotationAsset = std::make_shared<Asset>();
@@ -976,8 +978,10 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
     const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
     const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
 
-    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
-    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
 
     auto MessageAssetCollection = std::make_shared<AssetCollection>();
     auto AnnotationAsset = std::make_shared<Asset>();
