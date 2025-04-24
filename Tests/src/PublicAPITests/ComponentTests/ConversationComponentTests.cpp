@@ -40,6 +40,8 @@ using namespace std::chrono_literals;
 namespace
 {
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+const std::vector<char> PngHeader = { static_cast<char>(0x89), static_cast<char>(0x50), static_cast<char>(0x4E), static_cast<char>(0x47),
+    static_cast<char>(0x0D), static_cast<char>(0x0A), static_cast<char>(0x1A), static_cast<char>(0x0A) };
 
 }
 
@@ -1606,8 +1608,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
     static const csp::common::Vector3 TestConversationAuthorCameraPosition { 1.f, 2.f, 3.f };
     static const csp::common::Vector4 TestConversationAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
     static constexpr const uint16_t TestConversationFov = 90;
-    static constexpr char* TestConversationAnnotationData = "Test";
-    static constexpr char* TestConversationAnnotationThumbnailData = "Test2";
+
+    std::vector<char> TestAnnotationDataV = PngHeader;
+    TestAnnotationDataV.push_back('1');
+    std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+    TestAnnotationDataV.push_back('2');
 
     // Create annotation attached to conversation
     {
@@ -1617,14 +1622,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         Data.VerticalFov = TestConversationFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestConversationAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestConversationAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestConversationAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestConversationAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -1638,11 +1643,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestConversationAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
-        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestConversationAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
     }
 
     // Get conversation annotation and ensure data still matches
@@ -1658,11 +1669,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestConversationAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
-        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestConversationAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
     }
 
     // Delete conversation annotation and ensure collection and assets are deleted
@@ -1706,8 +1723,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
     static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
     static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
     static constexpr const uint16_t TestFov = 100;
-    static constexpr char* TestAnnotationData = "Test3";
-    static constexpr char* TestAnnotationThumbnailData = "Test4";
+
+    std::vector<char> TestAnnotationData2V = PngHeader;
+    TestAnnotationData2V.push_back('3');
+    std::vector<char> TestAnnotationThumbnailData2V = PngHeader;
+    TestAnnotationData2V.push_back('4');
 
     // Create annotation attached to message
     {
@@ -1717,14 +1737,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationData2V.data();
+        AnnotationBufferData.BufferLength = TestAnnotationData2V.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData2V.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailData2V.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -1738,11 +1758,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationData2V, DataV);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailData2V, ThumbnailDataV);
     }
 
     // Get annotation and ensure data still matches
@@ -1758,11 +1784,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationData2V, DataV);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
-        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailData2V(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailData2V, ThumbnailData2V);
     }
 
     // Delete annotation and ensure collection and assets are deleted
@@ -1863,8 +1895,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr char* TestAnnotationData = "Test";
-        static constexpr char* TestAnnotationThumbnailData = "Test2";
+        std::vector<char> TestAnnotationDataV = PngHeader;
+        TestAnnotationDataV.push_back('1');
+        std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+        TestAnnotationDataV.push_back('2');
 
         AnnotationUpdateParams Data;
         Data.AuthorCameraPosition = { 1.f, 2.f, 3.f };
@@ -1872,14 +1906,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         Data.VerticalFov = 90;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -1954,8 +1988,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
-        static constexpr char* TestAnnotationData = "Test";
-        static constexpr char* TestAnnotationThumbnailData = "Test2";
+        std::vector<char> TestAnnotationDataV = PngHeader;
+        TestAnnotationDataV.push_back('1');
+        std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+        TestAnnotationDataV.push_back('2');
 
         AnnotationUpdateParams Data;
         Data.AuthorCameraPosition = { 1.f, 2.f, 3.f };
@@ -1963,14 +1999,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         Data.VerticalFov = 90;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent, SetAnnotation, RequestPredicate, FirstMessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2080,8 +2116,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         static const csp::common::Vector3 TestAuthorCameraPosition { 1.f, 2.f, 3.f };
         static const csp::common::Vector4 TestAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
         static constexpr const uint16_t TestFov = 90;
-        static constexpr char* TestAnnotationData = "Test";
-        static constexpr char* TestAnnotationThumbnailData = "Test2";
+        std::vector<char> TestAnnotationDataV = PngHeader;
+        TestAnnotationDataV.push_back('1');
+        std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+        TestAnnotationDataV.push_back('2');
 
         AnnotationUpdateParams Data;
         Data.AuthorCameraPosition = TestAuthorCameraPosition;
@@ -2089,14 +2127,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2108,9 +2146,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
         static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
         static constexpr const uint16_t TestFov = 100;
-        static constexpr char* TestAnnotationData = "Test3";
-        static constexpr char* TestAnnotationThumbnailData = "Test4";
         bool AssetOverwriteLogCalled = false;
+
+        std::vector<char> TestAnnotationDataV = PngHeader;
+        TestAnnotationDataV.push_back('3');
+        std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+        TestAnnotationDataV.push_back('4');
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
             [&AssetOverwriteLogCalled](const csp::common::String& Message)
@@ -2127,14 +2168,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         Data.VerticalFov = TestFov;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestAnnotationThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2150,11 +2191,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
 
         auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestAnnotationThumbnailData, static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData())) == 0);
+
+        const char* ResultThumbnailData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultThumbnailData, ResultThumbnailData + strlen(ResultThumbnailData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
@@ -2254,12 +2301,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
         AnnotationBufferData.BufferLength = 0;
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
         AnnotationThumbnailBufferData.Buffer = "";
         AnnotationThumbnailBufferData.BufferLength = 0;
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2290,12 +2337,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
         AnnotationBufferData.BufferLength = 0;
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
         AnnotationThumbnailBufferData.Buffer = "";
         AnnotationThumbnailBufferData.BufferLength = 0;
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2448,12 +2495,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
         AnnotationBufferData.BufferLength = 0;
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
         AnnotationThumbnailBufferData.Buffer = "";
         AnnotationThumbnailBufferData.BufferLength = 0;
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, "", Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2549,12 +2596,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         csp::systems::BufferAssetDataSource AnnotationBufferData;
         AnnotationBufferData.Buffer = "";
         AnnotationBufferData.BufferLength = 0;
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
         AnnotationThumbnailBufferData.Buffer = "";
         AnnotationThumbnailBufferData.BufferLength = 0;
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent2, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2674,10 +2721,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         EXPECT_EQ(Result.GetTotalCount(), 0);
     }
 
-    static constexpr char* TestAnnotationData = "AnnotationTest";
-    static constexpr char* TestAnnotationData2 = "AnnotationTest2";
-    static constexpr char* TestThumbnailData = "ThumbnailTest";
-    static constexpr char* TestThumbnailData2 = "ThumbnailTest2";
+    std::vector<char> TestAnnotationDataV = PngHeader;
+    TestAnnotationDataV.push_back('1');
+
+    std::vector<char> TestAnnotationData2V = PngHeader;
+    TestAnnotationData2V.push_back('2');
+
+    std::vector<char> TestThumbnailDataV = PngHeader;
+    TestThumbnailDataV.push_back('3');
+
+    std::vector<char> TestThumbnailData2V = PngHeader;
+    TestThumbnailData2V.push_back('4');
 
     // Add annotation to the first message
     {
@@ -2687,14 +2741,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestThumbnailData;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result]
             = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2712,7 +2766,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         auto [DownloadAnnotationResult]
             = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId]);
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestThumbnailData, static_cast<const char*>(DownloadAnnotationResult.GetData())) == 0);
+
+        const char* Data = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(Data, Data + strlen(Data));
+        EXPECT_EQ(TestThumbnailDataV, DataV);
     }
 
     // Add annotation to the second message
@@ -2723,14 +2780,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = TestAnnotationData;
-        AnnotationBufferData.BufferLength = strlen(TestAnnotationData);
-        AnnotationBufferData.SetMimeType("application/json");
+        AnnotationBufferData.Buffer = TestAnnotationData2V.data();
+        AnnotationBufferData.BufferLength = TestAnnotationData2V.size();
+        AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = TestThumbnailData2;
-        AnnotationThumbnailBufferData.BufferLength = strlen(TestThumbnailData2);
-        AnnotationThumbnailBufferData.SetMimeType("application/json");
+        AnnotationThumbnailBufferData.Buffer = TestThumbnailData2V.data();
+        AnnotationThumbnailBufferData.BufferLength = TestThumbnailData2V.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
 
         auto [Result] = AWAIT_PRE(
             ConversationComponent, SetAnnotation, RequestPredicate, MessageId2, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
@@ -2748,12 +2805,18 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         auto [DownloadAnnotationResult1]
             = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId]);
         EXPECT_EQ(DownloadAnnotationResult1.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestThumbnailData, static_cast<const char*>(DownloadAnnotationResult1.GetData())) == 0);
+
+        const char* Data = static_cast<const char*>(DownloadAnnotationResult1.GetData());
+        std::vector<char> DataV(Data, Data + strlen(Data));
+        EXPECT_EQ(TestThumbnailDataV, DataV);
 
         auto [DownloadAnnotationResult2]
             = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAssetsMap()[MessageId2]);
         EXPECT_EQ(DownloadAnnotationResult2.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_TRUE(strcmp(TestThumbnailData2, static_cast<const char*>(DownloadAnnotationResult2.GetData())) == 0);
+
+        const char* Data2 = static_cast<const char*>(DownloadAnnotationResult2.GetData());
+        std::vector<char> DataV2(Data2, Data2 + strlen(Data2));
+        EXPECT_EQ(TestThumbnailData2V, DataV2);
     }
 
     // Delete space
