@@ -372,7 +372,7 @@ public:
     void Lock();
 
     /// @brief Unlocks the entity if the entity is locked
-    /// @pre The entity must not already be locked.
+    /// @pre The entity must be locked.
     /// A CSP error will be sent to the LogSystem if this condition is not met.
     /// @post This internally sets the lock type as a dirty property.
     /// This entity should now be replicated, to process the change.
