@@ -2945,9 +2945,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
 
     // Invoke function for delete objects errors
     EXPECT_CALL(*SignalRMock, Invoke)
-        .WillOnce([](const std::string& /*DeleteObjectsMethodName*/, const signalr::value& /*DeleteEntityMessage*/,
-                      std::function<void(const signalr::value&, std::exception_ptr)> Callback)
-            { Callback(signalr::value("Irrelevant value from DeleteObjects"), std::make_exception_ptr(std::runtime_error("mock exception"))); });
+        .WillOnce(
+            [](const std::string& DeleteObjectsMethodName, const signalr::value& DeleteEntityMessage,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                Callback(Value, Except);
+                return async::make_task(std::make_tuple(Value, Except));
+            });
 
     // Then the error callback we be called with an no error code
     MockMultiplayerErrorCallback MockErrorCallback;
@@ -2982,13 +2988,21 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
                 if (HubMethodName == "DeleteObjects")
                 {
                     // Succeed deleting objects
-                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
                 else if (HubMethodName == "GetClientId")
                 {
                     // Fail getting client Id
-                    Callback(signalr::value("Irrelevant value from GetClientId"), std::make_exception_ptr(std::runtime_error("mock exception")));
+                    auto Value = signalr::value("Irrelevant value from GetClientId");
+                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    Callback(Value, Except);
+                    return async::make_task(std::make_tuple(Value, Except));
                 }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
 
     // Then the error callback we be called with no error code
@@ -3024,18 +3038,26 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
                 if (HubMethodName == "DeleteObjects")
                 {
                     // Succeed deleting objects
-                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
                 else if (HubMethodName == "GetClientId")
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
                 }
                 else if (HubMethodName == "StartListening")
                 {
                     // Fail to start listening
-                    Callback(signalr::value(std::uint64_t(0)), std::make_exception_ptr(std::runtime_error("mock exception")));
+                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    Callback(signalr::value(std::uint64_t(0)), Except);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), Except));
                 }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
 
     // Then the error callback we be called with no error code
@@ -3070,18 +3092,19 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
                 if (HubMethodName == "DeleteObjects")
                 {
                     // Succeed deleting objects
-                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "GetClientId")
+                else if ((HubMethodName == "GetClientId") || (HubMethodName == "StartListening"))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "StartListening")
-                {
-                    // Succeed starting listening
-                    Callback(signalr::value(std::uint64_t(0)), nullptr);
-                }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
 
     // Then the error callback will be called with no error
