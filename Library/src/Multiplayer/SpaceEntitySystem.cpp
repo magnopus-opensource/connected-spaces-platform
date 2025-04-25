@@ -26,6 +26,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/Continuations.h"
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
@@ -36,7 +37,6 @@
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
-
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
 #else
@@ -78,6 +78,10 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
 
             assert(false && "Unsupported Entity Id type!");
         }
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Recieved an ID result not formatted as an array")
     }
 
     return EntityId;
@@ -246,88 +250,139 @@ void SpaceEntitySystem::Shutdown()
     IsInitialised = false;
 }
 
+namespace
+{
+    // Only neccesary because we use the silly custom memory management (so we can define the unique_ptr type with the custom deleter), delete when we
+    // get rid of it.
+    struct SpaceEntityDeleter
+    {
+        void operator()(csp::multiplayer::SpaceEntity* ptr) const noexcept { CSP_DELETE(ptr); }
+    };
+
+    std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
+        const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant,
+        const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
+    {
+        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter>(
+            CSP_NEW csp::multiplayer::SpaceEntity(&SpaceEntitySystem, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant),
+            SpaceEntityDeleter {});
+
+        auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
+        AvatarComponent->SetAvatarId(AvatarId);
+        AvatarComponent->SetState(AvatarState);
+        AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
+        AvatarComponent->SetUserId(UserSystem.GetLoginState().UserId);
+
+        return NewAvatar;
+    }
+
+}
+
+async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
+{
+    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
+    // I suspect literally no one knows if this is still neccesary.
+    const signalr::value Param1((uint64_t)1ULL);
+    const std::vector Arr { Param1 };
+    const signalr::value Params(Arr);
+
+    return Connection->Invoke("GenerateObjectIds", Params, {})
+        .then(common::continuations::UnwrapSignalRResultOrThrow())
+        .then(
+            [](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
+            {
+                const auto NetworkId = ParseGenerateObjectIDsResult(Result);
+                return NetworkId;
+            })
+        .share();
+}
+
+std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SpaceEntitySystem::SendNewAvatarObjectMessage(
+    const csp::common::String& Name, const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState,
+    AvatarPlayMode AvatarPlayMode)
+{
+    return [Name, Transform, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
+    {
+        SignalRMsgPackEntitySerialiser Serialiser;
+        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform,
+            MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+        NewAvatar->Serialise(Serialiser);
+        const signalr::value SerialisedUser = Serialiser.Finalise();
+
+        // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
+        return Connection->Invoke("SendObjectMessage", std::vector<signalr::value> { SerialisedUser });
+    };
+}
+
+std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> SpaceEntitySystem::CreateNewLocalAvatar(
+    const csp::common::String& Name, const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState,
+    AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback)
+{
+    return [Name, Transform, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
+               std::tuple<async::shared_task<uint64_t>, async::task<void>> NetworkIdFromChain)
+    {
+        uint64_t NetworkId = std::get<0>(NetworkIdFromChain).get();
+
+        /* Note we're constructing the avatar redundantly, both here and in the serialization.
+         * The reasons for this are because the gap between where we would first need to construct the avatar prior to serialization and here
+         * is too large and has a network call in between it. We don't want the possibility for a leak.
+         * A better solution would be to chain proper ownership structures down the continuation, but we can't do that due to a lack
+         * of a place to put them, we can't release to the client because we need shared ownership to do safe threadless chaining, but we also
+         * cant chain shared ownership because we don't have a sink to put it.
+         *
+         * The solution to this is to make `Entities` (ie SpaceEntityList) a true owner and have it contain shared_ptrs.
+         * Then, we'd make the other containers (Avatars, etc), store weak_ptrs, the idea being that for any given object,
+         * CSP owns it "uniquely" (In that there's one container in CSP memory space that has a true owning type, shared_ptr in this
+         * instance), but also clients may own it, sharing the ownership with us. This interacts well with garbage collectors and removes
+         * pretty much all ownership consideration from clients.
+         * To do this, we would want to create our own CSP pointer type that is backed by a shared_ptr, so we can provide that to
+         * clients via the callback, and have shared ownership of this sort of thing across the DLL/SO boundary.
+         *
+         * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
+         * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
+         */
+        std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter> NewAvatar
+            = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform,
+                MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+
+        std::scoped_lock EntitiesLocker(*EntitiesLock);
+        // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
+        SpaceEntity* ReleasedAvatar = NewAvatar.release();
+        Entities.Append(ReleasedAvatar);
+        Avatars.Append(ReleasedAvatar);
+        ReleasedAvatar->ApplyLocalPatch(false);
+
+        if (ElectionManager != nullptr)
+        {
+            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars);
+        }
+        Callback(ReleasedAvatar);
+    };
+}
+
 void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, AvatarState InState,
     const csp::common::String& InAvatarId, AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback)
 {
-    const std::function<void(signalr::value, std::exception_ptr)> LocalIDCallback
-        = [this, InName, InSpaceTransform, InState, InAvatarId, InAvatarPlayMode, Callback](
-              const signalr::value& Result, const std::exception_ptr& Except)
-    {
-        try
-        {
-            if (Except)
+
+    // Ask the server for an avatar Id via "GenerateObjectIds"
+    async::shared_task<uint64_t> GetAvatarNetworkIdChain = RemoteGenerateNewAvatarId();
+
+    // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
+    async::task<void> SerializeAndSendChain
+        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode))
+              .then(common::continuations::UnwrapSignalRResultOrThrow<false>());
+
+    // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
+    // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
+    async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
+        .then(CreateNewLocalAvatar(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode, Callback))
+        .then(csp::common::continuations::InvokeIfExceptionInChain(
+            [Callback, this](const std::exception& Except)
             {
-                std::rethrow_exception(Except);
-            }
-        }
-        catch (const std::exception& e)
-        {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
-            Callback(nullptr);
-        }
-
-        const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-
-        auto* NewAvatar = CSP_NEW SpaceEntity(this);
-        NewAvatar->Type = SpaceEntityType::Avatar;
-        const auto ID = ParseGenerateObjectIDsResult(Result);
-        NewAvatar->Id = ID;
-        NewAvatar->Name = InName;
-        NewAvatar->Transform = InSpaceTransform;
-        NewAvatar->OwnerId = MultiplayerConnectionInst->GetClientId();
-        NewAvatar->IsTransferable = false;
-        NewAvatar->IsPersistant = false;
-
-        auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
-        AvatarComponent->SetAvatarId(InAvatarId);
-        AvatarComponent->SetState(InState);
-        AvatarComponent->SetAvatarPlayMode(InAvatarPlayMode);
-        AvatarComponent->SetUserId(UserSystem->GetLoginState().UserId);
-
-        SignalRMsgPackEntitySerialiser Serialiser;
-
-        NewAvatar->Serialise(Serialiser);
-        const auto SerialisedUser = Serialiser.Finalise();
-
-        const std::vector InvokeArguments = { SerialisedUser };
-
-        const std::function LocalSendCallback = [this, Callback, NewAvatar](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-        {
-            try
-            {
-                if (Except)
-                {
-                    std::rethrow_exception(Except);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", e.what());
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
                 Callback(nullptr);
-            }
-
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-            Entities.Append(NewAvatar);
-            Avatars.Append(NewAvatar);
-            NewAvatar->ApplyLocalPatch(false);
-
-            if (ElectionManager != nullptr)
-            {
-                ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
-            }
-            Callback(NewAvatar);
-        };
-
-        Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
-    };
-
-    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
-
-    const signalr::value Params(Arr);
-    Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
+            }));
 }
 
 void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
@@ -751,8 +806,8 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
         && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
     {
-        // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges', etc.
-        // CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
+        // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
+        // etc. CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
         return;
     }
 
