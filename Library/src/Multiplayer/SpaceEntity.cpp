@@ -1176,8 +1176,9 @@ bool SpaceEntity::IsModifiable() const
     }
 
     if (EntityLock == LockType::UserAgnostic &&
-        // In the case where we are about to unlock a locked entity,
-        // we want to treat it as if it's unlocked so we can modify it.
+        // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
+        // so we skip the lock check they are about to unlock.
+        // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
         (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE) == false))
     {
         return false;
