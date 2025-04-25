@@ -207,8 +207,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 		model.isVisible = false;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(StaticModelScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 

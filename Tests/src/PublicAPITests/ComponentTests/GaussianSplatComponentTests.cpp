@@ -187,11 +187,11 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
     )xx";
 
     ScriptComponent->SetScriptSource(ScriptSource.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
     EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(0.0f, 0.1f, 0.2f));

@@ -215,11 +215,11 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
