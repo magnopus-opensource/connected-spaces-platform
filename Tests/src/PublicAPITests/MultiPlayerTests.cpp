@@ -3217,6 +3217,7 @@ void RunEntityLockTest(bool Local)
 
     // If local is false, test DeserialiseFromPatch functionality
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
 
     {
         // Create Entity
