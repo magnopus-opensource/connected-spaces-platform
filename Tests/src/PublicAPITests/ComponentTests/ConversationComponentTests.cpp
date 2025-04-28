@@ -1439,13 +1439,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoConversationPermissionsErrorLog, Message);
+                    if (Message == NoConversationPermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateConversation, RequestPredicate, {});
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
@@ -1457,13 +1460,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                    if (Message == NoMessagePermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, UpdateMessage, RequestPredicate, MessageId, {});
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
@@ -1475,13 +1481,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
                 [&CallbackCalled](const csp::common::String& Message)
                 {
-                    CallbackCalled = true;
-                    EXPECT_EQ(NoMessagePermissionsErrorLog, Message);
+                    if (Message == NoMessagePermissionsErrorLog)
+                    {
+                        CallbackCalled = true;
+                    }
                 });
 
             auto [Result] = AWAIT_PRE(RetrievedConversationComponent, DeleteMessage, RequestPredicate, MessageId);
             EXPECT_EQ(Result.GetHttpResultCode(), 0);
             EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+            EXPECT_TRUE(CallbackCalled);
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
         }
