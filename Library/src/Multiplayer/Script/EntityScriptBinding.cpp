@@ -147,7 +147,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (static_cast<int32_t>(Entity->GetId()) == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
@@ -170,7 +170,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (static_cast<int32_t>(Entity->GetId()) == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;

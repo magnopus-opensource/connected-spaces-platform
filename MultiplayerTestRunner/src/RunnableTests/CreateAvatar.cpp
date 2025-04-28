@@ -56,6 +56,8 @@ void RunTest()
     EntitySystem.CreateAvatar(UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
         [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
+    ResultFuture.get();
+
     EntitySystem.ProcessPendingEntityOperations();
 
     // This is a hail mary attempt to get this to stop being flaky on CI. CHS is known to sometimes have a processing delay, which is unfortunate.
