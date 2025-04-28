@@ -131,7 +131,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     HttpPayload Payload;
 
-    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
+    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -147,6 +147,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
     JsonDoc.AddMember("job", "builder", JsonDoc.GetAllocator());
 
     Payload.SetContent(JsonDoc);
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, Payload, EResponseCodes::ResponseOK);
 
@@ -166,6 +167,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
     Payload.SetContent(JsonDoc);
 
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseOK);
 
@@ -177,6 +179,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
 
