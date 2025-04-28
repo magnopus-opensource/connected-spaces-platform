@@ -22,7 +22,6 @@
 
 #include "gtest/gtest.h"
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_DEFAULT_CONSTRUCT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, DefaultConstructTest)
 {
     const csp::multiplayer::SpaceTransform SpaceTransform;
@@ -30,9 +29,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, DefaultConstructTest)
     EXPECT_EQ(SpaceTransform.Rotation, csp::common::Vector4::Identity());
     EXPECT_EQ(SpaceTransform.Scale, csp::common::Vector3::One());
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_CONSTRUCT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, ConstructTest)
 {
     const csp::common::Vector3 Pos { 1.0f, 2.0f, 3.0f };
@@ -44,9 +41,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, ConstructTest)
     EXPECT_EQ(SpaceTransform.Rotation, Rot);
     EXPECT_EQ(SpaceTransform.Scale, Scale);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_EQUALITY_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, EqualityTest)
 {
     const csp::common::Vector3 Pos { 1.0f, 2.0f, 3.0f };
@@ -60,18 +55,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, EqualityTest)
     EXPECT_EQ(SpaceTransform1, SpaceTransform2);
     EXPECT_NE(SpaceTransform1, SpaceTransformIdentity);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_MULTIPLICATION_IDENTITY_AXIOM_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityAxiomTest)
 {
     // Two identity matrices should be identity
     const csp::multiplayer::SpaceTransform Identity;
     EXPECT_EQ((Identity * Identity), Identity);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_MULTIPLICATION_IDENTITY_TRANSFORM_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityTransformTest)
 {
     const csp::multiplayer::SpaceTransform Identity;
@@ -91,9 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityTransformT
     EXPECT_EQ((Identity * Scaled), Scaled);
     EXPECT_EQ((Scaled * Identity), Scaled);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_MULTIPLICATION_TRS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
 {
     const csp::multiplayer::SpaceTransform Identity;
@@ -119,9 +108,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
 
     EXPECT_EQ(Output.Scale, (csp::common::Vector3 { 2.0f, 1.0f, 4.0f }));
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_MULTIPLICATION_NON_NORMAL_QUAT_TRS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTestNonNormalQuat)
 {
     const csp::multiplayer::SpaceTransform Identity;
@@ -148,4 +135,3 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTestNonNormalQu
 
     EXPECT_EQ(Output.Scale, (csp::common::Vector3 { 2.0f, 1.0f, 4.0f }));
 }
-#endif

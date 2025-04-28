@@ -40,9 +40,6 @@
 using namespace csp::common;
 using namespace csp::systems;
 
-namespace SystemResultsTest
-{
-
 typedef std::function<void(const NullResult& Result)> NullResultCallback;
 
 #ifdef CSP_WASM
@@ -113,17 +110,14 @@ void NullResultTestFunction(NullResultCallback Callback)
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SYSTEMRESULT_TESTS || RUN_SYSTEMRESULT_NULLRESULT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, NullResultTest)
 {
     NullResultCallback NullTestCallback
         = [this](const NullResult& _Result) { EXPECT_EQ(_Result.GetResultCode(), csp::systems::EResultCode::Success); };
     NullResultTestFunction(NullTestCallback);
 }
-#endif
 
 // BaseResult
-#if RUN_ALL_UNIT_TESTS || RUN_SYSTEMRESULT_TESTS || RUN_SYSTEMRESULT_BASERESULT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 {
     const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
@@ -154,6 +148,3 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     EXPECT_EQ(MyRequest->GetPayload().GetContent(), "1234");
     EXPECT_EQ(ResponseBase.GetResponseCode(), csp::services::EResponseCode::ResponseSuccess);
 }
-#endif
-
-} // namespace SystemResultsTest

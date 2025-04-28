@@ -34,8 +34,8 @@
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -633,7 +633,7 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
         });
 }
 
-void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
+void SpaceEntitySystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection)
 {
     Connection = InConnection;
 
@@ -1041,24 +1041,6 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
     }
 }
 
-ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
-{
-    // Search for component id across all entites
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ComponentBase* Component = Entities[i]->GetComponents()->operator[](Id);
-
-        if (Component)
-        {
-            return Component;
-        }
-    }
-
-    CSP_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
-
-    return nullptr;
-}
-
 const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
@@ -1146,7 +1128,7 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
     PendingAdds->emplace_back(EntityToAdd);
 }
 
-void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
+void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
 {
     const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {

@@ -17,8 +17,6 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "signalrclient/signalr_value.h"
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_SPACE_HELPER_TESTS)
-
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 #include "TestHelpers.h"
@@ -40,5 +38,3 @@ CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
         UniqueHexStrings[i] = HexValue;
     }
 }
-
-#endif

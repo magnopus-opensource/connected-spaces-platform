@@ -20,7 +20,6 @@
 
 using namespace csp::multiplayer;
 
-#if RUN_ALL_UNIT_TESTS || RUN_REPLICATEDVALUE_TESTS
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, InvalidTest)
 {
     ReplicatedValue MyValue;
@@ -226,4 +225,3 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapAssignmentTest)
     EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::StringMap);
     EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
-#endif

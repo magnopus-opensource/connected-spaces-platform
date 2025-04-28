@@ -47,7 +47,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
     Tests that ConversationSpaceComponents default properties are correct on construction.
     Also tests that the properties are correctly set using setters.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_PROPERTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
 {
     SetRandSeed();
@@ -123,12 +122,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPropertyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
     Tests that ConversationSpaceComponents can be sucessfully modified by scripts
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 {
     SetRandSeed();
@@ -202,13 +199,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
     Tests that ConversationSpaceComponents can sucessfully create, update and deleted messages and components.
     Also ensures all callback values are correct.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 {
     SetRandSeed();
@@ -368,9 +363,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_PREREQUISITES_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisitesTest)
 {
     SetRandSeed();
@@ -617,12 +610,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
     Ensures the ConversationComponent::GetNumberOfReplies work with a varying amount of messages.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_GETNUMBEROFREPLIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRepliesTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -733,12 +724,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRe
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
     Ensures the ConversationComponent::GetMessagesFromConversation work with a varying amount of messages.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_GETMESSAGESFROMCONVERSATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFromConversationTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -885,12 +874,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFr
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
     Ensures that when deleting the ConversationComponent, it internally calls DeleteConversation
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 {
     SetRandSeed();
@@ -973,12 +960,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 /*
 Tests that all conversation multiplayer events are correctly sent to their componenets,
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_EVENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1199,14 +1184,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
 /*
 Tests that the CreateConversaiton event is correctly received and processed by other clients.
 Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
 correctly when receiving the component property from a patch, which has been created by the ConversationSpaceComponent::CreateConversation call.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATIONCOMPONENT_SECOND_CLIENT_EVENT_DELAY_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1347,13 +1330,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     LogOut(UserSystem);
 }
 
-#endif
-
 /*
 Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
 Other clients can still delete other conversations, as components/entities dont have any restrictions.
 */
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATIONCOMPONENT_PERMISSIONS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1544,4 +1524,3 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
     // Log out
     LogOut(UserSystem);
 }
-#endif

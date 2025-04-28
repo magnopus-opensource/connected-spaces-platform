@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------
-// Copyright (c) Magnopus. All Rights Reserved.
+// Copyright (c) Magnopus LLC. All Rights Reserved.
 // ------------------------------------------------------------------
 
 #if ENABLE_IL2CPP

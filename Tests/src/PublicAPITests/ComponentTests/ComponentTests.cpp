@@ -44,7 +44,6 @@ namespace
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
@@ -269,4 +268,3 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif

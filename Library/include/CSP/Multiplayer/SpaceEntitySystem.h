@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
 
+#include <chrono>
 #include <deque>
 #include <functional>
 #include <list>
@@ -59,7 +60,7 @@ namespace csp::multiplayer
 
 class ClientElectionManager;
 class MultiplayerConnection;
-class SignalRConnection;
+class ISignalRConnection;
 class SpaceEntity;
 class SpaceTransform;
 
@@ -202,8 +203,8 @@ public:
     /// Note that this is already called in MultiplayerConnection::Connect, so this shouldn't need to be called anywhere else.
     /// This should not be called by client code directly, marked as No Export.
     ///
-    /// @param InConnection csp::multiplayer::SignalRConnection : A pointer to the connection object to be used by the system.
-    CSP_NO_EXPORT void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
+    /// @param InConnection csp::multiplayer::ISignalRConnection : A pointer to the connection object to be used by the system.
+    CSP_NO_EXPORT void SetConnection(csp::multiplayer::ISignalRConnection* InConnection);
 
     /// @brief Sets a callback to be executed when all existing entities have been retrieved after entering a space.
     /// @param Callback CallbackHandler : the callback to execute.
@@ -284,14 +285,6 @@ public:
     /// @return The id of the leader.
     uint64_t GetLeaderId() const;
 
-    /// @brief Finds a component by the given id.
-    ///
-    /// Searchs through all components of all entites so should be used sparingly.
-    ///
-    /// @param Id The id of the component to find.
-    /// @return A pointer to the found component which can be nullptr if the component is not found.
-    ComponentBase* FindComponentById(uint16_t Id);
-
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
     const bool GetEntityPatchRateLimitEnabled() const;
@@ -328,7 +321,7 @@ private:
     ~SpaceEntitySystem();
 
     MultiplayerConnection* MultiplayerConnectionInst;
-    csp::multiplayer::SignalRConnection* Connection;
+    csp::multiplayer::ISignalRConnection* Connection;
 
     using SpaceEntityQueue = std::deque<SpaceEntity*>;
     using PatchMessageQueue = std::deque<signalr::value*>;

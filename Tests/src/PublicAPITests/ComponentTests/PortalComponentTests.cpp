@@ -40,7 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_PORTAL_TESTS || RUN_USE_PORTAL_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 {
     SetRandSeed();
@@ -130,9 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PORTAL_TESTS || RUN_PORTAL_THUMBNAIL_TEST
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 {
     SetRandSeed();
@@ -214,9 +213,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PORTAL_TESTS || RUN_PORTAL_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 {
     SetRandSeed();
@@ -301,7 +298,3 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-
-#endif
-
-} // namespace

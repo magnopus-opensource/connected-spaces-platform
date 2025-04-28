@@ -69,7 +69,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 } // namespace
 
 // Tests that events are correctly sent to the correct component from the conversation system
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_EVENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -176,11 +175,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
 // Tests that events are correctly stored, and then sent when the corresponding component exists.
 // This can happen if a multiplayer event reaches another client before they have processed their component creation patch.
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_EVENT_DELAY_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -257,4 +254,3 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif

@@ -38,7 +38,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_COLLISION_TESTS || RUN_MULTIPLAYER_COLLISION_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 {
     SetRandSeed();
@@ -127,6 +128,3 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace
