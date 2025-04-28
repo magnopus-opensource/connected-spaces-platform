@@ -1172,7 +1172,9 @@ bool SpaceEntity::IsModifiable() const
 {
     if (EntitySystem == nullptr || csp::systems::SystemsManager::Get().GetMultiplayerConnection() == nullptr)
     {
-        return false;
+        // Return true here so entities that arent attached to the entity system can be modified.
+        // This is currently used for testing.
+        return true;
     }
 
     if (EntityLock == LockType::UserAgnostic &&
