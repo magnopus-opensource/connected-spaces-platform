@@ -129,9 +129,9 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     ResponseReceiver Receiver;
 
     // Synthesise a response to feed to ApiResponseBase
-    csp::web::HttpPayload* MyHttpPayload = CSP_NEW csp::web::HttpPayload(MyTestPayload);
+    csp::web::HttpPayload MyHttpPayload(MyTestPayload);
     csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(
-        WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(), *MyHttpPayload, &Receiver, csp::common::CancellationToken::Dummy());
+        WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(), MyHttpPayload, &Receiver, csp::common::CancellationToken::Dummy());
     MyTestRequest.SetRequestProgress(1.0f);
     MyTestRequest.SetResponseCode(MyTestResponseCode);
 
@@ -148,6 +148,4 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     csp::web::HttpRequest* MyRequest = ResponseBase.GetResponse()->GetRequest();
     EXPECT_EQ(MyRequest->GetPayload().GetContent(), "1234");
     EXPECT_EQ(ResponseBase.GetResponseCode(), csp::services::EResponseCode::ResponseSuccess);
-
-    CSP_DELETE(MyHttpPayload);
 }
