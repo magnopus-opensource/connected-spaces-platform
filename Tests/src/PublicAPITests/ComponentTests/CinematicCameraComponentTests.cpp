@@ -260,8 +260,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 		cinematicCamera.isViewerCamera = true;
 	)xx";
 
-    CreatedObject->GetScript()->SetScriptSource(CinematicCameraScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(CinematicCameraScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 

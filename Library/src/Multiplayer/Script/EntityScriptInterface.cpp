@@ -208,17 +208,17 @@ int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
 
 void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
 {
-    Entity->GetScript()->SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());
+    Entity->GetScript().SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());
 }
 
 void EntityScriptInterface::SubscribeToMessage(std::string Message, std::string MessageParamsJson)
 {
-    Entity->GetScript()->SubscribeToMessage(Message.c_str(), MessageParamsJson.c_str());
+    Entity->GetScript().SubscribeToMessage(Message.c_str(), MessageParamsJson.c_str());
 }
 
 void EntityScriptInterface::PostMessageToScript(std::string Message, std::string MessageParamsJson)
 {
-    Entity->GetScript()->PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
+    Entity->GetScript().PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
 }
 
 void EntityScriptInterface::ClaimScriptOwnership() { Entity->ClaimScriptOwnership(); }

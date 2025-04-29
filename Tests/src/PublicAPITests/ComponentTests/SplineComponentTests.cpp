@@ -190,8 +190,8 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 		
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(SplineScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(SplineScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 

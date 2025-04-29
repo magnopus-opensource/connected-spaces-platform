@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/IEntitySerialiser.h"
+#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 #include "CSP/ThirdPartyPlatforms.h"
 #include "SpaceEntitySystem.h"
@@ -28,6 +29,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <mutex>
 
 CSP_START_IGNORE
@@ -43,7 +45,6 @@ CSP_END_IGNORE
 namespace csp::multiplayer
 {
 class SpaceEntitySystem;
-class EntityScript;
 class EntityScriptInterface;
 
 /// @brief Enum used to specify the the type of a space entity
@@ -309,7 +310,7 @@ public:
 
     /// @brief Serialise the entire SpaceEntity into object message format into the given serialiser. Does not send a message.
     /// @param Serialiser IEntitySerialiser : The serialiser to use.
-    void Serialise(IEntitySerialiser& Serialiser);
+    void Serialise(IEntitySerialiser& Serialiser) const;
 
     /// @brief Serialises a given component into a consistent format for the given serialiser.
     /// @param Serialiser IEntitySerialiser : The serialiser to use.
@@ -322,7 +323,7 @@ public:
 
     /// @brief Gets the script associated with the space entity.
     /// @return The EntityScript instance set on the entity.
-    csp::multiplayer::EntityScript* GetScript();
+    EntityScript& GetScript();
 
     /// @brief Returns the selection state of the entity.
     /// @return Selection state of the entity, Selected = True, Deselected = False.
@@ -364,12 +365,8 @@ private:
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
     void AddDirtyComponent(ComponentBase* DirtyComponent);
 
-    void AddRef();
-    void RemoveRef();
-    std::atomic_int* GetRefCount();
-
     void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
-    csp::multiplayer::EntityScriptInterface* GetScriptInterface();
+    EntityScriptInterface* GetScriptInterface();
 
     void ClaimScriptOwnership();
     void MarkForUpdate();
@@ -413,14 +410,14 @@ private:
     csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
     uint16_t NextComponentId;
 
-    csp::multiplayer::EntityScript* Script;
-    csp::multiplayer::EntityScriptInterface* ScriptInterface;
+    EntityScript Script;
+    std::unique_ptr<EntityScriptInterface> ScriptInterface;
 
-    std::mutex* EntityLock;
-    std::mutex* ComponentsLock;
-    std::mutex* PropertiesLock;
-
-    std::atomic_int* RefCount;
+    CSP_START_IGNORE
+    mutable std::mutex EntityLock;
+    mutable std::mutex ComponentsLock;
+    mutable std::mutex PropertiesLock;
+    CSP_END_IGNORE
 
     csp::common::List<uint16_t> TransientDeletionComponentIds;
 
