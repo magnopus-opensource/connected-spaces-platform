@@ -172,7 +172,9 @@ inline double RandomRangeDouble(double Min, double Max)
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString()
 {
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+    std::random_device rd;
+    std::mt19937_64 rng(rd());
+    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator(rng);
     const UUIDv4::UUID uuid = uuidGenerator.getUUID();
 
     return uuid.str();
