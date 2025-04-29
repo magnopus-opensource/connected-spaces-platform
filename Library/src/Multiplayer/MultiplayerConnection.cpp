@@ -63,7 +63,14 @@ std::pair<ErrorCode, std::string> MultiplayerConnection::ParseMultiplayerErrorFr
 {
     try
     {
-        rethrow_exception(Exception);
+        if (Exception)
+        {
+            rethrow_exception(Exception);
+        }
+        else
+        {
+            return { ErrorCode::Unknown, "MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr, Unexpectedly no exception was thrown." };
+        }
     }
     catch (const std::exception& e)
     {
