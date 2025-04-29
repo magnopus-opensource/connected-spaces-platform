@@ -131,6 +131,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     HttpPayload Payload;
 
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
