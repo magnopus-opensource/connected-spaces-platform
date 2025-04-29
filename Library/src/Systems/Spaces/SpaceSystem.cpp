@@ -486,7 +486,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpace(this, CurrentSpace, InviteUsers))
-        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
             [CurrentSpace, Callback]()
@@ -567,7 +567,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpace(this, CurrentSpace, InviteUsers))
-        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
             [CurrentSpace, Callback]()
