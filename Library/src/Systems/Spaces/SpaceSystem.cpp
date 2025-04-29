@@ -453,6 +453,19 @@ bool SpaceSystem::IsInSpace() { return !CurrentSpace.Id.IsEmpty(); }
 
 const Space& SpaceSystem::GetCurrentSpace() const { return CurrentSpace; }
 
+/*
+ * ** CreateSpace Flow **
+ * CreateSpace
+ * AssertRequestSuccessOrError (CreateSpace Validation)
+ * CreateSpaceMetadataAssetCollection
+ * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
+ * CreateAndUploadSpaceThumbnailToSpace
+ * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailToSpace Validation)
+ * BulkInviteUsersToSpace
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpace Validation)
+ * Promotes the created space through the SpaceResultCallback
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
+ */
 void SpaceSystem::CreateSpace(const String& Name, const String& Description, SpaceAttributes Attributes,
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const Optional<FileAssetDataSource>& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
@@ -521,6 +534,19 @@ async::task<SpaceResult> SpaceSystem::CreateSpace(const String& Name, const Stri
     return OnCompleteTask;
 }
 
+/*
+ * ** CreateSpaceWithBuffer Flow **
+ * CreateSpace
+ * AssertRequestSuccessOrError (CreateSpace Validation)
+ * CreateSpaceMetadataAssetCollection
+ * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
+ * CreateAndUploadSpaceThumbnailWithBufferToSpace
+ * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailWithBufferToSpace Validation)
+ * BulkInviteUsersToSpace
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpace Validation)
+ * Promotes the created space through the SpaceResultCallback
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
+ */
 void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Description, SpaceAttributes Attributes,
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const BufferAssetDataSource& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
