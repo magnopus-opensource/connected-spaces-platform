@@ -157,17 +157,17 @@ std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
 
         return CreateSpaceThumbnailAssetCollection(AssetSystem, Space)
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully created space thumbnail asset collection.",
-                "Logged in user does not have permission to create this group. Failed to create space thumbnail asset collection.", {}, {}, {}))
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset collection.",
+                "Failed to create space thumbnail asset collection.", {}, {}, {}))
             .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
             .then(CreateSpaceThumbnailAsset(AssetSystem, Space, ThumbnailAssetCollection))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully created space thumbnail asset.",
-                "Logged in user does not have permission to create this group. Failed to create space thumbnail asset.", {}, {}, {}))
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset.",
+                "Failed to create space thumbnail asset.", {}, {}, {}))
             .then(UploadSpaceThumbnailAsset(AssetSystem, ThumbnailAssetCollection, *Data))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully upload space thumbnail asset.",
-                "Logged in user does not have permission to create this group. Failed to upload space thumbnail asset.", {}, {}, {}));
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully upload space thumbnail asset.",
+                "Failed to upload space thumbnail asset.", {}, {}, {}));
     };
 }
 
@@ -183,17 +183,17 @@ std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferT
 
         return CreateSpaceThumbnailAssetCollection(AssetSystem, Space)
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully created space thumbnail asset collection.",
-                "Logged in user does not have permission to create this group. Failed to create space thumbnail asset collection.", {}, {}, {}))
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset collection.",
+                "Failed to create space thumbnail asset collection.", {}, {}, {}))
             .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
             .then(CreateSpaceThumbnailAsset(AssetSystem, Space, ThumbnailAssetCollection))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully created space thumbnail asset.",
-                "Logged in user does not have permission to create this group. Failed to create space thumbnail asset.", {}, {}, {}))
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset.",
+                "Failed to create space thumbnail asset.", {}, {}, {}))
             .then(UploadSpaceThumbnailAssetWithBuffer(AssetSystem, ThumbnailAssetCollection, Data))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
-                "SpaceSystem::CreateSpace, successfully upload space thumbnail asset.",
-                "Logged in user does not have permission to create this group. Failed to upload space thumbnail asset.", {}, {}, {}));
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully upload space thumbnail asset.",
+                "Failed to upload space thumbnail asset.", {}, {}, {}));
     };
 }
 
@@ -557,18 +557,18 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 
     CreateSpaceWithBuffer(Name, Description, Attributes, InviteUsers, Metadata, Thumbnail, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
-            Callback, "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
         .then(CreateSpaceMetadataAssetCollection(AssetSystem, CurrentSpace, Metadata))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
-            "SpaceSystem::CreateSpace, successfully created space metadata asset collection.", "Failed to create space metadata asset collection.",
-            {}, {}, {}))
+            "SpaceSystem::CreateSpaceWithBuffer, successfully created space metadata asset collection.",
+            "Failed to create space metadata asset collection.", {}, {}, {}))
         .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(AssetSystem, CurrentSpace, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
-            Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpace(this, CurrentSpace, InviteUsers))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
             [CurrentSpace, Callback]()
             {
