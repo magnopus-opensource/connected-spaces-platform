@@ -228,11 +228,11 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
     EXPECT_EQ(ImageComponent->GetIsVisible(), false);

@@ -174,9 +174,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         Object->QueueUpdate();
@@ -306,11 +306,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         EXPECT_EQ(AnimatedModelComponent->GetPosition().X, 10.f);
@@ -396,8 +396,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -474,8 +474,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     std::string AvatarOKOScriptText = R"xx(
 
@@ -485,8 +485,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -571,7 +571,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -682,7 +682,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -818,7 +818,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
 
@@ -849,7 +849,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     // Re-add script component
     ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
 
@@ -949,11 +949,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
     }
 
@@ -1073,8 +1073,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
-    CreatedObject->GetScript()->SetScriptSource(ScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(ScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -1265,9 +1265,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
         // phew! now we have that we can attempt to modify script source again and re-invoke - this is the part that we really want to test
         // can we successfully modify a pre-existing script, and re-invoke it without script errors?
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
     }
 

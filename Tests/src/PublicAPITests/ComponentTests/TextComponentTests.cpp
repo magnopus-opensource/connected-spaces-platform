@@ -221,8 +221,8 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     )xx";
 
     ScriptComponent->SetScriptSource(TextScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    CreatedObject->GetScript().Invoke();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
     EntitySystem->ProcessPendingEntityOperations();
 
