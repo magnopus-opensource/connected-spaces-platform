@@ -338,6 +338,46 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithThumbnailTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    FileAssetDataSource SpaceThumbnail;
+    const std::string LocalFileName = "OKO.png";
+    const auto FilePath = std::filesystem::absolute("assets/" + LocalFileName);
+    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.SetMimeType("image/png");
+
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
+
+    auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_TRUE(IsUriValid(GetThumbnailResult.GetUri().c_str(), LocalFileName));
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithTagsTest)
 {
     SetRandSeed();
@@ -451,6 +491,82 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
     ::Space Space;
     CreateSpaceWithBuffer(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, BufferSource, nullptr, Space);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
+    FILE* UploadFile = nullptr;
+    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
+
+    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
+    auto* UploadFileData = new unsigned char[UploadFileSize];
+    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    fclose(UploadFile);
+
+    BufferAssetDataSource SpaceThumbnail;
+    SpaceThumbnail.Buffer = UploadFileData;
+    SpaceThumbnail.BufferLength = UploadFileSize;
+
+    SpaceThumbnail.SetMimeType("image/png");
+
+    ::Space Space;
+    CreateSpaceWithBuffer(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
+
+    {
+        auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+        EXPECT_FALSE(Result.GetUri().IsEmpty());
+
+        auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+        EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+        printf("Downloading asset data...\n");
+
+        // Get asset uri
+        auto [uri_Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+        ::Asset Asset;
+        Asset.FileName = "test.json";
+        Asset.Uri = uri_Result.GetUri();
+        // Get data
+        auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
+
+        EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
+        auto DownloadedAssetData = new uint8_t[DownloadedAssetDataSize];
+        memcpy(DownloadedAssetData, Download_Result.GetData(), DownloadedAssetDataSize);
+
+        EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
+        EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData, UploadFileSize), 0);
+
+        delete[] UploadFileData;
+        delete[] DownloadedAssetData;
+    }
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
