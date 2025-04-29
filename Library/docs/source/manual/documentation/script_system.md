@@ -15,7 +15,7 @@ The JavaScript code is compiled to bytecode and interpreted by [QuickJS Javascri
 
 To access the script on a CSP Entity we use the following:
 
-`EntityScript* Script = Entity->GetScript();`
+`EntityScript& Script = Entity.GetScript();`
 
 There are several useful things you can do with `EntityScript`, including updating the script, invoking it directly, checking for errors, and getting error messages back. For more information on the API, head over [here](https://builds.magnoboard.com/connected-spaces-platform/api/classcsp_1_1multiplayer_1_1_entity_script.html#class-documentation).
 

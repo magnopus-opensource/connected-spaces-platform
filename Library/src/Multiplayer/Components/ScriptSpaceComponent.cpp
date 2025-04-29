@@ -29,7 +29,7 @@ ScriptSpaceComponent::ScriptSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)] = static_cast<int64_t>(0);
     Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope)] = static_cast<int64_t>(ScriptScope::Owner);
 
-    Parent->GetScript()->SetScriptSpaceComponent(this);
+    Parent->GetScript().SetScriptSpaceComponent(this);
 }
 
 const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
@@ -42,7 +42,7 @@ void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
     // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
 
     SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
-    Parent->GetScript()->OnSourceChanged(Value);
+    Parent->GetScript().OnSourceChanged(Value);
 }
 
 int64_t ScriptSpaceComponent::GetOwnerId() const { return GetIntegerProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)); }
@@ -67,11 +67,11 @@ void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedVa
     {
         // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
-        Parent->GetScript()->Bind();
-        Parent->GetScript()->Invoke();
+        Parent->GetScript().Bind();
+        Parent->GetScript().Invoke();
     }
 }
 
-void ScriptSpaceComponent::OnRemove() { Parent->GetScript()->Shutdown(); }
+void ScriptSpaceComponent::OnRemove() { Parent->GetScript().Shutdown(); }
 
 } // namespace csp::multiplayer

@@ -205,8 +205,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
     )xx";
 
     ScriptComponent->SetScriptSource(HotspotScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    CreatedObject->GetScript().Invoke();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
     EntitySystem->ProcessPendingEntityOperations();
 

@@ -175,8 +175,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
             conversation.conversationCameraRotation = [11, 12, 13, 14];
 		)xx";
 
-    Object->GetScript()->SetScriptSource(ConversationScriptText.c_str());
-    Object->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(ConversationScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 

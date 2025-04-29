@@ -496,15 +496,15 @@ SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InNam
 
 void SpaceEntitySystem::RegisterEntityScriptAsModule(SpaceEntity* NewEntity)
 {
-    EntityScript* Script = NewEntity->GetScript();
-    Script->RegisterSourceAsModule();
+    EntityScript& Script = NewEntity->GetScript();
+    Script.RegisterSourceAsModule();
 }
 
 void SpaceEntitySystem::BindNewEntityToScript(SpaceEntity* NewEntity)
 {
-    EntityScript* Script = NewEntity->GetScript();
-    Script->Bind();
-    Script->Invoke();
+    EntityScript& Script = NewEntity->GetScript();
+    Script.Bind();
+    Script.Invoke();
 }
 
 void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
@@ -822,24 +822,24 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     // Register all scripts for import
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
-        Script->RegisterSourceAsModule();
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.RegisterSourceAsModule();
     }
 
     // Bind and invoke all scripts
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
+        EntityScript& Script = Entities[i]->GetScript();
 
-        Script->Bind();
-        Script->Invoke();
+        Script.Bind();
+        Script.Invoke();
     }
 
     // Tell all scripts that all entities are now loaded
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
-        Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
 
     if (IsLeaderElectionEnabled())
@@ -938,7 +938,7 @@ void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        if (Entities[i]->GetScript()->GetOwnerId() == ClientId)
+        if (Entities[i]->GetScript().GetOwnerId() == ClientId)
         {
             ClaimScriptOwnership(Entities[i]);
         }
@@ -961,7 +961,7 @@ void SpaceEntitySystem::TickEntityScripts()
         {
             for (size_t i = 0; i < Entities.Size(); ++i)
             {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
     }
@@ -971,9 +971,9 @@ void SpaceEntitySystem::TickEntityScripts()
 
         for (size_t i = 0; i < Entities.Size(); ++i)
         {
-            if (ClientId == Entities[i]->GetScript()->GetOwnerId())
+            if (ClientId == Entities[i]->GetScript().GetOwnerId())
             {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
     }
@@ -981,7 +981,6 @@ void SpaceEntitySystem::TickEntityScripts()
 
 bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity)
 {
-
     if (SelectedState && !Entity->IsSelected())
     {
         if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId()))
@@ -1078,8 +1077,8 @@ void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::
 void SpaceEntitySystem::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
     const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-    EntityScript* Script = Entity->GetScript();
-    Script->SetOwnerId(ClientId);
+    EntityScript& Script = Entity->GetScript();
+    Script.SetOwnerId(ClientId);
 }
 
 void SpaceEntitySystem::LockEntityUpdate() const { EntitiesLock->lock(); }
