@@ -123,6 +123,11 @@ public:
         const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
         const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> CreateSpace(const csp::common::String& Name, const csp::common::String& Description,
+        SpaceAttributes Attributes, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+        const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
 
     /// @brief Creates a new space Using BufferAssetDataSource.
     /// @param Name csp::common::String : name for the new space
@@ -138,6 +143,10 @@ public:
         const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
         const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::systems::BufferAssetDataSource& Thumbnail,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> CreateSpaceWithBuffer(const csp::common::String& Name, const csp::common::String& Description,
+        SpaceAttributes Attributes, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::systems::BufferAssetDataSource& Thumbnail,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
 
     /// @brief Updates the name and/or the description of a Space
     /// @param Space Space : the Space to update
@@ -214,6 +223,7 @@ public:
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void BulkInviteToSpace(
         const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback);
+    CSP_NO_EXPORT async::task<NullResult> BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers);
 
     /// @brief Returns an array of obfuscated email addresses, addresses of users that have not yet accepted the space invite
     /// @param Space Space : Space for which the invites where sent
@@ -362,8 +372,6 @@ private:
     // Space Metadata
     void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
     void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-    void AddMetadata(
-        const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata, NullResultCallback Callback);
     void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     // Space Thumbnail
