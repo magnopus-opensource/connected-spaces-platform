@@ -19,6 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
+#include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
@@ -83,42 +84,55 @@ public:
 };
 
 /// @ingroup Conversation
+/// @brief Information used to update an annotation
+class CSP_API AnnotationUpdateParams
+{
+public:
+    /// @brief The vertical fov of the camera when the annotation is created
+    uint16_t VerticalFov;
+    /// @brief The position of the camera when the annotation is created
+    csp::common::Vector3 AuthorCameraPosition;
+    /// @brief The rotation of the camera when the annotation is created
+    csp::common::Vector4 AuthorCameraRotation;
+};
+
+/// @ingroup Conversation
 /// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
 class CSP_API AnnotationData
 {
 public:
     AnnotationData();
-    AnnotationData(const csp::common::String& InAnnotationThumbnailId, const csp::common::String& InAnnotationId, const uint16_t InVerticalFov,
+    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, const uint16_t InVerticalFov,
         const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
 
-    /// @brief Get the Annotation Thumbnail AssetCollection ID
-    /// @return a string representing the thumbnail AssetCollection ID
-    csp::common::String GetAnnotationThumbnailId();
+    /// @brief Get the annotation id
+    /// @return csp::common::String
+    csp::common::String GetAnnotationId() const;
 
-    /// @brief Get the Annotation AssetCollection ID
-    /// @return a string representing the annotation AssetCollection ID
-    csp::common::String GetAnnotationId();
+    /// @brief Get the annotation collection id
+    /// @return csp::common::String
+    csp::common::String GetAnnotationThumbnailId() const;
 
     /// @brief Get the vertical FOV
     /// @return a uint16_t representing the vertical FOV
-    uint16_t GetVerticalFov();
+    uint16_t GetVerticalFov() const;
 
     /// @brief Get the AuthorCameraPosition
     /// @return a Vector3 representing the AuthorCameraPosition
-    csp::common::Vector3 GetAuthorCameraPosition();
+    csp::common::Vector3 GetAuthorCameraPosition() const;
 
     /// @brief Get the AuthorCameraRotation
     /// @return a Vector4 representing the AuthorCameraRotation
-    csp::common::Vector4 GetAuthorCameraRotation();
+    csp::common::Vector4 GetAuthorCameraRotation() const;
 
-    /// @brief Set the AnnotationThumbnailId
-    /// @param InAnnotationThumbnailId
-    void SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId);
+    /// @brief Set the annotation id
+    /// @param Id const csp::common::String& Id
+    void SetAnnotationId(const csp::common::String& Id);
 
-    /// @brief Set the AnnotationId
-    /// @param InAnnotationId
-    void SetAnnotationId(const csp::common::String& InAnnotationId);
+    /// @brief Set the annotation collection id
+    /// @param Id const csp::common::String& Id
+    void SetAnnotationThumbnailId(const csp::common::String& Id);
 
     /// @brief Set the VerticalFov
     /// @param InVerticalFov
@@ -133,8 +147,8 @@ public:
     void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
 
 private:
-    csp::common::String AnnotationThumbnailId;
     csp::common::String AnnotationId;
+    csp::common::String AnnotationThumbnailId;
     uint16_t VerticalFov;
     csp::common::Vector3 AuthorCameraPosition;
     csp::common::Vector4 AuthorCameraRotation;
@@ -150,7 +164,9 @@ enum class ConversationEventType
     ConversationInformation,
     MessageInformation,
     SetAnnotation,
-    DeleteAnnotation
+    DeleteAnnotation,
+    SetConversationAnnotation,
+    DeleteConversationAnnotation
 };
 
 /// @ingroup Conversation
@@ -299,6 +315,89 @@ private:
     uint64_t Count;
 };
 
+class CSP_API AnnotationResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AnnotationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AnnotationResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& AssetCollection);
+    CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
+    CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
+
+    /// @brief Gets the information about the annotation.
+    /// @return const AnnotationData&
+    const AnnotationData& GetAnnotationData() const;
+
+    /// @brief Gets the asset containing the annotation data.
+    /// @return const csp::systems::Asset&
+    const csp::systems::Asset& GetAnnotationAsset() const;
+
+    /// @brief Gets the asset containing the annotation thumbnail data.
+    /// @return const csp::systems::Asset&
+    const csp::systems::Asset& GetAnnotationThumbnailAsset() const;
+
+private:
+    explicit AnnotationResult(void*) {};
+    AnnotationResult() = default;
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+
+    AnnotationData Data;
+    systems::Asset AnnotationAsset;
+    systems::Asset AnnotationThumbnailAsset;
+};
+
+class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    /// @brief gets the annotation thumbnails that exist within the conversation.
+    /// @return const csp::common::Map<csp::common::String, csp::systems::Asset>&
+    const csp::common::Map<csp::common::String, csp::systems::Asset>& GetAnnotationThumbnailAssetsMap() const;
+
+    /// @brief Gets the number of asset thumbnails returned from GetAnnotationThumbnailAssetsMap.
+    /// @return uint64_t
+    uint64_t GetTotalCount() const;
+
+    CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
+
+private:
+    explicit AnnotationThumbnailCollectionResult(void*) {};
+    AnnotationThumbnailCollectionResult() = default;
+
+    csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
+};
+
 /// @brief Callback containing number of replies.
 /// @param Result NumberOfRepliesResult : result class
 typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
@@ -312,5 +411,11 @@ typedef std::function<void(const MessageCollectionResult& Result)> MessageCollec
 
 // Callback providing a result object with a message info object representing the conversation.
 typedef std::function<void(const ConversationResult& Result)> ConversationResultCallback;
+
+// Callback providing a result object with a annotations result object representing the conversation.
+typedef std::function<void(const AnnotationResult& Result)> AnnotationResultCallback;
+
+// Callback providing a result object with a annotations thumbnail collection result object .
+typedef std::function<void(const AnnotationThumbnailCollectionResult& Result)> AnnotationThumbnailCollectionResultCallback;
 
 } // namespace csp::multiplayer

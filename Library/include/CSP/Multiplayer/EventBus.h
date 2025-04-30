@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include <map>
+#include <optional>
 
 namespace csp::systems
 {
@@ -38,6 +39,14 @@ template <typename T> void Delete(T* Ptr);
 CSP_END_IGNORE
 
 } // namespace csp::memory
+
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -69,6 +78,8 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEvent(
         const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT async::task<std::optional<csp::multiplayer::ErrorCode>> SendNetworkEvent(
+        const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args);
 
     /// @brief Sends a network event by EventName, to TargetClientId.
     /// @param EventName csp::common::String : The identifying name for the event.

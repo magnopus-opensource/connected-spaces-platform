@@ -93,6 +93,26 @@ public:
 
     void GetNumberOfReplies(const common::String& ConversationId, csp::multiplayer::NumberOfRepliesResultCallback Callback);
 
+    void GetConversationAnnotation(const csp::common::String& ConversationId, multiplayer::AnnotationResultCallback Callback);
+
+    void SetConversationAnnotation(const csp::common::String& ConversationId, const multiplayer::AnnotationUpdateParams& AnnotationParams,
+        const systems::BufferAssetDataSource& Annotation, const systems::BufferAssetDataSource& AnnotationThumbnail,
+        multiplayer::AnnotationResultCallback Callback);
+
+    void DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback);
+
+    void GetAnnotation(
+        const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::AnnotationResultCallback Callback);
+
+    void SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
+        const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
+        const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback);
+
+    void DeleteAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback);
+
+    void GetAnnotationThumbnailsForConversation(
+        const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback);
+
     void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
     void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
 

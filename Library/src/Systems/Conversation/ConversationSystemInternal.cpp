@@ -4,13 +4,17 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "Multiplayer/EventSerialisation.h"
 
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
+#include "Memory/Memory.h"
 #include "Systems/ResultHelpers.h"
+
+#include "Common/Continuations.h"
 
 namespace csp::systems
 {
@@ -63,6 +67,278 @@ namespace
         }
 
         return true;
+    }
+
+    std::function<AssetCollectionResult(const AssetCollectionResult& Result)> ValidateMessageAssetCollection(common::String ConversationId)
+    {
+        return [ConversationId](const AssetCollectionResult& Result)
+        {
+            if (Result.GetAssetCollection().ParentId != ConversationId)
+            {
+                CSP_LOG_ERROR_MSG("Given message doesn't exist on the conversation.");
+                throw std::exception();
+            }
+
+            return Result;
+        };
+    }
+
+    std::function<void(const AssetCollectionResult& Result)> SetMessageAssetCollection(std::shared_ptr<systems::AssetCollection> OutAssetCollection)
+    {
+        return [OutAssetCollection](const AssetCollectionResult& Result) { *OutAssetCollection = Result.GetAssetCollection(); };
+    }
+
+    std::function<void(const AssetResult& Result)> SetAnnotationAsset(std::shared_ptr<Asset> OutAsset)
+    {
+        return [OutAsset](const systems::AssetResult& Result) { *OutAsset = Result.GetAsset(); };
+    }
+
+    std::function<void(const AssetsResult& Result)> SetAnnotationAssetFromAssets(std::shared_ptr<Asset> OutAsset)
+    {
+        return [OutAsset](const systems::AssetsResult& Result)
+        {
+            if (Result.GetAssets().Size() == 1)
+            {
+                *OutAsset = Result.GetAssets()[0];
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("Result didn't contain a valid asset.");
+                throw std::exception();
+            }
+        };
+    }
+
+    std::function<async::task<UriResult>()> UploadAnnotationAssetData(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection,
+        std::shared_ptr<systems::Asset> Asset, const systems::BufferAssetDataSource& Data, const csp::common::String& FileName)
+    {
+        return [AssetSystem, Collection, Asset, Data, FileName]()
+        {
+            Asset->FileName = FileName;
+            return AssetSystem->UploadAssetDataEx(*Collection, *Asset, Data, csp::common::CancellationToken::Dummy());
+        };
+    }
+
+    std::function<multiplayer::AnnotationResult()> CreateAnnotationResult(std::shared_ptr<systems::AssetCollection> AnnotationAssetCollection,
+        std::shared_ptr<systems::Asset> AnnotationAsset, std::shared_ptr<systems::Asset> AnnotationThumbnailAsset)
+    {
+        return [AnnotationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset]()
+        {
+            multiplayer::AnnotationResult Result(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+            Result.ParseAnnotationAssetData(*AnnotationAssetCollection);
+            Result.SetAnnotationAsset(*AnnotationAsset);
+            Result.SetAnnotationThumbnailAsset(*AnnotationThumbnailAsset);
+            return Result;
+        };
+    }
+
+    std::function<async::task<AssetsResult>()> GetAnnotationAsset(AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection)
+    {
+        return [AssetSystem, Collection]()
+        { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION }); };
+    }
+
+    std::function<async::task<AssetsResult>()> GetAnnotationThumbnailAsset(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+    {
+        return [AssetSystem, Collection]()
+        { return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { EAssetType::ANNOTATION_THUMBNAIL }); };
+    }
+
+    std::function<async::task<NullResult>(const AssetsResult&)> DeleteAnnotationAsset(
+        AssetSystem* AssetSystem, std::shared_ptr<AssetCollection> Collection)
+    {
+        return [AssetSystem, Collection](const AssetsResult& Result)
+        {
+            if (Result.GetAssets().Size() == 1)
+            {
+                return AssetSystem->DeleteAsset(*Collection, Result.GetAssets()[0]);
+            }
+            else if (Result.GetAssets().Size() == 0)
+            {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Annotation asset doesn't exist");
+            }
+            else
+            {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
+            }
+
+            throw std::exception();
+            return async::task<NullResult>();
+        };
+    }
+
+    std::function<void(const UriResult&)> SetAssetUri(std::shared_ptr<Asset> Asset)
+    {
+        return [Asset](const UriResult& Result) { Asset->Uri = Result.GetUri(); };
+    }
+
+    std::function<async::task<AssetCollectionResult>(const csp::common::Map<csp::common::String, csp::common::String>& Metadata)>
+    AppendCommentMetadata(AssetSystem* AssetSystem, std::shared_ptr<AssetCollection>& MessageCollection)
+    {
+        return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+        {
+            auto NewMetadata = MessageCollection->GetMetadataImmutable();
+            auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
+
+            std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
+                const_cast<common::Array<common::String>*>(Metadata.Keys()), Deleter);
+
+            for (const auto& Key : *Keys)
+            {
+                NewMetadata[Key] = Metadata[Key];
+            }
+
+            return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
+        };
+    }
+
+    std::function<async::task<AssetCollectionResult>(const AssetCollectionResult&)> RemoveAnnotationMetadata(AssetSystem* AssetSystem)
+    {
+        return [AssetSystem](const AssetCollectionResult& Result)
+        {
+            auto Metadata = ConversationSystemHelpers::RemoveAnnotationMetadata(Result.GetAssetCollection());
+            return AssetSystem->UpdateAssetCollectionMetadata(Result.GetAssetCollection(), Metadata, nullptr);
+        };
+    }
+
+    std::function<async::task<AssetResult>()> GetOrCreateAnnotationAsset(
+        AssetSystem* AssetSystem, std::shared_ptr<systems::AssetCollection> Collection, const csp::common::String& Name, EAssetType Type)
+    {
+        return [AssetSystem, Collection, Name, Type]()
+        {
+            return AssetSystem->GetAssetsByCriteria({ Collection->Id }, nullptr, nullptr, csp::common::Array { Type })
+                .then(
+                    [AssetSystem, Collection, Name, Type](const AssetsResult& Result)
+                    {
+                        if (Result.GetAssets().Size() == 0)
+                        {
+                            return AssetSystem->CreateAsset(*Collection, Name, nullptr, nullptr, Type);
+                        }
+                        else if (Result.GetAssets().Size() == 1)
+                        {
+                            CSP_LOG_MSG(
+                                csp::systems::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
+
+                            async::event_task<AssetResult> OnCompleteEvent;
+                            async::task<AssetResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+                            AssetResult NewResult(Result.GetResultCode(), Result.GetHttpResultCode());
+                            NewResult.SetAsset(Result.GetAssets()[0]);
+
+                            OnCompleteEvent.set(NewResult);
+                            return OnCompleteTask;
+                        }
+                        else
+                        {
+                            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation assets exist for this message");
+
+                            throw std::exception();
+                            return async::task<AssetResult>();
+                        }
+                    });
+        };
+    }
+
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(
+        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::EventBus* EventBus)
+    {
+        return [EventType, ConersationCollection, EventBus]()
+        {
+            const multiplayer::MessageInfo& EventInfo
+                = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection);
+            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray({ EventType, EventInfo });
+            return EventBus->SendNetworkEvent("Conversation", EventParams);
+        };
+    }
+
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationMessageEvent(
+        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection, multiplayer::EventBus* EventBus)
+    {
+        return [EventType, MessageCollection, EventBus]()
+        {
+            const multiplayer::MessageInfo& EventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection);
+            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray({ EventType, EventInfo });
+            return EventBus->SendNetworkEvent("Conversation", EventParams);
+        };
+    }
+
+    std::function<async::task<AssetCollectionsResult>()> FindMessageAssetCollections(
+        AssetSystem* AssetSystem, const common::String& ConversationId, const common::String& SpaceId)
+    {
+        return [AssetSystem, ConversationId, SpaceId]()
+        {
+            return AssetSystem->FindAssetCollections(nullptr, ConversationId, nullptr, common::Array { EAssetCollectionType::COMMENT }, nullptr,
+                common::Array { SpaceId }, nullptr, nullptr);
+        };
+    }
+
+    std::function<AssetCollectionResult(const AssetCollectionResult&)> ValidateAnnotationMetadata()
+    {
+        return [](const AssetCollectionResult& Result)
+        {
+            bool HasAnnotationData = ConversationSystemHelpers::HasAnnotationMetadata(Result.GetAssetCollection());
+
+            if (HasAnnotationData == false)
+            {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Message asset collection doesn't contain annotation data.");
+                throw std::exception();
+            }
+
+            return Result;
+        };
+    }
+
+    std::function<std::unordered_map<std::string, std::string>(const AssetCollectionsResult&)> GetAnnotationAssetIdsFromCollections()
+    {
+        return [](const AssetCollectionsResult& Result)
+        {
+            auto ThumbnailIds = ConversationSystemHelpers::GetAnnotationThumbnailAssetIdsFromCollectionResult(Result);
+
+            if (ThumbnailIds.size() == 0)
+            {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "No Thumbnails exist.");
+                throw std::exception();
+            }
+
+            return ThumbnailIds;
+        };
+    }
+
+    std::function<async::task<AssetsResult>(const std::unordered_map<std::string, std::string>&)> GetThumbnailAssetsFromMap(AssetSystem* AssetSystem)
+    {
+        return [AssetSystem](const std::unordered_map<std::string, std::string>& Result)
+        {
+            csp::common::Array<csp::common::String> MessageIds(Result.size());
+            csp::common::Array<csp::common::String> AssetIds(Result.size());
+            int i = 0;
+
+            for (const auto& Pair : Result)
+            {
+                MessageIds[i] = Pair.first.c_str();
+                AssetIds[i] = Pair.second.c_str();
+                i++;
+            }
+
+            return AssetSystem->GetAssetsByCriteria(MessageIds, AssetIds, nullptr, common::Array<EAssetType> { EAssetType::ANNOTATION_THUMBNAIL });
+        };
+    }
+
+    std::function<multiplayer::AnnotationThumbnailCollectionResult(const AssetsResult&)> CreateAnnotationThumbnailCollectionResult()
+    {
+        return [](const AssetsResult& Result)
+        {
+            multiplayer::AnnotationThumbnailCollectionResult ThumbnailResult(
+                EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
+            ThumbnailResult.ParseAssets(Result);
+            return ThumbnailResult;
+        };
+    }
+
+    std::function<common::Map<common::String, common::String>()> GenerateAnnotationMetadata(
+        const multiplayer::AnnotationUpdateParams& NewData, std::shared_ptr<Asset> AnnotationAsset, std::shared_ptr<Asset> AnnotationThumbnailAsset)
+    {
+        return [NewData, AnnotationAsset, AnnotationThumbnailAsset]()
+        { return ConversationSystemHelpers::GenerateAnnotationAssetCollectionMetadata(NewData, AnnotationAsset->Id, AnnotationThumbnailAsset->Id); };
     }
 }
 
@@ -512,11 +788,327 @@ void ConversationSystemInternal::GetNumberOfReplies(const common::String& Conver
     AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
 }
 
+void ConversationSystemInternal::GetConversationAnnotation(const csp::common::String& ConversationId, multiplayer::AnnotationResultCallback Callback)
+{
+    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
+    auto AnnotationAsset = std::make_shared<Asset>();
+    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+
+    // 1. Get conversation asset collection
+    AssetSystem->GetAssetCollectionById(ConversationId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved message asset collection",
+            "Failed to get message asset collection.", {}, {}, {}))
+        .then(ValidateAnnotationMetadata())
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
+            {}, {}))
+        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        // 3. Get annotation asset
+        .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {},
+            {}, {}))
+        .then(SetAnnotationAssetFromAssets(AnnotationAsset))
+        // 4. Get annotation thumbnail asset
+        .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetConversationAnnotation, successfully retrieved annotation thumbnail asset",
+            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+        .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
+        // 5. Process result
+        .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+}
+
+void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& ConversationId,
+    const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+{
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+
+    const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+
+    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+
+    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
+    auto AnnotationAsset = std::make_shared<Asset>();
+    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+
+    // 1. Get conversation asset collection
+    AssetSystem->GetAssetCollectionById(ConversationId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully retrieved message asset collection",
+            "Failed to get message asset collection.", {}, {}, {}))
+        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        // 2. Create Annotation asset
+        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {},
+            {}, {}))
+        .then(SetAnnotationAsset(AnnotationAsset))
+        // 3. Upload Annotation asset data
+        .then(UploadAnnotationAssetData(AssetSystem, ConversationAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation asset data",
+            "Failed to upload annotation asset data.", {}, {}, {}))
+        .then(SetAssetUri(AnnotationAsset))
+        // 4. Create Annotation thumbnail asset
+        .then(GetOrCreateAnnotationAsset(AssetSystem, ConversationAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully created annotation thumbnail asset",
+            "Failed to create annotation thumbnail asset.", {}, {}, {}))
+        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        // 5. Upload Annotation thumbnail asset data
+        .then(UploadAnnotationAssetData(
+            AssetSystem, ConversationAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully uploaded annotation thumbnail asset data",
+            "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
+        .then(SetAssetUri(AnnotationThumbnailAsset))
+        // 6. Update asset collection metadata
+        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(AppendCommentMetadata(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully updated message asset collection metadata",
+            "Failed to update message asset collection metadata.", {}, {}, {}))
+        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        // 7. Send multiplayer event
+        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBus))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(Callback,
+            "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
+        // 8. Process result
+        .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+}
+
+void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback)
+{
+    auto ConversationAssetCollection = std::make_shared<AssetCollection>();
+
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+
+    // 1. Get conversation asset collection
+    AssetSystem->GetAssetCollectionById(ConversationId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+        .then(ValidateAnnotationMetadata())
+        // 2. Remove annotation metadata
+        .then(RemoveAnnotationMetadata(AssetSystem))
+        .then(SetMessageAssetCollection(ConversationAssetCollection))
+        // 3. Send multiplayer event
+        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBus))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
+            Callback, "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
+        // 4. Delete annoation asset
+        .then(GetAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
+        // 5. Delete annoation thumbnail asset
+        .then(GetAnnotationThumbnailAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
+            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+        .then(DeleteAnnotationAsset(AssetSystem, ConversationAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
+            "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
+        // 6. Process result
+        .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain([Callback](const std::exception& exception) { Callback(MakeInvalid<NullResult>()); }));
+}
+
+void ConversationSystemInternal::GetAnnotation(
+    const csp::common::String& ConversationId, const csp::common::String& MessageId, multiplayer::AnnotationResultCallback Callback)
+{
+    auto MessageAssetCollection = std::make_shared<AssetCollection>();
+    auto AnnotationAsset = std::make_shared<Asset>();
+    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
+            {}, {}, {}))
+        .then(ValidateMessageAssetCollection(ConversationId))
+        .then(ValidateAnnotationMetadata())
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
+        // 3. Get annotation asset
+        .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(SetAnnotationAssetFromAssets(AnnotationAsset))
+        // 4. Get annotation thumbnail asset
+        .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
+            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+        .then(SetAnnotationAssetFromAssets(AnnotationThumbnailAsset))
+        // 5. Process result
+        .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+}
+
+void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
+    const multiplayer::AnnotationUpdateParams& AnnotationParams, const systems::BufferAssetDataSource& Annotation,
+    const systems::BufferAssetDataSource& AnnotationThumbnail, multiplayer::AnnotationResultCallback Callback)
+{
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+    const csp::common::String UserId = UserSystem->GetLoginState().UserId;
+
+    const common::String UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueAnnotationAssetCollectionName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+    const csp::common::String UniqueAnnotationThumbnailAssetName = ConversationSystemHelpers::GetUniqueAnnotationAssetName(SpaceId, UserId);
+
+    const csp::common::String UniqueAnnotationAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(Annotation.GetMimeType());
+    const csp::common::String UniqueAnnotationThumbnailAssetFileName = ConversationSystemHelpers::GetUniqueAnnotationAssetFileName(SpaceId, UserId)
+        + SpaceSystemHelpers::GetAssetFileExtension(AnnotationThumbnail.GetMimeType());
+
+    auto MessageAssetCollection = std::make_shared<AssetCollection>();
+    auto AnnotationAsset = std::make_shared<Asset>();
+    auto AnnotationThumbnailAsset = std::make_shared<Asset>();
+
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully retrieved message asset collection", "Failed to get message asset collection.",
+            {}, {}, {}))
+        .then(ValidateMessageAssetCollection(ConversationId))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
+        // 2. Create Annotation asset
+        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully created annotation asset", "Failed to create annotation asset.", {}, {}, {}))
+        .then(SetAnnotationAsset(AnnotationAsset))
+        // 3. Upload Annotation asset data
+        .then(UploadAnnotationAssetData(AssetSystem, MessageAssetCollection, AnnotationAsset, Annotation, UniqueAnnotationAssetFileName))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation asset data", "Failed to upload annotation asset data.", {},
+            {}, {}))
+        .then(SetAssetUri(AnnotationAsset))
+        // 4. Create Annotation thumbnail asset
+        .then(GetOrCreateAnnotationAsset(AssetSystem, MessageAssetCollection, UniqueAnnotationAssetName, EAssetType::ANNOTATION_THUMBNAIL))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully created annotation thumbnail asset",
+            "Failed to create annotation thumbnail asset.", {}, {}, {}))
+        .then(SetAnnotationAsset(AnnotationThumbnailAsset))
+        // 5. Upload Annotation thumbnail asset data
+        .then(UploadAnnotationAssetData(
+            AssetSystem, MessageAssetCollection, AnnotationThumbnailAsset, AnnotationThumbnail, UniqueAnnotationThumbnailAssetFileName))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully uploaded annotation thumbnail asset data",
+            "Failed to upload annotation thumbnail asset data.", {}, {}, {}))
+        .then(SetAssetUri(AnnotationThumbnailAsset))
+        // 6. Update asset collection metadata
+        .then(GenerateAnnotationMetadata(AnnotationParams, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(AppendCommentMetadata(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::SetAnnotation, successfully updated message asset collection metadata",
+            "Failed to update message asset collection metadata.", {}, {}, {}))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
+        // 7. Send multiplayer event
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBus))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
+            Callback, "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
+        // 8. Process result
+        .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
+        .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+}
+
+void ConversationSystemInternal::DeleteAnnotation(
+    const csp::common::String& ConversationId, const csp::common::String& MessageId, systems::NullResultCallback Callback)
+{
+    auto MessageAssetCollection = std::make_shared<AssetCollection>();
+
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+
+    // 1. Get message asset collection
+    AssetSystem->GetAssetCollectionById(MessageId)
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "ConversationSystemInternal::DeleteAnnotation, successfully retrieved asset collection", "Failed to get asset collection.", {}, {}, {}))
+        .then(ValidateMessageAssetCollection(ConversationId))
+        .then(ValidateAnnotationMetadata())
+        // 2. Remove annotation metadata
+        .then(RemoveAnnotationMetadata(AssetSystem))
+        .then(SetMessageAssetCollection(MessageAssetCollection))
+        // 3. Send multiplayer event
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBus))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
+            Callback, "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", std::nullopt, std::nullopt, std::nullopt))
+        // 4. Delete annoation asset
+        .then(GetAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation asset", "Failed to get annotation asset.", {}, {}, {}))
+        .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation asset", "Failed to deleted annotation asset.", {}, {}, {}))
+        // 5. Delete annoation thumbnail asset
+        .then(GetAnnotationThumbnailAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully retrieved annotation thumbnail asset",
+            "Failed to get annotation thumbnail asset.", {}, {}, {}))
+        .then(DeleteAnnotationAsset(AssetSystem, MessageAssetCollection))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+            "ConversationSystemInternal::GetAnnotation, successfully deleted annotation thumbnail asset",
+            "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
+        // 6. Process result
+        .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
+        .then(common::continuations::InvokeIfExceptionInChain([Callback](const std::exception& exception) { Callback(MakeInvalid<NullResult>()); }));
+}
+
+void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
+    const csp::common::String& ConversationId, multiplayer::AnnotationThumbnailCollectionResultCallback Callback)
+{
+    const csp::common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
+
+    // 1. Get all message asset collections
+    FindMessageAssetCollections(AssetSystem, ConversationId, SpaceId)()
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved message asset collections",
+            "Failed to get message asset collections.", {}, {}, {}))
+        // 2. Get all annotation thumbnail assets
+        .then(GetAnnotationAssetIdsFromCollections())
+        .then(GetThumbnailAssetsFromMap(AssetSystem))
+        .then(common::continuations::AssertRequestSuccessOrErrorFromResult<AssetsResult>(Callback,
+            "ConversationSystemInternal::GetAnnotationThumbnailsForConversation, successfully retrieved thumbnail assets",
+            "Failed to get thumbnail assets.", {}, {}, {}))
+        // 3. Process result
+        .then(CreateAnnotationThumbnailCollectionResult())
+        .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>()); }));
+}
+
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
 {
     Components.insert(Component);
     FlushEvents();
 }
+
 void ConversationSystemInternal::DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component) { Components.erase(Component); }
 
 void ConversationSystemInternal::RegisterSystemCallback()
@@ -584,5 +1176,4 @@ bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::Conversati
 
     return false;
 }
-
 }
