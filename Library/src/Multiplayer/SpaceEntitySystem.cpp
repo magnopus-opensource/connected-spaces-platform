@@ -34,8 +34,8 @@
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -496,15 +496,15 @@ SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InNam
 
 void SpaceEntitySystem::RegisterEntityScriptAsModule(SpaceEntity* NewEntity)
 {
-    EntityScript* Script = NewEntity->GetScript();
-    Script->RegisterSourceAsModule();
+    EntityScript& Script = NewEntity->GetScript();
+    Script.RegisterSourceAsModule();
 }
 
 void SpaceEntitySystem::BindNewEntityToScript(SpaceEntity* NewEntity)
 {
-    EntityScript* Script = NewEntity->GetScript();
-    Script->Bind();
-    Script->Invoke();
+    EntityScript& Script = NewEntity->GetScript();
+    Script.Bind();
+    Script.Invoke();
 }
 
 void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
@@ -633,7 +633,7 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
         });
 }
 
-void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
+void SpaceEntitySystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection)
 {
     Connection = InConnection;
 
@@ -822,24 +822,24 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     // Register all scripts for import
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
-        Script->RegisterSourceAsModule();
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.RegisterSourceAsModule();
     }
 
     // Bind and invoke all scripts
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
+        EntityScript& Script = Entities[i]->GetScript();
 
-        Script->Bind();
-        Script->Invoke();
+        Script.Bind();
+        Script.Invoke();
     }
 
     // Tell all scripts that all entities are now loaded
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript* Script = Entities[i]->GetScript();
-        Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
 
     if (IsLeaderElectionEnabled())
@@ -938,7 +938,7 @@ void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        if (Entities[i]->GetScript()->GetOwnerId() == ClientId)
+        if (Entities[i]->GetScript().GetOwnerId() == ClientId)
         {
             ClaimScriptOwnership(Entities[i]);
         }
@@ -961,7 +961,7 @@ void SpaceEntitySystem::TickEntityScripts()
         {
             for (size_t i = 0; i < Entities.Size(); ++i)
             {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
     }
@@ -971,9 +971,9 @@ void SpaceEntitySystem::TickEntityScripts()
 
         for (size_t i = 0; i < Entities.Size(); ++i)
         {
-            if (ClientId == Entities[i]->GetScript()->GetOwnerId())
+            if (ClientId == Entities[i]->GetScript().GetOwnerId())
             {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
     }
@@ -981,7 +981,6 @@ void SpaceEntitySystem::TickEntityScripts()
 
 bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity)
 {
-
     if (SelectedState && !Entity->IsSelected())
     {
         if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId()))
@@ -1041,24 +1040,6 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
     }
 }
 
-ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
-{
-    // Search for component id across all entites
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ComponentBase* Component = Entities[i]->GetComponents()->operator[](Id);
-
-        if (Component)
-        {
-            return Component;
-        }
-    }
-
-    CSP_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
-
-    return nullptr;
-}
-
 const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
@@ -1096,8 +1077,8 @@ void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::
 void SpaceEntitySystem::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
     const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-    EntityScript* Script = Entity->GetScript();
-    Script->SetOwnerId(ClientId);
+    EntityScript& Script = Entity->GetScript();
+    Script.SetOwnerId(ClientId);
 }
 
 void SpaceEntitySystem::LockEntityUpdate() const { EntitiesLock->lock(); }
@@ -1146,7 +1127,7 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
     PendingAdds->emplace_back(EntityToAdd);
 }
 
-void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
+void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
 {
     const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {

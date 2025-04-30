@@ -41,7 +41,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CINEMATIC_CAMERA_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
 {
     SetRandSeed();
@@ -127,9 +128,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CINEMATIC_CAMERA_COMPONENT_FOV_TEST
 CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest)
 {
     SetRandSeed();
@@ -202,9 +201,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CINEMATIC_CAMERA_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceTest)
 {
     SetRandSeed();
@@ -263,8 +260,8 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 		cinematicCamera.isViewerCamera = true;
 	)xx";
 
-    CreatedObject->GetScript()->SetScriptSource(CinematicCameraScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(CinematicCameraScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -288,6 +285,3 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

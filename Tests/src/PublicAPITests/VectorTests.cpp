@@ -21,7 +21,6 @@
 
 using namespace csp::common;
 
-#if RUN_ALL_UNIT_TESTS || RUN_VECTOR_TESTS
 CSP_PUBLIC_TEST(CSPEngine, VectorTests, IsNearlyEqualTest)
 {
     const Vector3 MyVector = { 0, 0, 0 };
@@ -40,4 +39,3 @@ CSP_PUBLIC_TEST(CSPEngine, VectorTests, IsNearlyEqualTest)
 
     EXPECT_TRUE(MyVector4_A != MyVector4_C);
 }
-#endif

@@ -244,7 +244,7 @@ ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInt
 
 void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message)
 {
-    GetParent()->GetScript()->SubscribeToPropertyChange(GetId(), PropertyKey, Message);
+    GetParent()->GetScript().SubscribeToPropertyChange(GetId(), PropertyKey, Message);
 }
 
 void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, EntityActionHandler ActionHandler)

@@ -31,8 +31,6 @@
 namespace csp::multiplayer
 {
 
-extern ErrorCode ParseError(std::exception_ptr Exception);
-
 constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 EventBus::~EventBus() { }

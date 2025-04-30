@@ -17,6 +17,7 @@
 #include "CSP/Systems/Spaces/Space.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "Common/Convert.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -54,6 +55,11 @@ void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::
     {
         BasicSpace.Description = Dto.GetDescription();
     }
+
+    if (Dto.HasTags())
+    {
+        BasicSpace.Tags = csp::common::Convert(Dto.GetTags());
+    }
 }
 
 void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
@@ -79,37 +85,24 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
         Space.Description = Dto.GetDescription();
     }
 
+    if (Dto.HasTags())
+    {
+        Space.Tags = csp::common::Convert(Dto.GetTags());
+    }
+
     if (Dto.HasUsers())
     {
-        auto& users = Dto.GetUsers();
-        Space.UserIds = Array<String>(users.size());
-
-        for (int i = 0; i < users.size(); ++i)
-        {
-            Space.UserIds[i] = users[i];
-        }
+        Space.UserIds = csp::common::Convert(Dto.GetUsers());
     }
 
     if (Dto.HasModerators())
     {
-        auto& Moderators = Dto.GetModerators();
-        Space.ModeratorIds = Array<String>(Moderators.size());
-
-        for (int i = 0; i < Moderators.size(); ++i)
-        {
-            Space.ModeratorIds[i] = Moderators[i];
-        }
+        Space.ModeratorIds = csp::common::Convert(Dto.GetModerators());
     }
 
     if (Dto.HasBannedUsers())
     {
-        auto& users = Dto.GetBannedUsers();
-        Space.BannedUserIds = Array<String>(users.size());
-
-        for (int i = 0; i < users.size(); ++i)
-        {
-            Space.BannedUserIds[i] = users[i];
-        }
+        Space.BannedUserIds = csp::common::Convert(Dto.GetBannedUsers());
     }
 }
 
@@ -255,11 +248,7 @@ void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
 
 const Map<String, String>& SpaceMetadataResult::GetMetadata() const { return Metadata; }
 
-const Array<String>& SpaceMetadataResult::GetTags() const { return Tags; }
-
 void SpaceMetadataResult::SetMetadata(const Map<String, String>& InMetadata) { Metadata = InMetadata; }
-
-void SpaceMetadataResult::SetTags(const Array<String>& InTags) { Tags = InTags; }
 
 Array<String>& PendingInvitesResult::GetPendingInvitesEmails() { return PendingInvitesEmailAddresses; }
 

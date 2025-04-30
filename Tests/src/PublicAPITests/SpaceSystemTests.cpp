@@ -28,6 +28,7 @@
 #include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <tuple>
 #include <uuid_v4.h>
@@ -108,8 +109,8 @@ void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace
 Array<BasicSpace> GetSpacesByAttributes(::SpaceSystem* SpaceSystem, const Optional<bool>& IsDiscoverable, const Optional<bool>& IsArchived,
     const Optional<bool>& RequiresInvite, const Optional<int>& ResultsSkipNo, const Optional<int>& ResultsMaxNo)
 {
-    auto [Result]
-        = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, IsArchived, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
+    auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, IsArchived, RequiresInvite, ResultsSkipNo,
+        ResultsMaxNo, nullptr, nullptr, nullptr);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -134,9 +135,9 @@ Array<Space> GetSpacesByIds(::SpaceSystem* SpaceSystem, const Array<String>& Spa
 }
 
 void UpdateSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, const Optional<String>& NewName, const Optional<String>& NewDescription,
-    const Optional<SpaceAttributes>& NewAttributes, BasicSpace& OutSpace)
+    const Optional<SpaceAttributes>& NewAttributes, const Optional<Array<String>>& NewTags, BasicSpace& OutSpace)
 {
-    auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpace, RequestPredicate, SpaceId, NewName, NewDescription, NewAttributes);
+    auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpace, RequestPredicate, SpaceId, NewName, NewDescription, NewAttributes, NewTags);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -235,12 +236,11 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
     }
 }
 
-void UpdateAndAssertSpaceMetadata(
-    ::SpaceSystem* SpaceSystem, const String& SpaceId, const Optional<Map<String, String>>& NewMetadata, const Optional<Array<String>>& Tags)
+void UpdateAndAssertSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, const Optional<Map<String, String>>& NewMetadata)
 {
     Map<String, String> Metadata = NewMetadata.HasValue() ? *NewMetadata : Map<String, String>();
 
-    auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata, Tags);
+    auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -265,32 +265,8 @@ Map<String, Map<String, String>> GetAndAssertSpacesMetadata(::SpaceSystem* Space
     return Result.GetMetadata();
 }
 
-Array<String> GetAndAssertSpaceTags(::SpaceSystem* SpaceSystem, const String& SpaceId)
-{
-    auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceMetadata, RequestPredicate, SpaceId);
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    return Result.GetTags();
-}
-
-Map<String, Array<String>> GetAndAssertSpacesTags(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds)
-{
-    auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesMetadata, RequestPredicate, SpaceIds);
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-    return Result.GetTags();
-}
-
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
-    // check that Uri starts with something valid
-    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0)
-    {
-        return false;
-    }
-
     // check that the correct filename is present in the Uri
     const auto PosLastSlash = Uri.rfind('/');
     const auto UriFileName = Uri.substr(PosLastSlash + 1, FileName.size());
@@ -332,7 +308,6 @@ InviteUserRoleInfoCollection CreateInviteUsers()
     return InviteUsers;
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceTest)
 {
     SetRandSeed();
@@ -362,9 +337,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_WITH_TAGS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithTagsTest)
 {
     SetRandSeed();
@@ -396,9 +369,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithTagsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_WITH_BULK_INVITE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
 {
     SetRandSeed();
@@ -441,9 +412,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACEWITHBUFFER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
 {
     SetRandSeed();
@@ -489,9 +458,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACEWITHBUFFER_WITH_BULK_INVITE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInviteTest)
 {
     SetRandSeed();
@@ -550,9 +517,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATESPACEDESCRIPTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceDescriptionTest)
 {
     SetRandSeed();
@@ -581,7 +546,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceDescriptionTest)
     SPRINTF(UpdatedDescription, "%s-Updated", TestSpaceDescription);
 
     BasicSpace UpdatedBasicSpace;
-    UpdateSpace(SpaceSystem, Space.Id, nullptr, UpdatedDescription, nullptr, UpdatedBasicSpace);
+    UpdateSpace(SpaceSystem, Space.Id, nullptr, UpdatedDescription, nullptr, nullptr, UpdatedBasicSpace);
 
     EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
     EXPECT_EQ(UpdatedBasicSpace.Description, UpdatedDescription);
@@ -600,9 +565,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceDescriptionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATESPACETYPE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 {
     SetRandSeed();
@@ -630,7 +593,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
     auto UpdatedAttributes = SpaceAttributes::Public;
 
     BasicSpace UpdatedBasicSpace;
-    UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, UpdatedAttributes, UpdatedBasicSpace);
+    UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, UpdatedAttributes, nullptr, UpdatedBasicSpace);
 
     EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
     EXPECT_EQ(UpdatedBasicSpace.Description, ""); // This should be empty because we elected to not give one when we invoked `UpdateSpace`.
@@ -650,9 +613,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETSPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
 {
     SetRandSeed();
@@ -705,9 +666,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceTest)
 {
     SetRandSeed();
@@ -742,9 +701,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETSPACESBYIDS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesByIdsTest)
 {
     SetRandSeed();
@@ -806,9 +763,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesByIdsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETPUBLICSPACESASGUEST_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 {
     SetRandSeed();
@@ -876,9 +831,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETPUBLICSPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 {
     SetRandSeed();
@@ -934,9 +887,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETPRIVATESPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 {
     SetRandSeed();
@@ -992,9 +943,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETPAGINATEDPRIVATESPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 {
     SetRandSeed();
@@ -1030,7 +979,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
     // Get private spaces paginated
     {
-        auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
+        auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, false, true, 0, static_cast<int>(SPACE_COUNT / 2),
+            nullptr, nullptr, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1050,9 +1000,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_JOINPUBLICSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 {
     SetRandSeed();
@@ -1119,9 +1067,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
     DeleteSpace(SpaceSystem, PublicSpace.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ADD_SITE_INFO_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, AddSiteInfoTest)
 {
     SetRandSeed();
@@ -1152,9 +1098,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, AddSiteInfoTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_SITE_INFO_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
 {
     SetRandSeed();
@@ -1211,9 +1155,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_USER_ROLES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 {
     SetRandSeed();
@@ -1319,9 +1261,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_GUEST_USER_ROLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
 {
     SetRandSeed();
@@ -1368,9 +1308,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
     DeleteSpace(SpaceSystem, PublicSpace.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_SET_USER_ROLE_ON_INVITE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 {
     SetRandSeed();
@@ -1417,9 +1355,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACE_METADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 {
     SetRandSeed();
@@ -1438,7 +1374,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     Map<String, String> TestSpaceMetadata = { { "site", "Void" } };
-    Array<String> Tags = { "tag-test" };
 
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space);
@@ -1450,7 +1385,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 
     TestSpaceMetadata["site"] = "MagOffice";
 
-    UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, Tags);
+    UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata);
 
     RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
@@ -1461,10 +1396,57 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_SPACES_METADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesMetadataTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    Map<String, String> TestSpaceMetadata = { { "site", "Void" } };
+
+    ::Space Space1, Space2;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space1);
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space2);
+
+    Map<String, Map<String, String>> RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, { Space1.Id, Space2.Id });
+
+    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
+    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
+    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "Void");
+    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "Void");
+
+    TestSpaceMetadata["site"] = "MagOffice";
+
+    // OB-3939 fix: passing tags as nullptr should leave them unchanged
+    UpdateAndAssertSpaceMetadata(SpaceSystem, Space1.Id, TestSpaceMetadata);
+    UpdateAndAssertSpaceMetadata(SpaceSystem, Space2.Id, TestSpaceMetadata);
+
+    RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, { Space1.Id, Space2.Id });
+
+    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
+    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
+    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "MagOffice");
+    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "MagOffice");
+
+    DeleteSpace(SpaceSystem, Space1.Id);
+    DeleteSpace(SpaceSystem, Space2.Id);
+
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
 {
     SetRandSeed();
 
@@ -1506,60 +1488,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesMetadataTest)
     DeleteSpace(SpaceSystem, Spaces[1]);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACETAGS_METADATA_TEST
-CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = ::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    Map<String, String> TestSpaceMetadata = { { "site", "Void" } };
-    Array<String> Tags = { "tag-test" };
-
-    ::Space Space;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space);
-
-    Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
-    Array<String> RetrievedTags = GetAndAssertSpaceTags(SpaceSystem, Space.Id);
-
-    EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata["site"], "Void");
-    EXPECT_EQ(RetrievedTags.Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[0], "tag-test");
-
-    TestSpaceMetadata["site"] = "MagOffice";
-
-    // OB-3939 fix: passing tags as nullptr should leave them unchanged
-    UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, nullptr);
-
-    RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
-    RetrievedTags = GetAndAssertSpaceTags(SpaceSystem, Space.Id);
-
-    EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata["site"], "MagOffice");
-    EXPECT_EQ(RetrievedTags.Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[0], "tag-test");
-
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACESTAGS_METADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
 {
     SetRandSeed();
@@ -1577,51 +1506,26 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
     String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    Map<String, String> TestSpaceMetadata = { { "site", "Void" } };
-    Array<String> Tags = { "tag-test" };
+    ::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Array<String> { "tag-test" }, Space);
 
-    ::Space Space1, Space2;
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space1);
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space2);
+    EXPECT_EQ(Space.Tags.Size(), 1);
+    EXPECT_EQ(Space.Tags[0], "tag-test");
 
-    Map<String, Map<String, String>> RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, { Space1.Id, Space2.Id });
-    Map<String, Array<String>> RetrievedTags = GetAndAssertSpacesTags(SpaceSystem, { Space1.Id, Space2.Id });
+    // Update tags
+    ::Space UpdatedSpace;
+    UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, nullptr, Array<String> { "new-tag-test", "new-tag-test-2" }, UpdatedSpace);
 
-    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "Void");
-    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "Void");
-    EXPECT_EQ(RetrievedTags[Space1.Id].Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[Space2.Id].Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[Space1.Id][0], "tag-test");
-    EXPECT_EQ(RetrievedTags[Space2.Id][0], "tag-test");
+    EXPECT_EQ(UpdatedSpace.Tags.Size(), 2);
+    EXPECT_EQ(UpdatedSpace.Tags[0], "new-tag-test");
+    EXPECT_EQ(UpdatedSpace.Tags[1], "new-tag-test-2");
 
-    TestSpaceMetadata["site"] = "MagOffice";
-
-    // OB-3939 fix: passing tags as nullptr should leave them unchanged
-    UpdateAndAssertSpaceMetadata(SpaceSystem, Space1.Id, TestSpaceMetadata, nullptr);
-    UpdateAndAssertSpaceMetadata(SpaceSystem, Space2.Id, TestSpaceMetadata, nullptr);
-
-    RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, { Space1.Id, Space2.Id });
-    RetrievedTags = GetAndAssertSpacesTags(SpaceSystem, { Space1.Id, Space2.Id });
-
-    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
-    EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "MagOffice");
-    EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "MagOffice");
-    EXPECT_EQ(RetrievedTags[Space1.Id].Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[Space2.Id].Size(), Tags.Size());
-    EXPECT_EQ(RetrievedTags[Space1.Id][0], "tag-test");
-    EXPECT_EQ(RetrievedTags[Space2.Id][0], "tag-test");
-
-    DeleteSpace(SpaceSystem, Space1.Id);
-    DeleteSpace(SpaceSystem, Space2.Id);
+    DeleteSpace(SpaceSystem, Space.Id);
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATESPACE_THUMBNAIL_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 {
     SetRandSeed();
@@ -1685,9 +1589,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATESPACE_THUMBNAIL_WITH_BUFFER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 {
     SetRandSeed();
@@ -1766,9 +1668,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATE_SPACE_EMPTY_METADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithEmptyMetadataTest)
 {
     SetRandSeed();
@@ -1798,9 +1698,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithEmptyMetadataTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACE_EMPTY_METADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
 {
     SetRandSeed();
@@ -1821,7 +1719,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, nullptr, nullptr);
+    UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, nullptr);
 
     Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
@@ -1831,10 +1729,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
 
     LogOut(UserSystem);
 }
-#endif
 
 // - TODO - JQ - Rename this test to InviteUserToSpaceTest?
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_PENDING_INVITES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 {
     SetRandSeed();
@@ -1891,9 +1787,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_ACCEPTED_INVITES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
 {
     SetRandSeed();
@@ -1975,9 +1869,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_BULK_INVITE_TO_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 {
     SetRandSeed();
@@ -2021,9 +1913,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETPUBLICSPACEMETADATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 {
     SetRandSeed();
@@ -2087,9 +1977,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETSPACE_THUMBNAIL_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 {
     SetRandSeed();
@@ -2150,9 +2038,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GETSPACE_THUMBNAIL_WITH_GUEST_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 {
     SetRandSeed();
@@ -2211,9 +2097,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_BAN_GUESTUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 {
     SetRandSeed();
@@ -2277,9 +2161,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_BAN_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 {
     SetRandSeed();
@@ -2343,9 +2225,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ENTER_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 {
     SetRandSeed();
@@ -2401,9 +2281,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ENTER_SPACE_ASNONMODERATOR_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 {
     SetRandSeed();
@@ -2446,9 +2324,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ENTER_SPACE_ASMODERATOR_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 {
     SetRandSeed();
@@ -2506,9 +2382,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GEOLOCATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 {
     SetRandSeed();
@@ -2634,9 +2508,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GEOLOCATION_VALIDATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 {
     SetRandSeed();
@@ -2786,9 +2658,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GEOLOCATION_WITHOUT_PERMISSION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 {
     SetRandSeed();
@@ -2882,9 +2752,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GEOLOCATION_WITHOUT_PERMISSION_PUBLIC_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicSpaceTest)
 {
     SetRandSeed();
@@ -2981,9 +2849,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_DUPLICATESPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 {
     SetRandSeed();
@@ -3052,9 +2918,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_ENTER_SPACE_PERMISSIONS_MATRIX_TESTS
 namespace CSPEngine
 {
 /*
@@ -3406,4 +3270,3 @@ INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenBanned,
         std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Failed,
             "Logged in user does not have permission to discover this space. Failed to enter space.")));
 }
-#endif

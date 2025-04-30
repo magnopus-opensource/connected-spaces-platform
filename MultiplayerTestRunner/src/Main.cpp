@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(argc, argv);
 
         // Get setup with CSP and CHS.
+        std::cout << "Initializing Multiplayer Test Runner with Endpoint : " << Settings.Endpoint << std::flush;
         Utils::InitialiseCSPWithUserAgentInfo(Settings.Endpoint.c_str());
 
         // Log in

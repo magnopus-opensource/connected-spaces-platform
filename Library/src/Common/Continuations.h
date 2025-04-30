@@ -56,6 +56,7 @@ csp_scheduler& default_scheduler();
 #include "Debug/Logging.h"
 #include "Multiplayer/ErrorCodeStrings.h"
 #include <async++.h>
+#include <memory>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -84,17 +85,26 @@ namespace csp::common::continuations
 using namespace csp::systems;
 
 /*
- * Print an error with provided error context objects, and throw a cancellation error.
+ * Print an error with provided error context objects and HTTP request status information, and throw a cancellation error.
  * Calls the main callback as an error before throwing.
  */
 template <typename ErrorResultT>
-inline void LogErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
+inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
     csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
     ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     INVOKE_IF_NOT_NULL(Callback, FailureResult);
-    throw async::task_canceled(); // Cancels the continuation chain.
+    throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
+}
+
+/*
+ * Print an error with provided string, and throw a cancellation error.
+ */
+inline void LogErrorAndCancelContinuation(std::string ErrorMsg, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+{
+    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
+    throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
 /*
@@ -117,7 +127,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const Error
             auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
             auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
             auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
-            LogErrorAndCancelContinuation<ErrorResultT>(
+            LogHTTPErrorAndCancelContinuation<ErrorResultT>(
                 Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
         }
         else
@@ -147,7 +157,7 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(std::function<void(const Er
         {
             // Error Case. We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            LogErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
+            LogHTTPErrorAndCancelContinuation<ErrorResultT>(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
                 HttpResultCode.value_or(csp::web::EResponseCodes::ResponseInternalServerError),
                 FailureReason.value_or(ERequestFailureReason::Unknown), LogLevel);
         }
@@ -190,8 +200,9 @@ template <typename ResultT> inline auto SendResult(std::function<void(const Resu
  */
 template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable)
 {
-    static_assert(std::is_invocable_v<Callable>,
-        "InvokeIfExceptionCallable must be invocable with zero arguments, if you need state, try passing a capturing lambda.");
+    static_assert(std::is_invocable_v<Callable, const std::exception&>,
+        "InvokeIfExceptionCallable must be invocable with a single const std::exception& arg, if you need other state, try passing a capturing "
+        "lambda.");
 
     return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable)](async::task<void> ExceptionTask)
     {
@@ -199,11 +210,21 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         {
             ExceptionTask.get();
         }
-        catch (...)
+        catch (const std::exception& exception)
         {
             CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
-            InvokeIfExceptionCallable();
+            InvokeIfExceptionCallable(exception);
         }
+    };
+}
+
+/* Stores the result in a shared pointer for access outside of continuation */
+template <typename ResultT> inline auto GetResultFromContinuation(std::shared_ptr<ResultT>& Ptr)
+{
+    return [Ptr](const ResultT& Result)
+    {
+        *Ptr = Result;
+        return Result;
     };
 }
 
@@ -232,24 +253,26 @@ namespace detail
         }
 
         template <typename ExceptionHandlerCallable>
-        inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
+        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(
             ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
             async::spawn(
-                [ResultCallback]() {
-                    LogErrorAndCancelContinuation(
+                [ResultCallback]()
+                {
+                    LogHTTPErrorAndCancelContinuation(
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
                 .then(InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
-        inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
+        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
             IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
             async::spawn(
-                [ResultCallback]() {
-                    LogErrorAndCancelContinuation(
+                [ResultCallback]()
+                {
+                    LogHTTPErrorAndCancelContinuation(
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
                 .then(std::forward<IntermediateStepCallable>(IntermediateStep))

@@ -45,6 +45,10 @@
 #include <filesystem>
 #include <thread>
 
+#include <async++.h>
+
+#include "Mocks/SignalRConnectionMock.h"
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
@@ -264,7 +268,6 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 }
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 {
     SetRandSeed();
@@ -326,9 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 {
     SetRandSeed();
@@ -362,7 +363,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
     InitialiseTestingConnection();
 
-    auto Headers = Connection->Connection->config.get_http_headers();
+    auto Headers = Connection->Connection->HTTPHeaders();
     ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
 
     // Enter space
@@ -380,9 +381,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_KEEPALIVE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 {
     SetRandSeed();
@@ -438,9 +437,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITYREPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 {
     SetRandSeed();
@@ -520,9 +517,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SELF_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 {
     SetRandSeed();
@@ -621,9 +616,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 {
     SetRandSeed();
@@ -697,9 +690,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_CREATOR_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 {
     SetRandSeed();
@@ -773,9 +764,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_MANY_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
 {
     /*
@@ -823,14 +812,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser1.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     MultiplayerTestRunnerProcess CreateAvatarRunner2
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser2.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     std::array<MultiplayerTestRunnerProcess, 2> Runners = { CreateAvatarRunner, CreateAvatarRunner2 };
     std::array<std::future<void>, 2> ReadyForAssertionsFutures = { Runners[0].ReadyForAssertionsFuture(), Runners[1].ReadyForAssertionsFuture() };
@@ -868,9 +859,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AVATAR_MOVEMENT_DIRECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 {
     SetRandSeed();
@@ -938,9 +927,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_CREATE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 {
     SetRandSeed();
@@ -1002,9 +989,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_ADDCOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 {
     SetRandSeed();
@@ -1105,9 +1090,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 {
     SetRandSeed();
@@ -1205,9 +1188,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENTREENTERSPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpace)
 {
     SetRandSeed();
@@ -1332,10 +1313,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This test currently requires manual steps and will be reviewed as part of OF-1535.
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -1414,9 +1393,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     // Log out
     Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {
     // Test for OB-1046
@@ -1489,9 +1466,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_SELECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 {
     SetRandSeed();
@@ -1557,7 +1532,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // Derived type that allows us to access protected members of SpaceEntitySystem
 class InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
@@ -1576,7 +1550,6 @@ public:
 };
 
 // Disabled by default as it can be slow
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 {
     SetRandSeed();
@@ -1672,9 +1645,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INVALID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 {
     SetRandSeed();
@@ -1735,77 +1706,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    csp::common::String UserId;
-
-    // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-    // Create space object
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [SpaceEntity] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-    // Create second space object
-    csp::common::String ObjectName2 = "Object 2";
-    auto [SpaceEntity2] = AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
-
-    auto Component1 = SpaceEntity->AddComponent(ComponentType::AnimatedModel);
-    auto Component2 = SpaceEntity2->AddComponent(ComponentType::AnimatedModel);
-
-    SpaceEntity->QueueUpdate();
-    SpaceEntity2->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
-
-    auto FoundComponent = EntitySystem->FindComponentById(Component1->GetId());
-
-    EXPECT_TRUE(FoundComponent != nullptr);
-    EXPECT_EQ(Component1->GetId(), FoundComponent->GetId());
-
-    FoundComponent = EntitySystem->FindComponentById(Component2->GetId());
-
-    EXPECT_TRUE(FoundComponent != nullptr);
-    EXPECT_EQ(Component2->GetId(), FoundComponent->GetId());
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
 
 void RunParentEntityReplicationTest(bool Local)
 {
@@ -2021,25 +1921,20 @@ void RunParentEntityReplicationTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityLocalReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GLOBAL_POSITION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2136,9 +2031,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_ROTATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2235,9 +2128,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_SCALE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2337,9 +2228,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_TRANSFORM_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2431,9 +2320,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_ENTER_SPACE_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2518,6 +2405,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     // Log out
     LogOut(UserSystem);
 
+    std::this_thread::sleep_for(std::chrono::seconds(7));
+
     // Log in again
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
@@ -2560,7 +2449,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentChildDeletionTest(bool Local)
 {
@@ -2725,25 +2613,20 @@ void RunParentChildDeletionTest(bool Local)
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_OBJECT_PARENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 {
     SetRandSeed();
@@ -2799,7 +2682,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentDeletionTest(bool Local)
 {
@@ -3027,20 +2909,249 @@ void RunParentDeletionTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(false);
 }
-#endif
+
+namespace
+{
+class MockMultiplayerErrorCallback
+{
+public:
+    MOCK_METHOD(void, Call, (csp::multiplayer::ErrorCode), ());
+};
+
+class MockConnectionCallback
+{
+public:
+    MOCK_METHOD(void, Call, (const csp::common::String&), ());
+};
+
+void StartAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Start).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+void StopAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Stop).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
+    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+
+    // The start function will throw internally
+    EXPECT_CALL(*SignalRMock, Start)
+        .WillOnce([](std::function<void(std::exception_ptr)> Callback) { Callback(std::make_exception_ptr(std::runtime_error("mock exception"))); });
+
+    // Then the error callback we be called with an unknown error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::Unknown));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::Start, Error when starting SignalR connection.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
+    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    // Invoke function for delete objects errors
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillOnce([](const std::string& DeleteObjectsMethodName, const signalr::value& DeleteEntityMessage,
+                      std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            { Callback(signalr::value("Irrelevant value from DeleteObjects"), std::make_exception_ptr(std::runtime_error("mock exception"))); });
+
+    // Then the error callback we be called with an no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback,
+        Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
+    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Fail getting client Id
+                    Callback(signalr::value("Irrelevant value from GetClientId"), std::make_exception_ptr(std::runtime_error("mock exception")));
+                }
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(
+        MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
+    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+                else if (HubMethodName == "StartListening")
+                {
+                    // Fail to start listening
+                    Callback(signalr::value(std::uint64_t(0)), std::make_exception_ptr(std::runtime_error("mock exception")));
+                }
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
+    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& Message,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    Callback(signalr::value("Irrelevant value from DeleteObjects"), nullptr);
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+                else if (HubMethodName == "StartListening")
+                {
+                    // Succeed starting listening
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                }
+            });
+
+    // Then the error callback will be called with no error
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(ErrorCode::None));
+
+    // And the connection callback with be called
+    MockConnectionCallback MockSuccessConnectionCallback;
+    EXPECT_CALL(MockSuccessConnectionCallback, Call(csp::common::String("Successfully connected to SignalR hub.")));
+
+    // And the disconnection callback will not be called
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
+
+    Connection->SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // ParseMultiplayerError is odd, it seems only concerned with understanding this "Scopes_ConcurrentUsersQuota error"
+    // I'm actually not sure if CHS even still throws this format of errors, this could be completely redundant...
+    auto [ErrorCodeTooManyUsers, MsgTooManyUsers] = Connection->ParseMultiplayerError(std::runtime_error("error code: Scopes_ConcurrentUsersQuota"));
+    EXPECT_EQ(ErrorCodeTooManyUsers, csp::multiplayer::ErrorCode::SpaceUserLimitExceeded);
+    EXPECT_EQ(MsgTooManyUsers, "error code: Scopes_ConcurrentUsersQuota");
+
+    auto [ErrorCodeUnknown, MsgUnknown] = Connection->ParseMultiplayerError(std::runtime_error("Some unknown error"));
+    EXPECT_EQ(ErrorCodeUnknown, csp::multiplayer::ErrorCode::Unknown);
+    EXPECT_EQ(MsgUnknown, "Some unknown error");
+}

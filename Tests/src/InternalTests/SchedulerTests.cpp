@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_SCHEDULER_TESTS)
 #include "Common/DateTime.h"
 #include "Common/Scheduler.h"
 #include "TestHelpers.h"
@@ -42,4 +41,3 @@ CSP_INTERNAL_TEST(CSPEngine, SchedulerTests, SchedulerTest)
 
     EXPECT_TRUE(ScheduleCallback);
 }
-#endif

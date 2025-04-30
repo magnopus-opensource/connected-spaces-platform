@@ -15,6 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -182,7 +183,6 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_FORGOTPASSWORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -214,9 +214,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 
     EXPECT_EQ(FailResult2.GetResultCode(), csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_RESETPASSWORD_BADTOKEN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -229,9 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -248,9 +244,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINASNEWTESTUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -264,9 +258,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_AS_GUEST_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -280,9 +272,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADTOKENLOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -302,9 +292,85 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADLOGOUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::Login, One of either Username or Email must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty email and username
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "", GeneratedTestAccountPassword, true).Await(RequestPredicate);
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::Login, Password must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty password
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", "", true).Await(RequestPredicate);
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsRefreshTokenLoginTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ExpectedErrorLog = "UserSystem::LoginWithRefreshToken, UserId must not be empty.";
+    bool CallbackCalled = false;
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        {
+            CallbackCalled = true;
+            EXPECT_EQ(ExpectedErrorLog, Message);
+        });
+
+    csp::common::String UserId;
+    // Log in with empty userId
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, "", "fakeToken");
+
+    EXPECT_TRUE(CallbackCalled);
+    EXPECT_EQ(Result.GetHttpResultCode(), 0);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadLogOutTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -315,9 +381,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadLogOutTest)
     // Log out without logging in first
     LogOut(UserSystem, csp::systems::EResultCode::Failed);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADDUALLOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -337,9 +401,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINERROR_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -356,10 +418,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This will be updated and re-instated in OF-1533
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_REFRESH_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -380,9 +440,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 {
     SetRandSeed();
@@ -430,9 +488,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_INCLUDING_BLANK_SPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpacesTest)
 {
     SetRandSeed();
@@ -462,9 +518,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_UPDATE_DISPLAY_NAME_INCLUDING_SYMBOLS_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTest)
 {
     SetRandSeed();
@@ -494,9 +548,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_PING_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PingTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -506,9 +558,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PingTest)
     auto [Result] = AWAIT_PRE(UserSystem, Ping, RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CREATE_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 {
     SetRandSeed();
@@ -562,9 +612,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DELETE_USER_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 {
     SetRandSeed();
@@ -612,9 +660,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CREATE_USER_EMPTY_USERNAME_DISPLAYNAME_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTest)
 {
     SetRandSeed();
@@ -653,9 +699,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_SUPPORTED_PROVIDERS_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -690,9 +734,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 
     EXPECT_TRUE(FoundGoogle && FoundDiscord && FoundApple);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_GOOGLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -708,9 +750,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
     const auto& AuthoriseURL = ResGoogle.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_DISCORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -726,9 +766,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
     const auto& AuthoriseURL = Result.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AUTHORISE_URL_FOR_APPLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -744,12 +782,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
     const auto& AuthoriseURL = Result.GetValue();
     ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
 }
-#endif
 
-// As the following two tests require manual actions explained inside, they are currently disabled
+// As the following three tests require manual actions explained inside, they are currently disabled
 // ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
 #if 0
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -801,9 +837,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 	// Log out
 	LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DISCORD_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -855,9 +889,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 	// Log out
 	LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_APPLE_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -910,9 +942,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 	LogOut(UserSystem);
 }
 #endif
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AGORA_USER_TOKEN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 {
     SetRandSeed();
@@ -921,15 +951,19 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
 
     // Log in
     csp::common::String UserId;
@@ -939,6 +973,13 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+
+    TestMsg1 = "AgoraUserTokenResult invalid";
+    TestMsg2 = "AgoraUserTokenResult doesn't contain expected member: token";
 
     csp::systems::AgoraUserTokenParams Params;
     Params.AgoraUserId = UserId;
@@ -955,6 +996,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -962,9 +1009,76 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GETPROFILEASGUEST_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName[256];
+    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+    TestMsg1 = "PostServiceProxyResult invalid";
+    TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
+
+    csp::systems::TokenInfoParams Params;
+    Params.ServiceName = "Agora";
+    Params.OperationName = "getUserToken";
+    Params.SetHelp = false;
+    Params.Parameters["userId"] = UserId;
+    Params.Parameters["channelName"] = Space.Id;
+    Params.Parameters["referenceId"] = Space.Id;
+    Params.Parameters["lifespan"] = std::to_string(10000).c_str();
+    Params.Parameters["readOnly"] = "true";
+    Params.Parameters["shareAudio"] = "false";
+    Params.Parameters["shareVideo"] = "false";
+    Params.Parameters["shareScreen"] = "false";
+
+    // Get agora token through PostServiceProxy
+    auto [Result] = AWAIT_PRE(UserSystem, PostServiceProxy, RequestPredicate, Params);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 {
     SetRandSeed();
@@ -983,9 +1097,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1017,11 +1129,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
     LogOut(UserSystem);
 }
-#endif
 
 // Currently disabled whilst stripe testing is unavailable for OKO_TESTS
 // This test will be reviewed and reinstated as part of OF-1534.
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1044,9 +1154,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 
     EXPECT_NE(Result.GetValue(), "");
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CHECKOUT_SESSION_URL_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1069,4 +1177,3 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
     EXPECT_NE(Result.GetValue(), "");
 }
-#endif

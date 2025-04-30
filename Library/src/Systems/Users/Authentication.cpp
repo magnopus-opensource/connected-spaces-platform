@@ -253,6 +253,36 @@ void AgoraUserTokenResult::OnResponse(const services::ApiResponseBase* ApiRespon
     }
 }
 
+void PostServiceProxyResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
+    const web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
+        AuthResponse->FromJson(Response->GetPayload().GetContent());
+        std::shared_ptr<rapidjson::Document> Result = AuthResponse->GetOperationResult();
+
+        if (!Result)
+        {
+            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult invalid");
+
+            return;
+        }
+
+        if (!Result->HasMember("token"))
+        {
+            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult doesn't contain expected member: token");
+
+            return;
+        }
+
+        SetValue(Result->operator[]("token").GetString());
+    }
+}
+
 void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);

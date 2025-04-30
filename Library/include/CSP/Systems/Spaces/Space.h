@@ -99,6 +99,7 @@ public:
     csp::common::String Name;
     csp::common::String Description;
     SpaceAttributes Attributes;
+    csp::common::Array<csp::common::String> Tags;
 };
 
 /// @ingroup Space System
@@ -293,7 +294,6 @@ class CSP_API SpaceMetadataResult : public csp::systems::ResultBase
 
 public:
     const csp::common::Map<csp::common::String, csp::common::String>& GetMetadata() const;
-    const csp::common::Array<csp::common::String>& GetTags() const;
 
     CSP_NO_EXPORT
     SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
@@ -305,10 +305,8 @@ private:
     SpaceMetadataResult() {};
 
     void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& MetadataAssetCollection);
-    void SetTags(const csp::common::Array<csp::common::String>& TagsAssetCollection);
 
     csp::common::Map<csp::common::String, csp::common::String> Metadata;
-    csp::common::Array<csp::common::String> Tags;
 };
 
 /// @ingroup Space System

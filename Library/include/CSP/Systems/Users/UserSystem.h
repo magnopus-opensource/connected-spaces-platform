@@ -81,6 +81,8 @@ public:
     /// @param Password csp::common::String
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
+    /// @pre One of either UserName or Email must not be empty.
+    /// @pre Password must not be empty.
     CSP_ASYNC_RESULT void Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
         const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
@@ -89,6 +91,7 @@ public:
     /// @param UserId csp::common::String : User ID for the previous session
     /// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
     /// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
+    /// @pre UserId must not be empty.
     CSP_ASYNC_RESULT void LoginWithRefreshToken(
         const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
 
@@ -206,9 +209,14 @@ public:
     CSP_ASYNC_RESULT void Ping(NullResultCallback Callback);
 
     /// @brief Retrieve User token from Agora
-    /// @param Params AgoraUserTokenParams : Params to configure the User token
-    /// @param Callback UserTokenResultCallback : callback to call when a response is received
+    /// @param Params const AgoraUserTokenParams& : Params to configure the User token
+    /// @param Callback StringResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
+
+    /// @brief Post Service Proxy to perform specified operation of specified service
+    /// @param Params const TokenInfoParams& : Params to specify service, operation, set help and parameters
+    /// @param Callback StringResultCallback : callback to call when a response is received
+    CSP_ASYNC_RESULT void PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback);
 
     /// @brief Re-send user verification email
     /// @param InEmail csp::common::String : User's email address

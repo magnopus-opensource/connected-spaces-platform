@@ -42,7 +42,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_FIDUCIALMARKER_TESTS || RUN_FIDUCIALMARKER_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 {
     SetRandSeed();
@@ -158,9 +159,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_FIDUCIALMARKER_TESTS || RUN_FIDUCIALMARKER_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTest)
 {
     SetRandSeed();
@@ -216,11 +215,11 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
@@ -233,6 +232,3 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

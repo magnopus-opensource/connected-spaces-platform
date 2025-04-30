@@ -39,7 +39,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_USE_SPLINE_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 {
     SetRandSeed();
@@ -133,9 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_SPLINE_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 {
     SetRandSeed();
@@ -191,8 +190,8 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 		
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(SplineScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(SplineScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -209,6 +208,3 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

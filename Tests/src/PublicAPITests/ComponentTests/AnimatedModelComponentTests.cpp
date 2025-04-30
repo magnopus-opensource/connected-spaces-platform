@@ -41,7 +41,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANIMATED_MODEL_TESTS || RUN_ANIMATED_MODEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
 {
     SetRandSeed();
@@ -166,9 +165,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANIMATED_MODEL_TESTS || RUN_ANIMATED_MODEL_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 {
     SetRandSeed();
@@ -225,8 +222,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 		model.animationIndex = 1;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(AnimatedModelScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AnimatedModelScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -249,9 +246,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_ANIMATED_MODEL_ENTER_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceTest)
 {
     SetRandSeed();
@@ -298,6 +293,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 
     {
         // Re-enter space
@@ -375,4 +372,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
     // Log out
     LogOut(UserSystem);
 }
-#endif

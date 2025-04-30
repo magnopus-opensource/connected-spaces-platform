@@ -40,7 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_PROPERTY_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
@@ -54,9 +55,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 
     EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 {
     SetRandSeed();
@@ -193,13 +192,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         std::this_thread::sleep_for(7s);
     }
 
+    std::this_thread::sleep_for(std::chrono::seconds(7));
+
     // Re-Enter space and verify contents
     {
-        // Reload the space and verify the contents match
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
         // Retrieve all entities
         auto GotAllEntities = false;
         SpaceEntity* LoadedObject;
@@ -214,6 +210,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
                 }
             });
 
+        // Reload the space and verify the contents match
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
         // Wait until loaded
         auto Start = std::chrono::steady_clock::now();
         auto Current = std::chrono::steady_clock::now();
@@ -227,7 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
             TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
         }
 
-        EXPECT_TRUE(GotAllEntities);
+        ASSERT_TRUE(GotAllEntities);
 
         const auto& Components = *LoadedObject->GetComponents();
 
@@ -285,6 +285,3 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

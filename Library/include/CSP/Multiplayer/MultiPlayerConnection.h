@@ -32,6 +32,13 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
 CSP_END_IGNORE
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::systems
 {
 
@@ -57,7 +64,7 @@ namespace csp::multiplayer
 class ReplicatedValue;
 class SpaceEntitySystem;
 class ClientElectionManager;
-class SignalRConnection;
+class ISignalRConnection;
 class IWebSocketClient;
 class EventBus;
 
@@ -142,6 +149,27 @@ public:
     /// @return True if self messaging is allowed, false otherwise.
     bool GetAllowSelfMessagingFlag() const;
 
+    /// @brief Parse a SignalR multiplayer error. Unpacks the exception and forwards to @ref ParseMultiplayerError
+    /// @param std::exception_ptr Exception : Pointer to the exception to parse.
+    /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerErrorFromExceptionPtr(std::exception_ptr Exception);
+
+    /// @brief Parse a SignalR multiplayer error.
+    /// @param const std::exception& Exception : The exception to parse
+    /// @return std::pair<ErrorCode, std::string> First element being the deduced error code, second being the exception message.
+    CSP_NO_EXPORT static std::pair<ErrorCode, std::string> ParseMultiplayerError(const std::exception& Exception);
+
+    /// @brief Create a default SignalRConnection configured to the configured MultiplayerServiceURI
+    /// @return ISignalRConnection* Pointer to SignalR connection. The caller should take ownership of the pointer.
+    CSP_NO_EXPORT static ISignalRConnection* MakeSignalRConnection();
+
+    /// @brief Start the connection and register to start receiving updates from the server.
+    /// Connect should be called after LogIn and before EnterSpace.
+    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
+    /// ownership of this pointer.
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection);
+
 private:
     MultiplayerConnection();
     ~MultiplayerConnection();
@@ -150,23 +178,25 @@ private:
 
     typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
 
-    /// @brief Start the connection and register to start receiving updates from the server.
-    /// Connect should be called after LogIn and before EnterSpace.
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    void Connect(ErrorCodeCallbackHandler Callback);
+    void Start(ExceptionCallbackHandler Callback) const;
+
+    //<void> template tags not supported in wrapper generator. (Why we're even wrapping private methods is a mystery to me though)
+    CSP_START_IGNORE
+    async::task<void> Start() const;
+    /* Connect Continuations */
+    // Delete the entity specified by the EntityId. std::numeric_limits<uint64_t>::max() means ALL_ENTITIES_ID, and deletes everything.
+    auto DeleteEntities(uint64_t EntityId) const;
+    // Get the client ID and return it (does not set it locally)
+    auto RequestClientId();
+    // Invoke "StartListening" on already created Connection
+    std::function<async::task<void>()> StartListening();
+    CSP_END_IGNORE
 
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     void Disconnect(ErrorCodeCallbackHandler Callback);
-
-    void Start(ExceptionCallbackHandler Callback) const;
     void Stop(ExceptionCallbackHandler Callback) const;
-
-    void StartListening(ErrorCodeCallbackHandler Callback);
     void StopListening(ErrorCodeCallbackHandler Callback);
-
-    void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
-    void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
 
     /// @brief Subscribes the connected user to the specified space's scope.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
@@ -176,11 +206,9 @@ private:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     void ResetScopes(ErrorCodeCallbackHandler Callback);
 
-    void RequestClientId(ErrorCodeCallbackHandler Callback);
-
     void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
 
-    class csp::multiplayer::SignalRConnection* Connection;
+    class csp::multiplayer::ISignalRConnection* Connection;
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     EventBus* EventBusPtr;

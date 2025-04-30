@@ -27,7 +27,6 @@
 
 // All the analytics tests will be reviewed, and the disabled tests reenabled, as part of OF-1538.
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_MACRO_LOG_METRIC_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -59,9 +58,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 
     System->DeregisterProvider(&Provider);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_UA_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -114,4 +111,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 
     csp::CSPFoundation::Tick();
 }
-#endif
