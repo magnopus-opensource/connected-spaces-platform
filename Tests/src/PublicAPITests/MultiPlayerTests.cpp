@@ -3368,6 +3368,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
         // Log out
         LogOut(UserSystem);
 
+        // Wait a few seconds for the CHS database to update
+        std::this_thread::sleep_for(std::chrono::seconds(8));
+
         // Log in again
         LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
