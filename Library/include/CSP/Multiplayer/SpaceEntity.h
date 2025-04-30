@@ -99,7 +99,7 @@ enum SpaceEntityUpdateFlags
 
 /// @brief Enum used to specify a lock type that has been added to an entity.
 /// Upon creation, entities have the 'None' lock type.
-enum class LockType : uint64_t
+enum class LockType
 {
     /// @brief The entity doesn't have a lock.
     None,
