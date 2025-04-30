@@ -83,7 +83,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
     EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
     EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
     EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == *User->ParentId); // ParentId
-    EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8); // Components
+    EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 9); // Components
 
     auto& Components = Array[6].as_uint_map();
 
