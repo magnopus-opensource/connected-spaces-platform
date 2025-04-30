@@ -18,7 +18,6 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
-#include <Multiplayer/SignalR/ISignalRConnection.h>
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
@@ -36,6 +35,7 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"

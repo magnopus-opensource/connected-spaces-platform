@@ -96,6 +96,7 @@ SpaceEntity::SpaceEntity()
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
+    , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(this, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
@@ -117,6 +118,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
+    , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(this, InEntitySystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
@@ -502,6 +504,10 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
             {
                 Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYREF].GetInt());
             }
+            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE].GetInt());
+            }
 
             assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
@@ -559,6 +565,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser) const
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(SelectedId));
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(ThirdPartyPlatform));
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
+            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, static_cast<int64_t>(EntityLock));
 
             assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
@@ -665,6 +672,12 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
             {
                 ThirdPartyRef = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF).GetString();
             }
+
+            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                auto Value = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt();
+                EntityLock = static_cast<LockType>(Value);
+            }
         }
         Deserialiser.LeaveComponents();
     }
@@ -730,6 +743,12 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                 ThirdPartyPlatform
                     = static_cast<csp::systems::EThirdPartyPlatform>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM).GetInt());
                 UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
+            }
+
+            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                EntityLock = static_cast<LockType>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt());
+                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
             }
 
             if (RealComponentCount > 0)
@@ -923,6 +942,10 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                 case COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM:
                     ThirdPartyPlatform = static_cast<csp::systems::EThirdPartyPlatform>(DirtyProperties[PropertyKey].GetInt());
                     UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
+                    break;
+                case COMPONENT_KEY_VIEW_LOCKTYPE:
+                    EntityLock = static_cast<LockType>(DirtyProperties[PropertyKey].GetInt());
+                    UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
                     break;
                 default:
                     break;
@@ -1119,27 +1142,74 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 
 bool SpaceEntity::Select()
 {
-    std::scoped_lock EntitiesLocker(EntityLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(true, this);
 }
 
 bool SpaceEntity::Deselect()
 {
-    std::scoped_lock EntitiesLocker(EntityLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(false, this);
 }
 
-bool SpaceEntity::IsModifiable()
+bool SpaceEntity::IsModifiable() const
 {
-    if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
+    if (EntitySystem == nullptr || csp::systems::SystemsManager::Get().GetMultiplayerConnection() == nullptr)
     {
-        return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
-    }
-    else
-    {
+        // Return true here so entities that arent attached to the entity system can be modified.
+        // This is currently used for testing.
         return true;
     }
+
+    if (EntityLock == LockType::UserAgnostic &&
+        // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
+        // so we skip the lock check they are about to unlock.
+        // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
+        (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE) == false))
+    {
+        return false;
+    }
+
+    return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
 }
+
+void SpaceEntity::Lock()
+{
+    if (IsLocked())
+    {
+        CSP_LOG_ERROR_MSG("Entity is already locked.")
+        return;
+    }
+
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                             "owner of. Entity name: %s",
+            Name.c_str());
+        return;
+    }
+
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+
+    DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
+}
+
+void SpaceEntity::Unlock()
+{
+    if (IsLocked() == false)
+    {
+        CSP_LOG_ERROR_MSG("Entity is not currently locked.")
+        return;
+    }
+
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+
+    DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::None));
+}
+
+bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
 {
