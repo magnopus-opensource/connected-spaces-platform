@@ -731,7 +731,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
     if (SpaceId.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("No space id given");
-        OnCompleteEvent.set_exception(std::make_exception_ptr(async::task_canceled()));
+        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
 

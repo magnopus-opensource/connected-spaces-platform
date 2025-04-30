@@ -76,7 +76,7 @@ namespace
             if (Result.GetAssetCollection().ParentId != ConversationId)
             {
                 CSP_LOG_ERROR_MSG("Given message doesn't exist on the conversation.");
-                throw async::task_canceled();
+                throw std::exception();
             }
 
             return Result;
@@ -104,7 +104,7 @@ namespace
             else
             {
                 CSP_LOG_ERROR_MSG("Result didn't contain a valid asset.");
-                throw async::task_canceled();
+                throw std::exception();
             }
         };
     }
@@ -162,7 +162,7 @@ namespace
                 CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
             }
 
-            throw async::task_canceled();
+            throw std::exception();
             return async::task<NullResult>();
         };
     }
@@ -232,7 +232,7 @@ namespace
                         {
                             CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation assets exist for this message");
 
-                            throw async::task_canceled();
+                            throw std::exception();
                             return async::task<AssetResult>();
                         }
                     });
@@ -281,7 +281,7 @@ namespace
             if (HasAnnotationData == false)
             {
                 CSP_LOG_MSG(csp::systems::LogLevel::Log, "Message asset collection doesn't contain annotation data.");
-                throw async::task_canceled();
+                throw std::exception();
             }
 
             return Result;
@@ -297,7 +297,7 @@ namespace
             if (ThumbnailIds.size() == 0)
             {
                 CSP_LOG_MSG(csp::systems::LogLevel::Log, "No Thumbnails exist.");
-                throw async::task_canceled();
+                throw std::exception();
             }
 
             return ThumbnailIds;
