@@ -14,45 +14,101 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Conversation/Conversation.h"
+#include "CSP/Systems/Assets/Asset.h"
 
-#include "ConversationSystemHelpers.h"
+#include "Systems/Conversation/ConversationSystemHelpers.h"
 #include "Web/HttpResponse.h"
 
 namespace csp::multiplayer
 {
 
+AnnotationData::AnnotationData()
+    : VerticalFov(0)
+    , AuthorCameraPosition()
+    , AuthorCameraRotation()
+{
+}
+
+AnnotationData::AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId,
+    const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
+    : AnnotationId(AnnotationId)
+    , AnnotationThumbnailId(AnnotationThumbnailId)
+    , VerticalFov(InVerticalFov)
+    , AuthorCameraPosition(InAuthorCameraPosition)
+    , AuthorCameraRotation(InAuthorCameraRotation)
+{
+}
+
+AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
+    : VerticalFov(InAnnotationData.VerticalFov)
+    , AuthorCameraPosition(InAnnotationData.AuthorCameraPosition)
+    , AuthorCameraRotation(InAnnotationData.AuthorCameraRotation)
+{
+}
+
+csp::common::String AnnotationData::GetAnnotationId() const { return AnnotationId; }
+
+csp::common::String AnnotationData::GetAnnotationThumbnailId() const { return AnnotationThumbnailId; }
+
+uint16_t AnnotationData::GetVerticalFov() const { return VerticalFov; }
+
+csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() const { return AuthorCameraPosition; }
+
+csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() const { return AuthorCameraRotation; }
+
+void AnnotationData::SetAnnotationId(const csp::common::String& Id) { AnnotationId = Id; }
+
+void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& Id) { AnnotationThumbnailId = Id; }
+
+void AnnotationData::SetVerticalFov(const uint16_t InVerticalFov) { VerticalFov = InVerticalFov; }
+
+void AnnotationData::SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition) { AuthorCameraPosition = InAuthorCameraPosition; }
+
+void AnnotationData::SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation) { AuthorCameraRotation = InAuthorCameraRotation; }
+
 MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
 
 const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
 
-MessageInfo::MessageInfo(const MessageInfo& MessageData)
+MessageInfo::MessageInfo()
+    : ConversationId("")
+    , CreatedTimestamp("")
+    , EditedTimestamp("")
+    , UserId("")
+    , Message("")
+    , MessageId("")
 {
-    Id = MessageData.Id;
-    ConversationId = MessageData.ConversationId;
-    Timestamp = MessageData.Timestamp;
-    UserID = MessageData.UserID;
-    UserDisplayName = MessageData.UserDisplayName;
-    Message = MessageData.Message;
-    Edited = MessageData.Edited;
 }
 
-ConversationInfo::ConversationInfo(const ConversationInfo& ConversationData)
+MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message)
+    : ConversationId(ConversationId)
+    , Message(Message)
 {
-    ConversationId = ConversationData.ConversationId;
-    Timestamp = ConversationData.Timestamp;
-    UserID = ConversationData.UserID;
-    UserDisplayName = ConversationData.UserDisplayName;
-    Message = ConversationData.Message;
-    Edited = ConversationData.Edited;
-    Resolved = ConversationData.Resolved;
-    CameraPosition = ConversationData.CameraPosition;
+}
+
+MessageInfo::MessageInfo(
+    const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId)
+    : ConversationId(ConversationId)
+    , Message(Message)
+    , MessageId(MessageId)
+{
+}
+
+MessageInfo::MessageInfo(const MessageInfo& MessageData)
+    : ConversationId(MessageData.ConversationId)
+    , CreatedTimestamp(MessageData.CreatedTimestamp)
+    , EditedTimestamp(MessageData.EditedTimestamp)
+    , UserId(MessageData.UserId)
+    , Message(MessageData.Message)
+    , MessageId(MessageData.MessageId)
+{
 }
 
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+    MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
 }
 
 csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return ConversationMessages; }
@@ -73,19 +129,55 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 
     for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
     {
-        MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
+        MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
         ConversationMessages[idx] = MsgInfo;
     }
 }
 
-ConversationInfo& ConversationResult::GetConversationInfo() { return ConvoInfo; }
+MessageInfo& ConversationResult::GetConversationInfo() { return ConvoInfo; }
 
-const ConversationInfo& ConversationResult::GetConversationInfo() const { return ConvoInfo; }
+const MessageInfo& ConversationResult::GetConversationInfo() const { return ConvoInfo; }
 
 void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
+    ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+}
+
+uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
+
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+
+void AnnotationResult::ParseAnnotationAssetData(const systems::AssetCollection& AssetCollection)
+{
+    SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+
+    Data = systems::ConversationSystemHelpers::GetAnnotationDataFromMessageAssetCollection(AssetCollection);
+}
+
+const AnnotationData& AnnotationResult::GetAnnotationData() const { return Data; }
+
+const csp::systems::Asset& AnnotationResult::GetAnnotationAsset() const { return AnnotationAsset; }
+
+const csp::systems::Asset& AnnotationResult::GetAnnotationThumbnailAsset() const { return AnnotationThumbnailAsset; }
+
+void AnnotationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+
+const csp::common::Map<csp::common::String, csp::systems::Asset>& AnnotationThumbnailCollectionResult::GetAnnotationThumbnailAssetsMap() const
+{
+    return AnnotationThumbnailAssetsMap;
+}
+
+uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return AnnotationThumbnailAssetsMap.Size(); }
+
+void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& Result)
+{
+    common::Array<systems::Asset> Assets = Result.GetAssets();
+
+    for (size_t i = 0; i < Assets.Size(); ++i)
+    {
+        AnnotationThumbnailAssetsMap[Assets[i].AssetCollectionId] = Assets[i];
+    }
 }
 } // namespace csp::multiplayer

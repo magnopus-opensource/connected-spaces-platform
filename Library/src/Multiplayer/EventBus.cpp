@@ -22,7 +22,11 @@
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
+
+#include <async++.h>
 #include <limits>
+#include <memory>
+#include <optional>
 
 namespace csp::multiplayer
 {
@@ -169,6 +173,28 @@ void EventBus::SendNetworkEvent(
     const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback)
 {
     SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID, Callback);
+}
+
+async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEvent(
+    const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
+    async::task<std::optional<csp::multiplayer::ErrorCode>> OnCompleteTask = OnCompleteEvent->get_task();
+
+    SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID,
+        [OnCompleteEvent](ErrorCode Code)
+        {
+            if (Code != ErrorCode::None)
+            {
+                OnCompleteEvent->set(Code);
+            }
+            else
+            {
+                OnCompleteEvent->set(std::nullopt);
+            }
+        });
+
+    return OnCompleteTask;
 }
 
 void EventBus::SendNetworkEventToClient(

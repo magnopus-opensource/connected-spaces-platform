@@ -38,4 +38,4 @@ public:
     /// @param DoubleDecode bool: Whether to doubly decode the string.
     static csp::common::String URI(const csp::common::String& UriToDecode, bool DoubleDecode = false);
 };
-};
+}; // namespace csp::common

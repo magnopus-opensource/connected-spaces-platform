@@ -430,6 +430,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
     if (Component != nullptr)
     {
         DirtyComponents[ComponentId] = DirtyComponent { Component, ComponentUpdateType::Add };
+        Component->OnCreated();
     }
 
     return Component;
@@ -642,6 +643,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 
                                 uint32_t Key = CheckedUInt64ToUint32(PropertyKey);
                                 Component->Properties[Key] = PropertyValue;
+                                Component->OnCreated();
                             }
                         }
                     }
@@ -806,6 +808,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                                 }
 
                                 Components[ComponentKey] = Component;
+                                Component->OnCreated();
                             }
                             break;
                         }

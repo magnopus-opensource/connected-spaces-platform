@@ -186,6 +186,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Ensure component data has been written to database by chs before entering the space again
+        // This is due to an enforced 2 second chs database write delay
+        std::this_thread::sleep_for(7s);
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(7));

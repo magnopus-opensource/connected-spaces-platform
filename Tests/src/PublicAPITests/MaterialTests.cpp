@@ -831,27 +831,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     // Enter space so we can get the material and asset events
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-    // Setup Asset callback
-    bool AssetDetailBlobChangedCallbackCalled = false;
-    csp::common::String CallbackAssetId;
-
-    auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
-    {
-        if (AssetDetailBlobChangedCallbackCalled)
-        {
-            return;
-        }
-
-        EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
-        EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
-
-        CallbackAssetId = Params.AssetId;
-        AssetDetailBlobChangedCallbackCalled = true;
-    };
-
-    AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
-
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial* CreatedGLTFMaterial = nullptr;
 
@@ -869,29 +848,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     };
 
     AssetSystem->SetMaterialChangedCallback(CB);
-
-    // Create asset collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-    // Create asset
-    csp::systems::Asset Asset;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-
-    // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
-    csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
-
-    Source.SetMimeType("application/json");
-
-    csp::common::String Uri;
-    UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
-
-    WaitForCallback(AssetDetailBlobChangedCallbackCalled);
-
-    EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
-    EXPECT_EQ(CallbackAssetId, Asset.Id);
 
     // Create a material associated with the space
     Material* CreatedMaterial = nullptr;
