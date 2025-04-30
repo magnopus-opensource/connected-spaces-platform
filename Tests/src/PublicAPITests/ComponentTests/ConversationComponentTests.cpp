@@ -502,8 +502,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 			conversation.rotation = [4,5,6,7];
 		)xx";
 
-        CreatedObject->GetScript()->SetScriptSource(ConversationScriptText.c_str());
-        CreatedObject->GetScript()->Invoke();
+        CreatedObject->GetScript().SetScriptSource(ConversationScriptText.c_str());
+        CreatedObject->GetScript().Invoke();
 
         EntitySystem->ProcessPendingEntityOperations();
 

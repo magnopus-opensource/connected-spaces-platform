@@ -155,8 +155,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 		ECommerce.productId = productId;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(ECommerceScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(ECommerceScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 

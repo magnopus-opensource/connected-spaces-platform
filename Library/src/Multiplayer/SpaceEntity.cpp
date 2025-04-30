@@ -98,12 +98,8 @@ SpaceEntity::SpaceEntity()
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, nullptr))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityMutexLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(this, nullptr)
+    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , TimeOfLastPatch(0)
 {
 }
@@ -124,12 +120,8 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, InEntitySystem))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityMutexLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(this, InEntitySystem)
+    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , TimeOfLastPatch(0)
 {
 }
@@ -143,14 +135,6 @@ SpaceEntity::~SpaceEntity()
     {
         CSP_DELETE(Components[Keys[i]]);
     }
-
-    CSP_DELETE(Script);
-    CSP_DELETE(ScriptInterface);
-
-    CSP_DELETE(EntityMutexLock);
-    CSP_DELETE(ComponentsLock);
-    CSP_DELETE(PropertiesLock);
-    CSP_DELETE(RefCount);
 }
 
 uint64_t SpaceEntity::GetId() const { return Id; }
@@ -169,7 +153,7 @@ void SpaceEntity::SetName(const csp::common::String& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_ENTITYNAME);
 
@@ -220,7 +204,7 @@ void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_POSITION);
 
@@ -257,7 +241,7 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_ROTATION);
 
@@ -286,7 +270,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_SCALE);
 
@@ -310,7 +294,7 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYREF);
 
@@ -330,7 +314,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM);
 
@@ -424,7 +408,7 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (Type == ComponentType::ScriptData)
     {
@@ -453,7 +437,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 void SpaceEntity::RemoveComponent(uint16_t Key)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (!TransientDeletionComponentIds.Contains(Key) || Components.HasKey(Key))
     {
@@ -468,7 +452,7 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
 
 void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Serialiser.BeginEntity();
     {
@@ -559,9 +543,9 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
     Serialiser.EndEntity();
 }
 
-void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
+void SpaceEntity::Serialise(IEntitySerialiser& Serialiser) const
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Serialiser.BeginEntity();
     {
@@ -603,7 +587,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 
 void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Deserialiser.EnterEntity();
     {
@@ -704,7 +688,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 {
     SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
 
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
@@ -858,8 +842,8 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
     if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
     {
-        std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
-        std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+        std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+        std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
         auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
@@ -1140,7 +1124,7 @@ void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBas
 
 void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (DirtyComponents.HasKey(Component->GetId()))
     {
@@ -1150,7 +1134,7 @@ void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
     DirtyComponents[Component->GetId()] = DirtyComponent { Component, ComponentUpdateType::Update };
 }
 
-EntityScript* SpaceEntity::GetScript() { return Script; }
+EntityScript& SpaceEntity::GetScript() { return Script; }
 
 bool SpaceEntity::IsSelected() const { return SelectedId != 0; }
 
@@ -1158,13 +1142,13 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 
 bool SpaceEntity::Select()
 {
-    std::scoped_lock EntitiesLocker(*EntityMutexLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(true, this);
 }
 
 bool SpaceEntity::Deselect()
 {
-    std::scoped_lock EntitiesLocker(*EntityMutexLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(false, this);
 }
 
@@ -1205,7 +1189,7 @@ void SpaceEntity::Lock()
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
     DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
@@ -1219,7 +1203,7 @@ void SpaceEntity::Unlock()
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
     DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::None));
@@ -1366,19 +1350,13 @@ void SpaceEntity::ResolveParentChildRelationship()
     }
 }
 
-csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface; }
+csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }
 
 void SpaceEntity::ClaimScriptOwnership() { EntitySystem->ClaimScriptOwnership(this); }
 
 void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
 {
-    Script->OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
+    Script.OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
 }
-
-void SpaceEntity::AddRef() { ++(*RefCount); }
-
-void SpaceEntity::RemoveRef() { --(*RefCount); }
-
-std::atomic_int* SpaceEntity::GetRefCount() { return RefCount; }
 
 } // namespace csp::multiplayer

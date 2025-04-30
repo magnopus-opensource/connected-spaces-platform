@@ -222,8 +222,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 		model.animationIndex = 1;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(AnimatedModelScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AnimatedModelScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
