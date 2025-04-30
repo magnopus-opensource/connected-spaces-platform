@@ -38,7 +38,7 @@ static constexpr const char* BaseColorFactor = "baseColorFactor";
 static constexpr const char* MetallicFactor = "metallicFactor";
 static constexpr const char* RoughnessFactor = "roughnessFactor";
 static constexpr const char* EmissiveFactor = "emissiveFactor";
-static constexpr const char* EmissiveIntensity = "emissiveIntensity";
+static constexpr const char* EmissiveStrength = "emissiveStrength";
 static constexpr const char* BaseColorTex = "baseColorTexture";
 static constexpr const char* MetallicRoughTex = "metallicRoughnessTexture";
 static constexpr const char* NormalTex = "normalTexture";
@@ -60,7 +60,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMater
     Serializer.SerializeMember(GLTFMaterialProperties::RoughnessFactor, Obj.RoughnessFactor);
     Serializer.SerializeMember(
         GLTFMaterialProperties::EmissiveFactor, csp::common::Array<float> { Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z });
-    Serializer.SerializeMember(GLTFMaterialProperties::EmissiveIntensity, Obj.EmissiveIntensity);
+    Serializer.SerializeMember(GLTFMaterialProperties::EmissiveStrength, Obj.EmissiveStrength);
 
     if (Obj.BaseColorTexture.IsSet())
         Serializer.SerializeMember(GLTFMaterialProperties::BaseColorTex, Obj.BaseColorTexture);
@@ -107,7 +107,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLT
         Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
     }
 
-    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::EmissiveIntensity, Obj.EmissiveIntensity);
+    Deserializer.SafeDeserializeMember(GLTFMaterialProperties::EmissiveStrength, Obj.EmissiveStrength);
 
     if (Deserializer.SafeDeserializeMember(GLTFMaterialProperties::BaseColorTex, Obj.BaseColorTexture))
     {
@@ -150,9 +150,9 @@ void GLTFMaterial::SetEmissiveFactor(const csp::common::Vector3& Factor) { Emiss
 
 const csp::common::Vector3& GLTFMaterial::GetEmissiveFactor() const { return EmissiveFactor; }
 
-void GLTFMaterial::SetEmissiveIntensity(float Intensity) { EmissiveIntensity = Intensity; }
+void GLTFMaterial::SetEmissiveStrength(float Strength) { EmissiveStrength = Strength; }
 
-float GLTFMaterial::GetEmissiveIntensity() const { return EmissiveIntensity; }
+float GLTFMaterial::GetEmissiveStrength() const { return EmissiveStrength; }
 
 void GLTFMaterial::SetBaseColorTexture(const TextureInfo& Texture) { BaseColorTexture = Texture; }
 
@@ -183,8 +183,7 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::S
     , MetallicFactor(1.f)
     , RoughnessFactor(1.f)
     , EmissiveFactor(0.f, 0.f, 0.f)
-    , EmissiveIntensity(1.0f)
-    ,
+    , EmissiveStrength(1.0f)
     , BaseColorTexture()
     , MetallicRoughnessTexture()
     , NormalTexture()

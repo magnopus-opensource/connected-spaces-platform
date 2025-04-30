@@ -106,13 +106,13 @@ public:
     /// @return csp::common::Vector3& : The emissive factor.
     const csp::common::Vector3& GetEmissiveFactor() const;
 
-    /// @brief Set the emissive intensity.
-    /// @param Intensity float : The emissive intensity.
-    void SetEmissiveIntensity(float Intensity);
+    /// @brief Set the emissive strength.
+    /// @param Strength float : The emissive strength.
+    void SetEmissiveStrength(float Strength);
 
-    /// @brief Get the emissive intensity.
-    /// @return float : The emissive intensity.
-    float GetEmissiveIntensity() const;
+    /// @brief Get the emissive strength.
+    /// @return float : The emissive strength.
+    float GetEmissiveStrength() const;
 
     /// @brief Sets the base color texture.
     /// @details The first three components (RGB) MUST be encoded with the sRGB transfer function. They specify the base color of the material.
@@ -195,7 +195,7 @@ private:
     float MetallicFactor;
     float RoughnessFactor;
     csp::common::Vector3 EmissiveFactor;
-    float EmissiveIntensity;
+    float EmissiveStrength;
 
     TextureInfo BaseColorTexture;
     TextureInfo MetallicRoughnessTexture;
