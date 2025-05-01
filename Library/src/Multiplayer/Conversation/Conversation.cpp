@@ -80,14 +80,14 @@ MessageInfo::MessageInfo()
 {
 }
 
-MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message)
+MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool /*IsConversation*/, const csp::common::String& Message)
     : ConversationId(ConversationId)
     , Message(Message)
 {
 }
 
 MessageInfo::MessageInfo(
-    const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId)
+    const csp::common::String& ConversationId, bool /*IsConversation*/, const csp::common::String& Message, const csp::common::String& MessageId)
     : ConversationId(ConversationId)
     , Message(Message)
     , MessageId(MessageId)
@@ -171,9 +171,9 @@ const csp::common::Map<csp::common::String, csp::systems::Asset>& AnnotationThum
 
 uint64_t AnnotationThumbnailCollectionResult::GetTotalCount() const { return AnnotationThumbnailAssetsMap.Size(); }
 
-void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& Result)
+void AnnotationThumbnailCollectionResult::ParseAssets(const systems::AssetsResult& AssetResult)
 {
-    common::Array<systems::Asset> Assets = Result.GetAssets();
+    common::Array<systems::Asset> Assets = AssetResult.GetAssets();
 
     for (size_t i = 0; i < Assets.Size(); ++i)
     {

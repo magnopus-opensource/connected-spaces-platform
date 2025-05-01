@@ -3188,7 +3188,7 @@ void RunEntityLockTest(bool Local)
 
             CreatedEntity->SetUpdateCallback(
                 [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {
@@ -3219,7 +3219,7 @@ void RunEntityLockTest(bool Local)
 
             CreatedEntity->SetUpdateCallback(
                 [&EntityUpdated, CreatedEntity](
-                    SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
                 {
                     if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
                     {

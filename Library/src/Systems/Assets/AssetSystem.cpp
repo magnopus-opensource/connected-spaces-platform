@@ -488,7 +488,7 @@ async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection
     }
 
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
-        [](const NullResult& s) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+        [](const NullResult& /*s*/) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
 

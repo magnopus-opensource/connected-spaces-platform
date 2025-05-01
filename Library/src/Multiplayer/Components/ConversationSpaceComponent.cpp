@@ -408,7 +408,7 @@ void ConversationSpaceComponent::OnLocalDelete()
 {
     // The component has been deleted by this client,
     // also delete the conversation
-    const auto Callback = [](const NullResult& Result) {};
+    const auto Callback = [](const NullResult& /*Result*/) {};
     DeleteConversation(Callback);
 }
 

@@ -625,7 +625,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRe
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -640,7 +639,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRe
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -739,7 +738,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFr
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -754,7 +752,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFr
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -945,7 +943,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
                 CallbackCalled = true;
             });
 
-        CreatedObject->Destroy([](bool Success) {});
+        CreatedObject->Destroy([](bool /*Success*/) {});
 
         CreatedObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
@@ -1416,7 +1414,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
         auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         bool EntitiesRetrieved = false;
 
@@ -1850,7 +1848,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         // However, we still need this callback to flush the original creation event
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
         const auto [Result] = AWAIT(ConversationComponent, CreateConversation, ConversationMessage);
@@ -1943,7 +1941,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
