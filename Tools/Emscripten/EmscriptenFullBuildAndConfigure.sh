@@ -1,6 +1,8 @@
 git config core.hooksPath .githooks
 git config commit.template .githooks/commit-template.txt
 
+# Example usage, ./EmscriptenFullBuildAndConfigure debug withNode
+
 if ! test -f "../../modules/premake/README.md"; then
     git submodule update --recursive
 fi
@@ -27,6 +29,19 @@ if [ "$1" != "debug" ] && [ "$1" != "release" ]
   then
     echo Unsupported configuration "$1". Supported configurations are "debug" and "release". Please try again.
     exit
+fi
+
+WITH_NODE=0
+if [ "$2" = "withNode" ]; then
+    WITH_NODE=1
+fi
+
+if [ "$WITH_NODE" -eq 1 ]; then
+    echo "Building with Node.js support"
+    "premake5" gmake2 --generate_wasm --wasm_with_node
+else
+    echo "Building without Node.js support"
+    "premake5" gmake2 --generate_wasm
 fi
 
 "premake5" gmake2 --generate_wasm
