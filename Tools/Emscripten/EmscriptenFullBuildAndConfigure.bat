@@ -2,6 +2,7 @@
 
 REM *** Command Line Arguments *** 
 REM [1] - Configuration - release || debug
+REM [1] - Optional, append withNode to build with Node support, example ./EmscriptenFullBuildAnd
 
 git config core.hooksPath .githooks
 git config commit.template .githooks/commit-template.txt
@@ -29,7 +30,7 @@ del Makefile
 if "%~1"=="" (goto ArgNone) else (goto ArgCheck)
 
 :ArgNone
-echo No configuration name provided
+echo No configuration name provided, please provide "debug" or "release" after ./EmscriptenFullBuildAndConfigure
 exit /b 1
 
 :ArgCheck
@@ -38,7 +39,17 @@ echo Unsupported configuration "%~1". Supported configurations are "debug" and "
 exit /b 1
 
 :ArgOk
-"modules/premake/bin/release/premake5" gmake2 --generate_wasm
+REM withNode is an optional arg
+set "WITH_NODE=0"
+if /i "%~2"=="withNode" set "WITH_NODE=1"
+
+if "%WITH_NODE%"=="1" (
+    echo Building with Node.js support
+    "modules/premake/bin/release/premake5" gmake2 --generate_wasm --wasm_with_node
+) else (
+    echo Building without Node.js support
+    "modules/premake/bin/release/premake5" gmake2 --generate_wasm
+)
 goto Wasm
 
 :Wasm
