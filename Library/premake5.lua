@@ -296,7 +296,7 @@ if not Project then
                 "websocket.js"
             }
         -- Compile with or without node support. Node support is used for headless testing.
-        -- In thoery, applications should be able to consume emscripten libraries with node compiled in no problem, but it hasn't worked out that way in practice.
+        -- In theory, applications should be able to consume emscripten libraries with node compiled in no problem, but it hasn't worked out that way in practice.
         filter { "platforms:wasm", "options:wasm_with_node" }
             linkoptions {"-sENVIRONMENT='web,worker,node'" }   
         filter { "platforms:wasm", "not options:wasm_with_node" }
