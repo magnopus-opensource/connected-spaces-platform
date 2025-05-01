@@ -154,9 +154,9 @@ protected:
     ComponentBase(ComponentType Type, SpaceEntity* Parent);
 
     const ReplicatedValue& GetProperty(uint32_t Key) const;
-    const bool GetBooleanProperty(uint32_t Key) const;
-    const int64_t GetIntegerProperty(uint32_t Key) const;
-    const float GetFloatProperty(uint32_t Key) const;
+    bool GetBooleanProperty(uint32_t Key) const;
+    int64_t GetIntegerProperty(uint32_t Key) const;
+    float GetFloatProperty(uint32_t Key) const;
     const csp::common::String& GetStringProperty(uint32_t Key) const;
     const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
     const csp::common::Vector3& GetVector3Property(uint32_t Key) const;

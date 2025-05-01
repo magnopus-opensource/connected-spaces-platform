@@ -163,7 +163,6 @@ namespace
             }
 
             throw std::exception();
-            return async::task<NullResult>();
         };
     }
 
@@ -233,7 +232,6 @@ namespace
                             CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation assets exist for this message");
 
                             throw std::exception();
-                            return async::task<AssetResult>();
                         }
                     });
         };
@@ -373,7 +371,7 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
 
         // 2.Send multiplayer event
         const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-            = [this, Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
+            = [Callback, AddCommentContainerResult](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
@@ -427,7 +425,7 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
             }
 
             // 3. Delete the asset colleciton associated with this conversation
-            NullResultCallback DeleteAssetCollectionCallback = [Callback, this](const NullResult& DeleteAssetCollectionResult)
+            NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
             {
                 if (HandleConversationResult(
                         DeleteAssetCollectionResult, "The deletion of the conversation asset collection was not successful.", Callback)
@@ -465,7 +463,7 @@ void ConversationSystemInternal::AddMessage(
         }
 
         // 2. Send multiplayer event
-        const auto SignalRCallback = [this, Callback, MessageResultCallbackResult](multiplayer::ErrorCode Error)
+        const auto SignalRCallback = [Callback, MessageResultCallbackResult](multiplayer::ErrorCode Error)
         {
             if (Error != multiplayer::ErrorCode::None)
             {
@@ -525,8 +523,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             AssetCollection MessageAssetCollection;
             MessageAssetCollection.Id = MessageId;
 
-            const NullResultCallback DeleteAssetCollectionCallback
-                = [this, Callback, ConversationId, MessageId](const NullResult& DeleteAssetCollectionResult)
+            const NullResultCallback DeleteAssetCollectionCallback = [Callback](const NullResult& DeleteAssetCollectionResult)
             {
                 if (HandleConversationResult(DeleteAssetCollectionResult, "Failed to delete Message asset collection.", Callback) == false)
                 {
@@ -657,7 +654,7 @@ void ConversationSystemInternal::UpdateConversation(
 }
 
 void ConversationSystemInternal::GetMessageInfo(
-    const common::String& ConversationId, const common::String& MessageId, multiplayer::MessageResultCallback Callback)
+    const common::String& /*ConversationId*/, const common::String& MessageId, multiplayer::MessageResultCallback Callback)
 {
     const AssetCollectionResultCallback GetMessageCallback = [Callback](const AssetCollectionResult& GetMessageResult)
     {
@@ -674,7 +671,7 @@ void ConversationSystemInternal::GetMessageInfo(
     AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
 }
 
-void ConversationSystemInternal::UpdateMessage(const common::String& ConversationId, const common::String& MessageId,
+void ConversationSystemInternal::UpdateMessage(const common::String& /*ConversationId*/, const common::String& MessageId,
     const multiplayer::MessageUpdateParams& NewData, multiplayer::MessageResultCallback Callback)
 {
     // 1. Get message asset collection
@@ -761,7 +758,7 @@ void ConversationSystemInternal::StoreConversationMessage(
 }
 
 void ConversationSystemInternal::DeleteMessages(
-    const common::String& ConversationId, common::Array<AssetCollection>& Messages, NullResultCallback Callback)
+    const common::String& /*ConversationId*/, common::Array<AssetCollection>& Messages, NullResultCallback Callback)
 {
     if (Messages.Size() == 0)
     {
@@ -822,7 +819,7 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& ConversationId,
@@ -891,7 +888,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
         .then(CreateAnnotationResult(ConversationAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback)
@@ -930,7 +927,8 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
         .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain([Callback](const std::exception& exception) { Callback(MakeInvalid<NullResult>()); }));
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<NullResult>()); }));
 }
 
 void ConversationSystemInternal::GetAnnotation(
@@ -967,7 +965,7 @@ void ConversationSystemInternal::GetAnnotation(
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
@@ -1036,7 +1034,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(common::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
 void ConversationSystemInternal::DeleteAnnotation(
@@ -1077,7 +1075,8 @@ void ConversationSystemInternal::DeleteAnnotation(
             "Failed to deleted annotation thumbnail asset.", {}, {}, {}))
         // 6. Process result
         .then(common::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
-        .then(common::continuations::InvokeIfExceptionInChain([Callback](const std::exception& exception) { Callback(MakeInvalid<NullResult>()); }));
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<NullResult>()); }));
 }
 
 void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
@@ -1100,7 +1099,7 @@ void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
         .then(CreateAnnotationThumbnailCollectionResult())
         .then(common::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>()); }));
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>()); }));
 }
 
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)

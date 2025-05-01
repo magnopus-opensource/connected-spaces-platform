@@ -94,7 +94,7 @@ std::vector<std::string> CustomSpaceComponentScriptInterface::GetCustomPropertyK
     std::vector<std::string> ReturnValue;
     csp::common::List<csp::common::String> Keys = static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertyKeys();
 
-    for (int i = 0; i < Keys.Size(); ++i)
+    for (size_t i = 0; i < Keys.Size(); ++i)
     {
         ReturnValue.push_back(Keys[i].c_str());
     }

@@ -39,7 +39,6 @@ This scenario would fail if events arent correctly stored, and then flushed when
 void RunTest()
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
     std::promise<csp::multiplayer::SpaceEntity*> CreateObjectResultPromise;

@@ -45,7 +45,7 @@ namespace
             DeletionKeys[i] = Sequences[i].Key;
         }
 
-        auto DeleteCallback = [Callback, SequenceSystem](const csp::systems::NullResult& DeleteResult)
+        auto DeleteCallback = [Callback](const csp::systems::NullResult& DeleteResult)
         {
             if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress)
             {
@@ -145,7 +145,7 @@ void HotspotSequenceSystem::RenameHotspotGroup(
             return;
         }
 
-        auto UpdateCB = [Callback, SQ, NewKey](const SequenceResult& Result)
+        auto UpdateCB = [Callback](const SequenceResult& Result)
         {
             if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
             {
@@ -267,13 +267,13 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
     DeregisterSystemCallback();
 }
 
-void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback)
+void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback /*Callback*/)
 {
-    systems::SpaceSystem* SpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
+    systems::SpaceSystem* MySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
     csp::common::String ItemCopy = ItemName;
 
-    auto GetSequencesCallback = [this, Callback, ItemCopy](const systems::SequencesResult& SequencesResult)
+    auto GetSequencesCallback = [ItemCopy](const systems::SequencesResult& SequencesResult)
     {
         if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
         {
@@ -301,7 +301,7 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
             }
         }
 
-        auto CB = [](const systems::NullResult& Res) {
+        auto CB = [](const systems::NullResult& /*Res*/) {
 
         };
 
@@ -310,7 +310,7 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
     };
 
     // Find all sequences containing this name
-    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { SpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
+    SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { MySpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
 }
 
 HotspotSequenceSystem::HotspotSequenceSystem()

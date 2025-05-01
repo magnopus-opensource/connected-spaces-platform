@@ -45,8 +45,6 @@ void OnDelete();
 std::atomic_bool IsTestComplete;
 std::atomic_bool IsDisconnected;
 std::atomic_bool IsReadyForUpdate;
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 SpaceEntity* TestUser;
 SpaceEntity* TestObject;
 
@@ -55,7 +53,6 @@ const int WaitForTestTimeoutLimit = 20000;
 const int NumberOfEntityUpdateTicks = 5;
 int ReceivedEntityUpdatesCount;
 
-bool EventSent = false;
 bool EventReceived = false;
 
 ReplicatedValue ObjectFloatProperty;
@@ -107,8 +104,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled1 = true; };
-        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled2 = true; };
+        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled1 = true; };
+        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
@@ -141,8 +138,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled1 = true; };
-        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled2 = true; };
+        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled1 = true; };
+        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
@@ -229,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
@@ -241,7 +238,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 

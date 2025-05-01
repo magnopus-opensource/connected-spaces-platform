@@ -129,8 +129,9 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     ResponseReceiver Receiver;
 
     // Synthesise a response to feed to ApiResponseBase
-    csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(),
-        csp::web::HttpPayload(MyTestPayload), &Receiver, csp::common::CancellationToken::Dummy());
+    csp::web::HttpPayload MyHttpPayload(MyTestPayload);
+    csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(
+        WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(), MyHttpPayload, &Receiver, csp::common::CancellationToken::Dummy());
     MyTestRequest.SetRequestProgress(1.0f);
     MyTestRequest.SetResponseCode(MyTestResponseCode);
 

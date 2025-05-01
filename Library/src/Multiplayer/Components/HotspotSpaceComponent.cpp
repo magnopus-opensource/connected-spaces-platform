@@ -102,7 +102,7 @@ void HotspotSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast
 
 void HotspotSpaceComponent::OnLocalDelete()
 {
-    auto CB = [](const csp::systems::NullResult& Result) {
+    auto CB = [](const csp::systems::NullResult& /*Result*/) {
 
     };
 

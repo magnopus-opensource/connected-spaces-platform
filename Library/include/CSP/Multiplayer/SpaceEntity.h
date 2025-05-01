@@ -229,7 +229,7 @@ public:
 
     /// @brief Get the third party platform type of this entity.
     /// @return A string representing third party platform type set for this entity.
-    const csp::systems::EThirdPartyPlatform GetThirdPartyPlatformType() const;
+    csp::systems::EThirdPartyPlatform GetThirdPartyPlatformType() const;
 
     /// @brief Set third party platform type for this entity.
     /// @param InThirdPartyPlatformType csp::systems::EThirdPartyPlatform : The third party platform type to set.

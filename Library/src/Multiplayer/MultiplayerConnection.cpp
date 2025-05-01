@@ -63,14 +63,19 @@ std::pair<ErrorCode, std::string> MultiplayerConnection::ParseMultiplayerErrorFr
 {
     try
     {
-        rethrow_exception(Exception);
+        if (Exception)
+        {
+            rethrow_exception(Exception);
+        }
+        else
+        {
+            return { ErrorCode::Unknown, "MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr, Unexpectedly no exception was thrown." };
+        }
     }
     catch (const std::exception& e)
     {
         return ParseMultiplayerError(e);
     }
-
-    return { ErrorCode::Unknown, "MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr, Unexpectedly no exception was thrown." };
 }
 
 std::pair<ErrorCode, std::string> MultiplayerConnection::ParseMultiplayerError(const std::exception& Exception)
@@ -235,7 +240,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
         }
 
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
-            = [EntitiesDeletedEvent](signalr::value Result, std::exception_ptr Except)
+            = [EntitiesDeletedEvent](signalr::value /*Result*/, std::exception_ptr Except)
         {
             if (Except != nullptr)
             {
@@ -324,7 +329,7 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
         }
 
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
-            = [StartListeningEvent](signalr::value Result, std::exception_ptr Except)
+            = [StartListeningEvent](signalr::value /*Result*/, std::exception_ptr Except)
         {
             if (Except != nullptr)
             {
@@ -508,7 +513,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -542,7 +547,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -569,7 +574,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -611,7 +616,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
     }
 
     std::function<void(signalr::value, std::exception_ptr)> LocalCallback
-        = [this, Callback, InAllowSelfMessaging](signalr::value Result, std::exception_ptr Except)
+        = [this, Callback, InAllowSelfMessaging](signalr::value /*Result*/, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {

@@ -142,7 +142,7 @@ inline void PrintProgress(float Progress)
     char ProgressString[256];
     SPRINTF(ProgressString, "Progress=%d%%\n", ProgressPercent);
 
-    for (int i = 0; i < strlen(ProgressString); ++i)
+    for (size_t i = 0; i < strlen(ProgressString); ++i)
         std::cerr << "\b";
 
     std::cerr << ProgressString;

@@ -622,6 +622,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
             std::cout << InMessage << std::endl;
         });
 
+#if CSP_PROFILING_ENABLED
     const int TestValue = 12345;
 
     CSP_PROFILE_SCOPED_TAG(TestTag);
@@ -637,7 +638,6 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
     CSP_PROFILE_EVENT_TAG(TestEvent);
     CSP_PROFILE_EVENT_FORMAT("Event %d", TestValue)
 
-#if CSP_PROFILING_ENABLED
     EXPECT_TRUE(BeginConfirmed);
     EXPECT_TRUE(EndConfirmed);
     EXPECT_TRUE(EventConfirmed);

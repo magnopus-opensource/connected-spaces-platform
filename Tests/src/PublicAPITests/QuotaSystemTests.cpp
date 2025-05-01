@@ -127,7 +127,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
-    for (int i = 0; i < TierFeaturesArray.Size(); i++)
+    for (size_t i = 0; i < TierFeaturesArray.Size(); i++)
     {
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
@@ -165,7 +165,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
-    for (int i = 0; i < TierFeaturesArray.Size(); i++)
+    for (size_t i = 0; i < TierFeaturesArray.Size(); i++)
     {
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
@@ -229,7 +229,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), ExpectedInfoArray.Size());
 
-    for (int i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
+    for (size_t i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
     {
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, ExpectedInfoArray[i].FeatureName);
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].TierName, ExpectedInfoArray[i].TierName);
@@ -244,7 +244,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     auto UserSystem = SystemsManager.GetUserSystem();
     auto QuotaSystem = SystemsManager.GetQuotaSystem();
     auto SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
         TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
