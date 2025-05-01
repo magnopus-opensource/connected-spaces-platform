@@ -81,7 +81,7 @@ SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
 std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
     AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
 {
-    return [AssetSystem, Space, &Metadata]() -> async::task<AssetCollectionResult>
+    return [AssetSystem, Space, Metadata]() -> async::task<AssetCollectionResult>
     {
         auto Id = Space->GetSpace().Id;
         auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
