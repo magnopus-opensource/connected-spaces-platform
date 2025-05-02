@@ -1,0 +1,362 @@
+/*
+ * Copyright 2025 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#pragma once
+
+#include <signalrclient/signalr_value.h>
+
+#include <map>
+#include <memory>
+#include <optional>
+#include <stack>
+#include <stdexcept>
+#include <string>
+#include <variant>
+#include <vector>
+
+namespace csp::multiplayer
+{
+/// @brief A variant reresenting all possible basic types serializable to a signalr value.
+struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, std::string, nullptr_t>
+{
+    using variant::variant;
+};
+
+/// @brief A stack-based signalr serializer which allows for custom class serialization using ISignalRSerializable
+class SignalRSerializer
+{
+public:
+    /// @brief Pushes an array onto the stack.
+    /// @details Once this function has been called, AppendValue should be used to add elements to the array.
+    /// PopArray should be used to finalize the array.
+    void PushArray();
+
+    /// @brief Pops the current array from the stack.
+    /// @pre PushArray should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void PopArray();
+
+    /// @brief Pushes a string map (std::map<std::string, T> onto the stack.
+    /// @details Once this function has been called, AppendKeyValue should be used to add elements to the map.
+    /// PopStringMap should be used to finalize the map.
+    void PushStringMap();
+
+    /// @brief Pops the current string map from the stack.
+    /// @pre PushStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void PopStringMap();
+
+    /// @brief Pushes a uint map (std::map<uint64_t, T> onto the stack.
+    /// @details Once this function has been called, AppendKeyValue should be used to add elements to the map.
+    /// PopUintMap should be used to finalize the map.
+    void PushUintMap();
+
+    /// @brief Pops the current uint map from the stack.
+    /// @pre PushUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void PopUintMap();
+
+    /// @brief Appends a value to the current stack.
+    /// @pre PushArray should be called before this function,
+    /// or if this serializer represents a single value.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void AppendValue(const T& Value) { AppendValueInternal(Value); }
+
+    /// @brief Appends a uint key-value pair to the current stack.
+    /// @pre PushUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void AppendKeyValue(uint64_t Key, const T& Value)
+    {
+        if (Stack.size() == 0 || std ::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()) == false)
+        {
+            throw std::runtime_error("Invalid call: Serializer was not in a uint map");
+        }
+
+        Stack.push(std::pair<uint64_t, signalr::value> {});
+        std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = Key;
+
+        AppendValue(Value);
+
+        // Get our pair form the top of the stack and pop
+        std::pair<uint64_t, signalr::value> Pair = std::get<std::pair<uint64_t, signalr::value>>(Stack.top());
+        Stack.pop();
+
+        // Get our map from the top of the stack and append the pair
+        std::map<uint64_t, signalr::value>& Map = std::get<std::map<uint64_t, signalr::value>>(Stack.top());
+        Map[Pair.first] = Pair.second;
+    }
+
+    /// @brief Appends a string key-value pair to the current stack.
+    /// @pre PushStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void AppendKeyValue(std::string Key, const T& Value)
+    {
+        if (Stack.size() == 0 || std ::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
+        {
+            throw std::runtime_error("Invalid call: Serializer was not in a string map");
+        }
+
+        Stack.push(std::pair<std::string, signalr::value> {});
+        std::get<std::pair<std::string, signalr::value>>(Stack.top()).first = Key;
+
+        AppendValue(Value);
+
+        // Get our pair from the top of the stack and pop.
+        std::pair<std::string, signalr::value> Pair = std::get<std::pair<std::string, signalr::value>>(Stack.top());
+        Stack.pop();
+
+        // Get our map from the top of the stack and append the pair.
+        std::map<std::string, signalr::value>& Map = std::get<std::map<std::string, signalr::value>>(Stack.top());
+        Map[Pair.first] = Pair.second;
+    }
+
+    /// @brief Gets the serialized singnal r value.
+    /// @return signalr::value
+    /// @pre The serializer should be at the root (array and maps should all be popped).
+    signalr::value Get() const;
+
+private:
+    void Pop(signalr::value&& Last);
+
+    template <class T> void AppendValueInternal(const T& Value)
+    {
+        signalr::value SerializedValue;
+
+        if constexpr (std::is_base_of<ISignalRSerializable, T>::value)
+        {
+            Value.Serialize(*this);
+        }
+        else
+        {
+            SerializedValue = signalr::value(Value);
+
+            if (Stack.size() == 0)
+            {
+                // Case where a user only want to serialize a single value
+                Stack.push(signalr::value(Value));
+            }
+            else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
+            {
+                std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedValue);
+            }
+            else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
+            {
+                std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedValue;
+            }
+            else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
+            {
+                std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedValue;
+            }
+            else
+            {
+                throw std::runtime_error("Invalid call: Serializer was not in an array or at the root");
+            }
+        }
+    }
+
+    template <class T> void AppendValueInternal(const std::optional<T>& Value)
+    {
+        if (Value.has_value())
+        {
+            AppendValueInternal(*Value);
+        }
+        else
+        {
+            AppendValueInternal<nullptr_t>(nullptr);
+        }
+    }
+
+    void AppendValueInternal(const SignalRSerializableValue& Value);
+
+    using Container = std::variant<signalr::value, std::vector<signalr::value>, std::map<uint64_t, signalr::value>,
+        std::map<std::string, signalr::value>, std::pair<uint64_t, signalr::value>, std::pair<std::string, signalr::value>>;
+
+    std::stack<Container> Stack;
+};
+
+/// @brief A stack-based signalr deserializer which allows for custom class deserialization using ISignalRDeserializable
+class SignalRDeserializer
+{
+public:
+    /// @brief Constructor used to copy object to deserialize.
+    /// @param Object const signalr::value& : The value to deserialize
+    /// This should match the structure generated by
+    SignalRDeserializer(const signalr::value& Object);
+
+    /// @brief Constructor used to move object to deserialize.
+    /// @param Object signalr::value&& : The value to deserialize
+    /// This should match the structure generated by
+    SignalRDeserializer(signalr::value&& Object);
+
+    /// @brief Enters the internal signalr value as an array
+    /// @details Once this function has been called, ReadValue should be used to read elements from the array.
+    /// @param Size size_t& Output parameter specifying the size of the array.
+    /// ExitArray should be used to exit the array once elements have been read.
+    void EnterArray(size_t& Size);
+
+    /// @brief Exits the internal signalr array.
+    /// @pre EnterArray should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void ExitArray();
+
+    /// @brief Enters the internal signalr value as an uint map
+    /// @details Once this function has been called, ReadKeyValue should be used to read elements from the map.
+    /// @param Size size_t& Output parameter specifying the size of the map.
+    /// ExitUintMap should be used to exit the map once elements have been read.
+    void EnterUintMap(size_t& Size);
+
+    /// @brief Exits the internal signalr uint map.
+    /// @pre EnterUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void ExitUintMap();
+
+    /// @brief Enters the internal signalr value as an string map
+    /// @details Once this function has been called, ReadKeyValue should be used to read elements from the map.
+    /// @param Size size_t& Output parameter specifying the size of the map.
+    /// ExitStringMap should be used to exit the map once elements have been read.
+    void EnterStringMap(size_t& Size);
+
+    /// @brief Exits the internal signalr string map.
+    /// @pre EnterStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void ExitStringMap();
+
+    /// @brief Reads a value from the internal signalr array.
+    /// @pre EnterArray should be called before this function,
+    /// or if this deserializer represents a single value.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadValue(T& OutVal)
+    {
+        const signalr::value& Next = ReadNextValue();
+        ReadValueFromObject(Next, OutVal);
+
+        IncrementIterator();
+    }
+
+    /// @brief Reads a uint key-value pair to the current stack.
+    /// @pre EnterUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal)
+    {
+        const std::pair<uint64_t, signalr::value>& Next = ReadNextUintKeyValue();
+
+        OutVal.first = Next.first;
+        ReadValueFromObject(Next.second, OutVal.second);
+
+        IncrementIterator();
+    }
+
+    /// @brief Reads a string key-value pair to the current stack.
+    /// @pre EnterStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal)
+    {
+        const std::pair<std::string, signalr::value>& Next = ReadNextStringKeyValue();
+
+        OutVal.first = Next.first;
+        ReadValueFromObject(Next.second, OutVal.second);
+
+        IncrementIterator();
+    }
+
+private:
+    const signalr::value& ReadNextValue();
+
+    const std::pair<std::uint64_t, signalr::value> ReadNextUintKeyValue() const;
+    const std::pair<std::string, signalr::value> ReadNextStringKeyValue() const;
+
+    template <class T> void ReadValueFromObject(const signalr::value& Object, T& OutVal)
+    {
+        if constexpr (std::is_base_of<ISignalRDeserializable, T>::value)
+        {
+            SignalRDeserializer Deserializer { Object };
+            OutVal.Deserialize(Deserializer);
+            return;
+        }
+        else
+        {
+            ReadValueFromObjectInternal(Object, OutVal);
+        }
+    }
+
+    void ReadValueFromObjectInternal(const signalr::value& Object, int64_t& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, uint64_t& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t&) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal) const;
+
+    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const
+    {
+        if (Object.is_null())
+        {
+            OutVal = std::nullopt;
+        }
+        else
+        {
+            OutVal = "";
+            ReadValueFromObjectInternal(Object, *OutVal);
+        }
+    }
+
+    void IncrementIterator();
+
+    using Iterator = std::variant<nullptr_t, std::vector<signalr::value>::const_iterator, std::map<uint64_t, signalr::value>::const_iterator,
+        std::map<std::string, signalr::value>::const_iterator>;
+
+    signalr::value Root;
+    std::stack<Iterator> ObjectStack;
+};
+
+/// @brief A serializer interface to allow classes to be serialized.
+class ISignalRSerializable
+{
+public:
+    /// @brief Function internally called when serializing this class using SignalRSerializer.
+    virtual void Serialize(SignalRSerializer&) const = 0;
+
+    virtual ~ISignalRSerializable() = default;
+
+protected:
+    ISignalRSerializable() = default;
+
+    ISignalRSerializable(const ISignalRSerializable&) = default;
+    ISignalRSerializable(ISignalRSerializable&&) = default;
+
+    ISignalRSerializable& operator=(const ISignalRSerializable&) = default;
+    ISignalRSerializable& operator=(ISignalRSerializable&&) = default;
+};
+
+/// @brief A deserializer interace to allow classes to be deserialized.
+class ISignalRDeserializable
+{
+public:
+    /// @brief Function internally called when serializing this class using SignalRDeserializer.
+    virtual void Deserialize(SignalRDeserializer&) = 0;
+
+    virtual ~ISignalRDeserializable() = default;
+
+protected:
+    ISignalRDeserializable() = default;
+
+    ISignalRDeserializable(const ISignalRDeserializable&) = default;
+    ISignalRDeserializable(ISignalRDeserializable&&) = default;
+
+    ISignalRDeserializable& operator=(const ISignalRDeserializable&) = default;
+    ISignalRDeserializable& operator=(ISignalRDeserializable&&) = default;
+};
+}
