@@ -17,7 +17,6 @@
 
 #include "Common/Queue.h"
 #include "Events/EventDispatcher.h"
-#include "Memory/Memory.h"
 
 #include <unordered_map>
 
@@ -63,8 +62,7 @@ private:
     csp::Queue<const Event*> EventQueue;
 
     // Define eastl map using above defined hasher and our custom allocator
-    using DispatcherMap = std::unordered_map<EventId, EventDispatcher, std::hash<EventId>, std::equal_to<EventId>,
-        csp::memory::StlAllocator<std::pair<const EventId, EventDispatcher>>>;
+    using DispatcherMap = std::unordered_map<EventId, EventDispatcher, std::hash<EventId>, std::equal_to<EventId>>;
 
     DispatcherMap Dispatchers;
 };

@@ -17,8 +17,9 @@
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
+
+#include <memory>
 
 namespace csp::multiplayer
 {

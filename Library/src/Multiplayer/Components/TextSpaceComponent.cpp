@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

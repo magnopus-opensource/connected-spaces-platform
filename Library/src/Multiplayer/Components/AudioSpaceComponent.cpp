@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
 namespace

@@ -15,7 +15,6 @@
  */
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
 #include <Debug/Logging.h>

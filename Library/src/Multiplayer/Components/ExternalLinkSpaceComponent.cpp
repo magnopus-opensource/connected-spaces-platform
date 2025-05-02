@@ -15,7 +15,6 @@
  */
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 
 #include <Debug/Logging.h>

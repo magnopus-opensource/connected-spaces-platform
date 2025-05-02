@@ -23,7 +23,6 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"

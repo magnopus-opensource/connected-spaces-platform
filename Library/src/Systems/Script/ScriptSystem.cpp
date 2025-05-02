@@ -17,8 +17,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"
 #include "Systems/Script/ScriptRuntime.h"

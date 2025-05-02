@@ -17,7 +17,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Web/HttpAuth.h"
 
 #include <Poco/Net/HTTPRequest.h>

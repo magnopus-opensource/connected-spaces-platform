@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "tinysplinecxx.h"
 

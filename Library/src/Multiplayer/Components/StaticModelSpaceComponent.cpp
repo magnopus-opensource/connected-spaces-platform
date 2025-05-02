@@ -17,8 +17,8 @@
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
+#include <memory>
 
 namespace csp::multiplayer
 {

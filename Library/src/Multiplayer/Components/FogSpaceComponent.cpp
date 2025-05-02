@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

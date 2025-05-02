@@ -18,7 +18,6 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
 csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent)

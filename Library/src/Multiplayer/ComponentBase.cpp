@@ -20,7 +20,6 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 namespace csp::multiplayer

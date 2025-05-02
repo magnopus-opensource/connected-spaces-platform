@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

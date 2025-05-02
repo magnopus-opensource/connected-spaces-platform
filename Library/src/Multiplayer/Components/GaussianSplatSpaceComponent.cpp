@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
