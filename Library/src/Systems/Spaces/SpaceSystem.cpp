@@ -223,7 +223,7 @@ std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferT
     };
 }
 
-std::function<async::task<NullResult>()> BulkInviteUsersToSpace(
+std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
     SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const Optional<InviteUserRoleInfoCollection>& InviteUsers)
 {
     return [SpaceSystem, Space, InviteUsers]() -> async::task<NullResult>
@@ -487,8 +487,8 @@ const Space& SpaceSystem::GetCurrentSpace() const { return CurrentSpace; }
  * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
  * CreateAndUploadSpaceThumbnailToSpace
  * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailToSpace Validation)
- * BulkInviteUsersToSpace
- * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpace Validation)
+ * BulkInviteUsersToSpaceIfNeccesary
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpaceIfNeccesary Validation)
  * Promotes the created space through the SpaceResultCallback
  * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
  */
@@ -511,7 +511,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(CreateAndUploadSpaceThumbnailToSpace(AssetSystem, CurrentSpace, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
-        .then(BulkInviteUsersToSpace(this, CurrentSpace, InviteUsers))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
@@ -543,8 +543,8 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
  * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
  * CreateAndUploadSpaceThumbnailWithBufferToSpace
  * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailWithBufferToSpace Validation)
- * BulkInviteUsersToSpace
- * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpace Validation)
+ * BulkInviteUsersToSpaceIfNeccesary
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpaceIfNeccesary Validation)
  * Promotes the created space through the SpaceResultCallback
  * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
  */
@@ -567,7 +567,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(AssetSystem, CurrentSpace, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
-        .then(BulkInviteUsersToSpace(this, CurrentSpace, InviteUsers))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
