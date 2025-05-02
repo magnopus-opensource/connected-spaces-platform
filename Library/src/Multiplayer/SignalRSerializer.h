@@ -92,7 +92,7 @@ public:
     signalr::value Get() const;
 
 private:
-    void Pop(signalr::value&& Last);
+    void FinalizeContainerSerializaiton(signalr::value&& SerializedContainer);
 
     template <class T> void WriteValueInternal(const T& Value);
     template <class T> void WriteValueInternal(const std::optional<T>& Value);

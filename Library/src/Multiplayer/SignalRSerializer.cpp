@@ -11,9 +11,9 @@ void SignalRSerializer::EndArray()
         throw std::runtime_error("Invalid call: Serializer was not in an array");
     }
 
-    auto Current = std::move(Stack.top());
+    auto ArrayObject = std::move(Stack.top());
     Stack.pop();
-    Pop(signalr::value { std::get<std::vector<signalr::value>>(Current) });
+    FinalizeContainerSerializaiton(signalr::value { std::get<std::vector<signalr::value>>(ArrayObject) });
 }
 
 void SignalRSerializer::StartStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
@@ -25,9 +25,9 @@ void SignalRSerializer::EndStringMap()
         throw std::runtime_error("Invalid call: Serializer was not in a string map");
     }
 
-    auto Current = std::move(Stack.top());
+    auto StringMapObject = std::move(Stack.top());
     Stack.pop();
-    Pop(signalr::value { std::get<std::map<std::string, signalr::value>>(Current) });
+    FinalizeContainerSerializaiton(signalr::value { std::get<std::map<std::string, signalr::value>>(StringMapObject) });
 }
 
 void SignalRSerializer::StartUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
@@ -39,9 +39,9 @@ void SignalRSerializer::EndUintMap()
         throw std::runtime_error("Invalid call: Serializer was not in a uint map");
     }
 
-    auto Current = std::move(Stack.top());
+    auto UintMapObject = std::move(Stack.top());
     Stack.pop();
-    Pop(signalr::value { std::get<std::map<uint64_t, signalr::value>>(Current) });
+    FinalizeContainerSerializaiton(signalr::value { std::get<std::map<uint64_t, signalr::value>>(UintMapObject) });
 }
 
 signalr::value SignalRSerializer::Get() const
@@ -82,26 +82,26 @@ signalr::value SignalRSerializer::Get() const
     return signalr::value {};
 }
 
-void SignalRSerializer::Pop(signalr::value&& Last)
+void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& SerializedContainer)
 {
     // We dont check for maps in this function because key-values are handled seperatly
     if (Stack.size() == 0)
     {
         // If the last element has been popped, push back a root value
-        Stack.push(Last);
+        Stack.push(SerializedContainer);
         return;
     }
     else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
     {
-        std::get<std::vector<signalr::value>>(Stack.top()).push_back(Last);
+        std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedContainer);
     }
     else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
     {
-        std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = Last;
+        std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedContainer;
     }
     else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
     {
-        std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = Last;
+        std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedContainer;
     }
     else
     {
