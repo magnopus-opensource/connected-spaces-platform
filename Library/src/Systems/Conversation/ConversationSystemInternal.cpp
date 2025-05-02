@@ -176,10 +176,8 @@ namespace
         return [AssetSystem, MessageCollection](const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
         {
             auto NewMetadata = MessageCollection->GetMetadataImmutable();
-            auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
 
-            std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
-                const_cast<common::Array<common::String>*>(Metadata.Keys()), Deleter);
+            std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(Metadata.Keys()));
 
             for (const auto& Key : *Keys)
             {

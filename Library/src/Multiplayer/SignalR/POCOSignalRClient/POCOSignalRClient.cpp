@@ -106,7 +106,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
 
         StopFlag = false;
 
-        PocoWebSocket = CSP_NEW Poco::Net::WebSocket(*cs, request, response);
+        PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
         // Receive worker thread
         ReceiveThread = std::thread([this]() { ReceiveThreadFunc(); });
 
@@ -158,7 +158,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
             CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
         }
 
-        CSP_DELETE(PocoWebSocket);
+        delete (PocoWebSocket);
         PocoWebSocket = nullptr;
     }
     else
@@ -225,7 +225,7 @@ void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
 void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 {
     bool HandshakeReceived = false;
-    auto* Buffer = (char*)CSP_ALLOC(INITIAL_BUFFER_SIZE);
+    auto* Buffer = (char*)std::malloc(INITIAL_BUFFER_SIZE);
     auto CurrentBufferSize = INITIAL_BUFFER_SIZE;
     auto CurrentBufferIndex = 0;
     auto SkipWait = false;
@@ -261,7 +261,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             // Resize buffer if needed
             if (CurrentBufferIndex + RECEIVE_BLOCK_SIZE > CurrentBufferSize)
             {
-                auto* NewBuffer = CSP_REALLOC(Buffer, CurrentBufferSize * 2);
+                auto* NewBuffer = std::realloc(Buffer, CurrentBufferSize * 2);
                 Buffer = static_cast<char*>(NewBuffer);
                 CurrentBufferSize = CurrentBufferSize * 2;
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);
@@ -281,7 +281,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             }
             catch (const std::exception& e)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError(e.what());
 
                 return;
@@ -296,7 +296,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             }
             catch (const std::exception& e)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError(e.what());
 
                 return;
@@ -304,7 +304,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
             if (Received == 0)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError("Error: Socket closed by remote host.");
 
                 return;
@@ -314,7 +314,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
             if (Flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_CLOSE)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError("Error: Socket closed.");
 
                 return;

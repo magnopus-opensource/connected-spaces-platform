@@ -35,7 +35,7 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW HotspotSpaceComponentScriptInterface(this));
+    SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& HotspotSpaceComponent::GetName() const

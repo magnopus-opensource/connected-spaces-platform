@@ -150,7 +150,7 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
-    return CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
@@ -158,11 +158,11 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 MultiplayerConnection::MultiplayerConnection()
     : Connection(nullptr)
     , WebSocketClient(nullptr)
-    , NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
+    , NetworkEventManager(new NetworkEventManagerImpl(this))
     , ClientId(0)
     , Connected(false)
 {
-    EventBusPtr = CSP_NEW EventBus(this);
+    EventBusPtr = new EventBus(this);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -180,10 +180,10 @@ MultiplayerConnection::~MultiplayerConnection()
             shutdownFuture.wait();
         }
 
-        CSP_DELETE(Connection);
-        CSP_DELETE(WebSocketClient);
-        CSP_DELETE(NetworkEventManager);
-        CSP_DELETE(EventBusPtr);
+        delete (Connection);
+        delete (WebSocketClient);
+        delete (NetworkEventManager);
+        delete (EventBusPtr);
     }
 }
 
@@ -232,12 +232,10 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
         // Shared pointer to keep alive in local callback
         auto EntitiesDeletedEvent = std::make_shared<async::event_task<void>>();
         auto EntitiesDeletedContinuation = EntitiesDeletedEvent->get_task();
-
         if (Connection == nullptr || !Connected)
         {
             throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::DeleteEntities, Error not connected.");
         }
-
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
             = [EntitiesDeletedEvent](signalr::value /*Result*/, std::exception_ptr Except)
         {
@@ -359,13 +357,13 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
             return;
         }
 
-        CSP_DELETE(Connection);
+        delete Connection;
     }
 
 #ifdef CSP_WASM
-    WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientEmscripten();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
 #else
-    WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientPOCO();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 

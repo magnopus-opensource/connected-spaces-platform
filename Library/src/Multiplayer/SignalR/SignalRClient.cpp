@@ -145,9 +145,9 @@ private:
 CSPHttpClient::CSPHttpClient()
 {
 #ifdef CSP_WASM
-    WebClientHttps = CSP_NEW csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS);
 #else
-    WebClientHttps = CSP_NEW csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS);
 #endif
 }
 

@@ -178,16 +178,16 @@ class DirtyComponent;
 using namespace std::chrono;
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)
-    : EntitiesLock(CSP_NEW std::recursive_mutex)
+    : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
-    , EventHandler(CSP_NEW SpaceEntityEventHandler(this))
+    , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
-    , TickEntitiesLock(CSP_NEW std::mutex)
-    , PendingAdds(CSP_NEW(SpaceEntityQueue))
-    , PendingRemoves(CSP_NEW(SpaceEntityQueue))
-    , PendingOutgoingUpdateUniqueSet(CSP_NEW(SpaceEntitySet))
-    , PendingIncomingUpdates(CSP_NEW(PatchMessageQueue))
+    , TickEntitiesLock(new std::mutex)
+    , PendingAdds(new(SpaceEntityQueue))
+    , PendingRemoves(new(SpaceEntityQueue))
+    , PendingOutgoingUpdateUniqueSet(new(SpaceEntitySet))
+    , PendingIncomingUpdates(new(PatchMessageQueue))
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
@@ -199,15 +199,15 @@ SpaceEntitySystem::~SpaceEntitySystem()
 {
     Shutdown();
 
-    CSP_DELETE(EventHandler);
+    delete (EventHandler);
 
-    CSP_DELETE(TickEntitiesLock);
-    CSP_DELETE(EntitiesLock);
+    delete (TickEntitiesLock);
+    delete (EntitiesLock);
 
-    CSP_DELETE(PendingAdds);
-    CSP_DELETE(PendingRemoves);
-    CSP_DELETE(PendingOutgoingUpdateUniqueSet);
-    CSP_DELETE(PendingIncomingUpdates);
+    delete (PendingAdds);
+    delete (PendingRemoves);
+    delete (PendingOutgoingUpdateUniqueSet);
+    delete (PendingIncomingUpdates);
 }
 
 void SpaceEntitySystem::Initialise()
@@ -267,7 +267,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 
         const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-        auto* NewAvatar = CSP_NEW SpaceEntity(this);
+        auto* NewAvatar = new SpaceEntity(this);
         NewAvatar->Type = SpaceEntityType::Avatar;
         const auto ID = ParseGenerateObjectIDsResult(Result);
         NewAvatar->Id = ID;
@@ -389,7 +389,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
         EntityComponent->OnLocalDelete();
     }
 
-    CSP_DELETE(Keys);
+    delete (Keys);
 
     csp::common::Array<ComponentUpdateInfo> Info;
 
@@ -545,7 +545,7 @@ static SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMe
 {
     SignalRMsgPackEntityDeserialiser Deserialiser(EntityMessage);
 
-    const auto NewEntity = CSP_NEW SpaceEntity(EntitySystem);
+    const auto NewEntity = new SpaceEntity(EntitySystem);
     NewEntity->Deserialise(Deserialiser);
 
     EntitySystem->AddEntity(NewEntity);
@@ -584,7 +584,7 @@ void SpaceEntitySystem::BindOnObjectPatch()
             // Params is an array of all params sent, so grab the first
             auto& EntityMessage = Params.as_array()[0];
 
-            PendingIncomingUpdates->emplace_back(CSP_NEW signalr::value(EntityMessage));
+            PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
         });
 }
 
@@ -728,7 +728,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
             LocalDestroyEntity(Entity);
         }
 
-        CSP_DELETE(Entity);
+        delete (Entity);
     }
 
     Entities.Clear();
@@ -1012,7 +1012,7 @@ void SpaceEntitySystem::EnableLeaderElection()
 {
     if (ElectionManager == nullptr)
     {
-        ElectionManager = CSP_NEW ClientElectionManager(this);
+        ElectionManager = new ClientElectionManager(this);
     }
 }
 
@@ -1020,7 +1020,7 @@ void SpaceEntitySystem::DisableLeaderElection()
 {
     if (ElectionManager != nullptr)
     {
-        CSP_DELETE(ElectionManager);
+        delete (ElectionManager);
         ElectionManager = nullptr;
     }
 }
@@ -1316,7 +1316,7 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 
     Entities.RemoveItem(EntityToRemove);
 
-    CSP_DELETE(EntityToRemove);
+    delete (EntityToRemove);
 }
 
 void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
@@ -1372,7 +1372,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(nullptr);
         }
 
-        auto* NewObject = CSP_NEW SpaceEntity(this);
+        auto* NewObject = new SpaceEntity(this);
         NewObject->Type = SpaceEntityType::Object;
         auto ID = ParseGenerateObjectIDsResult(Result);
         NewObject->Id = ID;

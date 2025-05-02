@@ -56,7 +56,7 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
 
-    SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ConversationSpaceComponentScriptInterface(this));
 }
 
 void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)

@@ -31,7 +31,7 @@ csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent
     Properties[static_cast<uint32_t>(PortalPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(PortalPropertyKeys::Radius)] = 1.5f;
 
-    SetScriptInterface(CSP_NEW PortalSpaceComponentScriptInterface(this));
+    SetScriptInterface(new PortalSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() const
