@@ -517,7 +517,9 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(
             [CurrentSpace, Callback]()
             {
-                CSP_LOG_MSG(LogLevel::Log, "successfully created space.");
+                CSP_LOG_MSG(LogLevel::Log,
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpace->GetSpace().Name)));
+
                 INVOKE_IF_NOT_NULL(Callback, *CurrentSpace);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
@@ -571,7 +573,9 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(
             [CurrentSpace, Callback]()
             {
-                CSP_LOG_MSG(LogLevel::Log, "successfully created space.");
+                CSP_LOG_MSG(LogLevel::Log,
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpace->GetSpace().Name)));
+
                 INVOKE_IF_NOT_NULL(Callback, *CurrentSpace);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
