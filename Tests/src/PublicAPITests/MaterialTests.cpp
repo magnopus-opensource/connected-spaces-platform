@@ -114,7 +114,7 @@ void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, 
 
 void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, Material** OutMaterial,
     csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+    csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ = csp::systems::ERequestFailureReason::None)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
         CreatedMaterial4->GetMaterialId(),
     };
 
-    for (int i = 0; i < FoundMaterials.Size(); ++i)
+    for (size_t i = 0; i < FoundMaterials.Size(); ++i)
     {
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
@@ -709,7 +709,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // Log in
     csp::common::String UserId;
@@ -809,7 +808,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
     const char* TestAssetName = "CSP-UNITTEST-ASSET";

@@ -231,7 +231,7 @@ Asset& AssetResult::GetAsset() { return Asset; }
 
 const Asset& AssetResult::GetAsset() const { return Asset; }
 
-void AssetResult::SetAsset(const csp::systems::Asset& Asset) { this->Asset = Asset; }
+void AssetResult::SetAsset(const csp::systems::Asset& SetAsset) { this->Asset = SetAsset; }
 
 void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

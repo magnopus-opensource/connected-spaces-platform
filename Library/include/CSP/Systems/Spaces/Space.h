@@ -417,7 +417,7 @@ class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase
 public:
     /// @brief Utility to check if a geo location actually exists for the space
     /// @return bool : true if GetSpaceGeoLocation will return a valid geo location for the space, false otherwise
-    const bool HasSpaceGeoLocation() const;
+    bool HasSpaceGeoLocation() const;
 
     /// @brief Returns the geo location of the space if one exists
     /// @return SpaceGeoLocation : Geo location of the space

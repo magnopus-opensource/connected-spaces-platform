@@ -47,7 +47,7 @@ private:
 };
 
 template <class T>
-[[deprecated("Unsupported type for URI param, please add support for it")]] inline void Uri::AddQueryParams(const char* ParamName, T Param)
+[[deprecated("Unsupported type for URI param, please add support for it")]] inline void Uri::AddQueryParams(const char* /*ParamName*/, T /*Param*/)
 {
     assert(false && "Unknown param type in Api binding");
 }

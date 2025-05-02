@@ -15,6 +15,11 @@ newoption {
     description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
 }
 
+newoption {
+   trigger = "wasm_with_node",
+   description = "Compile nodeJS support into the wasm build"
+}
+
 solution( "ConnectedSpacesPlatform" )
     -- Build configurations
     if CSP.HasCommandLineArgument("DLLOnly") then

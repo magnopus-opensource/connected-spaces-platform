@@ -34,9 +34,9 @@ public:
     void AddFloat(csp::common::String Key, float Value);
     void AddBool(csp::common::String Key, bool Value);
 
-    const int64_t GetInt(csp::common::String Key) const;
+    int64_t GetInt(csp::common::String Key) const;
     const csp::common::String& GetString(csp::common::String Key) const;
-    const float GetFloat(csp::common::String Key) const;
+    float GetFloat(csp::common::String Key) const;
     bool GetBool(csp::common::String Key) const;
 
     const csp::common::String& GetTag() const;

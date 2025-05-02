@@ -100,20 +100,20 @@ SpaceRAII::~SpaceRAII()
 
     if (CreatedThisSpace)
     {
-        std::promise<csp::systems::NullResult> ResultPromise;
-        std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
+        std::promise<csp::systems::NullResult> ResultPromise2;
+        std::future<csp::systems::NullResult> ResultFuture2 = ResultPromise2.get_future();
 
         SpaceSystem.DeleteSpace(SpaceId.c_str(),
-            [&ResultPromise](csp::systems::NullResult Result)
+            [&ResultPromise2](csp::systems::NullResult Result)
             {
                 // Callbacks are called both in progress and at the end, guard against double promise sets
                 if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
                 {
-                    ResultPromise.set_value(Result);
+                    ResultPromise2.set_value(Result);
                 }
             });
 
-        csp::systems::NullResult DeleteSpaceResult = ResultFuture.get();
+        csp::systems::NullResult DeleteSpaceResult = ResultFuture2.get();
 
         if (DeleteSpaceResult.GetResultCode() == csp::systems::EResultCode::Success)
         {

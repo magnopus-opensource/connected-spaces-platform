@@ -131,7 +131,7 @@ void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
 {
     bool finished2 = false;
 
-    auto Fn2 = [&](const std::string& S, bool result)
+    auto Fn2 = [&](const std::string& /*S*/, bool result)
     {
         finished2 = true;
         EXPECT_TRUE(result);

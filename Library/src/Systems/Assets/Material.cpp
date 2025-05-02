@@ -58,9 +58,9 @@ Material::Material(const csp::common::String& Name, const csp::common::String& I
 
 const csp::common::String& Material::GetName() const { return Name; }
 
-const csp::systems::EShaderType Material::GetShaderType() const { return Type; }
+csp::systems::EShaderType Material::GetShaderType() const { return Type; }
 
-const int Material::GetVersion() const { return Version; }
+int Material::GetVersion() const { return Version; }
 
 const csp::common::String& Material::GetMaterialCollectionId() const { return CollectionId; }
 
@@ -72,7 +72,7 @@ Material* MaterialResult::GetMaterial() { return Material; }
 
 void MaterialResult::SetMaterial(csp::systems::Material* InMaterial) { Material = InMaterial; }
 
-void MaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void MaterialResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
 const csp::common::Array<Material*>* MaterialsResult::GetMaterials() const { return &Materials; }
 
@@ -80,6 +80,6 @@ csp::common::Array<Material*>* MaterialsResult::GetMaterials() { return &Materia
 
 void MaterialsResult::SetMaterials(const csp::common::Array<Material*>& InMaterials) { Materials = InMaterials; }
 
-void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { }
+void MaterialsResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
 } // namespace csp::systems

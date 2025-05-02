@@ -264,7 +264,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnection->StopListening(
-        [this, MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        [MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
             {
@@ -274,7 +274,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
             CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [this, MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
                 {
                     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
@@ -289,7 +289,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
                     MultiplayerConnection->StartListening()()
                         .then(async::inline_scheduler(),
-                            [this, RefreshMultiplayerContinuationEvent]()
+                            [RefreshMultiplayerContinuationEvent]()
                             {
                                 CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
@@ -722,7 +722,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
     std::vector<String> SpaceIds;
     SpaceIds.reserve(RequestedSpaceIDs.Size());
 
-    for (auto idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
     {
         SpaceIds.push_back(RequestedSpaceIDs[idx]);
     }
@@ -1064,7 +1064,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
             Map<String, Array<String>> SpacesTags;
             const auto& AssetCollections = Result.GetAssetCollections();
 
-            for (int i = 0; i < AssetCollections.Size(); ++i)
+            for (size_t i = 0; i < AssetCollections.Size(); ++i)
             {
                 const auto& AssetCollection = AssetCollections[i];
 
@@ -1330,7 +1330,7 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
-    for (auto item = 0; item < SpaceIds.Size(); ++item)
+    for (size_t item = 0; item < SpaceIds.Size(); ++item)
     {
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
@@ -1638,7 +1638,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     return;
                 }
 
-                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult, AssetSystem](const NullResult& DeleteAssetCollResult)
+                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
                 {
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -1880,7 +1880,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         std::vector<String> GroupIds;
         GroupIds.reserve(MemberGroupIds->Size());
 
-        for (int i = 0; i < MemberGroupIds->Size(); ++i)
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
         {
             GroupIds.push_back(MemberGroupIds->operator[](i));
         }

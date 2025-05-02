@@ -118,7 +118,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
     EXPECT_EQ(Result.GetProductInfo().Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProductInfo().Media[i].Url, ImageUrl);
@@ -128,7 +128,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
     }
     EXPECT_EQ(Result.GetProductInfo().Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, VariantIds[i]);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, VariantTitleAndOptionValue[i]);
@@ -141,7 +141,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
+        for (size_t n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
         {
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, OptionsName);
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
@@ -212,7 +212,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
     EXPECT_EQ(Result.GetProducts()[0].Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, ImageUrl);
@@ -222,7 +222,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
     }
     EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
     {
         auto& Variant = Result.GetProducts()[0].Variants[i];
         EXPECT_EQ(Variant.Id, VariantIds[i]);
@@ -238,7 +238,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
         EXPECT_EQ(Variant.Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Variant.Options.Size(); ++n)
+        for (size_t n = 0; n < Variant.Options.Size(); ++n)
         {
             EXPECT_EQ(Variant.Options[n].Name, OptionsName);
             EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);
@@ -455,7 +455,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
 
     // Add local cart lines
-    for (int i = 0; i < VariantIds.Size(); ++i)
+    for (size_t i = 0; i < VariantIds.Size(); ++i)
     {
         auto CartLine = csp::systems::CartLine();
         CartLine.Quantity = 1;
@@ -485,7 +485,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
@@ -568,7 +568,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
@@ -604,7 +604,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
@@ -687,7 +687,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
