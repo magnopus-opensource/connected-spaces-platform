@@ -39,8 +39,6 @@ using namespace csp::multiplayer;
 
 namespace
 {
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -184,7 +182,7 @@ void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetColl
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset)
+void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& /*AssetCollection*/, csp::systems::Asset& Asset)
 {
     auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Asset).Await(RequestPredicate);
 
@@ -257,6 +255,20 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem, csp::
     OutMetaData = ResultAssetCollection.GetMetadataImmutable();
 }
 
+void GetAssetCollectionCount(csp::systems::AssetSystem* AssetSystem, const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+    const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+    const csp::common::Optional<csp::common::Array<csp::systems::EAssetCollectionType>>& Types,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds, uint64_t& Count)
+{
+
+    auto [Result] = AWAIT_PRE(AssetSystem, GetAssetCollectionCount, RequestPredicate, Ids, ParentId, Names, Types, Tags, SpaceIds);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    Count = Result.GetCount();
+}
+
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 {
     SetRandSeed();
@@ -313,7 +325,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
@@ -389,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
     bool Found1 = false, Found2 = false;
 
-    for (int i = 0; i < AssetCollections.Size(); ++i)
+    for (size_t i = 0; i < AssetCollections.Size(); ++i)
     {
         auto& AssetCollection = AssetCollections[i];
 
@@ -429,7 +440,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -490,12 +500,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -552,7 +560,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
-    const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
     const char* TestExternalUri = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb";
     const char* TestExternalMimeType = "model/gltf-binary";
     char UniqueSpaceName[256];
@@ -675,7 +682,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
     bool Found1 = false, Found2 = false, Found3 = false;
 
-    for (int i = 0; i < Assets.Size(); ++i)
+    for (size_t i = 0; i < Assets.Size(); ++i)
     {
         auto& Asset = Assets[i];
 
@@ -811,7 +818,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 
         const auto& RetrievedAssetCollections = Result.GetAssetCollections();
 
-        for (int idx = 0; idx < RetrievedAssetCollections.Size(); ++idx)
+        for (size_t idx = 0; idx < RetrievedAssetCollections.Size(); ++idx)
         {
             auto& CurrentAsset = RetrievedAssetCollections[idx];
 
@@ -927,7 +934,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
         const auto& RetrievedAssets = Result.GetAssets();
 
-        for (int idx = 0; idx < RetrievedAssets.Size(); ++idx)
+        for (size_t idx = 0; idx < RetrievedAssets.Size(); ++idx)
         {
             auto& CurrentAsset = RetrievedAssets[idx];
 
@@ -1216,7 +1223,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
     auto FilePath = std::filesystem::absolute("assets/Incorrect_File.jpg");
     csp::systems::FileAssetDataSource Source;
     Source.FilePath = FilePath.u8string().c_str();
-    const csp::common::String& FileMimeType = "image/jpeg";
 
     // Upload data
     auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
@@ -1760,7 +1766,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
     const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     csp::common::Array<csp::common::String> Tags = { "tag-test" };
@@ -1958,8 +1963,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1990,7 +1993,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2077,7 +2080,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2298,5 +2301,117 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
     DeleteSpace(SpaceSystem, DestSpace.Id);
 
     // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionCountTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName1[256];
+    SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName2[256];
+    SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName3[256];
+    SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Create asset collections
+
+    csp::common::Array<csp::common::String> AssetCollection1Tags { "TestTag" };
+
+    csp::systems::AssetCollection AssetCollection1, AssetCollection2, AssetCollection3;
+    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName1, csp::systems::EAssetCollectionType::SPACE_THUMBNAIL,
+        AssetCollection1Tags, AssetCollection1);
+    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName2, nullptr, nullptr, AssetCollection2);
+    CreateAssetCollection(AssetSystem, Space.Id, AssetCollection1.Id, UniqueAssetCollectionName3, nullptr, nullptr, AssetCollection3);
+
+    // Get Asset collection count associated with their ids
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(AssetSystem,
+            csp::common::Array<csp::common::String> { AssetCollection1.Id, AssetCollection2.Id, AssetCollection3.Id }, nullptr, nullptr, nullptr,
+            nullptr, csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        EXPECT_EQ(Count, 3);
+    }
+
+    // Get Asset collection count associated with their parent id
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(
+            AssetSystem, nullptr, AssetCollection1.Id, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        EXPECT_EQ(Count, 1);
+    }
+
+    // Get Asset collection count associated with their names
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(AssetSystem, nullptr, nullptr,
+            csp::common::Array<csp::common::String> { UniqueAssetCollectionName1, UniqueAssetCollectionName2, UniqueAssetCollectionName3 }, nullptr,
+            nullptr, csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        EXPECT_EQ(Count, 3);
+    }
+
+    // Get Asset collection count associated with their type
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(AssetSystem, nullptr, nullptr, nullptr,
+            csp::common::Array<csp::systems::EAssetCollectionType> { csp::systems::EAssetCollectionType::DEFAULT }, nullptr,
+            csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        EXPECT_EQ(Count, 2);
+    }
+
+    // Get Asset collection count associated with their tags
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(
+            AssetSystem, nullptr, nullptr, nullptr, nullptr, AssetCollection1Tags, csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        EXPECT_EQ(Count, 1);
+    }
+
+    // Get Asset collection count associated with their space ids only
+    {
+        uint64_t Count = 0;
+        GetAssetCollectionCount(
+            AssetSystem, nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { Space.Id }, Count);
+
+        // 3 + 1 for the space thumbnail
+        EXPECT_EQ(Count, 4);
+    }
+
+    // Cleanup
+    DeleteAssetCollection(AssetSystem, AssetCollection1);
+    DeleteAssetCollection(AssetSystem, AssetCollection2);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+
     LogOut(UserSystem);
 }

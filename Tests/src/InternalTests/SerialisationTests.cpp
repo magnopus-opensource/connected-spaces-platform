@@ -83,7 +83,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
     EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
     EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
     EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == *User->ParentId); // ParentId
-    EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8); // Components
+    EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 9); // Components
 
     auto& Components = Array[6].as_uint_map();
 
@@ -109,24 +109,24 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
         {
             EXPECT_TRUE(ComponentValue.is_array() && ComponentValue.as_array()[0].is_double());
 
-            auto& Array = ComponentValue.as_array();
+            auto& FloatArray = ComponentValue.as_array();
 
             if (Key == COMPONENT_KEY_VIEW_POSITION)
             {
 
-                EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == User->Transform.Position.X
-                    && Array[1].as_double() == User->Transform.Position.Y && Array[2].as_double() == User->Transform.Position.Z);
+                EXPECT_TRUE(FloatArray.size() == 3 && FloatArray[0].as_double() == User->Transform.Position.X
+                    && FloatArray[1].as_double() == User->Transform.Position.Y && FloatArray[2].as_double() == User->Transform.Position.Z);
             }
             else if (Key == COMPONENT_KEY_VIEW_ROTATION)
             {
-                EXPECT_TRUE(Array.size() == 4 && Array[0].as_double() == User->Transform.Rotation.X
-                    && Array[1].as_double() == User->Transform.Rotation.Y && Array[2].as_double() == User->Transform.Rotation.Z
-                    && Array[3].as_double() == User->Transform.Rotation.W);
+                EXPECT_TRUE(FloatArray.size() == 4 && FloatArray[0].as_double() == User->Transform.Rotation.X
+                    && FloatArray[1].as_double() == User->Transform.Rotation.Y && FloatArray[2].as_double() == User->Transform.Rotation.Z
+                    && FloatArray[3].as_double() == User->Transform.Rotation.W);
             }
             else if (Key == COMPONENT_KEY_VIEW_SCALE)
             {
-                EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == User->Transform.Scale.X && Array[1].as_double() == User->Transform.Scale.Y
-                    && Array[2].as_double() == User->Transform.Scale.Z);
+                EXPECT_TRUE(FloatArray.size() == 3 && FloatArray[0].as_double() == User->Transform.Scale.X
+                    && FloatArray[1].as_double() == User->Transform.Scale.Y && FloatArray[2].as_double() == User->Transform.Scale.Z);
             }
             else
             {
@@ -292,24 +292,24 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
         {
             EXPECT_TRUE(ComponentValue.is_array() && ComponentValue.as_array()[0].is_double());
 
-            auto& Array = ComponentValue.as_array();
+            auto& FloatArray = ComponentValue.as_array();
 
             if (Key == COMPONENT_KEY_VIEW_POSITION)
             {
 
-                EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == Object->Transform.Position.X
-                    && Array[1].as_double() == Object->Transform.Position.Y && Array[2].as_double() == Object->Transform.Position.Z);
+                EXPECT_TRUE(FloatArray.size() == 3 && FloatArray[0].as_double() == Object->Transform.Position.X
+                    && FloatArray[1].as_double() == Object->Transform.Position.Y && FloatArray[2].as_double() == Object->Transform.Position.Z);
             }
             else if (Key == COMPONENT_KEY_VIEW_ROTATION)
             {
-                EXPECT_TRUE(Array.size() == 4 && Array[0].as_double() == Object->Transform.Rotation.X
-                    && Array[1].as_double() == Object->Transform.Rotation.Y && Array[2].as_double() == Object->Transform.Rotation.Z
-                    && Array[3].as_double() == Object->Transform.Rotation.W);
+                EXPECT_TRUE(FloatArray.size() == 4 && FloatArray[0].as_double() == Object->Transform.Rotation.X
+                    && FloatArray[1].as_double() == Object->Transform.Rotation.Y && FloatArray[2].as_double() == Object->Transform.Rotation.Z
+                    && FloatArray[3].as_double() == Object->Transform.Rotation.W);
             }
             else if (Key == COMPONENT_KEY_VIEW_SCALE)
             {
-                EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == Object->Transform.Scale.X
-                    && Array[1].as_double() == Object->Transform.Scale.Y && Array[2].as_double() == Object->Transform.Scale.Z);
+                EXPECT_TRUE(FloatArray.size() == 3 && FloatArray[0].as_double() == Object->Transform.Scale.X
+                    && FloatArray[1].as_double() == Object->Transform.Scale.Y && FloatArray[2].as_double() == Object->Transform.Scale.Z);
             }
             else
             {

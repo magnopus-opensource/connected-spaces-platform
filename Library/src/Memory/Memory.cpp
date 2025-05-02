@@ -62,14 +62,17 @@ void operator delete(void* Ptr, std::align_val_t /*Alignment*/, csp::memory::All
 
 void operator delete[](void* Ptr, csp::memory::Allocator* Allocator) { csp::memory::Deallocate(Ptr, Allocator); }
 
-void operator delete[](void* Ptr, std::align_val_t Alignment, csp::memory::Allocator* Allocator) { csp::memory::Deallocate(Ptr, Allocator); }
+void operator delete[](void* Ptr, std::align_val_t /*Alignment*/, csp::memory::Allocator* Allocator) { csp::memory::Deallocate(Ptr, Allocator); }
 
 // Overrides for EASTL Debug builds when using the standard allocator
 // Note that these needs to call global new/malloc, since they will be deleted with delete[] in standard EASTL allocator
-void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line) { return std::malloc(size); }
+void* operator new[](size_t size, const char* /*pName*/, int /*flags*/, unsigned /*debugFlags*/, const char* /*file*/, int /*line*/)
+{
+    return std::malloc(size);
+}
 
-void* operator new[](
-    size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line)
+void* operator new[](size_t size, size_t /*alignment*/, size_t /*alignmentOffset*/, const char* /*pName*/, int /*flags*/, unsigned /*debugFlags*/,
+    const char* /*file*/, int /*line*/)
 {
     return std::malloc(size);
 }

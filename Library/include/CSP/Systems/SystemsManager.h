@@ -44,6 +44,7 @@ class ECommerceSystem;
 class QuotaSystem;
 class SequenceSystem;
 class HotspotSequenceSystem;
+class ConversationSystemInternal;
 
 } // namespace csp::systems
 
@@ -80,6 +81,7 @@ class CSP_API SystemsManager
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::CSPFoundation;
+    friend class csp::multiplayer::ConversationSpaceComponent;
     friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
     /** @endcond */
     CSP_END_IGNORE
@@ -165,6 +167,8 @@ private:
     SystemsManager();
     ~SystemsManager();
 
+    ConversationSystemInternal* GetConversationSystem();
+
     static void Instantiate();
     static void Destroy();
 
@@ -195,6 +199,7 @@ private:
     QuotaSystem* QuotaSystem;
     SequenceSystem* SequenceSystem;
     HotspotSequenceSystem* HotspotSequenceSystem;
+    ConversationSystemInternal* ConversationSystem;
 };
 
 } // namespace csp::systems

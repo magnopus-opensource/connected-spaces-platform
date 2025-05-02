@@ -19,6 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
+#include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
@@ -32,62 +33,148 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::systems
+{
+class ConversationSystemInternal;
+}
+
 namespace csp::multiplayer
 {
 
 class AssetCollection;
 
-/// @ingroup Conversation System
-/// @brief Data representation of fields shared by MessageInfo and CovnersationInfo.
-class CSP_API BaseMessageInfo
+/// @ingroup Conversation
+/// @brief Contains information about a conversation message.
+class CSP_API MessageInfo
 {
 public:
+    /// @brief The id of the conversation.
     csp::common::String ConversationId;
-    csp::common::String Timestamp;
-    csp::common::String UserID;
-    csp::common::String UserDisplayName;
-    csp::common::String Message;
-    bool Edited;
-};
 
-/// @ingroup Conversation System
-/// @brief Data representation of a message.
-class CSP_API MessageInfo : public BaseMessageInfo
-{
-public:
-    csp::common::String Id;
-    explicit MessageInfo(void*) {};
-    MessageInfo() = default;
+    /// @brief The time the message was created
+    csp::common::String CreatedTimestamp;
+
+    /// @brief The time the message was last edited
+    csp::common::String EditedTimestamp;
+
+    /// @brief The user id that triggered the event
+    csp::common::String UserId;
+
+    /// @brief The message contents
+    csp::common::String Message;
+
+    /// @brief The unique identifier of the message
+    csp::common::String MessageId;
+
+    MessageInfo();
+    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message);
+    MessageInfo(
+        const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId);
+
     MessageInfo(const MessageInfo& MessageData);
 };
 
-/// @brief Data representation of a conversation.
-class CSP_API ConversationInfo : public BaseMessageInfo
+/// @ingroup Conversation
+/// @brief Information used to update a message
+class CSP_API MessageUpdateParams
 {
 public:
-    bool Resolved;
-    SpaceTransform CameraPosition;
-    explicit ConversationInfo(void*) {};
-    ConversationInfo() = default;
-    ConversationInfo(const ConversationInfo& ConversationData);
+    /// @brief The contents of the new message
+    csp::common::String NewMessage;
+};
+
+/// @ingroup Conversation
+/// @brief Information used to update an annotation
+class CSP_API AnnotationUpdateParams
+{
+public:
+    /// @brief The vertical fov of the camera when the annotation is created
+    uint16_t VerticalFov;
+    /// @brief The position of the camera when the annotation is created
+    csp::common::Vector3 AuthorCameraPosition;
+    /// @brief The rotation of the camera when the annotation is created
+    csp::common::Vector4 AuthorCameraRotation;
+};
+
+/// @ingroup Conversation
+/// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
+class CSP_API AnnotationData
+{
+public:
+    AnnotationData();
+    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, const uint16_t InVerticalFov,
+        const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
+    AnnotationData(const AnnotationData& InAnnotationData);
+
+    /// @brief Get the annotation id
+    /// @return csp::common::String
+    csp::common::String GetAnnotationId() const;
+
+    /// @brief Get the annotation collection id
+    /// @return csp::common::String
+    csp::common::String GetAnnotationThumbnailId() const;
+
+    /// @brief Get the vertical FOV
+    /// @return a uint16_t representing the vertical FOV
+    uint16_t GetVerticalFov() const;
+
+    /// @brief Get the AuthorCameraPosition
+    /// @return a Vector3 representing the AuthorCameraPosition
+    csp::common::Vector3 GetAuthorCameraPosition() const;
+
+    /// @brief Get the AuthorCameraRotation
+    /// @return a Vector4 representing the AuthorCameraRotation
+    csp::common::Vector4 GetAuthorCameraRotation() const;
+
+    /// @brief Set the annotation id
+    /// @param Id const csp::common::String& Id
+    void SetAnnotationId(const csp::common::String& Id);
+
+    /// @brief Set the annotation collection id
+    /// @param Id const csp::common::String& Id
+    void SetAnnotationThumbnailId(const csp::common::String& Id);
+
+    /// @brief Set the VerticalFov
+    /// @param InVerticalFov
+    void SetVerticalFov(const uint16_t InVerticalFov);
+
+    /// @brief Set the AuthorCameraPosition
+    /// @param InAuthorCameraPosition
+    void SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition);
+
+    /// @brief Set the AuthorCameraRotation
+    /// @param InAuthorCameraRotation
+    void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
+
+private:
+    csp::common::String AnnotationId;
+    csp::common::String AnnotationThumbnailId;
+    uint16_t VerticalFov;
+    csp::common::Vector3 AuthorCameraPosition;
+    csp::common::Vector4 AuthorCameraRotation;
 };
 
 /// @brief Enum used to specify the type of a conversation system network event.
-enum class ConversationMessageType
+enum class ConversationEventType
 {
+    NewConversation,
     NewMessage,
     DeleteMessage,
     DeleteConversation,
     ConversationInformation,
-    MessageInformation
+    MessageInformation,
+    SetAnnotation,
+    DeleteAnnotation,
+    SetConversationAnnotation,
+    DeleteConversationAnnotation
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when a message is being retrieved
 class CSP_API MessageResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
-    friend class ConversationSystem;
+    friend class csp::systems::ConversationSystemInternal;
     friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
@@ -97,11 +184,11 @@ class CSP_API MessageResult : public csp::systems::ResultBase
 
 public:
     /// @brief Gets the message info object from this result.
-    /// @retrun The message info.
+    /// @return The message info.
     [[nodiscard]] MessageInfo& GetMessageInfo();
 
     /// @brief Gets the message info object from this result.
-    /// @retrun The message info.
+    /// @return The message info.
     [[nodiscard]] const MessageInfo& GetMessageInfo() const;
 
     CSP_NO_EXPORT MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
@@ -116,12 +203,13 @@ private:
     MessageInfo MsgInfo;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a collection of messages
 class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
-    friend class ConversationSystem;
+    friend class csp::systems::ConversationSystemInternal;
+    friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -130,11 +218,11 @@ class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 
 public:
     /// @brief Gets the list of messages, as message info objects, from this result.
-    /// @retrun Array of message info objects.
+    /// @return Array of message info objects.
     [[nodiscard]] csp::common::Array<MessageInfo>& GetMessages();
 
     /// @brief Gets the list of messages, as message info objects, from this result.
-    /// @retrun Array of message info objects.
+    /// @return Array of message info objects.
     [[nodiscard]] const csp::common::Array<MessageInfo>& GetMessages() const;
 
     /// @brief Retrieves the total number of messages in the conversation.
@@ -162,12 +250,12 @@ private:
     uint64_t ResultTotalCount = 0;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a conversation.
 class CSP_API ConversationResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
-    friend class ConversationSystem;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -175,13 +263,13 @@ class CSP_API ConversationResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Gets the conversation info object from this result.
-    /// @retrun The conversation info.
-    [[nodiscard]] ConversationInfo& GetConversationInfo();
+    /// @brief Gets the message info object from this result.
+    /// @return The MessageInfo object representing conversation info.
+    [[nodiscard]] MessageInfo& GetConversationInfo();
 
-    /// @brief Gets the conversation info object from this result.
-    /// @retrun The conversation info.
-    [[nodiscard]] const ConversationInfo& GetConversationInfo() const;
+    /// @brief Gets the message info object from this result.
+    /// @return The MessageInfo object representing conversation info.
+    [[nodiscard]] const MessageInfo& GetConversationInfo() const;
 
     CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
@@ -192,8 +280,127 @@ private:
 
     void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
 
-    ConversationInfo ConvoInfo;
+    MessageInfo ConvoInfo;
 };
+
+/// @ingroup Conversation
+/// @brief Data class used to contain information for GetNumberOfReplies.
+class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Gets the number of replies from the result
+    /// @return : The number of replies
+    uint64_t GetCount() const;
+
+    CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+private:
+    explicit NumberOfRepliesResult(void*) {};
+    NumberOfRepliesResult() = default;
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+
+    uint64_t Count;
+};
+
+class CSP_API AnnotationResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AnnotationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AnnotationResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& AssetCollection);
+    CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
+    CSP_NO_EXPORT void SetAnnotationThumbnailAsset(const csp::systems::Asset& Asset) { AnnotationThumbnailAsset = Asset; }
+
+    /// @brief Gets the information about the annotation.
+    /// @return const AnnotationData&
+    const AnnotationData& GetAnnotationData() const;
+
+    /// @brief Gets the asset containing the annotation data.
+    /// @return const csp::systems::Asset&
+    const csp::systems::Asset& GetAnnotationAsset() const;
+
+    /// @brief Gets the asset containing the annotation thumbnail data.
+    /// @return const csp::systems::Asset&
+    const csp::systems::Asset& GetAnnotationThumbnailAsset() const;
+
+private:
+    explicit AnnotationResult(void*) {};
+    AnnotationResult() = default;
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+
+    AnnotationData Data;
+    systems::Asset AnnotationAsset;
+    systems::Asset AnnotationThumbnailAsset;
+};
+
+class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AnnotationThumbnailCollectionResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    /// @brief gets the annotation thumbnails that exist within the conversation.
+    /// @return const csp::common::Map<csp::common::String, csp::systems::Asset>&
+    const csp::common::Map<csp::common::String, csp::systems::Asset>& GetAnnotationThumbnailAssetsMap() const;
+
+    /// @brief Gets the number of asset thumbnails returned from GetAnnotationThumbnailAssetsMap.
+    /// @return uint64_t
+    uint64_t GetTotalCount() const;
+
+    CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
+
+private:
+    explicit AnnotationThumbnailCollectionResult(void*) {};
+    AnnotationThumbnailCollectionResult() = default;
+
+    csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
+};
+
+/// @brief Callback containing number of replies.
+/// @param Result NumberOfRepliesResult : result class
+typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
 
 // callback signatures
 // Callback providing a result object with one message info object.
@@ -202,7 +409,13 @@ typedef std::function<void(const MessageResult& Result)> MessageResultCallback;
 // Callback providing a result object with a collection of message info objects.
 typedef std::function<void(const MessageCollectionResult& Result)> MessageCollectionResultCallback;
 
-// Callback providing a result object with a conversation info object.
+// Callback providing a result object with a message info object representing the conversation.
 typedef std::function<void(const ConversationResult& Result)> ConversationResultCallback;
+
+// Callback providing a result object with a annotations result object representing the conversation.
+typedef std::function<void(const AnnotationResult& Result)> AnnotationResultCallback;
+
+// Callback providing a result object with a annotations thumbnail collection result object .
+typedef std::function<void(const AnnotationThumbnailCollectionResult& Result)> AnnotationThumbnailCollectionResultCallback;
 
 } // namespace csp::multiplayer

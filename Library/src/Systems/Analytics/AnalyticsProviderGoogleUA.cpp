@@ -46,7 +46,7 @@ public:
 class ResponseReceiver : public csp::web::IHttpResponseHandler
 {
 public:
-    void OnHttpResponse(csp::web::HttpResponse& InResponse) override { }
+    void OnHttpResponse(csp::web::HttpResponse& /*InResponse*/) override { }
 
     bool ShouldDelete() const override { return true; }
 };
@@ -80,7 +80,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
     bool HasIntegerParam = false;
     bool HasStringParam = false;
 
-    for (int i = 0; i < Values->Size(); ++i)
+    for (size_t i = 0; i < Values->Size(); ++i)
     {
         if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
         {

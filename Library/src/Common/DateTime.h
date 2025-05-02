@@ -123,6 +123,10 @@ public:
     /// @return Clock::time_point&
     const Clock::time_point& GetTimePoint() const;
 
+    /// @brief Gets Utc string which respects ISO 8601/RFC 3339 standards.
+    /// @return csp::common::String
+    csp::common::String GetUtcString() const;
+
 private:
     Clock::time_point TimePoint;
 };

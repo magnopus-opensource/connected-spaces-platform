@@ -52,6 +52,10 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
     else if (DTOAssetDetailType == "Material")
         return csp::systems::EAssetType::MATERIAL;
+    else if (DTOAssetDetailType == "Annotation")
+        return csp::systems::EAssetType::ANNOTATION;
+    else if (DTOAssetDetailType == "AnnotationThumbnail")
+        return csp::systems::EAssetType::ANNOTATION_THUMBNAIL;
     else
     {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
@@ -174,6 +178,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         Asset.MimeType = Dto.GetMimeType();
     }
 }
+
 } // namespace csp::systems
 
 namespace csp::systems
@@ -225,6 +230,8 @@ void BufferAssetDataSource::SetUploadContent(
 Asset& AssetResult::GetAsset() { return Asset; }
 
 const Asset& AssetResult::GetAsset() const { return Asset; }
+
+void AssetResult::SetAsset(const csp::systems::Asset& SetAsset) { this->Asset = SetAsset; }
 
 void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

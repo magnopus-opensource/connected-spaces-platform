@@ -263,7 +263,7 @@ void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback 
         const auto& BlockedSpacesArray = Result.GetValue();
 
         // Ignore if space already blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        for (size_t i = 0; i < BlockedSpacesArray.Size(); ++i)
         {
             if (BlockedSpacesArray[i] == InSpaceID)
             {
@@ -301,7 +301,7 @@ void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallba
         auto FoundSpace = false;
 
         // Ignore if space not blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        for (size_t i = 0; i < BlockedSpacesArray.Size(); ++i)
         {
             if (BlockedSpacesArray[i] == InSpaceID)
             {

@@ -163,7 +163,7 @@ void HttpPayload::Reset()
     Headers.clear();
 }
 
-void HttpPayload::AddFormParam(const char* Name, const std::shared_ptr<csp::web::HttpPayload>& formFile)
+void HttpPayload::AddFormParam(const char* /*Name*/, const std::shared_ptr<csp::web::HttpPayload>& formFile)
 {
     // Set Multipart type and some boundary value
     std::string BoundaryText = "multipart/form-data; boundary=" + std::string(formFile->Boundary.c_str());

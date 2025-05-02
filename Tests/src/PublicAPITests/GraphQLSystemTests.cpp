@@ -86,7 +86,6 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto GraphQLSystem = SystemsManager.GetGraphQLSystem();
     auto UserSystem = SystemsManager.GetUserSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -103,7 +102,6 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto GraphQLSystem = SystemsManager.GetGraphQLSystem();
     auto UserSystem = SystemsManager.GetUserSystem();
-    auto SpaceSystem = SystemsManager.GetSpaceSystem();
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);

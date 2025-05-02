@@ -22,6 +22,6 @@ AssetFileDto::AssetFileDto() { }
 
 AssetFileDto::~AssetFileDto() { }
 
-void AssetFileDto::FromJson(const csp::common::String& Json) { }
+void AssetFileDto::FromJson(const csp::common::String& /*Json*/) { }
 
 } // namespace csp::services

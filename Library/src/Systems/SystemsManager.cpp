@@ -34,6 +34,7 @@
 #include "CSP/Systems/Voip/VoipSystem.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
+#include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 #include "signalrclient/signalr_value.h"
 
@@ -122,6 +123,8 @@ SystemsManager::SystemsManager()
 
 SystemsManager::~SystemsManager() { DestroySystems(); }
 
+ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
+
 void SystemsManager::CreateSystems()
 {
     // Create Log system first, so we can log any startup issues in other systems
@@ -155,6 +158,7 @@ void SystemsManager::CreateSystems()
     SequenceSystem = CSP_NEW csp::systems::SequenceSystem(WebClient, EventBus);
     HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
     SpaceEntitySystem = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
+    ConversationSystem = CSP_NEW csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
 }
 
 void SystemsManager::DestroySystems()

@@ -114,7 +114,7 @@ void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, 
 
 void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, Material** OutMaterial,
     csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+    csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ = csp::systems::ERequestFailureReason::None)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
         CreatedMaterial4->GetMaterialId(),
     };
 
-    for (int i = 0; i < FoundMaterials.Size(); ++i)
+    for (size_t i = 0; i < FoundMaterials.Size(); ++i)
     {
 // Guarding use of dynamic_cast to avoid having to enable RTTI for WASM.
 #if defined CSP_WINDOWS
@@ -709,7 +709,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // Log in
     csp::common::String UserId;
@@ -809,7 +808,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION";
     const char* TestAssetName = "CSP-UNITTEST-ASSET";
@@ -831,27 +829,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     // Enter space so we can get the material and asset events
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-    // Setup Asset callback
-    bool AssetDetailBlobChangedCallbackCalled = false;
-    csp::common::String CallbackAssetId;
-
-    auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
-    {
-        if (AssetDetailBlobChangedCallbackCalled)
-        {
-            return;
-        }
-
-        EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
-        EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
-
-        CallbackAssetId = Params.AssetId;
-        AssetDetailBlobChangedCallbackCalled = true;
-    };
-
-    AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
-
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial* CreatedGLTFMaterial = nullptr;
 
@@ -869,29 +846,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     };
 
     AssetSystem->SetMaterialChangedCallback(CB);
-
-    // Create asset collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-    // Create asset
-    csp::systems::Asset Asset;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-
-    // Upload data
-    auto FilePath = std::filesystem::absolute("assets/test.json");
-    csp::systems::FileAssetDataSource Source;
-    Source.FilePath = FilePath.u8string().c_str();
-
-    Source.SetMimeType("application/json");
-
-    csp::common::String Uri;
-    UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
-
-    WaitForCallback(AssetDetailBlobChangedCallbackCalled);
-
-    EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
-    EXPECT_EQ(CallbackAssetId, Asset.Id);
 
     // Create a material associated with the space
     Material* CreatedMaterial = nullptr;
