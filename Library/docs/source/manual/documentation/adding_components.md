@@ -29,7 +29,7 @@ MyComponent::MyComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::MyC
 {
 	Properties[static_cast<uint32_t>(MyPropertyKeys::ImageURL)]				= "";
 
-	SetScriptInterface(CSP_NEW MyComponentScriptInterface(this));
+	SetScriptInterface(new MyComponentScriptInterface(this));
 }
 
 const csp::common::String& MyComponent::GetImageURL() const
@@ -59,7 +59,7 @@ In `Library/src/Multiplayer/SpaceEntity.cpp`, in `InstantiateComponent`, add a c
 
 ```cpp
 case ComponentType::MyComponent:
-	Component = CSP_NEW MyComponent(this);
+	Component = new MyComponent(this);
 	break;
 ```
 
