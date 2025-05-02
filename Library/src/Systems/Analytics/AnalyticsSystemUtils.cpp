@@ -15,8 +15,6 @@
  */
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 
-#include "Memory/Memory.h"
-
 namespace csp::systems
 {
 

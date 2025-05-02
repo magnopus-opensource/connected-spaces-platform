@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

@@ -19,7 +19,6 @@
 #include "CSP/Common/Optional.h"
 #include "TestHelpers.h"
 
-#include <Memory/Memory.h>
 #include <gtest/gtest.h>
 
 using namespace csp::common;

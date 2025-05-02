@@ -18,8 +18,6 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 #include "Systems/Script/ScriptContext.h"
 #include "quickjspp.hpp"
 

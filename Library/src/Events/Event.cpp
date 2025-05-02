@@ -17,7 +17,6 @@
 
 #include "Common/StlString.h"
 #include "Common/Wrappers.h"
-#include "Memory/Memory.h"
 
 #include <map>
 
@@ -110,8 +109,7 @@ private:
         };
     };
 
-    using ParamMap
-        = std::map<csp::StlString, EventParam, std::less<csp::StlString>, csp::memory::StlAllocator<std::pair<const csp::StlString, EventParam>>>;
+    using ParamMap = std::map<csp::StlString, EventParam, std::less<csp::StlString>>;
 
     ParamMap Parameters;
 };

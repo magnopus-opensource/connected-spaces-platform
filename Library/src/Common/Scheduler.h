@@ -16,8 +16,6 @@
 #pragma once
 
 #include "Common/DateTime.h"
-#include "Memory/Memory.h"
-#include "Memory/StlAllocator.h"
 
 #include <assert.h>
 #include <chrono>
@@ -179,7 +177,7 @@ private:
 
 private:
     std::mutex ListLock;
-    std::list<FunctionTimer, csp::memory::StlAllocator<FunctionTimer>> Tasks;
+    std::list<FunctionTimer> Tasks;
     std::thread* Thread;
     std::atomic_uint32_t IdCounter;
     bool ShouldExit;

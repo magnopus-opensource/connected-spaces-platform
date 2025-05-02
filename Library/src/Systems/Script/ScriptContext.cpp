@@ -17,8 +17,6 @@
 
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 
 namespace csp::systems
 {

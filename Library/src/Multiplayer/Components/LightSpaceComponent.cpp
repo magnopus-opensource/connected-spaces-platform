@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

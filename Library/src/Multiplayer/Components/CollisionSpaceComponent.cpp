@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace

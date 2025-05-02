@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer

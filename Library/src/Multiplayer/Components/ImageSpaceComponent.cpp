@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
