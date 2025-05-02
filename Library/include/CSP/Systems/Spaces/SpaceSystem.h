@@ -375,6 +375,25 @@ private:
 
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
+    // CreateSpace Continuations
+    async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata);
+    async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space);
+    std::function<async::task<AssetResult>()> CreateSpaceThumbnailAsset(
+        const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAsset(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAssetWithBuffer(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
+        SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
+
     // EnterSpace Continuations
     auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);

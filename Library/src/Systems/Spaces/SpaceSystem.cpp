@@ -78,8 +78,9 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
 
 SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
 
-async::task<SpaceResult> CreateSpaceGroupInfo(
-    chs::GroupApi* GroupAPI, const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags)
+/* CreateSpace Continuations */
+async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
+    const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
     async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
@@ -99,77 +100,82 @@ async::task<SpaceResult> CreateSpaceGroupInfo(
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
         [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
-    GroupAPI->apiV1GroupsPost(GroupInfo, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsPost(GroupInfo, ResponseHandler);
 
     return OnCompleteTask;
 }
 
-std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
-    AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+std::function<async::task<AssetCollectionResult>()> SpaceSystem::CreateSpaceMetadataAssetCollection(
+    const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
 {
-    return [AssetSystem, Space, Metadata]() -> async::task<AssetCollectionResult>
+    return [Space, Metadata]() -> async::task<AssetCollectionResult>
     {
         auto Id = Space->GetSpace().Id;
         auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         // Don't assign this AssetCollection to a space so any user can retrieve the metadata without joining the space
         return AssetSystem->CreateAssetCollection(Id, nullptr, Name, Metadata, EAssetCollectionType::FOUNDATION_INTERNAL, nullptr);
     };
 }
 
-async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space)
+async::task<AssetCollectionResult> SpaceSystem::CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space)
 {
     auto SpaceId = Space->GetSpace().Id;
     auto Name = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
+    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users without joining the space
     return AssetSystem->CreateAssetCollection(SpaceId, nullptr, Name, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Array<String>({ SpaceId }));
 }
 
-std::function<async::task<AssetResult>()> CreateSpaceThumbnailAsset(
-    AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult)
+std::function<async::task<AssetResult>()> SpaceSystem::CreateSpaceThumbnailAsset(
+    const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult)
 {
-    return [AssetSystem, Space, AssetCollectionResult]() -> async::task<AssetResult>
+    return [Space, AssetCollectionResult]() -> async::task<AssetResult>
     {
         auto SpaceId = Space->GetSpace().Id;
         auto Name = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         return AssetSystem->CreateAsset(AssetCollectionResult->GetAssetCollection(), Name, nullptr, nullptr, EAssetType::IMAGE);
     };
 }
 
-std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAsset(
-    AssetSystem* AssetSystem, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data)
+std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAsset(
+    const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data)
 {
-    return [AssetSystem, AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
         UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
         UploadAsset.MimeType = Data.GetMimeType();
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         return AssetSystem->UploadAssetDataEx(
             AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
     };
 }
 
-std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAssetWithBuffer(
-    AssetSystem* AssetSystem, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data)
+std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAssetWithBuffer(
+    const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data)
 {
-    return [AssetSystem, AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
     {
         Asset UploadAsset = Result.GetAsset();
         UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
         UploadAsset.MimeType = Data.GetMimeType();
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         return AssetSystem->UploadAssetDataEx(
             AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
     };
 }
 
-std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
-    AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data)
+std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbnailToSpace(
+    const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data)
 {
-    return [AssetSystem, Space, Data]() -> async::task<UriResult>
+    return [Space, Data, this]() -> async::task<UriResult>
     {
         if (!Data.HasValue())
         {
@@ -181,49 +187,49 @@ std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
 
         NullResultCallback Callback;
 
-        return CreateSpaceThumbnailAssetCollection(AssetSystem, Space)
+        return CreateSpaceThumbnailAssetCollection(Space)
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset collection.",
                 "Failed to create space thumbnail asset collection.", {}, {}, {}))
             .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
-            .then(CreateSpaceThumbnailAsset(AssetSystem, Space, ThumbnailAssetCollection))
+            .then(CreateSpaceThumbnailAsset(Space, ThumbnailAssetCollection))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset.",
                 "Failed to create space thumbnail asset.", {}, {}, {}))
-            .then(UploadSpaceThumbnailAsset(AssetSystem, ThumbnailAssetCollection, *Data))
+            .then(UploadSpaceThumbnailAsset(ThumbnailAssetCollection, *Data))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully upload space thumbnail asset.",
                 "Failed to upload space thumbnail asset.", {}, {}, {}));
     };
 }
 
-std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferToSpace(
-    AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data)
+std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace(
+    const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data)
 {
-    return [AssetSystem, Space, Data]() -> async::task<UriResult>
+    return [Space, Data, this]() -> async::task<UriResult>
     {
         auto SpaceId = Space->GetSpace().Id;
         auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
 
         NullResultCallback Callback;
 
-        return CreateSpaceThumbnailAssetCollection(AssetSystem, Space)
+        return CreateSpaceThumbnailAssetCollection(Space)
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset collection.",
                 "Failed to create space thumbnail asset collection.", {}, {}, {}))
             .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
-            .then(CreateSpaceThumbnailAsset(AssetSystem, Space, ThumbnailAssetCollection))
+            .then(CreateSpaceThumbnailAsset(Space, ThumbnailAssetCollection))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset.",
                 "Failed to create space thumbnail asset.", {}, {}, {}))
-            .then(UploadSpaceThumbnailAssetWithBuffer(AssetSystem, ThumbnailAssetCollection, Data))
+            .then(UploadSpaceThumbnailAssetWithBuffer(ThumbnailAssetCollection, Data))
             .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
                 "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully upload space thumbnail asset.",
                 "Failed to upload space thumbnail asset.", {}, {}, {}));
     };
 }
 
-std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
+std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNeccesary(
     SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const Optional<InviteUserRoleInfoCollection>& InviteUsers)
 {
     return [SpaceSystem, Space, InviteUsers]() -> async::task<NullResult>
@@ -496,19 +502,17 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const Optional<FileAssetDataSource>& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
     auto CurrentSpace = std::make_shared<SpaceResult>();
 
-    CreateSpaceGroupInfo(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, Tags)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
-        .then(CreateSpaceMetadataAssetCollection(AssetSystem, CurrentSpace, Metadata))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpace, Metadata))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "SpaceSystem::CreateSpace, successfully created space metadata asset collection.", "Failed to create space metadata asset collection.",
             {}, {}, {}))
-        .then(CreateAndUploadSpaceThumbnailToSpace(AssetSystem, CurrentSpace, Thumbnail))
+        .then(CreateAndUploadSpaceThumbnailToSpace(CurrentSpace, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
@@ -552,19 +556,17 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const BufferAssetDataSource& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
     auto CurrentSpace = std::make_shared<SpaceResult>();
 
-    CreateSpaceGroupInfo(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, Tags)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
-        .then(CreateSpaceMetadataAssetCollection(AssetSystem, CurrentSpace, Metadata))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpace, Metadata))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "SpaceSystem::CreateSpaceWithBuffer, successfully created space metadata asset collection.",
             "Failed to create space metadata asset collection.", {}, {}, {}))
-        .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(AssetSystem, CurrentSpace, Thumbnail))
+        .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(CurrentSpace, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
