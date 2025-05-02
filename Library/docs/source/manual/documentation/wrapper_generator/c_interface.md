@@ -94,7 +94,7 @@
   // C
   CSP_C_API NativePointer csp_GetClassByValue() {
       return NativePointer {
-          CSP_NEW csp::ExampleClass(csp::GetClassByValue()),
+          new csp::ExampleClass(csp::GetClassByValue()),
           true
       };
   }
@@ -130,7 +130,7 @@
   // C
   CSP_C_API NativePointer csp_GetClassByConstPointer() {
       return NativePointer {
-          CSP_NEW csp::ExampleClass(*csp::GetClassByConstPointer()),
+          new csp::ExampleClass(*csp::GetClassByConstPointer()),
           true
       };
   }
@@ -166,7 +166,7 @@
   // C
   CSP_C_API NativePointer csp_GetClassByConstReference() {
       return NativePointer {
-          CSP_NEW csp::ExampleClass(csp::GetClassByConstReference()),
+          new csp::ExampleClass(csp::GetClassByConstReference()),
           true
       };
   }
@@ -184,7 +184,7 @@
   // C
   CSP_C_API char* csp_GetStringByValue() {
       auto Value = csp::GetStringByValue();
-      auto Buf = (char*)csp::memory::DllAlloc(Value.Length() + 1);
+      auto Buf = (char*)malloc(Value.Length() + 1);
       std::memcpy(Buf, Value.c_str(), Value.Length());
       Buf[Value.Length()] = '\0';
 
@@ -193,7 +193,7 @@
 
   CSP_C_API NativePointer csp_GetStringByConstReference() {
       const auto& Value = csp::GetStringByConstReference();
-      auto Buf = (char*)csp::memory::DllAlloc(Value.Length() + 1);
+      auto Buf = (char*)malloc(Value.Length() + 1);
       std::memcpy(Buf, Value.c_str(), Value.Length());
       Buf[Value.Length()] = '\0';
 
