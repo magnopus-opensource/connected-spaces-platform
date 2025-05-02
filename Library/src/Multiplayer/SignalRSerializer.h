@@ -79,50 +79,12 @@ public:
     /// @brief Writes a uint key-value pair to the current uint map.
     /// @pre StartUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void WriteKeyValue(uint64_t Key, const T& Value)
-    {
-        if (Stack.size() == 0 || std ::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()) == false)
-        {
-            throw std::runtime_error("Invalid call: Serializer was not in a uint map");
-        }
-
-        Stack.push(std::pair<uint64_t, signalr::value> {});
-        std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = Key;
-
-        WriteValue(Value);
-
-        // Get our pair form the top of the stack and pop
-        std::pair<uint64_t, signalr::value> Pair = std::get<std::pair<uint64_t, signalr::value>>(Stack.top());
-        Stack.pop();
-
-        // Get our map from the top of the stack and append the pair
-        std::map<uint64_t, signalr::value>& Map = std::get<std::map<uint64_t, signalr::value>>(Stack.top());
-        Map[Pair.first] = Pair.second;
-    }
+    template <class T> void WriteKeyValue(uint64_t Key, const T& Value);
 
     /// @brief Writes a string key-value pair to the current map.
     /// @pre StartStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void WriteKeyValue(std::string Key, const T& Value)
-    {
-        if (Stack.size() == 0 || std ::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
-        {
-            throw std::runtime_error("Invalid call: Serializer was not in a string map");
-        }
-
-        Stack.push(std::pair<std::string, signalr::value> {});
-        std::get<std::pair<std::string, signalr::value>>(Stack.top()).first = Key;
-
-        WriteValue(Value);
-
-        // Get our pair from the top of the stack and pop.
-        std::pair<std::string, signalr::value> Pair = std::get<std::pair<std::string, signalr::value>>(Stack.top());
-        Stack.pop();
-
-        // Get our map from the top of the stack and append the pair.
-        std::map<std::string, signalr::value>& Map = std::get<std::map<std::string, signalr::value>>(Stack.top());
-        Map[Pair.first] = Pair.second;
-    }
+    template <class T> void WriteKeyValue(std::string Key, const T& Value);
 
     /// @brief Gets the serialized singnal r value.
     /// @return signalr::value
@@ -132,53 +94,8 @@ public:
 private:
     void Pop(signalr::value&& Last);
 
-    template <class T> void WriteValueInternal(const T& Value)
-    {
-        signalr::value SerializedValue;
-
-        if constexpr (std::is_base_of<ISignalRSerializable, T>::value)
-        {
-            Value.Serialize(*this);
-        }
-        else
-        {
-            SerializedValue = signalr::value(Value);
-
-            if (Stack.size() == 0)
-            {
-                // Case where a user only want to serialize a single value
-                Stack.push(signalr::value(Value));
-            }
-            else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
-            {
-                std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedValue);
-            }
-            else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
-            {
-                std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedValue;
-            }
-            else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
-            {
-                std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedValue;
-            }
-            else
-            {
-                throw std::runtime_error("Invalid call: Serializer was not in an array or at the root");
-            }
-        }
-    }
-
-    template <class T> void WriteValueInternal(const std::optional<T>& Value)
-    {
-        if (Value.has_value())
-        {
-            WriteValueInternal(*Value);
-        }
-        else
-        {
-            WriteValueInternal<nullptr_t>(nullptr);
-        }
-    }
+    template <class T> void WriteValueInternal(const T& Value);
+    template <class T> void WriteValueInternal(const std::optional<T>& Value);
 
     void WriteValueInternal(const SignalRSerializableValue& Value);
 
@@ -239,39 +156,17 @@ public:
     /// @pre EnterArray should be called before this function,
     /// or if this deserializer represents a single value.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadValue(T& OutVal)
-    {
-        const signalr::value& Next = ReadNextValue();
-        ReadValueFromObject(Next, OutVal);
-
-        IncrementIterator();
-    }
+    template <class T> void ReadValue(T& OutVal);
 
     /// @brief Reads a uint key-value pair to the current uint map.
     /// @pre EnterUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal)
-    {
-        const std::pair<uint64_t, signalr::value>& Next = ReadNextUintKeyValue();
-
-        OutVal.first = Next.first;
-        ReadValueFromObject(Next.second, OutVal.second);
-
-        IncrementIterator();
-    }
+    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal);
 
     /// @brief Reads a string key-value pair to the current string map.
     /// @pre EnterStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal)
-    {
-        const std::pair<std::string, signalr::value>& Next = ReadNextStringKeyValue();
-
-        OutVal.first = Next.first;
-        ReadValueFromObject(Next.second, OutVal.second);
-
-        IncrementIterator();
-    }
+    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal);
 
 private:
     const signalr::value& ReadNextValue();
@@ -279,19 +174,7 @@ private:
     const std::pair<std::uint64_t, signalr::value> ReadNextUintKeyValue() const;
     const std::pair<std::string, signalr::value> ReadNextStringKeyValue() const;
 
-    template <class T> void ReadValueFromObject(const signalr::value& Object, T& OutVal)
-    {
-        if constexpr (std::is_base_of<ISignalRDeserializable, T>::value)
-        {
-            SignalRDeserializer Deserializer { Object };
-            OutVal.Deserialize(Deserializer);
-            return;
-        }
-        else
-        {
-            ReadValueFromObjectInternal(Object, OutVal);
-        }
-    }
+    template <class T> void ReadValueFromObject(const signalr::value& Object, T& OutVal);
 
     void ReadValueFromObjectInternal(const signalr::value& Object, int64_t& OutVal) const;
     void ReadValueFromObjectInternal(const signalr::value& Object, uint64_t& OutVal) const;
@@ -360,4 +243,131 @@ protected:
     ISignalRDeserializable& operator=(const ISignalRDeserializable&) = default;
     ISignalRDeserializable& operator=(ISignalRDeserializable&&) = default;
 };
+template <class T> inline void SignalRSerializer::WriteKeyValue(uint64_t Key, const T& Value)
+{
+    if (Stack.size() == 0 || std ::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()) == false)
+    {
+        throw std::runtime_error("Invalid call: Serializer was not in a uint map");
+    }
+
+    Stack.push(std::pair<uint64_t, signalr::value> {});
+    std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = Key;
+
+    WriteValue(Value);
+
+    // Get our pair form the top of the stack and pop
+    std::pair<uint64_t, signalr::value> Pair = std::get<std::pair<uint64_t, signalr::value>>(Stack.top());
+    Stack.pop();
+
+    // Get our map from the top of the stack and append the pair
+    std::map<uint64_t, signalr::value>& Map = std::get<std::map<uint64_t, signalr::value>>(Stack.top());
+    Map[Pair.first] = Pair.second;
+}
+template <class T> inline void SignalRSerializer::WriteKeyValue(std::string Key, const T& Value)
+{
+    if (Stack.size() == 0 || std ::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
+    {
+        throw std::runtime_error("Invalid call: Serializer was not in a string map");
+    }
+
+    Stack.push(std::pair<std::string, signalr::value> {});
+    std::get<std::pair<std::string, signalr::value>>(Stack.top()).first = Key;
+
+    WriteValue(Value);
+
+    // Get our pair from the top of the stack and pop.
+    std::pair<std::string, signalr::value> Pair = std::get<std::pair<std::string, signalr::value>>(Stack.top());
+    Stack.pop();
+
+    // Get our map from the top of the stack and append the pair.
+    std::map<std::string, signalr::value>& Map = std::get<std::map<std::string, signalr::value>>(Stack.top());
+    Map[Pair.first] = Pair.second;
+}
+template <class T> inline void SignalRSerializer::WriteValueInternal(const T& Value)
+{
+    signalr::value SerializedValue;
+
+    if constexpr (std::is_base_of<ISignalRSerializable, T>::value)
+    {
+        Value.Serialize(*this);
+    }
+    else
+    {
+        SerializedValue = signalr::value(Value);
+
+        if (Stack.size() == 0)
+        {
+            // Case where a user only want to serialize a single value
+            Stack.push(signalr::value(Value));
+        }
+        else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
+        {
+            std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedValue);
+        }
+        else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
+        {
+            std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedValue;
+        }
+        else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
+        {
+            std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedValue;
+        }
+        else
+        {
+            throw std::runtime_error("Invalid call: Serializer was not in an array or at the root");
+        }
+    }
+}
+template <class T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
+{
+    if (Value.has_value())
+    {
+        WriteValueInternal(*Value);
+    }
+    else
+    {
+        WriteValueInternal<nullptr_t>(nullptr);
+    }
+}
+template <class T> inline void SignalRDeserializer::ReadValue(T& OutVal)
+{
+    const signalr::value& Next = ReadNextValue();
+    ReadValueFromObject(Next, OutVal);
+
+    IncrementIterator();
+}
+
+template <class T> void SignalRDeserializer::ReadKeyValue(std::pair<uint64_t, T>& OutVal)
+{
+    const std::pair<uint64_t, signalr::value>& Next = ReadNextUintKeyValue();
+
+    OutVal.first = Next.first;
+    ReadValueFromObject(Next.second, OutVal.second);
+
+    IncrementIterator();
+}
+
+template <class T> void SignalRDeserializer::ReadKeyValue(std::pair<std::string, T>& OutVal)
+{
+    const std::pair<std::string, signalr::value>& Next = ReadNextStringKeyValue();
+
+    OutVal.first = Next.first;
+    ReadValueFromObject(Next.second, OutVal.second);
+
+    IncrementIterator();
+}
+
+template <class T> void SignalRDeserializer::ReadValueFromObject(const signalr::value& Object, T& OutVal)
+{
+    if constexpr (std::is_base_of<ISignalRDeserializable, T>::value)
+    {
+        SignalRDeserializer Deserializer { Object };
+        OutVal.Deserialize(Deserializer);
+        return;
+    }
+    else
+    {
+        ReadValueFromObjectInternal(Object, OutVal);
+    }
+}
 }
