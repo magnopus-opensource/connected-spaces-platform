@@ -504,34 +504,34 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const Optional<FileAssetDataSource>& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    auto CurrentSpace = std::make_shared<SpaceResult>();
+    auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
     CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
-        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
-        .then(CreateSpaceMetadataAssetCollection(CurrentSpace, Metadata))
+        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpaceResult, Metadata))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "SpaceSystem::CreateSpace, successfully created space metadata asset collection.", "Failed to create space metadata asset collection.",
             {}, {}, {}))
-        .then(CreateAndUploadSpaceThumbnailToSpace(CurrentSpace, Thumbnail))
+        .then(CreateAndUploadSpaceThumbnailToSpace(CurrentSpaceResult, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
-        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
-            [CurrentSpace, Callback]()
+            [CurrentSpaceResult, Callback]()
             {
                 CSP_LOG_MSG(LogLevel::Log,
-                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpace->GetSpace().Name)));
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
-                INVOKE_IF_NOT_NULL(Callback, *CurrentSpace);
+                INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            [this, CurrentSpace, Callback](const std::exception& /*Except*/)
+            [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                const auto SpaceId = CurrentSpace->GetSpace().Id;
+                const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
 
                 this->RemoveSpaceThumbnail(SpaceId, Callback);
                 this->RemoveMetadata(SpaceId, Callback);
@@ -558,36 +558,36 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const BufferAssetDataSource& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    auto CurrentSpace = std::make_shared<SpaceResult>();
+    auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
     CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
-        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
-        .then(CreateSpaceMetadataAssetCollection(CurrentSpace, Metadata))
+        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpaceResult, Metadata))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
             "SpaceSystem::CreateSpaceWithBuffer, successfully created space metadata asset collection.",
             "Failed to create space metadata asset collection.", {}, {}, {}))
-        .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(CurrentSpace, Thumbnail))
+        .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(CurrentSpaceResult, Thumbnail))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
-        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpace, InviteUsers))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
         .then(
-            [CurrentSpace, Callback]()
+            [CurrentSpaceResult, Callback]()
             {
                 CSP_LOG_MSG(LogLevel::Log,
-                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpace->GetSpace().Name)));
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
-                INVOKE_IF_NOT_NULL(Callback, *CurrentSpace);
+                INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
             })
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            [this, CurrentSpace, Callback](const std::exception& /*Except*/)
+            [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                return [this, CurrentSpace, Callback]()
+                return [this, CurrentSpaceResult, Callback]()
                 {
-                    const auto SpaceId = CurrentSpace->GetSpace().Id;
+                    const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
 
                     this->RemoveSpaceThumbnail(SpaceId, Callback);
                     this->RemoveMetadata(SpaceId, Callback);
