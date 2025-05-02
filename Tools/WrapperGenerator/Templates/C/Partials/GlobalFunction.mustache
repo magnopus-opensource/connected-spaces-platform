@@ -63,7 +63,7 @@
     NativePointer {
 {{# is_pointer_or_reference }}
 {{# is_const }}
-        CSP_NEW {{> Type }}(
+        new {{> Type }}(
 {{# is_pointer }}
         *
 {{/ is_pointer }}
@@ -75,7 +75,7 @@
 {{/ is_const }}
 {{/ is_reference }}
 {{^ is_pointer_or_reference }}
-        CSP_NEW {{> Type }}(
+        new {{> Type }}(
 {{/ is_pointer_or_reference }}
 {{/ is_class_or_interface }}
 {{^ is_class_or_interface }}
@@ -126,7 +126,7 @@
 
 {{# return_type }}
 {{# is_string }}
-    auto _resultBuffer = (char*)csp::memory::DllAlloc(_result.Length() + 1);
+    auto _resultBuffer = (char*)std::malloc(_result.Length() + 1);
     std::memcpy(_resultBuffer, _result.c_str(), _result.Length());
     _resultBuffer[_result.Length()] = '\0';
 
