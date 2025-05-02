@@ -74,7 +74,7 @@ public:
     {
         assert(Thread == nullptr);
         ShouldExit = false;
-        Thread = CSP_NEW std::thread([this]() { ThreadLoop(); });
+        Thread = new std::thread([this]() { ThreadLoop(); });
     }
 
     void Shutdown()
@@ -83,7 +83,7 @@ public:
         {
             ShouldExit = true;
             Thread->join();
-            CSP_DELETE(Thread);
+            delete (Thread);
             Thread = nullptr;
         }
     }

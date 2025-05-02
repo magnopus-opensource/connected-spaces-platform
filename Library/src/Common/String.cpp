@@ -30,7 +30,7 @@ namespace csp::common
 class String::Impl
 {
 public:
-    ~Impl() { CSP_DELETE_ARRAY(Text); }
+    ~Impl() { delete[] Text; }
 
     explicit Impl(char const* const InText)
         : Text(nullptr)
@@ -45,7 +45,7 @@ public:
 
         const size_t Len = strlen(_InText);
 
-        char* NewText = CSP_NEW char[Len + 1];
+        char* NewText = new char[Len + 1];
 
         if (Len > 0)
         {
@@ -70,7 +70,7 @@ public:
             Len = 0;
         }
 
-        char* NewText = CSP_NEW char[Len + 1];
+        char* NewText = new char[Len + 1];
 
         if (Len > 0)
         {
@@ -87,7 +87,7 @@ public:
         : Text(nullptr)
         , Length(0)
     {
-        char* NewText = CSP_NEW char[Len + 1];
+        char* NewText = new char[Len + 1];
 
 #if DEBUG
         if (Len > 0)
@@ -101,7 +101,7 @@ public:
         Length = Len;
     }
 
-    Impl* Clone() const { return CSP_NEW Impl(Text, Length); }
+    Impl* Clone() const { return new Impl(Text, Length); }
 
     inline void Append(const char* Other, size_t OtherLength)
     {
@@ -111,12 +111,12 @@ public:
         }
 
         auto NewLength = Length + OtherLength;
-        auto NewText = CSP_NEW char[NewLength + 1];
+        auto NewText = new char[NewLength + 1];
         memcpy(NewText, Text, Length);
         memcpy(NewText + Length, Other, OtherLength);
         NewText[NewLength] = '\0';
 
-        CSP_DELETE_ARRAY(Text);
+        delete[] Text;
         Text = NewText;
         Length = NewLength;
     }
@@ -173,22 +173,22 @@ public:
 };
 
 String::String()
-    : ImplPtr(CSP_NEW Impl(""))
+    : ImplPtr(new Impl(""))
 {
 }
 
 String::String(char const* const Text, size_t Length)
-    : ImplPtr(CSP_NEW Impl(Text, Length))
+    : ImplPtr(new Impl(Text, Length))
 {
 }
 
 String::String(size_t Length)
-    : ImplPtr(CSP_NEW Impl(Length))
+    : ImplPtr(new Impl(Length))
 {
 }
 
 String::String(const char* Text)
-    : ImplPtr(CSP_NEW Impl(Text))
+    : ImplPtr(new Impl(Text))
 {
 }
 
@@ -215,7 +215,7 @@ String& String::operator=(const String& Rhs)
 {
     if (ImplPtr != nullptr)
     {
-        CSP_DELETE(ImplPtr);
+        delete (ImplPtr);
     }
 
     ImplPtr = Rhs.ImplPtr->Clone();
@@ -226,7 +226,7 @@ String& String::operator=(String&& Rhs)
 {
     if (ImplPtr != nullptr)
     {
-        CSP_DELETE(ImplPtr);
+        delete (ImplPtr);
     }
 
     ImplPtr = Rhs.ImplPtr;
@@ -238,10 +238,10 @@ String& String::operator=(char const* const Text)
 {
     if (ImplPtr != nullptr)
     {
-        CSP_DELETE(ImplPtr);
+        delete (ImplPtr);
     }
 
-    ImplPtr = CSP_NEW Impl(Text);
+    ImplPtr = new Impl(Text);
     return *this;
 }
 
@@ -295,7 +295,7 @@ String::~String()
 {
     if (ImplPtr != nullptr)
     {
-        CSP_DELETE(ImplPtr);
+        delete (ImplPtr);
     }
 }
 
@@ -388,7 +388,7 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
         Length += Parts.Size() - 1;
     }
 
-    auto Buffer = CSP_NEW char[Length + 1]();
+    auto Buffer = new char[Length + 1]();
     size_t Pos = 0;
 
     for (size_t i = 0; i < Parts.Size(); ++i)
@@ -413,7 +413,7 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
 
     String JoinedString(Buffer);
 
-    CSP_DELETE_ARRAY(Buffer);
+    delete[] Buffer;
 
     return JoinedString;
 }
@@ -452,7 +452,7 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
         Length += Parts.size() - 1;
     }
 
-    auto Buffer = CSP_NEW char[Length + 1]();
+    auto Buffer = new char[Length + 1]();
     size_t Pos = 0;
 
     for (size_t i = 0; i < Parts.size(); ++i)
@@ -477,7 +477,7 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 
     String JoinedString(Buffer);
 
-    CSP_DELETE_ARRAY(Buffer);
+    delete[] Buffer;
 
     return JoinedString;
 }
