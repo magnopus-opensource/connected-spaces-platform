@@ -356,14 +356,14 @@ struct TestObject2 : public ISignalRSerializable, public ISignalRDeserializable
             Serializer.WriteValue(StringMember);
             Serializer.WriteValue(OptionalMember);
 
-            Serializer.EndUintMap();
+            Serializer.StartUintMap();
 
             for (const auto& Pair : UintMapMember)
             {
                 Serializer.WriteKeyValue(Pair.first, Pair.second);
             }
 
-            Serializer.StartUintMap();
+            Serializer.EndUintMap();
         }
         Serializer.EndArray();
     }

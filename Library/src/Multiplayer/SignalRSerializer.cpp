@@ -56,30 +56,11 @@ signalr::value SignalRSerializer::Get() const
         throw std::runtime_error("Invalid call: Serializer is not at the root");
     }
 
-    const Container& Root = Stack.top();
+    signalr::value SerializedValue;
+    // Dispatch internal variant type to the correct GetInternal call
+    std::visit([this, &SerializedValue](const auto& ValType) { SerializedValue = this->GetInternal(ValType); }, Stack.top());
 
-    if (std::holds_alternative<signalr::value>(Root))
-    {
-        return std::get<signalr::value>(Root);
-    }
-    else if (std::holds_alternative<std::vector<signalr::value>>(Root))
-    {
-        return signalr::value { std::get<std::vector<signalr::value>>(Root) };
-    }
-    else if (std::holds_alternative<std::map<std::string, signalr::value>>(Root))
-    {
-        return signalr::value { std::get<std::map<std::string, signalr::value>>(Root) };
-    }
-    else if (std::holds_alternative<std::map<uint64_t, signalr::value>>(Root))
-    {
-        return signalr::value { std::get<std::map<uint64_t, signalr::value>>(Root) };
-    }
-    else
-    {
-        throw std::runtime_error("Unexpected serializer state");
-    }
-
-    return signalr::value {};
+    return SerializedValue;
 }
 
 void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& SerializedContainer)
@@ -91,27 +72,32 @@ void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& Serializ
         Stack.push(SerializedContainer);
         return;
     }
-    else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
-    {
-        std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedContainer);
-    }
-    else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
-    {
-        std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedContainer;
-    }
-    else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
-    {
-        std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedContainer;
-    }
-    else
-    {
-        throw std::runtime_error("Unexpected serializer state");
-    }
+
+    // Dispatch internal variant type to the correct FinalizeContainerSerializaitonInternal call
+    std::visit([this, &SerializedContainer](auto& ValType) { this->FinalizeContainerSerializaitonInternal(ValType, std::move(SerializedContainer)); },
+        Stack.top());
+}
+
+void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer)
+{
+    Container.push_back(SerializedContainer);
 }
 
 void SignalRSerializer::WriteValueInternal(const SignalRSerializableValue& Value)
 {
     std::visit([this](auto&& ValType) { WriteValueInternal(ValType); }, Value);
+}
+
+signalr::value SignalRSerializer::GetInternal(const signalr::value& Object) const { return Object; }
+
+signalr::value SignalRSerializer::GetInternal(const std::pair<uint64_t, signalr::value>&) const
+{
+    throw std::runtime_error("Unexpected serializer state");
+}
+
+signalr::value SignalRSerializer::GetInternal(const std::pair<std::string, signalr::value>&) const
+{
+    throw std::runtime_error("Unexpected serializer state");
 }
 
 SignalRDeserializer::SignalRDeserializer(const signalr::value& Object)

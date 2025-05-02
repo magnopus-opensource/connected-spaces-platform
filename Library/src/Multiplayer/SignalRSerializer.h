@@ -92,15 +92,26 @@ public:
     signalr::value Get() const;
 
 private:
+    // Adds the serialized container object to the previous object, or the root
     void FinalizeContainerSerializaiton(signalr::value&& SerializedContainer);
+
+    template <class T> void FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer);
+    void FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer);
+    template <class K> void FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer);
 
     template <class T> void WriteValueInternal(const T& Value);
     template <class T> void WriteValueInternal(const std::optional<T>& Value);
 
     void WriteValueInternal(const SignalRSerializableValue& Value);
 
-    using Container = std::variant<signalr::value, std::vector<signalr::value>, std::map<uint64_t, signalr::value>,
-        std::map<std::string, signalr::value>, std::pair<uint64_t, signalr::value>, std::pair<std::string, signalr::value>>;
+    template <class T> signalr::value GetInternal(const T& Object);
+
+    signalr::value GetInternal(const signalr::value& Object) const;
+    signalr::value GetInternal(const std::pair<uint64_t, signalr::value>& Object) const;
+    signalr::value GetInternal(const std::pair<std::string, signalr::value>& Object) const;
+
+    using Container = std::variant<signalr::value, std::vector<signalr::value>, std::map<std::string, signalr::value>,
+        std::map<uint64_t, signalr::value>, std::pair<uint64_t, signalr::value>, std::pair<std::string, signalr::value>>;
 
     std::stack<Container> Stack;
 };
@@ -184,18 +195,7 @@ private:
     void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t&) const;
     void ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal) const;
 
-    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const
-    {
-        if (Object.is_null())
-        {
-            OutVal = std::nullopt;
-        }
-        else
-        {
-            OutVal = "";
-            ReadValueFromObjectInternal(Object, *OutVal);
-        }
-    }
+    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const;
 
     void IncrementIterator();
 
@@ -283,6 +283,15 @@ template <class T> inline void SignalRSerializer::WriteKeyValue(std::string Key,
     std::map<std::string, signalr::value>& Map = std::get<std::map<std::string, signalr::value>>(Stack.top());
     Map[Pair.first] = Pair.second;
 }
+template <class T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer)
+{
+    throw std::runtime_error("Unexpected serializer state");
+}
+template <class K>
+inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer)
+{
+    Pair.second = SerializedContainer;
+}
 template <class T> inline void SignalRSerializer::WriteValueInternal(const T& Value)
 {
     signalr::value SerializedValue;
@@ -318,6 +327,7 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const T& Va
         }
     }
 }
+template <class T> signalr::value SignalRSerializer::GetInternal(const T& Object) { return signalr::value(Object); }
 template <class T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
 {
     if (Value.has_value())
@@ -368,6 +378,18 @@ template <class T> void SignalRDeserializer::ReadValueFromObject(const signalr::
     else
     {
         ReadValueFromObjectInternal(Object, OutVal);
+    }
+}
+template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const
+{
+    if (Object.is_null())
+    {
+        OutVal = std::nullopt;
+    }
+    else
+    {
+        OutVal = "";
+        ReadValueFromObjectInternal(Object, *OutVal);
     }
 }
 }
