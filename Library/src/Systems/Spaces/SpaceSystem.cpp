@@ -179,6 +179,7 @@ std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbna
     {
         if (!Data.HasValue())
         {
+            // In the event the optional is null we still want to return success to continue the chain.
             return async::make_task(UriResult(EResultCode::Success, 200));
         }
 
@@ -236,6 +237,7 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
     {
         if (!InviteUsers.HasValue())
         {
+            // In the event the optional is null we still want to return success to continue the chain.
             return async::make_task(NullResult(EResultCode::Success, 200));
         }
 
