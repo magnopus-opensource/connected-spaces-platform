@@ -38,7 +38,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
 
-    SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
+    SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */
@@ -71,10 +71,7 @@ csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceCompo
 
     csp::common::Map<csp::common::String, csp::common::String> Overrides;
 
-    auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
-
-    std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
-        const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()), Deleter);
+    std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()));
 
     for (size_t i = 0; i < Keys->Size(); ++i)
     {

@@ -98,7 +98,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
             }
         }
 
-        CSP_DELETE(ComponentKeys);
+        delete (ComponentKeys);
     }
 
     return Components;

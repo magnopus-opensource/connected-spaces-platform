@@ -77,11 +77,8 @@ namespace
             ValueType = ItemComponentData::STRING_DICTIONARY;
             auto MValue = Value.GetStringMap();
 
-            auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
-
             std::map<std::string, signalr::value> Map;
-            std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
-                const_cast<common::Array<common::String>*>(MValue.Keys()), Deleter);
+            std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(MValue.Keys()));
 
             for (size_t i = 0; i < Keys->Size(); ++i)
             {

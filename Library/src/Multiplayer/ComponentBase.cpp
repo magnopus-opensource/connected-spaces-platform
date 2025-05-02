@@ -49,7 +49,7 @@ ComponentBase::~ComponentBase()
 {
     if (ScriptInterface)
     {
-        CSP_DELETE(ScriptInterface);
+        delete (ScriptInterface);
     }
 }
 

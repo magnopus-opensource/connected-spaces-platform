@@ -40,7 +40,7 @@ LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(LightPropertyKeys::LightShadowType)] = static_cast<int64_t>(LightShadowType::None);
 
-    SetScriptInterface(CSP_NEW LightSpaceComponentScriptInterface(this));
+    SetScriptInterface(new LightSpaceComponentScriptInterface(this));
 }
 
 LightType LightSpaceComponent::GetLightType() const

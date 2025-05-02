@@ -113,7 +113,7 @@ void EventSystemImpl::ProcessEvents()
         const EventId& Id = QueuedEvent->GetId();
         GetDispatcher(Id).Dispatch(*QueuedEvent);
 
-        CSP_DELETE(QueuedEvent);
+        delete (QueuedEvent);
     }
 }
 
@@ -126,13 +126,13 @@ EventSystem& EventSystem::Get()
 }
 
 EventSystem::EventSystem()
-    : Impl(CSP_NEW EventSystemImpl())
+    : Impl(new EventSystemImpl())
 {
 }
 
-EventSystem::~EventSystem() { CSP_DELETE(Impl); }
+EventSystem::~EventSystem() { delete (Impl); }
 
-Event* EventSystem::AllocateEvent(const EventId& Id) { return CSP_NEW Event(Id); }
+Event* EventSystem::AllocateEvent(const EventId& Id) { return new Event(Id); }
 
 void EventSystem::EnqueueEvent(const Event* InEvent)
 {

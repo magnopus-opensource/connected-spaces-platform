@@ -39,7 +39,7 @@ FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef)] = "";
 
-    SetScriptInterface(CSP_NEW FogSpaceComponentScriptInterface(this));
+    SetScriptInterface(new FogSpaceComponentScriptInterface(this));
 }
 
 FogMode FogSpaceComponent::GetFogMode() const { return static_cast<FogMode>(GetIntegerProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode))); }

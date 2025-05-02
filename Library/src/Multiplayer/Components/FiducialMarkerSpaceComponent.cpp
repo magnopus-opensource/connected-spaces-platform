@@ -34,7 +34,7 @@ FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible)] = true;
 
-    SetScriptInterface(CSP_NEW FiducialMarkerSpaceComponentScriptInterface(this));
+    SetScriptInterface(new FiducialMarkerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetMarkerAssetId() const

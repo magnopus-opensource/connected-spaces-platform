@@ -146,7 +146,7 @@ SpaceEntity::~SpaceEntity()
     size_t i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
-        CSP_DELETE(Components[Keys[i]]);
+        delete (Components[Keys[i]]);
     }
 }
 
@@ -554,7 +554,7 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
                 SerialiseComponent(Serialiser, &DeletionComponent);
             }
 
-            CSP_DELETE(&DirtyComponentKeys);
+            delete (&DirtyComponentKeys);
         }
         Serialiser.EndComponents();
     }
@@ -596,7 +596,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser) const
                 SerialiseComponent(Serialiser, Component);
             }
 
-            CSP_DELETE(&DirtyComponentKeys);
+            delete (&DirtyComponentKeys);
         }
         Serialiser.EndComponents();
     }
@@ -924,7 +924,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             DirtyComponents.Clear();
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
 
         if (DirtyProperties.Size() > 0)
         {
@@ -973,7 +973,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             DirtyProperties.Clear();
-            CSP_DELETE(DirtyViewKeys);
+            delete (DirtyViewKeys);
         }
 
         if (TransientDeletionComponentIds.Size() > 0)
@@ -998,7 +998,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             TransientDeletionComponentIds.Clear();
-            CSP_DELETE(DirtyComponentKeys);
+            delete (DirtyComponentKeys);
         }
 
         if (ShouldUpdateParent)
@@ -1044,73 +1044,73 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = CSP_NEW StaticModelSpaceComponent(this);
+        Component = new StaticModelSpaceComponent(this);
         break;
     case ComponentType::AnimatedModel:
-        Component = CSP_NEW AnimatedModelSpaceComponent(this);
+        Component = new AnimatedModelSpaceComponent(this);
         break;
     case ComponentType::VideoPlayer:
-        Component = CSP_NEW VideoPlayerSpaceComponent(this);
+        Component = new VideoPlayerSpaceComponent(this);
         break;
     case ComponentType::Image:
-        Component = CSP_NEW ImageSpaceComponent(this);
+        Component = new ImageSpaceComponent(this);
         break;
     case ComponentType::ExternalLink:
-        Component = CSP_NEW ExternalLinkSpaceComponent(this);
+        Component = new ExternalLinkSpaceComponent(this);
         break;
     case ComponentType::AvatarData:
-        Component = CSP_NEW AvatarSpaceComponent(this);
+        Component = new AvatarSpaceComponent(this);
         break;
     case ComponentType::Light:
-        Component = CSP_NEW LightSpaceComponent(this);
+        Component = new LightSpaceComponent(this);
         break;
     case ComponentType::ScriptData:
-        Component = CSP_NEW ScriptSpaceComponent(this);
+        Component = new ScriptSpaceComponent(this);
         break;
     case ComponentType::Button:
-        Component = CSP_NEW ButtonSpaceComponent(this);
+        Component = new ButtonSpaceComponent(this);
         break;
     case ComponentType::Custom:
-        Component = CSP_NEW CustomSpaceComponent(this);
+        Component = new CustomSpaceComponent(this);
         break;
     case ComponentType::Portal:
-        Component = CSP_NEW PortalSpaceComponent(this);
+        Component = new PortalSpaceComponent(this);
         break;
     case ComponentType::Conversation:
-        Component = CSP_NEW ConversationSpaceComponent(this);
+        Component = new ConversationSpaceComponent(this);
         break;
     case ComponentType::Audio:
-        Component = CSP_NEW AudioSpaceComponent(this);
+        Component = new AudioSpaceComponent(this);
         break;
     case ComponentType::Spline:
-        Component = CSP_NEW SplineSpaceComponent(this);
+        Component = new SplineSpaceComponent(this);
         break;
     case ComponentType::Collision:
-        Component = CSP_NEW CollisionSpaceComponent(this);
+        Component = new CollisionSpaceComponent(this);
         break;
     case ComponentType::Reflection:
-        Component = CSP_NEW ReflectionSpaceComponent(this);
+        Component = new ReflectionSpaceComponent(this);
         break;
     case ComponentType::Fog:
-        Component = CSP_NEW FogSpaceComponent(this);
+        Component = new FogSpaceComponent(this);
         break;
     case ComponentType::ECommerce:
-        Component = CSP_NEW ECommerceSpaceComponent(this);
+        Component = new ECommerceSpaceComponent(this);
         break;
     case ComponentType::CinematicCamera:
-        Component = CSP_NEW CinematicCameraSpaceComponent(this);
+        Component = new CinematicCameraSpaceComponent(this);
         break;
     case ComponentType::FiducialMarker:
-        Component = CSP_NEW FiducialMarkerSpaceComponent(this);
+        Component = new FiducialMarkerSpaceComponent(this);
         break;
     case ComponentType::GaussianSplat:
-        Component = CSP_NEW GaussianSplatSpaceComponent(this);
+        Component = new GaussianSplatSpaceComponent(this);
         break;
     case ComponentType::Text:
-        Component = CSP_NEW TextSpaceComponent(this);
+        Component = new TextSpaceComponent(this);
         break;
     case ComponentType::Hotspot:
-        Component = CSP_NEW HotspotSpaceComponent(this);
+        Component = new HotspotSpaceComponent(this);
         break;
     default:
     {
@@ -1297,7 +1297,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
         }
     }
 
-    CSP_DELETE(ComponentKeys);
+    delete (ComponentKeys);
 
     if (LocatedComponent == nullptr && SearchDirtyComponents)
     {
@@ -1314,7 +1314,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
             }
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
     }
 
     return LocatedComponent;

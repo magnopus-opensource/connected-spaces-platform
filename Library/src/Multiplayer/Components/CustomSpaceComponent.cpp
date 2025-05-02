@@ -29,7 +29,7 @@ CustomSpaceComponent::CustomSpaceComponent(SpaceEntity* Parent)
 {
     Properties[static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin)] = "";
 
-    SetScriptInterface(CSP_NEW CustomSpaceComponentScriptInterface(this));
+    SetScriptInterface(new CustomSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& CustomSpaceComponent::GetApplicationOrigin() const
