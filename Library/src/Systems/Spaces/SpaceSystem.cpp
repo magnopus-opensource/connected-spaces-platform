@@ -110,8 +110,8 @@ std::function<async::task<AssetCollectionResult>()> SpaceSystem::CreateSpaceMeta
 {
     return [Space, Metadata]() -> async::task<AssetCollectionResult>
     {
-        auto Id = Space->GetSpace().Id;
-        auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
+        const auto Id = Space->GetSpace().Id;
+        const auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
         auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         // Don't assign this AssetCollection to a space so any user can retrieve the metadata without joining the space
@@ -121,8 +121,8 @@ std::function<async::task<AssetCollectionResult>()> SpaceSystem::CreateSpaceMeta
 
 async::task<AssetCollectionResult> SpaceSystem::CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space)
 {
-    auto SpaceId = Space->GetSpace().Id;
-    auto Name = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
+    const auto SpaceId = Space->GetSpace().Id;
+    const auto Name = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
     // don't associate this asset collection with a particular space so that it can be retrieved by guest users without joining the space
@@ -134,8 +134,8 @@ std::function<async::task<AssetResult>()> SpaceSystem::CreateSpaceThumbnailAsset
 {
     return [Space, AssetCollectionResult]() -> async::task<AssetResult>
     {
-        auto SpaceId = Space->GetSpace().Id;
-        auto Name = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
+        const auto SpaceId = Space->GetSpace().Id;
+        const auto Name = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
         auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
         return AssetSystem->CreateAsset(AssetCollectionResult->GetAssetCollection(), Name, nullptr, nullptr, EAssetType::IMAGE);
@@ -182,7 +182,7 @@ std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbna
             return async::make_task(UriResult(EResultCode::Success, 200));
         }
 
-        auto SpaceId = Space->GetSpace().Id;
+        const auto SpaceId = Space->GetSpace().Id;
         auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
 
         NullResultCallback Callback;
@@ -208,7 +208,7 @@ std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbna
 {
     return [Space, Data, this]() -> async::task<UriResult>
     {
-        auto SpaceId = Space->GetSpace().Id;
+        const auto SpaceId = Space->GetSpace().Id;
         auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
 
         NullResultCallback Callback;
@@ -239,7 +239,7 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
             return async::make_task(NullResult(EResultCode::Success, 200));
         }
 
-        auto SpaceId = Space->GetSpace().Id;
+        const auto SpaceId = Space->GetSpace().Id;
 
         NullResultCallback Callback;
 
@@ -529,7 +529,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [this, CurrentSpace, Callback](const std::exception& /*Except*/)
             {
-                auto SpaceId = CurrentSpace->GetSpace().Id;
+                const auto SpaceId = CurrentSpace->GetSpace().Id;
 
                 this->RemoveSpaceThumbnail(SpaceId, Callback);
                 this->RemoveMetadata(SpaceId, Callback);
@@ -585,7 +585,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
             {
                 return [this, CurrentSpace, Callback]()
                 {
-                    auto SpaceId = CurrentSpace->GetSpace().Id;
+                    const auto SpaceId = CurrentSpace->GetSpace().Id;
 
                     this->RemoveSpaceThumbnail(SpaceId, Callback);
                     this->RemoveMetadata(SpaceId, Callback);
