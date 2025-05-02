@@ -42,6 +42,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialConstructorTest)
     EXPECT_EQ(Material.GetMetallicFactor(), 1.f);
     EXPECT_EQ(Material.GetRoughnessFactor(), 1.f);
     EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
+    EXPECT_EQ(Material.GetEmissiveStrength(), 1.f);
     EXPECT_EQ(Material.GetAlphaCutoff(), 0.5f);
     EXPECT_EQ(Material.GetDoubleSided(), false);
 
