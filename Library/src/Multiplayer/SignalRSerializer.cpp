@@ -2,9 +2,9 @@
 
 namespace csp::multiplayer
 {
-void SignalRSerializer::PushArray() { Stack.push(std::vector<signalr::value> {}); }
+void SignalRSerializer::StartArray() { Stack.push(std::vector<signalr::value> {}); }
 
-void SignalRSerializer::PopArray()
+void SignalRSerializer::EndArray()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::vector<signalr::value>>(Stack.top()) == false)
     {
@@ -16,9 +16,9 @@ void SignalRSerializer::PopArray()
     Pop(signalr::value { std::get<std::vector<signalr::value>>(Current) });
 }
 
-void SignalRSerializer::PushStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
+void SignalRSerializer::StartStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
 
-void SignalRSerializer::PopStringMap()
+void SignalRSerializer::EndStringMap()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
     {
@@ -30,9 +30,9 @@ void SignalRSerializer::PopStringMap()
     Pop(signalr::value { std::get<std::map<std::string, signalr::value>>(Current) });
 }
 
-void SignalRSerializer::PushUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
+void SignalRSerializer::StartUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
 
-void SignalRSerializer::PopUintMap()
+void SignalRSerializer::EndUintMap()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::map<std::uint64_t, signalr::value>>(Stack.top()) == false)
     {
@@ -109,9 +109,9 @@ void SignalRSerializer::Pop(signalr::value&& Last)
     }
 }
 
-void SignalRSerializer::AppendValueInternal(const SignalRSerializableValue& Value)
+void SignalRSerializer::WriteValueInternal(const SignalRSerializableValue& Value)
 {
-    std::visit([this](auto&& ValType) { AppendValueInternal(ValType); }, Value);
+    std::visit([this](auto&& ValType) { WriteValueInternal(ValType); }, Value);
 }
 
 SignalRDeserializer::SignalRDeserializer(const signalr::value& Object)

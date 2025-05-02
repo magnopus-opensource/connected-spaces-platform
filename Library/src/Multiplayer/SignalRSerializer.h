@@ -39,46 +39,47 @@ struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, 
 class SignalRSerializer
 {
 public:
-    /// @brief Pushes an array onto the stack.
-    /// @details Once this function has been called, AppendValue should be used to add elements to the array.
+    /// @brief Starts writing an array into the serializer.
+    /// @details Once this function has been called, WriteValue should be used to add elements to the array.
     /// PopArray should be used to finalize the array.
-    void PushArray();
+    void StartArray();
 
-    /// @brief Pops the current array from the stack.
-    /// @pre PushArray should be called before this function.
+    /// @brief Ends the current array in the serializer.
+    /// @pre StartArray should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void PopArray();
+    void EndArray();
 
-    /// @brief Pushes a string map (std::map<std::string, T> onto the stack.
-    /// @details Once this function has been called, AppendKeyValue should be used to add elements to the map.
+    /// @brief Starts writing a string map (std::map<std::string, T> into the serializer
+    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
     /// PopStringMap should be used to finalize the map.
-    void PushStringMap();
+    void StartStringMap();
 
-    /// @brief Pops the current string map from the stack.
-    /// @pre PushStringMap should be called before this function.
+    /// @brief Ends the current string map in the serializer.
+    /// @pre StartStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void PopStringMap();
+    void EndStringMap();
 
-    /// @brief Pushes a uint map (std::map<uint64_t, T> onto the stack.
-    /// @details Once this function has been called, AppendKeyValue should be used to add elements to the map.
+    /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer
+    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
     /// PopUintMap should be used to finalize the map.
-    void PushUintMap();
+    void StartUintMap();
 
-    /// @brief Pops the current uint map from the stack.
-    /// @pre PushUintMap should be called before this function.
+    /// @brief Ends the current uint map in the serializer.
+    /// @pre StartUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void PopUintMap();
+    void EndUintMap();
 
-    /// @brief Appends a value to the current stack.
-    /// @pre PushArray should be called before this function,
+    /// @brief Writes a value to the current container of the serializer.
+    /// @pre This function should be used if this serializer represents a single value,
+    /// or if StartArray is called first to write to the array
     /// or if this serializer represents a single value.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void AppendValue(const T& Value) { AppendValueInternal(Value); }
+    template <class T> void WriteValue(const T& Value) { WriteValueInternal(Value); }
 
-    /// @brief Appends a uint key-value pair to the current stack.
-    /// @pre PushUintMap should be called before this function.
+    /// @brief Writes a uint key-value pair to the current uint map.
+    /// @pre StartUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void AppendKeyValue(uint64_t Key, const T& Value)
+    template <class T> void WriteKeyValue(uint64_t Key, const T& Value)
     {
         if (Stack.size() == 0 || std ::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()) == false)
         {
@@ -88,7 +89,7 @@ public:
         Stack.push(std::pair<uint64_t, signalr::value> {});
         std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = Key;
 
-        AppendValue(Value);
+        WriteValue(Value);
 
         // Get our pair form the top of the stack and pop
         std::pair<uint64_t, signalr::value> Pair = std::get<std::pair<uint64_t, signalr::value>>(Stack.top());
@@ -99,10 +100,10 @@ public:
         Map[Pair.first] = Pair.second;
     }
 
-    /// @brief Appends a string key-value pair to the current stack.
-    /// @pre PushStringMap should be called before this function.
+    /// @brief Writes a string key-value pair to the current map.
+    /// @pre StartStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void AppendKeyValue(std::string Key, const T& Value)
+    template <class T> void WriteKeyValue(std::string Key, const T& Value)
     {
         if (Stack.size() == 0 || std ::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
         {
@@ -112,7 +113,7 @@ public:
         Stack.push(std::pair<std::string, signalr::value> {});
         std::get<std::pair<std::string, signalr::value>>(Stack.top()).first = Key;
 
-        AppendValue(Value);
+        WriteValue(Value);
 
         // Get our pair from the top of the stack and pop.
         std::pair<std::string, signalr::value> Pair = std::get<std::pair<std::string, signalr::value>>(Stack.top());
@@ -131,7 +132,7 @@ public:
 private:
     void Pop(signalr::value&& Last);
 
-    template <class T> void AppendValueInternal(const T& Value)
+    template <class T> void WriteValueInternal(const T& Value)
     {
         signalr::value SerializedValue;
 
@@ -167,19 +168,19 @@ private:
         }
     }
 
-    template <class T> void AppendValueInternal(const std::optional<T>& Value)
+    template <class T> void WriteValueInternal(const std::optional<T>& Value)
     {
         if (Value.has_value())
         {
-            AppendValueInternal(*Value);
+            WriteValueInternal(*Value);
         }
         else
         {
-            AppendValueInternal<nullptr_t>(nullptr);
+            WriteValueInternal<nullptr_t>(nullptr);
         }
     }
 
-    void AppendValueInternal(const SignalRSerializableValue& Value);
+    void WriteValueInternal(const SignalRSerializableValue& Value);
 
     using Container = std::variant<signalr::value, std::vector<signalr::value>, std::map<uint64_t, signalr::value>,
         std::map<std::string, signalr::value>, std::pair<uint64_t, signalr::value>, std::pair<std::string, signalr::value>>;
@@ -246,7 +247,7 @@ public:
         IncrementIterator();
     }
 
-    /// @brief Reads a uint key-value pair to the current stack.
+    /// @brief Reads a uint key-value pair to the current uint map.
     /// @pre EnterUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
     template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal)
@@ -259,7 +260,7 @@ public:
         IncrementIterator();
     }
 
-    /// @brief Reads a string key-value pair to the current stack.
+    /// @brief Reads a string key-value pair to the current string map.
     /// @pre EnterStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
     template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal)
