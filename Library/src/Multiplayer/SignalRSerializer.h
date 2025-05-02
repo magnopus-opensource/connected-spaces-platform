@@ -29,8 +29,10 @@
 
 namespace csp::multiplayer
 {
+class SignalRSerializableValue;
 /// @brief A variant reresenting all possible basic types serializable to a signalr value.
-struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, std::string, nullptr_t>
+struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, std::string, nullptr_t, std::vector<SignalRSerializableValue>,
+                                      std::map<uint64_t, SignalRSerializableValue>, std::map<std::string, SignalRSerializableValue>>
 {
     using variant::variant;
 };
@@ -39,36 +41,6 @@ struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, 
 class SignalRSerializer
 {
 public:
-    /// @brief Starts writing an array into the serializer.
-    /// @details Once this function has been called, WriteValue should be used to add elements to the array.
-    /// PopArray should be used to finalize the array.
-    void StartArray();
-
-    /// @brief Ends the current array in the serializer.
-    /// @pre StartArray should be called before this function.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    void EndArray();
-
-    /// @brief Starts writing a string map (std::map<std::string, T> into the serializer
-    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
-    /// PopStringMap should be used to finalize the map.
-    void StartStringMap();
-
-    /// @brief Ends the current string map in the serializer.
-    /// @pre StartStringMap should be called before this function.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    void EndStringMap();
-
-    /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer
-    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
-    /// PopUintMap should be used to finalize the map.
-    void StartUintMap();
-
-    /// @brief Ends the current uint map in the serializer.
-    /// @pre StartUintMap should be called before this function.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    void EndUintMap();
-
     /// @brief Writes a value to the current container of the serializer.
     /// @pre This function should be used if this serializer represents a single value,
     /// or if StartArray is called first to write to the array
@@ -86,6 +58,42 @@ public:
     /// A std::runtime_error will be thrown if this condition is not met.
     template <class T> void WriteKeyValue(std::string Key, const T& Value);
 
+    /// @brief Starts writing an array into the serializer.
+    /// @details Once this function has been called, WriteValue should be used to add elements to the array.
+    /// Favour writing the array directly to the serializer using the write functions over this.
+    /// Start/End functions should be used if you need custom serialization logic.
+    /// PopArray should be used to finalize the array.
+    void StartArray();
+
+    /// @brief Ends the current array in the serializer.
+    /// @pre StartArray should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void EndArray();
+
+    /// @brief Starts writing a string map (std::map<std::string, T> into the serializer
+    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
+    /// Favour writing the map directly to the serializer using the write functions over this.
+    /// Start/End functions should be used if you need custom serialization logic.
+    /// PopStringMap should be used to finalize the map.
+    void StartStringMap();
+
+    /// @brief Ends the current string map in the serializer.
+    /// @pre StartStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void EndStringMap();
+
+    /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer
+    /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
+    /// Favour writing the map directly to the serializer using the write functions over this.
+    /// Start/End functions should be used if you need custom serialization logic.
+    /// PopUintMap should be used to finalize the map.
+    void StartUintMap();
+
+    /// @brief Ends the current uint map in the serializer.
+    /// @pre StartUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    void EndUintMap();
+
     /// @brief Gets the serialized singnal r value.
     /// @return signalr::value
     /// @pre The serializer should be at the root (array and maps should all be popped).
@@ -101,8 +109,10 @@ private:
 
     template <class T> void WriteValueInternal(const T& Value);
     template <class T> void WriteValueInternal(const std::optional<T>& Value);
-
     void WriteValueInternal(const SignalRSerializableValue& Value);
+    template <class T> void WriteValueInternal(const std::vector<T>& Value);
+    template <class T> void WriteValueInternal(const std::map<uint64_t, T>& Value);
+    template <class T> void WriteValueInternal(const std::map<std::string, T>& Value);
 
     template <class T> signalr::value GetInternal(const T& Object);
 
@@ -129,6 +139,22 @@ public:
     /// @param Object signalr::value&& : The value to deserialize
     /// This should match the structure generated by
     SignalRDeserializer(signalr::value&& Object);
+
+    /// @brief Reads a value from the internal signalr array.
+    /// @pre EnterArray should be called before this function,
+    /// or if this deserializer represents a single value.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadValue(T& OutVal);
+
+    /// @brief Reads a uint key-value pair to the current uint map.
+    /// @pre EnterUintMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal);
+
+    /// @brief Reads a string key-value pair to the current string map.
+    /// @pre EnterStringMap should be called before this function.
+    /// A std::runtime_error will be thrown if this condition is not met.
+    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal);
 
     /// @brief Enters the internal signalr value as an array
     /// @details Once this function has been called, ReadValue should be used to read elements from the array.
@@ -163,22 +189,6 @@ public:
     /// A std::runtime_error will be thrown if this condition is not met.
     void ExitStringMap();
 
-    /// @brief Reads a value from the internal signalr array.
-    /// @pre EnterArray should be called before this function,
-    /// or if this deserializer represents a single value.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadValue(T& OutVal);
-
-    /// @brief Reads a uint key-value pair to the current uint map.
-    /// @pre EnterUintMap should be called before this function.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal);
-
-    /// @brief Reads a string key-value pair to the current string map.
-    /// @pre EnterStringMap should be called before this function.
-    /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal);
-
 private:
     const signalr::value& ReadNextValue();
 
@@ -193,9 +203,12 @@ private:
     void ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal) const;
     void ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal) const;
     void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t&) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal) const;
+    void ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal);
 
     template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const;
+    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal);
+    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<uint64_t, T>& OutVal);
+    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal);
 
     void IncrementIterator();
 
@@ -339,6 +352,42 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
         WriteValueInternal<nullptr_t>(nullptr);
     }
 }
+template <class T> inline void SignalRSerializer::WriteValueInternal(const std::vector<T>& Value)
+{
+    StartArray();
+
+    for (const auto& Element : Value)
+    {
+        WriteValue(Element);
+    }
+
+    EndArray();
+}
+
+template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<uint64_t, T>& Value)
+{
+    StartUintMap();
+
+    for (const auto& Pair : Value)
+    {
+        WriteKeyValue(Pair.first, Pair.second);
+    }
+
+    EndUintMap();
+}
+
+template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<std::string, T>& Value)
+{
+    StartStringMap();
+
+    for (const auto& Pair : Value)
+    {
+        WriteKeyValue(Pair.first, Pair.second);
+    }
+
+    EndStringMap();
+}
+
 template <class T> inline void SignalRDeserializer::ReadValue(T& OutVal)
 {
     const signalr::value& Next = ReadNextValue();
@@ -391,5 +440,47 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
         OutVal = "";
         ReadValueFromObjectInternal(Object, *OutVal);
     }
+}
+template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal)
+{
+    size_t ArraySize = 0;
+    EnterArray(ArraySize);
+
+    OutVal.resize(ArraySize);
+
+    for (size_t i = 0; i < ArraySize; ++i)
+    {
+        ReadValue(OutVal[i]);
+    }
+
+    ExitArray();
+}
+template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<uint64_t, T>& OutVal)
+{
+    size_t MapSize = 0;
+    EnterUintMap(MapSize);
+
+    for (size_t i = 0; i < MapSize; ++i)
+    {
+        std::pair<uint64_t, T> Pair;
+        ReadKeyValue(Pair);
+        OutVal[Pair.first] = Pair.second;
+    }
+
+    ExitUintMap();
+}
+template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal)
+{
+    size_t MapSize = 0;
+    EnterStringMap(MapSize);
+
+    for (size_t i = 0; i < MapSize; ++i)
+    {
+        std::pair<std::string, T> Pair;
+        ReadKeyValue(Pair);
+        OutVal[Pair.first] = Pair.second;
+    }
+
+    ExitStringMap();
 }
 }

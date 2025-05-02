@@ -274,7 +274,7 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
         throw std::runtime_error("Invalid call: Value was not null");
     }
 }
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal) const
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal)
 {
     if (Object.is_integer())
     {
@@ -299,6 +299,24 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
     else if (Object.is_null())
     {
         OutVal = nullptr;
+    }
+    else if (Object.is_array())
+    {
+        std::vector<SignalRSerializableValue> Array;
+        ReadValueFromObjectInternal(Object, Array);
+        OutVal = Array;
+    }
+    else if (Object.is_uint_map())
+    {
+        std::map<uint64_t, SignalRSerializableValue> Map;
+        ReadValueFromObjectInternal(Object, Map);
+        OutVal = Map;
+    }
+    else if (Object.is_string_map())
+    {
+        std::map<std::string, SignalRSerializableValue> Map;
+        ReadValueFromObjectInternal(Object, Map);
+        OutVal = Map;
     }
     else
     {
