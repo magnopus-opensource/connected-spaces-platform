@@ -78,6 +78,32 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
 
 SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
 
+async::task<SpaceResult> CreateSpaceGroupInfo(
+    chs::GroupApi* GroupAPI, const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
+    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
+    GroupInfo->SetName(Name);
+    GroupInfo->SetDescription(Description);
+    GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    GroupInfo->SetGroupType("space");
+
+    if (Tags.HasValue())
+    {
+        GroupInfo->SetTags(csp::common::Convert(Tags).value());
+    }
+
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+    GroupAPI->apiV1GroupsPost(GroupInfo, ResponseHandler);
+
+    return OnCompleteTask;
+}
+
 std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
     AssetSystem* AssetSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
 {
@@ -474,7 +500,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
 
     auto CurrentSpace = std::make_shared<SpaceResult>();
 
-    CreateSpace(Name, Description, Attributes, InviteUsers, Metadata, Thumbnail, Tags)
+    CreateSpaceGroupInfo(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
@@ -507,33 +533,6 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
             }));
 }
 
-async::task<SpaceResult> SpaceSystem::CreateSpace(const String& Name, const String& Description, SpaceAttributes Attributes,
-    const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const Optional<FileAssetDataSource>& Thumbnail,
-    const Optional<Array<String>>& Tags)
-{
-    auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
-    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
-
-    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
-    GroupInfo->SetName(Name);
-    GroupInfo->SetDescription(Description);
-    GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-    GroupInfo->SetGroupType("space");
-
-    if (Tags.HasValue())
-    {
-        GroupInfo->SetTags(csp::common::Convert(Tags).value());
-    }
-
-    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
-
-    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsPost(GroupInfo, ResponseHandler);
-
-    return OnCompleteTask;
-}
-
 /*
  * ** CreateSpaceWithBuffer Flow **
  * CreateSpace
@@ -555,7 +554,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 
     auto CurrentSpace = std::make_shared<SpaceResult>();
 
-    CreateSpaceWithBuffer(Name, Description, Attributes, InviteUsers, Metadata, Thumbnail, Tags)
+    CreateSpaceGroupInfo(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, Tags)
         .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
             Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
         .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpace))
@@ -589,35 +588,6 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
                     Callback(MakeInvalid<SpaceResult>());
                 };
             }));
-}
-
-async::task<SpaceResult> SpaceSystem::CreateSpaceWithBuffer(const csp::common::String& Name, const csp::common::String& Description,
-    SpaceAttributes Attributes, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
-    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::systems::BufferAssetDataSource& Thumbnail,
-    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
-{
-    auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
-    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
-
-    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
-    GroupInfo->SetName(Name);
-    GroupInfo->SetDescription(Description);
-    GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-    GroupInfo->SetGroupType("space");
-
-    if (Tags.HasValue())
-    {
-        GroupInfo->SetTags(csp::common::Convert(Tags).value());
-    }
-
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(
-            [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
-
-    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsPost(GroupInfo, ResponseHandler);
-
-    return OnCompleteTask;
 }
 
 void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Name, const Optional<String>& Description,
