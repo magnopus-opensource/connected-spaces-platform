@@ -23,7 +23,7 @@
 
 namespace
 {
-constexpr int InitialMaterialVersion = 1;
+constexpr int InitialMaterialVersion = 2;
 }
 
 namespace GLTFMaterialProperties
