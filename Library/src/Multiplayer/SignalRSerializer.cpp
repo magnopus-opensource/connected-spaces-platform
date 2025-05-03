@@ -2,9 +2,9 @@
 
 namespace csp::multiplayer
 {
-void SignalRSerializer::StartArray() { Stack.push(std::vector<signalr::value> {}); }
+void SignalRSerializer::StartWriteArray() { Stack.push(std::vector<signalr::value> {}); }
 
-void SignalRSerializer::EndArray()
+void SignalRSerializer::EndWriteArray()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::vector<signalr::value>>(Stack.top()) == false)
     {
@@ -16,9 +16,9 @@ void SignalRSerializer::EndArray()
     FinalizeContainerSerializaiton(signalr::value { std::get<std::vector<signalr::value>>(ArrayObject) });
 }
 
-void SignalRSerializer::StartStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
+void SignalRSerializer::StartWriteStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
 
-void SignalRSerializer::EndStringMap()
+void SignalRSerializer::EndWriteStringMap()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
     {
@@ -30,9 +30,9 @@ void SignalRSerializer::EndStringMap()
     FinalizeContainerSerializaiton(signalr::value { std::get<std::map<std::string, signalr::value>>(StringMapObject) });
 }
 
-void SignalRSerializer::StartUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
+void SignalRSerializer::StartWriteUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
 
-void SignalRSerializer::EndUintMap()
+void SignalRSerializer::EndWriteUintMap()
 {
     if (Stack.size() == 0 || std::holds_alternative<std::map<std::uint64_t, signalr::value>>(Stack.top()) == false)
     {
@@ -112,7 +112,7 @@ SignalRDeserializer::SignalRDeserializer(signalr::value&& Object)
     ObjectStack.push(nullptr);
 }
 
-void SignalRDeserializer::EnterArray(size_t& Size)
+void SignalRDeserializer::StartReadArray(size_t& Size)
 {
     const signalr::value& ArrayObject = ReadNextValue();
 
@@ -126,7 +126,7 @@ void SignalRDeserializer::EnterArray(size_t& Size)
     Size = ArrayObject.as_array().size();
 }
 
-void SignalRDeserializer::ExitArray()
+void SignalRDeserializer::EndReadArray()
 {
     if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()) == false)
     {
@@ -136,7 +136,7 @@ void SignalRDeserializer::ExitArray()
     ObjectStack.pop();
 }
 
-void SignalRDeserializer::EnterUintMap(size_t& Size)
+void SignalRDeserializer::StartReadUintMap(size_t& Size)
 {
     const signalr::value& MapObject = ReadNextValue();
 
@@ -149,7 +149,7 @@ void SignalRDeserializer::EnterUintMap(size_t& Size)
 
     Size = MapObject.as_uint_map().size();
 }
-void SignalRDeserializer::ExitUintMap()
+void SignalRDeserializer::EndReadUintMap()
 {
     if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
     {
@@ -159,7 +159,7 @@ void SignalRDeserializer::ExitUintMap()
     ObjectStack.pop();
 }
 
-void SignalRDeserializer::EnterStringMap(size_t& Size)
+void SignalRDeserializer::StartReadStringMap(size_t& Size)
 {
     const signalr::value& MapObject = ReadNextValue();
 
@@ -173,7 +173,7 @@ void SignalRDeserializer::EnterStringMap(size_t& Size)
     Size = MapObject.as_string_map().size();
 }
 
-void SignalRDeserializer::ExitStringMap()
+void SignalRDeserializer::EndReadStringMap()
 {
     if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()) == false)
     {

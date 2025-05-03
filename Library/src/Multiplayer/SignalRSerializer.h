@@ -63,36 +63,36 @@ public:
     /// Favour writing the array directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopArray should be used to finalize the array.
-    void StartArray();
+    void StartWriteArray();
 
     /// @brief Ends the current array in the serializer.
-    /// @pre StartArray should be called before this function.
+    /// @pre StartWriteArray should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void EndArray();
+    void EndWriteArray();
 
-    /// @brief Starts writing a string map (std::map<std::string, T> into the serializer
+    /// @brief Starts writing a string map (std::map<std::string, T> into the serializer.
     /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
     /// Favour writing the map directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopStringMap should be used to finalize the map.
-    void StartStringMap();
+    void StartWriteStringMap();
 
     /// @brief Ends the current string map in the serializer.
-    /// @pre StartStringMap should be called before this function.
+    /// @pre StartWriteStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void EndStringMap();
+    void EndWriteStringMap();
 
-    /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer
+    /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer.
     /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
     /// Favour writing the map directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopUintMap should be used to finalize the map.
-    void StartUintMap();
+    void StartWriteUintMap();
 
     /// @brief Ends the current uint map in the serializer.
-    /// @pre StartUintMap should be called before this function.
+    /// @pre StartWriteUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void EndUintMap();
+    void EndWriteUintMap();
 
     /// @brief Gets the serialized singnal r value.
     /// @return signalr::value
@@ -160,34 +160,34 @@ public:
     /// @details Once this function has been called, ReadValue should be used to read elements from the array.
     /// @param Size size_t& Output parameter specifying the size of the array.
     /// ExitArray should be used to exit the array once elements have been read.
-    void EnterArray(size_t& Size);
+    void StartReadArray(size_t& Size);
 
     /// @brief Exits the internal signalr array.
-    /// @pre EnterArray should be called before this function.
+    /// @pre StartReadArray should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void ExitArray();
+    void EndReadArray();
 
     /// @brief Enters the internal signalr value as an uint map
     /// @details Once this function has been called, ReadKeyValue should be used to read elements from the map.
     /// @param Size size_t& Output parameter specifying the size of the map.
     /// ExitUintMap should be used to exit the map once elements have been read.
-    void EnterUintMap(size_t& Size);
+    void StartReadUintMap(size_t& Size);
 
     /// @brief Exits the internal signalr uint map.
-    /// @pre EnterUintMap should be called before this function.
+    /// @pre StartReadUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void ExitUintMap();
+    void EndReadUintMap();
 
     /// @brief Enters the internal signalr value as an string map
     /// @details Once this function has been called, ReadKeyValue should be used to read elements from the map.
     /// @param Size size_t& Output parameter specifying the size of the map.
     /// ExitStringMap should be used to exit the map once elements have been read.
-    void EnterStringMap(size_t& Size);
+    void StartReadStringMap(size_t& Size);
 
     /// @brief Exits the internal signalr string map.
-    /// @pre EnterStringMap should be called before this function.
+    /// @pre StartReadStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    void ExitStringMap();
+    void EndReadStringMap();
 
 private:
     const signalr::value& ReadNextValue();
@@ -354,38 +354,38 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
 }
 template <class T> inline void SignalRSerializer::WriteValueInternal(const std::vector<T>& Value)
 {
-    StartArray();
+    StartWriteArray();
 
     for (const auto& Element : Value)
     {
         WriteValue(Element);
     }
 
-    EndArray();
+    EndWriteArray();
 }
 
 template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<uint64_t, T>& Value)
 {
-    StartUintMap();
+    StartWriteUintMap();
 
     for (const auto& Pair : Value)
     {
         WriteKeyValue(Pair.first, Pair.second);
     }
 
-    EndUintMap();
+    EndWriteUintMap();
 }
 
 template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<std::string, T>& Value)
 {
-    StartStringMap();
+    StartWriteStringMap();
 
     for (const auto& Pair : Value)
     {
         WriteKeyValue(Pair.first, Pair.second);
     }
 
-    EndStringMap();
+    EndWriteStringMap();
 }
 
 template <class T> inline void SignalRDeserializer::ReadValue(T& OutVal)
@@ -437,14 +437,14 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
     }
     else
     {
-        OutVal = "";
+        OutVal = T {};
         ReadValueFromObjectInternal(Object, *OutVal);
     }
 }
 template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal)
 {
     size_t ArraySize = 0;
-    EnterArray(ArraySize);
+    StartReadArray(ArraySize);
 
     OutVal.resize(ArraySize);
 
@@ -453,12 +453,12 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
         ReadValue(OutVal[i]);
     }
 
-    ExitArray();
+    EndReadArray();
 }
 template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<uint64_t, T>& OutVal)
 {
     size_t MapSize = 0;
-    EnterUintMap(MapSize);
+    StartReadUintMap(MapSize);
 
     for (size_t i = 0; i < MapSize; ++i)
     {
@@ -467,12 +467,12 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
         OutVal[Pair.first] = Pair.second;
     }
 
-    ExitUintMap();
+    EndReadUintMap();
 }
 template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal)
 {
     size_t MapSize = 0;
-    EnterStringMap(MapSize);
+    StartReadStringMap(MapSize);
 
     for (size_t i = 0; i < MapSize; ++i)
     {
@@ -481,6 +481,6 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
         OutVal[Pair.first] = Pair.second;
     }
 
-    ExitStringMap();
+    EndReadStringMap();
 }
 }

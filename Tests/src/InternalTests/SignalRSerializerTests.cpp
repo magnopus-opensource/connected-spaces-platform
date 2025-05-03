@@ -183,14 +183,14 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeVariantArrayTestMa
         std::map<std::string, SignalRSerializableValue> { { "", std::string { "Test2" } } } };
 
     SignalRSerializer Serializer;
-    Serializer.StartArray();
+    Serializer.StartWriteArray();
 
     for (const auto& Element : Value)
     {
         Serializer.WriteValue(Element);
     }
 
-    Serializer.EndArray();
+    Serializer.EndWriteArray();
 
     signalr::value SerializedValue = Serializer.Get();
 
@@ -199,7 +199,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeVariantArrayTestMa
     std::vector<SignalRSerializableValue> DeserializedValue;
 
     size_t ArraySize = 0;
-    Deserializer.EnterArray(ArraySize);
+    Deserializer.StartReadArray(ArraySize);
 
     for (size_t i = 0; i < ArraySize; ++i)
     {
@@ -208,7 +208,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeVariantArrayTestMa
         DeserializedValue.push_back(DeserializedElement);
     }
 
-    Deserializer.ExitArray();
+    Deserializer.EndReadArray();
 
     EXPECT_EQ(DeserializedValue, Value);
 }
@@ -218,16 +218,16 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayTestManual)
     const auto Value = std::make_tuple(1ll, 2ull, 3.0, true, "Test", nullptr);
 
     SignalRSerializer Serializer;
-    Serializer.StartArray();
-
-    Serializer.WriteValue(std::get<0>(Value));
-    Serializer.WriteValue(std::get<1>(Value));
-    Serializer.WriteValue(std::get<2>(Value));
-    Serializer.WriteValue(std::get<3>(Value));
-    Serializer.WriteValue(std::get<4>(Value));
-    Serializer.WriteValue(std::get<5>(Value));
-
-    Serializer.EndArray();
+    Serializer.StartWriteArray();
+    {
+        Serializer.WriteValue(std::get<0>(Value));
+        Serializer.WriteValue(std::get<1>(Value));
+        Serializer.WriteValue(std::get<2>(Value));
+        Serializer.WriteValue(std::get<3>(Value));
+        Serializer.WriteValue(std::get<4>(Value));
+        Serializer.WriteValue(std::get<5>(Value));
+    }
+    Serializer.EndWriteArray();
 
     signalr::value SerializedValue = Serializer.Get();
 
@@ -235,7 +235,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayTestManual)
     std::tuple<int64_t, uint64_t, double, bool, std::string, nullptr_t> DeserializedValue;
 
     size_t ArraySize = 0;
-    Deserializer.EnterArray(ArraySize);
+    Deserializer.StartReadArray(ArraySize);
     {
         Deserializer.ReadValue(std::get<0>(DeserializedValue));
         Deserializer.ReadValue(std::get<1>(DeserializedValue));
@@ -244,7 +244,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayTestManual)
         Deserializer.ReadValue(std::get<4>(DeserializedValue));
         Deserializer.ReadValue(std::get<5>(DeserializedValue));
     }
-    Deserializer.ExitArray();
+    Deserializer.EndReadArray();
 
     EXPECT_EQ(DeserializedValue, Value);
 }
@@ -273,14 +273,14 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapTestManual)
         { 5, { nullptr } } };
 
     SignalRSerializer Serializer;
-    Serializer.StartUintMap();
+    Serializer.StartWriteUintMap();
 
     for (const auto& Pair : Value)
     {
         Serializer.WriteKeyValue(Pair.first, Pair.second);
     }
 
-    Serializer.EndUintMap();
+    Serializer.EndWriteUintMap();
 
     signalr::value SerializedValue = Serializer.Get();
 
@@ -289,7 +289,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapTestManual)
     std::map<uint64_t, SignalRSerializableValue> DeserializedValue;
 
     size_t MapSize = 0;
-    Deserializer.EnterUintMap(MapSize);
+    Deserializer.StartReadUintMap(MapSize);
 
     for (size_t i = 0; i < MapSize; ++i)
     {
@@ -298,7 +298,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapTestManual)
         DeserializedValue[DeserializedPair.first] = DeserializedPair.second;
     }
 
-    Deserializer.ExitUintMap();
+    Deserializer.EndReadUintMap();
 
     EXPECT_EQ(DeserializedValue, Value);
 }
@@ -327,14 +327,14 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeStringMapTestManua
         { "4", { "Test" } }, { "5", { nullptr } } };
 
     SignalRSerializer Serializer;
-    Serializer.StartStringMap();
+    Serializer.StartWriteStringMap();
 
     for (const auto& Pair : Value)
     {
         Serializer.WriteKeyValue(Pair.first, Pair.second);
     }
 
-    Serializer.EndStringMap();
+    Serializer.EndWriteStringMap();
 
     signalr::value SerializedValue = Serializer.Get();
 
@@ -343,7 +343,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeStringMapTestManua
     std::map<std::string, SignalRSerializableValue> DeserializedValue;
 
     size_t MapSize = 0;
-    Deserializer.EnterStringMap(MapSize);
+    Deserializer.StartReadStringMap(MapSize);
 
     for (size_t i = 0; i < MapSize; ++i)
     {
@@ -352,7 +352,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeStringMapTestManua
         DeserializedValue[DeserializedPair.first] = DeserializedPair.second;
     }
 
-    Deserializer.ExitStringMap();
+    Deserializer.EndReadStringMap();
 
     EXPECT_EQ(DeserializedValue, Value);
 }
@@ -362,7 +362,6 @@ struct TestObject1 : public ISignalRSerializable, public ISignalRDeserializable
     std::vector<SignalRSerializableValue> Values;
 
     void Serialize(SignalRSerializer& Serializer) const override { Serializer.WriteValue(Values); }
-
     void Deserialize(SignalRDeserializer& Deserializer) override { Deserializer.ReadValue(Values); }
 
     // TODO: change when we implement deserializer
@@ -381,7 +380,7 @@ struct TestObject2 : public ISignalRSerializable, public ISignalRDeserializable
 
     void Serialize(SignalRSerializer& Serializer) const override
     {
-        Serializer.StartArray();
+        Serializer.StartWriteArray();
         {
             Serializer.WriteValue(Int64Member);
             Serializer.WriteValue(Uint64Member);
@@ -391,13 +390,13 @@ struct TestObject2 : public ISignalRSerializable, public ISignalRDeserializable
             Serializer.WriteValue(OptionalMember);
             Serializer.WriteValue(UintMapMember);
         }
-        Serializer.EndArray();
+        Serializer.EndWriteArray();
     }
 
     void Deserialize(SignalRDeserializer& Deserializer) override
     {
         size_t ArraySize = 0;
-        Deserializer.EnterArray(ArraySize);
+        Deserializer.StartReadArray(ArraySize);
         {
             Deserializer.ReadValue(Int64Member);
             Deserializer.ReadValue(Uint64Member);
@@ -407,7 +406,7 @@ struct TestObject2 : public ISignalRSerializable, public ISignalRDeserializable
             Deserializer.ReadValue(OptionalMember);
             Deserializer.ReadValue(UintMapMember);
         }
-        Deserializer.ExitArray();
+        Deserializer.EndReadArray();
     }
 
     bool operator==(const TestObject2& Other) const
