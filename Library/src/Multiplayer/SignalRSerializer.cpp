@@ -56,11 +56,6 @@ signalr::value SignalRSerializer::Get() const
         throw std::runtime_error("Invalid call: Serializer is not at the root");
     }
 
-    if (Stack.top().valueless_by_exception())
-    {
-        throw std::runtime_error("Invalid state");
-    }
-
     signalr::value SerializedValue;
     // Dispatch internal variant type to the correct GetInternal call
     std::visit([this, &SerializedValue](const auto& ValType) { SerializedValue = this->GetInternal(ValType); }, Stack.top());

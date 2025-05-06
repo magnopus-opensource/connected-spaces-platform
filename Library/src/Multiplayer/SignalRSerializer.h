@@ -115,7 +115,7 @@ private:
     template <typename T> signalr::value CreateSignalRObject(const T& Value);
 
     // Internal get functions called by Get.
-    template <typename T> signalr::value GetInternal(const T& Object);
+    template <typename T> signalr::value GetInternal(const T& Object) const;
     signalr::value GetInternal(const signalr::value& Object) const;
     signalr::value GetInternal(const std::pair<uint64_t, signalr::value>& Object) const;
     signalr::value GetInternal(const std::pair<std::string, signalr::value>& Object) const;
@@ -355,7 +355,7 @@ template <typename T> inline void SignalRSerializer::WriteValueInternal(const T&
     }
 }
 
-template <typename T> signalr::value SignalRSerializer::GetInternal(const T& Object) { return signalr::value(Object); }
+template <typename T> signalr::value SignalRSerializer::GetInternal(const T& Object) const { return signalr::value(Object); }
 
 template <typename T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
 {
