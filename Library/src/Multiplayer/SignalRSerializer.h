@@ -310,7 +310,7 @@ template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalR
     Map[Pair.first] = Pair.second;
 }
 
-template <typename T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer)
+template <typename T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&&)
 {
     throw std::runtime_error("Unexpected serializer state");
 }
@@ -502,7 +502,7 @@ template <typename T> inline void SignalRDeserializer::ReadValueFromObjectIntern
     }
 }
 
-template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal)
+template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value&, std::vector<T>& OutVal)
 {
     size_t ArraySize = 0;
     StartReadArray(ArraySize);
@@ -517,7 +517,7 @@ template <typename T> inline void SignalRDeserializer::ReadValueFromObjectIntern
     EndReadArray();
 }
 
-template <typename K, typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<K, T>& OutVal)
+template <typename K, typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value&, std::map<K, T>& OutVal)
 {
     size_t MapSize = 0;
     StartReadUintMap(MapSize);
@@ -532,7 +532,7 @@ template <typename K, typename T> inline void SignalRDeserializer::ReadValueFrom
     EndReadUintMap();
 }
 
-template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal)
+template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value&, std::map<std::string, T>& OutVal)
 {
     size_t MapSize = 0;
     StartReadStringMap(MapSize);
