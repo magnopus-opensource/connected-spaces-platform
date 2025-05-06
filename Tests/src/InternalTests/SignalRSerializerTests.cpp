@@ -376,9 +376,9 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeShortMapMultipleTy
 
     SignalRDeserializer Deserializer { SerializedValue };
 
-    std::pair<uint64_t, int64_t> DeserializedPair1;
-    std::pair<uint64_t, uint64_t> DeserializedPair2;
-    std::pair<uint64_t, double> DeserializedPair3;
+    std::pair<unsigned short, int64_t> DeserializedPair1;
+    std::pair<unsigned short, uint64_t> DeserializedPair2;
+    std::pair<unsigned short, double> DeserializedPair3;
 
     size_t ArraySize = 0;
     Deserializer.StartReadUintMap(ArraySize);
