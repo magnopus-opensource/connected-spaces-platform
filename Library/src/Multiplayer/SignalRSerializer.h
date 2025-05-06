@@ -16,26 +16,16 @@
 
 #pragma once
 
-#include <signalrclient/signalr_value.h>
+#include "SignalRSerializerTypeTraits.h"
 
 #include <map>
-#include <memory>
-#include <optional>
 #include <stack>
 #include <stdexcept>
-#include <string>
-#include <variant>
-#include <vector>
 
 namespace csp::multiplayer
 {
-class SignalRSerializableValue;
-/// @brief A variant reresenting all possible basic types serializable to a signalr value.
-struct SignalRSerializableValue : std::variant<int64_t, uint64_t, double, bool, std::string, nullptr_t, std::vector<SignalRSerializableValue>,
-                                      std::map<uint64_t, SignalRSerializableValue>, std::map<std::string, SignalRSerializableValue>>
-{
-    using variant::variant;
-};
+
+class ISignalRSerializable;
 
 /// @brief A stack-based signalr serializer which allows for custom class serialization using ISignalRSerializable
 class SignalRSerializer
@@ -43,20 +33,20 @@ class SignalRSerializer
 public:
     /// @brief Writes a value to the current container of the serializer.
     /// @pre This function should be used if this serializer represents a single value,
-    /// or if StartArray is called first to write to the array
-    /// or if this serializer represents a single value.
+    /// or if StartArray is called first to write to the array.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void WriteValue(const T& Value) { WriteValueInternal(Value); }
+    template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> WriteValue(const T& Value);
 
     /// @brief Writes a uint key-value pair to the current uint map.
     /// @pre StartUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void WriteKeyValue(uint64_t Key, const T& Value);
+    template <typename K, typename T>
+    std::enable_if_t<IsUnsignedIntegerV<K> && IsSupportedSignalRType<T>::value> WriteKeyValue(K Key, const T& Value);
 
     /// @brief Writes a string key-value pair to the current map.
     /// @pre StartStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void WriteKeyValue(std::string Key, const T& Value);
+    template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> WriteKeyValue(std::string Key, const T& Value);
 
     /// @brief Starts writing an array into the serializer.
     /// @details Once this function has been called, WriteValue should be used to add elements to the array.
@@ -100,22 +90,32 @@ public:
     signalr::value Get() const;
 
 private:
-    // Adds the serialized container object to the previous object, or the root
+    // Adds the serialized container object to the previous object, or the root.
+    // This will internally call one of the FinalizeContainerSerializaitonInternal overrides.
     void FinalizeContainerSerializaiton(signalr::value&& SerializedContainer);
 
-    template <class T> void FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer);
+    // Case where we fallback to an exception is we are trying to serialize to an unsupported container.
+    template <typename T> void FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer);
+    // Case for serializing value into a vector.
     void FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer);
-    template <class K> void FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer);
+    // Case for serializing value into a pair for a map.
+    template <typename K> void FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer);
 
-    template <class T> void WriteValueInternal(const T& Value);
-    template <class T> void WriteValueInternal(const std::optional<T>& Value);
-    void WriteValueInternal(const SignalRSerializableValue& Value);
-    template <class T> void WriteValueInternal(const std::vector<T>& Value);
-    template <class T> void WriteValueInternal(const std::map<uint64_t, T>& Value);
-    template <class T> void WriteValueInternal(const std::map<std::string, T>& Value);
+    // Writes all of our primitive types to a signalr value.
+    template <typename T> void WriteValueInternal(const T& Value);
 
-    template <class T> signalr::value GetInternal(const T& Object);
+    // Case for writing container types to a signalr value.
+    // These cases are recursive.
+    template <typename T> void WriteValueInternal(const std::optional<T>& Value);
+    template <typename T> void WriteValueInternal(const std::vector<T>& Value);
+    template <typename K, typename T> void WriteValueInternal(const std::map<K, T>& Value);
+    template <typename T> void WriteValueInternal(const std::map<std::string, T>& Value);
 
+    // Converts primitive value to a signalr object.
+    template <typename T> signalr::value CreateSignalRObject(const T& Value);
+
+    // Internal get functions called by Get.
+    template <typename T> signalr::value GetInternal(const T& Object);
     signalr::value GetInternal(const signalr::value& Object) const;
     signalr::value GetInternal(const std::pair<uint64_t, signalr::value>& Object) const;
     signalr::value GetInternal(const std::pair<std::string, signalr::value>& Object) const;
@@ -141,20 +141,21 @@ public:
     SignalRDeserializer(signalr::value&& Object);
 
     /// @brief Reads a value from the internal signalr array.
-    /// @pre EnterArray should be called before this function,
-    /// or if this deserializer represents a single value.
+    /// @pre This function should be used if this serializer represents a single value,
+    /// or if StartReadArray is called first to write to the array.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadValue(T& OutVal);
+    template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> ReadValue(T& OutVal);
 
     /// @brief Reads a uint key-value pair to the current uint map.
     /// @pre EnterUintMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<uint64_t, T>& OutVal);
+    template <typename K, typename T>
+    std::enable_if_t<IsUnsignedIntegerV<K> && IsSupportedSignalRType<T>::value> ReadKeyValue(std::pair<K, T>& OutVal);
 
     /// @brief Reads a string key-value pair to the current string map.
     /// @pre EnterStringMap should be called before this function.
     /// A std::runtime_error will be thrown if this condition is not met.
-    template <class T> void ReadKeyValue(std::pair<std::string, T>& OutVal);
+    template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> ReadKeyValue(std::pair<std::string, T>& OutVal);
 
     /// @brief Enters the internal signalr value as an array
     /// @details Once this function has been called, ReadValue should be used to read elements from the array.
@@ -190,25 +191,32 @@ public:
     void EndReadStringMap();
 
 private:
+    // Reads the next signalr value using the current iterator.
     const signalr::value& ReadNextValue();
 
     const std::pair<std::uint64_t, signalr::value> ReadNextUintKeyValue() const;
     const std::pair<std::string, signalr::value> ReadNextStringKeyValue() const;
 
-    template <class T> void ReadValueFromObject(const signalr::value& Object, T& OutVal);
+    // Reads the specified type from the given signalr object.
+    // This internally calls the ReadValueFromObjectInternal for the given type.
+    template <typename T> void ReadValueFromObject(const signalr::value& Object, T& OutVal);
 
-    void ReadValueFromObjectInternal(const signalr::value& Object, int64_t& OutVal) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, uint64_t& OutVal) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t&) const;
-    void ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal);
+    // Case for reading signed integers.
+    template <typename T> std::enable_if_t<IsSignedIntegerV<T>> ReadValueFromObjectInternal(const signalr::value& Object, T& OutVal);
+    // Case for reading unsigned integers.
+    template <typename T> std::enable_if_t<IsUnsignedIntegerV<T>> ReadValueFromObjectInternal(const signalr::value& Object, T& OutVal);
+    // Case for other primitive types.
+    void ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal);
+    void ReadValueFromObjectInternal(const signalr::value& Object, float& OutVal);
+    void ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal);
+    void ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal);
+    void ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t);
 
-    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const;
-    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal);
-    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<uint64_t, T>& OutVal);
-    template <class T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal);
+    // Case for other container values.
+    template <typename T> void ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal);
+    template <typename T> void ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal);
+    template <typename K, typename T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<K, T>& OutVal);
+    template <typename T> void ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal);
 
     void IncrementIterator();
 
@@ -256,7 +264,11 @@ protected:
     ISignalRDeserializable& operator=(const ISignalRDeserializable&) = default;
     ISignalRDeserializable& operator=(ISignalRDeserializable&&) = default;
 };
-template <class T> inline void SignalRSerializer::WriteKeyValue(uint64_t Key, const T& Value)
+
+template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalRSerializer::WriteValue(const T& Value) { WriteValueInternal(Value); }
+
+template <typename K, typename T>
+std::enable_if_t<IsUnsignedIntegerV<K> && IsSupportedSignalRType<T>::value> SignalRSerializer::WriteKeyValue(K Key, const T& Value)
 {
     if (Stack.size() == 0 || std ::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()) == false)
     {
@@ -264,7 +276,7 @@ template <class T> inline void SignalRSerializer::WriteKeyValue(uint64_t Key, co
     }
 
     Stack.push(std::pair<uint64_t, signalr::value> {});
-    std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = Key;
+    std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).first = static_cast<uint64_t>(Key);
 
     WriteValue(Value);
 
@@ -276,7 +288,8 @@ template <class T> inline void SignalRSerializer::WriteKeyValue(uint64_t Key, co
     std::map<uint64_t, signalr::value>& Map = std::get<std::map<uint64_t, signalr::value>>(Stack.top());
     Map[Pair.first] = Pair.second;
 }
-template <class T> inline void SignalRSerializer::WriteKeyValue(std::string Key, const T& Value)
+
+template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalRSerializer::WriteKeyValue(std::string Key, const T& Value)
 {
     if (Stack.size() == 0 || std ::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()) == false)
     {
@@ -296,43 +309,44 @@ template <class T> inline void SignalRSerializer::WriteKeyValue(std::string Key,
     std::map<std::string, signalr::value>& Map = std::get<std::map<std::string, signalr::value>>(Stack.top());
     Map[Pair.first] = Pair.second;
 }
-template <class T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer)
+
+template <typename T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer)
 {
     throw std::runtime_error("Unexpected serializer state");
 }
-template <class K>
+
+template <typename K>
 inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer)
 {
     Pair.second = SerializedContainer;
 }
-template <class T> inline void SignalRSerializer::WriteValueInternal(const T& Value)
+
+template <typename T> inline void SignalRSerializer::WriteValueInternal(const T& Value)
 {
     signalr::value SerializedValue;
 
-    if constexpr (std::is_base_of<ISignalRSerializable, T>::value)
+    if constexpr (IsCustomSerializableV<T>)
     {
         Value.Serialize(*this);
     }
     else
     {
-        SerializedValue = signalr::value(Value);
-
         if (Stack.size() == 0)
         {
             // Case where a user only want to serialize a single value
-            Stack.push(signalr::value(Value));
+            Stack.push(CreateSignalRObject(Value));
         }
         else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
         {
-            std::get<std::vector<signalr::value>>(Stack.top()).push_back(SerializedValue);
+            std::get<std::vector<signalr::value>>(Stack.top()).push_back(CreateSignalRObject(Value));
         }
         else if (std::holds_alternative<std::pair<uint64_t, signalr::value>>(Stack.top()))
         {
-            std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = SerializedValue;
+            std::get<std::pair<uint64_t, signalr::value>>(Stack.top()).second = CreateSignalRObject(Value);
         }
         else if (std::holds_alternative<std::pair<std::string, signalr::value>>(Stack.top()))
         {
-            std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = SerializedValue;
+            std::get<std::pair<std::string, signalr::value>>(Stack.top()).second = CreateSignalRObject(Value);
         }
         else
         {
@@ -340,8 +354,10 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const T& Va
         }
     }
 }
-template <class T> signalr::value SignalRSerializer::GetInternal(const T& Object) { return signalr::value(Object); }
-template <class T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
+
+template <typename T> signalr::value SignalRSerializer::GetInternal(const T& Object) { return signalr::value(Object); }
+
+template <typename T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
 {
     if (Value.has_value())
     {
@@ -352,7 +368,8 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
         WriteValueInternal<nullptr_t>(nullptr);
     }
 }
-template <class T> inline void SignalRSerializer::WriteValueInternal(const std::vector<T>& Value)
+
+template <typename T> inline void SignalRSerializer::WriteValueInternal(const std::vector<T>& Value)
 {
     StartWriteArray();
 
@@ -364,7 +381,7 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
     EndWriteArray();
 }
 
-template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<uint64_t, T>& Value)
+template <typename K, typename T> inline void SignalRSerializer::WriteValueInternal(const std::map<K, T>& Value)
 {
     StartWriteUintMap();
 
@@ -376,7 +393,7 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
     EndWriteUintMap();
 }
 
-template <class T> inline void SignalRSerializer::WriteValueInternal(const std::map<std::string, T>& Value)
+template <typename T> inline void SignalRSerializer::WriteValueInternal(const std::map<std::string, T>& Value)
 {
     StartWriteStringMap();
 
@@ -388,7 +405,24 @@ template <class T> inline void SignalRSerializer::WriteValueInternal(const std::
     EndWriteStringMap();
 }
 
-template <class T> inline void SignalRDeserializer::ReadValue(T& OutVal)
+template <typename T> inline signalr::value SignalRSerializer::CreateSignalRObject(const T& Value)
+{
+    // Allows us to support different integer types, as signalr only supports uint64 and int64.
+    if constexpr (IsSignedIntegerV<T>)
+    {
+        return signalr::value { static_cast<int64_t>(Value) };
+    }
+    else if constexpr (IsUnsignedIntegerV<T>)
+    {
+        return signalr::value { static_cast<uint64_t>(Value) };
+    }
+    else
+    {
+        return signalr::value { Value };
+    }
+}
+
+template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalRDeserializer::ReadValue(T& OutVal)
 {
     const signalr::value& Next = ReadNextValue();
     ReadValueFromObject(Next, OutVal);
@@ -396,17 +430,18 @@ template <class T> inline void SignalRDeserializer::ReadValue(T& OutVal)
     IncrementIterator();
 }
 
-template <class T> void SignalRDeserializer::ReadKeyValue(std::pair<uint64_t, T>& OutVal)
+template <typename K, typename T>
+std::enable_if_t<IsUnsignedIntegerV<K> && IsSupportedSignalRType<T>::value> SignalRDeserializer::ReadKeyValue(std::pair<K, T>& OutVal)
 {
     const std::pair<uint64_t, signalr::value>& Next = ReadNextUintKeyValue();
 
-    OutVal.first = Next.first;
+    OutVal.first = static_cast<K>(Next.first);
     ReadValueFromObject(Next.second, OutVal.second);
 
     IncrementIterator();
 }
 
-template <class T> void SignalRDeserializer::ReadKeyValue(std::pair<std::string, T>& OutVal)
+template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalRDeserializer::ReadKeyValue(std::pair<std::string, T>& OutVal)
 {
     const std::pair<std::string, signalr::value>& Next = ReadNextStringKeyValue();
 
@@ -416,20 +451,45 @@ template <class T> void SignalRDeserializer::ReadKeyValue(std::pair<std::string,
     IncrementIterator();
 }
 
-template <class T> void SignalRDeserializer::ReadValueFromObject(const signalr::value& Object, T& OutVal)
+template <typename T> void SignalRDeserializer::ReadValueFromObject(const signalr::value& Object, T& OutVal)
 {
-    if constexpr (std::is_base_of<ISignalRDeserializable, T>::value)
+    if constexpr (IsCustomDeserializableV<T>)
     {
         SignalRDeserializer Deserializer { Object };
         OutVal.Deserialize(Deserializer);
-        return;
     }
-    else
+    else if constexpr (IsSupportedSignalRType<T>::value)
     {
         ReadValueFromObjectInternal(Object, OutVal);
     }
+    else
+    {
+        static_assert(IsSupportedSignalRType<T>::value, "Type passed to ReadValueFromObject is not supported by SignalR deserialization.");
+    }
 }
-template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal) const
+
+template <typename T> std::enable_if_t<IsSignedIntegerV<T>> SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, T& OutVal)
+{
+    if (Object.is_integer() == false)
+    {
+        throw std::runtime_error("Invalid call: Value was not an integer");
+    }
+
+    OutVal = static_cast<T>(Object.as_integer());
+}
+
+template <typename T>
+std::enable_if_t<IsUnsignedIntegerV<T>> SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, T& OutVal)
+{
+    if (Object.is_uinteger() == false)
+    {
+        throw std::runtime_error("Invalid call: Value was not a uinteger");
+    }
+
+    OutVal = static_cast<T>(Object.as_uinteger());
+}
+
+template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::optional<T>& OutVal)
 {
     if (Object.is_null())
     {
@@ -438,10 +498,11 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
     else
     {
         OutVal = T {};
-        ReadValueFromObjectInternal(Object, *OutVal);
+        ReadValueFromObject(Object, *OutVal);
     }
 }
-template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal)
+
+template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::vector<T>& OutVal)
 {
     size_t ArraySize = 0;
     StartReadArray(ArraySize);
@@ -455,21 +516,23 @@ template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(
 
     EndReadArray();
 }
-template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<uint64_t, T>& OutVal)
+
+template <typename K, typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<K, T>& OutVal)
 {
     size_t MapSize = 0;
     StartReadUintMap(MapSize);
 
     for (size_t i = 0; i < MapSize; ++i)
     {
-        std::pair<uint64_t, T> Pair;
+        std::pair<K, T> Pair;
         ReadKeyValue(Pair);
         OutVal[Pair.first] = Pair.second;
     }
 
     EndReadUintMap();
 }
-template <class T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal)
+
+template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::map<std::string, T>& OutVal)
 {
     size_t MapSize = 0;
     StartReadStringMap(MapSize);

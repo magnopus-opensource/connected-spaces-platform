@@ -83,11 +83,6 @@ void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::vector<signa
     Container.push_back(SerializedContainer);
 }
 
-void SignalRSerializer::WriteValueInternal(const SignalRSerializableValue& Value)
-{
-    std::visit([this](auto&& ValType) { WriteValueInternal(ValType); }, Value);
-}
-
 signalr::value SignalRSerializer::GetInternal(const signalr::value& Object) const { return Object; }
 
 signalr::value SignalRSerializer::GetInternal(const std::pair<uint64_t, signalr::value>&) const
@@ -198,6 +193,7 @@ const signalr::value& SignalRDeserializer::ReadNextValue()
         throw std::runtime_error("Unexpected deserializer state");
     }
 }
+
 const std::pair<std::uint64_t, signalr::value> SignalRDeserializer::ReadNextUintKeyValue() const
 {
     if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
@@ -218,27 +214,7 @@ const std::pair<std::string, signalr::value> SignalRDeserializer::ReadNextString
     return *std::get<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top());
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, int64_t& OutVal) const
-{
-    if (Object.is_integer() == false)
-    {
-        throw std::runtime_error("Invalid call: Value was not an integer");
-    }
-
-    OutVal = Object.as_integer();
-}
-
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, uint64_t& OutVal) const
-{
-    if (Object.is_uinteger() == false)
-    {
-        throw std::runtime_error("Invalid call: Value was not a uinteger");
-    }
-
-    OutVal = Object.as_uinteger();
-}
-
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal) const
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, double& OutVal)
 {
     if (Object.is_double() == false)
     {
@@ -247,7 +223,18 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
 
     OutVal = Object.as_double();
 }
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal) const
+
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, float& OutVal)
+{
+    if (Object.is_double() == false)
+    {
+        throw std::runtime_error("Invalid call: Value was not a double");
+    }
+
+    OutVal = static_cast<float>(Object.as_double());
+}
+
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, bool& OutVal)
 {
     if (Object.is_bool() == false)
     {
@@ -257,7 +244,7 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
     OutVal = Object.as_bool();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal) const
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, std::string& OutVal)
 {
     if (Object.is_string() == false)
     {
@@ -267,60 +254,11 @@ void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Obje
     OutVal = Object.as_string();
 }
 
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t&) const
+void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, nullptr_t)
 {
     if (Object.is_null() == false)
     {
         throw std::runtime_error("Invalid call: Value was not null");
-    }
-}
-void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value& Object, SignalRSerializableValue& OutVal)
-{
-    if (Object.is_integer())
-    {
-        OutVal = Object.as_integer();
-    }
-    else if (Object.is_uinteger())
-    {
-        OutVal = Object.as_uinteger();
-    }
-    else if (Object.is_double())
-    {
-        OutVal = Object.as_double();
-    }
-    else if (Object.is_bool())
-    {
-        OutVal = Object.as_bool();
-    }
-    else if (Object.is_string())
-    {
-        OutVal = Object.as_string();
-    }
-    else if (Object.is_null())
-    {
-        OutVal = nullptr;
-    }
-    else if (Object.is_array())
-    {
-        std::vector<SignalRSerializableValue> Array;
-        ReadValueFromObjectInternal(Object, Array);
-        OutVal = Array;
-    }
-    else if (Object.is_uint_map())
-    {
-        std::map<uint64_t, SignalRSerializableValue> Map;
-        ReadValueFromObjectInternal(Object, Map);
-        OutVal = Map;
-    }
-    else if (Object.is_string_map())
-    {
-        std::map<std::string, SignalRSerializableValue> Map;
-        ReadValueFromObjectInternal(Object, Map);
-        OutVal = Map;
-    }
-    else
-    {
-        throw std::runtime_error("IUnexpected value: Value wasn't a supported variant type");
     }
 }
 
