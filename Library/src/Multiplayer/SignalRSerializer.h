@@ -118,7 +118,11 @@ private:
     signalr::value GetInternal(const signalr::value& Object) const;
     signalr::value GetInternal(const std::pair<uint64_t, signalr::value>& Object) const;
     signalr::value GetInternal(const std::pair<std::string, signalr::value>& Object) const;
-    template <typename T> signalr::value GetInternal(const T& Object) const;
+
+    template <typename T>
+    std::enable_if_t<!std::is_same_v<T, std::pair<uint64_t, signalr::value>> && !std::is_same_v<T, std::pair<std::string, signalr::value>>,
+        signalr::value>
+    GetInternal(const T& Object) const;
 
     using Container = std::variant<signalr::value, std::vector<signalr::value>, std::map<std::string, signalr::value>,
         std::map<uint64_t, signalr::value>, std::pair<uint64_t, signalr::value>, std::pair<std::string, signalr::value>>;
@@ -355,7 +359,13 @@ template <typename T> inline void SignalRSerializer::WriteValueInternal(const T&
     }
 }
 
-template <typename T> signalr::value SignalRSerializer::GetInternal(const T& Object) const { return signalr::value(Object); }
+template <typename T>
+std::enable_if_t<!std::is_same_v<T, std::pair<uint64_t, signalr::value>> && !std::is_same_v<T, std::pair<std::string, signalr::value>>,
+    signalr::value>
+SignalRSerializer::GetInternal(const T& Object) const
+{
+    return signalr::value(Object);
+}
 
 template <typename T> inline void SignalRSerializer::WriteValueInternal(const std::optional<T>& Value)
 {
