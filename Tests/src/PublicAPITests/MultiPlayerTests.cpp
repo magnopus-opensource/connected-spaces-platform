@@ -2946,7 +2946,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
     // Invoke function for delete objects errors
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillOnce(
-            [](const std::string& DeleteObjectsMethodName, const signalr::value& DeleteEntityMessage,
+            [](const std::string& /*DeleteObjectsMethodName*/, const signalr::value& /*DeleteEntityMessage*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
                 auto Value = signalr::value("Irrelevant value from DeleteObjects");

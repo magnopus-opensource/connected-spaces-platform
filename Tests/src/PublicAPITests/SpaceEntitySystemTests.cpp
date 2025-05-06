@@ -58,7 +58,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     auto SignalRMock
@@ -102,7 +101,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
@@ -147,7 +145,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
@@ -190,7 +187,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
@@ -242,7 +238,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
@@ -302,7 +297,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
     auto SignalRMock

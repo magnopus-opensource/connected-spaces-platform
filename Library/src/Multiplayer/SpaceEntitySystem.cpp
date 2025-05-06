@@ -378,7 +378,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
         .then(CreateNewLocalAvatar(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            [Callback, this](const std::exception& Except)
+            [Callback](const std::exception& Except)
             {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
                 Callback(nullptr);
