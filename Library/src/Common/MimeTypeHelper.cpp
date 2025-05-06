@@ -16,9 +16,8 @@
 
 #include "CSP/Common/MimeTypeHelper.h"
 
-#include "Memory/Memory.h"
-
 #include <cctype>
+#include <memory>
 
 namespace csp::common
 {

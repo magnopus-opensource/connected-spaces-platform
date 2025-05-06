@@ -17,7 +17,6 @@
 
 #include "Common/StlString.h"
 #include "Common/Wrappers.h"
-#include "Memory/Memory.h"
 
 #include <map>
 
@@ -87,14 +86,14 @@ private:
         {
             if (ParamType == TypeString)
             {
-                CSP_FREE(StringParam);
+                std::free(StringParam);
             }
         }
 
         void SetString(const char* InString)
         {
             size_t StringLen = strlen(InString);
-            StringParam = (char*)CSP_ALLOC(StringLen + 1);
+            StringParam = (char*)std::malloc(StringLen + 1);
 
             STRCPY(StringParam, StringLen + 1, InString);
         }
@@ -110,8 +109,7 @@ private:
         };
     };
 
-    using ParamMap
-        = std::map<csp::StlString, EventParam, std::less<csp::StlString>, csp::memory::StlAllocator<std::pair<const csp::StlString, EventParam>>>;
+    using ParamMap = std::map<csp::StlString, EventParam, std::less<csp::StlString>>;
 
     ParamMap Parameters;
 };
@@ -198,11 +196,11 @@ bool EventPayloadImpl::GetBool(const char* Key) const
 
 Event::Event(const EventId& InId)
     : Id(InId)
-    , Impl(CSP_NEW EventPayloadImpl())
+    , Impl(new EventPayloadImpl())
 {
 }
 
-Event::~Event() { CSP_DELETE(Impl); }
+Event::~Event() { delete (Impl); }
 
 void Event::AddInt(const char* Key, const int Value) { Impl->AddInt(Key, Value); }
 

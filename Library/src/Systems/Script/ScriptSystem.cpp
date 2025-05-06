@@ -17,8 +17,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 #include "Multiplayer/Script/ScriptHelpers.h"
 #include "Systems/Script/ScriptContext.h"
 #include "Systems/Script/ScriptRuntime.h"
@@ -85,7 +83,7 @@ void ScriptSystem::Initialise()
         return;
     }
 
-    TheScriptRuntime = CSP_NEW ScriptRuntime(this);
+    TheScriptRuntime = new ScriptRuntime(this);
 
 #if defined(SCRIPTS_INCLUDE_STD_LIBS)
     js_std_init_handlers(TheScriptRuntime->Runtime->rt);
@@ -107,7 +105,7 @@ void ScriptSystem::Shutdown()
 {
     if (TheScriptRuntime != nullptr)
     {
-        CSP_DELETE(TheScriptRuntime);
+        delete (TheScriptRuntime);
         TheScriptRuntime = nullptr;
     }
 }

@@ -71,7 +71,7 @@ const char*
     {{/ return_type.is_string }}
     {{^ return_type.is_string }}
     auto& _ref = inst->{{ name }}({{# parameters }}{{ name }}{{> Comma }}{{/ parameters }});
-    auto* _result = CSP_NEW {{# return_type }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{/ return_type }}(_ref);
+    auto* _result = new {{# return_type }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{/ return_type }}(_ref);
 
     return NativePointer { _result, true };
     {{/ return_type.is_string }}

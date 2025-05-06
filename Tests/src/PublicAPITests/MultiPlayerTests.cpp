@@ -27,7 +27,6 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
@@ -241,7 +240,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                             }
                         }
 
-                        CSP_DELETE(PropertyKeys);
+                        delete (PropertyKeys);
                     }
                 }
             }
@@ -2912,8 +2911,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // The start function will throw internally
     EXPECT_CALL(*SignalRMock, Start)
@@ -2936,8 +2934,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -2967,8 +2964,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -3009,8 +3005,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -3055,8 +3050,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);

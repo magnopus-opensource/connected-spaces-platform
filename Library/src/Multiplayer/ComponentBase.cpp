@@ -20,7 +20,6 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -50,7 +49,7 @@ ComponentBase::~ComponentBase()
 {
     if (ScriptInterface)
     {
-        CSP_DELETE(ScriptInterface);
+        delete (ScriptInterface);
     }
 }
 

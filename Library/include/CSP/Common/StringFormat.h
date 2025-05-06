@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/Common/String.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <cstdio>
 #include <functional>
@@ -45,7 +44,7 @@ template <typename... Args> static String StringFormat(const String& Format, Arg
 
     auto Size = static_cast<size_t>(SizeS);
 
-    std::unique_ptr<char[], csp::memory::DllDeleter<char>> Buf((char*)csp::memory::DllAlloc(Size));
+    std::unique_ptr<char[]> Buf(new char[Size]);
 
     std::snprintf(Buf.get(), Size, Format.c_str(), args...);
 

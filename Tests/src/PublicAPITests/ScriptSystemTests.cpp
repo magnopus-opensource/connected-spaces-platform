@@ -32,7 +32,6 @@
 #include "gtest/gtest.h"
 #include <CSP/Multiplayer/Components/CustomSpaceComponent.h>
 #include <CSP/Multiplayer/Components/SplineSpaceComponent.h>
-#include <Memory/Memory.h>
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>

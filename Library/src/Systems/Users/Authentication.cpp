@@ -40,7 +40,7 @@ namespace csp::systems
 
 LoginState::LoginState()
     : State(ELoginState::LoggedOut)
-    , AccessTokenRefreshTime(CSP_NEW DateTime())
+    , AccessTokenRefreshTime(new DateTime())
 {
 }
 
@@ -63,10 +63,10 @@ void LoginState::CopyStateFrom(const LoginState& OtherState)
 
     // Must reallocate the access token when copying otherwise destructor of
     // copied state will delete the original memory pointer potentially causing corruption
-    AccessTokenRefreshTime = CSP_NEW DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
+    AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
 }
 
-LoginState::~LoginState() { CSP_DELETE(AccessTokenRefreshTime); }
+LoginState::~LoginState() { delete (AccessTokenRefreshTime); }
 
 bool LoginState::RefreshNeeded() const
 {

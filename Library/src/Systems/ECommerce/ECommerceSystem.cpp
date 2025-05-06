@@ -62,10 +62,10 @@ ECommerceSystem::ECommerceSystem()
 ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    ShopifyAPI = CSP_NEW chs::ShopifyApi(InWebClient);
+    ShopifyAPI = new chs::ShopifyApi(InWebClient);
 }
 
-ECommerceSystem::~ECommerceSystem() { CSP_DELETE(ShopifyAPI); }
+ECommerceSystem::~ECommerceSystem() { delete (ShopifyAPI); }
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {

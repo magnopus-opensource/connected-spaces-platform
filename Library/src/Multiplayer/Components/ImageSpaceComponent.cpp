@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -37,7 +36,7 @@ ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(ImagePropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(ImagePropertyKeys::IsEmissive)] = false;
 
-    SetScriptInterface(CSP_NEW ImageSpaceComponentScriptInterface(this));
+    SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ImageSpaceComponent::GetImageAssetId() const

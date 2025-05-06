@@ -15,7 +15,6 @@
  */
 #include "Web/HttpRequest.h"
 
-#include "Memory/Memory.h"
 #include "Web/WebClient.h"
 
 namespace csp::web
@@ -37,7 +36,7 @@ HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::we
 {
     if (&CancellationToken == &csp::common::CancellationToken::Dummy())
     {
-        this->CancellationToken = CSP_NEW csp::common::CancellationToken();
+        this->CancellationToken = new csp::common::CancellationToken();
         OwnsCancellationToken = true;
     }
     else
@@ -51,12 +50,12 @@ HttpRequest::~HttpRequest()
 {
     if (OwnsCancellationToken)
     {
-        CSP_DELETE(CancellationToken);
+        delete (CancellationToken);
     }
 
     if ((Callback != nullptr) && Callback->ShouldDelete())
     {
-        CSP_DELETE(Callback);
+        delete (Callback);
     }
 }
 
