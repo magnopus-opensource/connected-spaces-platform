@@ -1224,6 +1224,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
               .SetTimeoutInSeconds(60);
 
     std::future<void> ReadyForAssertionsFuture = CreateConversationRunner.ReadyForAssertionsFuture();
