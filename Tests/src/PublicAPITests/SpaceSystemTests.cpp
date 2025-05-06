@@ -477,12 +477,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
     fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
 
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
     fclose(UploadFile);
 
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
+    BufferSource.Buffer = UploadFileData.get();
     BufferSource.BufferLength = UploadFileSize;
 
     BufferSource.SetMimeType("image/png");
@@ -523,12 +523,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailT
     fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
 
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
     fclose(UploadFile);
 
     BufferAssetDataSource SpaceThumbnail;
-    SpaceThumbnail.Buffer = UploadFileData;
+    SpaceThumbnail.Buffer = UploadFileData.get();
     SpaceThumbnail.BufferLength = UploadFileSize;
 
     SpaceThumbnail.SetMimeType("image/png");
@@ -558,14 +558,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailT
         EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
-        auto DownloadedAssetData = new uint8_t[DownloadedAssetDataSize];
-        memcpy(DownloadedAssetData, Download_Result.GetData(), DownloadedAssetDataSize);
+        auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
+        memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
 
         EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-        EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData, UploadFileSize), 0);
-
-        delete[] UploadFileData;
-        delete[] DownloadedAssetData;
+        EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
     }
 
     // Delete space
@@ -601,12 +598,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
     fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
 
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
     fclose(UploadFile);
 
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
+    BufferSource.Buffer = UploadFileData.get();
     BufferSource.BufferLength = UploadFileSize;
 
     BufferSource.SetMimeType("image/png");
@@ -1740,12 +1737,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
     fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
 
     uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
     fclose(UploadFile);
 
     BufferAssetDataSource SpaceThumbnail;
-    SpaceThumbnail.Buffer = UploadFileData;
+    SpaceThumbnail.Buffer = UploadFileData.get();
     SpaceThumbnail.BufferLength = UploadFileSize;
 
     SpaceThumbnail.SetMimeType("image/png");
@@ -1768,14 +1765,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
     EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
-    auto DownloadedAssetData = new uint8_t[DownloadedAssetDataSize];
-    memcpy(DownloadedAssetData, Download_Result.GetData(), DownloadedAssetDataSize);
+    auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
+    memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
 
     EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-    EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData, UploadFileSize), 0);
-
-    delete[] UploadFileData;
-    delete[] DownloadedAssetData;
+    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
