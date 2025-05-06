@@ -56,11 +56,26 @@ signalr::value SignalRSerializer::Get() const
         throw std::runtime_error("Invalid call: Serializer is not at the root");
     }
 
-    signalr::value SerializedValue;
-    // Dispatch internal variant type to the correct GetInternal call
-    std::visit([this, &SerializedValue](const auto& ValType) { SerializedValue = this->GetInternal(ValType); }, Stack.top());
-
-    return SerializedValue;
+    if (std::holds_alternative<signalr::value>(Stack.top()))
+    {
+        return std::get<signalr::value>(Stack.top());
+    }
+    else if (std::holds_alternative<std::vector<signalr::value>>(Stack.top()))
+    {
+        return signalr::value { std::get<std::vector<signalr::value>>(Stack.top()) };
+    }
+    else if (std::holds_alternative<std::map<uint64_t, signalr::value>>(Stack.top()))
+    {
+        return signalr::value { std::get<std::map<uint64_t, signalr::value>>(Stack.top()) };
+    }
+    else if (std::holds_alternative<std::map<std::string, signalr::value>>(Stack.top()))
+    {
+        return signalr::value { std::get<std::map<std::string, signalr::value>>(Stack.top()) };
+    }
+    else
+    {
+        throw std::runtime_error("Unexpected serializer state");
+    }
 }
 
 void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& SerializedContainer)
@@ -81,18 +96,6 @@ void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& Serializ
 void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer)
 {
     Container.push_back(SerializedContainer);
-}
-
-signalr::value SignalRSerializer::GetInternal(const signalr::value& Object) const { return Object; }
-
-signalr::value SignalRSerializer::GetInternal(const std::pair<uint64_t, signalr::value>&) const
-{
-    throw std::runtime_error("Unexpected serializer state");
-}
-
-signalr::value SignalRSerializer::GetInternal(const std::pair<std::string, signalr::value>&) const
-{
-    throw std::runtime_error("Unexpected serializer state");
 }
 
 SignalRDeserializer::SignalRDeserializer(const signalr::value& Object)
