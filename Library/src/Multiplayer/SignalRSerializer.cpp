@@ -58,7 +58,7 @@ signalr::value SignalRSerializer::Get() const
 
     signalr::value SerializedValue;
     // Dispatch internal variant type to the correct GetInternal call
-    std::visit([this, &SerializedValue](const auto& ValType) { SerializedValue = this->GetInternal(ValType); }, Stack.top());
+    std::visit([this, &SerializedValue](const auto& ValType) mutable { SerializedValue = this->GetInternal(ValType); }, Stack.top());
 
     return SerializedValue;
 }
