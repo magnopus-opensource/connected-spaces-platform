@@ -400,6 +400,9 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
         break;
     }
 
+    CSP_LOG_FORMAT(
+        csp::systems::LogLevel::VeryVerbose, "Services request %s %s has been sent.", Verb.c_str(), Response.GetRequest()->GetUri().GetAsString());
+
     if (ResponsePayload.IsEmpty())
     {
         CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.", Verb.c_str(),
