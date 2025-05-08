@@ -78,6 +78,54 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeShortTest)
     EXPECT_EQ(DeserializedValue, Value);
 }
 
+// Test we throw an exception if the value being deserialized is larger than the input type.
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintInvalidSizeTest)
+{
+    const uint64_t Value = 99999999;
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(Value);
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+
+    uint16_t DeserializedValue;
+    EXPECT_THROW(Deserializer.ReadValue(DeserializedValue), std::runtime_error);
+}
+
+// Test we throw an exception if the value being deserialized is larger than the input type.
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeIntInvalidSizeTest)
+{
+    const int64_t Value = 99999999;
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(Value);
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+
+    int16_t DeserializedValue;
+    EXPECT_THROW(Deserializer.ReadValue(DeserializedValue), std::runtime_error);
+}
+
+// Test we throw an exception if the value being deserialized is larger than the input type.
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeIntInvalidSizeMinTest)
+{
+    const int64_t Value = -99999999;
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(Value);
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+
+    int16_t DeserializedValue;
+    EXPECT_THROW(Deserializer.ReadValue(DeserializedValue), std::runtime_error);
+}
+
 /*
     This is important, as signalr only supports uint64 unsigned integer types,
     so we need to test our internal conversion logic.
