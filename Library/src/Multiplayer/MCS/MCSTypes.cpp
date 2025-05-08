@@ -31,7 +31,7 @@ namespace
 
     template <class T> void DeserializeComponentDataInternal(SignalRDeserializer& Deserializer, ItemComponentDataVariant& OutVal)
     {
-        // Its important we construct the exact type we want to put into our variant,
+        // It's important we construct the exact type we want to put into our variant,
         // as signalr only supports double floating points, int64 integer values, and uint64 unsigned integer values.
         T DeserializedValue {};
         Deserializer.ReadValue(DeserializedValue);

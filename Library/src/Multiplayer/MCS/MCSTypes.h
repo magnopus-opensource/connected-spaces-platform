@@ -104,14 +104,16 @@ enum class ItemComponentDataType : uint64_t
 class ItemComponentData;
 
 /// @brief Variant that holds all currently implemented MCS types by CSP.
-/// This should be updated if we need to support more of the above types in the future.
+/// @details This should be updated if we need to support more of the above types in the future.
 /// All of our variant types must match the supported signalr serializer values, or we will get a compile error.
 using ItemComponentDataVariant = std::variant<bool, int64_t, uint64_t, float, std::vector<float>, double, std::string,
     std::map<uint16_t, ItemComponentData>, std::map<std::string, ItemComponentData>>;
 
 using PropertyKeyType = uint16_t;
 
-// TODO: doc
+/// @brief ItemComponentData which represents a MCS component which is stores as a variant.
+/// More information about this type can be found here:
+/// https://github.com/magnopus/Magnopus.Services/blob/e7fff2e1171bbe185c0ad1f50fadc1ec64a30a6a/Source/Magnopus.Service.Multiplayer.Contracts/Messages/Components/IComponentData.cs
 class ItemComponentData : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
@@ -129,7 +131,10 @@ private:
     ItemComponentDataVariant Value;
 };
 
-// TODO: doc
+/// @brief Represents an MCS object message.
+/// @details This should be used when an object is first created, and needs to be replicated to MCS and other clients.
+/// More information about this type can be found here:
+/// https://github.com/magnopus/Magnopus.Services/blob/e7fff2e1171bbe185c0ad1f50fadc1ec64a30a6a/Source/Magnopus.Service.Multiplayer.Contracts/Messages/ObjectMessage.cs
 class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
@@ -159,7 +164,9 @@ private:
     std::map<PropertyKeyType, ItemComponentData> Components;
 };
 
-// TODO: doc
+/// @brief Represents an MCS object patch.
+/// @details This should be used when an object needs to be update, and needs to be replicated to MCS and other clients.
+/// More information about this type can be found here:
 class ObjectPatch : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
