@@ -104,15 +104,15 @@ public:
 
 private:
     // Adds the serialized container object to the previous object, or the root.
-    // This will internally call one of the FinalizeContainerSerializaitonInternal overrides.
-    void FinalizeContainerSerializaiton(signalr::value&& SerializedContainer);
+    // This will internally call one of the FinalizeContainerSerializationInternal overrides.
+    void FinalizeContainerSerialization(signalr::value&& SerializedContainer);
 
     // Case where we fallback to an exception is we are trying to serialize to an unsupported container.
-    template <typename T> void FinalizeContainerSerializaitonInternal(T&, signalr::value&& SerializedContainer);
+    template <typename T> void FinalizeContainerSerializationInternal(T&, signalr::value&& SerializedContainer);
     // Case for serializing value into a vector.
-    void FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer);
+    void FinalizeContainerSerializationInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer);
     // Case for serializing value into a pair for a map.
-    template <typename K> void FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer);
+    template <typename K> void FinalizeContainerSerializationInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer);
 
     // Writes all of our primitive types to a signalr value.
     template <typename T> void WriteValueInternal(const T& Value);
@@ -323,13 +323,13 @@ template <typename T> std::enable_if_t<IsSupportedSignalRType<T>::value> SignalR
     Map[Pair.first] = Pair.second;
 }
 
-template <typename T> inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(T&, signalr::value&&)
+template <typename T> inline void SignalRSerializer::FinalizeContainerSerializationInternal(T&, signalr::value&&)
 {
     throw std::runtime_error("Unexpected serializer state");
 }
 
 template <typename K>
-inline void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer)
+inline void SignalRSerializer::FinalizeContainerSerializationInternal(std::pair<K, signalr::value>& Pair, signalr::value&& SerializedContainer)
 {
     Pair.second = SerializedContainer;
 }

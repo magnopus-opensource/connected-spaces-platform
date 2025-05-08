@@ -13,7 +13,7 @@ void SignalRSerializer::EndWriteArray()
 
     auto ArrayObject = std::move(Stack.top());
     Stack.pop();
-    FinalizeContainerSerializaiton(signalr::value { std::get<std::vector<signalr::value>>(ArrayObject) });
+    FinalizeContainerSerialization(signalr::value { std::get<std::vector<signalr::value>>(ArrayObject) });
 }
 
 void SignalRSerializer::StartWriteStringMap() { Stack.push(std::map<std::string, signalr::value> {}); }
@@ -27,7 +27,7 @@ void SignalRSerializer::EndWriteStringMap()
 
     auto StringMapObject = std::move(Stack.top());
     Stack.pop();
-    FinalizeContainerSerializaiton(signalr::value { std::get<std::map<std::string, signalr::value>>(StringMapObject) });
+    FinalizeContainerSerialization(signalr::value { std::get<std::map<std::string, signalr::value>>(StringMapObject) });
 }
 
 void SignalRSerializer::StartWriteUintMap() { Stack.push(std::map<uint64_t, signalr::value> {}); }
@@ -41,7 +41,7 @@ void SignalRSerializer::EndWriteUintMap()
 
     auto UintMapObject = std::move(Stack.top());
     Stack.pop();
-    FinalizeContainerSerializaiton(signalr::value { std::get<std::map<uint64_t, signalr::value>>(UintMapObject) });
+    FinalizeContainerSerialization(signalr::value { std::get<std::map<uint64_t, signalr::value>>(UintMapObject) });
 }
 
 signalr::value SignalRSerializer::Get() const
@@ -78,7 +78,7 @@ signalr::value SignalRSerializer::Get() const
     }
 }
 
-void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& SerializedContainer)
+void SignalRSerializer::FinalizeContainerSerialization(signalr::value&& SerializedContainer)
 {
     // We dont check for maps in this function because key-values are handled separately.
     if (Stack.size() == 0)
@@ -88,12 +88,12 @@ void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& Serializ
         return;
     }
 
-    // Dispatch internal variant type to the correct FinalizeContainerSerializaitonInternal call.
-    std::visit([this, &SerializedContainer](auto& ValType) { this->FinalizeContainerSerializaitonInternal(ValType, std::move(SerializedContainer)); },
+    // Dispatch internal variant type to the correct FinalizeContainerSerializationInternal call.
+    std::visit([this, &SerializedContainer](auto& ValType) { this->FinalizeContainerSerializationInternal(ValType, std::move(SerializedContainer)); },
         Stack.top());
 }
 
-void SignalRSerializer::FinalizeContainerSerializaitonInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer)
+void SignalRSerializer::FinalizeContainerSerializationInternal(std::vector<signalr::value>& Container, signalr::value&& SerializedContainer)
 {
     Container.push_back(SerializedContainer);
 }
