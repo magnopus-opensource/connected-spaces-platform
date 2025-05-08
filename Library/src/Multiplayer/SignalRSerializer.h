@@ -99,7 +99,7 @@ public:
 
     /// @brief Gets the serialized singnal r value.
     /// @return signalr::value
-    /// @pre The serializer should be at the root (array and maps should all be popped).
+    /// @pre The serializer should be at the root (array and maps should all be ended using EndWrite[X]).
     signalr::value Get() const;
 
 private:
