@@ -109,7 +109,7 @@ public:
 
     /// @brief Get the ComponentType of the component.
     /// @return The type of the component as an enum.
-    ComponentType GetComponentType();
+    ComponentType GetComponentType() const;
 
     /// @brief Get a map of the replicated values defined for this component.
     ///
@@ -117,7 +117,7 @@ public:
     /// intended to be defined in the inherited component as an enum of available properties keys.
     ///
     /// @return A map of the replicated values, keyed by their unique key.
-    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties();
+    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties() const;
 
     /// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
     /// @return A pointer to the parent SpaceEntity.
