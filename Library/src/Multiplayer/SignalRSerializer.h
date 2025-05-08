@@ -27,7 +27,23 @@ namespace csp::multiplayer
 
 class ISignalRSerializable;
 
-/// @brief A stack-based signalr serializer which allows for custom class serialization using ISignalRSerializable
+/// @brief A serializer which allows for custom class serialization using ISignalRSerializable interface.
+/// @details Writing single values is supported. However, if you want to serialize multiple values,
+/// you will need to add a container, by calling WriteValue on one of the supported containers,
+/// or calling StartWrite[X].
+///
+/// Currently supported types:
+///     - Unsigned integers
+///     - Signed integers
+///     - Doubles
+///     - Floats
+///     - String
+///     - Null pointers (represents null)
+///     - Optionals
+///     - Vectors
+///     - Unsigned integer key maps
+///     - string key maps
+///     - Types with ISignalRSerializable interface
 class SignalRSerializer
 {
 public:
@@ -117,7 +133,9 @@ private:
     std::stack<Container> Stack;
 };
 
-/// @brief A stack-based signalr deserializer which allows for custom class deserialization using ISignalRDeserializable
+/// @brief A signalr deserializer which allows for custom class deserialization using ISignalRDeserializable interface.
+/// @details This supports all types outlined in the SignalRSerializer, except ISignalRDeserializable is needed for deserialization.
+/// If ISignalRDeserializable types are being deserialized from a container, then need to be default constructable.
 class SignalRDeserializer
 {
 public:
