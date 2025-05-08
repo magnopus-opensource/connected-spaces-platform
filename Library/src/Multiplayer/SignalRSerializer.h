@@ -293,7 +293,7 @@ std::enable_if_t<IsUnsignedIntegerV<K> && IsSupportedSignalRType<T>::value> Sign
 
     WriteValue(Value);
 
-    // Get our pair form the top of the stack and pop
+    // Get our pair from the top of the stack and pop
     std::pair<uint64_t, signalr::value> Pair = std::get<std::pair<uint64_t, signalr::value>>(Stack.top());
     Stack.pop();
 

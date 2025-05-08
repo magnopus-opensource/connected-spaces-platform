@@ -80,15 +80,15 @@ signalr::value SignalRSerializer::Get() const
 
 void SignalRSerializer::FinalizeContainerSerializaiton(signalr::value&& SerializedContainer)
 {
-    // We dont check for maps in this function because key-values are handled seperatly
+    // We dont check for maps in this function because key-values are handled separately.
     if (Stack.size() == 0)
     {
-        // If the last element has been popped, push back a root value
+        // If the last element has been popped, push back a root value.
         Stack.push(SerializedContainer);
         return;
     }
 
-    // Dispatch internal variant type to the correct FinalizeContainerSerializaitonInternal call
+    // Dispatch internal variant type to the correct FinalizeContainerSerializaitonInternal call.
     std::visit([this, &SerializedContainer](auto& ValType) { this->FinalizeContainerSerializaitonInternal(ValType, std::move(SerializedContainer)); },
         Stack.top());
 }
