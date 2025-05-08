@@ -432,24 +432,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageSerializationUnsetParentComp
     // Serialize the space entity using the old method
     SignalRMsgPackEntitySerialiser OldSerializer;
     TestEntity->Serialise(OldSerializer);
-
-    // Create MCS object and serialize using the new method
-    std::map<uint16_t, mcs::ItemComponentData> Components;
-
-    // Write view components
-    Components[COMPONENT_KEY_VIEW_ENTITYNAME] = { std::string { TestEntity->GetName().c_str() } };
-    Components[COMPONENT_KEY_VIEW_POSITION]
-        = { std::vector<float> { TestEntity->GetPosition().X, TestEntity->GetPosition().Y, TestEntity->GetPosition().Z } };
-    Components[COMPONENT_KEY_VIEW_ROTATION] = { std::vector<float> {
-        TestEntity->GetRotation().X, TestEntity->GetRotation().Y, TestEntity->GetRotation().Z, TestEntity->GetRotation().W } };
-    Components[COMPONENT_KEY_VIEW_SCALE] = { std::vector<float> { TestEntity->GetScale().X, TestEntity->GetScale().Y, TestEntity->GetScale().Z } };
-    Components[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = { static_cast<int64_t>(TestEntity->GetSelectingClientID()) };
-    Components[COMPONENT_KEY_VIEW_THIRDPARTYREF] = { std::string { TestEntity->GetThirdPartyRef() } };
-    Components[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = { static_cast<int64_t>(TestEntity->GetThirdPartyPlatformType()) };
-    Components[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(TestEntity->EntityLock) };
-
-    mcs::ObjectMessage MCSObject { TestEntity->Id, static_cast<uint64_t>(TestEntity->Type), TestEntity->IsTransferable, TestEntity->IsPersistant,
-        TestEntity->OwnerId, Convert(TestEntity->ParentId), Components };
+    mcs::ObjectMessage MCSObject = TestEntity->CreateObjectMessage();
 
     SignalRSerializer NewSerializer;
     NewSerializer.WriteValue(MCSObject);
@@ -529,7 +512,6 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectPatchSerializationComponentsCompari
     const csp::common::Vector3 TestScale = csp::common::Vector3 { 2.f, 2.f, 2.f };
     const uint64_t TestSelectionState = 10;
     const csp::common::String TestThirdPartyRef = "TestRef";
-    LockType TestLockType = LockType::UserAgnostic;
 
     TestEntity->SetName(TestName);
     TestEntity->SetPosition(TestPosition);
@@ -545,20 +527,7 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectPatchSerializationComponentsCompari
     TestEntity->SerialisePatch(OldSerializer);
 
     // Create MCS object and serialize using the new method
-    std::map<uint16_t, mcs::ItemComponentData> Components;
-
-    // Write view components
-    Components[COMPONENT_KEY_VIEW_ENTITYNAME] = { std::string { TestName.c_str() } };
-    Components[COMPONENT_KEY_VIEW_POSITION] = { std::vector<float> { TestPosition.X, TestPosition.Y, TestPosition.Z } };
-    Components[COMPONENT_KEY_VIEW_ROTATION] = { std::vector<float> { TestRotation.X, TestRotation.Y, TestRotation.Z, TestRotation.W } };
-    Components[COMPONENT_KEY_VIEW_SCALE] = { std::vector<float> { TestScale.X, TestScale.Y, TestScale.Z } };
-    Components[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = { static_cast<int64_t>(TestSelectionState) };
-    Components[COMPONENT_KEY_VIEW_THIRDPARTYREF] = { std::string { TestThirdPartyRef } };
-    // Components[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = { static_cast<int64_t>(TestEntity->GetThirdPartyPlatformType()) };
-    Components[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(TestLockType) };
-
-    mcs::ObjectPatch MCSObject { TestEntity->Id, TestEntity->OwnerId, false, TestEntity->ShouldUpdateParent, Convert(TestEntity->ParentId),
-        Components };
+    mcs::ObjectPatch MCSObject = TestEntity->CreateObjectPatch();
 
     SignalRSerializer NewSerializer;
     NewSerializer.WriteValue(MCSObject);
