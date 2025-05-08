@@ -50,7 +50,6 @@ public:
 
     /// @brief Starts writing an array into the serializer.
     /// @details Once this function has been called, WriteValue should be used to add elements to the array.
-    /// Favour writing the array directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopArray should be used to finalize the array.
     void StartWriteArray();
@@ -62,7 +61,6 @@ public:
 
     /// @brief Starts writing a string map (std::map<std::string, T> into the serializer.
     /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
-    /// Favour writing the map directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopStringMap should be used to finalize the map.
     void StartWriteStringMap();
@@ -74,7 +72,6 @@ public:
 
     /// @brief Starts writing a uint map (std::map<uint64_t, T> into the serializer.
     /// @details Once this function has been called, WriteKeyValue should be used to add elements to the map.
-    /// Favour writing the map directly to the serializer using the write functions over this.
     /// Start/End functions should be used if you need custom serialization logic.
     /// PopUintMap should be used to finalize the map.
     void StartWriteUintMap();
