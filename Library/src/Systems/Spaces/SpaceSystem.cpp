@@ -533,9 +533,12 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
             {
                 const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
 
-                this->RemoveSpaceThumbnail(SpaceId, Callback);
-                this->RemoveMetadata(SpaceId, Callback);
-                this->DeleteSpace(SpaceId, Callback);
+                auto NullResultCallback
+                    = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
+
+                this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
+                this->RemoveMetadata(SpaceId, NullResultCallback);
+                this->DeleteSpace(SpaceId, NullResultCallback);
 
                 Callback(MakeInvalid<SpaceResult>());
             }));
@@ -589,9 +592,12 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
                 {
                     const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
 
-                    this->RemoveSpaceThumbnail(SpaceId, Callback);
-                    this->RemoveMetadata(SpaceId, Callback);
-                    this->DeleteSpace(SpaceId, Callback);
+                    auto NullResultCallback
+                        = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
+
+                    this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
+                    this->RemoveMetadata(SpaceId, NullResultCallback);
+                    this->DeleteSpace(SpaceId, NullResultCallback);
 
                     Callback(MakeInvalid<SpaceResult>());
                 };

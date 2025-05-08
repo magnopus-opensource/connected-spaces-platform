@@ -175,19 +175,15 @@ public:
 
     CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
-    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
-    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode)) {};
+
     CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
-    CSP_NO_EXPORT SpaceResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
     SpaceResult() = default;
-    SpaceResult(void*) {};
 
 private:
+    SpaceResult(void*) {};
+
     void SetSpace(const Space& InSpace);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
