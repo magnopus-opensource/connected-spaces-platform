@@ -378,6 +378,48 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithThumbnailTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    FileAssetDataSource SpaceThumbnail;
+    const std::string LocalFileName = "OKO.png";
+    const auto FilePath = std::filesystem::absolute("assets/badpath/" + LocalFileName);
+    SpaceThumbnail.FilePath = FilePath.u8string().c_str();
+    SpaceThumbnail.SetMimeType("image/png");
+
+    // TODO: Add tests for public spaces
+    auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, TestSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr,
+        Map<String, String>({ { "site", "Void" } }), SpaceThumbnail, nullptr);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    // required as the GetSpaces will return out dated result before the request has been processed.
+    std::this_thread::sleep_for(700ms);
+
+    auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+
+    EXPECT_EQ(SpacesResult.GetSpaces().Size(), 0);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithTagsTest)
 {
     SetRandSeed();
@@ -537,36 +579,86 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailT
     CreateSpaceWithBuffer(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
 
-    {
-        auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-        EXPECT_FALSE(Result.GetUri().IsEmpty());
+    auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_FALSE(Result.GetUri().IsEmpty());
 
-        auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
-        EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
-        printf("Downloading asset data...\n");
+    auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+    printf("Downloading asset data...\n");
 
-        // Get asset uri
-        auto [uri_Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
-        ::Asset Asset;
-        Asset.FileName = "test.json";
-        Asset.Uri = uri_Result.GetUri();
-        // Get data
-        auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
+    // Get asset uri
+    auto [uri_Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
+    ::Asset Asset;
+    Asset.FileName = "test.json";
+    Asset.Uri = uri_Result.GetUri();
+    // Get data
+    auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-        EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-        size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
-        auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
-        memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
+    size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
+    auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
+    memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
 
-        EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-        EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
-    }
+    EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
+    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidBufferWithThumbnailTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    auto InviteUsers = CreateInviteUsers();
+
+    String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
+    FILE* UploadFile = nullptr;
+    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
+
+    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
+    fclose(UploadFile);
+
+    BufferAssetDataSource BufferSource;
+    BufferSource.Buffer = UploadFileData.get();
+    BufferSource.BufferLength = UploadFileSize;
+
+    BufferSource.SetMimeType("image/json");
+
+    auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpaceWithBuffer, RequestPredicate, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private,
+        InviteUsers, Map<String, String>({ { "site", "Void" } }), BufferSource, nullptr);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+    // required as the GetSpaces will return out dated result before the request has been processed.
+    std::this_thread::sleep_for(700ms);
+
+    auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+
+    EXPECT_EQ(SpacesResult.GetSpaces().Size(), 0);
 
     // Log out
     LogOut(UserSystem);
