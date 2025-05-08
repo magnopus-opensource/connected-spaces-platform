@@ -1452,6 +1452,7 @@ csp::multiplayer::mcs::ItemComponentData SpaceEntity::CreateItemComponentData(co
 // TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,
 // as we can create compile-time checking by using std::visit and function overloads.
 // This will prevent us forgetting to update this when we add new types.
+// https://magnopus.atlassian.net/browse/OF-1511
 mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ReplicatedValue& Value)
 {
     if (Value.GetReplicatedValueType() == ReplicatedValueType::Boolean)
