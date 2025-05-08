@@ -160,6 +160,24 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeInt64Test)
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeUint64Test)
+{
+    const uint64_t TestValue = 10;
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(ComponentValue);
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+
+    mcs::ItemComponentData DeserializedValue {};
+    Deserializer.ReadValue(DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeDoubleTest)
 {
     const double TestValue = 10.1;
