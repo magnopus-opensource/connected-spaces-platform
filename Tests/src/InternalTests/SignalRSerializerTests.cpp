@@ -227,7 +227,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayTest)
     EXPECT_EQ(DeserializedValue, Value);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleTypes)
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleTypesTest)
 {
     const auto Value = std::make_tuple(1ll, 2ull, 3.0, true, std::string { "Test" }, nullptr);
 
@@ -263,6 +263,59 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleTypes
     EXPECT_EQ(DeserializedValue, Value);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeArrayMultipleArraysTest)
+{
+    const auto Value = std::make_tuple(1ll, 2ull, std::make_tuple(5ull, std::string { "Test2" }), 3.0, true, std::string { "Test" }, nullptr);
+
+    SignalRSerializer Serializer;
+    Serializer.StartWriteArray();
+    {
+        Serializer.WriteValue(std::get<0>(Value));
+        Serializer.WriteValue(std::get<1>(Value));
+
+        Serializer.StartWriteArray();
+        {
+            Serializer.WriteValue(std::get<0>(std::get<2>(Value)));
+            Serializer.WriteValue(std::get<1>(std::get<2>(Value)));
+        }
+        Serializer.EndWriteArray();
+
+        Serializer.WriteValue(std::get<3>(Value));
+        Serializer.WriteValue(std::get<4>(Value));
+        Serializer.WriteValue(std::get<5>(Value));
+        Serializer.WriteValue(std::get<6>(Value));
+    }
+    Serializer.EndWriteArray();
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+    std::tuple<int64_t, uint64_t, std::tuple<uint64_t, std::string>, double, bool, std::string, nullptr_t> DeserializedValue;
+
+    size_t ArraySize = 0;
+    Deserializer.StartReadArray(ArraySize);
+    {
+        Deserializer.ReadValue(std::get<0>(DeserializedValue));
+        Deserializer.ReadValue(std::get<1>(DeserializedValue));
+
+        size_t ArraySize2 = 0;
+        Deserializer.StartReadArray(ArraySize2);
+        {
+            Deserializer.ReadValue(std::get<0>(std::get<2>(DeserializedValue)));
+            Deserializer.ReadValue(std::get<1>(std::get<2>(DeserializedValue)));
+        }
+        Deserializer.EndReadArray();
+
+        Deserializer.ReadValue(std::get<3>(DeserializedValue));
+        Deserializer.ReadValue(std::get<4>(DeserializedValue));
+        Deserializer.ReadValue(std::get<5>(DeserializedValue));
+        Deserializer.ReadValue(std::get<6>(DeserializedValue));
+    }
+    Deserializer.EndReadArray();
+
+    EXPECT_EQ(DeserializedValue, Value);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapTest)
 {
     std::map<uint64_t, std::string> Value { { 0, "Test1" }, { 1, "Test2" }, { 2, "Test3" } };
@@ -280,7 +333,7 @@ CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapTest)
     EXPECT_EQ(DeserializedValue, Value);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapMultipleTypes)
+CSP_INTERNAL_TEST(CSPEngine, SignalRSerializerTests, SerializeUintMapMultipleTypesTest)
 {
     std::pair<uint64_t, int64_t> Pair1 { 0, 1 };
     std::pair<uint64_t, uint64_t> Pair2 { 1, 2ull };

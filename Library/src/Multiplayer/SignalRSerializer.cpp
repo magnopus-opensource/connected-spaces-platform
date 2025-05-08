@@ -126,12 +126,8 @@ void SignalRDeserializer::StartReadArray(size_t& Size)
 
 void SignalRDeserializer::EndReadArray()
 {
-    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()) == false)
-    {
-        throw std::runtime_error("Invalid call: Deserializer was not in an array");
-    }
-
-    ObjectStack.pop();
+    EndReadArrayInternal();
+    IncrementIterator();
 }
 
 void SignalRDeserializer::StartReadUintMap(size_t& Size)
@@ -149,12 +145,8 @@ void SignalRDeserializer::StartReadUintMap(size_t& Size)
 }
 void SignalRDeserializer::EndReadUintMap()
 {
-    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
-    {
-        throw std::runtime_error("Invalid call: Deserializer was not in a uint map");
-    }
-
-    ObjectStack.pop();
+    EndReadUintMapInternal();
+    IncrementIterator();
 }
 
 void SignalRDeserializer::StartReadStringMap(size_t& Size)
@@ -173,12 +165,8 @@ void SignalRDeserializer::StartReadStringMap(size_t& Size)
 
 void SignalRDeserializer::EndReadStringMap()
 {
-    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()) == false)
-    {
-        throw std::runtime_error("Invalid call: Deserializer was not in a string map");
-    }
-
-    ObjectStack.pop();
+    EndReadStringMapInternal();
+    IncrementIterator();
 }
 
 const signalr::value& SignalRDeserializer::ReadNextValue()
@@ -195,6 +183,36 @@ const signalr::value& SignalRDeserializer::ReadNextValue()
     {
         throw std::runtime_error("Unexpected deserializer state");
     }
+}
+
+void SignalRDeserializer::EndReadArrayInternal()
+{
+    if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    {
+        throw std::runtime_error("Invalid call: Deserializer was not in an array");
+    }
+
+    ObjectStack.pop();
+}
+
+void SignalRDeserializer::EndReadUintMapInternal()
+{
+    if (std::holds_alternative<std::map<uint64_t, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    {
+        throw std::runtime_error("Invalid call: Deserializer was not in a uint map");
+    }
+
+    ObjectStack.pop();
+}
+
+void SignalRDeserializer::EndReadStringMapInternal()
+{
+    if (std::holds_alternative<std::map<std::string, signalr::value>::const_iterator>(ObjectStack.top()) == false)
+    {
+        throw std::runtime_error("Invalid call: Deserializer was not in a string map");
+    }
+
+    ObjectStack.pop();
 }
 
 const std::pair<std::uint64_t, signalr::value> SignalRDeserializer::ReadNextUintKeyValue() const

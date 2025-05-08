@@ -188,6 +188,10 @@ private:
     // Reads the next signalr value using the current iterator.
     const signalr::value& ReadNextValue();
 
+    void EndReadArrayInternal();
+    void EndReadUintMapInternal();
+    void EndReadStringMapInternal();
+
     const std::pair<std::uint64_t, signalr::value> ReadNextUintKeyValue() const;
     const std::pair<std::string, signalr::value> ReadNextStringKeyValue() const;
 
@@ -506,7 +510,7 @@ template <typename T> inline void SignalRDeserializer::ReadValueFromObjectIntern
         ReadValue(OutVal[i]);
     }
 
-    EndReadArray();
+    EndReadArrayInternal();
 }
 
 template <typename K, typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value&, std::map<K, T>& OutVal)
@@ -521,7 +525,7 @@ template <typename K, typename T> inline void SignalRDeserializer::ReadValueFrom
         OutVal[Pair.first] = Pair.second;
     }
 
-    EndReadUintMap();
+    EndReadUintMapInternal();
 }
 
 template <typename T> inline void SignalRDeserializer::ReadValueFromObjectInternal(const signalr::value&, std::map<std::string, T>& OutVal)
@@ -536,6 +540,6 @@ template <typename T> inline void SignalRDeserializer::ReadValueFromObjectIntern
         OutVal[Pair.first] = Pair.second;
     }
 
-    EndReadStringMap();
+    EndReadStringMapInternal();
 }
 }
