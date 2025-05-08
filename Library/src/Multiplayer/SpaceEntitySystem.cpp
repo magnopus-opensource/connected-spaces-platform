@@ -29,12 +29,14 @@
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "MCS/MCSTypes.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
+#include "SignalRSerializer.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
@@ -284,12 +286,10 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
         AvatarComponent->SetAvatarPlayMode(InAvatarPlayMode);
         AvatarComponent->SetUserId(UserSystem->GetLoginState().UserId);
 
-        SignalRMsgPackEntitySerialiser Serialiser;
+        mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
 
-        NewAvatar->Serialise(Serialiser);
-        const auto SerialisedUser = Serialiser.Finalise();
-
-        const std::vector InvokeArguments = { SerialisedUser };
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         const std::function LocalSendCallback = [this, Callback, NewAvatar](const signalr::value& /*Result*/, const std::exception_ptr& Except)
         {
@@ -319,7 +319,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
             Callback(NewAvatar);
         };
 
-        Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+        Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
     };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
@@ -599,17 +599,15 @@ void SpaceEntitySystem::BindOnRequestToSendObject()
             // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
             if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
             {
-                SignalRMsgPackEntitySerialiser Serialiser;
+                mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
 
-                MatchedEntity->Serialise(Serialiser);
-                const auto SerialisedObject = Serialiser.Finalise();
-
-                std::vector const InvokeArguments = { SerialisedObject };
+                SignalRSerializer Serializer;
+                Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
                 const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except)
                 { HandleException(Except, "Failed to send server requested object."); };
 
-                Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+                Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
             }
             else
             {
@@ -1127,7 +1125,7 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
     PendingAdds->emplace_back(EntityToAdd);
 }
 
-void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
+void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {
     const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {
@@ -1144,19 +1142,22 @@ void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::co
         }
     };
 
-    SignalRMsgPackEntitySerialiser Serialiser;
-    std::vector<signalr::value> ObjectPatches;
+    std::vector<mcs::ObjectPatch> Patches;
+    SignalRSerializer Serializer;
 
     for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
-        PendingEntities[i]->SerialisePatch(Serialiser);
-        auto SerialisedEntity = Serialiser.Finalise();
-        ObjectPatches.push_back(SerialisedEntity);
+        Patches.push_back(PendingEntities[i]->CreateObjectPatch());
     }
 
-    const std::vector InvokeArguments = { signalr::value(ObjectPatches) };
+    // We are writing multiple patches, so we need an additional nested array.
+    Serializer.StartWriteArray();
+    {
+        Serializer.WriteValue(Patches);
+    }
+    Serializer.EndWriteArray();
 
-    Connection->Invoke("SendObjectPatches", InvokeArguments, LocalCallback);
+    Connection->Invoke("SendObjectPatches", Serializer.Get(), LocalCallback);
 }
 
 void SpaceEntitySystem::ProcessPendingEntityOperations()
@@ -1237,7 +1238,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
         if (PendingEntities.Size() != 0)
         {
             // Send list of PendingEntities to chs
-            SendPatches(Connection, PendingEntities);
+            SendPatches(PendingEntities);
 
             // Loop through and apply local patches from generated list
             for (size_t i = 0; i < PendingEntities.Size(); ++i)
@@ -1387,12 +1388,10 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             NewObject->SetParentId(*InParent);
         }
 
-        SignalRMsgPackEntitySerialiser Serialiser;
+        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
 
-        NewObject->Serialise(Serialiser);
-        const auto SerialisedObject = Serialiser.Finalise();
-
-        const std::vector InvokeArguments = { SerialisedObject };
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
             = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
@@ -1419,7 +1418,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(NewObject);
         };
 
-        Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+        Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
     };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
