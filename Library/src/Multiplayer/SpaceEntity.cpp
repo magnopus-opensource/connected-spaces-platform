@@ -1424,6 +1424,15 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
         }
     }
 
+    // Finally handle any component deletions
+    ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
+
+    for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+    {
+        DeletionComponent.Id = TransientDeletionComponentIds[i];
+        ComponentData[DeletionComponent.Id] = CreateItemComponentData(&DeletionComponent);
+    }
+
     return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentData };
 }
 

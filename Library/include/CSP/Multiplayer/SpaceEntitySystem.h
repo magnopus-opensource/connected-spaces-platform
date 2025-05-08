@@ -369,6 +369,8 @@ private:
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
 
+    void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
+
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
     class ClientElectionManager* ElectionManager;
