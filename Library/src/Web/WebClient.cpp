@@ -319,6 +319,8 @@ void WebClient::ProcessRequest(HttpRequest* Request)
             {
                 if (!RetryIssued)
                 {
+                    CSP_LOG_FORMAT(
+                        csp::systems::LogLevel::VeryVerbose, "Services request %s has been sent.", Response.GetRequest()->GetUri().GetAsString());
                     const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
                     if (ResponseCode >= 400)
                     {
@@ -334,6 +336,8 @@ void WebClient::ProcessRequest(HttpRequest* Request)
             {
                 if (!RetryIssued)
                 {
+                    CSP_LOG_FORMAT(
+                        csp::systems::LogLevel::VeryVerbose, "Services request %s has been sent.", Response.GetRequest()->GetUri().GetAsString());
                     const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
                     if (ResponseCode >= 400)
                     {
@@ -399,9 +403,6 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     default:
         break;
     }
-
-    CSP_LOG_FORMAT(
-        csp::systems::LogLevel::VeryVerbose, "Services request %s %s has been sent.", Verb.c_str(), Response.GetRequest()->GetUri().GetAsString());
 
     if (ResponsePayload.IsEmpty())
     {
