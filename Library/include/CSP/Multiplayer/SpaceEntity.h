@@ -40,6 +40,13 @@ class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_T
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+
+class CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -47,6 +54,15 @@ namespace csp::multiplayer
 {
 class SpaceEntitySystem;
 class EntityScriptInterface;
+
+CSP_START_IGNORE
+namespace mcs
+{
+    class ItemComponentData;
+    class ObjectMessage;
+    class ObjectPatch;
+}
+CSP_END_IGNORE
 
 /// @brief Enum used to specify the the type of a space entity
 ///
@@ -126,6 +142,12 @@ class CSP_API SpaceEntity
     friend class ::CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -418,6 +440,11 @@ private:
     void AddChildEntitiy(SpaceEntity* ChildEntity);
 
     void ResolveParentChildRelationship();
+
+    csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
+    csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
+    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ComponentBase* Component);
+    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ReplicatedValue& Value);
 
     SpaceEntitySystem* EntitySystem;
 

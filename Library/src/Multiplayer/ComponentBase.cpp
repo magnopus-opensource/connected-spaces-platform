@@ -56,9 +56,9 @@ ComponentBase::~ComponentBase()
 
 uint16_t ComponentBase::GetId() { return Id; }
 
-ComponentType ComponentBase::GetComponentType() { return Type; }
+ComponentType ComponentBase::GetComponentType() const { return Type; }
 
-const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() { return &Properties; }
+const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
 const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 {
