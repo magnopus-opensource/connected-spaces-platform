@@ -133,6 +133,8 @@ public:
     CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
+    AssetCollectionResult() = default;
+
 private:
     AssetCollectionResult(void*) {};
 
