@@ -42,6 +42,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialConstructorTest)
     EXPECT_EQ(Material.GetMetallicFactor(), 1.f);
     EXPECT_EQ(Material.GetRoughnessFactor(), 1.f);
     EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
+    EXPECT_EQ(Material.GetEmissiveStrength(), 1.f);
     EXPECT_EQ(Material.GetAlphaCutoff(), 0.5f);
     EXPECT_EQ(Material.GetDoubleSided(), false);
 
@@ -89,6 +90,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialSetterTest)
     float TestMetallicFactor = 1.f;
     float TestRoughnessFactor = 2.f;
     csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
+    float TestEmissiveStrength = 1.f;
     float TestAlphaCutoff = 3.f;
     bool TestDoubleSided = true;
 
@@ -99,6 +101,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialSetterTest)
     Material.SetMetallicFactor(TestMetallicFactor);
     Material.SetRoughnessFactor(TestRoughnessFactor);
     Material.SetEmissiveFactor(TestEmissiveFactor);
+    Material.SetEmissiveStrength(TestEmissiveStrength);
     Material.SetAlphaCutoff(TestAlphaCutoff);
     Material.SetDoubleSided(TestDoubleSided);
 
@@ -108,6 +111,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialSetterTest)
     EXPECT_EQ(Material.GetMetallicFactor(), TestMetallicFactor);
     EXPECT_EQ(Material.GetRoughnessFactor(), TestRoughnessFactor);
     EXPECT_EQ(Material.GetEmissiveFactor(), TestEmissiveFactor);
+    EXPECT_EQ(Material.GetEmissiveStrength(), TestEmissiveStrength);
     EXPECT_EQ(Material.GetAlphaCutoff(), TestAlphaCutoff);
     EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
 }
@@ -165,6 +169,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     float TestMetallicFactor = 1.f;
     float TestRoughnessFactor = 2.f;
     csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
+    float TestEmissiveStrength = 1.f;
     float TestAlphaCutoff = 3.f;
     bool TestDoubleSided = true;
 
@@ -262,6 +267,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetMetallicFactor(), TestMetallicFactor);
     EXPECT_EQ(DeserializedMaterial.GetRoughnessFactor(), TestRoughnessFactor);
     EXPECT_EQ(DeserializedMaterial.GetEmissiveFactor(), TestEmissiveFactor);
+    EXPECT_EQ(DeserializedMaterial.GetEmissiveStrength(), TestEmissiveStrength);
     EXPECT_EQ(DeserializedMaterial.GetAlphaCutoff(), TestAlphaCutoff);
     EXPECT_EQ(DeserializedMaterial.GetDoubleSided(), TestDoubleSided);
 

@@ -30,6 +30,7 @@
  * - We want a shared location to enable common error management
  * - Continuations must be callables, so we need to return an invokable object, obvious choice is a lambda.
  * - Lambdas require auto return types, which require the definition to be known at point of call
+ *    --- !!! Not true, we discovered that even capturing lambdas can be stored in a std::function, this whole reasoning may be incorrect.
  * - We _could_ explicitly define continuation types with specific member variables to mimic capture,
  *   but I worry that losing the flexibility of capture lists will disincentivise future utilities.
  *   (Capture is the reason we can't use std::function or equivilants, we require state.)
@@ -58,6 +59,7 @@ csp_scheduler& default_scheduler();
 #include <async++.h>
 #include <memory>
 #include <optional>
+#include <signalrclient/signalr_value.h>
 #include <string>
 #include <type_traits>
 
@@ -228,8 +230,30 @@ template <typename ResultT> inline auto GetResultFromContinuation(std::shared_pt
     };
 }
 
+/* Continuations out of SignalR Invoke come back as a task<tuple<value, exception_ptr>>
+   This function transforms that into just a value, rethrowing the exception if it's populated. */
+template <bool ForwardResult = true>
+auto UnwrapSignalRResultOrThrow()
+    -> std::conditional_t<ForwardResult, std::function<signalr::value(std::tuple<const signalr::value&, std::exception_ptr>)>,
+        std::function<void(std::tuple<const signalr::value&, std::exception_ptr>)>>
+{
+    return [](std::tuple<const signalr::value&, std::exception_ptr> Results)
+    {
+        auto [Result, Exception] = Results;
+        if (Exception)
+        {
+            std::rethrow_exception(Exception);
+        }
+
+        if constexpr (ForwardResult)
+        {
+            return Result;
+        }
+    };
+}
+
 //"Private" namespace for testing, to allow us not to link async++ in tests,
-// for the few tests where we want to stricly test mechanisms.
+// for the few tests where we want to strictly test mechanisms.
 namespace detail
 {
     namespace testing
