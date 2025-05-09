@@ -29,11 +29,17 @@
 #include <mutex>
 #include <set>
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class task;
+template <typename T> class shared_task;
+CSP_END_IGNORE
+}
+
 namespace signalr
 {
-
 class value;
-
 } // namespace signalr
 
 namespace csp::memory
@@ -53,6 +59,12 @@ class SystemsManager;
 class SequenceSystem;
 
 } // namespace csp::systems
+
+class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -82,6 +94,13 @@ class CSP_API SpaceEntitySystem
     friend class EntityScript;
     friend class SpaceEntity;
     friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
+
+    // Tests
+    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
     /** @endcond */
     CSP_END_IGNORE
 
@@ -368,6 +387,16 @@ private:
 
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
+
+    // CreateAvatar Continuations
+    CSP_START_IGNORE
+    async::shared_task<uint64_t> RemoteGenerateNewAvatarId();
+    std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name,
+        const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
+    std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> CreateNewLocalAvatar(const csp::common::String& Name,
+        const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
+        EntityCreatedCallback Callback);
+    CSP_END_IGNORE
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;

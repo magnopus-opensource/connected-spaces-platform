@@ -51,7 +51,7 @@ public:
 
     void On(const std::string& EventName, const MethodInvokedHandler& Handler) override;
 
-    void Invoke(
+    async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
         const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
         std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {}) override;
 

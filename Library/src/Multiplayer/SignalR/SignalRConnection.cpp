@@ -17,6 +17,7 @@
 
 #include "Debug/Logging.h"
 #include "SignalRClient.h"
+#include <memory>
 
 #if ENABLE_SIGNALR_LOGGING
 #include <iostream>
@@ -106,15 +107,22 @@ void SignalRConnection::On(const std::string& EventName, const SignalRConnection
     Connection.on(EventName, Handler);
 }
 
-void SignalRConnection::Invoke(
+async::task<std::tuple<signalr::value, std::exception_ptr>> SignalRConnection::Invoke(
     const std::string& MethodName, const signalr::value& Arguments, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
 {
     CSP_PROFILE_SCOPED();
 
+    auto InvokeOnCompleteEvent = std::make_shared<async::event_task<std::tuple<signalr::value, std::exception_ptr>>>();
+    auto InvokeOnCompleteContinuation = InvokeOnCompleteEvent->get_task();
+
     std::function<void(const signalr::value&, std::exception_ptr)> InvocationCallback
-        = [Callback, this](const signalr::value& Value, std::exception_ptr ExceptionPtr)
+        = [Callback, this, CompleteContinuation = std::move(InvokeOnCompleteEvent)](const signalr::value& Value, std::exception_ptr ExceptionPtr)
     {
-        Callback(Value, ExceptionPtr);
+        if (Callback)
+        {
+            Callback(Value, ExceptionPtr);
+        }
+        CompleteContinuation->set(std::make_tuple(Value, ExceptionPtr));
 
         PendingInvocations--;
         if (PendingStopCallback && PendingInvocations == 0)
@@ -133,6 +141,7 @@ void SignalRConnection::Invoke(
 
     PendingInvocations++;
     Connection.invoke(MethodName, Arguments, InvocationCallback);
+    return InvokeOnCompleteContinuation;
 }
 
 void SignalRConnection::Send(const std::string& MethodName, const signalr::value& Arguments, std::function<void(std::exception_ptr)> Callback)

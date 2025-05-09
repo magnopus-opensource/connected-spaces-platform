@@ -27,8 +27,8 @@ public:
     MOCK_METHOD(std::string, GetConnectionId, (), (const, override));
     MOCK_METHOD(void, SetDisconnected, (const std::function<void(std::exception_ptr)>&), (override));
     MOCK_METHOD(void, On, (const std::string&, const MethodInvokedHandler&), (override));
-    MOCK_METHOD(
-        void, Invoke, (const std::string&, const signalr::value&, std::function<void(const signalr::value&, std::exception_ptr)>), (override));
+    MOCK_METHOD((async::task<std::tuple<signalr::value, std::exception_ptr>>), Invoke,
+        (const std::string&, const signalr::value&, std::function<void(const signalr::value&, std::exception_ptr)>), (override));
     MOCK_METHOD(void, Send, (const std::string&, const signalr::value&, std::function<void(std::exception_ptr)>), (override));
     MOCK_METHOD((const std::map<std::string, std::string>&), HTTPHeaders, (), (const, override));
 };
