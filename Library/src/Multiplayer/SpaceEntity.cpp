@@ -42,8 +42,10 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
@@ -1367,6 +1369,158 @@ void SpaceEntity::ResolveParentChildRelationship()
             Parent->ChildEntities.RemoveItem(this);
             Parent = nullptr;
         }
+    }
+}
+
+mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
+{
+    // First convert all of our view components to mcs compatible types.
+    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+
+    ComponentData[COMPONENT_KEY_VIEW_ENTITYNAME] = { std::string { GetName().c_str() } };
+    ComponentData[COMPONENT_KEY_VIEW_POSITION] = { std::vector<float> { GetPosition().X, GetPosition().Y, GetPosition().Z } };
+    ComponentData[COMPONENT_KEY_VIEW_ROTATION] = { std::vector<float> { GetRotation().X, GetRotation().Y, GetRotation().Z, GetRotation().W } };
+    ComponentData[COMPONENT_KEY_VIEW_SCALE] = { std::vector<float> { GetScale().X, GetScale().Y, GetScale().Z } };
+    ComponentData[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = { static_cast<int64_t>(GetSelectingClientID()) };
+    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYREF] = { std::string { GetThirdPartyRef() } };
+    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = { static_cast<int64_t>(GetThirdPartyPlatformType()) };
+    ComponentData[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(EntityLock) };
+
+    // Next convert all of our runtime components to mcs compatible types.
+    auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+    std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+        {
+            auto* Component = DirtyComponents[(*Keys)[i]].Component;
+            ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
+        }
+        else
+        {
+            assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+        }
+    }
+
+    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistant, OwnerId, Convert(ParentId), ComponentData };
+}
+
+mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
+{
+    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+
+    // First convert our modified view components to mcs compatible types.
+    {
+        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()), Deleter);
+
+        for (size_t i = 0; i < Keys->Size(); ++i)
+        {
+            ComponentData[(*Keys)[i]] = CreateItemComponentData(DirtyProperties[(*Keys)[i]]);
+        }
+    }
+
+    // Next convert all of our runtime components to mcs compatible types.
+    {
+        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+
+        for (size_t i = 0; i < Keys->Size(); ++i)
+        {
+            if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+            {
+                auto* Component = DirtyComponents[(*Keys)[i]].Component;
+                ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
+            }
+            else
+            {
+                assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+            }
+        }
+    }
+
+    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentData };
+}
+
+csp::multiplayer::mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ComponentBase* Component)
+{
+    std::map<uint16_t, mcs::ItemComponentData> ComponentProperties;
+
+    // Manually write the component type, as this isnt stored in the component properties.
+    // This is currently the ONLY value that uses a uint64 types as a key for some reason. The rest use int64.
+    ComponentProperties[COMPONENT_KEY_COMPONENTTYPE] = { static_cast<uint64_t>(Component->GetComponentType()) };
+
+    // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
+    auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
+    std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(
+        const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()), Deleter);
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        ComponentProperties[static_cast<uint16_t>((*Keys)[i])]
+            = CreateItemComponentData((*Component->GetProperties())[static_cast<uint32_t>((*Keys)[i])]);
+    }
+
+    return mcs::ItemComponentData { ComponentProperties };
+}
+
+// TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,
+// as we can create compile-time checking by using std::visit and function overloads.
+// This will prevent us forgetting to update this when we add new types.
+// https://magnopus.atlassian.net/browse/OF-1511
+mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ReplicatedValue& Value)
+{
+    if (Value.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+    {
+        return mcs::ItemComponentData { Value.GetBool() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Integer)
+    {
+        return mcs::ItemComponentData { Value.GetInt() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Float)
+    {
+        return mcs::ItemComponentData { Value.GetFloat() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::String)
+    {
+        return mcs::ItemComponentData { std::string { Value.GetString().c_str() } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+    {
+        common::Vector3 Vec = Value.GetVector3();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+    {
+        common::Vector4 Vec = Value.GetVector4();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z, Vec.W } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+    {
+        common::Vector2 Vec = Value.GetVector2();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::StringMap)
+    {
+        std::map<std::string, mcs::ItemComponentData> Map;
+
+        auto ReplicatedMap = Value.GetStringMap();
+        auto Deleter = [](const common::Array<csp::common::String>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<csp::common::String>, decltype(Deleter)> Keys(
+            const_cast<common::Array<csp::common::String>*>(ReplicatedMap.Keys()), Deleter);
+
+        for (auto Key : (*Keys))
+        {
+            Map[Key.c_str()] = CreateItemComponentData(ReplicatedMap[Key]);
+        }
+
+        return mcs::ItemComponentData { Map };
+    }
+    else
+    {
+        throw std::runtime_error("Invalid ReplicatedValue property");
     }
 }
 
