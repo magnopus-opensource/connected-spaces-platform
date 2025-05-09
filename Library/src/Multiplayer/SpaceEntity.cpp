@@ -128,6 +128,18 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 {
 }
 
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name,
+    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant)
+    : SpaceEntity(EntitySystem)
+{
+    this->Id = Id;
+    this->Name = Name;
+    this->Transform = Transform;
+    this->OwnerId = OwnerId;
+    this->IsTransferable = IsTransferable;
+    this->IsPersistant = IsPersistant;
+}
+
 SpaceEntity::~SpaceEntity()
 {
     auto& Keys = *Components.Keys();
@@ -391,6 +403,10 @@ void SpaceEntity::MarkForUpdate()
 #else
         EntitySystem->QueueEntityUpdate(this);
 #endif
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
     }
 }
 

@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <async++.h>
 #include <exception>
 #include <functional>
 #include <map>
@@ -48,7 +49,7 @@ public:
     virtual std::string GetConnectionId() const = 0;
     virtual void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback) = 0;
     virtual void On(const std::string& EventName, const MethodInvokedHandler& Handler) = 0;
-    virtual void Invoke(
+    virtual async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
         const std::string& MethodName, const signalr::value& Arguments,
         std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {})
         = 0;
