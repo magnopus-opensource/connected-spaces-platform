@@ -403,7 +403,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest
     SpaceThumbnail.FilePath = FilePath.u8string().c_str();
     SpaceThumbnail.SetMimeType("image/png");
 
-    // TODO: Add tests for public spaces
     auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, TestSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr,
         Map<String, String>({ { "site", "Void" } }), SpaceThumbnail, nullptr);
 
