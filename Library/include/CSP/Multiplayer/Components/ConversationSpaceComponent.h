@@ -238,7 +238,7 @@ public:
     /// @param Callback csp::multiplayer::AnnotationThumbnailCollectionResultCallback : Callback when asynchronous task finishes.
     /// @pre This component must contain a valid conversation id (component must have a conversation id that isn't an empty string).
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
-    void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
 
     typedef std::function<void(const ConversationEventParams&)> ConversationUpdateCallbackHandler;
 

@@ -23,14 +23,14 @@ namespace csp::multiplayer
 {
 
 AnnotationData::AnnotationData()
-    : VerticalFov(0)
+    : VerticalFov(0.0)
     , AuthorCameraPosition()
     , AuthorCameraRotation()
 {
 }
 
-AnnotationData::AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId,
-    const uint16_t InVerticalFov, const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
+AnnotationData::AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, double InVerticalFov,
+    const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation)
     : AnnotationId(AnnotationId)
     , AnnotationThumbnailId(AnnotationThumbnailId)
     , VerticalFov(InVerticalFov)
@@ -45,26 +45,6 @@ AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
     , AuthorCameraRotation(InAnnotationData.AuthorCameraRotation)
 {
 }
-
-csp::common::String AnnotationData::GetAnnotationId() const { return AnnotationId; }
-
-csp::common::String AnnotationData::GetAnnotationThumbnailId() const { return AnnotationThumbnailId; }
-
-uint16_t AnnotationData::GetVerticalFov() const { return VerticalFov; }
-
-csp::common::Vector3 AnnotationData::GetAuthorCameraPosition() const { return AuthorCameraPosition; }
-
-csp::common::Vector4 AnnotationData::GetAuthorCameraRotation() const { return AuthorCameraRotation; }
-
-void AnnotationData::SetAnnotationId(const csp::common::String& Id) { AnnotationId = Id; }
-
-void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& Id) { AnnotationThumbnailId = Id; }
-
-void AnnotationData::SetVerticalFov(const uint16_t InVerticalFov) { VerticalFov = InVerticalFov; }
-
-void AnnotationData::SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition) { AuthorCameraPosition = InAuthorCameraPosition; }
-
-void AnnotationData::SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation) { AuthorCameraRotation = InAuthorCameraRotation; }
 
 MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
 
