@@ -62,8 +62,8 @@ MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(MultiplayerTestRunner
     , ExitSpacePromise(std::exchange(other.ExitSpacePromise, std::promise<void>()))
     , LoggedOutPromise(std::exchange(other.LoggedOutPromise, std::promise<void>()))
     , TestToRun(other.TestToRun)
-    , LoginEmail(std::exchange(other.LoginEmail, std::optional<std::string>()))
-    , Password(std::exchange(other.Password, std::optional<std::string>()))
+    , LoginEmail(other.LoginEmail)
+    , Password(other.Password)
     , SpaceId(std::exchange(other.SpaceId, std::optional<std::string>()))
     , TimeoutInSeconds(std::exchange(other.TimeoutInSeconds, std::optional<int>()))
     , Endpoint(std::exchange(other.Endpoint, std::optional<std::string>()))
@@ -83,9 +83,9 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(Multiplaye
         this->LoggedOutPromise = std::exchange(other.LoggedOutPromise, std::promise<void>());
 
         this->TestToRun = other.TestToRun;
+        this->LoginEmail = other.LoginEmail;
+        this->Password = other.Password;
 
-        this->LoginEmail = std::exchange(other.LoginEmail, std::optional<std::string>());
-        this->Password = std::exchange(other.Password, std::optional<std::string>());
         this->SpaceId = std::exchange(other.SpaceId, std::optional<std::string>());
         this->TimeoutInSeconds = std::exchange(other.TimeoutInSeconds, std::optional<int>());
         this->Endpoint = std::exchange(other.Endpoint, std::optional<std::string>());
@@ -95,41 +95,41 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(Multiplaye
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string LoginEmail)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetLoginEmail(std::string SetLoginEmail)
 {
-    this->LoginEmail = std::move(LoginEmail);
+    this->LoginEmail = std::move(SetLoginEmail);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string Password)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetPassword(std::string SetPassword)
 {
-    this->Password = std::move(Password);
+    this->Password = std::move(SetPassword);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string SpaceId)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetSpaceId(std::string SetSpaceId)
 {
-    this->SpaceId = std::move(SpaceId);
+    this->SpaceId = std::move(SetSpaceId);
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int TimeoutInSeconds)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetTimeoutInSeconds(int SetTimeoutInSeconds)
 {
-    this->TimeoutInSeconds = TimeoutInSeconds;
+    this->TimeoutInSeconds = SetTimeoutInSeconds;
     return *this;
 }
 
-MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string Endpoint)
+MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::string SetEndpoint)
 {
-    this->Endpoint = std::move(Endpoint);
+    this->Endpoint = std::move(SetEndpoint);
     return *this;
 }
 
 namespace
 {
 /* Construct the CLI arguments to pass to MultiplayerTestRunner with spawning a TinyProcessLib::Process*/
-std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun, std::optional<std::string> LoginEmail,
-    std::optional<std::string> Password, std::optional<std::string> SpaceId, std::optional<int> TimeoutInSeconds, std::optional<std::string> Endpoint)
+std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun, std::string LoginEmail,
+    std::string Password, std::optional<std::string> SpaceId, std::optional<int> TimeoutInSeconds, std::optional<std::string> Endpoint)
 {
     std::vector<std::string> CLIArgs;
 
@@ -138,18 +138,10 @@ std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifi
     CLIArgs.push_back("MultiplayerTestRunner");
     CLIArgs.push_back("--test");
     CLIArgs.push_back(MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(TestToRun));
-
-    if (LoginEmail.has_value())
-    {
-        CLIArgs.push_back("--email");
-        CLIArgs.push_back(LoginEmail.value());
-    }
-
-    if (Password.has_value())
-    {
-        CLIArgs.push_back("--password");
-        CLIArgs.push_back(Password.value());
-    }
+    CLIArgs.push_back("--email");
+    CLIArgs.push_back(LoginEmail);
+    CLIArgs.push_back("--password");
+    CLIArgs.push_back(Password);
 
     if (SpaceId.has_value())
     {
@@ -182,9 +174,9 @@ bool ContainsStr(const std::string& ContainingString, const std::string& Contain
 
 MultiplayerTestRunner::TestIdentifiers::TestIdentifier MultiplayerTestRunnerProcess::GetTestToRun() const { return TestToRun; }
 
-std::optional<std::string> MultiplayerTestRunnerProcess::GetLoginEmail() const { return LoginEmail; }
+std::string MultiplayerTestRunnerProcess::GetLoginEmail() const { return LoginEmail; }
 
-std::optional<std::string> MultiplayerTestRunnerProcess::GetPassword() const { return Password; }
+std::string MultiplayerTestRunnerProcess::GetPassword() const { return Password; }
 
 std::optional<std::string> MultiplayerTestRunnerProcess::GetSpaceId() const { return SpaceId; }
 
@@ -217,7 +209,7 @@ void MultiplayerTestRunnerProcess::StartProcess()
         {
             // STDOUT
             std::string StdOutStr = std::string(bytes, n);
-            // You might want to put std::cout << StdOutStr << std::endl; here when debugging.
+            std::cout << StdOutStr << std::endl;
 
             if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR))
             {

@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/IEntitySerialiser.h"
+#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 #include "CSP/ThirdPartyPlatforms.h"
 #include "SpaceEntitySystem.h"
@@ -28,6 +29,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <mutex>
 
 CSP_START_IGNORE
@@ -37,14 +39,30 @@ class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
+class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+
+class CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
+class CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
 CSP_END_IGNORE
 
 namespace csp::multiplayer
 {
 class SpaceEntitySystem;
-class EntityScript;
 class EntityScriptInterface;
+
+CSP_START_IGNORE
+namespace mcs
+{
+    class ItemComponentData;
+    class ObjectMessage;
+    class ObjectPatch;
+}
+CSP_END_IGNORE
 
 /// @brief Enum used to specify the the type of a space entity
 ///
@@ -92,6 +110,17 @@ enum SpaceEntityUpdateFlags
     UPDATE_FLAGS_THIRD_PARTY_REF = 64,
     UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
     UPDATE_FLAGS_PARENT = 256,
+    UPDATE_FLAGS_LOCK_TYPE = 512,
+};
+
+/// @brief Enum used to specify a lock type that has been added to an entity.
+/// Upon creation, entities have the 'None' lock type.
+enum class LockType
+{
+    /// @brief The entity doesn't have a lock.
+    None,
+    /// @brief The Entity cannot be mutated by anyone. Anyone can remove the lock.
+    UserAgnostic
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -111,6 +140,14 @@ class CSP_API SpaceEntity
     friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRSerialisationTest_Test;
     friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
     friend class ::CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
+    friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
+    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -133,6 +170,11 @@ public:
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
     SpaceEntity(SpaceEntitySystem* InEntitySystem);
+
+    /// Internal constructor to explicitly create a SpaceEntity in a specified state.
+    /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
+        uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -214,7 +256,7 @@ public:
 
     /// @brief Get the third party platform type of this entity.
     /// @return A string representing third party platform type set for this entity.
-    const csp::systems::EThirdPartyPlatform GetThirdPartyPlatformType() const;
+    csp::systems::EThirdPartyPlatform GetThirdPartyPlatformType() const;
 
     /// @brief Set third party platform type for this entity.
     /// @param InThirdPartyPlatformType csp::systems::EThirdPartyPlatform : The third party platform type to set.
@@ -309,7 +351,7 @@ public:
 
     /// @brief Serialise the entire SpaceEntity into object message format into the given serialiser. Does not send a message.
     /// @param Serialiser IEntitySerialiser : The serialiser to use.
-    void Serialise(IEntitySerialiser& Serialiser);
+    void Serialise(IEntitySerialiser& Serialiser) const;
 
     /// @brief Serialises a given component into a consistent format for the given serialiser.
     /// @param Serialiser IEntitySerialiser : The serialiser to use.
@@ -322,7 +364,7 @@ public:
 
     /// @brief Gets the script associated with the space entity.
     /// @return The EntityScript instance set on the entity.
-    csp::multiplayer::EntityScript* GetScript();
+    EntityScript& GetScript();
 
     /// @brief Returns the selection state of the entity.
     /// @return Selection state of the entity, Selected = True, Deselected = False.
@@ -348,8 +390,25 @@ public:
     /// @brief Checks if the entity can be modified.
     /// Specifically whether the local client already owns the entity or can take ownership of the entity.
     /// @return True if the entity can be modified, False if not.
-    bool IsModifiable();
-    void MarkForUpdate();
+    bool IsModifiable() const;
+
+    /// @brief Locks the entity if it hasn't been locked already.
+    /// @pre The entity must not already be locked.
+    /// A CSP error will be sent to the LogSystem if this condition is not met.
+    /// @post This internally sets the lock type as a dirty property.
+    /// This entity should now be replicated, to process the change.
+    void Lock();
+
+    /// @brief Unlocks the entity if the entity is locked
+    /// @pre The entity must be locked.
+    /// A CSP error will be sent to the LogSystem if this condition is not met.
+    /// @post This internally sets the lock type as a dirty property.
+    /// This entity should now be replicated, to process the change.
+    void Unlock();
+
+    /// @brief Checks if the entity has a lock type other than LockType::None, set by calling SpaceEntity::Lock.
+    /// @return bool
+    bool IsLocked() const;
 
 private:
     class DirtyComponent
@@ -365,12 +424,8 @@ private:
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
     void AddDirtyComponent(ComponentBase* DirtyComponent);
 
-    void AddRef();
-    void RemoveRef();
-    std::atomic_int* GetRefCount();
-
     void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
-    csp::multiplayer::EntityScriptInterface* GetScriptInterface();
+    EntityScriptInterface* GetScriptInterface();
 
 
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
@@ -383,6 +438,11 @@ private:
     void AddChildEntitiy(SpaceEntity* ChildEntity);
 
     void ResolveParentChildRelationship();
+
+    csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
+    csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
+    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ComponentBase* Component);
+    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ReplicatedValue& Value);
 
     SpaceEntitySystem* EntitySystem;
 
@@ -403,6 +463,8 @@ private:
     SpaceEntity* Parent;
     csp::common::List<SpaceEntity*> ChildEntities;
 
+    LockType EntityLock;
+
     UpdateCallback EntityUpdateCallback;
     DestroyCallback EntityDestroyCallback;
     CallbackHandler EntityPatchSentCallback;
@@ -412,14 +474,14 @@ private:
     csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
     uint16_t NextComponentId;
 
-    csp::multiplayer::EntityScript* Script;
-    csp::multiplayer::EntityScriptInterface* ScriptInterface;
+    EntityScript Script;
+    std::unique_ptr<EntityScriptInterface> ScriptInterface;
 
-    std::mutex* EntityLock;
-    std::mutex* ComponentsLock;
-    std::mutex* PropertiesLock;
-
-    std::atomic_int* RefCount;
+    CSP_START_IGNORE
+    mutable std::mutex EntityMutexLock;
+    mutable std::mutex ComponentsLock;
+    mutable std::mutex PropertiesLock;
+    CSP_END_IGNORE
 
     csp::common::List<uint16_t> TransientDeletionComponentIds;
 

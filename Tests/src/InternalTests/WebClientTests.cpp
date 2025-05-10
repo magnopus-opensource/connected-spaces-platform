@@ -131,7 +131,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     HttpPayload Payload;
 
-    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -147,6 +149,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
     JsonDoc.AddMember("job", "builder", JsonDoc.GetAllocator());
 
     Payload.SetContent(JsonDoc);
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, Payload, EResponseCodes::ResponseOK);
 
@@ -166,6 +169,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
     Payload.SetContent(JsonDoc);
 
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseOK);
 
@@ -177,6 +181,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
 
@@ -366,6 +371,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
@@ -377,6 +383,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/apiiii/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
@@ -389,6 +396,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 
     HttpPayload Payload;
     Payload.AddContent("{ \"email\": \"test@olympus\" }");
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/register", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseBadRequest);
 
@@ -439,7 +447,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 
     HttpPayload Payload;
     RunWebClientTest<RetryResponseReceiver>(
-        "https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
+        (std::string(EndpointBaseURI()) + "/mag-user/appsettings").c_str(), ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
 
     csp::CSPFoundation::Shutdown();
 }

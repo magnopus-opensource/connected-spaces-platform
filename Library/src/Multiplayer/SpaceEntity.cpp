@@ -43,8 +43,10 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
@@ -97,13 +99,10 @@ SpaceEntity::SpaceEntity()
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
+    , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, nullptr))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(this, nullptr)
+    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , TimeOfLastPatch(0)
 {
 }
@@ -122,34 +121,35 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
+    , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(CSP_NEW EntityScript(this, InEntitySystem))
-    , ScriptInterface(CSP_NEW EntityScriptInterface(this))
-    , EntityLock(CSP_NEW std::mutex)
-    , ComponentsLock(CSP_NEW std::mutex)
-    , PropertiesLock(CSP_NEW std::mutex)
-    , RefCount(CSP_NEW std::atomic_int(0))
+    , Script(this, InEntitySystem)
+    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , TimeOfLastPatch(0)
 {
+}
+
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name,
+    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant)
+    : SpaceEntity(EntitySystem)
+{
+    this->Id = Id;
+    this->Name = Name;
+    this->Transform = Transform;
+    this->OwnerId = OwnerId;
+    this->IsTransferable = IsTransferable;
+    this->IsPersistant = IsPersistant;
 }
 
 SpaceEntity::~SpaceEntity()
 {
     auto& Keys = *Components.Keys();
 
-    auto i = 0;
+    size_t i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
         CSP_DELETE(Components[Keys[i]]);
     }
-
-    CSP_DELETE(Script);
-    CSP_DELETE(ScriptInterface);
-
-    CSP_DELETE(EntityLock);
-    CSP_DELETE(ComponentsLock);
-    CSP_DELETE(PropertiesLock);
-    CSP_DELETE(RefCount);
 }
 
 uint64_t SpaceEntity::GetId() const { return Id; }
@@ -168,7 +168,7 @@ void SpaceEntity::SetName(const csp::common::String& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_ENTITYNAME);
 
@@ -219,7 +219,7 @@ void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_POSITION);
 
@@ -256,7 +256,7 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_ROTATION);
 
@@ -285,7 +285,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_SCALE);
 
@@ -309,7 +309,7 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYREF);
 
@@ -329,7 +329,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
         return;
     }
 
-    std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM);
 
@@ -339,7 +339,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
     }
 }
 
-const csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
+csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -405,6 +405,10 @@ void SpaceEntity::MarkForUpdate()
         EntitySystem->QueueEntityUpdate(this);
 #endif
     }
+    else
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
+    }
 }
 
 const csp::common::Map<uint16_t, ComponentBase*>* SpaceEntity::GetComponents() const { return &Components; }
@@ -421,11 +425,11 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
+ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
-    if (Type == ComponentType::ScriptData)
+    if (AddType == ComponentType::ScriptData)
     {
         ComponentBase* ScriptComponent = FindFirstComponentOfType(ComponentType::ScriptData, true);
 
@@ -439,12 +443,13 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
     }
 
     auto ComponentId = GenerateComponentId();
-    auto* Component = InstantiateComponent(ComponentId, Type);
+    auto* Component = InstantiateComponent(ComponentId, AddType);
 
     // If Component is null, component has not been instantiated, so is skipped.
     if (Component != nullptr)
     {
         DirtyComponents[ComponentId] = DirtyComponent { Component, ComponentUpdateType::Add };
+        Component->OnCreated();
     }
 
     return Component;
@@ -452,7 +457,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 void SpaceEntity::RemoveComponent(uint16_t Key)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (!TransientDeletionComponentIds.Contains(Key) || Components.HasKey(Key))
     {
@@ -467,7 +472,7 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
 
 void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Serialiser.BeginEntity();
     {
@@ -519,12 +524,16 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
             {
                 Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYREF].GetInt());
             }
+            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE].GetInt());
+            }
 
             assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            int i = 0;
+            size_t i = 0;
             for (i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 if (DirtyComponents[DirtyComponentKeys[i]].Component != nullptr)
@@ -554,9 +563,9 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
     Serialiser.EndEntity();
 }
 
-void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
+void SpaceEntity::Serialise(IEntitySerialiser& Serialiser) const
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Serialiser.BeginEntity();
     {
@@ -576,12 +585,13 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(SelectedId));
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(ThirdPartyPlatform));
             Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
+            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, static_cast<int64_t>(EntityLock));
 
             assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
             const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
 
-            for (int i = 0; i < DirtyComponentKeys.Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys.Size(); ++i)
             {
                 auto* Component = DirtyComponents[DirtyComponentKeys[i]].Component;
 
@@ -597,7 +607,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 
 void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     Deserialiser.EnterEntity();
     {
@@ -634,24 +644,25 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
             {
                 Deserialiser.EnterComponent(ComponentId, _ComponentType);
                 {
-                    auto Type = (ComponentType)_ComponentType;
+                    auto CompType = (ComponentType)_ComponentType;
 
-                    if (Type != ComponentType::Invalid)
+                    if (CompType != ComponentType::Invalid)
                     {
-                        auto* Component = InstantiateComponent(ComponentId, Type);
+                        auto* Component = InstantiateComponent(ComponentId, CompType);
 
                         // if Component == nullptr component has not been instantiated, so is skipped.
                         if (Component != nullptr)
                         {
                             Components[ComponentId] = Component;
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
 
                                 uint32_t Key = CheckedUInt64ToUint32(PropertyKey);
                                 Component->Properties[Key] = PropertyValue;
+                                Component->OnCreated();
                             }
                         }
                     }
@@ -682,6 +693,12 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
             {
                 ThirdPartyRef = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF).GetString();
             }
+
+            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                auto Value = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt();
+                EntityLock = static_cast<LockType>(Value);
+            }
         }
         Deserialiser.LeaveComponents();
     }
@@ -692,7 +709,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 {
     SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
 
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
@@ -749,6 +766,12 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                 UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
             }
 
+            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
+            {
+                EntityLock = static_cast<LockType>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt());
+                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
+            }
+
             if (RealComponentCount > 0)
             {
                 UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
@@ -777,7 +800,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                         {
                             auto* Component = Components[ComponentKey];
 
-                            for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                             {
                                 uint64_t PropertyKey;
                                 auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -794,7 +817,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                             // if Component != nullptr component has not been Instantiate, so is skipped.
                             if (Component != nullptr)
                             {
-                                for (int i = 0; i < Deserialiser.GetNumProperties(); ++i)
+                                for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
                                 {
                                     uint64_t PropertyKey;
                                     auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
@@ -804,6 +827,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                                 }
 
                                 Components[ComponentKey] = Component;
+                                Component->OnCreated();
                             }
                             break;
                         }
@@ -840,8 +864,8 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
     if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
     {
-        std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
-        std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+        std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+        std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
         auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
@@ -855,7 +879,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
 
-            for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
             {
                 uint16_t ComponentKey = DirtyComponentKeys->operator[](i);
 
@@ -882,7 +906,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     /*const csp::common::Map<uint32_t, ReplicatedValue> DirtyComponentProperties = DirtyComponents[i].Component->DirtyProperties;
                     const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys			  = DirtyComponentProperties.Keys();
 
-                    for (int j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
+                    for (size_t j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
                     {
                             uint32_t PropertyKey							  = DirtyComponentPropertyKeys->operator[](j);
                             Components[ComponentKey]->Properties[PropertyKey] = DirtyComponentProperties[PropertyKey];
@@ -908,7 +932,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             const csp::common::Array<uint16_t>* DirtyViewKeys = DirtyProperties.Keys();
 
-            for (int i = 0; i < DirtyViewKeys->Size(); ++i)
+            for (size_t i = 0; i < DirtyViewKeys->Size(); ++i)
             {
                 uint16_t PropertyKey = DirtyViewKeys->operator[](i);
                 switch (PropertyKey)
@@ -941,6 +965,10 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     ThirdPartyPlatform = static_cast<csp::systems::EThirdPartyPlatform>(DirtyProperties[PropertyKey].GetInt());
                     UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
                     break;
+                case COMPONENT_KEY_VIEW_LOCKTYPE:
+                    EntityLock = static_cast<LockType>(DirtyProperties[PropertyKey].GetInt());
+                    UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
+                    break;
                 default:
                     break;
                 }
@@ -954,7 +982,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         {
             DirtyComponentKeys = DirtyComponents.Keys();
 
-            for (int i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+            for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
             {
                 if (Components.HasKey(TransientDeletionComponentIds[i]))
                 {
@@ -991,31 +1019,31 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 
 uint16_t SpaceEntity::GenerateComponentId()
 {
-    auto Id = NextComponentId;
+    auto NextId = NextComponentId;
 
     for (;;)
     {
-        if (!Components.HasKey(Id) && !DirtyComponents.HasKey(Id))
+        if (!Components.HasKey(NextId) && !DirtyComponents.HasKey(NextId))
         {
-            NextComponentId = Id + 1;
+            NextComponentId = NextId + 1;
 
-            return Id;
+            return NextId;
         }
 
-        ++Id;
+        ++NextId;
 
-        if (Id == COMPONENT_KEY_END_COMPONENTS)
+        if (NextId == COMPONENT_KEY_END_COMPONENTS)
         {
-            Id = COMPONENT_KEY_START_COMPONENTS;
+            NextId = COMPONENT_KEY_START_COMPONENTS;
         }
     }
 }
 
-ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type)
+ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, ComponentType InstantiateType)
 {
     ComponentBase* Component;
 
-    switch (Type)
+    switch (InstantiateType)
     {
     case ComponentType::StaticModel:
         Component = CSP_NEW StaticModelSpaceComponent(this);
@@ -1091,12 +1119,13 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
         break;
     default:
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning, csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
+        CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+            csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
         return nullptr;
     }
     }
 
-    Component->Id = Id;
+    Component->Id = InstantiateId;
 
     return Component;
 }
@@ -1108,7 +1137,7 @@ void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBas
         auto& Properties = Component->Properties;
         const auto& Keys = Properties.Keys();
 
-        for (int j = 0; j < Keys->Size(); ++j)
+        for (size_t j = 0; j < Keys->Size(); ++j)
         {
             auto& Key = Keys->operator[](j);
             auto& Property = Properties[Key];
@@ -1121,7 +1150,7 @@ void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBas
 
 void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (DirtyComponents.HasKey(Component->GetId()))
     {
@@ -1131,7 +1160,7 @@ void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
     DirtyComponents[Component->GetId()] = DirtyComponent { Component, ComponentUpdateType::Update };
 }
 
-EntityScript* SpaceEntity::GetScript() { return Script; }
+EntityScript& SpaceEntity::GetScript() { return Script; }
 
 bool SpaceEntity::IsSelected() const { return SelectedId != 0; }
 
@@ -1139,27 +1168,74 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 
 bool SpaceEntity::Select()
 {
-    std::scoped_lock EntitiesLocker(*EntityLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(true, this);
 }
 
 bool SpaceEntity::Deselect()
 {
-    std::scoped_lock EntitiesLocker(*EntityLock);
+    std::scoped_lock EntitiesLocker(EntityMutexLock);
     return EntitySystem->SetSelectionStateOfEntity(false, this);
 }
 
-bool SpaceEntity::IsModifiable()
+bool SpaceEntity::IsModifiable() const
 {
-    if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
+    if (EntitySystem == nullptr || csp::systems::SystemsManager::Get().GetMultiplayerConnection() == nullptr)
     {
-        return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
-    }
-    else
-    {
+        // Return true here so entities that arent attached to the entity system can be modified.
+        // This is currently used for testing.
         return true;
     }
+
+    if (EntityLock == LockType::UserAgnostic &&
+        // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
+        // so we skip the lock check they are about to unlock.
+        // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
+        (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE) == false))
+    {
+        return false;
+    }
+
+    return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
 }
+
+void SpaceEntity::Lock()
+{
+    if (IsLocked())
+    {
+        CSP_LOG_ERROR_MSG("Entity is already locked.")
+        return;
+    }
+
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                             "owner of. Entity name: %s",
+            Name.c_str());
+        return;
+    }
+
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+
+    DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
+}
+
+void SpaceEntity::Unlock()
+{
+    if (IsLocked() == false)
+    {
+        CSP_LOG_ERROR_MSG("Entity is not currently locked.")
+        return;
+    }
+
+    std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
+
+    DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::None));
+}
+
+bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
 {
@@ -1210,16 +1286,16 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
     }
 }
 
-ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents) const
+ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, bool SearchDirtyComponents) const
 {
     const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
     ComponentBase* LocatedComponent = nullptr;
 
-    for (int i = 0; i < ComponentKeys->Size(); ++i)
+    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         ComponentBase* Component = Components[ComponentKeys->operator[](i)];
 
-        if (Component->GetComponentType() == Type)
+        if (Component->GetComponentType() == FindType)
         {
             LocatedComponent = Component;
             break;
@@ -1232,11 +1308,11 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
     {
         const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
 
-        for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
         {
             const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
 
-            if (Component.UpdateType != ComponentUpdateType::Delete && Component.Component->GetComponentType() == Type)
+            if (Component.UpdateType != ComponentUpdateType::Delete && Component.Component->GetComponentType() == FindType)
             {
                 LocatedComponent = Component.Component;
                 break;
@@ -1300,18 +1376,164 @@ void SpaceEntity::ResolveParentChildRelationship()
     }
 }
 
-csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface; }
+mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
+{
+    // First convert all of our view components to mcs compatible types.
+    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+
+    ComponentData[COMPONENT_KEY_VIEW_ENTITYNAME] = { std::string { GetName().c_str() } };
+    ComponentData[COMPONENT_KEY_VIEW_POSITION] = { std::vector<float> { GetPosition().X, GetPosition().Y, GetPosition().Z } };
+    ComponentData[COMPONENT_KEY_VIEW_ROTATION] = { std::vector<float> { GetRotation().X, GetRotation().Y, GetRotation().Z, GetRotation().W } };
+    ComponentData[COMPONENT_KEY_VIEW_SCALE] = { std::vector<float> { GetScale().X, GetScale().Y, GetScale().Z } };
+    ComponentData[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = { static_cast<int64_t>(GetSelectingClientID()) };
+    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYREF] = { std::string { GetThirdPartyRef() } };
+    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = { static_cast<int64_t>(GetThirdPartyPlatformType()) };
+    ComponentData[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(EntityLock) };
+
+    // Next convert all of our runtime components to mcs compatible types.
+    auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+    std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+        {
+            auto* Component = DirtyComponents[(*Keys)[i]].Component;
+            ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
+        }
+        else
+        {
+            assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+        }
+    }
+
+    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistant, OwnerId, Convert(ParentId), ComponentData };
+}
+
+mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
+{
+    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+
+    // First convert our modified view components to mcs compatible types.
+    {
+        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()), Deleter);
+
+        for (size_t i = 0; i < Keys->Size(); ++i)
+        {
+            ComponentData[(*Keys)[i]] = CreateItemComponentData(DirtyProperties[(*Keys)[i]]);
+        }
+    }
+
+    // Next convert all of our runtime components to mcs compatible types.
+    {
+        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+
+        for (size_t i = 0; i < Keys->Size(); ++i)
+        {
+            if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+            {
+                auto* Component = DirtyComponents[(*Keys)[i]].Component;
+                ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
+            }
+            else
+            {
+                assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+            }
+        }
+    }
+
+    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentData };
+}
+
+csp::multiplayer::mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ComponentBase* Component)
+{
+    std::map<uint16_t, mcs::ItemComponentData> ComponentProperties;
+
+    // Manually write the component type, as this isnt stored in the component properties.
+    // This is currently the ONLY value that uses a uint64 types as a key for some reason. The rest use int64.
+    ComponentProperties[COMPONENT_KEY_COMPONENTTYPE] = { static_cast<uint64_t>(Component->GetComponentType()) };
+
+    // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
+    auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
+    std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(
+        const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()), Deleter);
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        ComponentProperties[static_cast<uint16_t>((*Keys)[i])]
+            = CreateItemComponentData((*Component->GetProperties())[static_cast<uint32_t>((*Keys)[i])]);
+    }
+
+    return mcs::ItemComponentData { ComponentProperties };
+}
+
+// TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,
+// as we can create compile-time checking by using std::visit and function overloads.
+// This will prevent us forgetting to update this when we add new types.
+// https://magnopus.atlassian.net/browse/OF-1511
+mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ReplicatedValue& Value)
+{
+    if (Value.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+    {
+        return mcs::ItemComponentData { Value.GetBool() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Integer)
+    {
+        return mcs::ItemComponentData { Value.GetInt() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Float)
+    {
+        return mcs::ItemComponentData { Value.GetFloat() };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::String)
+    {
+        return mcs::ItemComponentData { std::string { Value.GetString().c_str() } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+    {
+        common::Vector3 Vec = Value.GetVector3();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+    {
+        common::Vector4 Vec = Value.GetVector4();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z, Vec.W } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+    {
+        common::Vector2 Vec = Value.GetVector2();
+        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y } };
+    }
+    else if (Value.GetReplicatedValueType() == ReplicatedValueType::StringMap)
+    {
+        std::map<std::string, mcs::ItemComponentData> Map;
+
+        auto ReplicatedMap = Value.GetStringMap();
+        auto Deleter = [](const common::Array<csp::common::String>* Ptr) { CSP_DELETE(Ptr); };
+        std::unique_ptr<common::Array<csp::common::String>, decltype(Deleter)> Keys(
+            const_cast<common::Array<csp::common::String>*>(ReplicatedMap.Keys()), Deleter);
+
+        for (auto Key : (*Keys))
+        {
+            Map[Key.c_str()] = CreateItemComponentData(ReplicatedMap[Key]);
+        }
+
+        return mcs::ItemComponentData { Map };
+    }
+    else
+    {
+        throw std::runtime_error("Invalid ReplicatedValue property");
+    }
+}
+
+csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }
 
 
 void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
 {
-    Script->OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
+    Script.OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
 }
-
-void SpaceEntity::AddRef() { ++(*RefCount); }
-
-void SpaceEntity::RemoveRef() { --(*RefCount); }
-
-std::atomic_int* SpaceEntity::GetRefCount() { return RefCount; }
 
 } // namespace csp::multiplayer

@@ -173,8 +173,8 @@ if not Project then
 			buildoptions {
 				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
 				"-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
-				"-Wno-error=unused-lambda-capture", --This shouldn't be disabled, we just had to rush to unblock android builds. Take all the this captures out and remove.
-				"-Wno-unknown-pragmas", --Also not the greatest. This is to try and suppress a signalR warning, even though the signalR project dosen't emit warnings (I think this error is a bit unique cause of preprocessor stuff)
+				"-Wno-missing-field-initializers", -- Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+				"-Wno-unknown-pragmas", --Not the greatest. This is to try and suppress a signalR warning, even though the signalR project dosen't emit warnings (I think this error is a bit unique cause of preprocessor stuff)
 				"-Wno-error=nonportable-include-path", --Include paths dont match file structure. Should get around to fixing
 				"-Wno-error=format-security" --In logging, __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str()) is unnaceptable for some reason.
             }
@@ -215,7 +215,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init"
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
 			}
 
             links { 
@@ -236,7 +236,7 @@ if not Project then
 			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
 			-- These disables are to do with warnings in generated code that we should get around to dealing with.
 			xcodebuildsettings {
-				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init"
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
 			}
 
             links {
@@ -254,9 +254,11 @@ if not Project then
             buildoptions {
                 "--no-entry",           -- remove default library entry point
                 "-pthread",             -- enable threading
-                "-fwasm-exceptions",     -- enable native wasm exceptions
-				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
-				"-Wno-braced-scalar-init" -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+                "-fwasm-exceptions",    -- enable native wasm exceptions
+                "-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
+                "-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+                "-Wno-missing-field-initializers", -- Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+                "-Wno-ignored-qualifiers" -- Don't warn against ignored qualifiers, e.g. "const qualifier on return type has no effect" (because of the wrapper generator)
             }
 
             linkoptions { 
@@ -268,7 +270,6 @@ if not Project then
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
                 "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
-                "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
                 "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
@@ -292,10 +293,17 @@ if not Project then
                 "]",
                 --"-sUSE_ES6_IMPORT_META=0"                                       -- disable use of import.meta as it is not yet supported everywhere
             }
-
+            
             links {
                 "websocket.js"
             }
+        -- Compile with or without node support. Node support is used for headless testing.
+        -- In theory, applications should be able to consume emscripten libraries with node compiled in no problem, but it hasn't worked out that way in practice.
+        filter { "platforms:wasm", "options:wasm_with_node" }
+            linkoptions {"-sENVIRONMENT='web,worker,node'" }   
+        filter { "platforms:wasm", "not options:wasm_with_node" }
+            linkoptions { "-sENVIRONMENT='web,worker'" }   
+
         filter { "platforms:wasm", "configurations:*Debug*" }
             buildoptions {
                 "-gdwarf-5",

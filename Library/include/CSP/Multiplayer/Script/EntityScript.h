@@ -38,13 +38,13 @@ class ScriptSpaceComponent;
 /// Provides functions for setting the script source, subscribing to property changes and messages and other script management.
 class CSP_API EntityScript
 {
-    CSP_START_IGNORE
-    /** @cond DO_NOT_DOCUMENT */
-    friend class SpaceEntity;
-    /** @endcond */
-    CSP_END_IGNORE
 
 public:
+    // Don't want to be constructable by public users.
+    CSP_START_IGNORE
+    EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem);
+    CSP_END_IGNORE
+
     /// @brief Destroy the instance of EntityScript.
     ~EntityScript();
 
@@ -123,7 +123,7 @@ public:
     void Shutdown();
 
 private:
-    EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem);
+    EntityScript(); // Just to appease the generator :(
 
     void CheckBinding();
 

@@ -47,7 +47,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -69,7 +68,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -93,10 +92,9 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 0.0f);
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
     EXPECT_EQ(VideoComponent->GetIsVisible(), true);
-    EXPECT_EQ(VideoComponent->GetMeshComponentId(), 0);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
 
-    auto* ModelComponent = static_cast<VideoPlayerSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
+    CreatedObject->AddComponent(ComponentType::AnimatedModel);
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -118,7 +116,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     VideoComponent->SetCurrentPlayheadPosition(1.0f);
     VideoComponent->SetVideoPlayerSourceType(VideoPlayerSourceType::URLSource);
     VideoComponent->SetIsVisible(false);
-    VideoComponent->SetMeshComponentId(ModelComponent->GetId());
     VideoComponent->SetIsEnabled(false);
 
     // Ensure values are set correctly
@@ -135,7 +132,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 1.0f);
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
     EXPECT_EQ(VideoComponent->GetIsVisible(), false);
-    EXPECT_EQ(VideoComponent->GetMeshComponentId(), ModelComponent->GetId());
     EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

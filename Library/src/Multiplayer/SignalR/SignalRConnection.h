@@ -17,8 +17,8 @@
 
 #include "Web/Uri.h"
 
+#include <Multiplayer/SignalR/ISignalRConnection.h>
 #include <atomic>
-#include <functional>
 #include <signalrclient/hub_connection_builder.h>
 
 CSP_START_IGNORE
@@ -28,7 +28,7 @@ CSP_END_IGNORE
 namespace csp::multiplayer
 {
 
-class SignalRConnection
+class SignalRConnection : public ISignalRConnection
 {
 public:
     /** @cond DO_NOT_DOCUMENT */
@@ -40,32 +40,26 @@ public:
     SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient);
     virtual ~SignalRConnection();
 
-    void Start(std::function<void(std::exception_ptr)> Callback);
-    void Stop(std::function<void(std::exception_ptr)> Callback);
+    void Start(std::function<void(std::exception_ptr)> Callback) override;
+    void Stop(std::function<void(std::exception_ptr)> Callback) override;
 
-    enum class ConnectionState
-    {
-        Connecting,
-        Connected,
-        Disconnecting,
-        Disconnected
-    };
+    ConnectionState GetConnectionState() const override;
 
-    ConnectionState GetConnectionState() const;
+    std::string GetConnectionId() const override;
 
-    std::string GetConnectionId() const;
+    void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback) override;
 
-    void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback);
+    void On(const std::string& EventName, const MethodInvokedHandler& Handler) override;
 
-    void On(const std::string& EventName, const MethodInvokedHandler& Handler);
-
-    void Invoke(
+    async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
         const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
-        std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {});
+        std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {}) override;
 
     void Send(
         const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
-        std::function<void(std::exception_ptr)> Callback = [](std::exception_ptr) {});
+        std::function<void(std::exception_ptr)> Callback = [](std::exception_ptr) {}) override;
+
+    const std::map<std::string, std::string>& HTTPHeaders() const override;
 
 private:
     signalr::hub_connection Connection;

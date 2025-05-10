@@ -208,17 +208,17 @@ int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
 
 void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
 {
-    Entity->GetScript()->SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());
+    Entity->GetScript().SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());
 }
 
 void EntityScriptInterface::SubscribeToMessage(std::string Message, std::string MessageParamsJson)
 {
-    Entity->GetScript()->SubscribeToMessage(Message.c_str(), MessageParamsJson.c_str());
+    Entity->GetScript().SubscribeToMessage(Message.c_str(), MessageParamsJson.c_str());
 }
 
 void EntityScriptInterface::PostMessageToScript(std::string Message, std::string MessageParamsJson)
 {
-    Entity->GetScript()->PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
+    Entity->GetScript().PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
 }
 
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
@@ -230,7 +230,7 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
         const csp::common::Map<uint16_t, ComponentBase*>& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
-        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < ComponentKeys->Size(); ++i)
         {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 

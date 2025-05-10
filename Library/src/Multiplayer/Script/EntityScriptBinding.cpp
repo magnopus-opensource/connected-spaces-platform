@@ -147,7 +147,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
@@ -170,7 +170,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;
@@ -213,7 +213,7 @@ public:
         {
             EntitySystem->LockEntityUpdate();
 
-            for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+            for (size_t i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
             {
                 SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
                 RootHierarchyEntities.push_back(Entity->GetScriptInterface());
@@ -465,7 +465,11 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsActive, "isActive")
         .PROPERTY_GET_SET(ConversationSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation");
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Title, "title")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Resolved, "resolved")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraPosition, "conversationCameraPosition")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraRotation, "conversationCameraRotation");
 
     Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()

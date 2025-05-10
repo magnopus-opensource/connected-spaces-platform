@@ -38,9 +38,9 @@ public:
     void AddBool(const char* Key, const bool Value);
 
     // Get Payload params
-    const int GetInt(const char* Key) const;
+    int GetInt(const char* Key) const;
     const char* GetString(const char* Key) const;
-    const float GetFloat(const char* Key) const;
+    float GetFloat(const char* Key) const;
     bool GetBool(const char* Key) const;
 
     const EventId& GetId() const;

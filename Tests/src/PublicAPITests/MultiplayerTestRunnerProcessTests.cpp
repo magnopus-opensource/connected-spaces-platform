@@ -16,32 +16,27 @@
 
 #include "MultiplayerTestRunnerProcess.h"
 #include "TestHelpers.h"
+#include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <PublicAPITests/UserSystemTestHelpers.h>
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
     EXPECT_EQ(Process.GetTestToRun(), MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
-    EXPECT_EQ(Process.GetInvocationArgs(), (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar" }));
-
-    // Optional arguments have no value initially
-    EXPECT_FALSE(Process.GetLoginEmail().has_value());
-    EXPECT_FALSE(Process.GetPassword().has_value());
-    EXPECT_FALSE(Process.GetSpaceId().has_value());
-    EXPECT_FALSE(Process.GetTimeoutInSeconds().has_value());
-    EXPECT_FALSE(Process.GetEndpoint().has_value());
-
     Process.SetLoginEmail("FakeEmail@MrMoustacheMan.com");
-    EXPECT_EQ(Process.GetLoginEmail(), std::optional<std::string> { "FakeEmail@MrMoustacheMan.com" });
-    EXPECT_EQ(Process.GetInvocationArgs(),
-        (std::vector<std::string> { "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com" }));
-
+    EXPECT_EQ(Process.GetLoginEmail(), std::string { "FakeEmail@MrMoustacheMan.com" });
     Process.SetPassword("Hunter2");
-    EXPECT_EQ(Process.GetPassword(), std::optional<std::string> { "Hunter2" });
+    EXPECT_EQ(Process.GetPassword(), std::string { "Hunter2" });
     EXPECT_EQ(Process.GetInvocationArgs(),
         (std::vector<std::string> {
             "MultiplayerTestRunner", "--test", "CreateAvatar", "--email", "FakeEmail@MrMoustacheMan.com", "--password", "Hunter2" }));
+
+    // Optional arguments have no value initially
+    EXPECT_FALSE(Process.GetSpaceId().has_value());
+    EXPECT_FALSE(Process.GetTimeoutInSeconds().has_value());
+    EXPECT_FALSE(Process.GetEndpoint().has_value());
 
     Process.SetSpaceId("MyFakeSpaceId");
     EXPECT_EQ(Process.GetSpaceId(), std::optional<std::string> { "MyFakeSpaceId" });
@@ -64,10 +59,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, FutureTest)
 {
-    // Actually invoke the runner and make sure the future's are all set
+    // Actually invoke the runner and make sure the futures are all set
     MultiplayerTestRunnerProcess Process(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR);
+    auto TestUser = CreateTestUser();
+    Process.SetLoginEmail(TestUser.Email.c_str());
+    Process.SetPassword(GeneratedTestAccountPassword);
     Process.SetTimeoutInSeconds(0); // So we don't sit at ready for assertions for any real time.
-
+    Process.SetEndpoint(EndpointBaseURI());
     Process.StartProcess();
 
     // We need to spin up a process, login, create a space, join it, ... so we're a bit permissive with the timeouts to try and prevent flakiness.

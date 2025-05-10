@@ -110,7 +110,7 @@ public:
 
     /// @brief Get the ComponentType of the component.
     /// @return The type of the component as an enum.
-    ComponentType GetComponentType();
+    ComponentType GetComponentType() const;
 
     /// @brief Get a map of the replicated values defined for this component.
     ///
@@ -118,7 +118,7 @@ public:
     /// intended to be defined in the inherited component as an enum of available properties keys.
     ///
     /// @return A map of the replicated values, keyed by their unique key.
-    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties();
+    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties() const;
 
     /// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
     /// @return A pointer to the parent SpaceEntity.
@@ -155,9 +155,9 @@ protected:
     ComponentBase(ComponentType Type, SpaceEntity* Parent);
 
     const ReplicatedValue& GetProperty(uint32_t Key) const;
-    const bool GetBooleanProperty(uint32_t Key) const;
-    const int64_t GetIntegerProperty(uint32_t Key) const;
-    const float GetFloatProperty(uint32_t Key) const;
+    bool GetBooleanProperty(uint32_t Key) const;
+    int64_t GetIntegerProperty(uint32_t Key) const;
+    float GetFloatProperty(uint32_t Key) const;
     const csp::common::String& GetStringProperty(uint32_t Key) const;
     const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
     const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
@@ -169,6 +169,10 @@ protected:
     void SetProperties(const csp::common::Map<uint32_t, ReplicatedValue>& Value);
 
     virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
+
+    // Called when a component has first been created locally, or when the component
+    // is first deserialized, after it's properties have been set.
+    virtual void OnCreated();
 
     // Called whenever an entity is removed from the system.
     // Used to shutdown any behavior managed by the entity.

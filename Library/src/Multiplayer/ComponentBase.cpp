@@ -56,9 +56,9 @@ ComponentBase::~ComponentBase()
 
 uint16_t ComponentBase::GetId() { return Id; }
 
-ComponentType ComponentBase::GetComponentType() { return Type; }
+ComponentType ComponentBase::GetComponentType() const { return Type; }
 
-const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() { return &Properties; }
+const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
 const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 {
@@ -72,7 +72,7 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
     return InvalidValue;
 }
 
-const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
+bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
@@ -86,7 +86,7 @@ const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
     return false;
 }
 
-const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
+int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
@@ -100,7 +100,7 @@ const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
     return 0;
 }
 
-const float ComponentBase::GetFloatProperty(uint32_t Key) const
+float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
@@ -230,6 +230,8 @@ void ComponentBase::SetProperties(const csp::common::Map<uint32_t, ReplicatedVal
 
 void ComponentBase::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) { Properties[Key] = Value; }
 
+void ComponentBase::OnCreated() { }
+
 void ComponentBase::OnRemove() { }
 
 SpaceEntity* ComponentBase::GetParent() { return Parent; }
@@ -242,7 +244,7 @@ ComponentScriptInterface* ComponentBase::GetScriptInterface() { return ScriptInt
 
 void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common::String Message)
 {
-    GetParent()->GetScript()->SubscribeToPropertyChange(GetId(), PropertyKey, Message);
+    GetParent()->GetScript().SubscribeToPropertyChange(GetId(), PropertyKey, Message);
 }
 
 void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, EntityActionHandler ActionHandler)

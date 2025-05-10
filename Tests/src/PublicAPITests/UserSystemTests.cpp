@@ -565,7 +565,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
     const char* TestUserName = "CSP-TEST-NAME";
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
@@ -619,10 +618,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
     const char* TestUserName = "CSP-TEST-NAME";
-    const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
     char UniqueUserName[256];
     SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
@@ -668,8 +665,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const char* TestUserName = "CSP-TEST-NAME";
-
     char UniqueEmail[256];
     SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
 
@@ -712,7 +707,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
     bool FoundGoogle = false;
     bool FoundDiscord = false;
     bool FoundApple = false;
-    for (auto idx = 0; idx < SupportedProviders.Size(); ++idx)
+    for (size_t idx = 0; idx < SupportedProviders.Size(); ++idx)
     {
         if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google)
         {
@@ -951,15 +946,19 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
 
     // Log in
     csp::common::String UserId;
@@ -969,6 +968,13 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+
+    TestMsg1 = "AgoraUserTokenResult invalid";
+    TestMsg2 = "AgoraUserTokenResult doesn't contain expected member: token";
 
     csp::systems::AgoraUserTokenParams Params;
     Params.AgoraUserId = UserId;
@@ -985,6 +991,81 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName[256];
+    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    bool LogConfirmed1 = false, LogConfirmed2 = false;
+    csp::common::String TestMsg1, TestMsg2;
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Set up Log callbacks
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+    TestMsg1 = "PostServiceProxyResult invalid";
+    TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
+
+    csp::systems::TokenInfoParams Params;
+    Params.ServiceName = "Agora";
+    Params.OperationName = "getUserToken";
+    Params.SetHelp = false;
+    Params.Parameters["userId"] = UserId;
+    Params.Parameters["channelName"] = Space.Id;
+    Params.Parameters["referenceId"] = Space.Id;
+    Params.Parameters["lifespan"] = std::to_string(10000).c_str();
+    Params.Parameters["readOnly"] = "true";
+    Params.Parameters["shareAudio"] = "false";
+    Params.Parameters["shareVideo"] = "false";
+    Params.Parameters["shareScreen"] = "false";
+
+    // Get agora token through PostServiceProxy
+    auto [Result] = AWAIT_PRE(UserSystem, PostServiceProxy, RequestPredicate, Params);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_FALSE(Result.GetValue().IsEmpty());
+    WaitForCallback(LogConfirmed1);
+    EXPECT_FALSE(LogConfirmed1);
+    WaitForCallback(LogConfirmed2);
+    EXPECT_FALSE(LogConfirmed2);
+
+    LogSystem.ClearAllCallbacks();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);

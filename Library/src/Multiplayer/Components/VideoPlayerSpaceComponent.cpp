@@ -208,26 +208,6 @@ void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType V
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(Value));
 }
 
-uint16_t VideoPlayerSpaceComponent::GetMeshComponentId() const
-{
-    return static_cast<uint16_t>(GetIntegerProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)));
-}
-
-void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
-{
-    SpaceEntity* Entity = GetParent();
-    SpaceEntitySystem* EntitySystem = Entity->GetSpaceEntitySystem();
-
-    ComponentBase* FoundComponent = EntitySystem->FindComponentById(Value);
-
-    if (FoundComponent == nullptr)
-    {
-        return;
-    }
-
-    SetProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId), static_cast<int64_t>(Value));
-}
-
 /* IVisibleComponent */
 
 bool VideoPlayerSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)); }

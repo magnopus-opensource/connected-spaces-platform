@@ -111,7 +111,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnection->StopListening(
-        [this, MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        [MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
             {
@@ -121,7 +121,7 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
             CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [this, MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
                 {
                     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
@@ -134,23 +134,27 @@ void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
                         CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
                     }
 
-                    MultiplayerConnection->StartListening(
-                        [this, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
-                        {
-                            if (Error != csp::multiplayer::ErrorCode::None)
+                    MultiplayerConnection->StartListening()()
+                        .then(async::inline_scheduler(),
+                            [RefreshMultiplayerContinuationEvent]()
                             {
-                                RefreshMultiplayerContinuationEvent->set(Error);
-                                return;
-                            }
+                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
-                            CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
+                                // TODO: Support getting errors from RetrieveAllEntities
+                                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
 
-                            // TODO: Support getting errors from RetrieveAllEntities
-                            csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
-
-                            // Success!
-                            RefreshMultiplayerContinuationEvent->set({});
-                        });
+                                // Success!
+                                RefreshMultiplayerContinuationEvent->set({});
+                            })
+                        .then(async::inline_scheduler(),
+                            csp::common::continuations::InvokeIfExceptionInChain(
+                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                                {
+                                    // Error case
+                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                    RefreshMultiplayerContinuationEvent->set(Error);
+                                    return;
+                                }));
                 });
         });
 }
@@ -174,7 +178,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSy
         /* If we need permissions, check that the user has permission to enter this specific space */
         if (JoiningSpaceRequiresInvite && !UserIsRecognizedBySpace)
         {
-            csp::common::continuations::LogErrorAndCancelContinuation(Callback,
+            csp::common::continuations::LogHTTPErrorAndCancelContinuation(Callback,
                 "Logged in user does not have permission to join this space. Failed to add to space.", EResultCode::Failed,
                 csp::web::EResponseCodes::ResponseForbidden, ERequestFailureReason::UserSpaceAccessDenied);
         }
@@ -271,8 +275,9 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed,
                 csp::web::EResponseCodes::ResponseInternalServerError, ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
         .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully entered space."))
-        .then(
-            async::inline_scheduler(), csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace]() { CurrentSpace = {}; }));
+        .then(async::inline_scheduler(),
+            csp::common::continuations::InvokeIfExceptionInChain(
+                [&CurrentSpace = CurrentSpace](const std::exception& /*Except*/) { CurrentSpace = {}; }));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
@@ -682,7 +687,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
     std::vector<String> SpaceIds;
     SpaceIds.reserve(RequestedSpaceIDs.Size());
 
-    for (auto idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
     {
         SpaceIds.push_back(RequestedSpaceIDs[idx]);
     }
@@ -726,7 +731,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
     if (SpaceId.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("No space id given");
-        OnCompleteEvent.set_exception(std::make_exception_ptr(async::task_canceled()));
+        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
 
@@ -1004,7 +1009,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
             Map<String, Array<String>> SpacesTags;
             const auto& AssetCollections = Result.GetAssetCollections();
 
-            for (int i = 0; i < AssetCollections.Size(); ++i)
+            for (size_t i = 0; i < AssetCollections.Size(); ++i)
             {
                 const auto& AssetCollection = AssetCollections[i];
 
@@ -1270,7 +1275,7 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
-    for (auto item = 0; item < SpaceIds.Size(); ++item)
+    for (size_t item = 0; item < SpaceIds.Size(); ++item)
     {
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
@@ -1594,7 +1599,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     return;
                 }
 
-                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult, AssetSystem](const NullResult& DeleteAssetCollResult)
+                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
                 {
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -1836,7 +1841,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         std::vector<String> GroupIds;
         GroupIds.reserve(MemberGroupIds->Size());
 
-        for (int i = 0; i < MemberGroupIds->Size(); ++i)
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
         {
             GroupIds.push_back(MemberGroupIds->operator[](i));
         }

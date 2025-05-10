@@ -43,7 +43,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -65,7 +64,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -142,7 +141,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -164,7 +162,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -195,8 +193,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		audio.volume = 0.75;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -219,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.75;
     )xx";
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
@@ -227,8 +225,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = -2.75;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
@@ -237,8 +235,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.0;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
 
@@ -246,8 +244,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 0.0;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 

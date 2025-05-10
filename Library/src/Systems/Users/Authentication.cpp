@@ -233,23 +233,53 @@ void AgoraUserTokenResult::OnResponse(const services::ApiResponseBase* ApiRespon
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
         AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> Result = AuthResponse->GetOperationResult();
+        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
 
-        if (!Result)
+        if (!OperationResult)
         {
             CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult invalid");
 
             return;
         }
 
-        if (!Result->HasMember("token"))
+        if (!OperationResult->HasMember("token"))
         {
             CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
 
             return;
         }
 
-        SetValue(Result->operator[]("token").GetString());
+        SetValue(OperationResult->operator[]("token").GetString());
+    }
+}
+
+void PostServiceProxyResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
+    const web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
+        AuthResponse->FromJson(Response->GetPayload().GetContent());
+        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
+
+        if (!OperationResult)
+        {
+            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult invalid");
+
+            return;
+        }
+
+        if (!OperationResult->HasMember("token"))
+        {
+            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult doesn't contain expected member: token");
+
+            return;
+        }
+
+        SetValue(OperationResult->operator[]("token").GetString());
     }
 }
 

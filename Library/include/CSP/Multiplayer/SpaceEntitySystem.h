@@ -29,11 +29,17 @@
 #include <mutex>
 #include <set>
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class task;
+template <typename T> class shared_task;
+CSP_END_IGNORE
+}
+
 namespace signalr
 {
-
 class value;
-
 } // namespace signalr
 
 namespace csp::memory
@@ -54,12 +60,18 @@ class SequenceSystem;
 
 } // namespace csp::systems
 
+class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
 
 class MultiplayerConnection;
-class SignalRConnection;
+class ISignalRConnection;
 class SpaceEntity;
 class SpaceTransform;
 
@@ -80,6 +92,13 @@ class CSP_API SpaceEntitySystem
     friend class EntityScript;
     friend class SpaceEntity;
     friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
+
+    // Tests
+    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
     /** @endcond */
     CSP_END_IGNORE
 
@@ -201,8 +220,8 @@ public:
     /// Note that this is already called in MultiplayerConnection::Connect, so this shouldn't need to be called anywhere else.
     /// This should not be called by client code directly, marked as No Export.
     ///
-    /// @param InConnection csp::multiplayer::SignalRConnection : A pointer to the connection object to be used by the system.
-    CSP_NO_EXPORT void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
+    /// @param InConnection csp::multiplayer::ISignalRConnection : A pointer to the connection object to be used by the system.
+    CSP_NO_EXPORT void SetConnection(csp::multiplayer::ISignalRConnection* InConnection);
 
     /// @brief Sets a callback to be executed when all existing entities have been retrieved after entering a space.
     /// @param Callback CallbackHandler : the callback to execute.
@@ -267,17 +286,9 @@ public:
     bool SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity);
 
 
-    /// @brief Finds a component by the given id.
-    ///
-    /// Searchs through all components of all entites so should be used sparingly.
-    ///
-    /// @param Id The id of the component to find.
-    /// @return A pointer to the found component which can be nullptr if the component is not found.
-    ComponentBase* FindComponentById(uint16_t Id);
-
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
-    const bool GetEntityPatchRateLimitEnabled() const;
+    bool GetEntityPatchRateLimitEnabled() const;
 
     /// @brief Set the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     ///
@@ -311,7 +322,7 @@ private:
     ~SpaceEntitySystem();
 
     MultiplayerConnection* MultiplayerConnectionInst;
-    csp::multiplayer::SignalRConnection* Connection;
+    csp::multiplayer::ISignalRConnection* Connection;
 
     using SpaceEntityQueue = std::deque<SpaceEntity*>;
     using PatchMessageQueue = std::deque<signalr::value*>;
@@ -356,6 +367,16 @@ private:
 
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
+
+    // CreateAvatar Continuations
+    CSP_START_IGNORE
+    async::shared_task<uint64_t> RemoteGenerateNewAvatarId();
+    std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name,
+        const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
+    std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> CreateNewLocalAvatar(const csp::common::String& Name,
+        const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
+        EntityCreatedCallback Callback);
+    CSP_END_IGNORE
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;

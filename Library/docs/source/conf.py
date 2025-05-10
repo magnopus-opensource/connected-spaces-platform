@@ -94,6 +94,8 @@ html_context = {
 
 html_static_path = ['_static']
 
+html_extra_path = ['robots.txt']
+
 # This function is called for every parsed file (markdowns included).
 def read_rst(app, docname, source):
 
