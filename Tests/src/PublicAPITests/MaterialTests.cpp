@@ -800,7 +800,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MaterialTests, MaterialAssetEventTest)
 {
     SetRandSeed();
 

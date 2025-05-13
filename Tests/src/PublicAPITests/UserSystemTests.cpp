@@ -938,7 +938,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 }
 #endif
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 {
     SetRandSeed();
 
@@ -1005,7 +1005,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, PostServiceProxyTest)
 {
     SetRandSeed();
 

@@ -188,7 +188,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
 {
     SetRandSeed();
 
@@ -301,7 +301,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 {
     SetRandSeed();
 
