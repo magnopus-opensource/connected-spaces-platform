@@ -938,6 +938,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 }
 #endif
 
+// This test is to be fixed as part of OF-1646.
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 {
     SetRandSeed();
@@ -1005,6 +1006,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1646.
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, PostServiceProxyTest)
 {
     SetRandSeed();

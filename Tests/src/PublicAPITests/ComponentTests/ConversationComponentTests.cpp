@@ -1188,6 +1188,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that the CreateConversaiton event is correctly received and processed by other clients.
 Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
@@ -1334,6 +1335,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
 Other clients can still delete other conversations, as components/entities dont have any restrictions.
