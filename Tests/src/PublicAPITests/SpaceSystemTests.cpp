@@ -416,6 +416,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest
         SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
 
         // Wait to allow for the space deltion to be processed.
+        //
+        // This is required as shutting down will cause a memory access violation,
+        // due to spawned process not being resolved while systems are being destroyed.
         std::this_thread::sleep_for(500ms);
     }
 
@@ -669,6 +672,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidBufferWithThu
         SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
 
         // Wait to allow for the space deltion to be processed.
+        //
+        // This is required as shutting down will cause a memory access violation,
+        // due to spawned process not being resolved while systems are being destroyed.
         std::this_thread::sleep_for(500ms);
     }
 
