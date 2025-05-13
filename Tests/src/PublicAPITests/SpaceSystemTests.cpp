@@ -408,12 +408,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
-    // required as the GetSpaces will return out dated result before the request has been processed.
-    std::this_thread::sleep_for(700ms);
+    bool SpaceHasBeenDeleted = false;
+    while (!SpaceHasBeenDeleted)
+    {
+        // Validate that the in progress invalid space creation has been resolved and space has been removed.
+        auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+        SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
 
-    auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+        // Wait to allow for the space deltion to be processed.
+        std::this_thread::sleep_for(500ms);
+    }
 
-    EXPECT_EQ(SpacesResult.GetSpaces().Size(), 0);
+    EXPECT_EQ(SpaceHasBeenDeleted, true);
 
     // Log out
     LogOut(UserSystem);
@@ -655,9 +661,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidBufferWithThu
     // required as the GetSpaces will return out dated result before the request has been processed.
     std::this_thread::sleep_for(700ms);
 
-    auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+    bool SpaceHasBeenDeleted = false;
+    while (!SpaceHasBeenDeleted)
+    {
+        // Validate that the in progress invalid space creation has been resolved and space has been removed.
+        auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
+        SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
 
-    EXPECT_EQ(SpacesResult.GetSpaces().Size(), 0);
+        // Wait to allow for the space deltion to be processed.
+        std::this_thread::sleep_for(500ms);
+    }
+
+    EXPECT_EQ(SpaceHasBeenDeleted, true);
 
     // Log out
     LogOut(UserSystem);
