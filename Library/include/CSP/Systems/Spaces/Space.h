@@ -22,6 +22,7 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 
 #include <functional>
 
@@ -175,10 +176,13 @@ public:
     CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
+    CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+    SpaceResult() = default;
+
 private:
     SpaceResult(void*) {};
-    CSP_NO_EXPORT SpaceResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
     void SetSpace(const Space& InSpace);
 
