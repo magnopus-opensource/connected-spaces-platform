@@ -128,11 +128,12 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name,
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
     const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant)
     : SpaceEntity(EntitySystem)
 {
     this->Id = Id;
+    this->Type = Type;
     this->Name = Name;
     this->Transform = Transform;
     this->OwnerId = OwnerId;
@@ -353,6 +354,8 @@ void SpaceEntity::SetParentId(uint64_t InParentId)
         ShouldUpdateParent = true;
     }
 }
+
+csp::common::Optional<uint64_t> SpaceEntity::GetParentId() { return ParentId; }
 
 void SpaceEntity::RemoveParentEntity()
 {
@@ -858,6 +861,17 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
     }
 }
 
+void SpaceEntity::RemoveParentChildEntity() { GetParentEntity()->ChildEntities.RemoveItem(this); }
+
+void SpaceEntity::RemoveChildEntity(size_t Index)
+{
+    if (Index < ChildEntities.Size())
+    {
+        ChildEntities[Index]->RemoveParentEntity();
+        ChildEntities[Index]->Parent = nullptr;
+    }
+}
+
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
@@ -1015,6 +1029,35 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         }
     }
 }
+
+SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return EntityUpdateCallback; }
+
+void SpaceEntity::SetEntityUpdateCallbackParams(SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& Info)
+{
+    EntityUpdateCallback(Entity, Flags, Info);
+}
+
+SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return EntityDestroyCallback; }
+
+void SpaceEntity::SetEntityDestroyCallbackParams(bool Boolean) { EntityDestroyCallback(Boolean); }
+
+SpaceEntity::CallbackHandler SpaceEntity::GetEntityPatchSentCallback() { return EntityPatchSentCallback; }
+
+void SpaceEntity::SetEntityPatchSentCallbackParams(bool Boolean) { EntityPatchSentCallback(Boolean); }
+
+csp::common::Map<uint16_t, SpaceEntity::DirtyComponent> SpaceEntity::GetDirtyComponents() { return DirtyComponents; }
+
+csp::common::Map<uint16_t, csp::multiplayer::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
+
+csp::common::List<uint16_t> SpaceEntity::GetTransientDeletionComponentIds() { return TransientDeletionComponentIds; }
+
+bool SpaceEntity::GetShouldUpdateParent() { return ShouldUpdateParent; }
+
+void SpaceEntity::SetShouldUpdateParent(const bool Boolean) { ShouldUpdateParent = Boolean; }
+
+SpaceEntity* SpaceEntity::GetParent() { return Parent; }
+
+void SpaceEntity::SetParent(SpaceEntity* InParent) { Parent = InParent; }
 
 uint16_t SpaceEntity::GenerateComponentId()
 {
@@ -1269,6 +1312,10 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, ui
     return false;
 }
 
+std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return TimeOfLastPatch; }
+
+void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
+
 void SpaceEntity::DestroyComponent(uint16_t Key)
 {
     if (Components.HasKey(Key))
@@ -1321,7 +1368,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
     return LocatedComponent;
 }
 
-void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
+void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
 
 void SpaceEntity::ResolveParentChildRelationship()
 {

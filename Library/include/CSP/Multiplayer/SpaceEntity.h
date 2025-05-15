@@ -52,7 +52,6 @@ CSP_END_IGNORE
 
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
 class EntityScriptInterface;
 
 CSP_START_IGNORE
@@ -128,12 +127,6 @@ class CSP_API SpaceEntity
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class SpaceEntitySystem;
-    friend class EntityScript;
-    friend class EntityScriptInterface;
-    friend class EntitySystemScriptInterface;
-    friend class ComponentBase;
-    friend class ComponentScriptInterface;
 #ifdef CSP_TESTS
     friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
     friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRDeserialisationTest_Test;
@@ -173,8 +166,8 @@ public:
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
-        uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
+        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -418,28 +411,48 @@ private:
         ComponentUpdateType UpdateType;
     };
 
-    void DeserialiseFromPatch(IEntityDeserialiser& Deserialiser);
-    void ApplyLocalPatch(bool InvokeUpdateCallback = true);
-    uint16_t GenerateComponentId();
-    ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
-    void AddDirtyComponent(ComponentBase* DirtyComponent);
-
-    void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
-    EntityScriptInterface* GetScriptInterface();
-
-    void ClaimScriptOwnership();
-    void MarkForUpdate();
+public:
+    CSP_NO_EXPORT void AddDirtyComponent(ComponentBase* DirtyComponent); // moved
+    CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey); // moved
+    CSP_NO_EXPORT void MarkForUpdate(); // moved
+    CSP_NO_EXPORT EntityScriptInterface* GetScriptInterface(); // moved
+    CSP_NO_EXPORT void ClaimScriptOwnership(); // moved
+    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true); // moved
+    CSP_NO_EXPORT UpdateCallback GetEntityUpdateCallback();
+    CSP_NO_EXPORT void SetEntityUpdateCallbackParams(
+        SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& Info);
+    CSP_NO_EXPORT DestroyCallback GetEntityDestroyCallback();
+    CSP_NO_EXPORT void SetEntityDestroyCallbackParams(const bool Boolean);
+    CSP_NO_EXPORT CallbackHandler GetEntityPatchSentCallback();
+    CSP_NO_EXPORT void SetEntityPatchSentCallbackParams(const bool Boolean);
+    CSP_NO_EXPORT csp::common::Map<uint16_t, DirtyComponent> GetDirtyComponents();
+    CSP_NO_EXPORT csp::common::Map<uint16_t, ReplicatedValue> GetDirtyProperties();
+    CSP_NO_EXPORT csp::common::List<uint16_t> GetTransientDeletionComponentIds();
+    CSP_NO_EXPORT bool GetShouldUpdateParent();
+    CSP_NO_EXPORT void SetShouldUpdateParent(const bool Boolean);
+    CSP_NO_EXPORT SpaceEntity* GetParent();
+    CSP_NO_EXPORT void SetParent(SpaceEntity* InParent);
+    CSP_NO_EXPORT void ResolveParentChildRelationship(); // moved
+    CSP_NO_EXPORT csp::common::Optional<uint64_t> GetParentId();
 
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
-    bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
+    CSP_NO_EXPORT bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID); // moved
+
+    CSP_NO_EXPORT std::chrono::milliseconds GetTimeOfLastPatch();
+    CSP_NO_EXPORT void SetOwnerId(const uint64_t InOwnerId);
+    CSP_NO_EXPORT void DeserialiseFromPatch(IEntityDeserialiser& Deserialiser); // moved
+    CSP_NO_EXPORT void RemoveParentChildEntity();
+    CSP_NO_EXPORT void RemoveChildEntity(size_t Index);
+
+private:
+    uint16_t GenerateComponentId();
+    ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
 
     void DestroyComponent(uint16_t Key);
 
     ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
-    void AddChildEntitiy(SpaceEntity* ChildEntity);
-
-    void ResolveParentChildRelationship();
+    void AddChildEntity(SpaceEntity* ChildEntity);
 
     csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
     csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
