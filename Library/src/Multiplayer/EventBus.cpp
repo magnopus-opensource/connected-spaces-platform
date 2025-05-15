@@ -121,7 +121,7 @@ void EventBus::StopListenNetworkEvent(const csp::common::String& EventName)
 
 void EventBus::StartEventMessageListening()
 {
-    if (MultiplayerConnectionInst->Connection == nullptr)
+    if (MultiplayerConnectionInst->GetSignalRConnection() == nullptr)
     {
         CSP_LOG_ERROR_MSG("Error : Multiplayer connection is unavailable, EventBus cannot start listening to events.");
         return;
@@ -165,7 +165,7 @@ void EventBus::StartEventMessageListening()
         }
     };
 
-    MultiplayerConnectionInst->Connection->On("OnEventMessage", LocalCallback);
+    MultiplayerConnectionInst->GetSignalRConnection()->On("OnEventMessage", LocalCallback);
 }
 
 void EventBus::SendNetworkEvent(
@@ -199,7 +199,7 @@ async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEve
 void EventBus::SendNetworkEventToClient(
     const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
-    MultiplayerConnectionInst->NetworkEventManager->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
+    MultiplayerConnectionInst->GetNetworkEventManager()->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
 }
 
 } // namespace csp::multiplayer

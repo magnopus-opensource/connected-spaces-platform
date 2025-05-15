@@ -51,12 +51,6 @@ enum class ErrorCode;
 class CSP_API EventBus
 {
 public:
-    /** @cond DO_NOT_DOCUMENT */
-    friend class csp::systems::SpaceSystem;
-    friend class csp::systems::SystemsManager;
-    friend class MultiplayerConnection;
-    /** @endcond */
-
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
     // The callback used to register to listen to events.
@@ -98,11 +92,13 @@ public:
     /// @brief Instructs the event bus to start listening to messages
     void StartEventMessageListening();
 
+    /// @brief EventBus constructor
+    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
+    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection);
+
 private:
     EventBus();
     ~EventBus();
-
-    EventBus(MultiplayerConnection* InMultiplayerConnection);
 
     class MultiplayerConnection* MultiplayerConnectionInst;
 

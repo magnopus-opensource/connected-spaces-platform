@@ -473,7 +473,7 @@ bool ClientElectionManager::IsConnected() const
         return false;
     }
 
-    return Connection->Connected;
+    return Connection->IsConnected();
 }
 
 void ClientElectionManager::BindNetworkEvents()
