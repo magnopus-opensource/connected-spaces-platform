@@ -1388,7 +1388,7 @@ void SpaceEntity::ResolveParentChildRelationship()
         {
             // Parent may not have been added yet
             // so check pending entities
-            for (const auto& PendingParent : *EntitySystem->PendingAdds)
+            for (const auto& PendingParent : *EntitySystem->GetPendingAdds())
             {
                 if (PendingParent->Id == *ParentId)
                 {

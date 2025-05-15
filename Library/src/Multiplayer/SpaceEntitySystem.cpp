@@ -122,14 +122,14 @@ SpaceEntityEventHandler::SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem
 
 void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->MultiplayerConnectionInst != nullptr
-        && EntitySystem->MultiplayerConnectionInst->Connected)
+    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->GetMultiplayerConnectionInstance() != nullptr
+        && EntitySystem->GetMultiplayerConnectionInstance()->Connected)
     {
         EntitySystem->TickEntities();
     }
     else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
     {
-        auto Connection = EntitySystem->MultiplayerConnectionInst;
+        auto Connection = EntitySystem->GetMultiplayerConnectionInstance();
         csp::common::String Reason(InEvent.GetString("Reason"));
 
         auto Done = false;
@@ -249,6 +249,10 @@ void SpaceEntitySystem::Shutdown()
 
     IsInitialised = false;
 }
+
+SpaceEntitySystem::SpaceEntityQueue* SpaceEntitySystem::GetPendingAdds() { return PendingAdds; }
+
+MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
 
 namespace
 {
