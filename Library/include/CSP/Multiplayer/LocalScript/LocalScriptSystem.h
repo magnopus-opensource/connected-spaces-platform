@@ -53,15 +53,18 @@ public:
     ~LocalScriptSystem();
     
     using ModuleSourceMap = std::map<std::string, std::string>;
-    // Add a new method to initialize the module functions
-    /// @brief Initializes the script module functions after construction
-    /// This is called automatically by LoadAndRegisterScripts
-    void InitializeModuleFunctions();
 
+    /// @brief Initialize the LocalScriptSystem and create a local context
+    void Initialize();
+    
+    /// @brief Load and register script modules from the given space
+    /// @param SpaceId The ID of the space to load scripts from
+    void LoadScriptModules(const csp::common::String& SpaceId);
 
 private:
 
     ModuleSourceMap Modules;
+    csp::systems::ScriptSystem* ScriptSystem;
 
 };
 

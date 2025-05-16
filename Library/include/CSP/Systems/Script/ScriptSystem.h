@@ -76,11 +76,20 @@ public:
     CSP_EVENT void SetLocalScriptCommandCallback(LocalScriptCommandCallback Callback);
     void FireLocalScriptCommand(const csp::common::String& data);
     
+    /// @brief Checks if a context with the given ID exists
+    /// @param ContextId ID of the context to check
+    /// @return True if the context exists, false otherwise
+    bool HasContext(int64_t ContextId);
+    
+    /// @brief Creates a new script context with the specified ID
+    /// @param ContextId ID to use for the new context
+    /// @return True if successfully created, false if the context already exists or creation failed
+    bool CreateContext(int64_t ContextId);
+    
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
     
 
-    bool CreateContext(int64_t ContextId);
     bool GetLocalContext(int64_t ContextId);
     bool DestroyContext(int64_t ContextId);
     bool BindContext(int64_t ContextId);

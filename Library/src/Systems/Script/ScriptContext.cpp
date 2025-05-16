@@ -157,4 +157,15 @@ void ScriptContext::Reset()
     Initialise();
 }
 
+void* ScriptContext::GetContext() 
+{ 
+    if (!Context)
+    {
+        CSP_LOG_ERROR_MSG("Context is null in GetContext()");
+        return nullptr;
+    }
+    
+    return Context; 
+}
+
 } // namespace csp::systems

@@ -48,6 +48,9 @@ public:
 
     size_t GetNumImportedModules() const;
     const char* GetImportedModule(size_t Index) const;
+    
+    // Add GetContext method
+    void* GetContext();
 
     void Reset();
 

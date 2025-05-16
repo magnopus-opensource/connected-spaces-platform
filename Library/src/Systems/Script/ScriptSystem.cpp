@@ -156,7 +156,21 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     return !HasErrors;
 }
 
-bool ScriptSystem::CreateContext(int64_t ContextId) { return TheScriptRuntime->AddContext(ContextId); }
+bool ScriptSystem::HasContext(int64_t ContextId)
+{
+    return TheScriptRuntime->GetContext(ContextId) != nullptr;
+}
+
+bool ScriptSystem::CreateContext(int64_t ContextId)
+{
+    if (HasContext(ContextId))
+    {
+        CSP_LOG_ERROR_FORMAT("Context %lld already exists", ContextId);
+        return false;
+    }
+    
+    return TheScriptRuntime->AddContext(ContextId);
+}
 
 bool ScriptSystem::DestroyContext(int64_t ContextId) { return TheScriptRuntime->RemoveContext(ContextId); }
 
