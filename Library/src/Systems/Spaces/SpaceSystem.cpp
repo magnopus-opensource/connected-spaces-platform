@@ -531,14 +531,10 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
-
                 auto NullResultCallback
                     = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-                this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
-                this->RemoveMetadata(SpaceId, NullResultCallback);
-                this->DeleteSpace(SpaceId, NullResultCallback);
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
                 Callback(MakeInvalid<SpaceResult>());
             }));
@@ -588,14 +584,10 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
-
                 auto NullResultCallback
                     = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-                this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
-                this->RemoveMetadata(SpaceId, NullResultCallback);
-                this->DeleteSpace(SpaceId, NullResultCallback);
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
                 Callback(MakeInvalid<SpaceResult>());
             }));
