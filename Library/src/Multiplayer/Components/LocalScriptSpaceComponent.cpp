@@ -67,11 +67,11 @@ void LocalScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const Replica
     {
         // CSP_LOG_WARN_FORMAT("LocalScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
-        Parent->GetScript()->Bind();
-        Parent->GetScript()->Invoke();
+        Parent->GetScript().Bind();
+        Parent->GetScript().Invoke();
     }
 }
 
-void LocalScriptSpaceComponent::OnRemove() { Parent->GetScript()->Shutdown(); }
+void LocalScriptSpaceComponent::OnRemove() { Parent->GetScript().Shutdown(); }
 
 } // namespace csp::multiplayer

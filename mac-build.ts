@@ -111,7 +111,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
 
   // Step 5: Copy binary files
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
-  const binaryDestPath = join("..", "oly-web-client", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized);
+  const binaryDestPath = join("..", "oko-web", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized);
   
   console.log(`\n[${step}/${totalSteps}] Copying binary files from ${binarySourcePath} to ${binaryDestPath}...`);
   if (!await copyDirectory(binarySourcePath, binaryDestPath)) {
@@ -121,7 +121,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
 
   // Step 6: Copy TypeScript files
   const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
-  const tsDestPath = join("..", "oly-web-client", "node_modules", "connected-spaces-platform.web");
+  const tsDestPath = join("..", "oko-web", "node_modules", "connected-spaces-platform.web");
   
   console.log(`\n[${step}/${totalSteps}] Copying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
   if (!await copyDirectory(tsSourcePath, tsDestPath)) {

@@ -24,7 +24,7 @@
 
 namespace csp::systems
 {
-class LocalScriptsResult;
+class LocalScriptResult;
 }
 
 namespace csp::services
@@ -43,7 +43,7 @@ namespace csp::systems
 {
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download a collection of local script data.
-class CSP_API LocalScriptsResult : public csp::systems::ResultBase
+class CSP_API LocalScriptResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
@@ -54,14 +54,14 @@ class CSP_API LocalScriptsResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Retreives the GLTFMaterial from the result.
+    /// @brief Retreives the LocalScriptResult from the result.
     const csp::common::Map<csp::common::String, csp::common::String>& GetLocalScripts() const;
 
-    CSP_NO_EXPORT LocalScriptsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT LocalScriptResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    LocalScriptsResult(void*) {};
+    LocalScriptResult(void*) {};
 
     void SetLocalScripts(const csp::common::Map<csp::common::String, csp::common::String>& LocalScripts);
 
@@ -72,7 +72,7 @@ private:
 
 /// @brief Callback containing a collection of local script data.
 /// @param Result Map<String, String> : result class
-typedef std::function<void(const LocalScriptsResult& Result)> LocalScriptsResultCallback;
+typedef std::function<void(const LocalScriptResult& Result)> LocalScriptResultCallback;
 
 
 } // namespace csp::systems

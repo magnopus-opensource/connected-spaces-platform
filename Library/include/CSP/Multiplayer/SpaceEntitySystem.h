@@ -360,11 +360,6 @@ private:
     void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
     void TickEntityScripts();
 
-    void OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
-
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
 

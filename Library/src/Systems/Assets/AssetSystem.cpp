@@ -1548,7 +1548,7 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
     DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
-void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
     // 1. find asset collection for space
     auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
@@ -1673,7 +1673,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr, FindAssetCollectionsCB);
 }
 
-void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
 {
     // 1. Get asset collection
     auto GetAssetCollectionCB = [this, AssetCollectionId, AssetId, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
@@ -1745,53 +1745,52 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
-void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::LocalScriptsResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::LocalScriptResultCallback Callback)
 {
-    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Loading scripts");
-
+    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Loading scripts!!!!!!!!!!!");
+    
     // 1. find asset collection for space
     auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
     {   
         if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
         {
-            Callback(LocalScriptsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            Callback(LocalScriptResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
             return;
         }
 
-        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
-        CSP_LOG_MSG(csp::systems::LogLevel::Log, "Fetch asset collections");
-        
-        if (AssetCollections.Size() == 0)
+        // Create a shared reference to prevent it going out of scope between callbacks
+        auto AssetCollections = std::make_shared<csp::common::Array<csp::systems::AssetCollection>>(FindAssetCollectionsResult.GetAssetCollections());
+
+        if ((*AssetCollections).Size() == 0)
         {
             // There are no asset collections for this space
-            Callback(LocalScriptsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            Callback(LocalScriptResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
             return;
         }
 
         // 2. Find local script assets in collections
-        csp::common::Array<csp::common::String> AssetCollectionIds(AssetCollections.Size());
+        csp::common::Array<csp::common::String> AssetCollectionIds((*AssetCollections).Size());
         
-      
-        for (size_t i = 0; i < AssetCollections.Size(); ++i)
+        for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
         {
-            AssetCollectionIds[i] = AssetCollections[i].Id;
+            AssetCollectionIds[i] = (*AssetCollections)[i].Id;
         }
 
-        auto LoadScriptsCb = [this, Callback](const AssetsResult& GetAssetsResult)
+        auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Got assets");
+
             if (AssetsToDownload == 0)
             {
-                // There are no material assets in this space
-                Callback(LocalScriptsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+                // There are no script assets assets in this space
+                Callback(LocalScriptResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
                 return;
             }
 
             // These are shared references to prevent going out of scope between callbacks
             // Note: The callbacks ARE called on the main thread
-            auto DownloadedScripts = std::make_shared<csp::common::Map<csp::common::String, csp::common::String>>();
+            auto DownloadedLocalScripts = std::make_shared<csp::common::Map<csp::common::String, csp::common::String>>();
             auto AssetsDownloaded = std::make_shared<size_t>();
             auto Failed = std::make_shared<bool>();
 
@@ -1800,9 +1799,11 @@ void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::
             {
                 csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
                 csp::common::String AssetId = Assets[i].Id;
+                // Create a copy of just the asset name we need
+                csp::common::String AssetName = Assets[i].Name;
 
-                auto DownloadMaterialCallback = [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedScripts,
-                                                    AssetsDownloaded, Failed, Assets](const AssetDataResult& DownloadResult)
+                auto DownloadLocalScriptCallback = [Callback, AssetsToDownload, AssetCollectionId, AssetId, DownloadedLocalScripts,
+                                                  AssetsDownloaded, Failed, AssetName](const AssetDataResult& DownloadResult)
                 {
                     // Return early as one of the calls has already failed
                     if (*Failed)
@@ -1810,41 +1811,44 @@ void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::
                         return;
                     }
 
-                    if (DownloadResult.GetResultCode() != EResultCode::Success)
+                    if (DownloadResult.GetResultCode() == EResultCode::InProgress)
                     {
-                        if (DownloadResult.GetResultCode() == EResultCode::Failed)
-                        {
-                            *Failed = true;
-                        }
-
-                        Callback(LocalScriptsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
                         return;
                     }
-                    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Downloaded asset");
-                    // Convert material json to material
-                    const char* ScriptData = static_cast<const char*>(DownloadResult.GetData());
 
+                    if (DownloadResult.GetResultCode() == EResultCode::Failed)
+                    {
+                        *Failed = true;
+
+                        Callback(LocalScriptResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+                        return;
+                    }
+
+                    const char* LocalScriptData = static_cast<const char*>(DownloadResult.GetData());
+                    size_t LocalScriptLength = DownloadResult.GetDataLength();
+
+                    csp::common::String LocalScript(LocalScriptData, LocalScriptLength);
+                    
+                    // Use the captured AssetName instead of accessing Assets array
+                    (*DownloadedLocalScripts)[AssetName] = LocalScript;
+                    
                     (*AssetsDownloaded)++;
-
-                    (*DownloadedScripts)[Assets[i].Name] = CSP_TEXT(ScriptData);
 
                     if ((*AssetsDownloaded) >= AssetsToDownload)
                     {
-                        CSP_LOG_ERROR_FORMAT("Found %d scripts", static_cast<int>(AssetsToDownload));
                         // Finish
-                        csp::systems::LocalScriptsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                        Result.SetLocalScripts((*DownloadedScripts));
+                        LocalScriptResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
+                        Result.SetLocalScripts(*DownloadedLocalScripts);
 
                         Callback(Result);
                     }
                 };
-                
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Download assets");
-                DownloadAssetData(Assets[i], DownloadMaterialCallback);
-            };
+
+                DownloadAssetData(Assets[i], DownloadLocalScriptCallback);
+            }
         };
-        CSP_LOG_MSG(csp::systems::LogLevel::Log, "GetAssetsByCriteria");
-        GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::SCRIPT_LIBRARY }, LoadScriptsCb);
+
+        GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::SCRIPT_LIBRARY }, GetAssetsCB);
     };
 
     FindAssetCollections(

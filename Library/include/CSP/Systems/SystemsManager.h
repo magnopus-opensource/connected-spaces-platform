@@ -31,6 +31,7 @@ class SpaceSystem;
 class AssetSystem;
 class VoipSystem;
 class ScriptSystem;
+class LocalScriptSystem;
 class PointOfInterestSystem;
 class PointOfInterestInternalSystem;
 class AnchorSystem;
@@ -109,6 +110,10 @@ public:
     /// @return ScriptingSystem : pointer to the script system class
     ScriptSystem* GetScriptSystem();
 
+    /// @brief Get the LocalScriptSystem instance.
+    /// @return The LocalScriptSystem instance.
+    LocalScriptSystem* GetLocalScriptSystem();
+
     /// @brief Retrieves the Point Of Interest system.
     /// @return PointOfInterestSystem : pointer to the POI system class
     PointOfInterestSystem* GetPointOfInterestSystem();
@@ -186,6 +191,7 @@ private:
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;
     ScriptSystem* ScriptSystem;
+    LocalScriptSystem* LocalScriptSystem;
     VoipSystem* VoipSystem;
     PointOfInterestInternalSystem* PointOfInterestSystem;
     AnchorSystem* AnchorSystem;

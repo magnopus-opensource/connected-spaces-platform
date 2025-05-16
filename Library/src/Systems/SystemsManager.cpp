@@ -26,6 +26,7 @@
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
@@ -63,6 +64,9 @@ SpaceSystem* SystemsManager::GetSpaceSystem() { return SpaceSystem; }
 AssetSystem* SystemsManager::GetAssetSystem() { return AssetSystem; }
 
 ScriptSystem* SystemsManager::GetScriptSystem() { return ScriptSystem; }
+
+LocalScriptSystem* SystemsManager::GetLocalScriptSystem() { return LocalScriptSystem; }
+
 
 VoipSystem* SystemsManager::GetVoipSystem() { return VoipSystem; }
 
@@ -105,6 +109,7 @@ SystemsManager::SystemsManager()
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
     , ScriptSystem(nullptr)
+    , LocalScriptSystem(nullptr)
     , VoipSystem(nullptr)
     , PointOfInterestSystem(nullptr)
     , AnchorSystem(nullptr)
@@ -129,7 +134,7 @@ void SystemsManager::CreateSystems()
 {
     // Create Log system first, so we can log any startup issues in other systems
     LogSystem = CSP_NEW csp::systems::LogSystem();
-
+    CSP_LOG_MSG(LogLevel::Log, "Systems Manager!!!");
 #ifdef CSP_WASM
     WebClient = CSP_NEW csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
@@ -159,6 +164,8 @@ void SystemsManager::CreateSystems()
     HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
     SpaceEntitySystem = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
     ConversationSystem = CSP_NEW csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
+    // Create the LocalScriptSystem after ScriptSystem is initialized
+    LocalScriptSystem = CSP_NEW csp::systems::LocalScriptSystem();
 }
 
 void SystemsManager::DestroySystems()
@@ -182,6 +189,9 @@ void SystemsManager::DestroySystems()
     CSP_DELETE(UserSystem);
     CSP_DELETE(AnalyticsSystem);
     CSP_DELETE(MultiplayerConnection);
+    
+    // Make sure to delete LocalScriptSystem before ScriptSystem since it depends on it
+    CSP_DELETE(LocalScriptSystem);
     CSP_DELETE(ScriptSystem);
 
     CSP_DELETE(WebClient);

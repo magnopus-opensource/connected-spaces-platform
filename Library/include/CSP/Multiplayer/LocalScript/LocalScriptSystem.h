@@ -26,17 +26,12 @@
 namespace csp::systems
 {
 class LocalScriptSystem;
-class LocalScriptsResult;
+class LocalScriptResult;
 }
 
 namespace csp::services
 {
 
-class ApiResponseBase;
-
-CSP_START_IGNORE
-template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
-CSP_END_IGNORE
 
 } // namespace csp::services
 
@@ -50,99 +45,24 @@ namespace csp::systems
 class CSP_API LocalScriptSystem
 {
 
-
 public:
+    /// @brief Construct a new instance of LocalScriptSystem.
+    LocalScriptSystem();
+    
     /// @brief Destroy the instance of LocalScriptSystem.
     ~LocalScriptSystem();
+    
+    using ModuleSourceMap = std::map<std::string, std::string>;
+    // Add a new method to initialize the module functions
+    /// @brief Initializes the script module functions after construction
+    /// This is called automatically by LoadAndRegisterScripts
+    void InitializeModuleFunctions();
 
-    /// @brief Sets the source code for the script.
-    /// @param ScriptSource csp::common::String : The source as a string.
-    void SetScriptSource(const csp::common::String& ScriptSource);
-
-    /// @brief Runs the script.
-    /// @return True if the script runs successfully or false if there are errors.
-    bool Invoke();
-
-    /// @brief Run a script with the given source rather than the stored source.
-    ///
-    /// Will be run locally.
-    ///
-    /// @param ScriptSource csp::common::String : The source to use.
-    void RunScript(const csp::common::String& ScriptSource);
-
-    /// @brief Checks if there was an error with the last script invocation.
-    /// @return True if there was an error, false otherwise.
-    bool HasError();
-
-    /// @brief Gets the text of the last error if it is known or otherwise returns a default unknown error string.
-    /// @return Text of the last error.
-    csp::common::String GetErrorText();
-
-    /// @brief Gets the stored script source code.
-    /// @return The source as a string.
-    csp::common::String GetScriptSource();
-
-    /// @brief Called when a component property changes so that a message can be passed to the script if a subscription has been setup.
-    /// @param ComponentId int32_t : ID of the component that changed.
-    /// @param PropertyKey int32_t : Key of the property that changed.
-    void OnPropertyChanged(int32_t ComponentId, int32_t PropertyKey);
-
-    // Script Binding Interface
-    /// @brief Sets up a subscription where the given message is posted to the script when a change is made to the specified component property.
-    /// @param ComponentId int32_t : The ID of the component that the property belongs to.
-    /// @param PropertyKey int32_t : The key of the component property to subscribe to changes of.
-    /// @param Message csp::common::String : The message that will be posted to the script when a change occurs to the property.
-    CSP_NO_EXPORT void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, csp::common::String Message);
-
-    /// @brief Sets up a subscription where the given callback in the script will be run when given message is posted to the script.
-    /// @param Message csp::common::String : The message to subscribe to.
-    /// @param OnMessageCallback csp::common::String : The callback that will be run in the script.
-    CSP_NO_EXPORT void SubscribeToMessage(const csp::common::String Message, const csp::common::String OnMessageCallback);
-
-    /// @brief Runs the callback associated with the given message, if a subscription has been setup, and passes the given params.
-    /// @param Message csp::common::String : The message to use.
-    /// @param MessageParamsJson csp::common::String : A JSON formatted string of parameters to be passed to the callback.
-    void PostMessageToScript(const csp::common::String Message, const csp::common::String MessageParamsJson = "");
-
-    /// @brief Resets binding, context and subscriptions when the source is changed for the script.
-    /// @param InScriptSource csp::common::String : The new source for the script.
-    void OnSourceChanged(const csp::common::String& InScriptSource);
-
-    /// @brief Registers the script source for the related entity in the script system.
-    void RegisterSourceAsModule();
-
-    /// @brief Binds
-    void Bind();
-
-    /// @brief Sets the owner of the script.
-    /// @param ClientId uint64_t : The ID of the client to be set as owner.
-    void SetOwnerId(uint64_t ClientId);
-
-    /// @brief Get the owner of the script.
-    /// @return The client ID of the owner.
-    uint64_t GetOwnerId() const;
-
-    /// @brief Removes the script source and context from the script system.
-    void Shutdown();
 
 private:
-    LocalScriptSystem();
 
-    void CheckBinding();
+    ModuleSourceMap Modules;
 
-    csp::systems::ScriptSystem* ScriptSystem;
-
-    bool HasLastError;
-    csp::common::String LastError;
-
-    using PropertyChangeKey = std::pair<int32_t, int32_t>;
-    using PropertyChangeMap = std::map<PropertyChangeKey, csp::common::String>;
-    PropertyChangeMap PropertyMap;
-
-    using SubscribedMessageMap = std::map<csp::common::String, csp::common::String>;
-    SubscribedMessageMap MessageMap;
-
-    bool HasBinding;
 };
 
 

@@ -427,6 +427,7 @@ private:
     void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
     EntityScriptInterface* GetScriptInterface();
 
+    void MarkForUpdate();
 
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
     bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);

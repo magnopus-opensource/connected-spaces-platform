@@ -348,10 +348,6 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
         Avatars.Append(ReleasedAvatar);
         ReleasedAvatar->ApplyLocalPatch(false);
 
-        if (ElectionManager != nullptr)
-        {
-            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars);
-        }
         Callback(ReleasedAvatar);
     };
 }
@@ -962,11 +958,10 @@ void SpaceEntitySystem::TickEntityScripts()
     const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
 
     {
-        const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
 
         for (size_t i = 0; i < Entities.Size(); ++i)
         {
-            Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+            Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
         }
     }
 }
@@ -1001,25 +996,7 @@ bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, Spac
     return false;
 }
 
-ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
-{
-    // Search for component id across all entites
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ComponentBase* Component = Entities[i]->GetComponents()->operator[](Id);
-
-        if (Component)
-        {
-            return Component;
-        }
-    }
-
-    CSP_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
-
-    return nullptr;
-}
-
-const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
+bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
@@ -1218,12 +1195,10 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
         {
         case SpaceEntityType::Avatar:
             Avatars.Append(EntityToAdd);
-            OnAvatarAdd(EntityToAdd, Avatars);
             break;
 
         case SpaceEntityType::Object:
             Objects.Append(EntityToAdd);
-            OnObjectAdd(EntityToAdd, Objects);
             break;
         }
     }
@@ -1241,13 +1216,11 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
     {
     case SpaceEntityType::Avatar:
         assert(Avatars.Contains(EntityToRemove));
-        OnAvatarRemove(EntityToRemove, Avatars);
         Avatars.RemoveItem(EntityToRemove);
         break;
 
     case SpaceEntityType::Object:
         assert(Objects.Contains(EntityToRemove));
-        OnObjectRemove(EntityToRemove, Objects);
         Objects.RemoveItem(EntityToRemove);
         break;
 
@@ -1262,22 +1235,6 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
     Entities.RemoveItem(EntityToRemove);
 
     CSP_DELETE(EntityToRemove);
-}
-
-void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
-{
-}
-
-void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
-{
-}
-
-void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
-{
-}
-
-void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
-{
 }
 
 void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,

@@ -355,7 +355,7 @@ public:
     /// @brief Load all local scripts associated with the given space.
     /// @param SpaceId const csp::common::String& : The space id the local scripts are associated with.
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, LocalScriptsResultCallback Callback);
+    CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, LocalScriptResultCallback Callback);
 
 
     /// @brief Registers the system to listen for the named event.

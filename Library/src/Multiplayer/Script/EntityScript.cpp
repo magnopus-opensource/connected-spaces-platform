@@ -125,6 +125,7 @@ void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptCo
     }
     
     qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
+    (void)CommonModule;
     ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
     JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
     if (JS_IsException(module)) {
@@ -208,6 +209,7 @@ void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
         }
         
         qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
+        (void)CommonModule;
         ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
         JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
         if (JS_IsException(module))
