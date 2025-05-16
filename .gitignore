@@ -104,3 +104,4 @@ Tests/assets/test_account_creds.txt
 
 # Ignore generated package directories
 package/
+mac-build
