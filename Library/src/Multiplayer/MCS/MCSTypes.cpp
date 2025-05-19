@@ -31,8 +31,8 @@ namespace
 
     template <class T> void DeserializeComponentDataInternal(SignalRDeserializer& Deserializer, ItemComponentDataVariant& OutVal)
     {
-        // It's important we construct the exact type we want to put into our variant,
-        // as signalr only supports double floating points, int64 integer values, and uint64 unsigned integer values.
+        // It's important we construct the exact type we want to read from our variant,
+        // as we want to make sure our variant is populated with the correct type.
         T DeserializedValue {};
         Deserializer.ReadValue(DeserializedValue);
         OutVal = DeserializedValue;
@@ -85,7 +85,7 @@ void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
     // 1. Write an array for type-value pair.
     Serializer.StartWriteArray();
     {
-        // Get the underlying variant type
+        // Visit the variant to get the underlying type.
         std::visit(
             [&Serializer](const auto& ValueType)
             {
@@ -134,7 +134,7 @@ const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Val
 bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
 
 ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-    const std::map<uint16_t, ItemComponentData>& Components)
+    const std::map<PropertyKeyType, ItemComponentData>& Components)
     : Id { Id }
     , Type { Type }
     , IsTransferable { IsTransferable }
@@ -197,7 +197,7 @@ std::optional<uint64_t> ObjectMessage::GetParentId() const { return ParentId; }
 const std::map<PropertyKeyType, ItemComponentData>& ObjectMessage::GetComponents() const { return Components; }
 
 ObjectPatch::ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-    const std::map<uint16_t, ItemComponentData>& Components)
+    const std::map<PropertyKeyType, ItemComponentData>& Components)
     : Id { Id }
     , OwnerId { OwnerId }
     , Destroy { Destroy }

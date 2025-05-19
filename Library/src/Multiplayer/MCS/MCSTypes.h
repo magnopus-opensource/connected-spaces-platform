@@ -138,8 +138,9 @@ private:
 class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
+    ObjectMessage() = default;
     ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-        const std::map<uint16_t, ItemComponentData>& Components);
+        const std::map<PropertyKeyType, ItemComponentData>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -155,11 +156,11 @@ public:
     const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
 
 private:
-    uint64_t Id;
-    uint64_t Type;
-    bool IsTransferable;
-    bool IsPersistant;
-    uint64_t OwnerId;
+    uint64_t Id = 0;
+    uint64_t Type = 0;
+    bool IsTransferable = false;
+    bool IsPersistant = false;
+    uint64_t OwnerId = 0;
     std::optional<uint64_t> ParentId;
     std::map<PropertyKeyType, ItemComponentData> Components;
 };
@@ -170,8 +171,9 @@ private:
 class ObjectPatch : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
+    ObjectPatch() = default;
     ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-        const std::map<uint16_t, ItemComponentData>& Components);
+        const std::map<PropertyKeyType, ItemComponentData>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -186,10 +188,10 @@ public:
     const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
 
 private:
-    uint64_t Id;
-    uint64_t OwnerId;
-    bool Destroy;
-    bool ShouldUpdateParent;
+    uint64_t Id = 0;
+    uint64_t OwnerId = 0;
+    bool Destroy = false;
+    bool ShouldUpdateParent = false;
     std::optional<uint64_t> ParentId;
     std::map<PropertyKeyType, ItemComponentData> Components;
 };
