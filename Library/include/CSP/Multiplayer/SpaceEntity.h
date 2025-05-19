@@ -436,10 +436,15 @@ private:
 
     void ResolveParentChildRelationship();
 
+    CSP_START_IGNORE
     csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
     csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
-    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ComponentBase* Component);
-    csp::multiplayer::mcs::ItemComponentData CreateItemComponentData(const ReplicatedValue& Value);
+
+    void FromObjectMessage(const mcs::ObjectMessage& Message);
+    void FromObjectPatch(const mcs::ObjectPatch& Patch);
+    void ComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData);
+    ComponentUpdateInfo ComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData);
+    CSP_END_IGNORE
 
     SpaceEntitySystem* EntitySystem;
 
