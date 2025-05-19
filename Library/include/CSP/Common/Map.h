@@ -95,6 +95,9 @@ public:
         return *this;
     }
 
+    /// @brief Move assignment.
+    /// @param Other Map<TKey, TValue>&&
+    /// @return Map<TKey, TValue>&
     CSP_NO_EXPORT Map<TKey, TValue>& operator=(Map<TKey, TValue>&& Other)
     {
         if (this == &Other)
