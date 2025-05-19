@@ -40,17 +40,11 @@ public:
 
     /// @brief Copy constructor.
     /// @param Other const Map<TKey, TValue>&
-    Map(const Map<TKey, TValue>& Other)
-    {
-        Container = new MapType(*Other.Container); // Copy construct
-    }
+    Map(const Map<TKey, TValue>& Other) { Container = new MapType(*Other.Container); }
 
     /// @brief Move constructor.
     /// @param Other Map<TKey, TValue>&&
-    CSP_NO_EXPORT Map(Map<TKey, TValue>&& Other)
-    {
-        Container = new MapType(std::move(*Other.Container)); // Copy construct
-    }
+    CSP_NO_EXPORT Map(Map<TKey, TValue>&& Other) { Container = new MapType(std::move(*Other.Container)); }
 
     /// @brief Constructs a map from a `std::initializer_list`.
     /// @param Values const std::initializer_list<std::pair<const TKey, const TValue>> : Elements to construct the map from
