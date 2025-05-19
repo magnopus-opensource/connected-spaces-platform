@@ -542,12 +542,16 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
     }
 }
 
-static SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem)
+SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem)
 {
-    SignalRMsgPackEntityDeserialiser Deserialiser(EntityMessage);
+    // Create object message from signalr value
+    mcs::ObjectMessage Message;
+    SignalRDeserializer Deserializer { EntityMessage };
+    Deserializer.ReadValue(Message);
 
+    // Create entity from object message
     const auto NewEntity = CSP_NEW SpaceEntity(EntitySystem);
-    NewEntity->Deserialise(Deserialiser);
+    NewEntity->FromObjectMessage(Message);
 
     EntitySystem->AddEntity(NewEntity);
 
@@ -1431,90 +1435,60 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
-    SignalRMsgPackEntityDeserialiser Deserialiser(*EntityMessage);
+    mcs::ObjectPatch Patch;
+    SignalRDeserializer Deserializer { *EntityMessage };
+    Deserializer.ReadValue(Patch);
 
-    Deserialiser.EnterEntity();
+    if (Patch.GetDestroy())
     {
-        const uint64_t EntityID = Deserialiser.ReadUInt64();
-        const uint64_t OwnerID = Deserialiser.ReadUInt64();
-        const bool Destroy = Deserialiser.ReadBool();
-        bool ShouldUpdateParent = false;
-        csp::common::Optional<uint64_t> ParentId = nullptr;
-
-        if (Deserialiser.NextValueIsArray())
+        // This is an entity deletion.
+        // Deletion
+        for (size_t i = 0; i < Entities.Size(); ++i)
         {
-            uint32_t size = 0;
-            Deserialiser.EnterArray(size);
+            SpaceEntity* Entity = Entities[i];
+
+            if (Entity->GetId() == Patch.GetId())
             {
-                ShouldUpdateParent = Deserialiser.ReadBool();
-
-                if (Deserialiser.NextValueIsNull())
+                if (Entity->GetEntityType() == SpaceEntityType::Avatar)
                 {
-                    Deserialiser.Skip();
-                }
-                else
-                {
-                    ParentId = Deserialiser.ReadUInt64();
-                }
-            }
-            Deserialiser.LeaveArray();
-        }
+                    // All clients will take ownership of deleted avatars scripts
+                    // Last client which receives patch will end up with ownership
+                    ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
 
-        if (Destroy)
-        {
-            // Deletion
-            for (size_t i = 0; i < Entities.Size(); ++i)
-            {
-                SpaceEntity* Entity = Entities[i];
-
-                if (Entity->GetId() == EntityID)
-                {
-                    if (Entity->GetEntityType() == SpaceEntityType::Avatar)
+                    // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
+                    // This covers disconnected clients as their avatar gets cleaned up after timing out.
+                    for (size_t j = 0; j < Entities.Size(); ++j)
                     {
-                        // All clients will take ownership of deleted avatars scripts
-                        // Last client which receives patch will end up with ownership
-                        ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
-
-                        // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
-                        // This covers disconnected clients as their avatar gets cleaned up after timing out.
-                        for (size_t j = 0; j < Entities.Size(); ++j)
+                        if (Entities[j]->GetSelectingClientID() == Patch.GetId())
                         {
-                            if (Entities[j]->GetSelectingClientID() == EntityID)
-                            {
-                                Entities[j]->Deselect();
-                                SelectedEntities.RemoveItem(Entities[j]);
-                            }
+                            Entities[j]->Deselect();
+                            SelectedEntities.RemoveItem(Entities[j]);
                         }
                     }
-
-                    LocalDestroyEntity(Entity);
                 }
-            }
-        }
-        else
-        {
-            bool EntityFound = false;
 
-            // Update
-            for (size_t i = 0; i < Entities.Size(); ++i)
-            {
-                if (Entities[i]->GetId() == EntityID)
-                {
-                    EntityFound = true;
-                    Entities[i]->ShouldUpdateParent = ShouldUpdateParent;
-                    Entities[i]->ParentId = ParentId;
-                    Entities[i]->DeserialiseFromPatch(Deserialiser);
-                    Entities[i]->OwnerId = OwnerID;
-                }
-            }
-
-            if (!EntityFound)
-            {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", EntityID);
+                LocalDestroyEntity(Entity);
             }
         }
     }
-    Deserialiser.LeaveEntity();
+    else
+    {
+        bool EntityFound = false;
+
+        // Update
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            if (Entities[i]->GetId() == Patch.GetId())
+            {
+                Entities[i]->FromObjectPatch(Patch);
+            }
+        }
+
+        if (!EntityFound)
+        {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", Patch.GetId());
+        }
+    }
 }
 
 void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
