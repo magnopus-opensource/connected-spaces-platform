@@ -1386,8 +1386,7 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     ComponentData[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(EntityLock) };
 
     // Next convert all of our runtime components to mcs compatible types.
-    auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+    std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
 
     for (size_t i = 0; i < Keys->Size(); ++i)
     {
@@ -1411,8 +1410,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
 
     // First convert our modified view components to mcs compatible types.
     {
-        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()), Deleter);
+        std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()));
 
         for (size_t i = 0; i < Keys->Size(); ++i)
         {
@@ -1422,8 +1420,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
 
     // Next convert all of our runtime components to mcs compatible types.
     {
-        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+        std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
 
         for (size_t i = 0; i < Keys->Size(); ++i)
         {
@@ -1451,9 +1448,7 @@ csp::multiplayer::mcs::ItemComponentData SpaceEntity::CreateItemComponentData(co
     ComponentProperties[COMPONENT_KEY_COMPONENTTYPE] = { static_cast<uint64_t>(Component->GetComponentType()) };
 
     // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
-    auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(
-        const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()), Deleter);
+    std::unique_ptr<common::Array<uint32_t>> Keys(const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()));
 
     for (size_t i = 0; i < Keys->Size(); ++i)
     {
@@ -1506,9 +1501,7 @@ mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ReplicatedValu
         std::map<std::string, mcs::ItemComponentData> Map;
 
         auto ReplicatedMap = Value.GetStringMap();
-        auto Deleter = [](const common::Array<csp::common::String>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<csp::common::String>, decltype(Deleter)> Keys(
-            const_cast<common::Array<csp::common::String>*>(ReplicatedMap.Keys()), Deleter);
+        std::unique_ptr<common::Array<csp::common::String>> Keys(const_cast<common::Array<csp::common::String>*>(ReplicatedMap.Keys()));
 
         for (auto Key : (*Keys))
         {
