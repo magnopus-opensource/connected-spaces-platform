@@ -1392,16 +1392,16 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
 
     // Loop through all components and convert to ItemComponentData.
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (uint16_t Key : *Keys)
     {
-        if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+        if (DirtyComponents[Key].Component != nullptr)
         {
-            auto* Component = DirtyComponents[(*Keys)[i]].Component;
-            ComponentPacker.WriteValue((*Keys)[i], Component);
+            auto* Component = DirtyComponents[Key].Component;
+            ComponentPacker.WriteValue(Key, Component);
         }
         else
         {
-            assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+            assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
         }
     }
 
@@ -1421,9 +1421,9 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
         std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()), Deleter);
 
         // Loop through modfied view components and convert to ItemComponentData.
-        for (size_t i = 0; i < Keys->Size(); ++i)
+        for (uint16_t Key : *Keys)
         {
-            ComponentPacker.WriteValue((*Keys)[i], DirtyProperties[(*Keys)[i]]);
+            ComponentPacker.WriteValue(Key, DirtyProperties[Key]);
         }
     }
 
@@ -1434,16 +1434,16 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
         std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
 
         // Loop through all components and convert to ItemComponentData.
-        for (size_t i = 0; i < Keys->Size(); ++i)
+        for (uint16_t Key : *Keys)
         {
-            if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+            if (DirtyComponents[Key].Component != nullptr)
             {
-                auto* Component = DirtyComponents[(*Keys)[i]].Component;
-                ComponentPacker.WriteValue((*Keys)[i], Component);
+                auto* Component = DirtyComponents[Key].Component;
+                ComponentPacker.WriteValue(Key, Component);
             }
             else
             {
-                assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+                assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
             }
         }
     }
