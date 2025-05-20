@@ -201,8 +201,11 @@ public:
     void EndReadStringMap();
 
     /// @brief Returns true if the next value to read is a signed integer.
+    /// @return bool
     bool NextValueIsInt() const;
 
+    /// @brief Returns true if the next value to read is an unsigned integer.
+    /// @return bool
     bool NextValueIsUint() const;
 
 private:
