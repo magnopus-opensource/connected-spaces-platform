@@ -190,7 +190,7 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(int64_t Value
 
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(float Value) { return mcs::ItemComponentData { Value }; }
 
-mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::String& Value) { return std::string { Value }.c_str(); }
+mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::String& Value) { return std::string { Value.c_str() }; }
 
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::Vector3& Value)
 {
