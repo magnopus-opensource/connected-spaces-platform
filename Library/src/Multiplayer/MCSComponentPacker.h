@@ -63,9 +63,22 @@ public:
     MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& Components);
 
     template <typename T> bool TryReadValue(uint16_t Key, T& Value);
-    template <typename T> void ReadValue(uint16_t Key, T& Value);
 
     uint64_t GetRealComponentsCount() const;
+
+    // Primitive types can be converted without changes
+    template <class T> static void CreateReplicatedValueFromType(const T& Type, ReplicatedValue& Value) { Value = ReplicatedValue(Type); }
+
+    static void CreateReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(uint64_t, ReplicatedValue&);
+    static void CreateReplicatedValueFromType(double, ReplicatedValue&);
+    static void CreateReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&);
+    static void CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
+
+private:
+    template <typename T> void ReadValue(uint16_t Key, T& Value);
 
     // We currently only store int64 values, so if we are using uint64, we need to convert.
     // We should update this in the future to store the correct integer type.
@@ -80,18 +93,6 @@ public:
     // Case for enums
     template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value);
 
-    static void ReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value);
-    static void ReplicatedValueFromType(uint64_t, ReplicatedValue&);
-    static void ReplicatedValueFromType(double, ReplicatedValue&);
-    static void ReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value);
-    static void ReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&);
-    static void ReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value);
-    static void ReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
-
-    // Primitive types can be converted without changes
-    template <class T> static void ReplicatedValueFromType(const T& Type, ReplicatedValue& Value) { Value = ReplicatedValue(Type); }
-
-private:
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
 

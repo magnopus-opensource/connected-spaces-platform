@@ -59,10 +59,10 @@ void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value)
 {
-    std::visit([&Value](const auto& ValueType) { ReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
+    std::visit([&Value](const auto& ValueType) { CreateReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
 }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value)
 {
     if (Type.size() == 2)
     {
@@ -82,21 +82,21 @@ void MCSComponentUnpacker::ReplicatedValueFromType(const std::vector<float>& Typ
     }
 }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(uint64_t, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
+void MCSComponentUnpacker::CreateReplicatedValueFromType(uint64_t, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(double, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
+void MCSComponentUnpacker::CreateReplicatedValueFromType(double, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value)
 {
     Value = ReplicatedValue { csp::common::String { Type.c_str() } };
 }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&)
 {
     throw std::runtime_error("Unsupported");
 }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value)
 {
     // Convert string map of ItemComponentData to csp string map of ReplicatedValue.
     csp::common::Map<csp::common::String, ReplicatedValue> Map;
@@ -104,16 +104,16 @@ void MCSComponentUnpacker::ReplicatedValueFromType(const std::map<std::string, m
     for (const auto& Pair : Type)
     {
         ReplicatedValue ChildValue;
-        ReplicatedValueFromType(Pair.second, ChildValue);
+        CreateReplicatedValueFromType(Pair.second, ChildValue);
         Map[Pair.first.c_str()] = ChildValue;
     }
 
-    ReplicatedValueFromType(Map, Value);
+    CreateReplicatedValueFromType(Map, Value);
 }
 
-void MCSComponentUnpacker::ReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value)
 {
-    std::visit([&Value](const auto& ValueType) { ReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
+    std::visit([&Value](const auto& ValueType) { CreateReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
 }
 
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase* Value)

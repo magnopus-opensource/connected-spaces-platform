@@ -1600,7 +1600,7 @@ void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs
                 }
 
                 ReplicatedValue Property;
-                MCSComponentUnpacker::ReplicatedValueFromType(PatchComponentPair.second, Property);
+                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->Properties[PatchComponentPair.first] = Property;
                 Component->OnCreated();
@@ -1642,7 +1642,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
             }
 
             ReplicatedValue Property;
-            MCSComponentUnpacker::ReplicatedValueFromType(PatchComponentPair.second, Property);
+            MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
             Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
         }
@@ -1664,7 +1664,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
                 }
 
                 ReplicatedValue Property;
-                MCSComponentUnpacker::ReplicatedValueFromType(PatchComponentPair.second, Property);
+                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
             }
