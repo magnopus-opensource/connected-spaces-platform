@@ -171,6 +171,11 @@ public:
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
     SpaceEntity(SpaceEntitySystem* InEntitySystem);
 
+    /// Internal constructor to explicitly create a SpaceEntity in a specified state.
+    /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
+        uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
+
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
 
