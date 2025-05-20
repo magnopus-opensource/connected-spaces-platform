@@ -1457,7 +1457,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
         ComponentPacker.WriteValue(DeletionComponent.Id, &DeletionComponent);
     }
 
-    // 4. Create the object patch using the reqired properties and our created components.
+    // 4. Create the object patch using the required properties and our created components.
     return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentPacker.GetComponents() };
 }
 
