@@ -46,7 +46,15 @@ namespace
             DeserializeComponentDataInternal<bool>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::INT64:
-            DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            // We can't guarantee MCS will give us back a signed integer, even if one is sent.
+            if (Deserializer.NextValueIsInt())
+            {
+                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            }
+            else
+            {
+                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            }
             break;
         case ItemComponentDataType::UINT64:
             DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
@@ -194,7 +202,7 @@ uint64_t ObjectMessage::GetOwnerId() const { return OwnerId; }
 
 std::optional<uint64_t> ObjectMessage::GetParentId() const { return ParentId; }
 
-const std::map<PropertyKeyType, ItemComponentData>& ObjectMessage::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectMessage::GetComponents() const { return Components; }
 
 ObjectPatch::ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
     const std::map<PropertyKeyType, ItemComponentData>& Components)
@@ -266,6 +274,6 @@ bool ObjectPatch::GetShouldUpdateParent() const { return ShouldUpdateParent; }
 
 std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
 
-const std::map<PropertyKeyType, ItemComponentData>& ObjectPatch::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
 
 }

@@ -153,7 +153,7 @@ public:
     bool GetIsPersistant() const;
     uint64_t GetOwnerId() const;
     std::optional<uint64_t> GetParentId() const;
-    const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
     uint64_t Id = 0;
@@ -162,7 +162,7 @@ private:
     bool IsPersistant = false;
     uint64_t OwnerId = 0;
     std::optional<uint64_t> ParentId;
-    std::map<PropertyKeyType, ItemComponentData> Components;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 
 /// @brief Represents an MCS object patch.
@@ -185,7 +185,7 @@ public:
     bool GetDestroy() const;
     bool GetShouldUpdateParent() const;
     std::optional<uint64_t> GetParentId() const;
-    const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
     uint64_t Id = 0;
@@ -193,6 +193,6 @@ private:
     bool Destroy = false;
     bool ShouldUpdateParent = false;
     std::optional<uint64_t> ParentId;
-    std::map<PropertyKeyType, ItemComponentData> Components;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 }

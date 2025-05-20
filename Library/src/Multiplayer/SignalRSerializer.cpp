@@ -169,7 +169,19 @@ void SignalRDeserializer::EndReadStringMap()
     IncrementIterator();
 }
 
-const signalr::value& SignalRDeserializer::ReadNextValue()
+bool SignalRDeserializer::NextValueIsInt() const
+{
+    const signalr::value& Next = ReadNextValue();
+    return Next.is_integer();
+}
+
+bool SignalRDeserializer::NextValueIsUint() const
+{
+    const signalr::value& Next = ReadNextValue();
+    return Next.is_uinteger();
+}
+
+const signalr::value& SignalRDeserializer::ReadNextValue() const
 {
     if (std::holds_alternative<std::vector<signalr::value>::const_iterator>(ObjectStack.top()))
     {

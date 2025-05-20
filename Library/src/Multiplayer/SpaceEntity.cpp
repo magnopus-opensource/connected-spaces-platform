@@ -1383,8 +1383,8 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ROTATION, GetRotation());
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SCALE, GetScale());
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, GetSelectingClientID());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef());
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, GetThirdPartyPlatformType());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef());
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
 
     // 2. Convert all of our runtime components to mcs compatible types.
@@ -1470,29 +1470,32 @@ void SpaceEntity::FromObjectMessage(const mcs::ObjectMessage& Message)
     OwnerId = Message.GetOwnerId();
     ParentId = common::Convert(Message.GetParentId());
 
-    std::map<uint16_t, mcs::ItemComponentData> MessageComponents = Message.GetComponents();
+    auto MessageComponents = Message.GetComponents();
 
-    // Get view components
-    MCSComponentUnpacker ComponentUnpacker { Message.GetComponents() };
-
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
-    ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
-
-    for (const auto& ComponentDataPair : MessageComponents)
+    if (MessageComponents.has_value())
     {
-        if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
-        {
-            // This is the end of our components
-            break;
-        }
+        // Get view components
+        MCSComponentUnpacker ComponentUnpacker { *Message.GetComponents() };
 
-        ComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
+
+        for (const auto& ComponentDataPair : *MessageComponents)
+        {
+            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+            {
+                // This is the end of our components
+                break;
+            }
+
+            ComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
+        }
     }
 }
 
@@ -1503,59 +1506,64 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
     ParentId = common::Convert(Patch.GetParentId());
 
     SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
+    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
-    std::map<uint16_t, mcs::ItemComponentData> PatchComponents = Patch.GetComponents();
-    MCSComponentUnpacker ComponentUnpacker { Patch.GetComponents() };
+    auto PatchComponents = Patch.GetComponents();
 
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name))
+    if (PatchComponents.has_value())
     {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-    }
-    if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock))
-    {
-        UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-    }
+        MCSComponentUnpacker ComponentUnpacker { *Patch.GetComponents() };
 
-    uint64_t ComponentCount = ComponentUnpacker.GetRealComponentsCount();
-
-    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(ComponentCount);
-    size_t ComponentIndex = 0;
-
-    for (const auto& ComponentDataPair : PatchComponents)
-    {
-        if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name))
         {
-            // This is the end of our components
-            break;
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
         }
 
-        ComponentUpdateInfo UpdateInfo = ComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
-        ComponentUpdates[ComponentIndex] = UpdateInfo;
-        ComponentIndex++;
+        uint64_t ComponentCount = ComponentUnpacker.GetRealComponentsCount();
+
+        ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
+        size_t ComponentIndex = 0;
+
+        for (const auto& ComponentDataPair : *PatchComponents)
+        {
+            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+            {
+                // This is the end of our components
+                break;
+            }
+
+            ComponentUpdateInfo UpdateInfo = ComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
+            ComponentUpdates[ComponentIndex] = UpdateInfo;
+            ComponentIndex++;
+        }
     }
 
     if (ShouldUpdateParent)
