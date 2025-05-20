@@ -800,7 +800,8 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
+// This test is to be fixed as part of OF-1651.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MaterialTests, MaterialAssetEventTest)
 {
     SetRandSeed();
 

@@ -214,6 +214,7 @@ public:
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void BulkInviteToSpace(
         const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback);
+    CSP_NO_EXPORT async::task<NullResult> BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers);
 
     /// @brief Returns an array of obfuscated email addresses, addresses of users that have not yet accepted the space invite
     /// @param Space Space : Space for which the invites where sent
@@ -362,8 +363,6 @@ private:
     // Space Metadata
     void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
     void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-    void AddMetadata(
-        const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata, NullResultCallback Callback);
     void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     // Space Thumbnail
@@ -375,6 +374,25 @@ private:
     void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+
+    // CreateSpace Continuations
+    async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata);
+    async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space);
+    std::function<async::task<AssetResult>()> CreateSpaceThumbnailAsset(
+        const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAsset(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAssetWithBuffer(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
+        SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
 
     // EnterSpace Continuations
     auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);

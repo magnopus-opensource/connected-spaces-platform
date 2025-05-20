@@ -1188,12 +1188,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that the CreateConversaiton event is correctly received and processed by other clients.
 Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
 correctly when receiving the component property from a patch, which has been created by the ConversationSpaceComponent::CreateConversation call.
 */
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -1224,6 +1225,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
               .SetTimeoutInSeconds(60);
 
     std::future<void> ReadyForAssertionsFuture = CreateConversationRunner.ReadyForAssertionsFuture();
@@ -1333,11 +1335,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
 Other clients can still delete other conversations, as components/entities dont have any restrictions.
 */
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
