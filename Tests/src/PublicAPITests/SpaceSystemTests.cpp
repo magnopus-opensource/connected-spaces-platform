@@ -408,14 +408,28 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidThumbnailTest
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
+    // When it fails, CreateSpace spawns an async operation that deletes the space.
+    // It's a bit of an API bug that we can't observe this operation via a task or handle, so we just busy wait for now.
+
     bool SpaceHasBeenDeleted = false;
+    const auto Start = std::chrono::steady_clock::now();
+    constexpr std::chrono::seconds Timeout = std::chrono::seconds(10);
     while (!SpaceHasBeenDeleted)
     {
+        if ((std::chrono::steady_clock::now() - Start) >= Timeout)
+        {
+            // Timeout reached
+            FAIL() << "Busy wait timeout reached waiting for space deletion.";
+        }
+
         // Validate that the in progress invalid space creation has been resolved and space has been removed.
         auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
-        SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
+        const size_t SpaceSize = SpacesResult.GetSpaces().Size();
 
-        // Wait to allow for the space deltion to be processed.
+        std::cout << "Number of spaces whilst waiting for delete: " << SpaceSize << std::endl;
+        SpaceHasBeenDeleted = SpaceSize == 0;
+
+        // Wait to allow for the space deletion to be processed.
         //
         // This is required as shutting down will cause a memory access violation,
         // due to spawned process not being resolved while systems are being destroyed.
@@ -664,14 +678,28 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidBufferWithThu
     // required as the GetSpaces will return out dated result before the request has been processed.
     std::this_thread::sleep_for(700ms);
 
+    // When it fails, CreateSpace spawns an async operation that deletes the space.
+    // It's a bit of an API bug that we can't observe this operation via a task or handle, so we just busy wait for now.
+
     bool SpaceHasBeenDeleted = false;
+    const auto Start = std::chrono::steady_clock::now();
+    constexpr std::chrono::seconds Timeout = std::chrono::seconds(10);
     while (!SpaceHasBeenDeleted)
     {
+        if ((std::chrono::steady_clock::now() - Start) >= Timeout)
+        {
+            // Timeout reached
+            FAIL() << "Busy wait timeout reached waiting for space deletion.";
+        }
+
         // Validate that the in progress invalid space creation has been resolved and space has been removed.
         auto [SpacesResult] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
-        SpaceHasBeenDeleted = SpacesResult.GetSpaces().Size() == 0;
+        const size_t SpaceSize = SpacesResult.GetSpaces().Size();
 
-        // Wait to allow for the space deltion to be processed.
+        std::cout << "Number of spaces whilst waiting for delete: " << SpaceSize << std::endl;
+        SpaceHasBeenDeleted = SpaceSize == 0;
+
+        // Wait to allow for the space deletion to be processed.
         //
         // This is required as shutting down will cause a memory access violation,
         // due to spawned process not being resolved while systems are being destroyed.
