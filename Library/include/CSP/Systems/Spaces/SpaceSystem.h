@@ -151,7 +151,7 @@ public:
         const csp::common::Optional<csp::common::String>& Description, const csp::common::Optional<SpaceAttributes>& Type,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, BasicSpaceResultCallback Callback);
 
-    /// @brief Deletes a given space and the corresponding UserService group.
+    /// @brief Deletes a given space and the associated objects that belong to it. Including UserService group, Metadata, and Thumbnail.
     /// @param Space Space : space to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
