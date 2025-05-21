@@ -100,12 +100,12 @@ template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, cons
 
 template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> MCSComponentPacker::CreateItemComponentData(T Value)
 {
-    return CreateItemComponentData(static_cast<int64_t>(Value));
+    return CreateItemComponentData(static_cast<uint64_t>(Value));
 }
 
 template <typename T> inline bool MCSComponentUnpacker::TryReadValue(uint16_t Key, T& Value)
 {
-    if (Components.find(Key) != Components.end())
+    if (Components.find(Key) == Components.end())
     {
         return false;
     }
@@ -123,7 +123,7 @@ template <typename T> inline void MCSComponentUnpacker::ReadValue(uint16_t Key, 
 template <typename T>
 inline std::enable_if_t<std::is_enum_v<T>> MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value)
 {
-    int64_t RawEnumValue = 0;
+    uint64_t RawEnumValue = 0;
     ReadValue(ComponentData, RawEnumValue);
     Value = static_cast<T>(RawEnumValue);
 }

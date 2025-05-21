@@ -28,7 +28,7 @@ uint64_t MCSComponentUnpacker::GetRealComponentsCount() const
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value)
 {
-    Value = static_cast<uint64_t>(std::get<int64_t>(ComponentData.GetValue()));
+    Value = std::get<uint64_t>(ComponentData.GetValue());
 }
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value)
@@ -120,7 +120,6 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase
 {
     // Create a nested map to represent the component properties.
     MCSComponentPacker ComponentPacker;
-    std::map<uint16_t, mcs::ItemComponentData> ComponentProperties;
 
     // Manually write the component type, as this isn't stored in the component properties.
     // This is currently the ONLY value that uses a uint64 types as a key for some reason. The rest use int64.
@@ -130,12 +129,12 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase
     auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
     std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint32_t>*>(Value->GetProperties()->Keys()), Deleter);
 
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (uint32_t Key : *Keys)
     {
-        ComponentPacker.WriteValue(static_cast<uint16_t>((*Keys)[i]), (*Value->GetProperties())[static_cast<uint32_t>((*Keys)[i])]);
+        ComponentPacker.WriteValue(static_cast<uint16_t>(Key), (*Value->GetProperties())[static_cast<uint32_t>(Key)]);
     }
 
-    return mcs::ItemComponentData { ComponentProperties };
+    return mcs::ItemComponentData { ComponentPacker.GetComponents() };
 }
 
 // TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,

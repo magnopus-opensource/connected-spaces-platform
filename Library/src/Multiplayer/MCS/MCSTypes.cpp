@@ -57,7 +57,17 @@ namespace
             }
             break;
         case ItemComponentDataType::UINT64:
-            DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            // Due to us changing some of our types from int64->uint64, we may receive some unexpected int64 values here.
+            // So we need to account for this here.
+            if (Deserializer.NextValueIsUint())
+            {
+                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            }
+            else
+            {
+                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            }
+
             break;
         case ItemComponentDataType::DOUBLE:
             DeserializeComponentDataInternal<double>(Deserializer, OutVal);
@@ -72,10 +82,28 @@ namespace
             DeserializeComponentDataInternal<std::string>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::UINT16_DICTIONARY:
-            DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(Deserializer, OutVal);
+            // If a dictionary is empty, we will receive null from MCS.
+            if (Deserializer.NextValueIsNull())
+            {
+                Deserializer.Skip();
+                OutVal = std::map<uint16_t, ItemComponentData> {};
+            }
+            else
+            {
+                DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(Deserializer, OutVal);
+            }
             break;
         case ItemComponentDataType::STRING_DICTIONARY:
-            DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
+            // If a dictionary is empty, we will receive null from MCS.
+            if (Deserializer.NextValueIsNull())
+            {
+                Deserializer.Skip();
+                OutVal = std::map<std::string, ItemComponentData> {};
+            }
+            else
+            {
+                DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
+            }
             break;
         default:
             throw std::invalid_argument("Trying to deserialize unsupported ItemComponentDataType");
