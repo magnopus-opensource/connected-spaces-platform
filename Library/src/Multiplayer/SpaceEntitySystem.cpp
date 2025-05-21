@@ -261,8 +261,8 @@ namespace
         const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
-        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(
-            new csp::multiplayer::SpaceEntity(&SpaceEntitySystem, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
+        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
+            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
@@ -1428,9 +1428,9 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(nullptr);
         }
 
-        auto* NewObject = new SpaceEntity(this);
-        NewObject->Type = SpaceEntityType::Object;
         auto ID = ParseGenerateObjectIDsResult(Result);
+        auto* NewObject
+            = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
 
         if (InParent.HasValue())
         {

@@ -194,13 +194,14 @@ public:
     /// @brief MultiplayerConnection constructor
     CSP_NO_EXPORT MultiplayerConnection();
 
+    /// @brief MultiplayerConnection destructor
+    CSP_NO_EXPORT ~MultiplayerConnection();
+
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
 
 private:
-    ~MultiplayerConnection();
-
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
     typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
@@ -222,7 +223,7 @@ private:
     class csp::multiplayer::ISignalRConnection* Connection;
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
-    EventBus* EventBusPtr;
+    class EventBus* EventBusPtr;
 
     uint64_t ClientId;
 

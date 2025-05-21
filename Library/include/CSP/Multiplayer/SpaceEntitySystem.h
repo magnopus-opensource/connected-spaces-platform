@@ -326,7 +326,10 @@ public:
 
     /// @brief SpaceEntitySystem constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
-    SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
+
+    /// @brief SpaceEntitySystem destructor
+    CSP_NO_EXPORT ~SpaceEntitySystem();
 
     /// @brief Getter for the pending adds
     /// @return: SpaceEntityQueue*
@@ -346,8 +349,6 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
-    ~SpaceEntitySystem();
-
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
 

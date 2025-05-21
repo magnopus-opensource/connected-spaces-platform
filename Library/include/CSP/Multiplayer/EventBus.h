@@ -96,9 +96,11 @@ public:
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
     CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection);
 
+    /// @brief EventBus destructor
+    CSP_NO_EXPORT ~EventBus();
+
 private:
     EventBus();
-    ~EventBus();
 
     class MultiplayerConnection* MultiplayerConnectionInst;
 
