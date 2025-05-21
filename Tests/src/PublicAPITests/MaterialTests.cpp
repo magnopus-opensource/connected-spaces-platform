@@ -729,12 +729,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 
         auto CB = [&CallbackCalled, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
         {
-            EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-            EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+            if (CreatedGLTFMaterial)
+            {
+                EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
+                EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
 
-            EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
+                EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
 
-            CallbackCalled = true;
+                CallbackCalled = true;
+            }
         };
 
         AssetSystem->SetMaterialChangedCallback(CB);
