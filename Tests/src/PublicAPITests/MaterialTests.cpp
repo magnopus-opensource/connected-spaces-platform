@@ -729,15 +729,23 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 
         auto CB = [&CallbackCalled, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
         {
-            if (CreatedGLTFMaterial)
+            const auto Start = std::chrono::steady_clock::now();
+            constexpr std::chrono::seconds Timeout = std::chrono::seconds(10);
+            while (!CreatedGLTFMaterial)
             {
-                EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-                EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
-
-                EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
-
-                CallbackCalled = true;
+                if ((std::chrono::steady_clock::now() - Start) >= Timeout)
+                {
+                    // Timeout reached
+                    FAIL() << "Busy wait timeout reached waiting for Material creation.";
+                }
             }
+
+            EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
+            EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+
+            EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
+
+            CallbackCalled = true;
         };
 
         AssetSystem->SetMaterialChangedCallback(CB);
@@ -802,8 +810,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     LogOut(UserSystem);
 }
 
-// This test is to be fixed as part of OF-1651.
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, MaterialTests, MaterialAssetEventTest)
+CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
 {
     SetRandSeed();
 
@@ -840,6 +847,17 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MaterialTests, MaterialAssetEventTest)
 
     auto CB = [&CallbackCalled, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
     {
+        const auto Start = std::chrono::steady_clock::now();
+        constexpr std::chrono::seconds Timeout = std::chrono::seconds(10);
+        while (!CreatedGLTFMaterial)
+        {
+            if ((std::chrono::steady_clock::now() - Start) >= Timeout)
+            {
+                // Timeout reached
+                FAIL() << "Busy wait time-out reached waiting for Material creation.";
+            }
+        }
+
         EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
         EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
 
