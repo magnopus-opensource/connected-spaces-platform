@@ -82,7 +82,11 @@ void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::vector<float
     }
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(uint64_t, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
+void MCSComponentUnpacker::CreateReplicatedValueFromType(uint64_t Type, ReplicatedValue& Value)
+{
+    // ReplicatedValue only supported signed integers.
+    CreateReplicatedValueFromType(static_cast<int64_t>(Type), Value);
+}
 
 void MCSComponentUnpacker::CreateReplicatedValueFromType(double, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
 
@@ -161,11 +165,11 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const Replica
     }
     else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector3)
     {
-        return CreateItemComponentData(Value.GetDefaultVector3());
+        return CreateItemComponentData(Value.GetVector3());
     }
     else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector4)
     {
-        return CreateItemComponentData(Value.GetDefaultVector4());
+        return CreateItemComponentData(Value.GetVector4());
     }
     else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector2)
     {
