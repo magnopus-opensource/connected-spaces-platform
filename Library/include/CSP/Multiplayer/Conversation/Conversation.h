@@ -89,7 +89,7 @@ class CSP_API AnnotationUpdateParams
 {
 public:
     /// @brief The vertical fov of the camera when the annotation is created
-    uint16_t VerticalFov;
+    double VerticalFov;
     /// @brief The position of the camera when the annotation is created
     csp::common::Vector3 AuthorCameraPosition;
     /// @brief The rotation of the camera when the annotation is created
@@ -102,54 +102,13 @@ class CSP_API AnnotationData
 {
 public:
     AnnotationData();
-    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, const uint16_t InVerticalFov,
+    AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, double InVerticalFov,
         const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
 
-    /// @brief Get the annotation id
-    /// @return csp::common::String
-    csp::common::String GetAnnotationId() const;
-
-    /// @brief Get the annotation collection id
-    /// @return csp::common::String
-    csp::common::String GetAnnotationThumbnailId() const;
-
-    /// @brief Get the vertical FOV
-    /// @return a uint16_t representing the vertical FOV
-    uint16_t GetVerticalFov() const;
-
-    /// @brief Get the AuthorCameraPosition
-    /// @return a Vector3 representing the AuthorCameraPosition
-    csp::common::Vector3 GetAuthorCameraPosition() const;
-
-    /// @brief Get the AuthorCameraRotation
-    /// @return a Vector4 representing the AuthorCameraRotation
-    csp::common::Vector4 GetAuthorCameraRotation() const;
-
-    /// @brief Set the annotation id
-    /// @param Id const csp::common::String& Id
-    void SetAnnotationId(const csp::common::String& Id);
-
-    /// @brief Set the annotation collection id
-    /// @param Id const csp::common::String& Id
-    void SetAnnotationThumbnailId(const csp::common::String& Id);
-
-    /// @brief Set the VerticalFov
-    /// @param InVerticalFov
-    void SetVerticalFov(const uint16_t InVerticalFov);
-
-    /// @brief Set the AuthorCameraPosition
-    /// @param InAuthorCameraPosition
-    void SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition);
-
-    /// @brief Set the AuthorCameraRotation
-    /// @param InAuthorCameraRotation
-    void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
-
-private:
     csp::common::String AnnotationId;
     csp::common::String AnnotationThumbnailId;
-    uint16_t VerticalFov;
+    double VerticalFov;
     csp::common::Vector3 AuthorCameraPosition;
     csp::common::Vector4 AuthorCameraRotation;
 };
