@@ -291,14 +291,14 @@ SequenceSystem::SequenceSystem()
 SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
     : SystemBase(InWebClient, InEventBus)
 {
-    SequenceAPI = CSP_NEW chs::SequenceApi(InWebClient);
+    SequenceAPI = new chs::SequenceApi(InWebClient);
 
     RegisterSystemCallback();
 }
 
 SequenceSystem::~SequenceSystem()
 {
-    CSP_DELETE(SequenceAPI);
+    delete (SequenceAPI);
 
     DeregisterSystemCallback();
 }

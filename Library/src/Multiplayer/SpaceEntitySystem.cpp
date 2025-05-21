@@ -30,7 +30,6 @@
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -183,16 +182,16 @@ class DirtyComponent;
 using namespace std::chrono;
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)
-    : EntitiesLock(CSP_NEW std::recursive_mutex)
+    : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
-    , EventHandler(CSP_NEW SpaceEntityEventHandler(this))
+    , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
-    , TickEntitiesLock(CSP_NEW std::mutex)
-    , PendingAdds(CSP_NEW(SpaceEntityQueue))
-    , PendingRemoves(CSP_NEW(SpaceEntityQueue))
-    , PendingOutgoingUpdateUniqueSet(CSP_NEW(SpaceEntitySet))
-    , PendingIncomingUpdates(CSP_NEW(PatchMessageQueue))
+    , TickEntitiesLock(new std::mutex)
+    , PendingAdds(new(SpaceEntityQueue))
+    , PendingRemoves(new(SpaceEntityQueue))
+    , PendingOutgoingUpdateUniqueSet(new(SpaceEntitySet))
+    , PendingIncomingUpdates(new(PatchMessageQueue))
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
@@ -204,15 +203,15 @@ SpaceEntitySystem::~SpaceEntitySystem()
 {
     Shutdown();
 
-    CSP_DELETE(EventHandler);
+    delete (EventHandler);
 
-    CSP_DELETE(TickEntitiesLock);
-    CSP_DELETE(EntitiesLock);
+    delete (TickEntitiesLock);
+    delete (EntitiesLock);
 
-    CSP_DELETE(PendingAdds);
-    CSP_DELETE(PendingRemoves);
-    CSP_DELETE(PendingOutgoingUpdateUniqueSet);
-    CSP_DELETE(PendingIncomingUpdates);
+    delete (PendingAdds);
+    delete (PendingRemoves);
+    delete (PendingOutgoingUpdateUniqueSet);
+    delete (PendingIncomingUpdates);
 }
 
 void SpaceEntitySystem::Initialise()
@@ -252,22 +251,13 @@ void SpaceEntitySystem::Shutdown()
 
 namespace
 {
-    // Only neccesary because we use the silly custom memory management (so we can define the unique_ptr type with the custom deleter), delete when we
-    // get rid of it.
-    struct SpaceEntityDeleter
-    {
-        void operator()(csp::multiplayer::SpaceEntity* ptr) const noexcept { CSP_DELETE(ptr); }
-    };
-
-    std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
+    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
         csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
         const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
-        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter>(
-            CSP_NEW csp::multiplayer::SpaceEntity(&SpaceEntitySystem, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant),
-            SpaceEntityDeleter {});
-
+        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(
+            new csp::multiplayer::SpaceEntity(&SpaceEntitySystem, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
         AvatarComponent->SetState(AvatarState);
@@ -342,9 +332,8 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        std::unique_ptr<csp::multiplayer::SpaceEntity, SpaceEntityDeleter> NewAvatar
-            = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform,
-                MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this,
+            NetworkId, Name, Transform, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
@@ -445,7 +434,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
         EntityComponent->OnLocalDelete();
     }
 
-    CSP_DELETE(Keys);
+    delete (Keys);
 
     csp::common::Array<ComponentUpdateInfo> Info;
 
@@ -601,7 +590,7 @@ static SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMe
 {
     SignalRMsgPackEntityDeserialiser Deserialiser(EntityMessage);
 
-    const auto NewEntity = CSP_NEW SpaceEntity(EntitySystem);
+    const auto NewEntity = new SpaceEntity(EntitySystem);
     NewEntity->Deserialise(Deserialiser);
 
     EntitySystem->AddEntity(NewEntity);
@@ -640,7 +629,7 @@ void SpaceEntitySystem::BindOnObjectPatch()
             // Params is an array of all params sent, so grab the first
             auto& EntityMessage = Params.as_array()[0];
 
-            PendingIncomingUpdates->emplace_back(CSP_NEW signalr::value(EntityMessage));
+            PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
         });
 }
 
@@ -784,7 +773,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
             LocalDestroyEntity(Entity);
         }
 
-        CSP_DELETE(Entity);
+        delete (Entity);
     }
 
     Entities.Clear();
@@ -1068,7 +1057,7 @@ void SpaceEntitySystem::EnableLeaderElection()
 {
     if (ElectionManager == nullptr)
     {
-        ElectionManager = CSP_NEW ClientElectionManager(this);
+        ElectionManager = new ClientElectionManager(this);
     }
 }
 
@@ -1076,7 +1065,7 @@ void SpaceEntitySystem::DisableLeaderElection()
 {
     if (ElectionManager != nullptr)
     {
-        CSP_DELETE(ElectionManager);
+        delete (ElectionManager);
         ElectionManager = nullptr;
     }
 }
@@ -1372,7 +1361,7 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 
     Entities.RemoveItem(EntityToRemove);
 
-    CSP_DELETE(EntityToRemove);
+    delete (EntityToRemove);
 }
 
 void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
@@ -1428,7 +1417,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(nullptr);
         }
 
-        auto* NewObject = CSP_NEW SpaceEntity(this);
+        auto* NewObject = new SpaceEntity(this);
         NewObject->Type = SpaceEntityType::Object;
         auto ID = ParseGenerateObjectIDsResult(Result);
         NewObject->Id = ID;

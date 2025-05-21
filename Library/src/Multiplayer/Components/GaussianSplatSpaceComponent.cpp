@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -36,7 +35,7 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)] = true;
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)] = csp::common::Vector3::One();
 
-    SetScriptInterface(CSP_NEW GaussianSplatSpaceComponentScriptInterface(this));
+    SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */

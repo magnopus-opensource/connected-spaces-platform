@@ -118,9 +118,9 @@ AnalyticsProviderGoogleUA::AnalyticsProviderGoogleUA(const csp::common::String& 
     , Start { std::chrono::steady_clock::now() }
 {
 #ifdef CSP_WASM
-    WebClient = CSP_NEW UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-    WebClient = CSP_NEW UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
 }
 
@@ -132,7 +132,7 @@ void AnalyticsProviderGoogleUA::Log(AnalyticsEvent* Event)
     uint64_t MS = std::chrono::duration_cast<std::chrono::milliseconds>(Current - Start).count();
     EventString += csp::common::String("&cm1=") + std::to_string(MS).c_str();
 
-    auto* Receiver = CSP_NEW ResponseReceiver;
+    auto* Receiver = new ResponseReceiver;
 
     csp::web::HttpPayload Payload;
     Payload.SetContent(EventString);

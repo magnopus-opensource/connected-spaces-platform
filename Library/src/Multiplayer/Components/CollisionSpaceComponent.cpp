@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -44,7 +43,7 @@ CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";
 
-    SetScriptInterface(CSP_NEW CollisionSpaceComponentScriptInterface(this));
+    SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }
 
 /* ITransformComponent */

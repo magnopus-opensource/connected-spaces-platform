@@ -17,14 +17,13 @@
 
 #include "Events/Event.h"
 #include "Events/EventListener.h"
-#include "Memory/StlAllocator.h"
 
 #include <list>
 
 namespace csp::events
 {
 
-using EventCallbackList = std::list<csp::events::EventListener*, csp::memory::StlAllocator<csp::events::EventListener*>>;
+using EventCallbackList = std::list<csp::events::EventListener*>;
 
 class EventDispatcher
 {

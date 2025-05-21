@@ -72,11 +72,11 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
     , CurrentSpace()
 {
-    GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
-    SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(InWebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
 }
 
-SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
+SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(

@@ -48,15 +48,6 @@ class UserSystem;
 
 } // namespace csp::systems
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
@@ -102,7 +93,6 @@ public:
     friend class ClientElectionEventHandler;
     friend class EventBus;
     friend class ::CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
-    friend void csp::memory::Delete<MultiplayerConnection>(MultiplayerConnection* Ptr);
     /** @endcond */
 
     // Simple callback that receives an error code.
