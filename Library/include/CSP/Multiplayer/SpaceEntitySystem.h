@@ -42,15 +42,6 @@ namespace signalr
 class value;
 } // namespace signalr
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 
@@ -93,7 +84,6 @@ class CSP_API SpaceEntitySystem
     friend class ClientElectionManager;
     friend class EntityScript;
     friend class SpaceEntity;
-    friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
 
     // Tests
     friend class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;

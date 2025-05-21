@@ -72,11 +72,11 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
     , CurrentSpace()
 {
-    GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
-    SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(InWebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
 }
 
-SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
+SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
@@ -531,14 +531,10 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
-
                 auto NullResultCallback
                     = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-                this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
-                this->RemoveMetadata(SpaceId, NullResultCallback);
-                this->DeleteSpace(SpaceId, NullResultCallback);
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
                 Callback(MakeInvalid<SpaceResult>());
             }));
@@ -588,14 +584,10 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                const auto SpaceId = CurrentSpaceResult->GetSpace().Id;
-
                 auto NullResultCallback
                     = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-                this->RemoveSpaceThumbnail(SpaceId, NullResultCallback);
-                this->RemoveMetadata(SpaceId, NullResultCallback);
-                this->DeleteSpace(SpaceId, NullResultCallback);
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
                 Callback(MakeInvalid<SpaceResult>());
             }));

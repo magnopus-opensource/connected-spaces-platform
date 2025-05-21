@@ -10,7 +10,7 @@
 {{/ parameters }}
 )
 {
-    void* inst = CSP_NEW {{# definition }}{{ namespace }}::{{ name }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>(
+    void* inst = new {{# definition }}{{ namespace }}::{{ name }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>(
 {{# parameters }}
 {{# type.is_string }}
         csp::common::String({{ name }}){{> Comma }}

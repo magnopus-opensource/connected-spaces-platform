@@ -1,6 +1,5 @@
 #include "MCSComponentPacker.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "Memory/Memory.h"
 #include "SpaceEntityKeys.h"
 
 namespace csp::multiplayer
@@ -130,8 +129,7 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase
     ComponentPacker.WriteValue(COMPONENT_KEY_COMPONENTTYPE, static_cast<uint64_t>(Value->GetComponentType()));
 
     // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
-    auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint32_t>*>(Value->GetProperties()->Keys()), Deleter);
+    std::unique_ptr<common::Array<uint32_t>> Keys(const_cast<common::Array<uint32_t>*>(Value->GetProperties()->Keys()));
 
     for (uint32_t Key : *Keys)
     {
@@ -216,10 +214,7 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::co
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::Map<csp::common::String, ReplicatedValue>& Value)
 {
     std::map<std::string, mcs::ItemComponentData> Map;
-
-    auto Deleter = [](const common::Array<csp::common::String>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<csp::common::String>, decltype(Deleter)> Keys(
-        const_cast<common::Array<csp::common::String>*>(Value.Keys()), Deleter);
+    std::unique_ptr<common::Array<csp::common::String>> Keys(const_cast<common::Array<csp::common::String>*>(Value.Keys()));
 
     for (auto Key : (*Keys))
     {

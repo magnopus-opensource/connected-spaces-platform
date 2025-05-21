@@ -34,10 +34,10 @@ AnchorSystem::AnchorSystem()
 AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    AnchorsAPI = CSP_NEW chs::AnchorsApi(InWebClient);
+    AnchorsAPI = new chs::AnchorsApi(InWebClient);
 }
 
-AnchorSystem::~AnchorSystem() { CSP_DELETE(AnchorsAPI); }
+AnchorSystem::~AnchorSystem() { delete (AnchorsAPI); }
 
 void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorProvider, const csp::common::String& ThirdPartyAnchorId,
     const csp::common::String& AssetCollectionId, const csp::systems::GeoLocation& Location, const csp::systems::OlyAnchorPosition& Position,

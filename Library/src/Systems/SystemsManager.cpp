@@ -33,7 +33,6 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
-#include "Memory/Memory.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 #include "signalrclient/signalr_value.h"
@@ -128,77 +127,77 @@ ConversationSystemInternal* SystemsManager::GetConversationSystem() { return Con
 void SystemsManager::CreateSystems()
 {
     // Create Log system first, so we can log any startup issues in other systems
-    LogSystem = CSP_NEW csp::systems::LogSystem();
+    LogSystem = new csp::systems::LogSystem();
 
 #ifdef CSP_WASM
-    WebClient = CSP_NEW csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-    WebClient = CSP_NEW csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
-    ScriptSystem = CSP_NEW csp::systems::ScriptSystem();
+    ScriptSystem = new csp::systems::ScriptSystem();
 
     ScriptSystem->Initialise();
 
-    MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
+    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection();
     EventBus = MultiplayerConnection->EventBusPtr;
 
-    AnalyticsSystem = CSP_NEW csp::systems::AnalyticsSystem();
-    UserSystem = CSP_NEW csp::systems::UserSystem(WebClient, EventBus);
-    SpaceSystem = CSP_NEW csp::systems::SpaceSystem(WebClient);
-    AssetSystem = CSP_NEW csp::systems::AssetSystem(WebClient, EventBus);
-    AnchorSystem = CSP_NEW csp::systems::AnchorSystem(WebClient);
-    PointOfInterestSystem = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
-    SettingsSystem = CSP_NEW csp::systems::SettingsSystem(WebClient);
-    GraphQLSystem = CSP_NEW csp::systems::GraphQLSystem(WebClient);
-    VoipSystem = CSP_NEW csp::systems::VoipSystem();
-    MaintenanceSystem = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
-    EventTicketingSystem = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
-    ECommerceSystem = CSP_NEW csp::systems::ECommerceSystem(WebClient);
-    QuotaSystem = CSP_NEW csp::systems::QuotaSystem(WebClient);
-    SequenceSystem = CSP_NEW csp::systems::SequenceSystem(WebClient, EventBus);
-    HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
-    SpaceEntitySystem = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
-    ConversationSystem = CSP_NEW csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
+    AnalyticsSystem = new csp::systems::AnalyticsSystem();
+    UserSystem = new csp::systems::UserSystem(WebClient, EventBus);
+    SpaceSystem = new csp::systems::SpaceSystem(WebClient);
+    AssetSystem = new csp::systems::AssetSystem(WebClient, EventBus);
+    AnchorSystem = new csp::systems::AnchorSystem(WebClient);
+    PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient);
+    SettingsSystem = new csp::systems::SettingsSystem(WebClient);
+    GraphQLSystem = new csp::systems::GraphQLSystem(WebClient);
+    VoipSystem = new csp::systems::VoipSystem();
+    MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient);
+    EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient);
+    ECommerceSystem = new csp::systems::ECommerceSystem(WebClient);
+    QuotaSystem = new csp::systems::QuotaSystem(WebClient);
+    SequenceSystem = new csp::systems::SequenceSystem(WebClient, EventBus);
+    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
+    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
+    ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
 }
 
 void SystemsManager::DestroySystems()
 {
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
-    CSP_DELETE(SpaceEntitySystem);
-    CSP_DELETE(HotspotSequenceSystem);
-    CSP_DELETE(SequenceSystem);
-    CSP_DELETE(QuotaSystem);
-    CSP_DELETE(ECommerceSystem);
-    CSP_DELETE(EventTicketingSystem);
-    CSP_DELETE(MaintenanceSystem);
-    CSP_DELETE(VoipSystem);
-    CSP_DELETE(GraphQLSystem);
-    CSP_DELETE(SettingsSystem);
-    CSP_DELETE(PointOfInterestSystem);
-    CSP_DELETE(AnchorSystem);
-    CSP_DELETE(AssetSystem);
-    CSP_DELETE(SpaceSystem);
-    CSP_DELETE(UserSystem);
-    CSP_DELETE(AnalyticsSystem);
-    CSP_DELETE(MultiplayerConnection);
-    CSP_DELETE(ScriptSystem);
+    delete SpaceEntitySystem;
+    delete HotspotSequenceSystem;
+    delete SequenceSystem;
+    delete QuotaSystem;
+    delete ECommerceSystem;
+    delete EventTicketingSystem;
+    delete MaintenanceSystem;
+    delete VoipSystem;
+    delete GraphQLSystem;
+    delete SettingsSystem;
+    delete PointOfInterestSystem;
+    delete AnchorSystem;
+    delete AssetSystem;
+    delete SpaceSystem;
+    delete UserSystem;
+    delete AnalyticsSystem;
+    delete MultiplayerConnection; // Also deletes EventBus
+    delete ScriptSystem;
 
-    CSP_DELETE(WebClient);
-    CSP_DELETE(LogSystem);
+    delete WebClient;
+    delete LogSystem;
 }
 
 void SystemsManager::Instantiate()
 {
     assert(!Instance && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
-    Instance = CSP_NEW SystemsManager();
+    Instance = new SystemsManager();
     Instance->CreateSystems();
 }
 
 void SystemsManager::Destroy()
 {
     assert(Instance && "Please call csp::CSPFoundation::Initialize() before calling csp::CSPFoundation::Shutdown().");
-    CSP_DELETE(Instance);
+    delete (Instance);
     Instance = nullptr;
 }
 

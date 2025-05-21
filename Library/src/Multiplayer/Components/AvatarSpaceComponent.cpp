@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -41,7 +40,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)] = static_cast<int64_t>(LocomotionModel::Grounded);
 
-    SetScriptInterface(CSP_NEW AvatarSpaceComponentScriptInterface(this));
+    SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAvatarId() const

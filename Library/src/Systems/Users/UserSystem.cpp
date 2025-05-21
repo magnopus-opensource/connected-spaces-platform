@@ -94,22 +94,22 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Event
     : SystemBase(InWebClient, InEventBus)
     , RefreshTokenChangedCallback(nullptr)
 {
-    AuthenticationAPI = CSP_NEW chs_user::AuthenticationApi(InWebClient);
-    ProfileAPI = CSP_NEW chs_user::ProfileApi(InWebClient);
-    PingAPI = CSP_NEW chs_user::PingApi(InWebClient);
-    ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
-    StripeAPI = CSP_NEW chs_user::StripeApi(InWebClient);
+    AuthenticationAPI = new chs_user::AuthenticationApi(InWebClient);
+    ProfileAPI = new chs_user::ProfileApi(InWebClient);
+    PingAPI = new chs_user::PingApi(InWebClient);
+    ExternalServiceProxyApi = new chs_aggregation::ExternalServiceProxyApi(InWebClient);
+    StripeAPI = new chs_user::StripeApi(InWebClient);
 
     RegisterSystemCallback();
 }
 
 UserSystem::~UserSystem()
 {
-    CSP_DELETE(PingAPI);
-    CSP_DELETE(ProfileAPI);
-    CSP_DELETE(AuthenticationAPI);
-    CSP_DELETE(ExternalServiceProxyApi);
-    CSP_DELETE(StripeAPI);
+    delete (PingAPI);
+    delete (ProfileAPI);
+    delete (AuthenticationAPI);
+    delete (ExternalServiceProxyApi);
+    delete (StripeAPI);
 
     DeregisterSystemCallback();
 }

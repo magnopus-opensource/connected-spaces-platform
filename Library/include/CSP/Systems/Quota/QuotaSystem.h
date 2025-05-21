@@ -33,15 +33,6 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 /// @ingroup Quota System
@@ -52,7 +43,6 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
-    friend void csp::memory::Delete<QuotaSystem>(QuotaSystem* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 

@@ -62,7 +62,7 @@
         ) {
 {{# parameters }}
 {{# type.is_reference }}
-            auto* _{{ name }} = CSP_NEW {{# type }}{{> Type }}{{/ type }}({{ name }});
+            auto* _{{ name }} = new {{# type }}{{> Type }}{{/ type }}({{ name }});
 {{/ type.is_reference }}
 {{/ parameters }}
             {{ name }}({{# parameters }}{{# type.is_pointer_or_reference }}NativePointer { {{# type.is_reference }}_{{/ type.is_reference }}{{/ type.is_pointer_or_reference }}{{ name }}{{# type.is_pointer }}, false }{{/ type.is_pointer }}{{# type.is_reference }}, true }{{/ type.is_reference }}{{> Comma }}{{/ parameters }});

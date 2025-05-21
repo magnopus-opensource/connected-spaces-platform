@@ -31,15 +31,6 @@ class SystemBase;
 
 } // namespace csp::systems
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace async
 {
 CSP_START_IGNORE
@@ -64,7 +55,6 @@ public:
     friend class csp::systems::SpaceSystem;
     friend class csp::systems::SystemsManager;
     friend class MultiplayerConnection;
-    friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
     /** @endcond */
 
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
