@@ -349,6 +349,8 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
+    SpaceEntitySystem(); // needed for the wrapper generator
+
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
 
