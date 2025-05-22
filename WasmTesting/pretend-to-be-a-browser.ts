@@ -1,5 +1,10 @@
 // Whist we build WASM in node mode, some of our generated code still expects us to be a browser
 // This simulates that, more or less.
+
+// This one is actually important, lets us do web requests whilst in node. (Polyfill via xhr)
+import XHR from 'xhr2';
+(globalThis as any).XMLHttpRequest = XHR;
+
 if (typeof globalThis.navigator === 'undefined') {
   Object.defineProperty(globalThis, 'navigator', {
     value: { userAgent: 'Node.js' },
