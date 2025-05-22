@@ -62,7 +62,7 @@ class MCSComponentUnpacker
 public:
     MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& Components);
 
-    template <typename T> bool TryReadValue(uint16_t Key, T& Value);
+    template <typename T> bool TryReadValue(uint16_t Key, T& Value) const;
 
     uint64_t GetRealComponentsCount() const;
 
@@ -78,7 +78,7 @@ public:
     static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
 
 private:
-    template <typename T> void ReadValue(uint16_t Key, T& Value);
+    template <typename T> void ReadValue(uint16_t Key, T& Value) const;
 
     // We currently only store int64 values, so if we are using uint64, we need to convert.
     // We should update this in the future to store the correct integer type.
@@ -91,7 +91,7 @@ private:
     static void ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
 
     // Case for enums
-    template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value);
+    template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const;
 
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
@@ -103,7 +103,7 @@ template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData
     return CreateItemComponentData(static_cast<uint64_t>(Value));
 }
 
-template <typename T> inline bool MCSComponentUnpacker::TryReadValue(uint16_t Key, T& Value)
+template <typename T> inline bool MCSComponentUnpacker::TryReadValue(uint16_t Key, T& Value) const
 {
     if (Components.find(Key) == Components.end())
     {
@@ -114,14 +114,14 @@ template <typename T> inline bool MCSComponentUnpacker::TryReadValue(uint16_t Ke
     return true;
 }
 
-template <typename T> inline void MCSComponentUnpacker::ReadValue(uint16_t Key, T& Value)
+template <typename T> inline void MCSComponentUnpacker::ReadValue(uint16_t Key, T& Value) const
 {
-    const mcs::ItemComponentData& ComponentData = Components[Key];
+    const mcs::ItemComponentData& ComponentData = Components.find(Key)->second;
     ReadValue(ComponentData, Value);
 }
 
 template <typename T>
-inline std::enable_if_t<std::is_enum_v<T>> MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value)
+inline std::enable_if_t<std::is_enum_v<T>> MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const
 {
     uint64_t RawEnumValue = 0;
     ReadValue(ComponentData, RawEnumValue);
