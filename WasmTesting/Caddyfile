@@ -1,0 +1,10 @@
+:8888 {
+    root * ./html_tests
+  
+    header {
+      Cross-Origin-Opener-Policy "same-origin"
+      Cross-Origin-Embedder-Policy "require-corp"
+    }
+  
+    file_server browse
+  }
