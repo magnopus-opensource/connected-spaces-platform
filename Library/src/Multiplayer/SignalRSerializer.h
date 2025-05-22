@@ -200,9 +200,24 @@ public:
     /// A std::runtime_error will be thrown if this condition is not met.
     void EndReadStringMap();
 
+    /// @brief Skips the next value to be read.
+    void Skip();
+
+    /// @brief Returns true if the next value to read is a signed integer.
+    /// @return bool
+    bool NextValueIsInt() const;
+
+    /// @brief Returns true if the next value to read is an unsigned integer.
+    /// @return bool
+    bool NextValueIsUint() const;
+
+    /// @brief Returns true if the next value to read is null.
+    /// @return bool
+    bool NextValueIsNull() const;
+
 private:
     // Reads the next signalr value using the current iterator.
-    const signalr::value& ReadNextValue();
+    const signalr::value& ReadNextValue() const;
 
     void EndReadArrayInternal();
     void EndReadUintMapInternal();

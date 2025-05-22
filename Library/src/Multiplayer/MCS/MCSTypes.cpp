@@ -31,8 +31,8 @@ namespace
 
     template <class T> void DeserializeComponentDataInternal(SignalRDeserializer& Deserializer, ItemComponentDataVariant& OutVal)
     {
-        // It's important we construct the exact type we want to put into our variant,
-        // as signalr only supports double floating points, int64 integer values, and uint64 unsigned integer values.
+        // It's important we construct the exact type we want to read from our variant,
+        // as we want to make sure our variant is populated with the correct type.
         T DeserializedValue {};
         Deserializer.ReadValue(DeserializedValue);
         OutVal = DeserializedValue;
@@ -46,10 +46,28 @@ namespace
             DeserializeComponentDataInternal<bool>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::INT64:
-            DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            // We can't guarantee MCS will give us back a signed integer, even if one is sent.
+            if (Deserializer.NextValueIsInt())
+            {
+                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            }
+            else
+            {
+                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            }
             break;
         case ItemComponentDataType::UINT64:
-            DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            // Due to us changing some of our types from int64->uint64, we may receive some unexpected int64 values here.
+            // So we need to account for this here.
+            if (Deserializer.NextValueIsUint())
+            {
+                DeserializeComponentDataInternal<uint64_t>(Deserializer, OutVal);
+            }
+            else
+            {
+                DeserializeComponentDataInternal<int64_t>(Deserializer, OutVal);
+            }
+
             break;
         case ItemComponentDataType::DOUBLE:
             DeserializeComponentDataInternal<double>(Deserializer, OutVal);
@@ -64,10 +82,28 @@ namespace
             DeserializeComponentDataInternal<std::string>(Deserializer, OutVal);
             break;
         case ItemComponentDataType::UINT16_DICTIONARY:
-            DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(Deserializer, OutVal);
+            // If a dictionary is empty, we will receive null from MCS.
+            if (Deserializer.NextValueIsNull())
+            {
+                Deserializer.Skip();
+                OutVal = std::map<uint16_t, ItemComponentData> {};
+            }
+            else
+            {
+                DeserializeComponentDataInternal<std::map<uint16_t, ItemComponentData>>(Deserializer, OutVal);
+            }
             break;
         case ItemComponentDataType::STRING_DICTIONARY:
-            DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
+            // If a dictionary is empty, we will receive null from MCS.
+            if (Deserializer.NextValueIsNull())
+            {
+                Deserializer.Skip();
+                OutVal = std::map<std::string, ItemComponentData> {};
+            }
+            else
+            {
+                DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
+            }
             break;
         default:
             throw std::invalid_argument("Trying to deserialize unsupported ItemComponentDataType");
@@ -85,7 +121,7 @@ void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
     // 1. Write an array for type-value pair.
     Serializer.StartWriteArray();
     {
-        // Get the underlying variant type
+        // Visit the variant to get the underlying type.
         std::visit(
             [&Serializer](const auto& ValueType)
             {
@@ -134,7 +170,7 @@ const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Val
 bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
 
 ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-    const std::map<uint16_t, ItemComponentData>& Components)
+    const std::map<PropertyKeyType, ItemComponentData>& Components)
     : Id { Id }
     , Type { Type }
     , IsTransferable { IsTransferable }
@@ -194,10 +230,10 @@ uint64_t ObjectMessage::GetOwnerId() const { return OwnerId; }
 
 std::optional<uint64_t> ObjectMessage::GetParentId() const { return ParentId; }
 
-const std::map<PropertyKeyType, ItemComponentData>& ObjectMessage::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectMessage::GetComponents() const { return Components; }
 
 ObjectPatch::ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-    const std::map<uint16_t, ItemComponentData>& Components)
+    const std::map<PropertyKeyType, ItemComponentData>& Components)
     : Id { Id }
     , OwnerId { OwnerId }
     , Destroy { Destroy }
@@ -237,13 +273,17 @@ void ObjectPatch::Deserialize(SignalRDeserializer& Deserializer)
         Deserializer.ReadValue(OwnerId);
         Deserializer.ReadValue(Destroy);
 
-        size_t ParentArraySize = 0;
-        Deserializer.StartReadArray(ParentArraySize);
+        // Array will be null from MCS if there is no parent update.
+        if (Deserializer.NextValueIsNull() == false)
         {
-            Deserializer.ReadValue(ShouldUpdateParent);
-            Deserializer.ReadValue(ParentId);
+            size_t ParentArraySize = 0;
+            Deserializer.StartReadArray(ParentArraySize);
+            {
+                Deserializer.ReadValue(ShouldUpdateParent);
+                Deserializer.ReadValue(ParentId);
+            }
+            Deserializer.EndReadArray();
         }
-        Deserializer.EndReadArray();
 
         Deserializer.ReadValue(Components);
     }
@@ -266,6 +306,6 @@ bool ObjectPatch::GetShouldUpdateParent() const { return ShouldUpdateParent; }
 
 std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
 
-const std::map<PropertyKeyType, ItemComponentData>& ObjectPatch::GetComponents() const { return Components; }
+const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
 
 }

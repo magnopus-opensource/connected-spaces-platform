@@ -348,6 +348,8 @@ private:
     void BindOnRequestToSendObject();
     void BindOnRequestToDisconnect() const;
 
+    SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem);
+
     void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
     std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(int Skip);
 
@@ -378,6 +380,7 @@ private:
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
 
+    void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
     // CreateAvatar Continuations
     CSP_START_IGNORE
     async::shared_task<uint64_t> RemoteGenerateNewAvatarId();

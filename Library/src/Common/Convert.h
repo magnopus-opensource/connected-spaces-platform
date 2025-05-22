@@ -90,6 +90,21 @@ template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& 
     return Out;
 }
 
+/// @brief Converts std::optional to csp::common::Optional.
+/// @param In const std::optional<T>
+/// @return Optional<T>&
+template <typename T> Optional<T> Convert(const std::optional<T>& In)
+{
+    Optional<T> Out;
+
+    if (In.has_value())
+    {
+        Out = *In;
+    }
+
+    return Out;
+}
+
 /// @brief Converts csp::common::Optional to std::optional.
 /// @param In const Optional<T>&
 /// @return std::optional<T>
