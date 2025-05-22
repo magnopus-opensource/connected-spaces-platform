@@ -1136,7 +1136,7 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
             UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
         }
 
-        uint64_t ComponentCount = ComponentUnpacker.GetRealComponentsCount();
+        uint64_t ComponentCount = ComponentUnpacker.GetRealRuntimeComponentsCount();
 
         ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
         size_t ComponentIndex = 0;
