@@ -169,12 +169,12 @@ const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Val
 
 bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
 
-ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
+ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
     const std::map<PropertyKeyType, ItemComponentData>& Components)
     : Id { Id }
     , Type { Type }
     , IsTransferable { IsTransferable }
-    , IsPersistant { IsPersistant }
+    , IsPersistent { IsPersistent }
     , OwnerId { OwnerId }
     , ParentId { ParentId }
     , Components { Components }
@@ -188,7 +188,7 @@ void ObjectMessage::Serialize(SignalRSerializer& Serializer) const
         Serializer.WriteValue(Id);
         Serializer.WriteValue(Type);
         Serializer.WriteValue(IsTransferable);
-        Serializer.WriteValue(IsPersistant);
+        Serializer.WriteValue(IsPersistent);
         Serializer.WriteValue(OwnerId);
         Serializer.WriteValue(ParentId);
         Serializer.WriteValue(Components);
@@ -204,7 +204,7 @@ void ObjectMessage::Deserialize(SignalRDeserializer& Deserializer)
         Deserializer.ReadValue(Id);
         Deserializer.ReadValue(Type);
         Deserializer.ReadValue(IsTransferable);
-        Deserializer.ReadValue(IsPersistant);
+        Deserializer.ReadValue(IsPersistent);
         Deserializer.ReadValue(OwnerId);
         Deserializer.ReadValue(ParentId);
         Deserializer.ReadValue(Components);
@@ -214,7 +214,7 @@ void ObjectMessage::Deserialize(SignalRDeserializer& Deserializer)
 
 bool ObjectMessage::operator==(const ObjectMessage& Other) const
 {
-    return Id == Other.Id && Type == Other.Type && IsTransferable == Other.IsTransferable && IsPersistant == Other.IsPersistant
+    return Id == Other.Id && Type == Other.Type && IsTransferable == Other.IsTransferable && IsPersistent == Other.IsPersistent
         && OwnerId == Other.OwnerId && ParentId == Other.ParentId && Components == Other.Components;
 }
 
@@ -224,7 +224,7 @@ uint64_t ObjectMessage::GetType() const { return Type; }
 
 bool ObjectMessage::GetIsTransferable() const { return IsTransferable; }
 
-bool ObjectMessage::GetIsPersistant() const { return IsPersistant; }
+bool ObjectMessage::GetIsPersistent() const { return IsPersistent; }
 
 uint64_t ObjectMessage::GetOwnerId() const { return OwnerId; }
 
