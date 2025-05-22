@@ -472,6 +472,19 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
     }
 }
 
+void SpaceEntity::RemoveChildEntities() { GetParentEntity()->ChildEntities.RemoveItem(this); }
+
+void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
+{
+    if (Index < ChildEntities.Size())
+    {
+        ChildEntities[Index]->RemoveParentEntity();
+        ChildEntities[Index]->Parent = nullptr;
+    }
+}
+
+void SpaceEntity::RemoveParentId() { ParentId = nullptr; }
+
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.

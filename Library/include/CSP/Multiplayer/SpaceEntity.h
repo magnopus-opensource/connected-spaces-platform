@@ -114,6 +114,8 @@ class CSP_API SpaceEntity
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
+    friend class SpaceEntitySystem;
+
 #ifdef CSP_TESTS
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 #endif
@@ -408,10 +410,6 @@ public:
     /// @return SpaceEntity*
     CSP_NO_EXPORT SpaceEntity* GetParent();
 
-    /// @brief Setter for the parent entity
-    /// @param InParent SpaceEntity : the parent entity to set
-    CSP_NO_EXPORT void SetParent(SpaceEntity* InParent);
-
     /// @brief Getter for the parent id
     /// @return csp::common::Optional<uint64_t>
     CSP_NO_EXPORT csp::common::Optional<uint64_t> GetParentId();
@@ -420,23 +418,9 @@ public:
     /// @return std::chrono::milliseconds
     CSP_NO_EXPORT std::chrono::milliseconds GetTimeOfLastPatch();
 
-    /// @brief Setter for the time of the last patch
-    /// @param NewTime std::chrono::milliseconds : the time to set
-    CSP_NO_EXPORT void SetTimeOfLastPatch(std::chrono::milliseconds NewTime);
-
-    /// @brief Setter for the owner ID
-    /// @param InOwnerId uint64_t : the owner ID to set
-    CSP_NO_EXPORT void SetOwnerId(const uint64_t InOwnerId);
-
-    /// @brief Remove child entities from parent
-    CSP_NO_EXPORT void RemoveChildEntities();
-
     /// @brief Remove the parent from the specified child entity
     /// @param Index size_t : the index of the child entity
     CSP_NO_EXPORT void RemoveParentFromChildEntity(size_t Index);
-
-    /// @brief Set ParentId to nullptr
-    CSP_NO_EXPORT void RemoveParentId();
 
     /// @brief Mark for update
     CSP_NO_EXPORT void MarkForUpdate();
@@ -454,13 +438,6 @@ public:
 
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
-
-    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
-    /// @brief Internal version of the selected state of the entity setter
-    /// @param SelectedState bool : the selected state to set
-    /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
-    /// @return bool : the selection state of the entity
-    CSP_NO_EXPORT bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
 
 private:
     class DirtyComponent
@@ -546,6 +523,31 @@ private:
     csp::common::List<uint16_t> TransientDeletionComponentIds;
 
     std::chrono::milliseconds TimeOfLastPatch;
+
+    /// @brief Setter for the parent entity
+    /// @param InParent SpaceEntity : the parent entity to set
+    void SetParent(SpaceEntity* InParent);
+
+    /// @brief Setter for the time of the last patch
+    /// @param NewTime std::chrono::milliseconds : the time to set
+    void SetTimeOfLastPatch(std::chrono::milliseconds NewTime);
+
+    /// @brief Setter for the owner ID
+    /// @param InOwnerId uint64_t : the owner ID to set
+    void SetOwnerId(const uint64_t InOwnerId);
+
+    /// @brief Remove child entities from parent
+    void RemoveChildEntities();
+
+    /// @brief Set ParentId to nullptr
+    void RemoveParentId();
+
+    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
+    /// @brief Internal version of the selected state of the entity setter
+    /// @param SelectedState bool : the selected state to set
+    /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
+    /// @return bool : the selection state of the entity
+    bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
 };
 
 } // namespace csp::multiplayer
