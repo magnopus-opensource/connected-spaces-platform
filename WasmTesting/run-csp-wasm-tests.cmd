@@ -12,7 +12,7 @@ IF NOT EXIST ".\html_tests\shared" (
 )
 
 REM Caddy is the web server we use to serve the html files
-CALL choco install caddy --version=2.10.0 -y
+CALL choco install caddy --version=2.10.0 -y --source=https://community.chocolatey.org/api/v2/
 
 REM Kill any caddy instances that may be open
 taskkill /IM caddy.exe /F
