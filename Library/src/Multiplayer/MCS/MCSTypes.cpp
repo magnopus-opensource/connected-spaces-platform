@@ -273,13 +273,17 @@ void ObjectPatch::Deserialize(SignalRDeserializer& Deserializer)
         Deserializer.ReadValue(OwnerId);
         Deserializer.ReadValue(Destroy);
 
-        size_t ParentArraySize = 0;
-        Deserializer.StartReadArray(ParentArraySize);
+        // Array will be null from MCS if there is no parent update.
+        if (Deserializer.NextValueIsNull() == false)
         {
-            Deserializer.ReadValue(ShouldUpdateParent);
-            Deserializer.ReadValue(ParentId);
+            size_t ParentArraySize = 0;
+            Deserializer.StartReadArray(ParentArraySize);
+            {
+                Deserializer.ReadValue(ShouldUpdateParent);
+                Deserializer.ReadValue(ParentId);
+            }
+            Deserializer.EndReadArray();
         }
-        Deserializer.EndReadArray();
 
         Deserializer.ReadValue(Components);
     }
