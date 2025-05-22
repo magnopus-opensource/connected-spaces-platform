@@ -10,7 +10,7 @@ MCSComponentUnpacker::MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemCom
 {
 }
 
-uint64_t MCSComponentUnpacker::GetRealRuntimeComponentsCount() const
+uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
 {
     uint64_t ComponentCount = 0;
 

@@ -64,7 +64,8 @@ public:
 
     template <typename T> bool TryReadValue(uint16_t Key, T& Value) const;
 
-    uint64_t GetRealComponentsCount() const;
+    // Gets the count of all csp runtime components, excluding view components.
+    uint64_t GetRuntimeComponentsCount() const;
 
     // Primitive types can be converted without changes
     template <class T> static void CreateReplicatedValueFromType(const T& Type, ReplicatedValue& Value) { Value = ReplicatedValue(Type); }
