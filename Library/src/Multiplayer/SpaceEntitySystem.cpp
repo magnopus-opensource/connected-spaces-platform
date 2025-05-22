@@ -35,7 +35,6 @@
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
 #include "SignalRSerializer.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
 #ifdef CSP_WASM
@@ -157,21 +156,21 @@ std::map<uint64_t, signalr::value> GetEntityTransformComponents(const SpaceEntit
     std::map<uint64_t, signalr::value> Components { {
                                                         ENTITY_POSITION,
                                                         std::vector<signalr::value> {
-                                                            msgpack_typeids::ItemComponentData::NULLABLE_FLOAT_ARRAY,
+                                                            static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
                                                             std::vector { signalr::value(Position) },
                                                         },
                                                     },
         {
             ENTITY_ROTATION,
             std::vector<signalr::value> {
-                msgpack_typeids::ItemComponentData::NULLABLE_FLOAT_ARRAY,
+                static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
                 std::vector { signalr::value(Rotation) },
             },
         },
         {
             ENTITY_SCALE,
             std::vector<signalr::value> {
-                msgpack_typeids::ItemComponentData::NULLABLE_FLOAT_ARRAY,
+                static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_FLOAT_ARRAY),
                 std::vector { signalr::value(Scale) },
             },
         } };

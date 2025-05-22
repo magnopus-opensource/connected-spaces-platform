@@ -20,7 +20,6 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/IEntitySerialiser.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 #include "CSP/ThirdPartyPlatforms.h"
@@ -34,19 +33,7 @@
 
 CSP_START_IGNORE
 #ifdef CSP_TESTS
-class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
-class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
-class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
-class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
-class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
-
-class CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
-class CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
-class CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
-class CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
-class CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
-class CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -135,19 +122,7 @@ class CSP_API SpaceEntity
     friend class ComponentBase;
     friend class ComponentScriptInterface;
 #ifdef CSP_TESTS
-    friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
-    friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRDeserialisationTest_Test;
-    friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRSerialisationTest_Test;
-    friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
-    friend class ::CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
-
-    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComparisonTest_Test;
-    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationComponentsComparisonTest_Test;
-    friend class ::CSPEngine_MCSTests_ObjectMessageSerializationUnsetParentComparisonTest_Test;
-    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComparisonTest_Test;
-    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationNoParentUpdateComparisonTest_Test;
-    friend class ::CSPEngine_MCSTests_ObjectPatchSerializationComponentsComparisonTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -345,23 +320,6 @@ public:
     /// @param Key uint16_t : The component ID of the component to remove.
     void RemoveComponent(uint16_t Key);
 
-    /// @brief Serialise local changes into patch message format into the given serialiser. Does not send a patch.
-    /// @param Serialiser IEntitySerialiser : The serialiser to use.
-    void SerialisePatch(IEntitySerialiser& Serialiser) const;
-
-    /// @brief Serialise the entire SpaceEntity into object message format into the given serialiser. Does not send a message.
-    /// @param Serialiser IEntitySerialiser : The serialiser to use.
-    void Serialise(IEntitySerialiser& Serialiser) const;
-
-    /// @brief Serialises a given component into a consistent format for the given serialiser.
-    /// @param Serialiser IEntitySerialiser : The serialiser to use.
-    /// @param Component ComponentBase : The component to be serialised.
-    void SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBase* Component) const;
-
-    /// @brief Using the given deserialiser, populate the SpaceEntity with the data in the deserialiser.
-    /// @param Deserialiser IEntityDeserialiser : The deserialiser to use.
-    void Deserialise(IEntityDeserialiser& Deserialiser);
-
     /// @brief Gets the script associated with the space entity.
     /// @return The EntityScript instance set on the entity.
     EntityScript& GetScript();
@@ -418,7 +376,6 @@ private:
         ComponentUpdateType UpdateType;
     };
 
-    void DeserialiseFromPatch(IEntityDeserialiser& Deserialiser);
     void ApplyLocalPatch(bool InvokeUpdateCallback = true);
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);

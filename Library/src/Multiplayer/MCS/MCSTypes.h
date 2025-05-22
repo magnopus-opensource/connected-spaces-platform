@@ -44,7 +44,7 @@ namespace csp::multiplayer::mcs
 enum class ItemComponentDataType : uint64_t
 {
     BOOL = 0,
-    // NULLABLE_BOOL = 1,
+    NULLABLE_BOOL = 1, // Currently only implemented for NetworkEventManager visibility.
     // BOOL_ARRAY = 2,
     // NULLABLE_BOOL_ARRAY = 3,
     // UINT8 = 4,
@@ -60,7 +60,7 @@ enum class ItemComponentDataType : uint64_t
     // UINT32_ARRAY = 14,
     // NULLABLE_UINT32_ARRAY = 15,
     INT64 = 16,
-    // NULLABLE_INT64 = 17,
+    NULLABLE_INT64 = 17, // Currently only implemented for NetworkEventManager visibility.
     // INT64_ARRAY = 18,
     // NULLABLE_INT64_ARRAY = 19,
     UINT64 = 20,
@@ -70,13 +70,13 @@ enum class ItemComponentDataType : uint64_t
     FLOAT = 24,
     // NULLABLE_FLOAT = 25,
     FLOAT_ARRAY = 26,
-    // NULLABLE_FLOAT_ARRAY = 27,
+    NULLABLE_FLOAT_ARRAY = 27, // Currently only implemented for EntityTransformComponents
     DOUBLE = 28,
-    // NULLABLE_DOUBLE = 29,
+    NULLABLE_DOUBLE = 29, // Currently only implemented for NetworkEventManager visibility.
     // DOUBLE_ARRAY = 30,
     // NULLABLE_DOUBLE_ARRAY = 31,
     STRING = 32,
-    // STRING_ARRAY = 33,
+    STRING_ARRAY = 33, // Currently only implemented for EventSerialisation visibility.
     // DATETIMEOFFSET = 34,
     // NULLABLE_DATETIMEOFFSET = 35,
     // DATETIMEOFFSET_ARRAY = 36,
@@ -94,7 +94,7 @@ enum class ItemComponentDataType : uint64_t
     // INT16_ARRAY = 48,
     // NULLABLE_INT16_ARRAY = 49,
     // UINT16 = 50,
-    // NULLABLE_UINT16 = 51,
+    NULLABLE_UINT16 = 51, // Currently only implemented for NetworkEventManager visibility.
     // UINT16_ARRAY = 52,
     // NULLABLE_UINT16_ARRAY = 53,
     UINT16_DICTIONARY = 54,
