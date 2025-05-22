@@ -26,7 +26,6 @@
 namespace csp::multiplayer
 {
 
-constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
 EntityScript::EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
@@ -50,12 +49,7 @@ bool EntityScript::Invoke()
     HasLastError = false;
     LastError = "Unknown Error";
 
-    if (EntityScriptComponent == nullptr)
-    {
-        HasLastError = true;
-        LastError = SCRIPT_ERROR_NO_COMPONENT;
-    }
-    else
+    if (EntityScriptComponent != nullptr)
     {
         const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
 
