@@ -1488,7 +1488,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
     if (Patch.GetDestroy())
     {
         // This is an entity deletion.
-        // Deletion
         for (size_t i = 0; i < Entities.Size(); ++i)
         {
             SpaceEntity* Entity = Entities[i];
