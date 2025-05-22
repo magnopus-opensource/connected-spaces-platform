@@ -985,14 +985,12 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     // Loop through all components and convert to ItemComponentData.
     for (uint16_t Key : *Keys)
     {
+        assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
+
         if (DirtyComponents[Key].Component != nullptr)
         {
             auto* Component = DirtyComponents[Key].Component;
             ComponentPacker.WriteValue(Key, Component);
-        }
-        else
-        {
-            assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
         }
     }
 
@@ -1025,14 +1023,12 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
         // Loop through all components and convert to ItemComponentData.
         for (uint16_t Key : *Keys)
         {
+            assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
+
             if (DirtyComponents[Key].Component != nullptr)
             {
                 auto* Component = DirtyComponents[Key].Component;
                 ComponentPacker.WriteValue(Key, Component);
-            }
-            else
-            {
-                assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
             }
         }
     }
