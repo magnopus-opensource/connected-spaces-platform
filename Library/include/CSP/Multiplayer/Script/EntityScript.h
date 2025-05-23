@@ -67,6 +67,10 @@ public:
     /// @return True if there was an error, false otherwise.
     bool HasError();
 
+    /// @brief Checks if the entity has an script component.
+    /// @return True if component exist, false otherwise.
+    bool HasEntityScriptComponent();
+
     /// @brief Gets the text of the last error if it is known or otherwise returns a default unknown error string.
     /// @return Text of the last error.
     csp::common::String GetErrorText();
