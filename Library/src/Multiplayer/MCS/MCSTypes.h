@@ -139,7 +139,7 @@ class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
     ObjectMessage() = default;
-    ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
+    ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
         const std::map<PropertyKeyType, ItemComponentData>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
@@ -150,7 +150,7 @@ public:
     uint64_t GetId() const;
     uint64_t GetType() const;
     bool GetIsTransferable() const;
-    bool GetIsPersistant() const;
+    bool GetIsPersistent() const;
     uint64_t GetOwnerId() const;
     std::optional<uint64_t> GetParentId() const;
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
@@ -159,7 +159,7 @@ private:
     uint64_t Id = 0;
     uint64_t Type = 0;
     bool IsTransferable = false;
-    bool IsPersistant = false;
+    bool IsPersistent = false;
     uint64_t OwnerId = 0;
     std::optional<uint64_t> ParentId;
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;

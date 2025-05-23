@@ -144,7 +144,7 @@ public:
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
     CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
-        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
+        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -486,7 +486,7 @@ private:
     SpaceEntityType Type;
     uint64_t Id;
     bool IsTransferable;
-    bool IsPersistant;
+    bool IsPersistent;
     uint64_t OwnerId;
     csp::common::Optional<uint64_t> ParentId;
     bool ShouldUpdateParent;

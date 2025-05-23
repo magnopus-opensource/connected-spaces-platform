@@ -258,11 +258,11 @@ namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
         csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
-        const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant,
+        const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
-            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
+            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
