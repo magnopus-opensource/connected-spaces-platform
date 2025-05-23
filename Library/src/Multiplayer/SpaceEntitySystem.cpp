@@ -122,14 +122,14 @@ SpaceEntityEventHandler::SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem
 
 void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->MultiplayerConnectionInst != nullptr
-        && EntitySystem->MultiplayerConnectionInst->Connected)
+    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->GetMultiplayerConnectionInstance() != nullptr
+        && EntitySystem->GetMultiplayerConnectionInstance()->IsConnected())
     {
         EntitySystem->TickEntities();
     }
     else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
     {
-        auto Connection = EntitySystem->MultiplayerConnectionInst;
+        auto Connection = EntitySystem->GetMultiplayerConnectionInstance();
         csp::common::String Reason(InEvent.GetString("Reason"));
 
         auto Done = false;
@@ -250,6 +250,10 @@ void SpaceEntitySystem::Shutdown()
     IsInitialised = false;
 }
 
+SpaceEntitySystem::SpaceEntityQueue* SpaceEntitySystem::GetPendingAdds() { return PendingAdds; }
+
+MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
+
 namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
@@ -257,8 +261,9 @@ namespace
         const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
-        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(
-            new csp::multiplayer::SpaceEntity(&SpaceEntitySystem, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
+        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
+            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistant));
+
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
         AvatarComponent->SetState(AvatarState);
@@ -384,7 +389,7 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
 {
-    const auto& Children = Entity->ChildEntities;
+    const auto& Children = Entity->GetChildEntities()->ToArray();
 
     const std::function LocalCallback = [Callback](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
     {
@@ -449,12 +454,12 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 
     for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
     {
-        ChildrenToUpdate[i]->ParentId = nullptr;
+        ChildrenToUpdate[i]->RemoveParentId();
         ResolveEntityHierarchy(ChildrenToUpdate[i]);
 
-        if (ChildrenToUpdate[i]->EntityUpdateCallback)
+        if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
         {
-            ChildrenToUpdate[i]->EntityUpdateCallback(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
+            ChildrenToUpdate[i]->SetEntityUpdateCallbackParams(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
         }
     }
 
@@ -472,9 +477,9 @@ void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 {
     if (Entity != nullptr)
     {
-        if (Entity->EntityDestroyCallback != nullptr)
+        if (Entity->GetEntityDestroyCallback() != nullptr)
         {
-            Entity->EntityDestroyCallback(true);
+            Entity->SetEntityDestroyCallbackParams(true);
         }
 
         RemoveEntity(Entity);
@@ -796,8 +801,8 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
-    if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
-        && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
+    if (EntityToUpdate->GetDirtyComponents().Size() == 0 && EntityToUpdate->GetDirtyProperties().Size() == 0
+        && EntityToUpdate->GetTransientDeletionComponentIds().Size() == 0 && EntityToUpdate->GetShouldUpdateParent() == false)
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
         // etc. CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -934,20 +939,19 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
     if (Deletion->GetParentEntity())
     {
-        Deletion->GetParentEntity()->ChildEntities.RemoveItem(Deletion);
+        Deletion->RemoveChildEntities();
     }
 
-    for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
+    for (size_t i = 0; i < Deletion->GetChildEntities()->Size(); ++i)
     {
-        Deletion->ChildEntities[i]->RemoveParentEntity();
-        Deletion->ChildEntities[i]->Parent = nullptr;
-        ResolveEntityHierarchy(Deletion->ChildEntities[i]);
+        Deletion->RemoveParentFromChildEntity(i);
+        ResolveEntityHierarchy(Deletion->GetChildEntities()->ToArray()[i]);
     }
 }
 
 void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
 {
-    if (Entity->ParentId.HasValue())
+    if (Entity->GetParentId().HasValue())
     {
         for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
         {
@@ -1251,7 +1255,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
             const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-            if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
+            if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
             {
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
                 if (!PendingEntity->IsModifiable())
@@ -1265,17 +1269,17 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
                 }
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
-                PendingEntity->OwnerId = MultiplayerConnectionInst->GetClientId();
+                PendingEntity->SetOwnerId(MultiplayerConnectionInst->GetClientId());
                 ClaimScriptOwnership(PendingEntity);
 
                 PendingEntities.Append(PendingEntity);
 
-                if (PendingEntity->EntityPatchSentCallback != nullptr)
+                if (PendingEntity->GetEntityPatchSentCallback() != nullptr)
                 {
-                    PendingEntity->EntityPatchSentCallback(true);
+                    PendingEntity->SetEntityPatchSentCallbackParams(true);
                 }
 
-                PendingEntity->TimeOfLastPatch = CurrentTime;
+                PendingEntity->SetTimeOfLastPatch(CurrentTime);
                 it = PendingOutgoingUpdateUniqueSet->erase(it);
             }
             else
@@ -1424,14 +1428,9 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(nullptr);
         }
 
-        auto* NewObject = new SpaceEntity(this);
-        NewObject->Type = SpaceEntityType::Object;
         auto ID = ParseGenerateObjectIDsResult(Result);
-        NewObject->Id = ID;
-        NewObject->Name = InName;
-        NewObject->Transform = InSpaceTransform;
-        NewObject->OwnerId = MultiplayerConnectionInst->GetClientId();
-        NewObject->IsTransferable = true;
+        auto* NewObject
+            = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
 
         if (InParent.HasValue())
         {

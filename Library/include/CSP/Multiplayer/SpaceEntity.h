@@ -39,7 +39,6 @@ CSP_END_IGNORE
 
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
 class EntityScriptInterface;
 
 CSP_START_IGNORE
@@ -66,7 +65,7 @@ enum class SpaceEntityType
 /// Add means the component is newly added, clients should ensure that this triggers appropriate instantiation of wrapping objects.
 /// All properties for the component should be included.
 /// Delete means the component has been marked for deletion. It is likely that some other clients will not have the component at the point this is
-/// recieved. Any wrapping data objects should be deleted when this is recieved, and clients should cease updating this component as any call would
+/// received. Any wrapping data objects should be deleted when this is received, and clients should cease updating this component as any call would
 /// fail. The CSP representation of the component has been removed at this point.
 enum class ComponentUpdateType
 {
@@ -116,11 +115,7 @@ class CSP_API SpaceEntity
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;
-    friend class EntityScript;
-    friend class EntityScriptInterface;
-    friend class EntitySystemScriptInterface;
-    friend class ComponentBase;
-    friend class ComponentScriptInterface;
+
 #ifdef CSP_TESTS
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 #endif
@@ -148,8 +143,8 @@ public:
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
-        uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
+        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -217,8 +212,8 @@ public:
     /// @param Value csp::common::Vector3 : The scale to set.
     void SetScale(const csp::common::Vector3& Value);
 
-    /// @brief Get whether the space is transient or persistant.
-    /// @return returns True if the space is transient and false if it is marked as persistant.
+    /// @brief Get whether the space is transient or persistent.
+    /// @return returns True if the space is transient and false if it is marked as persistent.
     bool GetIsTransient() const;
 
     /// @brief Get the third party reference of this entity.
@@ -286,7 +281,7 @@ public:
     /// @brief Set a callback to be executed when a patch message is received for this Entity. Only one callback can be set.
     /// @param Callback UpdateCallback : Contains the SpaceEntity that updated, a set of flags to tell which parts updated
     /// and an array of information to tell which components updated.
-    /// When this callback is recieved, the flags and arrays should be used to determine which properties have updated data.
+    /// When this callback is received, the flags and arrays should be used to determine which properties have updated data.
     CSP_EVENT void SetUpdateCallback(UpdateCallback Callback);
 
     /// @brief Set a callback to be executed when a patch message with a destroy flag is received for this Entity. Only one callback can be set.
@@ -368,6 +363,82 @@ public:
     /// @return bool
     bool IsLocked() const;
 
+    /// @brief Getter for the EntityUpdateCallback
+    /// @return: UpdateCallback
+    CSP_NO_EXPORT UpdateCallback GetEntityUpdateCallback();
+
+    /// @brief Setter for the parameters of the EntityUpdateCallback
+    /// @param Entity SpaceEntity* : the entity for which the callback is set
+    /// @param Flags SpaceEntityUpdateFlags : the flags to set
+    /// @param Info csp::common::Array<ComponentUpdateInfo>& : the array of component update info to set
+    CSP_NO_EXPORT void SetEntityUpdateCallbackParams(
+        SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& Info);
+
+    /// @brief Getter for the EntityDestroyCallback
+    /// @return: DestroyCallback
+    CSP_NO_EXPORT DestroyCallback GetEntityDestroyCallback();
+
+    /// @brief Setter for the parameters of the EntityDestroyCallbackParams
+    /// @param bool : the boolean to set
+    CSP_NO_EXPORT void SetEntityDestroyCallbackParams(const bool Boolean);
+
+    /// @brief Getter for the EntityPatchSentCallback
+    /// @return: CallbackHandler
+    CSP_NO_EXPORT CallbackHandler GetEntityPatchSentCallback();
+
+    /// @brief Setter for the parameters of the EntityPatchSentCallbackParams
+    /// @param bool : the boolean to set
+    CSP_NO_EXPORT void SetEntityPatchSentCallbackParams(const bool Boolean);
+
+    /// @brief Getter for the dirty properties
+    /// @return csp::common::Map<uint16_t, ReplicatedValue>
+    CSP_NO_EXPORT csp::common::Map<uint16_t, ReplicatedValue> GetDirtyProperties();
+
+    /// @brief Getter for the transient deletion component IDs
+    /// @return csp::common::List<uint16_t>
+    CSP_NO_EXPORT csp::common::List<uint16_t> GetTransientDeletionComponentIds();
+
+    /// @brief Getter for the ShouldUpdateParent boolean
+    /// @return bool
+    CSP_NO_EXPORT bool GetShouldUpdateParent();
+
+    /// @brief Setter for the ShouldUpdateParent boolean
+    /// @param Boolean bool : the boolean value to set ShouldUpdateParent to
+    CSP_NO_EXPORT void SetShouldUpdateParent(const bool Boolean);
+
+    /// @brief Getter for the parent entity
+    /// @return SpaceEntity*
+    CSP_NO_EXPORT SpaceEntity* GetParent();
+
+    /// @brief Getter for the parent id
+    /// @return csp::common::Optional<uint64_t>
+    CSP_NO_EXPORT csp::common::Optional<uint64_t> GetParentId();
+
+    /// @brief Getter for the time of the last patch
+    /// @return std::chrono::milliseconds
+    CSP_NO_EXPORT std::chrono::milliseconds GetTimeOfLastPatch();
+
+    /// @brief Remove the parent from the specified child entity
+    /// @param Index size_t : the index of the child entity
+    CSP_NO_EXPORT void RemoveParentFromChildEntity(size_t Index);
+
+    /// @brief Mark for update
+    CSP_NO_EXPORT void MarkForUpdate();
+
+    /// @brief Getter for the script interface
+    /// @return EntityScriptInterface*
+    CSP_NO_EXPORT EntityScriptInterface* GetScriptInterface();
+
+    /// @brief Claim script ownership
+    CSP_NO_EXPORT void ClaimScriptOwnership();
+
+    /// @brief Apply a local patch
+    /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
+    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+
+    /// @brief Resolve the relationship between the parent and the child
+    CSP_NO_EXPORT void ResolveParentChildRelationship();
+
 private:
     class DirtyComponent
     {
@@ -376,27 +447,29 @@ private:
         ComponentUpdateType UpdateType;
     };
 
-    void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+public:
+    /// @brief Getter for the dirty components
+    /// @return csp::common::Map<uint16_t, DirtyComponent>
+    CSP_NO_EXPORT csp::common::Map<uint16_t, DirtyComponent> GetDirtyComponents();
+
+    /// @brief Add specified dirty component to space entity
+    /// @param DirtyComponent ComponentBase* : the dirty component to add
+    CSP_NO_EXPORT void AddDirtyComponent(ComponentBase* DirtyComponent);
+
+    /// @brief Update after the property of a component was changed
+    /// @param DirtyComponent ComponentBase* : the dirty component to update
+    /// @param PropertyKey int32_t : the key of the property to update
+    CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
+
+private:
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
-    void AddDirtyComponent(ComponentBase* DirtyComponent);
-
-    void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
-    EntityScriptInterface* GetScriptInterface();
-
-    void ClaimScriptOwnership();
-    void MarkForUpdate();
-
-    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
-    bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
 
     void DestroyComponent(uint16_t Key);
 
     ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
-    void AddChildEntitiy(SpaceEntity* ChildEntity);
-
-    void ResolveParentChildRelationship();
+    void AddChildEntity(SpaceEntity* ChildEntity);
 
     csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
     csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
@@ -450,6 +523,31 @@ private:
     csp::common::List<uint16_t> TransientDeletionComponentIds;
 
     std::chrono::milliseconds TimeOfLastPatch;
+
+    /// @brief Setter for the parent entity
+    /// @param InParent SpaceEntity : the parent entity to set
+    void SetParent(SpaceEntity* InParent);
+
+    /// @brief Setter for the time of the last patch
+    /// @param NewTime std::chrono::milliseconds : the time to set
+    void SetTimeOfLastPatch(std::chrono::milliseconds NewTime);
+
+    /// @brief Setter for the owner ID
+    /// @param InOwnerId uint64_t : the owner ID to set
+    void SetOwnerId(const uint64_t InOwnerId);
+
+    /// @brief Remove child entities from parent
+    void RemoveChildEntities();
+
+    /// @brief Set ParentId to nullptr
+    void RemoveParentId();
+
+    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
+    /// @brief Internal version of the selected state of the entity setter
+    /// @param SelectedState bool : the selected state to set
+    /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
+    /// @return bool : the selection state of the entity
+    bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
 };
 
 } // namespace csp::multiplayer
