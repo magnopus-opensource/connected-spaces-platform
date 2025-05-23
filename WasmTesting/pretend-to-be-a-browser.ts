@@ -2,6 +2,7 @@
 // This simulates that, more or less.
 
 // This one is actually important, lets us do web requests whilst in node. (Polyfill via xhr)
+// @ts-ignore (Don't want to write type bindings for XHR)
 import XHR from 'xhr2';
 (globalThis as any).XMLHttpRequest = XHR;
 
@@ -13,21 +14,29 @@ if (typeof globalThis.navigator === 'undefined') {
 }
 
 if (typeof globalThis.localStorage === 'undefined') {
+  const store = new Map<string, string>();
+
   globalThis.localStorage = {
     store: new Map<string, string>(),
     getItem(key: string) {
-      return this.store.get(key) ?? null;
+      return store.get(key) ?? null;
     },
     setItem(key: string, value: string) {
-      this.store.set(key, value);
+      store.set(key, value);
     },
     removeItem(key: string) {
-      this.store.delete(key);
+      store.delete(key);
     },
     clear() {
-      this.store.clear();
+      store.clear();
+    },
+    get length() {
+      return store.size;
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null;
     }
-  };
+  } as Storage;
 }
 
 if (typeof globalThis.window === 'undefined') {
