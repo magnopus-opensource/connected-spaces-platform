@@ -1,3 +1,25 @@
+SET "SHARED_TARGET=%CD%\shared"
+SET "NODE_MODULES_TARGET=%CD%\node_modules"
+
+REM Junction node_modules so web server can serve them
+IF NOT EXIST ".\html_tests\node_modules" (
+    mklink /J ".\html_tests\node_modules" "%NODE_MODULES_TARGET%"
+)
+
+REM Junction code that's shared between typescript and html runtimes
+IF NOT EXIST ".\html_tests\shared" (
+    mklink /J ".\html_tests\shared" "%SHARED_TARGET%"
+)
+
+REM Caddy is the web server we use to serve the html files
+CALL choco install caddy --version=2.10.0 -y --source=https://community.chocolatey.org/api/v2/
+
+REM Kill any caddy instances that may be open
+taskkill /IM caddy.exe /F
+
+REM Start Caddy to serve the HTML tests directory on localhost
+echo Starting Caddy server on http://localhost:8888
+start /B caddy run
 
 REM Install typescript runner, test framework, etc. All at pinned versions from yarn.lock
 CALL yarn install --immutable

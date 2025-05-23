@@ -2,12 +2,16 @@
   "name": "csp-wasm-tests",
   "type": "module",
   "scripts": {
-    "test": "tsx csp-wasm.test.ts"
+    "test": "tsc --noEmit --strict && tsx csp-wasm.test.ts"
   },
   "dependencies": {
-    "uvu": "^0.5.6"
+    "puppeteer": "^24.8.2",
+    "uuid": "^11.1.0",
+    "uvu": "^0.5.6",
+    "xhr2": "^0.2.1"
   },
   "devDependencies": {
+    "@types/puppeteer": "^7.0.4",
     "tsx": "^3.12.7",
     "typescript": "^5.0.0"
   }
