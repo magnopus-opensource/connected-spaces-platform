@@ -67,7 +67,7 @@ public:
     /// @return True if there was an error, false otherwise.
     bool HasError();
 
-    /// @brief Checks if the entity has an script component.
+    /// @brief Checks if the entity has a script component.
     /// @return True if component exist, false otherwise.
     bool HasEntityScriptComponent();
 
