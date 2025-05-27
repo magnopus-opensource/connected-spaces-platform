@@ -27,18 +27,18 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageConstructorTest)
     const uint64_t TestId = 1;
     const uint64_t TestType = 2;
     const bool TestIsTransferable = false;
-    const bool TestIsPersistant = true;
+    const bool TestIsPersistent = true;
     const uint64_t TestOwnerId = 3;
     const std::optional<uint64_t> TestParentId = 4;
     std::map<mcs::PropertyKeyType, mcs::ItemComponentData> TestComponents;
     TestComponents[0] = mcs::ItemComponentData { { 0ll } };
 
-    mcs::ObjectMessage Object { TestId, TestType, TestIsTransferable, TestIsPersistant, TestOwnerId, TestParentId, TestComponents };
+    mcs::ObjectMessage Object { TestId, TestType, TestIsTransferable, TestIsPersistent, TestOwnerId, TestParentId, TestComponents };
 
     EXPECT_EQ(Object.GetId(), TestId);
     EXPECT_EQ(Object.GetType(), TestType);
     EXPECT_EQ(Object.GetIsTransferable(), TestIsTransferable);
-    EXPECT_EQ(Object.GetIsPersistant(), TestIsPersistant);
+    EXPECT_EQ(Object.GetIsPersistent(), TestIsPersistent);
     EXPECT_EQ(Object.GetOwnerId(), TestOwnerId);
     EXPECT_EQ(Object.GetParentId(), TestParentId);
     EXPECT_EQ(Object.GetComponents(), TestComponents);
@@ -71,13 +71,13 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageSerializeTest)
     const uint64_t TestId = 1;
     const uint64_t TestType = 2;
     const bool TestIsTransferable = true;
-    const bool TestIsPersistant = true;
+    const bool TestIsPersistent = true;
     const uint64_t TestOwnerId = 3;
     const std::optional<uint64_t> TestParentId = 4;
     std::map<mcs::PropertyKeyType, mcs::ItemComponentData> TestComponents;
     TestComponents[0] = mcs::ItemComponentData { { 0ll } };
 
-    mcs::ObjectMessage Object { TestId, TestType, TestIsTransferable, TestIsPersistant, TestOwnerId, TestParentId, TestComponents };
+    mcs::ObjectMessage Object { TestId, TestType, TestIsTransferable, TestIsPersistent, TestOwnerId, TestParentId, TestComponents };
 
     SignalRSerializer Serializer;
     Serializer.WriteValue(Object);

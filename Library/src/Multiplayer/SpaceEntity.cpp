@@ -89,7 +89,7 @@ SpaceEntity::SpaceEntity()
     , Type(SpaceEntityType::Avatar)
     , Id(0)
     , IsTransferable(true)
-    , IsPersistant(true)
+    , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
     , ShouldUpdateParent(false)
@@ -111,7 +111,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
     , IsTransferable(true)
-    , IsPersistant(true)
+    , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
     , ShouldUpdateParent(false)
@@ -129,7 +129,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 }
 
 SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant)
+    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent)
     : SpaceEntity(EntitySystem)
 {
     this->Id = Id;
@@ -138,7 +138,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, 
     this->Transform = Transform;
     this->OwnerId = OwnerId;
     this->IsTransferable = IsTransferable;
-    this->IsPersistant = IsPersistant;
+    this->IsPersistent = IsPersistent;
 }
 
 SpaceEntity::~SpaceEntity()
@@ -295,7 +295,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
     }
 }
 
-bool SpaceEntity::GetIsTransient() const { return !IsPersistant; }
+bool SpaceEntity::GetIsTransient() const { return !IsPersistent; }
 
 const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdPartyRef; }
 
@@ -1046,7 +1046,7 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     }
 
     // 3. Create the object message using the reqired properties and our created components.
-    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistant, OwnerId, Convert(ParentId),
+    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistent, OwnerId, Convert(ParentId),
         ComponentPacker.GetComponents() };
 }
 
@@ -1102,7 +1102,7 @@ void SpaceEntity::FromObjectMessage(const mcs::ObjectMessage& Message)
     Id = Message.GetId();
     Type = static_cast<SpaceEntityType>(Message.GetType());
     IsTransferable = Message.GetIsTransferable();
-    IsPersistant = Message.GetIsPersistant();
+    IsPersistent = Message.GetIsPersistent();
     OwnerId = Message.GetOwnerId();
     ParentId = common::Convert(Message.GetParentId());
 
