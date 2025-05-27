@@ -429,6 +429,13 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_MSG("Entity is locked. New components can not be added to a locked Entity.");
+
+        return nullptr;
+    }
+
     std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (AddType == ComponentType::ScriptData)
@@ -440,7 +447,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
             CSP_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
 
             // Return the existing script component
-            return nullptr;
+            return ScriptComponent;
         }
     }
 
@@ -459,6 +466,13 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 
 void SpaceEntity::RemoveComponent(uint16_t Key)
 {
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_MSG("Entity is locked. Components can not be removed from a locked Entity.");
+
+        return;
+    }
+
     std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
 
     if (!TransientDeletionComponentIds.Contains(Key) || Components.HasKey(Key))
