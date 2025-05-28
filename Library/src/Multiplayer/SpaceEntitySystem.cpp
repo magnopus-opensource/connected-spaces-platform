@@ -882,10 +882,11 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     // Bind and invoke all scripts
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        EntityScript& Script = Entities[i]->GetScript();
-
-        Script.Bind();
-        Script.Invoke();
+        if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
+        {
+            Script.Bind();
+            Script.Invoke();
+        }
     }
 
     // Tell all scripts that all entities are now loaded
