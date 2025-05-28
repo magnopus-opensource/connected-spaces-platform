@@ -315,7 +315,7 @@ public:
         const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
     /// @brief Resolve the entity hierarchy
-    /// @param: Entity SpaceEntity* : pointer to the entity for which to resolve the hierarchy
+    /// @param Entity SpaceEntity* : pointer to the entity for which to resolve the hierarchy
     CSP_NO_EXPORT void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /// @brief Initialise the SpaceEntitySystem
