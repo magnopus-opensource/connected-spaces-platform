@@ -3401,10 +3401,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockAddComponentTest)
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Create Entity
-        const csp::common::String EntityName = "Entity";
-        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
-
-        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
 
         // Lock Entity
         CreatedEntity->Lock();
@@ -3465,10 +3462,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockRemoveComponentTest)
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Create Entity
-        const csp::common::String EntityName = "Entity";
-        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
-
-        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
 
         // Add a component to the entity
         auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
