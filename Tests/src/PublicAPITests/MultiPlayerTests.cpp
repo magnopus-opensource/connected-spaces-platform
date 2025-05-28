@@ -3375,3 +3375,127 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
     // Log out
     LogOut(UserSystem);
 }
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockAddComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the add component error message is logged when we try to add a component to a locked entity.
+            static const csp::common::String AddComponentErrorMsg = "Entity is locked. New components can not be added to a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(AddComponentErrorMsg)).Times(1);
+
+            // Attempt to add a component to a locked entity
+            auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+
+            EXPECT_EQ(NewComponent, nullptr);
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockRemoveComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Add a component to the entity
+        auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+        EXPECT_NE(NewComponent, nullptr);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the remove component error message is logged when we try to remove a component from a locked entity.
+            static const csp::common::String RemoveComponentErrorMsg = "Entity is locked. Components can not be removed from a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(RemoveComponentErrorMsg)).Times(1);
+
+            // Attempt to remove a component from a locked entity
+            CreatedEntity->RemoveComponent(NewComponent->GetId());
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
