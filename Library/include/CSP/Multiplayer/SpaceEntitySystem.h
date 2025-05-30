@@ -361,7 +361,7 @@ private:
     void TickEntityScripts();
 
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
-        EntityCreatedCallback Callback);
+        bool IsLocal, EntityCreatedCallback Callback);
 
     // CreateAvatar Continuations
     CSP_START_IGNORE

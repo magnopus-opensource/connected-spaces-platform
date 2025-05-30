@@ -90,6 +90,7 @@ SpaceEntity::SpaceEntity()
     , Type(SpaceEntityType::Avatar)
     , Id(0)
     , IsTransferable(true)
+    , IsOwnedByLocalClient(false)
     , IsPersistant(true)
     , OwnerId(0)
     , ParentId(nullptr)
@@ -107,11 +108,35 @@ SpaceEntity::SpaceEntity()
 {
 }
 
+SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, bool IsLocalOnly)
+    : EntitySystem(nullptr)
+    , Type(SpaceEntityType::Avatar)
+    , Id(0)
+    , IsTransferable(true)
+    , IsOwnedByLocalClient(IsLocalOnly)
+    , IsPersistant(true)
+    , OwnerId(0)
+    , ParentId(nullptr)
+    , ShouldUpdateParent(false)
+    , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
+    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
+    , ThirdPartyRef("")
+    , SelectedId(0)
+    , Parent(nullptr)
+    , EntityLock(LockType::None)
+    , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
+    , Script(this, InEntitySystem)
+    , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
+    , TimeOfLastPatch(0)
+{
+}
+
 SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
     , IsTransferable(true)
+    , IsOwnedByLocalClient(false)
     , IsPersistant(true)
     , OwnerId(0)
     , ParentId(nullptr)
@@ -368,7 +393,12 @@ SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
 
 void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-    EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
+    EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, false, Callback);
+}
+
+void SpaceEntity::CreateLocalChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+    EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, true, Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
@@ -394,6 +424,12 @@ void SpaceEntity::SetUpdateCallback(UpdateCallback Callback) { EntityUpdateCallb
 void SpaceEntity::SetDestroyCallback(DestroyCallback Callback) { EntityDestroyCallback = Callback; }
 
 void SpaceEntity::SetPatchSentCallback(CallbackHandler Callback) { EntityPatchSentCallback = Callback; }
+
+// Returns if this entity has the IsLocal flag set
+bool SpaceEntity::IsLocal() const
+{
+    return IsOwnedByLocalClient;
+}
 
 void SpaceEntity::MarkForUpdate()
 {

@@ -1570,14 +1570,17 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterials(const csp::common::String& Space
         }
 
         // 2. Find material assets in collections
+        // Create a map from ID to AssetCollection for easier lookup
+        auto AssetCollectionMap = std::make_shared<csp::common::Map<csp::common::String, csp::systems::AssetCollection>>();
         csp::common::Array<csp::common::String> AssetCollectionIds((*AssetCollections).Size());
-
+        
         for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
         {
             AssetCollectionIds[i] = (*AssetCollections)[i].Id;
+            (*AssetCollectionMap)[(*AssetCollections)[i].Id] = (*AssetCollections)[i];
         }
 
-        auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
+        auto GetAssetsCB = [this, AssetCollections, AssetCollectionMap, Callback](const AssetsResult& GetAssetsResult)
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
@@ -1745,10 +1748,47 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterial(const csp::common::String& AssetC
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
+
+csp::common::String AssetSystem::GetAssetPath(
+    const Asset& Asset, 
+    const csp::common::Map<csp::common::String, csp::systems::AssetCollection>& AssetCollectionMap)
+{
+    // Start with the asset name
+    csp::common::String Path = Asset.Name;
+    
+    // Get the asset collection for this asset
+    csp::common::String CurrentCollectionId = Asset.AssetCollectionId;
+    
+    // Build the path by walking up the parent hierarchy
+    while (!CurrentCollectionId.IsEmpty())
+    {
+        // Look up the current collection
+        if (!AssetCollectionMap.HasKey(CurrentCollectionId))
+        {
+            // If we can't find the collection, return what we have so far with a warning
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Incomplete asset path: collection ID not found, %s, for %s", CurrentCollectionId.c_str(), Asset.Name.c_str());
+            return Path;
+        }
+        
+        const AssetCollection& CurrentCollection = AssetCollectionMap[CurrentCollectionId];
+        
+        // Add this collection's name to the path
+        Path = CurrentCollection.Name + "/" + Path;
+        
+        // Move up to the parent
+        CurrentCollectionId = CurrentCollection.ParentId;
+    }
+    
+    // Add leading slash
+    Path = "/" + Path;
+    
+    return Path;
+}
+
 CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceId, csp::systems::LocalScriptResultCallback Callback)
 {
-    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Loading scripts!!!!!!!!!!!");
-    
+    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Loading scripts");
+
     // 1. find asset collection for space
     auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
     {   
@@ -1769,14 +1809,17 @@ CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceI
         }
 
         // 2. Find local script assets in collections
+        // Create a map from ID to AssetCollection for easier lookup
+        auto AssetCollectionMap = std::make_shared<csp::common::Map<csp::common::String, csp::systems::AssetCollection>>();
         csp::common::Array<csp::common::String> AssetCollectionIds((*AssetCollections).Size());
         
         for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
         {
             AssetCollectionIds[i] = (*AssetCollections)[i].Id;
+            (*AssetCollectionMap)[(*AssetCollections)[i].Id] = (*AssetCollections)[i];
         }
 
-        auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
+        auto GetAssetsCB = [this, AssetCollections, AssetCollectionMap, Callback](const AssetsResult& GetAssetsResult)
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
@@ -1793,17 +1836,20 @@ CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceI
             auto DownloadedLocalScripts = std::make_shared<csp::common::Map<csp::common::String, csp::common::String>>();
             auto AssetsDownloaded = std::make_shared<size_t>();
             auto Failed = std::make_shared<bool>();
+            
+            // Create a copy of the assets array to ensure it stays in scope
+            auto AssetsCopy = std::make_shared<csp::common::Array<csp::systems::Asset>>(Assets);
 
             // 3. Download asset data for each material asset
-            for (size_t i = 0; i < Assets.Size(); ++i)
+            for (size_t i = 0; i < AssetsCopy->Size(); ++i)
             {
-                csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
-                csp::common::String AssetId = Assets[i].Id;
-                // Create a copy of just the asset name we need
-                csp::common::String AssetName = Assets[i].Name;
+                // Create a copy of the asset by value to ensure it stays in scope when the callback is invoked
+                Asset AssetCopy = (*AssetsCopy)[i];
+                csp::common::String AssetCollectionId = AssetCopy.AssetCollectionId;
+                csp::common::String AssetId = AssetCopy.Id;
 
-                auto DownloadLocalScriptCallback = [Callback, AssetsToDownload, AssetCollectionId, AssetId, DownloadedLocalScripts,
-                                                  AssetsDownloaded, Failed, AssetName](const AssetDataResult& DownloadResult)
+                auto DownloadLocalScriptCallback = [this, Callback, AssetsToDownload, AssetCollectionId, AssetId, DownloadedLocalScripts,
+                                                    AssetsDownloaded, Failed, AssetCopy, AssetCollectionMap](const AssetDataResult& DownloadResult)
                 {
                     // Return early as one of the calls has already failed
                     if (*Failed)
@@ -1828,10 +1874,16 @@ CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceI
                     size_t LocalScriptLength = DownloadResult.GetDataLength();
 
                     csp::common::String LocalScript(LocalScriptData, LocalScriptLength);
+
+                    // Get the path for the local script, this is the "canonical" path
+                    // that will be used to store the script for the module loader
+                    csp::common::String path = GetAssetPath(AssetCopy, *AssetCollectionMap);
                     
-                    // Use the captured AssetName instead of accessing Assets array
-                    (*DownloadedLocalScripts)[AssetName] = LocalScript;
-                    
+                    // Store the local script in the map with its path as the key
+                    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loaded local script: %s", path.c_str());
+
+                    (*DownloadedLocalScripts)[path] = LocalScript;
+
                     (*AssetsDownloaded)++;
 
                     if ((*AssetsDownloaded) >= AssetsToDownload)
@@ -1844,7 +1896,7 @@ CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceI
                     }
                 };
 
-                DownloadAssetData(Assets[i], DownloadLocalScriptCallback);
+                DownloadAssetData(AssetCopy, DownloadLocalScriptCallback);
             }
         };
 

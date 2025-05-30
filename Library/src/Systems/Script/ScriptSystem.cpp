@@ -124,7 +124,19 @@ void ScriptSystem::FireLocalScriptCommand(const csp::common::String& commandJson
 
 }
 
+// AddModule to Context
+void* ScriptSystem::AddModuleToContext(int64_t ContextId, const csp::common::String& ModuleName)
+{
+    ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
+    if (TheScriptContext == nullptr)
+    {
+        CSP_LOG_ERROR_FORMAT("Context %lld does not exist\n", ContextId);
+        return nullptr;
+    }
 
+    TheScriptContext->AddModule(ModuleName);
+    return TheScriptContext->GetModule(ModuleName);
+}
 
 bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& ScriptText)
 {

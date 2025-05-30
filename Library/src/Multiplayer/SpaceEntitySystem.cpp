@@ -378,7 +378,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 
 void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-    CreateObjectInternal(InName, nullptr, InSpaceTransform, Callback);
+    CreateObjectInternal(InName, nullptr, InSpaceTransform, false, Callback);
 }
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
@@ -788,6 +788,11 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 
 void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
+    // If Entity is not remote (i.e. owned by a local script), we don't want to send updates to the server.
+    if (EntityToUpdate->IsLocal())
+    {
+        return;
+    }
     // If we have nothing to update, don't allow a patch to be sent.
     if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
         && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
@@ -1238,10 +1243,10 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 }
 
 void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
-    const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+    const SpaceTransform& InSpaceTransform, bool IsLocal, EntityCreatedCallback Callback)
 {
     const std::function LocalIDCallback
-        = [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+        = [this, InName, InParent, InSpaceTransform, Callback, &IsLocal](const signalr::value& Result, const std::exception_ptr& Except)
     {
         try
         {
@@ -1256,7 +1261,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(nullptr);
         }
 
-        auto* NewObject = CSP_NEW SpaceEntity(this);
+        auto* NewObject = CSP_NEW SpaceEntity(this, IsLocal);
         NewObject->Type = SpaceEntityType::Object;
         auto ID = ParseGenerateObjectIDsResult(Result);
         NewObject->Id = ID;

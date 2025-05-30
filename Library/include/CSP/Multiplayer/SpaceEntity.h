@@ -171,6 +171,9 @@ public:
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
     SpaceEntity(SpaceEntitySystem* InEntitySystem);
 
+    /// @brief Creates a SpaceEntity giving the option to make it local only.
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, bool IsOwnedByLocalClient);
+
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
     CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
@@ -291,6 +294,9 @@ public:
     CSP_ASYNC_RESULT void CreateChildEntity(
         const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
+    CSP_ASYNC_RESULT void CreateLocalChildEntity(
+        const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+
     /// @brief Gets the children of this entity
     /// @return csp::common::List<SpaceEntity>
     const csp::common::List<SpaceEntity*>* GetChildEntities() const;
@@ -392,6 +398,11 @@ public:
     /// @return True if the entity can be modified, False if not.
     bool IsModifiable() const;
 
+    /// @brief Checks if the entity is Local.
+    /// This means the local client owns the entity and updates are not shared
+    /// @return True if the entity is Local, False if not.
+    bool IsLocal() const;
+
     /// @brief Locks the entity if it hasn't been locked already.
     /// @pre The entity must not already be locked.
     /// A CSP error will be sent to the LogSystem if this condition is not met.
@@ -450,6 +461,7 @@ private:
     SpaceEntityType Type;
     uint64_t Id;
     bool IsTransferable;
+    bool IsOwnedByLocalClient;
     bool IsPersistant;
     uint64_t OwnerId;
     csp::common::Optional<uint64_t> ParentId;

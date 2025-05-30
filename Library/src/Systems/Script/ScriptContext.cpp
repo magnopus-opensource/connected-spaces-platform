@@ -46,6 +46,7 @@ void ScriptContext::Initialise()
         {
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, Alias.c_str() };
         }
+        CSP_LOG_ERROR_FORMAT("Module lookup %s\n", Url.c_str());
 
         csp::common::String Source = TheScriptSystem->GetModuleSource(Url);
 

@@ -165,6 +165,18 @@ public:
     /// @return String : A copy of this string with characters converted to lower-case.
     String ToLower() const;
 
+    /// @brief Returns a substring starting from a given index.
+    /// @param Start The starting index of the substring.
+    /// @return A new string containing the substring.
+    String substr(size_t Start) const;
+
+    /// @brief Returns a substring starting from a given index and length.
+    /// @param Start The starting index of the substring.
+    /// @param Length The length of the substring.
+    /// @note If the length exceeds the string's length, it will be capped to the string's length.
+    /// @return A new string containing the substring.
+    String substr(size_t Start, size_t Length) const;
+
     /// @brief Concatenates all elements in the list with a separator after each element and returns as a string.
     /// @param Parts const csp::common::List<String>& : List to concatenate
     /// @param Separator csp::common::Optional<char> : An optional separator to add after each concatenated element

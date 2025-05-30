@@ -484,4 +484,32 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
     return JoinedString;
 }
 
+//substr just Start
+String String::substr(size_t Start) const
+{
+    if (Start >= ImplPtr->Length)
+    {
+        return String();
+    }
+
+    return String(ImplPtr->Text + Start, ImplPtr->Length - Start);
+
+} // namespace csp::common
+
+// substr
+String String::substr(size_t Start, size_t Length) const
+{
+    if (Start >= ImplPtr->Length)
+    {
+        return String();
+    }
+
+    if (Length == 0 || Start + Length > ImplPtr->Length)
+    {
+        Length = ImplPtr->Length - Start;
+    }
+
+    return String(ImplPtr->Text + Start, Length);
+}
+
 } // namespace csp::common

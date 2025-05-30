@@ -382,6 +382,10 @@ private:
 
     AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
     MaterialChangedCallbackHandler MaterialChangedCallback;
+
+    csp::common::String GetAssetPath(
+    const Asset& Asset, 
+    const csp::common::Map<csp::common::String, csp::systems::AssetCollection>& AssetCollectionMap);
 };
 
 } // namespace csp::systems

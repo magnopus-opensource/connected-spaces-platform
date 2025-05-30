@@ -70,35 +70,6 @@ void LocalScriptSystem::Initialize()
             }
         }
         
-        // Setup console.log and other utilities
-        ScriptContext* localContext = static_cast<ScriptContext*>(ScriptSystem->GetContext(LOCAL_SCRIPT_CONTEXT_ID));
-        if (!localContext)
-        {
-            CSP_LOG_ERROR_MSG("Failed to get local context after creation");
-            return;
-        }
-        
-        // Create console namespace with log function if it doesn't exist
-        ScriptSystem->RunScript(LOCAL_SCRIPT_CONTEXT_ID, 
-            "if (typeof globalThis.console === 'undefined') {\n"
-            "    globalThis.console = {\n"
-            "        log: function(msg) { _consoleLogToNative(String(msg)); }\n"
-            "    };\n"
-            "}");
-            
-        // Add the native handler for console.log
-        void* contextPtr = localContext->GetContext();
-        if (!contextPtr)
-        {
-            CSP_LOG_ERROR_MSG("Failed to get JS context from local context");
-            return;
-        }
-            
-        qjs::Context* jsContext = static_cast<qjs::Context*>(contextPtr);
-        jsContext->global()["_consoleLogToNative"] = [](std::string msg) {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Script Log: %s", msg.c_str());
-        };
-        
         CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem::Initialize completed successfully");
     }
     catch(const std::exception& e)
@@ -107,9 +78,45 @@ void LocalScriptSystem::Initialize()
     }
 }
 
+void ScriptLog(qjs::rest<std::string> Args)
+{
+    std::stringstream Str;
+
+    for (auto const& Arg : Args)
+    {
+        Str << Arg << " ";
+    }
+
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "%s", Str.str().c_str());
+}
+
 void LocalScriptSystem::LoadScriptModules(const csp::common::String& SpaceId)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loading script modules for space: %s", SpaceId.c_str());
+
+    if (!ScriptSystem->HasContext(LOCAL_SCRIPT_CONTEXT_ID))
+    {
+        ScriptSystem->CreateContext(LOCAL_SCRIPT_CONTEXT_ID);
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "Create Local Script Context");
+
+        ScriptModule* cspModule = (ScriptModule*)ScriptSystem->AddModuleToContext(LOCAL_SCRIPT_CONTEXT_ID, "csp");
+        qjs::Context* context = (qjs::Context*)ScriptSystem->GetContext(LOCAL_SCRIPT_CONTEXT_ID);
+        auto Fn = [this](const char* Str)
+        {
+            ScriptSystem->FireLocalScriptCommand(Str);
+        };
+    
+        try {
+            cspModule->Module->function("log", ScriptLog);
+            cspModule->Module->function("sendMessage", Fn);
+            std::stringstream ss;
+            ss << "import * as csp from 'csp';\n";
+            ss << "globalThis.csp = csp;";
+            context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+        } catch (const std::exception& e) {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called for %s", e.what());
+        }
+    }
     
     // Get asset system to load scripts
     csp::systems::AssetSystem* assetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
@@ -129,7 +136,18 @@ void LocalScriptSystem::LoadScriptModules(const csp::common::String& SpaceId)
             
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loaded %zu scripts from space %s", totalScripts, SpaceId.c_str());
             
-            // Register each script as a module
+            // First pass: Register all modules so they're available for imports
+            for (size_t i = 0; i < totalScripts; ++i)
+            {
+                auto scriptName = scripts.Keys()->operator[](i);
+                auto scriptContent = scripts[scriptName];
+                
+                // Register with the script system
+                ScriptSystem->SetModuleSource(scriptName, scriptContent);
+                ScriptSystem->AddModuleToContext(LOCAL_SCRIPT_CONTEXT_ID, scriptName);
+            }
+            
+            // Second pass: Evaluate and import all modules
             for (size_t i = 0; i < totalScripts; ++i)
             {
                 try
@@ -137,60 +155,7 @@ void LocalScriptSystem::LoadScriptModules(const csp::common::String& SpaceId)
                     auto scriptName = scripts.Keys()->operator[](i);
                     auto scriptContent = scripts[scriptName];
                     
-                    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Registering script module: %s", scriptName.c_str());
-                    
-                    // Register with the script system
-                    ScriptSystem->SetModuleSource(scriptName, scriptContent);
-                    
-                    // Get the local context
-                    ScriptContext* localContext = static_cast<ScriptContext*>(ScriptSystem->GetContext(LOCAL_SCRIPT_CONTEXT_ID));
-                    if (!localContext)
-                    {
-                        CSP_LOG_ERROR_MSG("Failed to get local context for script registration");
-                        continue;
-                    }
-                    
-                    // Try to evaluate the script as a module
-                    void* contextPtr = localContext->GetContext();
-                    if (!contextPtr)
-                    {
-                        CSP_LOG_ERROR_MSG("Failed to get JS context from local context");
-                        continue;
-                    }
-                    
-                    qjs::Context* jsContext = static_cast<qjs::Context*>(contextPtr);
-                    
-                    // Evaluate the script as a module to make it available
-                    try
-                    {
-                        JSValue result = jsContext->eval(scriptContent.c_str(), scriptName.c_str(), JS_EVAL_TYPE_MODULE);
-                        
-                        if (JS_IsException(result))
-                        {
-                            CSP_LOG_ERROR_FORMAT("Error evaluating module %s", scriptName.c_str());
-                            continue;
-                        }
-                        
-                        // Import the module into global scope
-                        csp::common::String importScript = csp::common::String("try {\n") +
-                            "  import * as mod from '" + scriptName + "';\n" +
-                            "  globalThis." + scriptName + " = mod;\n" +
-                            "  if (typeof mod.initialize === 'function') {\n" +
-                            "    mod.initialize();\n" +
-                            "    console.log('Initialized module: " + scriptName + "');\n" +
-                            "  }\n" +
-                            "} catch(e) {\n" +
-                            "  console.log('Error importing module " + scriptName + ": ' + e);\n" +
-                            "}";
-                            
-                        jsContext->eval(importScript.c_str(), "import_script.js", JS_EVAL_TYPE_GLOBAL);
-                        
-                        CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Successfully registered module: %s", scriptName.c_str());
-                    }
-                    catch (const std::exception& e)
-                    {
-                        CSP_LOG_ERROR_FORMAT("Exception registering module %s: %s", scriptName.c_str(), e.what());
-                    }
+                    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Importing script module: %s", scriptName.c_str());
                 }
                 catch (const std::exception& e)
                 {

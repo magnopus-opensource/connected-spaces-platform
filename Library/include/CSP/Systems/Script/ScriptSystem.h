@@ -76,6 +76,8 @@ public:
     CSP_EVENT void SetLocalScriptCommandCallback(LocalScriptCommandCallback Callback);
     void FireLocalScriptCommand(const csp::common::String& data);
     
+    void* AddModuleToContext(int64_t ContextId, const csp::common::String& ModuleName);
+
     /// @brief Checks if a context with the given ID exists
     /// @param ContextId ID of the context to check
     /// @return True if the context exists, false otherwise

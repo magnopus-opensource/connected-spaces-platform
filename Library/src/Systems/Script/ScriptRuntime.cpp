@@ -206,7 +206,8 @@ void ScriptRuntime::ClearModuleSource(csp::common::String ModuleUrl) { Modules.e
 csp::common::String ScriptRuntime::GetModuleSource(csp::common::String ModuleUrl)
 {
     ModuleSourceMap::const_iterator ModuleIt = Modules.find(ModuleUrl.c_str());
-
+    // Log number of modules
+    CSP_LOG_FORMAT(LogLevel::Log, "Number of modules: %d", Modules.size());
     if (ModuleIt != Modules.end())
     {
         return csp::common::String(ModuleIt->second.c_str());
@@ -222,7 +223,11 @@ csp::common::String ScriptRuntime::GetModuleSource(csp::common::String ModuleUrl
         }
     }
 #endif
-
+    // log out all the modules if not found
+    for (const auto& Module : Modules)
+    {
+        CSP_LOG_FORMAT(LogLevel::Log, "Module: %s", Module.first.c_str());
+    }
     return csp::common::String();
 }
 
