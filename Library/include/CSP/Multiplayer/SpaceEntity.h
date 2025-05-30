@@ -516,7 +516,7 @@ private:
 
     CSP_START_IGNORE
     mutable std::mutex EntityMutexLock;
-    mutable std::mutex ComponentsLock;
+    mutable std::recursive_mutex ComponentsLock;
     mutable std::mutex PropertiesLock;
     CSP_END_IGNORE
 

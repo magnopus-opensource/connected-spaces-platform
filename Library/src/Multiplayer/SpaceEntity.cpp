@@ -436,7 +436,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
         return nullptr;
     }
 
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (AddType == ComponentType::ScriptData)
     {
@@ -473,7 +473,7 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
         return;
     }
 
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (!TransientDeletionComponentIds.Contains(Key) || Components.HasKey(Key))
     {
@@ -505,7 +505,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
     if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
     {
         std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
-        std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+        std::scoped_lock ComponentsLocker(ComponentsLock);
 
         auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
@@ -798,7 +798,7 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
 
 void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (DirtyComponents.HasKey(Component->GetId()))
     {
@@ -1044,6 +1044,8 @@ mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef());
     ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
 
+    std::scoped_lock ComponentsLocker(ComponentsLock);
+
     // 2. Convert all of our runtime components to mcs compatible types.
     std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
 
@@ -1082,6 +1084,8 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
 
     // 2. Convert all of our runtime components to mcs compatible types.
     {
+        std::scoped_lock ComponentsLocker(ComponentsLock);
+
         // Get component keys.
         std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
 
@@ -1199,20 +1203,25 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
 
         uint64_t ComponentCount = ComponentUnpacker.GetRuntimeComponentsCount();
 
-        ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
-        size_t ComponentIndex = 0;
-
-        for (const auto& ComponentDataPair : *PatchComponents)
+        if (ComponentCount > 0)
         {
-            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
-            {
-                // This is the end of our components
-                break;
-            }
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
 
-            ComponentUpdateInfo UpdateInfo = ComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
-            ComponentUpdates[ComponentIndex] = UpdateInfo;
-            ComponentIndex++;
+            ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
+            size_t ComponentIndex = 0;
+
+            for (const auto& ComponentDataPair : *PatchComponents)
+            {
+                if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+                {
+                    // This is the end of our components
+                    break;
+                }
+
+                ComponentUpdateInfo UpdateInfo = ComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
+                ComponentUpdates[ComponentIndex] = UpdateInfo;
+                ComponentIndex++;
+            }
         }
     }
 
@@ -1255,7 +1264,7 @@ void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs
                 Component->Properties[PatchComponentPair.first] = Property;
                 Component->OnCreated();
             }
-
+            std::scoped_lock ComponentsLocker(ComponentsLock);
             Components[ComponentId] = Component;
         }
     }
@@ -1276,6 +1285,8 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
     {
         UpdateType = ComponentUpdateType::Delete;
     }
+
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     switch (UpdateType)
     {

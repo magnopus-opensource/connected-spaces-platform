@@ -1526,6 +1526,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
             if (Entities[i]->GetId() == Patch.GetId())
             {
                 Entities[i]->FromObjectPatch(Patch);
+                EntityFound = true;
             }
         }
 
