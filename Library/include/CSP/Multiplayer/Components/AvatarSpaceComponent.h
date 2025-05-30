@@ -28,7 +28,7 @@ namespace csp::multiplayer
 
 /// @brief Enumerates the supported states for an avatar.
 ///        These are used to establish the related animation that the avatar will use on its state machine.
-enum class AvatarState
+enum class AvatarState : int
 {
     Idle = 0,
     Walking,
@@ -40,7 +40,7 @@ enum class AvatarState
 };
 
 /// @brief Enumerates the supported play mode for the avatar.
-enum class AvatarPlayMode
+enum class AvatarPlayMode : int
 {
     /// Viewer mode, with desktop or mobile viewer
     Default = 0,
