@@ -41,13 +41,15 @@ void RunTest()
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
+    // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+    EntitySystem.SetEntityPatchRateLimitEnabled(false);
+
+    csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+
     std::promise<csp::multiplayer::SpaceEntity*> CreateObjectResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> CreateObjectResultFuture = CreateObjectResultPromise.get_future();
 
-    // Create object to represent the conversation
-    csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-
-    EntitySystem.CreateObject("Object1", ObjectTransform,
+    EntitySystem.CreateObject("TestObject", ObjectTransform,
         [&CreateObjectResultPromise](csp::multiplayer::SpaceEntity* Result) { CreateObjectResultPromise.set_value(Result); });
 
     csp::multiplayer::SpaceEntity* Object = CreateObjectResultFuture.get();
