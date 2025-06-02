@@ -1393,6 +1393,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
+        // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+        EntitySystem->SetEntityPatchRateLimitEnabled(false);
+
         // Create object to represent the conversation
         csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
         ConversationObjectId = Object->GetId();
@@ -1433,9 +1436,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
         csp::common::String SecondTestUserId;
         LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
-
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         bool EntitiesRetrieved = false;
@@ -1448,6 +1448,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
                     EntitiesRetrieved = true;
                 }
             });
+
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
         WaitForCallbackWithUpdate(EntitiesRetrieved, EntitySystem);
 
