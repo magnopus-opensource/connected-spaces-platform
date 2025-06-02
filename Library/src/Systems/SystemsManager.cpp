@@ -165,7 +165,7 @@ void SystemsManager::CreateSystems()
     SpaceEntitySystem = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
     ConversationSystem = CSP_NEW csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
     // Create the LocalScriptSystem after ScriptSystem is initialized
-    LocalScriptSystem = CSP_NEW csp::systems::LocalScriptSystem();
+    LocalScriptSystem = CSP_NEW csp::systems::LocalScriptSystem(SpaceEntitySystem);
 }
 
 void SystemsManager::DestroySystems()

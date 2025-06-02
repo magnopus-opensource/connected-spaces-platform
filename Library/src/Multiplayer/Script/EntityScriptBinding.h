@@ -16,6 +16,8 @@
 #pragma once
 
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "quickjspp.hpp"
+#include "Debug/Logging.h"
 
 namespace csp::systems
 {
@@ -31,6 +33,7 @@ class EntityScriptBinding : public csp::systems::IScriptBinding
 {
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
+    void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, uint64_t EntityId);
     virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
 
     static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);

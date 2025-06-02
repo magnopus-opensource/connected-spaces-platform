@@ -109,7 +109,7 @@ SpaceEntity::SpaceEntity()
 }
 
 SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, bool IsLocalOnly)
-    : EntitySystem(nullptr)
+    : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
     , IsTransferable(true)

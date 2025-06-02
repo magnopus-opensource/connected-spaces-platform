@@ -18,16 +18,28 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
+#include "Debug/Logging.h"
+#include "CSP/Common/StringFormat.h"
+#include "quickjspp.hpp"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 
 #include <map>
 #include <string>
+#include <sstream>
 
 namespace csp::systems
 {
 class LocalScriptSystem;
 class LocalScriptResult;
 }
+
+// namespace qjs
+// {
+// class Runtime;
+// class Context;
+// using Context::Module = qjs::Context::Module;
+// }
 
 namespace csp::services
 {
@@ -47,11 +59,13 @@ class CSP_API LocalScriptSystem
 
 public:
     /// @brief Construct a new instance of LocalScriptSystem.
-    LocalScriptSystem();
+    LocalScriptSystem(csp::multiplayer::SpaceEntitySystem* InEntitySystem);
     
     /// @brief Destroy the instance of LocalScriptSystem.
     ~LocalScriptSystem();
-    
+
+    void TickAnimationFrame(int32_t timestamp);
+
     using ModuleSourceMap = std::map<std::string, std::string>;
 
     /// @brief Initialize the LocalScriptSystem and create a local context
@@ -60,12 +74,18 @@ public:
     /// @brief Load and register script modules from the given space
     /// @param SpaceId The ID of the space to load scripts from
     void LoadScriptModules(const csp::common::String& SpaceId);
+    void RunScript(const csp::common::String& SpaceId, const csp::common::String& Path);
+    
 
 private:
-
-    ModuleSourceMap Modules;
-    csp::systems::ScriptSystem* ScriptSystem;
-
+    /// @brief The QuickJS context for script execution
+    qjs::Context* Context; 
+    qjs::Runtime* Runtime;
+    csp::multiplayer::EntityScriptBinding* ScriptBinding;
+    multiplayer::SpaceEntitySystem* EntitySystem;
+    //qjs::Context::Module* CSP_Module;
+    // Store loaded scripts to ensure they remain in memory
+    csp::common::Map<csp::common::String, csp::common::String> LoadedScripts;
 };
 
 

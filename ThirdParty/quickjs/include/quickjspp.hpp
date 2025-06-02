@@ -44,7 +44,7 @@ static void csp_dump_obj(JSContext* ctx, FILE* f, JSValueConst val)
 	str = JS_ToCString(ctx, val);
 	if (str)
 	{
-		CSP_LOG_ERROR_FORMAT("%s\n", str);
+		CSP_LOG_ERROR_FORMAT("Error: %s\n", str);
 		JS_FreeCString(ctx, str);
 	}
 	else

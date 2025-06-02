@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "Debug/Logging.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 
 #include "CSP/CSPFoundation.h"
@@ -22,7 +23,6 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
@@ -287,6 +287,7 @@ void BindComponents(qjs::Context::Module* Module)
         .base<ComponentScriptInterface>()
         .PROPERTY_GET_SET(LightSpaceComponent, LightType, "lightType")
         .PROPERTY_GET_SET(LightSpaceComponent, Intensity, "Intensity")
+        .PROPERTY_GET_SET(LightSpaceComponent, Intensity, "intensity")
         .PROPERTY_GET_SET(LightSpaceComponent, Range, "range")
         .PROPERTY_GET_SET(LightSpaceComponent, InnerConeAngle, "innerConeAngle")
         .PROPERTY_GET_SET(LightSpaceComponent, OuterConeAngle, "outerConeAngle")
@@ -524,16 +525,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
 
-void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
+void BindInternal(qjs::Context::Module* Module)
 {
-    if (ScriptSystem == nullptr)
-    {
-        ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-    }
-
-    qjs::Context* Context = (qjs::Context*)ScriptSystem->GetContext(ContextId);
-    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
-
     Module->function<&EntityScriptLog>("Log");
 
     Module->class_<EntityScriptInterface>("Entity")
@@ -602,6 +595,19 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
         .fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
+}
+
+void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
+{
+    if (ScriptSystem == nullptr)
+    {
+        ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
+    }
+
+    qjs::Context* Context = (qjs::Context*)ScriptSystem->GetContext(ContextId);
+    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
+
+    BindInternal(Module);
 
     Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
     Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
@@ -616,6 +622,20 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
     ss.clear();
     ss << "globalThis." << csp::systems::OLD_SCRIPT_NAMESPACE << " = " << csp::systems::SCRIPT_NAMESPACE;
     Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+}
+
+void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, uint64_t EntityId)
+{
+    BindInternal(Module);
+
+    Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
+    Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(EntityId));
+
+    // Always import CSP module into scripts
+    std::stringstream ss;
+    ss << "import * as csp from 'csp'; globalThis.csp = csp;";
+    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+
 }
 
 } // namespace csp::multiplayer

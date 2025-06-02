@@ -788,11 +788,6 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 
 void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
-    // If Entity is not remote (i.e. owned by a local script), we don't want to send updates to the server.
-    if (EntityToUpdate->IsLocal())
-    {
-        return;
-    }
     // If we have nothing to update, don't allow a patch to be sent.
     if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
         && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
@@ -1076,6 +1071,11 @@ void SendPatches(csp::multiplayer::ISignalRConnection* Connection, const csp::co
 
     for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
+        if (PendingEntities[i]->IsLocal())
+        {
+            // If the entity is local, we don't want to send it to the server.
+            continue;
+        }
         PendingEntities[i]->SerialisePatch(Serialiser);
         auto SerialisedEntity = Serialiser.Finalise();
         ObjectPatches.push_back(SerialisedEntity);
@@ -1127,8 +1127,8 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
             const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-            if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
-            {
+            if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled || PendingEntity->IsLocal())
+{
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
                 if (!PendingEntity->IsModifiable())
                 {
