@@ -1,7 +1,5 @@
 #!lua
 
-include "Tools/PremakeFixes/AndroidFixes.lua"
-
 include "Library/CSharpWrapper/premake5.lua"
 
 include "ThirdParty/poco/Foundation/premake5.lua"

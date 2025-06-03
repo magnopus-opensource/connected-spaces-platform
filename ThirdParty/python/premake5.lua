@@ -10,8 +10,8 @@ CurrentDirectory = os.getcwd()
         CurrentDirectory .. "/libs/"
     }
     
-    configuration "Debug"
+    filter "configurations:Debug"
         postbuildcommands { "copy $(SolutionDir)\\ThirdParty\\python\\python38.dll $(SolutionDir)\\Application\\Binaries\\x64\\Debug\\python38.dll" }
-    configuration "Release"
+    filter "configurations:Release"
         postbuildcommands { "copy $(SolutionDir)\\ThirdParty\\python\\python38.dll $(SolutionDir)\\Application\\Binaries\\x64\\Release\\python38.dll" }
-    configuration {}
+    filter {}

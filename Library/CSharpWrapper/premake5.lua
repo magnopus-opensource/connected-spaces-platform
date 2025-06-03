@@ -48,8 +48,8 @@ if not WrapperGenerator then
             "Microsoft.CSharp"
         }
 
-        configuration "*Debug*"
+        filter "configurations:*Debug*"
             defines { "TRACE", "DEBUG" }
-        configuration {} 
+        filter {}
     end
 end
