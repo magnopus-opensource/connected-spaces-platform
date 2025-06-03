@@ -95,7 +95,7 @@ public:
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     /// @pre Entity creation callback is non null. This can be set via SetEntityCreatedCallback.
     CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-        csp::multiplayer::AvatarState State, const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
+        const csp::multiplayer::AvatarState& State, const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode,
         csp::multiplayer::EntityCreatedCallback Callback)
         = 0;
 
