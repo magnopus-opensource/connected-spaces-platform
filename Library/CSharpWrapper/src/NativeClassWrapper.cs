@@ -45,7 +45,7 @@ namespace Csp
 
         internal virtual string _safeTypeName { get; }
 
-        [Deprecated("NativeClassWrapper instances are now guaranteed to be valid")]
+        [Obsolete("NativeClassWrapper instances are now guaranteed to be valid")]
         public bool PointerIsValid => _ptr != IntPtr.Zero;
 
         public NativeClassWrapper() { }
