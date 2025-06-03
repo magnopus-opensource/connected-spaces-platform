@@ -19,15 +19,13 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/String.h"
 
-CSP_START_IGNORE
 namespace csp::multiplayer
 {
-enum class AvatarPlayMode : int;
-enum class AvatarState : int;
+enum class AvatarPlayMode;
+enum class AvatarState;
 class SpaceTransform;
 class SpaceEntity;
 }
-CSP_END_IGNORE
 
 namespace csp::multiplayer
 {
