@@ -26,7 +26,6 @@ enum class AvatarPlayMode : int;
 enum class AvatarState : int;
 class SpaceTransform;
 class SpaceEntity;
-class EventBus;
 }
 CSP_END_IGNORE
 
