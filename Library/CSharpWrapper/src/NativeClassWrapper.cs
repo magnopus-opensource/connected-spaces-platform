@@ -45,12 +45,18 @@ namespace Csp
 
         internal virtual string _safeTypeName { get; }
 
+        [Obsolete("NativeClassWrapper instances are now guaranteed to be valid")]
         public bool PointerIsValid => _ptr != IntPtr.Zero;
 
         public NativeClassWrapper() { }
 
         internal NativeClassWrapper(NativePointer ptr)
         {
+            if (ptr.Pointer == IntPtr.Zero)
+            {
+                throw new ArgumentException("NativePointer cannot be zero.", nameof(ptr));
+            }
+
             _ptr = ptr.Pointer;
             _ownsPtr = ptr.OwnsOwnData;
         }
