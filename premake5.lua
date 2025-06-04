@@ -12,7 +12,7 @@ include "Library/premake5.lua"
 --Custom build options
 newoption {
     trigger     = "generate_wasm",
-    description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
+    description = "Generate the project for building WebAssembly. This option should only be used with the gmake action"
 }
 
 newoption {

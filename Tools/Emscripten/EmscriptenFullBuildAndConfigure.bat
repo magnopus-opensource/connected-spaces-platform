@@ -45,10 +45,10 @@ if /i "%~2"=="withNode" set "WITH_NODE=1"
 
 if "%WITH_NODE%"=="1" (
     echo Building with Node.js support
-    "modules/premake/bin/release/premake5" gmake2 --generate_wasm --wasm_with_node
+    "modules/premake/bin/release/premake5" gmake --generate_wasm --wasm_with_node
 ) else (
     echo Building without Node.js support
-    "modules/premake/bin/release/premake5" gmake2 --generate_wasm
+    "modules/premake/bin/release/premake5" gmake --generate_wasm
 )
 goto Wasm
 

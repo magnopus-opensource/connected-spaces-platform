@@ -180,7 +180,7 @@ if not CSP then
     end
 
     function CSP.IsWebAssemblyGeneration()
-        if(_OPTIONS["generate_wasm"] ~= nil and _ACTION ~= "gmake2") then
+        if(_OPTIONS["generate_wasm"] ~= nil and _ACTION ~= "gmake") then
             error("Unsupported project generation with the combination of action: " .. _ACTION .. " and option --generate_wasm. Please check the --generate_wasm option help.")
         end 
 
