@@ -93,7 +93,6 @@ public:
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    /// @pre Entity creation callback is non null. This can be set via SetEntityCreatedCallback.
     CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
         const csp::multiplayer::AvatarState& State, const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode,
         csp::multiplayer::EntityCreatedCallback Callback)
@@ -104,7 +103,6 @@ public:
     /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    /// @pre Entity creation callback is non null. This can be set via SetEntityCreatedCallback.
     CSP_ASYNC_RESULT virtual void CreateEntity(
         const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform, csp::multiplayer::EntityCreatedCallback Callback)
         = 0;
@@ -117,7 +115,6 @@ public:
     /// @brief Sets a callback to be executed when an entity is fully created.
     ///
     /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    /// This must be set prior to creating an Entity.
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
     CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) = 0;
