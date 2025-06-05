@@ -21,7 +21,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Systems/Assets/Asset.h"
 
 #include <atomic>
 #include <functional>
