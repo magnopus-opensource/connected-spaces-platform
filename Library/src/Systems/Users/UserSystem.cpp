@@ -31,7 +31,7 @@
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
 
-#include <CallHelpers.h>
+#include <Common/CallHelpers.h>
 
 namespace chs_user = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;

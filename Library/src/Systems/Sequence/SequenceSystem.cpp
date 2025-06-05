@@ -17,7 +17,7 @@
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CallHelpers.h"
+#include "Common/CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
 #include "Multiplayer/EventSerialisation.h"

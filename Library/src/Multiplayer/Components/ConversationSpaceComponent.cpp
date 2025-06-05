@@ -16,7 +16,7 @@
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 
-#include "CallHelpers.h"
+#include "Common/CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
