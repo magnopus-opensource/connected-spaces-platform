@@ -256,7 +256,7 @@
 {{/ delegates }}
 
 {{# has_events }}
-        readonly List<GCHandle> eventHandles = new List<GCHandle>();
+        readonly System.Collections.Generic.List<GCHandle> eventHandles = new System.Collections.Generic.List<GCHandle>();
 
 {{# events }}
         {{> Class/Event }}
