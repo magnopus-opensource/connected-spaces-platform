@@ -24,15 +24,6 @@
 
 #include <unordered_set>
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::multiplayer
 {
 class ConversationSpaceComponent;
@@ -55,7 +46,6 @@ public:
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
-    friend void csp::memory::Delete<ConversationSystemInternal>(ConversationSystemInternal* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 

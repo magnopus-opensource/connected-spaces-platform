@@ -63,15 +63,6 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 
@@ -83,7 +74,6 @@ class CSP_API SystemsManager
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::CSPFoundation;
     friend class csp::multiplayer::ConversationSpaceComponent;
-    friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 

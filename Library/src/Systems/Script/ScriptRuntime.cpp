@@ -18,8 +18,6 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 #include "Systems/Script/ScriptContext.h"
 #include "quickjspp.hpp"
 
@@ -47,19 +45,19 @@ inline std::optional<std::string> ReadScriptModuleFile(std::filesystem::path con
 
 ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
     : TheScriptSystem(InScriptSystem)
-    , Runtime(CSP_NEW qjs::Runtime())
+    , Runtime(new qjs::Runtime())
 {
-    LocalContext = CSP_NEW ScriptContext(TheScriptSystem, Runtime, 0);
+    LocalContext = new ScriptContext(TheScriptSystem, Runtime, 0);
 }
 
 ScriptRuntime::~ScriptRuntime()
 {
     for (auto Context : Contexts)
     {
-        CSP_DELETE(Context.second);
+        delete (Context.second);
     }
 
-    CSP_DELETE(Runtime);
+    delete (Runtime);
 }
 
 bool ScriptRuntime::AddContext(int64_t ContextId)
@@ -68,7 +66,7 @@ bool ScriptRuntime::AddContext(int64_t ContextId)
 
     if (It == Contexts.end())
     {
-        ScriptContext* TheScriptContext = CSP_NEW ScriptContext(TheScriptSystem, Runtime, ContextId);
+        ScriptContext* TheScriptContext = new ScriptContext(TheScriptSystem, Runtime, ContextId);
         Contexts.insert(ContextMap::value_type(ContextId, TheScriptContext));
         return true;
     }
@@ -86,7 +84,7 @@ bool ScriptRuntime::RemoveContext(int64_t ContextId)
 
     if (It != Contexts.end())
     {
-        CSP_DELETE(It->second);
+        delete (It->second);
         Contexts.erase(It);
         return true;
     }

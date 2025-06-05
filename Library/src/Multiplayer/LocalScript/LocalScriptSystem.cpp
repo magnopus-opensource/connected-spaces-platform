@@ -21,8 +21,6 @@
 #include "Debug/Logging.h"
 #include "quickjspp.hpp"
 #include "CSP/Systems/Assets/AssetSystem.h"
-#include "Memory/Memory.h"
-#include "Memory/MemoryManager.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include <functional>
@@ -65,9 +63,9 @@ LocalScriptSystem::~LocalScriptSystem()
 void LocalScriptSystem::Initialize()
 {
     try {
-        Runtime = CSP_NEW qjs::Runtime(); 
-        Context = CSP_NEW qjs::Context(*Runtime);
-        ScriptBinding = CSP_NEW csp::multiplayer::EntityScriptBinding(EntitySystem);
+        Runtime = new qjs::Runtime(); 
+        Context = new qjs::Context(*Runtime);
+        ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
            qjs::Context::Module& CSP_Module = Context->addModule("csp");
         multiplayer::SpaceEntity* entity = EntitySystem->FindSpaceEntity("test");
         CSP_Module.function("log", &EntityScriptLog);

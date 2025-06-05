@@ -23,7 +23,7 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Memory/Memory.h"
+#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -262,7 +262,7 @@ EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem)
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem)
 {
-    EntityScriptBinding* ScriptBinding = CSP_NEW EntityScriptBinding(InEntitySystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem);
     csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
     ScriptSystem->RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
@@ -624,8 +624,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 
     BindInternal(Module);
 
-    Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
     // Always import OKO module into scripts
     std::stringstream ss;
@@ -643,8 +643,8 @@ void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Contex
 {
     BindInternal(Module);
     // This is temporary
-    Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(EntityId));
+    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(EntityId));
 
     // Always import CSP module into scripts
     std::stringstream ss;

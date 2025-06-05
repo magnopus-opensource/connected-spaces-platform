@@ -34,15 +34,6 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 
@@ -56,7 +47,6 @@ class CSP_API UserSystem : public SystemBase
     friend class SystemsManager;
     friend class LoginStateResult;
     friend class csp::web::WebClient;
-    friend void csp::memory::Delete<UserSystem>(UserSystem* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 

@@ -31,15 +31,6 @@ class SystemBase;
 
 } // namespace csp::systems
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace async
 {
 CSP_START_IGNORE
@@ -60,13 +51,6 @@ enum class ErrorCode;
 class CSP_API EventBus
 {
 public:
-    /** @cond DO_NOT_DOCUMENT */
-    friend class csp::systems::SpaceSystem;
-    friend class csp::systems::SystemsManager;
-    friend class MultiplayerConnection;
-    friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
-    /** @endcond */
-
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
     // The callback used to register to listen to events.
@@ -108,11 +92,15 @@ public:
     /// @brief Instructs the event bus to start listening to messages
     void StartEventMessageListening();
 
+    /// @brief EventBus constructor
+    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
+    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection);
+
+    /// @brief EventBus destructor
+    CSP_NO_EXPORT ~EventBus();
+
 private:
     EventBus();
-    ~EventBus();
-
-    EventBus(MultiplayerConnection* InMultiplayerConnection);
 
     class MultiplayerConnection* MultiplayerConnectionInst;
 

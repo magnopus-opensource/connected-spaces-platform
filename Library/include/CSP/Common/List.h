@@ -17,8 +17,8 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Memory/DllAllocator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
@@ -267,12 +267,23 @@ public:
     {
         assert(Index < CurrentSize);
 
-        T* ObjectPtr = &ObjectArray[Index];
-        ObjectPtr->~T();
+        if constexpr (std::is_pointer<T>::value)
+        {
+            // I dont think the list owns any pointers that are in it. That seems weird, because it _will_ destruct value types
+            // To maintain exactly the same behaviour, do the destruct behaviour for pointers. Use regular RAII cleanup for value types below during
+            // the shift.
 
+            // delete ObjectArray[Index]; <-- What we should be doing ... (although actually, we should just have this type backed by std::list)
+            T* ObjectPtr = &ObjectArray[Index];
+            ObjectPtr->~T();
+        }
+
+        // Shift everything left
+        for (size_t i = Index; i < CurrentSize - 1; ++i)
+        {
+            ObjectArray[i] = ObjectArray[i + 1];
+        }
         --CurrentSize;
-        auto Remaining = CurrentSize - Index;
-        std::memmove(ObjectArray + Index, ObjectArray + (Index + 1), sizeof(T) * Remaining);
     }
 
     /// @brief Removes the given element from the list.
@@ -335,33 +346,26 @@ private:
     /// @param Size size_t : Number of elements in the list
     void AllocList(const size_t Size)
     {
-        ObjectArray = (T*)csp::memory::DllAlloc(sizeof(T) * Size);
+        ObjectArray = new T[Size];
         MaximumSize = Size;
     }
 
-    /// @brief Reallocates memory for the list.
-    /// @param Size const size_t : Number of elements in the list
     void ReallocList(const size_t Size)
     {
-        ObjectArray = (T*)csp::memory::DllRealloc(ObjectArray, sizeof(T) * Size);
+        T* NewArray = new T[Size];
+        if (ObjectArray)
+        {
+            std::copy(ObjectArray, ObjectArray + std::min(MaximumSize, Size), NewArray);
+            delete[] ObjectArray;
+        }
+        ObjectArray = NewArray;
         MaximumSize = Size;
     }
 
     /// @brief Frees memory for the list.
     void FreeList()
     {
-        if (ObjectArray == nullptr)
-        {
-            return;
-        }
-
-        for (size_t i = 0; i < CurrentSize; ++i)
-        {
-            T* ObjectPtr = &ObjectArray[i];
-            ObjectPtr->~T();
-        }
-
-        csp::memory::DllFree(ObjectArray);
+        delete[] ObjectArray;
         ObjectArray = nullptr;
         CurrentSize = 0;
         MaximumSize = 0;

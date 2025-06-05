@@ -44,7 +44,7 @@ namespace csp::multiplayer::mcs
 enum class ItemComponentDataType : uint64_t
 {
     BOOL = 0,
-    // NULLABLE_BOOL = 1,
+    NULLABLE_BOOL = 1, // Currently only implemented for NetworkEventManager visibility.
     // BOOL_ARRAY = 2,
     // NULLABLE_BOOL_ARRAY = 3,
     // UINT8 = 4,
@@ -60,7 +60,7 @@ enum class ItemComponentDataType : uint64_t
     // UINT32_ARRAY = 14,
     // NULLABLE_UINT32_ARRAY = 15,
     INT64 = 16,
-    // NULLABLE_INT64 = 17,
+    NULLABLE_INT64 = 17, // Currently only implemented for NetworkEventManager visibility.
     // INT64_ARRAY = 18,
     // NULLABLE_INT64_ARRAY = 19,
     UINT64 = 20,
@@ -70,13 +70,13 @@ enum class ItemComponentDataType : uint64_t
     FLOAT = 24,
     // NULLABLE_FLOAT = 25,
     FLOAT_ARRAY = 26,
-    // NULLABLE_FLOAT_ARRAY = 27,
+    NULLABLE_FLOAT_ARRAY = 27, // Currently only implemented for EntityTransformComponents
     DOUBLE = 28,
-    // NULLABLE_DOUBLE = 29,
+    NULLABLE_DOUBLE = 29, // Currently only implemented for NetworkEventManager visibility.
     // DOUBLE_ARRAY = 30,
     // NULLABLE_DOUBLE_ARRAY = 31,
     STRING = 32,
-    // STRING_ARRAY = 33,
+    STRING_ARRAY = 33, // Currently only implemented for EventSerialisation visibility.
     // DATETIMEOFFSET = 34,
     // NULLABLE_DATETIMEOFFSET = 35,
     // DATETIMEOFFSET_ARRAY = 36,
@@ -94,7 +94,7 @@ enum class ItemComponentDataType : uint64_t
     // INT16_ARRAY = 48,
     // NULLABLE_INT16_ARRAY = 49,
     // UINT16 = 50,
-    // NULLABLE_UINT16 = 51,
+    NULLABLE_UINT16 = 51, // Currently only implemented for NetworkEventManager visibility.
     // UINT16_ARRAY = 52,
     // NULLABLE_UINT16_ARRAY = 53,
     UINT16_DICTIONARY = 54,
@@ -138,8 +138,9 @@ private:
 class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
-    ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistant, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-        const std::map<uint16_t, ItemComponentData>& Components);
+    ObjectMessage() = default;
+    ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
+        const std::map<PropertyKeyType, ItemComponentData>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -149,19 +150,19 @@ public:
     uint64_t GetId() const;
     uint64_t GetType() const;
     bool GetIsTransferable() const;
-    bool GetIsPersistant() const;
+    bool GetIsPersistent() const;
     uint64_t GetOwnerId() const;
     std::optional<uint64_t> GetParentId() const;
-    const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
-    uint64_t Id;
-    uint64_t Type;
-    bool IsTransferable;
-    bool IsPersistant;
-    uint64_t OwnerId;
+    uint64_t Id = 0;
+    uint64_t Type = 0;
+    bool IsTransferable = false;
+    bool IsPersistent = false;
+    uint64_t OwnerId = 0;
     std::optional<uint64_t> ParentId;
-    std::map<PropertyKeyType, ItemComponentData> Components;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 
 /// @brief Represents an MCS object patch.
@@ -170,8 +171,9 @@ private:
 class ObjectPatch : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
+    ObjectPatch() = default;
     ObjectPatch(uint64_t Id, uint64_t OwnerId, bool Destroy, bool ShouldUpdateParent, std::optional<uint64_t> ParentId,
-        const std::map<uint16_t, ItemComponentData>& Components);
+        const std::map<PropertyKeyType, ItemComponentData>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -183,14 +185,14 @@ public:
     bool GetDestroy() const;
     bool GetShouldUpdateParent() const;
     std::optional<uint64_t> GetParentId() const;
-    const std::map<PropertyKeyType, ItemComponentData>& GetComponents() const;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
-    uint64_t Id;
-    uint64_t OwnerId;
-    bool Destroy;
-    bool ShouldUpdateParent;
+    uint64_t Id = 0;
+    uint64_t OwnerId = 0;
+    bool Destroy = false;
+    bool ShouldUpdateParent = false;
     std::optional<uint64_t> ParentId;
-    std::map<PropertyKeyType, ItemComponentData> Components;
+    std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 }

@@ -16,7 +16,6 @@
 #pragma once
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Memory/Memory.h"
 
 #include <string>
 #include <vector>
@@ -112,7 +111,7 @@ std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
             }
         }
 
-        CSP_DELETE(ComponentKeys);
+        delete (ComponentKeys);
     }
 
     return Components;

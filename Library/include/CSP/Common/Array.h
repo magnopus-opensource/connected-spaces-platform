@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <cassert>
 #include <cstring>
@@ -210,29 +209,7 @@ private:
     {
         if (ObjectArray == nullptr)
         {
-#ifndef CSP_DISABLE_OVERFLOW_CHECKING
-#ifdef _MSC_VER // MSVC
-            auto HighBits = __umulh(sizeof(T), Size);
-#else // GCC or Clang
-            auto MultiplyResult = static_cast<__uint128_t>(sizeof(T)) * static_cast<__uint128_t>(Size);
-            auto HighBits = static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
-#endif
-
-            if (HighBits > 0)
-            {
-                throw std::overflow_error("Size");
-            }
-#endif
-
-            auto BufferSize = sizeof(T) * Size;
-            ObjectArray = (T*)csp::memory::DllAlloc(BufferSize);
-
-            for (size_t i = 0; i < Size; ++i)
-            {
-                T* ObjectPtr = &ObjectArray[i];
-                new (ObjectPtr) T;
-            }
-
+            ObjectArray = new T[Size];
             ArraySize = Size;
         }
     }
@@ -240,17 +217,8 @@ private:
     /// @brief Frees memory for the array.
     void FreeArray()
     {
-        if (ObjectArray != nullptr)
-        {
-            for (size_t i = 0; i < ArraySize; ++i)
-            {
-                T* ObjectPtr = &ObjectArray[i];
-                ObjectPtr->~T();
-            }
-
-            csp::memory::DllFree(ObjectArray);
-            ObjectArray = nullptr;
-        }
+        delete[] ObjectArray;
+        ObjectArray = nullptr;
     }
 
     size_t ArraySize;

@@ -45,8 +45,8 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Common/Convert.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
@@ -91,7 +91,7 @@ SpaceEntity::SpaceEntity()
     , Id(0)
     , IsTransferable(true)
     , IsOwnedByLocalClient(false)
-    , IsPersistant(true)
+    , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
     , ShouldUpdateParent(false)
@@ -114,7 +114,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, bool IsLocalOnly)
     , Id(0)
     , IsTransferable(true)
     , IsOwnedByLocalClient(IsLocalOnly)
-    , IsPersistant(true)
+    , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
     , ShouldUpdateParent(false)
@@ -137,7 +137,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , Id(0)
     , IsTransferable(true)
     , IsOwnedByLocalClient(false)
-    , IsPersistant(true)
+    , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
     , ShouldUpdateParent(false)
@@ -154,16 +154,18 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, uint64_t Id, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistant)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
+    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent, bool IsLocal)
     : SpaceEntity(EntitySystem)
 {
     this->Id = Id;
+    this->Type = Type;
     this->Name = Name;
     this->Transform = Transform;
     this->OwnerId = OwnerId;
     this->IsTransferable = IsTransferable;
-    this->IsPersistant = IsPersistant;
+    this->IsPersistent = IsPersistent;
+    this->IsOwnedByLocalClient = IsLocal;
 }
 
 SpaceEntity::~SpaceEntity()
@@ -173,7 +175,7 @@ SpaceEntity::~SpaceEntity()
     size_t i = 0;
     for (i = 0; i < Keys.Size(); ++i)
     {
-        CSP_DELETE(Components[Keys[i]]);
+        delete (Components[Keys[i]]);
     }
 }
 
@@ -320,7 +322,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
     }
 }
 
-bool SpaceEntity::GetIsTransient() const { return !IsPersistant; }
+bool SpaceEntity::GetIsTransient() const { return !IsPersistent; }
 
 const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdPartyRef; }
 
@@ -379,6 +381,8 @@ void SpaceEntity::SetParentId(uint64_t InParentId)
         ShouldUpdateParent = true;
     }
 }
+
+csp::common::Optional<uint64_t> SpaceEntity::GetParentId() { return ParentId; }
 
 void SpaceEntity::RemoveParentEntity()
 {
@@ -463,7 +467,14 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_MSG("Entity is locked. New components can not be added to a locked Entity.");
+
+        return nullptr;
+    }
+
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (AddType == ComponentType::ScriptData)
     {
@@ -474,7 +485,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
             CSP_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
 
             // Return the existing script component
-            return nullptr;
+            return ScriptComponent;
         }
     }
 
@@ -493,7 +504,14 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 
 void SpaceEntity::RemoveComponent(uint16_t Key)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    if (!IsModifiable())
+    {
+        CSP_LOG_ERROR_MSG("Entity is locked. Components can not be removed from a locked Entity.");
+
+        return;
+    }
+
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (!TransientDeletionComponentIds.Contains(Key) || Components.HasKey(Key))
     {
@@ -506,394 +524,18 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
     }
 }
 
-void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
+void SpaceEntity::RemoveChildEntities() { GetParentEntity()->ChildEntities.RemoveItem(this); }
+
+void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
-
-    Serialiser.BeginEntity();
+    if (Index < ChildEntities.Size())
     {
-        /*
-         * class EntityMessagePatch
-         * [0] uint Id
-         * [1] uint OwnerId
-         * [2] bool Destroy
-         * [3] [bool, uint?] ParentId    ((true, id) to set new parent, (true, null) to remove parent, (false, null) to not change parent)
-         * [4] map<uint, vec> Components
-         */
-        Serialiser.WriteUInt64(Id);
-        Serialiser.WriteUInt64(OwnerId);
-        Serialiser.WriteBool(false); // Destroy
-        Serialiser.BeginArray(); // ParentId
-        {
-            Serialiser.WriteBool(ShouldUpdateParent);
-            ParentId.HasValue() ? Serialiser.WriteUInt64(*ParentId) : Serialiser.WriteNull();
-        }
-        Serialiser.EndArray();
-
-        Serialiser.BeginComponents();
-        {
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_ENTITYNAME))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_ENTITYNAME, DirtyProperties[COMPONENT_KEY_VIEW_ENTITYNAME].GetString());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_POSITION))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_POSITION, DirtyProperties[COMPONENT_KEY_VIEW_POSITION].GetVector3());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_ROTATION))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_ROTATION, DirtyProperties[COMPONENT_KEY_VIEW_ROTATION].GetVector4());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_SCALE))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SCALE, DirtyProperties[COMPONENT_KEY_VIEW_SCALE].GetVector3());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_SELECTEDCLIENTID))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID].GetInt());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_THIRDPARTYREF))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYREF].GetString());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYREF].GetInt());
-            }
-            if (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE))
-            {
-                Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE].GetInt());
-            }
-
-            assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
-
-            const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
-
-            size_t i = 0;
-            for (i = 0; i < DirtyComponentKeys.Size(); ++i)
-            {
-                if (DirtyComponents[DirtyComponentKeys[i]].Component != nullptr)
-                {
-                    auto* Component = DirtyComponents[DirtyComponentKeys[i]].Component;
-
-                    SerialiseComponent(Serialiser, Component);
-                }
-                else
-                {
-                    assert(DirtyComponents[DirtyComponentKeys[i]].Component != nullptr && "DirtyComponent given a null component!");
-                }
-            }
-
-            ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
-
-            for (i = 0; i < TransientDeletionComponentIds.Size(); ++i)
-            {
-                DeletionComponent.Id = TransientDeletionComponentIds[i];
-                SerialiseComponent(Serialiser, &DeletionComponent);
-            }
-
-            CSP_DELETE(&DirtyComponentKeys);
-        }
-        Serialiser.EndComponents();
+        ChildEntities[Index]->RemoveParentEntity();
+        ChildEntities[Index]->Parent = nullptr;
     }
-    Serialiser.EndEntity();
 }
 
-void SpaceEntity::Serialise(IEntitySerialiser& Serialiser) const
-{
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
-
-    Serialiser.BeginEntity();
-    {
-        Serialiser.WriteUInt64(Id);
-        Serialiser.WriteUInt64((uint64_t)Type); // PrefabId
-        Serialiser.WriteBool(IsTransferable); // IsTransferable
-        Serialiser.WriteBool(IsPersistant);
-        Serialiser.WriteUInt64(OwnerId);
-        ParentId.HasValue() ? Serialiser.WriteUInt64(*ParentId) : Serialiser.WriteNull(); // ParentId
-
-        Serialiser.BeginComponents();
-        {
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(SelectedId));
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(ThirdPartyPlatform));
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
-            Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE, static_cast<int64_t>(EntityLock));
-
-            assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
-
-            const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
-
-            for (size_t i = 0; i < DirtyComponentKeys.Size(); ++i)
-            {
-                auto* Component = DirtyComponents[DirtyComponentKeys[i]].Component;
-
-                SerialiseComponent(Serialiser, Component);
-            }
-
-            CSP_DELETE(&DirtyComponentKeys);
-        }
-        Serialiser.EndComponents();
-    }
-    Serialiser.EndEntity();
-}
-
-void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
-{
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
-
-    Deserialiser.EnterEntity();
-    {
-        Id = Deserialiser.ReadUInt64();
-        Type = (SpaceEntityType)Deserialiser.ReadUInt64();
-        IsTransferable = Deserialiser.ReadBool();
-        IsPersistant = Deserialiser.ReadBool();
-        OwnerId = Deserialiser.ReadUInt64();
-
-        if (Deserialiser.NextValueIsNull())
-        {
-            ParentId = nullptr;
-            Deserialiser.Skip();
-        }
-        else
-        {
-            ParentId = Deserialiser.ReadUInt64();
-        }
-
-        assert(Id > 0);
-
-        Deserialiser.EnterComponents();
-        {
-            [[maybe_unused]] auto ComponentCount = Deserialiser.GetNumComponents();
-            auto RealComponentCount = Deserialiser.GetNumRealComponents();
-
-            assert(ComponentCount >= 3 && "SpaceObject should have at least 4 components!");
-            // assert(RealComponentCount >= 1 && "SpaceObject should have at least 1 non-view component!");
-
-            uint16_t ComponentId;
-            uint64_t _ComponentType;
-
-            while (RealComponentCount--)
-            {
-                Deserialiser.EnterComponent(ComponentId, _ComponentType);
-                {
-                    auto CompType = (ComponentType)_ComponentType;
-
-                    if (CompType != ComponentType::Invalid)
-                    {
-                        auto* Component = InstantiateComponent(ComponentId, CompType);
-
-                        // if Component == nullptr component has not been instantiated, so is skipped.
-                        if (Component != nullptr)
-                        {
-                            Components[ComponentId] = Component;
-
-                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
-                            {
-                                uint64_t PropertyKey;
-                                auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
-
-                                uint32_t Key = CheckedUInt64ToUint32(PropertyKey);
-                                Component->Properties[Key] = PropertyValue;
-                                Component->OnCreated();
-                            }
-                        }
-                    }
-                }
-                Deserialiser.LeaveComponent();
-            }
-
-            Name = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_ENTITYNAME).GetString();
-            Transform.Position = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_POSITION).GetVector3();
-            Transform.Rotation = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_ROTATION).GetVector4();
-            Transform.Scale = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SCALE).GetVector3();
-
-            const ReplicatedValue SelectedIdValue = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
-
-            if (SelectedIdValue.GetReplicatedValueType() != ReplicatedValueType::InvalidType)
-            {
-                SelectedId = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID).GetInt();
-            }
-
-            // Space entities created with versions of Connected Spaces Platform prior to 3.16 do not have these properties
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM))
-            {
-                auto Value = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM).GetInt();
-                ThirdPartyPlatform = static_cast<csp::systems::EThirdPartyPlatform>(Value);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF))
-            {
-                ThirdPartyRef = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF).GetString();
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
-            {
-                auto Value = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt();
-                EntityLock = static_cast<LockType>(Value);
-            }
-        }
-        Deserialiser.LeaveComponents();
-    }
-    Deserialiser.LeaveEntity();
-}
-
-void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
-{
-    SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
-
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
-
-    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
-
-    if (!Deserialiser.NextValueIsNull()) // It is valid for entities to not have components
-    {
-        Deserialiser.EnterComponents();
-        {
-            auto RealComponentCount = Deserialiser.GetNumRealComponents();
-            ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(RealComponentCount);
-
-            uint16_t ComponentKey;
-            uint64_t _ComponentType;
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_ENTITYNAME))
-            {
-                Name = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_ENTITYNAME).GetString();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_POSITION))
-            {
-                Transform.Position = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_POSITION).GetVector3();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_ROTATION))
-            {
-                Transform.Rotation = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_ROTATION).GetVector4();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_SCALE))
-            {
-                Transform.Scale = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SCALE).GetVector3();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID))
-            {
-                SelectedId = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID).GetInt();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF))
-            {
-                ThirdPartyRef = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF).GetString();
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM))
-            {
-                ThirdPartyPlatform
-                    = static_cast<csp::systems::EThirdPartyPlatform>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM).GetInt());
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-            }
-
-            if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE))
-            {
-                EntityLock = static_cast<LockType>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_LOCKTYPE).GetInt());
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-            }
-
-            if (RealComponentCount > 0)
-            {
-                UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
-
-                while (RealComponentCount--)
-                {
-                    Deserialiser.EnterComponent(ComponentKey, _ComponentType);
-                    {
-                        auto UpdateType = ComponentUpdateType::Update;
-
-                        if (!Components.HasKey(ComponentKey))
-                        {
-                            UpdateType = ComponentUpdateType::Add;
-                        }
-                        else if (Components[ComponentKey]->GetComponentType() != (ComponentType)_ComponentType)
-                        {
-                            UpdateType = ComponentUpdateType::Delete;
-                        }
-
-                        ComponentUpdates[RealComponentCount].ComponentId = ComponentKey;
-                        ComponentUpdates[RealComponentCount].UpdateType = UpdateType;
-
-                        switch (UpdateType)
-                        {
-                        case ComponentUpdateType::Update:
-                        {
-                            auto* Component = Components[ComponentKey];
-
-                            for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
-                            {
-                                uint64_t PropertyKey;
-                                auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
-
-                                uint32_t Key = CheckedUInt64ToUint32(PropertyKey);
-                                Component->SetPropertyFromPatch(Key, PropertyValue);
-                            }
-
-                            break;
-                        }
-                        case ComponentUpdateType::Add:
-                        {
-                            auto* Component = InstantiateComponent(ComponentKey, (ComponentType)_ComponentType);
-                            // if Component != nullptr component has not been Instantiate, so is skipped.
-                            if (Component != nullptr)
-                            {
-                                for (uint64_t i = 0; i < Deserialiser.GetNumProperties(); ++i)
-                                {
-                                    uint64_t PropertyKey;
-                                    auto PropertyValue = Deserialiser.ReadProperty(PropertyKey);
-
-                                    uint32_t Key = CheckedUInt64ToUint32(PropertyKey);
-                                    Component->SetPropertyFromPatch(Key, PropertyValue);
-                                }
-
-                                Components[ComponentKey] = Component;
-                                Component->OnCreated();
-                            }
-                            break;
-                        }
-                        case ComponentUpdateType::Delete:
-                            DestroyComponent(ComponentKey);
-                            break;
-                        default:
-                            assert(false && "Unknown component update type!");
-                            break;
-                        }
-                    }
-                    Deserialiser.LeaveComponent();
-                }
-            }
-        }
-        Deserialiser.LeaveComponents();
-    }
-
-    if (ShouldUpdateParent)
-    {
-        EntitySystem->ResolveEntityHierarchy(this);
-        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
-        ShouldUpdateParent = false;
-    }
-
-    if (UpdateFlags != 0 && EntityUpdateCallback != nullptr)
-    {
-        EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
-    }
-}
+void SpaceEntity::RemoveParentId() { ParentId = nullptr; }
 
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
@@ -901,7 +543,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
     if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
     {
         std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
-        std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+        std::scoped_lock ComponentsLocker(ComponentsLock);
 
         auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
@@ -962,7 +604,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             DirtyComponents.Clear();
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
 
         if (DirtyProperties.Size() > 0)
         {
@@ -1011,7 +653,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             DirtyProperties.Clear();
-            CSP_DELETE(DirtyViewKeys);
+            delete (DirtyViewKeys);
         }
 
         if (TransientDeletionComponentIds.Size() > 0)
@@ -1036,7 +678,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
             }
 
             TransientDeletionComponentIds.Clear();
-            CSP_DELETE(DirtyComponentKeys);
+            delete (DirtyComponentKeys);
         }
 
         if (ShouldUpdateParent)
@@ -1052,6 +694,35 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
         }
     }
 }
+
+SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return EntityUpdateCallback; }
+
+void SpaceEntity::SetEntityUpdateCallbackParams(SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& Info)
+{
+    EntityUpdateCallback(Entity, Flags, Info);
+}
+
+SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return EntityDestroyCallback; }
+
+void SpaceEntity::SetEntityDestroyCallbackParams(bool Boolean) { EntityDestroyCallback(Boolean); }
+
+SpaceEntity::CallbackHandler SpaceEntity::GetEntityPatchSentCallback() { return EntityPatchSentCallback; }
+
+void SpaceEntity::SetEntityPatchSentCallbackParams(bool Boolean) { EntityPatchSentCallback(Boolean); }
+
+csp::common::Map<uint16_t, SpaceEntity::DirtyComponent> SpaceEntity::GetDirtyComponents() { return DirtyComponents; }
+
+csp::common::Map<uint16_t, csp::multiplayer::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
+
+csp::common::List<uint16_t> SpaceEntity::GetTransientDeletionComponentIds() { return TransientDeletionComponentIds; }
+
+bool SpaceEntity::GetShouldUpdateParent() { return ShouldUpdateParent; }
+
+void SpaceEntity::SetShouldUpdateParent(const bool Boolean) { ShouldUpdateParent = Boolean; }
+
+SpaceEntity* SpaceEntity::GetParent() { return Parent; }
+
+void SpaceEntity::SetParent(SpaceEntity* InParent) { Parent = InParent; }
 
 uint16_t SpaceEntity::GenerateComponentId()
 {
@@ -1082,76 +753,76 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = CSP_NEW StaticModelSpaceComponent(this);
+        Component = new StaticModelSpaceComponent(this);
         break;
     case ComponentType::AnimatedModel:
-        Component = CSP_NEW AnimatedModelSpaceComponent(this);
+        Component = new AnimatedModelSpaceComponent(this);
         break;
     case ComponentType::VideoPlayer:
-        Component = CSP_NEW VideoPlayerSpaceComponent(this);
+        Component = new VideoPlayerSpaceComponent(this);
         break;
     case ComponentType::Image:
-        Component = CSP_NEW ImageSpaceComponent(this);
+        Component = new ImageSpaceComponent(this);
         break;
     case ComponentType::ExternalLink:
-        Component = CSP_NEW ExternalLinkSpaceComponent(this);
+        Component = new ExternalLinkSpaceComponent(this);
         break;
     case ComponentType::AvatarData:
-        Component = CSP_NEW AvatarSpaceComponent(this);
+        Component = new AvatarSpaceComponent(this);
         break;
     case ComponentType::Light:
-        Component = CSP_NEW LightSpaceComponent(this);
+        Component = new LightSpaceComponent(this);
         break;
     case ComponentType::ScriptData:
-        Component = CSP_NEW ScriptSpaceComponent(this);
+        Component = new ScriptSpaceComponent(this);
         break;
     case ComponentType::LocalScript:
-        Component = CSP_NEW LocalScriptSpaceComponent(this);
+        Component = new LocalScriptSpaceComponent(this);
         break;
     case ComponentType::Button:
-        Component = CSP_NEW ButtonSpaceComponent(this);
+        Component = new ButtonSpaceComponent(this);
         break;
     case ComponentType::Custom:
-        Component = CSP_NEW CustomSpaceComponent(this);
+        Component = new CustomSpaceComponent(this);
         break;
     case ComponentType::Portal:
-        Component = CSP_NEW PortalSpaceComponent(this);
+        Component = new PortalSpaceComponent(this);
         break;
     case ComponentType::Conversation:
-        Component = CSP_NEW ConversationSpaceComponent(this);
+        Component = new ConversationSpaceComponent(this);
         break;
     case ComponentType::Audio:
-        Component = CSP_NEW AudioSpaceComponent(this);
+        Component = new AudioSpaceComponent(this);
         break;
     case ComponentType::Spline:
-        Component = CSP_NEW SplineSpaceComponent(this);
+        Component = new SplineSpaceComponent(this);
         break;
     case ComponentType::Collision:
-        Component = CSP_NEW CollisionSpaceComponent(this);
+        Component = new CollisionSpaceComponent(this);
         break;
     case ComponentType::Reflection:
-        Component = CSP_NEW ReflectionSpaceComponent(this);
+        Component = new ReflectionSpaceComponent(this);
         break;
     case ComponentType::Fog:
-        Component = CSP_NEW FogSpaceComponent(this);
+        Component = new FogSpaceComponent(this);
         break;
     case ComponentType::ECommerce:
-        Component = CSP_NEW ECommerceSpaceComponent(this);
+        Component = new ECommerceSpaceComponent(this);
         break;
     case ComponentType::CinematicCamera:
-        Component = CSP_NEW CinematicCameraSpaceComponent(this);
+        Component = new CinematicCameraSpaceComponent(this);
         break;
     case ComponentType::FiducialMarker:
-        Component = CSP_NEW FiducialMarkerSpaceComponent(this);
+        Component = new FiducialMarkerSpaceComponent(this);
         break;
     case ComponentType::GaussianSplat:
-        Component = CSP_NEW GaussianSplatSpaceComponent(this);
+        Component = new GaussianSplatSpaceComponent(this);
         break;
     case ComponentType::Text:
-        Component = CSP_NEW TextSpaceComponent(this);
+        Component = new TextSpaceComponent(this);
         break;
     case ComponentType::Hotspot:
-        Component = CSP_NEW HotspotSpaceComponent(this);
+        Component = new HotspotSpaceComponent(this);
         break;
     default:
     {
@@ -1166,27 +837,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
     return Component;
 }
 
-void SpaceEntity::SerialiseComponent(IEntitySerialiser& Serialiser, ComponentBase* Component) const
-{
-    Serialiser.BeginComponent(Component->Id, (uint64_t)Component->Type);
-    {
-        auto& Properties = Component->Properties;
-        const auto& Keys = Properties.Keys();
-
-        for (size_t j = 0; j < Keys->Size(); ++j)
-        {
-            auto& Key = Keys->operator[](j);
-            auto& Property = Properties[Key];
-
-            Serialiser.WriteProperty(Key, Property);
-        }
-    }
-    Serialiser.EndComponent();
-}
-
 void SpaceEntity::AddDirtyComponent(ComponentBase* Component)
 {
-    std::scoped_lock<std::mutex> ComponentsLocker(ComponentsLock);
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
     if (DirtyComponents.HasKey(Component->GetId()))
     {
@@ -1309,6 +962,12 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, ui
     return false;
 }
 
+std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return TimeOfLastPatch; }
+
+void SpaceEntity::SetTimeOfLastPatch(std::chrono::milliseconds NewTime) { TimeOfLastPatch = NewTime; }
+
+void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
+
 void SpaceEntity::DestroyComponent(uint16_t Key)
 {
     if (Components.HasKey(Key))
@@ -1338,7 +997,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
         }
     }
 
-    CSP_DELETE(ComponentKeys);
+    delete (ComponentKeys);
 
     if (LocatedComponent == nullptr && SearchDirtyComponents)
     {
@@ -1355,13 +1014,13 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType, boo
             }
         }
 
-        CSP_DELETE(DirtyComponentKeys);
+        delete (DirtyComponentKeys);
     }
 
     return LocatedComponent;
 }
 
-void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
+void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
 
 void SpaceEntity::ResolveParentChildRelationship()
 {
@@ -1381,7 +1040,7 @@ void SpaceEntity::ResolveParentChildRelationship()
         {
             // Parent may not have been added yet
             // so check pending entities
-            for (const auto& PendingParent : *EntitySystem->PendingAdds)
+            for (const auto& PendingParent : *EntitySystem->GetPendingAdds())
             {
                 if (PendingParent->Id == *ParentId)
                 {
@@ -1414,154 +1073,321 @@ void SpaceEntity::ResolveParentChildRelationship()
 
 mcs::ObjectMessage SpaceEntity::CreateObjectMessage()
 {
-    // First convert all of our view components to mcs compatible types.
-    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+    // 1. Convert all of our view components to mcs compatible types.
+    MCSComponentPacker ComponentPacker;
 
-    ComponentData[COMPONENT_KEY_VIEW_ENTITYNAME] = { std::string { GetName().c_str() } };
-    ComponentData[COMPONENT_KEY_VIEW_POSITION] = { std::vector<float> { GetPosition().X, GetPosition().Y, GetPosition().Z } };
-    ComponentData[COMPONENT_KEY_VIEW_ROTATION] = { std::vector<float> { GetRotation().X, GetRotation().Y, GetRotation().Z, GetRotation().W } };
-    ComponentData[COMPONENT_KEY_VIEW_SCALE] = { std::vector<float> { GetScale().X, GetScale().Y, GetScale().Z } };
-    ComponentData[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = { static_cast<int64_t>(GetSelectingClientID()) };
-    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYREF] = { std::string { GetThirdPartyRef() } };
-    ComponentData[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = { static_cast<int64_t>(GetThirdPartyPlatformType()) };
-    ComponentData[COMPONENT_KEY_VIEW_LOCKTYPE] = { static_cast<int64_t>(EntityLock) };
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ENTITYNAME, GetName());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_POSITION, GetPosition());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ROTATION, GetRotation());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SCALE, GetScale());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, GetSelectingClientID());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, GetThirdPartyPlatformType());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef());
+    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
 
-    // Next convert all of our runtime components to mcs compatible types.
-    auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+    std::scoped_lock ComponentsLocker(ComponentsLock);
 
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    // 2. Convert all of our runtime components to mcs compatible types.
+    std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
+
+    // Loop through all components and convert to ItemComponentData.
+    for (uint16_t Key : *Keys)
     {
-        if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+        assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
+
+        if (DirtyComponents[Key].Component != nullptr)
         {
-            auto* Component = DirtyComponents[(*Keys)[i]].Component;
-            ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
-        }
-        else
-        {
-            assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+            auto* Component = DirtyComponents[Key].Component;
+            ComponentPacker.WriteValue(Key, Component);
         }
     }
 
-    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistant, OwnerId, Convert(ParentId), ComponentData };
+    // 3. Create the object message using the reqired properties and our created components.
+    return mcs::ObjectMessage { Id, static_cast<uint64_t>(Type), IsTransferable, IsPersistent, OwnerId, Convert(ParentId),
+        ComponentPacker.GetComponents() };
 }
 
 mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
 {
-    std::map<uint16_t, mcs::ItemComponentData> ComponentData;
+    MCSComponentPacker ComponentPacker;
 
-    // First convert our modified view components to mcs compatible types.
+    // 1. Convert our modified view components to mcs compatible types.
     {
-        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()), Deleter);
+        // Get dirty property keys.
+        std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyProperties.Keys()));
 
-        for (size_t i = 0; i < Keys->Size(); ++i)
+        // Loop through modfied view components and convert to ItemComponentData.
+        for (uint16_t Key : *Keys)
         {
-            ComponentData[(*Keys)[i]] = CreateItemComponentData(DirtyProperties[(*Keys)[i]]);
+            ComponentPacker.WriteValue(Key, DirtyProperties[Key]);
         }
     }
 
-    // Next convert all of our runtime components to mcs compatible types.
+    // 2. Convert all of our runtime components to mcs compatible types.
     {
-        auto Deleter = [](const common::Array<uint16_t>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<uint16_t>, decltype(Deleter)> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()), Deleter);
+        std::scoped_lock ComponentsLocker(ComponentsLock);
 
-        for (size_t i = 0; i < Keys->Size(); ++i)
+        // Get component keys.
+        std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(DirtyComponents.Keys()));
+
+        // Loop through all components and convert to ItemComponentData.
+        for (uint16_t Key : *Keys)
         {
-            if (DirtyComponents[(*Keys)[i]].Component != nullptr)
+            assert(DirtyComponents[Key].Component != nullptr && "DirtyComponent given a null component!");
+
+            if (DirtyComponents[Key].Component != nullptr)
             {
-                auto* Component = DirtyComponents[(*Keys)[i]].Component;
-                ComponentData[(*Keys)[i]] = CreateItemComponentData(Component);
-            }
-            else
-            {
-                assert(DirtyComponents[(*Keys)[i]].Component != nullptr && "DirtyComponent given a null component!");
+                auto* Component = DirtyComponents[Key].Component;
+                ComponentPacker.WriteValue(Key, Component);
             }
         }
     }
 
-    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentData };
+    // 3. Handle any component deletions
+    ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
+
+    for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
+    {
+        DeletionComponent.Id = TransientDeletionComponentIds[i];
+        ComponentPacker.WriteValue(DeletionComponent.Id, &DeletionComponent);
+    }
+
+    // 4. Create the object patch using the required properties and our created components.
+    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentPacker.GetComponents() };
 }
 
-csp::multiplayer::mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ComponentBase* Component)
+void SpaceEntity::FromObjectMessage(const mcs::ObjectMessage& Message)
 {
-    std::map<uint16_t, mcs::ItemComponentData> ComponentProperties;
+    Id = Message.GetId();
+    Type = static_cast<SpaceEntityType>(Message.GetType());
+    IsTransferable = Message.GetIsTransferable();
+    IsPersistent = Message.GetIsPersistent();
+    OwnerId = Message.GetOwnerId();
+    ParentId = common::Convert(Message.GetParentId());
 
-    // Manually write the component type, as this isnt stored in the component properties.
-    // This is currently the ONLY value that uses a uint64 types as a key for some reason. The rest use int64.
-    ComponentProperties[COMPONENT_KEY_COMPONENTTYPE] = { static_cast<uint64_t>(Component->GetComponentType()) };
+    auto MessageComponents = Message.GetComponents();
 
-    // Our current component keys are stores as uint32s when they should really be stored as uint16, as this is what we support.
-    auto Deleter = [](const common::Array<uint32_t>* Ptr) { CSP_DELETE(Ptr); };
-    std::unique_ptr<common::Array<uint32_t>, decltype(Deleter)> Keys(
-        const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()), Deleter);
-
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    if (MessageComponents.has_value())
     {
-        ComponentProperties[static_cast<uint16_t>((*Keys)[i])]
-            = CreateItemComponentData((*Component->GetProperties())[static_cast<uint32_t>((*Keys)[i])]);
-    }
+        // Get view components
+        MCSComponentUnpacker ComponentUnpacker { *Message.GetComponents() };
 
-    return mcs::ItemComponentData { ComponentProperties };
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
+        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
+
+        for (const auto& ComponentDataPair : *MessageComponents)
+        {
+            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+            {
+                // This is the end of our components
+                break;
+            }
+
+            ComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
+        }
+    }
 }
 
-// TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,
-// as we can create compile-time checking by using std::visit and function overloads.
-// This will prevent us forgetting to update this when we add new types.
-// https://magnopus.atlassian.net/browse/OF-1511
-mcs::ItemComponentData SpaceEntity::CreateItemComponentData(const ReplicatedValue& Value)
+void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
 {
-    if (Value.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-    {
-        return mcs::ItemComponentData { Value.GetBool() };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Integer)
-    {
-        return mcs::ItemComponentData { Value.GetInt() };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Float)
-    {
-        return mcs::ItemComponentData { Value.GetFloat() };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::String)
-    {
-        return mcs::ItemComponentData { std::string { Value.GetString().c_str() } };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-    {
-        common::Vector3 Vec = Value.GetVector3();
-        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z } };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-    {
-        common::Vector4 Vec = Value.GetVector4();
-        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y, Vec.Z, Vec.W } };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector2)
-    {
-        common::Vector2 Vec = Value.GetVector2();
-        return mcs::ItemComponentData { std::vector<float> { Vec.X, Vec.Y } };
-    }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::StringMap)
-    {
-        std::map<std::string, mcs::ItemComponentData> Map;
+    OwnerId = Patch.GetOwnerId();
+    ShouldUpdateParent = Patch.GetShouldUpdateParent();
+    ParentId = common::Convert(Patch.GetParentId());
 
-        auto ReplicatedMap = Value.GetStringMap();
-        auto Deleter = [](const common::Array<csp::common::String>* Ptr) { CSP_DELETE(Ptr); };
-        std::unique_ptr<common::Array<csp::common::String>, decltype(Deleter)> Keys(
-            const_cast<common::Array<csp::common::String>*>(ReplicatedMap.Keys()), Deleter);
+    SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
+    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
-        for (auto Key : (*Keys))
+    auto PatchComponents = Patch.GetComponents();
+
+    if (PatchComponents.has_value())
+    {
+        MCSComponentUnpacker ComponentUnpacker { *Patch.GetComponents() };
+
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name))
         {
-            Map[Key.c_str()] = CreateItemComponentData(ReplicatedMap[Key]);
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
+        }
+        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock))
+        {
+            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
         }
 
-        return mcs::ItemComponentData { Map };
+        uint64_t ComponentCount = ComponentUnpacker.GetRuntimeComponentsCount();
+
+        if (ComponentCount > 0)
+        {
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+
+            ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
+            size_t ComponentIndex = 0;
+
+            for (const auto& ComponentDataPair : *PatchComponents)
+            {
+                if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+                {
+                    // This is the end of our components
+                    break;
+                }
+
+                ComponentUpdateInfo UpdateInfo = ComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
+                ComponentUpdates[ComponentIndex] = UpdateInfo;
+                ComponentIndex++;
+            }
+        }
     }
-    else
+
+    if (ShouldUpdateParent)
     {
-        throw std::runtime_error("Invalid ReplicatedValue property");
+        EntitySystem->ResolveEntityHierarchy(this);
+        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+        ShouldUpdateParent = false;
     }
+
+    if (UpdateFlags != 0 && EntityUpdateCallback != nullptr)
+    {
+        EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
+    }
+}
+
+void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
+{
+    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
+    ComponentType MessageComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+
+    if (MessageComponentType != ComponentType::Invalid)
+    {
+        auto* Component = InstantiateComponent(ComponentId, MessageComponentType);
+
+        // if Component == nullptr component has not been instantiated, so is skipped.
+        if (Component != nullptr)
+        {
+            for (const auto& PatchComponentPair : ComponentDataMap)
+            {
+                if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+                {
+                    // We don't store the type inside our component properties
+                    continue;
+                }
+
+                ReplicatedValue Property;
+                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+
+                Component->Properties[PatchComponentPair.first] = Property;
+                Component->OnCreated();
+            }
+            std::scoped_lock ComponentsLocker(ComponentsLock);
+            Components[ComponentId] = Component;
+        }
+    }
+}
+
+ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
+{
+    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
+    ComponentType PatchComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
+
+    auto UpdateType = ComponentUpdateType::Update;
+
+    if (!Components.HasKey(ComponentId))
+    {
+        UpdateType = ComponentUpdateType::Add;
+    }
+    else if (Components[ComponentId]->GetComponentType() != PatchComponentType)
+    {
+        UpdateType = ComponentUpdateType::Delete;
+    }
+
+    std::scoped_lock ComponentsLocker(ComponentsLock);
+
+    switch (UpdateType)
+    {
+    case ComponentUpdateType::Update:
+    {
+        auto* Component = Components[ComponentId];
+
+        for (const auto& PatchComponentPair : ComponentDataMap)
+        {
+            if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+            {
+                // We don't store the type inside our component properties
+                continue;
+            }
+
+            ReplicatedValue Property;
+            MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+
+            Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
+        }
+
+        break;
+    }
+    case ComponentUpdateType::Add:
+    {
+        auto* Component = InstantiateComponent(ComponentId, PatchComponentType);
+        // if Component != nullptr component has not been Instantiate, so is skipped.
+        if (Component != nullptr)
+        {
+            for (const auto& PatchComponentPair : ComponentDataMap)
+            {
+                if (PatchComponentPair.first == COMPONENT_KEY_COMPONENTTYPE)
+                {
+                    // We don't store the type inside our component properties
+                    continue;
+                }
+
+                ReplicatedValue Property;
+                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+
+                Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
+            }
+
+            Components[ComponentId] = Component;
+            Component->OnCreated();
+        }
+        break;
+    }
+    case ComponentUpdateType::Delete:
+        DestroyComponent(ComponentId);
+        break;
+    default:
+        assert(false && "Unknown component update type!");
+        break;
+    }
+
+    ComponentUpdateInfo UpdateInfo;
+    UpdateInfo.ComponentId = ComponentId;
+    UpdateInfo.UpdateType = UpdateType;
+    return UpdateInfo;
 }
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }

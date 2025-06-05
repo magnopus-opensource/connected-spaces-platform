@@ -156,7 +156,7 @@ public:
     void SetScale(const oly_common::Vector3& Value);
     /**
      * @brief Get is the SpaceEntity marked as transient?
-     * @return returns !IsPersistant.
+     * @return returns !IsPersistent.
      */
     bool GetIsTransient() const;
     /**
@@ -341,7 +341,7 @@ private:
     SpaceEntityType Type;
     uint64_t Id;
     bool IsTransferable;
-    bool IsPersistant;
+    bool IsPersistent;
     uint64_t OwnerId;
     oly_common::String Name;
     SpaceTransform Transform;

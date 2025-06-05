@@ -19,7 +19,6 @@
 #include "Debug/Logging.h"
 #include "Mocks/SignalRConnectionMock.h"
 #include "TestHelpers.h"
-#include <Memory/Memory.h>
 
 #include "signalrclient/signalr_value.h"
 #include "gtest/gtest.h"
@@ -47,11 +46,6 @@ struct RAIIMockLogger
     ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
 };
 
-struct SignalRConnectionMockDeleter
-{
-    void operator()(SignalRConnectionMock* ptr) const noexcept { CSP_DELETE(ptr); }
-};
-
 }
 
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNewAvatarId)
@@ -59,9 +53,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
@@ -93,7 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
@@ -102,10 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
@@ -137,7 +126,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
@@ -146,10 +135,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
@@ -179,7 +165,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
@@ -188,10 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
@@ -230,7 +213,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
@@ -239,10 +222,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    // SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     using MockEntityCreatedCallback = testing::MockFunction<void(SpaceEntity*)>;
@@ -286,7 +266,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
@@ -298,9 +278,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    auto SignalRMock
-        = std::unique_ptr<SignalRConnectionMock, SignalRConnectionMockDeleter>(CSP_NEW SignalRConnectionMock(), SignalRConnectionMockDeleter {});
+    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
@@ -328,6 +306,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
     SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }

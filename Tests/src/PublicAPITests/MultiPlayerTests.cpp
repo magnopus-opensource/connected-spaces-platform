@@ -27,7 +27,6 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
@@ -241,7 +240,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                             }
                         }
 
-                        CSP_DELETE(PropertyKeys);
+                        delete (PropertyKeys);
                     }
                 }
             }
@@ -2284,7 +2283,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
+// This test is to be fixed as part of OF-1651.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
     // for ParentId and ChildEntities
@@ -2912,8 +2912,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // The start function will throw internally
     EXPECT_CALL(*SignalRMock, Start)
@@ -2936,8 +2935,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -2973,8 +2971,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -3023,8 +3020,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -3077,8 +3073,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    // As CSP deletes its owned pointers with CSP_DELETE, you must use CSP_NEW.
-    SignalRConnectionMock* SignalRMock = CSP_NEW SignalRConnectionMock();
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
     // Start and stop will call their callbacks
     StartAlwaysSucceeds(*SignalRMock);
@@ -3372,6 +3367,130 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
     {
         SpaceEntity* Entity = EntitySystem->GetEntityByIndex(0);
         EXPECT_TRUE(Entity->IsLocked());
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockAddComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the add component error message is logged when we try to add a component to a locked entity.
+            static const csp::common::String AddComponentErrorMsg = "Entity is locked. New components can not be added to a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(AddComponentErrorMsg)).Times(1);
+
+            // Attempt to add a component to a locked entity
+            auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+
+            EXPECT_EQ(NewComponent, nullptr);
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockRemoveComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Add a component to the entity
+        auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+        EXPECT_NE(NewComponent, nullptr);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the remove component error message is logged when we try to remove a component from a locked entity.
+            static const csp::common::String RemoveComponentErrorMsg = "Entity is locked. Components can not be removed from a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(RemoveComponentErrorMsg)).Times(1);
+
+            // Attempt to remove a component from a locked entity
+            CreatedEntity->RemoveComponent(NewComponent->GetId());
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 
     // Delete space

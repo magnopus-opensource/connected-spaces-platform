@@ -236,13 +236,13 @@ Material* InstantiateMaterialOfType(csp::systems::EShaderType ShaderType, const 
     {
     case EShaderType::Standard:
     {
-        GLTFMaterial* NewGLTFMaterial = CSP_NEW GLTFMaterial(Name, AssetCollectionId, AssetId);
+        GLTFMaterial* NewGLTFMaterial = new GLTFMaterial(Name, AssetCollectionId, AssetId);
         NewMaterial = static_cast<Material*>(NewGLTFMaterial);
         break;
     }
     case EShaderType::AlphaVideo:
     {
-        AlphaVideoMaterial* NewAlphaVideoMaterial = CSP_NEW AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
+        AlphaVideoMaterial* NewAlphaVideoMaterial = new AlphaVideoMaterial(Name, AssetCollectionId, AssetId);
         NewMaterial = static_cast<Material*>(NewAlphaVideoMaterial);
         break;
     }
@@ -363,20 +363,20 @@ AssetSystem::AssetSystem()
 AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
     : SystemBase(InWebClient, InEventBus)
 {
-    PrototypeAPI = CSP_NEW chs::PrototypeApi(InWebClient);
-    AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
+    PrototypeAPI = new chs::PrototypeApi(InWebClient);
+    AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
 
-    FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+    FileManager = new web::RemoteFileManager(InWebClient);
 
     RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
 {
-    CSP_DELETE(FileManager);
+    delete (FileManager);
 
-    CSP_DELETE(AssetDetailAPI);
-    CSP_DELETE(PrototypeAPI);
+    delete (AssetDetailAPI);
+    delete (PrototypeAPI);
 
     DeregisterSystemCallback();
 }

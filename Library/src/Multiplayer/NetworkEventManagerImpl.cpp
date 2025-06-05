@@ -19,6 +19,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CallHelpers.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
@@ -76,7 +77,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetBool());
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::NULLABLE_BOOL, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -86,7 +87,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetInt());
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::NULLABLE_INT64, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_INT64), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -96,7 +97,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetFloat());
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::NULLABLE_DOUBLE, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_DOUBLE), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -106,7 +107,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetString().c_str());
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::STRING, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::STRING), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -117,7 +118,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             auto Vector = Arguments[i].GetVector2();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y });
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::FLOAT_ARRAY, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -128,7 +129,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             auto Vector = Arguments[i].GetVector3();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z });
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::FLOAT_ARRAY, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
             Components.insert({ i, Component });
 
             break;
@@ -139,7 +140,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
             auto Vector = Arguments[i].GetVector4();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W });
 
-            std::vector<signalr::value> Component { msgpack_typeids::ItemComponentData::FLOAT_ARRAY, Fields };
+            std::vector<signalr::value> Component { static_cast<uint64_t>(mcs::ItemComponentDataType::FLOAT_ARRAY), Fields };
             Components.insert({ i, Component });
 
             break;

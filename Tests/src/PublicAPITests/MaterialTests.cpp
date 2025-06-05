@@ -19,7 +19,6 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Memory/Memory.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -728,13 +727,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     {
         bool CallbackCalled = false;
 
-        auto CB = [&CallbackCalled, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+        csp::common::String MaterialCollectionId;
+        csp::common::String MaterialId;
+
+        auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::multiplayer::MaterialChangedParams& Params)
         {
-            EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-            EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+            MaterialCollectionId = Params.MaterialCollectionId;
+            MaterialId = Params.MaterialId;
 
             EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
-
             CallbackCalled = true;
         };
 
@@ -746,8 +747,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
 
         WaitForCallback(CallbackCalled);
-
         EXPECT_TRUE(CallbackCalled);
+
+        // Do the check here where we know it exists
+        EXPECT_EQ(MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
+        EXPECT_EQ(MaterialId, CreatedGLTFMaterial->GetMaterialId());
     }
 
     // Update material and listen for event
@@ -835,13 +839,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     // Create material and listen for event
     bool CallbackCalled = false;
 
-    auto CB = [&CallbackCalled, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+    csp::common::String MaterialCollectionId;
+    csp::common::String MaterialId;
+
+    auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::multiplayer::MaterialChangedParams& Params)
     {
-        EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
-        EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
+        MaterialCollectionId = Params.MaterialCollectionId;
+        MaterialId = Params.MaterialId;
 
         EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
-
         CallbackCalled = true;
     };
 
@@ -853,8 +859,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     CreatedGLTFMaterial = static_cast<GLTFMaterial*>(CreatedMaterial);
 
     WaitForCallback(CallbackCalled);
-
     EXPECT_TRUE(CallbackCalled);
+
+    // Do the check here where we know it exists
+    EXPECT_EQ(MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
+    EXPECT_EQ(MaterialId, CreatedGLTFMaterial->GetMaterialId());
 
     // Cleanup
     DeleteSpace(SpaceSystem, Space.Id);

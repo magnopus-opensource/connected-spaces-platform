@@ -17,7 +17,6 @@
 
 #include "CSP/Systems/WebService.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Services/DtoBase/DtoBase.h"
 #include "Web/HttpResponse.h"
 #include "Web/Json.h"
@@ -233,7 +232,7 @@ public:
         async::event_task<ResponseType> InOnResponseEventTask = async::event_task<ResponseType> {})
     {
         // This gets owned by the HttpRequest and gets deleted in it's destructor once the request is complete
-        ResponseHandlerPtr Handler = CSP_NEW ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
+        ResponseHandlerPtr Handler = new ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(
             InCallback, InDepend, InValidResponseCode, std::move(InOnResponseEventTask));
         return Handler;
     }
@@ -248,10 +247,10 @@ public:
 
 template <class DtoType>
 ApiResponse<DtoType>::ApiResponse()
-    : ApiResponseBase(CSP_NEW DtoType())
+    : ApiResponseBase(new DtoType())
 {
 }
 
-template <class DtoType> ApiResponse<DtoType>::~ApiResponse() { CSP_DELETE(Dto); }
+template <class DtoType> ApiResponse<DtoType>::~ApiResponse() { delete (Dto); }
 
 } // namespace csp::services

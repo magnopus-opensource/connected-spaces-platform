@@ -42,24 +42,6 @@ namespace signalr
 class value;
 } // namespace signalr
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
-namespace csp::systems
-{
-
-class SpaceSystem;
-class SystemsManager;
-class SequenceSystem;
-
-} // namespace csp::systems
-
 class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
 class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
 class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
@@ -69,11 +51,9 @@ class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
-
+class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
-class SpaceEntity;
-class SpaceTransform;
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -85,15 +65,6 @@ class CSP_API SpaceEntitySystem
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class csp::systems::SystemsManager;
-    friend class csp::systems::SpaceSystem;
-    friend class MultiplayerConnection;
-    friend class SpaceEntityEventHandler;
-    friend class EntityScript;
-    friend class SpaceEntity;
-    friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
-
-    // Tests
     friend class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
     friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
     friend class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
@@ -248,6 +219,9 @@ public:
     // TODO: OF-1005 This should not be a part of the public API
     void BindNewEntityToScript(SpaceEntity* NewEntity);
 
+    /// @brief Sets the script owner for the given entity to the current client
+    /// @param Entity SpaceEntity : A pointer to the entity
+    void ClaimScriptOwnership(SpaceEntity* Entity) const;
 
     /// @brief Adds the entity to a list of entities to be updated on tick
     /// @param Entity SpaceEntity : A pointer to the entity to be added
@@ -285,6 +259,18 @@ public:
     /// @return True if a selection state change has occurred, false if no change was made (due to one of the above criteria not being met).
     bool SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity);
 
+    void EnableLeaderElection();
+
+    /// @brief Disable Leader Election feature.
+    void DisableLeaderElection();
+
+    /// @brief Check if the Leader Election feature is enabled.
+    /// @return true if enabled, false otherwise.
+    bool IsLeaderElectionEnabled() const;
+
+    /// @brief Debug helper to get the id of the currently elected script leader.
+    /// @return The id of the leader.
+    uint64_t GetLeaderId() const;
 
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
@@ -298,19 +284,62 @@ public:
     /// \rst
     ///.. note::
     ///   If disabling this feature, more requests will be made to Magnopus Connected Services,
-    ///   and consequntly more patch merges may occur on the server as a result.
+    ///   and consequently more patch merges may occur on the server as a result.
     /// \endrst
     void SetEntityPatchRateLimitEnabled(bool Enabled);
 
-    /// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
+    /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
     CSP_NO_EXPORT void FireEntityCreatedEvent(SpaceEntity* Entity);
 
-protected:
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
+    using SpaceEntityQueue = std::deque<SpaceEntity*>;
 
+    /// @brief Checks whether we should run scripts locally
+    /// @return bool
+    CSP_NO_EXPORT bool CheckIfWeShouldRunScriptsLocally() const;
+
+    /// @brief Runs the provided script remotely
+    /// @param ContextId int64_t : the ID of the context on which to run the script
+    /// @param ScriptText csp::common::String& : the text of the script to run
+    CSP_NO_EXPORT void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
+
+    /// @brief Internal version of CreateObject
+    /// @param InName csp::common::String& : the name of the object to create
+    /// @param InParent csp::common::Optional<uint64_t> : the parent of the object, if any
+    /// @param InSpaceTransform SpaceTransform& : the space transform of the object
+    /// @param Callback EntityCreatedCallback : the callback called when the entity is created
+    CSP_NO_EXPORT void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
+        const SpaceTransform& InSpaceTransform, bool IsLocal, EntityCreatedCallback Callback);
+
+    /// @brief Resolve the entity hierarchy
+    /// @param Entity SpaceEntity* : pointer to the entity for which to resolve the hierarchy
+    CSP_NO_EXPORT void ResolveEntityHierarchy(SpaceEntity* Entity);
+
+    /// @brief Initialise the SpaceEntitySystem
+    CSP_NO_EXPORT void Initialise();
+
+    /// @brief Shut down the SpaceEntitySystem
+    CSP_NO_EXPORT void Shutdown();
+
+    /// @brief SpaceEntitySystem constructor
+    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
+
+    /// @brief SpaceEntitySystem destructor
+    CSP_NO_EXPORT ~SpaceEntitySystem();
+
+    /// @brief Getter for the pending adds
+    /// @return: SpaceEntityQueue*
+    CSP_NO_EXPORT SpaceEntityQueue* GetPendingAdds();
+
+    /// @brief Getter for the multiplayer connection instance
+    /// @return: MultiplayerConnection*
+    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
+
+protected:
     SpaceEntityList Entities;
     SpaceEntityList Avatars;
     SpaceEntityList Objects;
@@ -320,13 +349,11 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
-    SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
-    ~SpaceEntitySystem();
+    SpaceEntitySystem(); // needed for the wrapper generator
 
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
 
-    using SpaceEntityQueue = std::deque<SpaceEntity*>;
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
 
@@ -334,13 +361,12 @@ private:
     CallbackHandler InitialEntitiesRetrievedCallback;
     CallbackHandler ScriptSystemReadyCallback;
 
-    void Initialise();
-    void Shutdown();
-
     void BindOnObjectMessage();
     void BindOnObjectPatch();
     void BindOnRequestToSendObject();
     void BindOnRequestToDisconnect() const;
+
+    SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem);
 
     void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
     std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(int Skip);
@@ -356,14 +382,17 @@ private:
     void DetermineScriptOwners();
 
     void ResolveParentChildForDeletion(SpaceEntity* Deletion);
-    void ResolveEntityHierarchy(SpaceEntity* Entity);
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
-    void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
+    void ClaimScriptOwnershipFromClient(uint64_t ClientId);
     void TickEntityScripts();
 
-    void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
-        bool IsLocal, EntityCreatedCallback Callback);
+    void OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
+    void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
+    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
+
+    void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
     // CreateAvatar Continuations
     CSP_START_IGNORE
@@ -377,6 +406,7 @@ private:
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
+    class ClientElectionManager* ElectionManager;
 
     std::mutex* TickEntitiesLock;
 

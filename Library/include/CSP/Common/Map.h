@@ -18,7 +18,6 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <map>
 
@@ -37,34 +36,21 @@ template <typename TKey, typename TValue> class CSP_API Map
 
 public:
     /// @brief Constructs a map with 0 elements.
-    Map()
-    {
-        Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        new (Container) MapType;
-    }
+    Map() { Container = new MapType(); }
 
     /// @brief Copy constructor.
     /// @param Other const Map<TKey, TValue>&
-    Map(const Map<TKey, TValue>& Other)
-    {
-        Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        new (Container) MapType(*Other.Container);
-    }
+    Map(const Map<TKey, TValue>& Other) { Container = new MapType(*Other.Container); }
 
     /// @brief Move constructor.
     /// @param Other Map<TKey, TValue>&&
-    CSP_NO_EXPORT Map(Map<TKey, TValue>&& Other)
-    {
-        Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        new (Container) MapType(*Other.Container);
-    }
+    CSP_NO_EXPORT Map(Map<TKey, TValue>&& Other) { Container = new MapType(std::move(*Other.Container)); }
 
     /// @brief Constructs a map from a `std::initializer_list`.
     /// @param Values const std::initializer_list<std::pair<const TKey, const TValue>> : Elements to construct the map from
     CSP_NO_EXPORT Map(const std::initializer_list<std::pair<const TKey, const TValue>> Values)
     {
-        Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        new (Container) MapType;
+        Container = new MapType();
 
         for (const auto& Pair : Values)
         {
@@ -74,11 +60,7 @@ public:
 
     /// @brief Destructor.
     /// Frees map memory.
-    ~Map()
-    {
-        Container->~MapType();
-        csp::memory::DllFree(Container);
-    }
+    ~Map() { delete Container; }
 
     /// @brief Returns a reference to the element with the given key in this map.
     ///        Will create a new element if the given key is not present.
@@ -106,21 +88,10 @@ public:
     CSP_NO_EXPORT Map<TKey, TValue>& operator=(const Map<TKey, TValue>& Other)
     {
         if (this == &Other)
-        {
             return *this;
-        }
 
-        if (Container)
-        {
-            Container->~MapType();
-        }
-        else
-        {
-            Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        }
-
-        new (Container) MapType(*Other.Container);
-
+        delete Container;
+        Container = new MapType(*Other.Container); // Copy construct
         return *this;
     }
 
@@ -130,21 +101,10 @@ public:
     CSP_NO_EXPORT Map<TKey, TValue>& operator=(Map<TKey, TValue>&& Other)
     {
         if (this == &Other)
-        {
             return *this;
-        }
 
-        if (Container)
-        {
-            Container->~MapType();
-        }
-        else
-        {
-            Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
-        }
-
-        new (Container) MapType(*Other.Container);
-
+        delete Container;
+        Container = new MapType(std::move(*Other.Container)); // Move construct
         return *this;
     }
 
@@ -166,8 +126,7 @@ public:
     /// @return const csp::common::Array<TKey>* : Array of keys
     const Array<TKey>* Keys() const
     {
-        auto Keys = (Array<TKey>*)csp::memory::DllAlloc(sizeof(Array<TKey>));
-        new (Keys) Array<TKey>(Container->size());
+        auto Keys = new Array<TKey>(Container->size());
         int i = 0;
 
         for (const auto& Pair : *Container)
@@ -182,8 +141,7 @@ public:
     /// @return const csp::common::Array<TValue>* : Array of values
     const Array<TValue>* Values() const
     {
-        auto Values = (Array<TValue>*)csp::memory::DllAlloc(sizeof(Array<TValue>));
-        new (Values) Array<TValue>(Container->size());
+        auto Values = new Array<TValue>(Container->size());
         int i = 0;
 
         for (const auto& Pair : *Container)

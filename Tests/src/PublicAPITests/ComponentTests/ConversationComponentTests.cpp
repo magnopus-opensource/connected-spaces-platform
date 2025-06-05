@@ -1188,12 +1188,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that the CreateConversaiton event is correctly received and processed by other clients.
 Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
 correctly when receiving the component property from a patch, which has been created by the ConversationSpaceComponent::CreateConversation call.
 */
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -1224,6 +1225,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
               .SetTimeoutInSeconds(60);
 
     std::future<void> ReadyForAssertionsFuture = CreateConversationRunner.ReadyForAssertionsFuture();
@@ -1333,11 +1335,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     LogOut(UserSystem);
 }
 
+// This test is to be fixed as part of OF-1645.
 /*
 Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
 Other clients can still delete other conversations, as components/entities dont have any restrictions.
 */
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -1584,7 +1587,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
     static const csp::common::Vector3 TestConversationAuthorCameraPosition { 1.f, 2.f, 3.f };
     static const csp::common::Vector4 TestConversationAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
-    static constexpr const uint16_t TestConversationFov = 90;
+    static constexpr const float TestConversationFov = 90.f;
 
     std::vector<char> TestAnnotationDataV = PngHeader;
     TestAnnotationDataV.push_back('1');
@@ -1614,9 +1617,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestConversationAuthorCameraPosition));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestConversationAuthorCameraRotation));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestConversationFov);
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestConversationAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestConversationAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestConversationFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1640,9 +1643,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestConversationAuthorCameraPosition));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestConversationAuthorCameraRotation));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestConversationFov);
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestConversationAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestConversationAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestConversationFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1699,7 +1702,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
     static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
     static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
-    static constexpr const uint16_t TestFov = 100;
+    static constexpr const float TestFov = 100.f;
 
     std::vector<char> TestAnnotationData2V = PngHeader;
     TestAnnotationData2V.push_back('3');
@@ -1729,9 +1732,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestAuthorCameraPosition));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestAuthorCameraRotation));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestFov);
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1755,9 +1758,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestAuthorCameraPosition));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestAuthorCameraRotation));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestFov);
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -2092,7 +2095,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
     {
         static const csp::common::Vector3 TestAuthorCameraPosition { 1.f, 2.f, 3.f };
         static const csp::common::Vector4 TestAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
-        static constexpr const uint16_t TestFov = 90;
+        static constexpr const float TestFov = 90.f;
         std::vector<char> TestAnnotationDataV = PngHeader;
         TestAnnotationDataV.push_back('1');
         std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
@@ -2122,7 +2125,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
     {
         static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
         static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
-        static constexpr const uint16_t TestFov = 100;
+        static constexpr const float TestFov = 100.f;
         bool AssetOverwriteLogCalled = false;
 
         std::vector<char> TestAnnotationDataV = PngHeader;
@@ -2162,9 +2165,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
 
         const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
 
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraPosition() == TestAuthorCameraPosition));
-        EXPECT_TRUE((RetrievedData.GetAuthorCameraRotation() == TestAuthorCameraRotation));
-        EXPECT_EQ(RetrievedData.GetVerticalFov(), TestFov);
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
 
         auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
         EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);

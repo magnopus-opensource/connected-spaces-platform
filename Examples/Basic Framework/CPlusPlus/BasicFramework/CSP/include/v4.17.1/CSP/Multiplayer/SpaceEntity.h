@@ -335,7 +335,7 @@ private:
     SpaceEntityType Type;
     uint64_t Id;
     bool IsTransferable;
-    bool IsPersistant;
+    bool IsPersistent;
     uint64_t OwnerId;
     csp::common::String Name;
     SpaceTransform Transform;

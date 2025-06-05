@@ -3,7 +3,6 @@
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 #define CSP_API
 #define CSP_NO_EXPORT
-#define CSP_NEW new(csp::memory::DefaultAllocator())
 #define CSP_START_IGNORE
 #define CSP_END_IGNORE
 #define CSP_ASYNC_RESULT

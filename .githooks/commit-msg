@@ -3,7 +3,7 @@
 commit_msg="${1}"
 commit_msg_lines=()
 error_msg="[COMMIT FAILED]"
-allowed_subject_verbs=('fix:' 'feat:'  'build:' 'chore:' 'ci:' 'docs:' 'style:' 'refac:' 'perf:' 'test:' 'fix:!' 'feat!:' 'docs!:' 'style!:' 'refac!:' 'test!:')
+allowed_subject_verbs=('fix:' 'feat:'  'build:' 'chore:' 'ci:' 'docs:' 'style:' 'refac:' 'perf:' 'test:' 'fix!:' 'feat!:' 'docs!:' 'style!:' 'refac!:' 'test!:')
 
 # Splits the commit msg into separate lines and adds them to an array
 split_commit_msg() {

@@ -242,11 +242,11 @@ multiplayer::AnnotationData GetAnnotationDataFromMessageAssetCollection(const As
     multiplayer::AnnotationData Data;
     const auto& MetadataMap = MessageAssetCollection.GetMetadataImmutable();
 
-    Data.SetAnnotationId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID]);
-    Data.SetAnnotationThumbnailId(MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID]);
-    Data.SetVerticalFov(static_cast<uint16_t>(std::stoi(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str())));
-    Data.SetAuthorCameraPosition(StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]));
-    Data.SetAuthorCameraRotation(StringToVector4(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION]));
+    Data.AnnotationId = MetadataMap[ASSET_COLLECTION_METADATA_KEY_ANNOTATION_ID];
+    Data.AnnotationThumbnailId = MetadataMap[ASSET_COLLECTION_METADATA_KEY_THUMBNAIL_ID];
+    Data.VerticalFov = std::stod(MetadataMap[ASSET_COLLECTION_METADATA_KEY_VERTICAL_FOV].c_str());
+    Data.AuthorCameraPosition = StringToVector3(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_POSITION]);
+    Data.AuthorCameraRotation = StringToVector4(MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_ROTATION]);
 
     return Data;
 }

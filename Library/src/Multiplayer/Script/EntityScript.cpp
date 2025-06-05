@@ -104,6 +104,8 @@ void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 
 bool EntityScript::HasError() { return HasLastError; }
 
+bool EntityScript::HasEntityScriptComponent() { return EntityScriptComponent != nullptr; }
+
 csp::common::String EntityScript::GetErrorText() { return LastError; }
 
 void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
