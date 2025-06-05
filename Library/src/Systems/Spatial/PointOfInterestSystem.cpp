@@ -18,7 +18,7 @@
 
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
-#include "CallHelpers.h"
+#include "Common/CallHelpers.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
 #include "Systems/ResultHelpers.h"
