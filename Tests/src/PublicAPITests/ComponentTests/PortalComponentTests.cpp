@@ -186,7 +186,9 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     };
 
     PortalComponent->SetSpaceId(Space.Id);
-    PortalComponent->GetSpaceThumbnail(Callback);
+
+    // Get thumbnail using the space id.
+    SpaceSystem->GetSpaceThumbnail(PortalComponent->GetSpaceId(), Callback);
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
