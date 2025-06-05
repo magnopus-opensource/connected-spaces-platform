@@ -1,4 +1,4 @@
-require "vstudio"
+require "android"
 
 local p = premake
 local m = p.vstudio.vc2010
