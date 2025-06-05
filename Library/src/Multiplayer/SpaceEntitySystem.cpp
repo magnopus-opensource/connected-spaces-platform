@@ -563,6 +563,20 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
     SpaceEntityCreatedCallback = std::move(Callback);
 }
 
+void SpaceEntitySystem::FireEntityCreatedEvent(SpaceEntity* Entity)
+{
+    if (Entity == nullptr)
+    {
+        CSP_LOG_ERROR_MSG("Tried to fire entity created event with a null entity!");
+        return;
+    }
+
+    if (SpaceEntityCreatedCallback)
+    {
+        SpaceEntityCreatedCallback(Entity);
+    }
+}
+
 void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Callback)
 {
     if (InitialEntitiesRetrievedCallback)

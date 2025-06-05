@@ -72,13 +72,26 @@ public:
 
     std::vector<ComponentScriptInterface*> GetComponents();
 
+    template <typename ScriptInterface, ComponentType Type> ScriptInterface* CreateComponentOfType();
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
 private:
     SpaceEntity* Entity;
 };
 
-template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
+template <typename ScriptInterface, ComponentType Type>
+ScriptInterface* EntityScriptInterface::CreateComponentOfType()
+{
+    if (Entity)
+    {
+        ComponentBase* Component = Entity->AddComponent(Type);
+        return (ScriptInterface*)Component->GetScriptInterface();
+    }
+    return nullptr;
+}
+
+template <typename ScriptInterface, ComponentType Type>
+std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
 {
     std::vector<ScriptInterface*> Components;
 

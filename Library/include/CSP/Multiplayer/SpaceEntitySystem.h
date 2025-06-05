@@ -306,6 +306,8 @@ public:
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
+    CSP_NO_EXPORT void FireEntityCreatedEvent(SpaceEntity* Entity);
+
 protected:
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
 

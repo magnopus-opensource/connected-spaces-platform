@@ -225,6 +225,18 @@ public:
         return RootHierarchyEntities;
     }
 
+    void CreateEntity(std::string Name)
+    {
+        if (EntitySystem)
+        {
+            EntitySystem->LockEntityUpdate();
+            EntitySystem->CreateObject(Name.c_str(), SpaceTransform(), [this](SpaceEntity* Entity) {
+                EntitySystem->UnlockEntityUpdate();
+                EntitySystem->FireEntityCreatedEvent(Entity);
+            });
+        }
+    }
+
     std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
 
 private:
@@ -535,6 +547,8 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntityScriptInterface::SubscribeToMessage>("subscribeToMessage")
         .fun<&EntityScriptInterface::PostMessageToScript>("postMessage")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
+        .fun<&EntityScriptInterface::CreateComponentOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("createLightComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>>("createStaticModelComponent")
         .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>>(
@@ -588,6 +602,7 @@ void BindInternal(qjs::Context::Module* Module)
     Module->class_<EntitySystemScriptInterface>("EntitySystem")
         .constructor<>()
         .fun<&EntitySystemScriptInterface::GetFoundationVersion>("getFoundationVersion")
+        .fun<&EntitySystemScriptInterface::CreateEntity>("createEntity")
         .fun<&EntitySystemScriptInterface::GetEntities>("getEntities")
         .fun<&EntitySystemScriptInterface::GetObjects>("getObjects")
         .fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
@@ -627,7 +642,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, uint64_t EntityId)
 {
     BindInternal(Module);
-
+    // This is temporary
     Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
     Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(EntityId));
 
