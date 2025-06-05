@@ -9,7 +9,7 @@
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "Multiplayer/EventSerialisation.h"
 
-#include "CallHelpers.h"
+#include "Common/CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Systems/ResultHelpers.h"
 
