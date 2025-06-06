@@ -73,11 +73,9 @@ def get_rel_path(filename: str) -> str:
 
 
 def read_whole_file(filename: str) -> str:
-    file = open(filename, encoding='utf-8-sig')
-    data = file.read()
-    file.close()
-    
-    return data
+    """ Reads the entire content of a file and returns it as a string."""
+    with open(filename, encoding='utf-8-sig') as f:
+        return f.read()
 
 
 def log(message: str, indent_level: int = 0, indent_width: int = 2) -> None:
