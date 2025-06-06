@@ -47,10 +47,13 @@ if not CSP then
 
     function CSP.UseStandardSettings()
         -- Build location
-        if not CSP.IsVisionOSTarget() then
-            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
-        else
+        if CSP.IsVisionOSTarget() then
             targetdir "%{prj.location}/Binaries/visionos/%{cfg.buildcfg}"
+        else
+            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+            filter "system:Android"
+                targetdir "ARM64/'%{cfg.buildcfg} %{cfg.platform}'"
+            filter {}
         end
 
         -- Intermediate C++ files
