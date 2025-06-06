@@ -103,7 +103,6 @@ class WordReader:
         >>> w.next_word()
         'world!'
         >>> w.next_word()
-        None
         """
         if delimiters is None:
             delimiters = self.DEFAULT_DELIMITERS
