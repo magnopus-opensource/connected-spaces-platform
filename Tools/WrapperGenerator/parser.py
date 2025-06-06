@@ -1,3 +1,25 @@
+# Copyright 2025 Magnopus LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+Parse CSP header files and generate metadata for each type and function.
+
+This parser is specifically designed for the Connected Spaces Platform (CSP) codebase.
+Specific assumptions are made about the structure and conventions used in the code.
+Do not expect it to work correctly on all C++ code.
+"""
+
 from __future__ import annotations
 
 import os
@@ -70,11 +92,8 @@ class AccessModifier(Enum):
 
 class Parser:
     """
-        Parses C++ header files and generates metadata that represents each type and function.
-
-        NOTE: This is purpose-written for internal REWIND projects. As such, there are some assumptions made about the consumed code base. Do not expect it to work correctly on all C++ code.
+    Parses C++ header files and generates metadata that represents each type and function.
     """
-
 
     enums: Dict[str, EnumMetadata] = {}
     structs: Dict[str, StructMetadata] = {}
