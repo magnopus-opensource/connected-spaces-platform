@@ -8,7 +8,7 @@ from glob import glob
 from CWrapperGenerator import CWrapperGenerator
 from CSharpWrapperGenerator import CSharpWrapperGenerator
 from TypeScriptWrapperGenerator import TypeScriptWrapperGenerator
-from Parser import Parser
+from parser import Parser
 
 from Config import config
 

@@ -16,7 +16,7 @@ from MetadataTypes import (
     TypeMetadata,
     InterfaceMetadata,
 )
-from Parser import read_whole_file
+from parser import read_whole_file
 from TypeScriptWrapperGenerator_Jinja2 import TypeScriptWrapperGenerator_Jinja2
 
 
