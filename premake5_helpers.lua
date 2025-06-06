@@ -47,10 +47,13 @@ if not CSP then
 
     function CSP.UseStandardSettings()
         -- Build location
-        if not CSP.IsVisionOSTarget() then
-            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
-        else
+        if CSP.IsVisionOSTarget() then
             targetdir "%{prj.location}/Binaries/visionos/%{cfg.buildcfg}"
+        else
+            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+            filter "system:Android"
+                targetdir "ARM64/'%{cfg.buildcfg} %{cfg.platform}'"
+            filter {}
         end
 
         -- Intermediate C++ files
@@ -180,7 +183,7 @@ if not CSP then
     end
 
     function CSP.IsWebAssemblyGeneration()
-        if(_OPTIONS["generate_wasm"] ~= nil and _ACTION ~= "gmake2") then
+        if(_OPTIONS["generate_wasm"] ~= nil and _ACTION ~= "gmake") then
             error("Unsupported project generation with the combination of action: " .. _ACTION .. " and option --generate_wasm. Please check the --generate_wasm option help.")
         end 
 
