@@ -18,7 +18,7 @@ from MetadataTypes import (
     InterfaceMetadata,
     ParameterMetadata,
 )
-from Parser import read_whole_file, error_in_file, warning_in_file
+from parser import read_whole_file, error_in_file, warning_in_file
 
 
 class CSharpWrapperGenerator:

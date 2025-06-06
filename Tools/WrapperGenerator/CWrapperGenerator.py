@@ -10,7 +10,7 @@ import subprocess
 
 from Config import config
 from MetadataTypes import EnumMetadata, StructMetadata, FunctionMetadata, ClassMetadata, TemplateMetadata, InterfaceMetadata
-from Parser import read_whole_file
+from parser import read_whole_file
 
 
 TEMPLATE_DIRECTORY = config['template_directory'] + 'C/'
