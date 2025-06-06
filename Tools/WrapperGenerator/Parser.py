@@ -11,7 +11,7 @@ from typing import Dict, List, Union, Any
 
 from Config import config
 from MetadataTypes import *
-from WordReader import WordReader
+from word_reader import WordReader
 
 
 log_file: TextIOWrapper
