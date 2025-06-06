@@ -8,8 +8,30 @@ class WordReader:
     index: int
     current_line: int = 1
 
-    WHITESPACE_CHARS: List[str] = [' ', '\t', '\r', '\n']
-
+    WHITESPACE_CHARS = set([" ", "\t", "\r", "\n"])
+    DEFAULT_DELIMITERS = set(
+        [
+            " ",
+            "\t",
+            "\n",
+            ":",
+            ";",
+            "{",
+            "}",
+            ",",
+            "<",
+            ">",
+            "(",
+            ")",
+            "=",
+            "#",
+            "~",
+            "*",
+            "&",
+            "[",
+            "]",
+        ]
+    )
 
     def __init__(self, text: str):
         self.text = text
@@ -24,7 +46,10 @@ class WordReader:
             self.index += 1
     
 
-    def next_word(self, delimiters: List[str] = [' ', '\t', '\n', ':', ';', '{', '}', ',', '<', '>', '(', ')', '=', '#', '~', '*', '&', '[', ']'], return_empty: bool = False) -> str:
+    def next_word(self, delimiters: set[str] = None, return_empty: bool = False) -> str:
+        if delimiters is None:
+            delimiters = self.DEFAULT_DELIMITERS
+
         if self.index == len(self.text):
             return None
         
@@ -92,7 +117,7 @@ class WordReader:
         self.skip_whitespace()
     
 
-    def find_next_of(self, chars: List[str]) -> str:
+    def find_next_of(self, chars: set[str]) -> str:
         offset = 0
 
         while self.text[self.index + offset] not in chars:
