@@ -16,6 +16,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -41,7 +42,6 @@
 #include "Web/Uri.h"
 
 #include <algorithm>
-#include <async++.h>
 #include <chrono>
 #include <exception>
 #include <future>

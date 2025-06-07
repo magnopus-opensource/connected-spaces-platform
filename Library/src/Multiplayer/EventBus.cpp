@@ -22,7 +22,7 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 
-#include <async++.h>
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include <limits>
 #include <memory>
 #include <optional>

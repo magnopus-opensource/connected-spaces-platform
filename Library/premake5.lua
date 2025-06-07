@@ -112,7 +112,8 @@ if not Project then
             "POCO_UTIL_NO_JSONCONFIGURATION",
             "POCO_UTIL_NO_XMLCONFIGURATION",
             "POCO_NET_NO_IPv6",
-			"LIBASYNC_STATIC"
+			"LIBASYNC_STATIC",
+            "LIBASYNC_CUSTOM_DEFAULT_SCHEDULER"
         }
 
         filter "platforms:not wasm"

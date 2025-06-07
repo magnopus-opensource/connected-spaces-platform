@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Systems/WebService.h"
 #include "Debug/Logging.h"
 #include "Services/DtoBase/DtoBase.h"
@@ -22,7 +23,6 @@
 #include "Web/Json.h"
 #include "Web/WebClient.h"
 
-#include <async++.h>
 #include <list>
 #include <memory>
 #include <vector>

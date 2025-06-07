@@ -38,7 +38,6 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 
-#include <async++.h>
 #include <exception>
 #include <memory>
 #include <optional>
