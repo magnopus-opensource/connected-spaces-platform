@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-#include "Common/Continuations.h"
+#include "CSP/Multiplayer/ContinuationUtils.h"
+#include "CSP/Systems/ContinuationUtils.h"
 
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Web/HTTPResponseCodes.h"
 #include "Services/ApiBase/ApiBase.h"
+#include "Systems/ResultHelpers.h"
 #include "TestHelpers.h"
 
 #include <gmock/gmock.h>
@@ -69,7 +71,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestReportSuccess)
     // Expect that we log the success message
     EXPECT_CALL(MockLogger.MockLogCallback, Call(SuccessMsg)).Times(1);
 
-    csp::common::continuations::ReportSuccess(MockResultCallback.AsStdFunction(), SuccessMsg.c_str())();
+    csp::systems::continuations::ReportSuccess(MockResultCallback.AsStdFunction(), SuccessMsg.c_str())();
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
@@ -91,7 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
     // This throws a async++::task_cancelled exception, but we don't want to link that lib in the tests, so just expect any exception.
-    ASSERT_ANY_THROW(csp::common::continuations::LogHTTPErrorAndCancelContinuation(
+    ASSERT_ANY_THROW(csp::systems::continuations::LogHTTPErrorAndCancelContinuation(
         MockResultCallback.AsStdFunction(), ErrorMsg.c_str(), ResultCode, HttpResultCode, FailureReason));
 }
 
@@ -110,7 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     EXPECT_CALL(MockLogger.MockLogCallback, Call(SuccessMsg)).Times(1);
 
     NullResult SuccessResult(EResultCode::Success, 200, ERequestFailureReason::None);
-    ASSERT_EQ(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
+    ASSERT_EQ(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
                   MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, LogLevel::Log)(SuccessResult),
         SuccessResult);
 }
@@ -137,7 +139,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         // Expect that we log the error message
         EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-        ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
+        ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, LogLevel::Log)(ExpectedFailureResult));
 
         ::testing::Mock::VerifyAndClearExpectations(&MockResultCallback);
@@ -157,7 +159,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         // Expect that we log the error message
         EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-        ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(MockResultCallback.AsStdFunction(),
+        ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(MockResultCallback.AsStdFunction(),
             SuccessMsg.c_str(), ErrorMsg.c_str(), std::make_optional(ResultCodeExplicit), std::make_optional(HttpResultCodeExplicit),
             std::make_optional(FailureReasonExplicit), LogLevel::Log)(ExpectedFailureResult));
     }
@@ -173,8 +175,8 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     // When we don't provide an error code, we expect to just log a success message, no return or exception //
     EXPECT_CALL(MockLogger.MockLogCallback, Call(SuccessMsg)).Times(1);
 
-    csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
-        MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), {}, {}, {}, LogLevel::Log)({});
+    csp::multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
+        MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), MakeInvalid<NullResult>(), LogLevel::Log)({});
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromErrorCodeWhenError)
@@ -183,44 +185,34 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     /* Specific values are irrelevent */
     csp::common::String SuccessMsg = "Mock Success Msg";
-    EResultCode ResultCode = EResultCode::Failed;
-    csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
-    ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
-    NullResult ExpectedFailureResult(ResultCode, HttpResultCode, FailureReason);
 
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
-    ::testing::MockFunction<void(NullResultCallback Callback, std::string ErrorMsg, EResultCode ResultCode, uint16_t HttpResultCode,
-        ERequestFailureReason FailureReason, LogLevel LogLevel)>
-        MockLogErrorAndCancelContinuation;
 
     // When we provide an error code, we expect the error callback to be called and an error message logged.
     csp::multiplayer::ErrorCode ErrorCode = csp::multiplayer::ErrorCode::NotConnected;
     std::string ExpectedErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode);
 
     {
-        // When we pass full optionals, we expect the values from the optionals to be used to construct the result passed in the callback //
-        // Expect that the callback is called with the result constructed as expected.
-        EXPECT_CALL(MockResultCallback, Call(ExpectedFailureResult)).Times(1);
         // Expect that we log the error message
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
 
-        ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(MockResultCallback.AsStdFunction(), SuccessMsg.c_str(),
-            std::make_optional(ResultCode), std::make_optional(HttpResultCode), std::make_optional(FailureReason), LogLevel::Log)(ErrorCode));
+        ASSERT_ANY_THROW(csp::multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
+            MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), MakeInvalid<NullResult>(), LogLevel::Log)(ErrorCode));
 
         ::testing::Mock::VerifyAndClearExpectations(&MockResultCallback);
         ::testing::Mock::VerifyAndClearExpectations(&MockLogger.MockLogCallback);
     }
     {
         // When we pass empty optionals, we expect default values to be used to construct the result passed in the callback //
-        NullResult DefaultFailureResult(EResultCode::Failed, 500, ERequestFailureReason::Unknown);
+        NullResult DefaultFailureResult = MakeInvalid<NullResult>();
 
         // Expect that the callback is called with the result constructed as expected.
         EXPECT_CALL(MockResultCallback, Call(DefaultFailureResult)).Times(1);
         // Expect that we log the error message
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
 
-        ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(
-            MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), {}, {}, {}, LogLevel::Log)(ErrorCode));
+        ASSERT_ANY_THROW(csp::multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
+            MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), MakeInvalid<NullResult>(), LogLevel::Log)(ErrorCode));
     }
 }
 
@@ -230,7 +222,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenNoExceptionThrownI
     // No exception, expect exception handler callable not called.
     ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(0);
-    csp::common::continuations::detail::testing::SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
+    csp::systems::continuations::detail::testing::SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenExceptionThrownInContinuationChainThenHandlerCalled)
@@ -238,7 +230,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenExceptionThrownInC
     // Exception thrown, expect exception handler callable called
     ::testing::MockFunction<void(const std::exception&)> MockExceptionHandlerCallable;
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
-    csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
+    csp::systems::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(MockExceptionHandlerCallable.AsStdFunction());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainCancelledThenHandlerAndResultCallbackCalled)
@@ -248,7 +240,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainC
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
-    csp::common::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(
+    csp::systems::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(
         MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
 
@@ -261,7 +253,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledAndInter
     EXPECT_CALL(MockIntermediateStepCallable, Call()).Times(0);
     EXPECT_CALL(MockExceptionHandlerCallable, Call(::testing::_)).Times(1);
     EXPECT_CALL(MockResultCallback, Call(::testing::_)).Times(1);
-    csp::common::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
+    csp::systems::continuations::detail::testing::SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
         MockIntermediateStepCallable.AsStdFunction(), MockExceptionHandlerCallable.AsStdFunction(), MockResultCallback.AsStdFunction());
 }
 
@@ -275,5 +267,5 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestCallableCalledOnSameTh
     auto VerifyThread = [ThisThreadId](const std::exception& /*Except*/) { ASSERT_EQ(ThisThreadId, std::this_thread::get_id()); };
     // Just use the exception handler to serve as a general purpose way to call a callable in tests.
     // Could simply have made another detail::testing function ... but why bother when this already exists.
-    csp::common::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(VerifyThread);
+    csp::systems::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(VerifyThread);
 }

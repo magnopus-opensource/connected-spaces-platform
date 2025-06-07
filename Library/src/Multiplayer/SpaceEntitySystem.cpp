@@ -18,6 +18,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
@@ -26,7 +27,6 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Common/Continuations.h"
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
@@ -284,7 +284,7 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
     const signalr::value Params(Arr);
 
     return Connection->Invoke("GenerateObjectIds", Params, {})
-        .then(common::continuations::UnwrapSignalRResultOrThrow())
+        .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
             {
@@ -368,7 +368,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
     // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
     async::task<void> SerializeAndSendChain
         = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode))
-              .then(common::continuations::UnwrapSignalRResultOrThrow<false>());
+              .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 
     // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it

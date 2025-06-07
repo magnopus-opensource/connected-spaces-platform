@@ -17,12 +17,12 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"
-#include "Common/Continuations.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
