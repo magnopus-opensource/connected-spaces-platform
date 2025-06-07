@@ -1914,6 +1914,12 @@ void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallba
     RegisterSystemCallback();
 }
 
+void AssetSystem::SetAssetCodeChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+{
+    AssetCodeChangedCallback = Callback;
+    RegisterSystemCallback();
+}
+
 void AssetSystem::SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback)
 {
     MaterialChangedCallback = Callback;
@@ -1949,7 +1955,7 @@ void AssetSystem::DeregisterSystemCallback()
 
 void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
+    if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback && !AssetCodeChangedCallback)
     {
         return;
     }
@@ -1962,6 +1968,11 @@ void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
     if (AssetDetailBlobChangedCallback)
     {
         AssetDetailBlobChangedCallback(AssetParams);
+    }
+
+    if (AssetCodeChangedCallback)
+    {
+        AssetCodeChangedCallback(AssetParams);
     }
 
     if (AssetParams.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)

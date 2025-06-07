@@ -35,7 +35,7 @@
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
-#include "CSP/Multiplayer/Components/LocalScriptSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
@@ -776,8 +776,8 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
     case ComponentType::ScriptData:
         Component = new ScriptSpaceComponent(this);
         break;
-    case ComponentType::LocalScript:
-        Component = new LocalScriptSpaceComponent(this);
+    case ComponentType::Code:
+        Component = new CodeSpaceComponent(this);
         break;
     case ComponentType::Button:
         Component = new ButtonSpaceComponent(this);

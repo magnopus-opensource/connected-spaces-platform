@@ -21,6 +21,7 @@
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Web/HTTPResponseCodes.h"
@@ -410,6 +411,36 @@ auto SpaceSystem::RefreshMultiplayerScopes()
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace");
+    
+    // get LocalscriptSystem and call initialize to ensure that the space entity system is initialised
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    
+
+    // For WASM builds, handle script initialization differently
+    try {
+        csp::systems::LocalScriptSystem* LocalScriptSystem = SystemsManager.GetLocalScriptSystem();
+        if (LocalScriptSystem)
+        {   
+            CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->SetSpaceId(SpaceId)");
+            LocalScriptSystem->SetSpaceId(SpaceId);
+            // Try initialization but don't block if it fails
+            try {
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->Initialize();");
+                LocalScriptSystem->Initialize();
+                CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->LoadScriptModulesWithTimeout();");
+                // Use the timeout version which is WASM safe
+                LocalScriptSystem->LoadScriptModulesWithTimeout(10000); // Immediate return in WASM
+            } 
+            catch (const std::exception& e) {
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Script initialization error: %s", e.what());
+                // Continue even if script initialization fails
+            }
+        }
+    } 
+    catch (...) {
+        CSP_LOG_MSG(csp::systems::LogLevel::Error, "Unexpected error during script system initialization");
+        // Continue execution even if there was an error
+    }
 
     GetSpace(SpaceId)
         .then(async::inline_scheduler(),
@@ -440,7 +471,12 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     // As the user is exiting the space, we now clear all scopes that they are registered to.
     auto& SystemsManager = systems::SystemsManager::Get();
     auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
-
+    auto* LocalScriptSystem = SystemsManager.GetLocalScriptSystem();
+    if (LocalScriptSystem)
+    {
+        // TODO Local scripting
+        // LocalScriptSystem->Shutdown();
+    }
     if (MultiplayerConnection != nullptr)
     {
         csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Shutdown();

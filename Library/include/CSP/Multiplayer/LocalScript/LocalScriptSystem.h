@@ -70,12 +70,20 @@ public:
 
     /// @brief Initialize the LocalScriptSystem and create a local context
     void Initialize();
-    
+
+    void SetSpaceId(const csp::common::String& InSpaceId)
+    {
+        this->SpaceId = InSpaceId;
+    }
+
     /// @brief Load and register script modules from the given space
-    /// @param SpaceId The ID of the space to load scripts from
-    void LoadScriptModules(const csp::common::String& SpaceId);
-    void RunScript(const csp::common::String& SpaceId, const csp::common::String& Path);
-    
+    void LoadScriptModules();
+    void RunScript(const csp::common::String& Path);
+
+    /// @brief Load script modules with a timeout to prevent hanging
+    /// @param TimeoutMs Maximum time in milliseconds to wait for loading to complete
+    /// @return True if loading completed successfully, false if it timed out or failed
+    bool LoadScriptModulesWithTimeout(uint32_t TimeoutMs);
 
 private:
     /// @brief The QuickJS context for script execution
@@ -83,6 +91,7 @@ private:
     qjs::Runtime* Runtime;
     csp::multiplayer::EntityScriptBinding* ScriptBinding;
     multiplayer::SpaceEntitySystem* EntitySystem;
+    csp::common::String SpaceId;
     //qjs::Context::Module* CSP_Module;
     // Store loaded scripts to ensure they remain in memory
     csp::common::Map<csp::common::String, csp::common::String> LoadedScripts;

@@ -342,6 +342,10 @@ public:
     /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
     CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
 
+    /// @brief Sets a callback for a script changed event.
+    /// @param Callback ScriptChangedCallbackHandler: Callback to receive data for the script that has been changed.
+    CSP_NO_EXPORT void SetAssetCodeChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
+
     /// @brief Load all local scripts associated with the given space.
     /// @param SpaceId const csp::common::String& : The space id the local scripts are associated with.
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
@@ -371,6 +375,7 @@ private:
     csp::web::RemoteFileManager* FileManager;
 
     AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
+    AssetDetailBlobChangedCallbackHandler AssetCodeChangedCallback;
     MaterialChangedCallbackHandler MaterialChangedCallback;
 
     csp::common::String GetAssetPath(

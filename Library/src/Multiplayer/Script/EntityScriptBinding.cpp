@@ -44,6 +44,7 @@
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
@@ -230,7 +231,7 @@ public:
         if (EntitySystem)
         {
             EntitySystem->LockEntityUpdate();
-            EntitySystem->CreateObject(Name.c_str(), SpaceTransform(), [this](SpaceEntity* Entity) {
+            EntitySystem->CreateLocalObject(Name.c_str(), SpaceTransform(), [this](SpaceEntity* Entity) {
                 EntitySystem->UnlockEntityUpdate();
                 EntitySystem->FireEntityCreatedEvent(Entity);
             });
@@ -465,6 +466,14 @@ void BindComponents(qjs::Context::Module* Module)
         .fun<&CustomSpaceComponentScriptInterface::GetCustomPropertyKeys>("getCustomPropertyKeys")
         .fun<&CustomSpaceComponentScriptInterface::SetCustomProperty>("setCustomProperty");
 
+    Module->class_<CodeSpaceComponentScriptInterface>("CodeSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .fun<&CodeSpaceComponentScriptInterface::GetAttributeSubscriptionKey>("getAttributeSubscriptionKey")
+        .fun<&CodeSpaceComponentScriptInterface::HasAttribute>("hasAttribute")
+        .fun<&CodeSpaceComponentScriptInterface::GetAttribute>("getAttribute")
+        .fun<&CodeSpaceComponentScriptInterface::GetAttributeKeys>("getAttributeKeys");
+
     Module->class_<SplineSpaceComponentScriptInterface>("SplineSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -639,12 +648,11 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
     Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
 }
 
-void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, uint64_t EntityId)
+void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module)
 {
     BindInternal(Module);
     // This is temporary
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(EntityId));
 
     // Always import CSP module into scripts
     std::stringstream ss;

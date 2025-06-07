@@ -52,6 +52,21 @@
 
 using namespace std::chrono_literals;
 
+// temporary local entity ID generator
+// https://stackoverflow.com/questions/33010010/how-to-generate-random-64-bit-unsigned-integer-in-c
+#define IMAX_BITS(m) ((m)/((m)%255+1) / 255%255*8 + 7-86/((m)%255+12))
+#define RAND_MAX_WIDTH IMAX_BITS(RAND_MAX)
+_Static_assert((RAND_MAX & (RAND_MAX + 1u)) == 0, "RAND_MAX not a Mersenne number");
+
+uint64_t rand64(void) {
+  uint64_t r = 0;
+  for (int i = 0; i < 64; i += RAND_MAX_WIDTH) {
+    r <<= RAND_MAX_WIDTH;
+    r ^= (unsigned) rand();
+  }
+  return r;
+}
+
 namespace
 {
 
@@ -378,6 +393,11 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
     CreateObjectInternal(InName, nullptr, InSpaceTransform, false, Callback);
+}
+
+void SpaceEntitySystem::CreateLocalObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+    CreateObjectInternal(InName, nullptr, InSpaceTransform, true, Callback);
 }
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
@@ -1193,7 +1213,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
             const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-            if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
+            if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled || PendingEntity->IsLocal())
             {
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
                 if (!PendingEntity->IsModifiable())
@@ -1289,26 +1309,26 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 {
     assert(Entities.Contains(EntityToRemove));
 
-    switch (EntityToRemove->GetEntityType())
-    {
-    case SpaceEntityType::Avatar:
-        assert(Avatars.Contains(EntityToRemove));
-        Avatars.RemoveItem(EntityToRemove);
-        break;
+        switch (EntityToRemove->GetEntityType())
+        {
+        case SpaceEntityType::Avatar:
+            assert(Avatars.Contains(EntityToRemove));
+            Avatars.RemoveItem(EntityToRemove);
+            break;
 
-    case SpaceEntityType::Object:
-        assert(Objects.Contains(EntityToRemove));
-        Objects.RemoveItem(EntityToRemove);
-        break;
+        case SpaceEntityType::Object:
+            assert(Objects.Contains(EntityToRemove));
+            Objects.RemoveItem(EntityToRemove);
+            break;
 
-    default:
-        assert(false && "Unhandled entity type encountered during its destruction!");
-        break;
-    }
+        default:
+            assert(false && "Unhandled entity type encountered during its destruction!");
+            break;
+        }
 
     RootHierarchyEntities.RemoveItem(EntityToRemove);
     ResolveParentChildForDeletion(EntityToRemove);
-
+    
     Entities.RemoveItem(EntityToRemove);
 
     delete (EntityToRemove);
@@ -1317,8 +1337,9 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
     const SpaceTransform& InSpaceTransform, bool IsLocal, EntityCreatedCallback Callback)
 {
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Create Entity, IsLocal?: %s", IsLocal ? "true" : "false");
     const std::function LocalIDCallback
-        = [this, InName, InParent, InSpaceTransform, Callback, &IsLocal](const signalr::value& Result, const std::exception_ptr& Except)
+        = [this, InName, InParent, InSpaceTransform, Callback, IsLocal](const signalr::value& Result, const std::exception_ptr& Except)
     {
         try
         {
@@ -1332,19 +1353,21 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
             Callback(nullptr);
         }
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Create Entity, STILL IsLocal?: %s", IsLocal ? "true" : "false");
 
-        auto ID = ParseGenerateObjectIDsResult(Result);
+        auto ID = IsLocal ? rand64() : ParseGenerateObjectIDsResult(Result);
         auto* NewObject
             = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true, IsLocal);
         if (InParent.HasValue())
         {
             NewObject->SetParentId(*InParent);
         }
+        
+            mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
 
-        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
-
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+            SignalRSerializer Serializer;
+            Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        
 
         const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
             = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
@@ -1370,8 +1393,15 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Objects.Append(NewObject);
             Callback(NewObject);
         };
-
-        Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
+        if (IsLocal) {
+            ResolveEntityHierarchy(NewObject);
+            Entities.Append(NewObject);
+            Objects.Append(NewObject);
+            Callback(NewObject); // If the object is local, we can immediately return it without sending it to the server.
+        }
+        else {
+            Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
+        }
     };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice

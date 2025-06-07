@@ -98,6 +98,14 @@ public:
     /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
+    /// @brief Creates a Local SpaceEntity of type Object, and relevant default values that is only accesible to this client.
+    /// @param InName csp::common::String : The name to give the new SpaceEntity.
+    /// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
+    /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
+    CSP_ASYNC_RESULT void CreateLocalObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+
+
     /// @brief Destroys both the remote view and the local view of the specified entity.
     /// @param Entity SpaceEntity : The entity to be destroyed.
     /// @param Callback CallbackHandler : the callback to execute.

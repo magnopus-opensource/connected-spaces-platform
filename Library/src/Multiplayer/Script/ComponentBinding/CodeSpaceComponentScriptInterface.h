@@ -15,32 +15,25 @@
  */
 #pragma once
 
-#include "CSP/Systems/Script/ScriptSystem.h"
-#include "quickjspp.hpp"
-#include "Debug/Logging.h"
+#include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::systems
-{
-class ScriptSystem;
-}
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace csp::multiplayer
 {
 
-class SpaceEntitySystem;
+class CodeSpaceComponent;
 
-class EntityScriptBinding : public csp::systems::IScriptBinding
+class CodeSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-    EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
-    void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module);
-    virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
-
-    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
-    static void RemoveBinding(EntityScriptBinding* InEntityBinding);
-
-private:
-    SpaceEntitySystem* EntitySystem;
+    CodeSpaceComponentScriptInterface(CodeSpaceComponent* InComponent = nullptr);
+    uint32_t GetAttributeSubscriptionKey(const std::string& Key);
+    bool HasAttribute(const std::string& Key) const;
+    const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetAttribute(const std::string& Key);
+    std::vector<std::string> GetAttributeKeys();
 };
 
 } // namespace csp::multiplayer
