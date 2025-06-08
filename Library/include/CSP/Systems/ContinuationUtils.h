@@ -35,9 +35,10 @@ using namespace csp::systems;
  */
 template <typename ErrorResultT>
 inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
-    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::common::LogSystem* LogSystem,
+    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
+    LogSystem->LogMsg(LogLevel, ErrorMsg.c_str());
     ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     if (Callback)
     {
