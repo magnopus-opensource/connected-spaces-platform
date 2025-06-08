@@ -38,7 +38,6 @@
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
-#include "Debug/Logging.h"
 #include "Web/Uri.h"
 
 #include <algorithm>
@@ -155,10 +154,11 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 }
 
 /// @brief MultiplayerConnection
-MultiplayerConnection::MultiplayerConnection()
+MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem* LogSystem)
     : Connection(nullptr)
     , WebSocketClient(nullptr)
     , NetworkEventManager(new NetworkEventManagerImpl(this))
+    , LogSystem(LogSystem)
     , ClientId(0)
     , Connected(false)
 {
@@ -198,6 +198,7 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
     EventBusPtr = InBoundConnection.EventBusPtr;
     Connected = (InBoundConnection.Connected) ? true : false;
+    LogSystem = InBoundConnection.LogSystem;
 }
 
 namespace
@@ -406,7 +407,8 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
                 {
                     auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(Except);
                     DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
-                }));
+                },
+                LogSystem));
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
@@ -456,7 +458,7 @@ async::task<void> MultiplayerConnection::Start() const
 {
     if (Connection == nullptr)
     {
-        csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.");
+        csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.", LogSystem);
     }
 
     // Shared pointer to keep alive in local callback

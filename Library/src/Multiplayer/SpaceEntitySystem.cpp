@@ -17,6 +17,7 @@
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
@@ -45,6 +46,7 @@
 
 #include <chrono>
 #include <exception>
+#include <fmt/format.h>
 #include <iostream>
 #include <map>
 #include <unordered_set>
@@ -182,9 +184,10 @@ class DirtyComponent;
 
 using namespace std::chrono;
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)
+SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
+    , LogSystem(LogSystem)
     , Connection(nullptr)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
@@ -379,7 +382,8 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
             {
                 CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
                 Callback(nullptr);
-            }));
+            },
+            LogSystem));
 }
 
 void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
@@ -563,7 +567,7 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
     if (SpaceEntityCreatedCallback)
     {
-        CSP_LOG_WARN_MSG("SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
     SpaceEntityCreatedCallback = std::move(Callback);
@@ -573,7 +577,7 @@ void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Call
 {
     if (InitialEntitiesRetrievedCallback)
     {
-        CSP_LOG_WARN_MSG("InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
     }
 
     InitialEntitiesRetrievedCallback = std::move(Callback);
@@ -583,7 +587,7 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 {
     if (ScriptSystemReadyCallback)
     {
-        CSP_LOG_WARN_MSG("ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
     }
 
     ScriptSystemReadyCallback = std::move(Callback);
@@ -625,7 +629,8 @@ void SpaceEntitySystem::BindOnObjectMessage()
             }
             else
             {
-                CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+                LogSystem->LogMsg(
+                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
             }
         });
 }
@@ -731,7 +736,8 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
             }
             else
             {
-                CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+                LogSystem->LogMsg(
+                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
             }
         }
 
@@ -812,8 +818,10 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
     if (!EntityToUpdate->IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-            EntityToUpdate->GetName().c_str());
+        LogSystem->LogMsg(common::LogLevel::Error,
+            fmt::format("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
+                EntityToUpdate->GetName())
+                .c_str());
         return;
     }
 
@@ -1066,7 +1074,7 @@ void SpaceEntitySystem::EnableLeaderElection()
 {
     if (ElectionManager == nullptr)
     {
-        ElectionManager = new ClientElectionManager(this);
+        ElectionManager = new ClientElectionManager(this, LogSystem);
     }
 }
 
@@ -1261,9 +1269,11 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
                 if (!PendingEntity->IsModifiable())
                 {
-                    CSP_LOG_ERROR_FORMAT(
-                        "Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-                        PendingEntity->GetName().c_str());
+                    LogSystem->LogMsg(common::LogLevel::Error,
+                        fmt::format(
+                            "Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
+                            PendingEntity->GetName())
+                            .c_str());
 
                     it = PendingOutgoingUpdateUniqueSet->erase(it);
                     continue;
@@ -1341,7 +1351,7 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
     }
     else
     {
-        CSP_LOG_ERROR_MSG("Attempted to add a pending entity that we already have!");
+        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
     }
 }
 

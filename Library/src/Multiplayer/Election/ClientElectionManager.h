@@ -20,6 +20,11 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 
@@ -43,7 +48,7 @@ class ClientElectionManager
     /** @endcond */
 
 public:
-    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem);
+    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem* LogSystem);
     ~ClientElectionManager();
 
     void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
@@ -104,6 +109,7 @@ private:
 
 private:
     SpaceEntitySystem* SpaceEntitySystemPtr;
+    csp::common::LogSystem* LogSystemPtr;
     class ClientElectionEventHandler* EventHandler;
 
     ClientMap Clients;

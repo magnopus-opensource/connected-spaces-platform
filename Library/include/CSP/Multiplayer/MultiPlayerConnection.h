@@ -39,6 +39,11 @@ template <typename T> class task;
 CSP_END_IGNORE
 }
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
 
@@ -192,7 +197,7 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection();
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem* LogSystem);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -224,6 +229,7 @@ private:
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class EventBus* EventBusPtr;
+    csp::common::LogSystem* LogSystem;
 
     uint64_t ClientId;
 
