@@ -81,6 +81,7 @@ if not Project then
             "%{wks.location}/ThirdParty/glm",
 			"%{wks.location}/ThirdParty/asyncplusplus/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
+            "%{wks.location}/ThirdParty/fmt/include",
             "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"
         }
@@ -113,7 +114,8 @@ if not Project then
             "POCO_UTIL_NO_XMLCONFIGURATION",
             "POCO_NET_NO_IPv6",
 			"LIBASYNC_STATIC",
-            "LIBASYNC_CUSTOM_DEFAULT_SCHEDULER"
+            "LIBASYNC_CUSTOM_DEFAULT_SCHEDULER",
+            "FMT_HEADER_ONLY"
         }
 
         filter "platforms:not wasm"
@@ -158,7 +160,8 @@ if not Project then
             }
 			
 			buildoptions{
-				"/bigobj"
+				"/bigobj",
+                "/utf-8" -- fmt asked us for this, seems like we need to explicitly opt into unicode on windows
 			}
 
             links {
