@@ -13,6 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Enums common between all the libraries that make up CSP.
+ * These tend to merely be types for data exchange between libraries.
+ * Don't get too hung up on namespaces
+ */
+
 #pragma once
 #include <cstdint>
 
@@ -87,3 +94,58 @@ enum class EResponseCodes : uint16_t
 };
 
 } // namespace csp::web
+
+namespace csp::systems
+{
+
+/// @brief Code to indicate the result of a request.
+/// Request results should be checked for a success by clients before using any other accessors.
+enum class EResultCode : uint8_t
+{
+    Init,
+    InProgress,
+    Success,
+    Failed
+};
+
+enum class ERequestFailureReason
+{
+    Unknown = -1,
+    None = 0,
+    AddUserToSpaceDenied,
+    UserSpaceAccessDenied,
+    UserSpaceBannedAccessDenied,
+    UserSpaceFullAccessDenied,
+    UserSpaceInviteExpired,
+    SpacePublicNameDuplicate,
+    UserMaxSpaceLimitReached,
+    UserAccountLocked,
+    UserMissingPassword,
+    UserUnverifiedEmail,
+    UserBannedFromSpace,
+    UserInvalidEmailDomain,
+    UserInvalidThirdPartyAuth,
+    UserAgeNotVerified,
+    UserGuestLoginDisallowed,
+    UserAgoraLimitReached,
+    UserOpenAILimitReached,
+    UserTicketedSpacesLimitReached,
+    UserSpaceConcurrentUsersLimitReached,
+    PrototypeReservedKeysNotAllowed,
+    AssetInvalidFileContents,
+    AssetInvalidFileType,
+    AssetAudioVideoLimitReached,
+    AssetObjectCaptureLimitReached,
+    AssetTotalUploadSizeLimitReached,
+    TicketUnknownNumber,
+    TicketEmailMismatch,
+    TicketVendorOAuthFailure,
+    TicketOAuthTokenInvalid,
+    TicketAlreadyApplied,
+    ShopifyConnectionBroken,
+    ShopifyInvalidStoreName,
+    UserShopifyLimitReached,
+    UserTokenRefreshFailed,
+    InvalidSequenceKey,
+};
+} // namespace csp::systems

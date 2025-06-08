@@ -21,9 +21,8 @@ CSP_START_IGNORE
 #include <optional>
 
 #include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "CSP/Systems/WebService.h" //BANNED
-#include "CSP/Web/HTTPResponseCodes.h" //BANNED
 #include "Multiplayer/ErrorCodeStrings.h"
 #include <signalrclient/signalr_value.h>
 

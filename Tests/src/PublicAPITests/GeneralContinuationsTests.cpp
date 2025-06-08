@@ -18,8 +18,8 @@
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Systems/ContinuationUtils.h"
 
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Systems/SystemsResult.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"
 #include "TestHelpers.h"

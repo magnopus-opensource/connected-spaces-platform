@@ -18,9 +18,9 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 
 namespace csp::services
 {

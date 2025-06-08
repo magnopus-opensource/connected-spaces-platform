@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Web/HTTPResponseCodes.h"
+#include "CSP/Common/SharedEnums.h"
 #include "HttpPayload.h"
 #include "HttpProgress.h"
 
