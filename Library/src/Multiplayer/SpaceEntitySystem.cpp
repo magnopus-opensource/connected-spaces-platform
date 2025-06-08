@@ -187,6 +187,7 @@ using namespace std::chrono;
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
+    , LogSystem(LogSystem)
     , Connection(nullptr)
     , LogSystem(LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
