@@ -21,7 +21,7 @@ CSP_START_IGNORE
 #include <optional>
 
 #include "CSP/Common/ContinuationUtils.h"
-#include "CSP/Systems/Log/LogSystem.h" //BANNED
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/WebService.h" //BANNED
 #include "CSP/Web/HTTPResponseCodes.h" //BANNED
 #include "Multiplayer/ErrorCodeStrings.h"
@@ -37,9 +37,9 @@ namespace csp::multiplayer::continuations
  */
 template <typename ErrorResultT>
 inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
-    ErrorResultT ErrorResult, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+    ErrorResultT ErrorResult, csp::common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogLevel](
+    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogSystem, LogLevel](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
     {
         if (ErrorCode.has_value())
@@ -50,12 +50,12 @@ inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<vo
             {
                 Callback(ErrorResult);
             }
-            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogLevel);
+            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
         }
         else
         {
             // Success Case
-            CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
+            LogSystem->LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
         }
     };
 }

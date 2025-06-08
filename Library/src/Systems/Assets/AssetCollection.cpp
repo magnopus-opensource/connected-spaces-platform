@@ -15,7 +15,7 @@
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
 
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/Dto.h"
 

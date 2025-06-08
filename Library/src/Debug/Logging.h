@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 
 #include <string>

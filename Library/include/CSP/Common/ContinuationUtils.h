@@ -21,8 +21,7 @@ CSP_START_IGNORE
 #include <optional>
 
 #include "CSP/Common/CSPAsyncScheduler.h"
-#include "CSP/Systems/Log/LogSystem.h"
-#include "Debug/Logging.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
 namespace csp::common::continuations
 {
@@ -43,13 +42,13 @@ inline void LogErrorAndCancelContinuation(
  * and call a passed in callable, (probably a state-reset or cleanup function of some sort).
  * The callable is perfectly forwarded.
  */
-template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable)
+template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable, csp::common::LogSystem* LogSystem)
 {
     static_assert(std::is_invocable_v<Callable, const std::exception&>,
         "InvokeIfExceptionCallable must be invocable with a single const std::exception& arg, if you need other state, try passing a capturing "
         "lambda.");
 
-    return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable)](async::task<void> ExceptionTask)
+    return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable), LogSystem](async::task<void> ExceptionTask)
     {
         try
         {
@@ -57,7 +56,8 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
         catch (const std::exception& exception)
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            LogSystem->LogMsg(
+                csp::common::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
             InvokeIfExceptionCallable(exception);
         }
     };

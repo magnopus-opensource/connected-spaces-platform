@@ -16,8 +16,8 @@
 
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
-#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "SpaceSystemTestHelpers.h"

@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -22,7 +23,6 @@
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
-#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -69,7 +69,7 @@ PointOfInterestSystem* SystemsManager::GetPointOfInterestSystem() { return Point
 
 AnchorSystem* SystemsManager::GetAnchorSystem() { return AnchorSystem; }
 
-LogSystem* SystemsManager::GetLogSystem() { return LogSystem; }
+csp::common::LogSystem* SystemsManager::GetLogSystem() { return LogSystem; }
 
 SettingsSystem* SystemsManager::GetSettingsSystem() { return SettingsSystem; }
 
@@ -127,7 +127,7 @@ ConversationSystemInternal* SystemsManager::GetConversationSystem() { return Con
 void SystemsManager::CreateSystems()
 {
     // Create Log system first, so we can log any startup issues in other systems
-    LogSystem = new csp::systems::LogSystem();
+    LogSystem = new csp::common::LogSystem();
 
 #ifdef CSP_WASM
     WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
@@ -138,7 +138,7 @@ void SystemsManager::CreateSystems()
 
     ScriptSystem->Initialise();
 
-    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection();
+    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(LogSystem);
     EventBus = MultiplayerConnection->GetEventBusPtr();
 
     AnalyticsSystem = new csp::systems::AnalyticsSystem();
@@ -156,7 +156,7 @@ void SystemsManager::CreateSystems()
     QuotaSystem = new csp::systems::QuotaSystem(WebClient);
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, EventBus);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
-    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
+    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, LogSystem);
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus);
 }
 

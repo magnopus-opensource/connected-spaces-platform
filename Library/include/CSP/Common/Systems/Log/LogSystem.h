@@ -21,7 +21,7 @@
 
 #include <functional>
 
-namespace csp::systems
+namespace csp::common
 {
 
 enum class LogLevel
@@ -48,6 +48,9 @@ class CSP_API LogSystem
     CSP_END_IGNORE
 
 public:
+    LogSystem();
+    ~LogSystem();
+
     typedef std::function<void(const csp::common::String&)> LogCallbackHandler;
     typedef std::function<void(const csp::common::String&)> EventCallbackHandler;
     typedef std::function<void(const csp::common::String&)> BeginMarkerCallbackHandler;
@@ -73,19 +76,19 @@ public:
 
     /// @brief Set the verbosity of logging for a system-wide level.
     /// @param InSystemLevel The level to set the system logging to.
-    void SetSystemLevel(const csp::systems::LogLevel InSystemLevel);
+    void SetSystemLevel(const csp::common::LogLevel InSystemLevel);
 
     /// @brief Retreive the log verbosity level.
-    csp::systems::LogLevel GetSystemLevel();
+    csp::common::LogLevel GetSystemLevel();
 
     /// @brief Check if we currently log a specified log verbosity level.
     /// @param Level The level to check.
-    bool LoggingEnabled(const csp::systems::LogLevel Level);
+    bool LoggingEnabled(const csp::common::LogLevel Level);
 
     /// @brief Log a message at a specific verbosity level.
     /// @param Level The level to log this message at.
     /// @param InMessage The message to be logged.
-    void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
+    void LogMsg(const csp::common::LogLevel Level, const csp::common::String& InMessage);
     /// @brief Log an event.
     /// @param InEvent The event to be logged.
     void LogEvent(const csp::common::String& InEvent);
@@ -99,10 +102,7 @@ public:
     void ClearAllCallbacks();
 
 private:
-    LogSystem();
-    ~LogSystem();
-
-    csp::systems::LogLevel SystemLevel = LogLevel::All;
+    csp::common::LogLevel SystemLevel = LogLevel::All;
 
     void LogToFile(const csp::common::String& InMessage);
 

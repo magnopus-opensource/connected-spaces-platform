@@ -20,7 +20,7 @@ CSP_START_IGNORE
 #include <optional>
 
 #include "CSP/Common/ContinuationUtils.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 #include "Debug/Logging.h"
@@ -35,10 +35,9 @@ using namespace csp::systems;
  */
 template <typename ErrorResultT>
 inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
-    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::common::LogSystem* LogSystem,
-    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    LogSystem->LogMsg(LogLevel, ErrorMsg.c_str());
+    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
     ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     if (Callback)
     {
@@ -131,14 +130,16 @@ namespace detail
         inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
             async::spawn([]() { return; })
-                .then(csp::common::continuations::InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename ExceptionHandlerCallable>
         inline void SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
             async::spawn([]() { throw std::runtime_error(""); })
-                .then(csp::common::continuations::InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename ExceptionHandlerCallable>
@@ -151,7 +152,8 @@ namespace detail
                     LogHTTPErrorAndCancelContinuation(
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
-                .then(csp::common::continuations::InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
@@ -165,7 +167,8 @@ namespace detail
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
                 .then(std::forward<IntermediateStepCallable>(IntermediateStep))
-                .then(csp::common::continuations::InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
         }
     }
 }

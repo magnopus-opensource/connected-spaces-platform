@@ -15,7 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"

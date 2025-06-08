@@ -16,7 +16,7 @@
 #include "Web/HttpPayload.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/StlString.h"
 #include "Debug/Logging.h"
 #include "Web/HttpAuth.h"
