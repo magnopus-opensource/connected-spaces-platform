@@ -264,7 +264,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Image");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Image");
                 }
 
                 if (VariantProductInformation->HasSelectedOptions())
@@ -281,7 +281,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing SelectedOptions");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing SelectedOptions");
                 }
 
                 if (VariantProductInformation->HasUnitPrice())
@@ -300,7 +300,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing UnitPrice");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing UnitPrice");
                 }
 
                 if (VariantProductInformation->HasQuantityAvailable())
@@ -309,7 +309,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing QuantityAvailable");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing QuantityAvailable");
                 }
 
                 if (Dto.HasTags())
@@ -325,7 +325,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Tags");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Tags");
                 }
 
                 if (Dto.HasMedia())
@@ -364,7 +364,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
                 }
                 else
                 {
-                    CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Media");
+                    CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Media");
                 }
 
                 TotalVariantIndex++;
@@ -372,7 +372,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
         }
         else
         {
-            CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Variants");
+            CSP_LOG_MSG(csp::common::LogLevel::Log, "ShopifyProductDto missing Variants");
         }
     }
 }

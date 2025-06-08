@@ -220,7 +220,7 @@ namespace
                     }
                 }
 
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Connection Interrupted.");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Connection Interrupted.");
             });
     }
 }
@@ -265,7 +265,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
 
         Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
 
@@ -300,12 +300,12 @@ auto MultiplayerConnection::RequestClientId()
                 return;
             }
 
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
 
             ClientIdRequestedEvent->set(Result.as_uinteger());
         };
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling GetClientId");
 
         Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
@@ -339,7 +339,7 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
             StartListeningEvent->set();
         };
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StartListening");
         Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
 
         return StartListeningContinuation;
@@ -584,7 +584,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
+    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StopListening");
 
     Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
@@ -628,7 +628,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
     Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);

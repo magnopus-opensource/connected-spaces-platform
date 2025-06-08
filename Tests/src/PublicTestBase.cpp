@@ -27,11 +27,11 @@ void PublicTestBase::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -50,7 +50,7 @@ void PublicTestBase::TearDown()
         return;
     }
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation shutdown!");
     csp::CSPFoundation::Shutdown();
 }
 
@@ -60,11 +60,11 @@ template <typename T> void PublicTestBaseWithParam<T>::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -87,7 +87,7 @@ template <typename T> void PublicTestBaseWithParam<T>::TearDown()
         return;
     }
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation shutdown!");
     csp::CSPFoundation::Shutdown();
 }
 

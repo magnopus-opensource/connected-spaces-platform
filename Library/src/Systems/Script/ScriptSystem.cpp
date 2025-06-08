@@ -127,7 +127,7 @@ bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& Scrip
 
 bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
 {
-    CSP_LOG_FORMAT(LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
+    CSP_LOG_FORMAT(common::LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
 
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
     if (TheScriptContext == nullptr)

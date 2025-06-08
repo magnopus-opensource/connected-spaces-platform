@@ -30,9 +30,10 @@ namespace csp::common::continuations
 /*
  * Print an error with provided string, and throw a cancellation error.
  */
-inline void LogErrorAndCancelContinuation(std::string ErrorMsg, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+inline void LogErrorAndCancelContinuation(
+    std::string ErrorMsg, common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
+    LogSystem->LogMsg(LogLevel, ErrorMsg.c_str());
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
@@ -56,7 +57,7 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
         catch (const std::exception& exception)
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
             InvokeIfExceptionCallable(exception);
         }
     };

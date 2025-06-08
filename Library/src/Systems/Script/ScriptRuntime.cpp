@@ -154,13 +154,13 @@ void ScriptRuntime::ResetContext(ScriptContext* Context) { Context->Reset(); }
 
 void ScriptRuntime::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
     Modules[ModuleUrl.c_str()] = Source.c_str();
 }
 
 void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
 
     UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
 

@@ -35,9 +35,10 @@ using namespace csp::systems;
  */
 template <typename ErrorResultT>
 inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResultT&)> Callback, std::string ErrorMsg, EResultCode ResultCode,
-    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::common::LogSystem* LogSystem,
+    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
+    LogSystem->LogMsg(LogLevel, ErrorMsg.c_str());
     ErrorResultT FailureResult(ResultCode, HttpResultCode, FailureReason);
     if (Callback)
     {
@@ -55,7 +56,7 @@ inline void LogHTTPErrorAndCancelContinuation(std::function<void(const ErrorResu
 template <typename ResultT, typename ErrorResultT>
 inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg, std::string ErrorMsg,
     std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
-    csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorMsg = std::move(ErrorMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](
                const ResultT& Result)
@@ -72,7 +73,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(std::function<void(const Error
         else
         {
             // Success Case
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, SuccessMsg.c_str());
+            CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
         }
         return Result;
     };
@@ -84,7 +85,7 @@ template <typename ResultT> inline auto ReportSuccess(std::function<void(const R
     return [Callback, SuccessMsg = std::move(SuccessMsg)]()
     {
         /* Continuation was a success. We're done! */
-        CSP_LOG_MSG(LogLevel::Log, SuccessMsg.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
         ResultT SuccessResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
         if (Callback)
         {
@@ -99,7 +100,7 @@ template <typename ResultT> inline auto SendResult(std::function<void(const Resu
     return [Callback, SuccessMsg = std::move(SuccessMsg)](const ResultT& Result)
     {
         /* Continuation was a success. We're done! */
-        CSP_LOG_MSG(LogLevel::Log, SuccessMsg.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
         if (Callback)
         {
             Callback(Result);

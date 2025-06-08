@@ -157,11 +157,11 @@ namespace
             }
             else if (Result.GetAssets().Size() == 0)
             {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Annotation asset doesn't exist");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Annotation asset doesn't exist");
             }
             else
             {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
             }
 
             throw std::exception();
@@ -216,7 +216,7 @@ namespace
                         else if (Result.GetAssets().Size() == 1)
                         {
                             CSP_LOG_MSG(
-                                csp::systems::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
+                                csp::common::LogLevel::Log, "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating");
 
                             async::event_task<AssetResult> OnCompleteEvent;
                             async::task<AssetResult> OnCompleteTask = OnCompleteEvent.get_task();
@@ -229,7 +229,7 @@ namespace
                         }
                         else
                         {
-                            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Invalid number of annotation assets exist for this message");
+                            CSP_LOG_MSG(csp::common::LogLevel::Log, "Invalid number of annotation assets exist for this message");
 
                             throw std::exception();
                         }
@@ -278,7 +278,7 @@ namespace
 
             if (HasAnnotationData == false)
             {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Message asset collection doesn't contain annotation data.");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Message asset collection doesn't contain annotation data.");
                 throw std::exception();
             }
 
@@ -294,7 +294,7 @@ namespace
 
             if (ThumbnailIds.size() == 0)
             {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "No Thumbnails exist.");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "No Thumbnails exist.");
                 throw std::exception();
             }
 

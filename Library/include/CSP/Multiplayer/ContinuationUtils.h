@@ -37,7 +37,7 @@ namespace csp::multiplayer::continuations
  */
 template <typename ErrorResultT>
 inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
-    ErrorResultT ErrorResult, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+    ErrorResultT ErrorResult, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogLevel](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
@@ -55,7 +55,7 @@ inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<vo
         else
         {
             // Success Case
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, SuccessMsg.c_str());
+            CSP_LOG_MSG(csp::common::LogLevel::Log, SuccessMsg.c_str());
         }
     };
 }

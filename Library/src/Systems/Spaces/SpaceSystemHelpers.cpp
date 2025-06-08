@@ -154,7 +154,7 @@ namespace SpaceSystemHelpers
         // Convert old JSON metadata to key-value metadata
         if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
         {
-            CSP_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
+            CSP_LOG_FORMAT(common::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
 
             const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
             Map<String, String> NewMetadata;

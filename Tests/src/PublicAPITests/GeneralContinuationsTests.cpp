@@ -113,7 +113,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     NullResult SuccessResult(EResultCode::Success, 200, ERequestFailureReason::None);
     ASSERT_EQ(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-                  MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, LogLevel::Log)(SuccessResult),
+                  MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, csp::common::LogLevel::Log)(SuccessResult),
         SuccessResult);
 }
 
@@ -140,7 +140,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
         ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, LogLevel::Log)(ExpectedFailureResult));
+            MockResultCallback.AsStdFunction(), SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, csp::common::LogLevel::Log)(ExpectedFailureResult));
 
         ::testing::Mock::VerifyAndClearExpectations(&MockResultCallback);
         ::testing::Mock::VerifyAndClearExpectations(&MockLogger.MockLogCallback);
@@ -161,7 +161,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
         ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(MockResultCallback.AsStdFunction(),
             SuccessMsg.c_str(), ErrorMsg.c_str(), std::make_optional(ResultCodeExplicit), std::make_optional(HttpResultCodeExplicit),
-            std::make_optional(FailureReasonExplicit), LogLevel::Log)(ExpectedFailureResult));
+            std::make_optional(FailureReasonExplicit), csp::common::LogLevel::Log)(ExpectedFailureResult));
     }
 }
 

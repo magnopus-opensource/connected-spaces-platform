@@ -273,7 +273,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreateAvatarChain)
 {
     RAIIMockLogger MockLogger {};
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::Log);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Log);
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();

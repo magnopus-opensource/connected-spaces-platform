@@ -33,7 +33,7 @@ namespace
     {
         if (ConversationId.IsEmpty())
         {
-            CSP_LOG_MSG(LogLevel::Log,
+            CSP_LOG_MSG(csp::common::LogLevel::Log,
                 "This component does not have an associated conversation. "
                 "Call CreateConversation to create a new conversation for this component");
             return false;

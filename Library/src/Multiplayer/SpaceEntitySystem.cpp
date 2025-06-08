@@ -71,7 +71,7 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
         {
             if (IdValue.is_uinteger())
             {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
+                CSP_LOG_FORMAT(csp::common::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
                 EntityId = IdValue.as_uinteger();
                 break;
             }
@@ -81,7 +81,7 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
     }
     else
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Recieved an ID result not formatted as an array")
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array")
     }
 
     return EntityId;
@@ -377,7 +377,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& Except)
             {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
+                CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
                 Callback(nullptr);
             }));
 }
@@ -402,7 +402,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
             Callback(false);
         }
 
@@ -805,7 +805,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
         && EntityToUpdate->GetTransientDeletionComponentIds().Size() == 0 && EntityToUpdate->GetShouldUpdateParent() == false)
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
-        // etc. CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
+        // etc. CSP_LOG_MSG(csp::common::LogLevel::Log, "Skipped patch message send as no data changed");
         return;
     }
 
@@ -1117,7 +1117,7 @@ bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
 {
     // Run script on a remote leader...
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
 
     ClientProxy* LeaderProxy = ElectionManager->GetLeader();
 
@@ -1193,7 +1193,7 @@ void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> Pendin
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
         }
     };
 
@@ -1425,7 +1425,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
             Callback(nullptr);
         }
 
@@ -1455,7 +1455,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             }
             catch (const std::exception& e)
             {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
+                CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
                 Callback(nullptr);
             }
 
@@ -1532,7 +1532,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
         if (!EntityFound)
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", Patch.GetId());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", Patch.GetId());
         }
     }
 }
@@ -1548,7 +1548,7 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
     }
     catch (const std::exception& e)
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
     }
 }
 } // namespace csp::multiplayer

@@ -298,7 +298,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
         }
         catch (const WebClientException& Ex)
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::Error, Ex.what());
+            CSP_LOG_MSG(csp::common::LogLevel::Error, Ex.what());
 
             Request->SetRequestProgress(100.0f);
             Request->SetResponseCode(EResponseCodes::ResponseServiceUnavailable);

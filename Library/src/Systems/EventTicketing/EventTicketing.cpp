@@ -28,7 +28,7 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
     }
     else
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+        CSP_LOG_MSG(csp::common::LogLevel::Warning,
             "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
     }
 
@@ -50,7 +50,7 @@ csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus
     else
     {
         CSP_LOG_MSG(
-            csp::systems::LogLevel::Error, "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
+            csp::common::LogLevel::Error, "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
     }
 
     return Status;
@@ -302,8 +302,8 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
             if (FirstJSONMember->value.IsBool())
             {
                 SpaceIsTicketed = FirstJSONMember->value.GetBool();
-                CSP_LOG_FORMAT(LogLevel::VeryVerbose, "We found that the space with ID %s has ticketed status: %s", FirstJSONMember->name.GetString(),
-                    SpaceIsTicketed ? "true" : "false");
+                CSP_LOG_FORMAT(common::LogLevel::VeryVerbose, "We found that the space with ID %s has ticketed status: %s",
+                    FirstJSONMember->name.GetString(), SpaceIsTicketed ? "true" : "false");
             }
             else
             {
@@ -317,8 +317,8 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
 
         if (ExpectedResponse == false)
         {
-            CSP_LOG_MSG(
-                LogLevel::Error, "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
+            CSP_LOG_MSG(common::LogLevel::Error,
+                "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
         }
     }
 }

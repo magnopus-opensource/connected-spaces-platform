@@ -193,9 +193,9 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
 class MyCoolClass
 {
 public:
-    MyCoolClass() { CSP_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::MyCoolClass() called!"); }
+    MyCoolClass() { CSP_LOG_MSG(csp::common::LogLevel::Log, "MyCoolClass::MyCoolClass() called!"); }
 
-    ~MyCoolClass() { CSP_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::~MyCoolClass() called!"); }
+    ~MyCoolClass() { CSP_LOG_MSG(csp::common::LogLevel::Log, "MyCoolClass::~MyCoolClass() called!"); }
 };
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, OptionalAssignmentOperatorTest)
