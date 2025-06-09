@@ -3,10 +3,10 @@
 // Include the generated C interface so it gets compiled
 #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 
-
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 #include "generated_exports.h"
 
@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 namespace csp {
     // Helper function to free allocated memory from wrappers
     CSP_API void Free(void* Pointer) {
-        csp::memory::DllFree(Pointer);
+        std::free(Pointer);
     }
 
     // Helper function to check floats for equality using dynamic tolerance value
