@@ -186,7 +186,8 @@ if not Project then
             }
 
             libdirs {
-                "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/Android/ARM64"
+                "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/Android/ARM64",
+                "%{wks.location}/ARM64/%{cfg.buildcfg} %{cfg.platform}"
             }
 
             links {
