@@ -187,8 +187,8 @@ using namespace std::chrono;
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
-    , LogSystem(LogSystem)
     , Connection(nullptr)
+    , LogSystem(LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::mutex)
@@ -1106,6 +1106,63 @@ bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPa
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
 const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+
+void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
+    csp::common::String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
+{
+    // A refactor to a regular continuation would be appreciated ... assuming we need to keep this method at all.
+
+    // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+    // This hopefully will change in a future version when CHS support it.
+    MultiplayerConnectionInst->StopListening(
+        [MultiplayerConnection = MultiplayerConnectionInst, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        {
+            if (Error != csp::multiplayer::ErrorCode::None)
+            {
+                RefreshMultiplayerContinuationEvent->set(Error);
+                return;
+            }
+
+            CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StopListening success");
+            MultiplayerConnection->SetScopes(SpaceId,
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                {
+                    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes callback");
+                    if (Error != csp::multiplayer::ErrorCode::None)
+                    {
+                        RefreshMultiplayerContinuationEvent->set(Error);
+                        return;
+                    }
+                    else
+                    {
+                        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes was called successfully");
+                    }
+
+                    MultiplayerConnection->StartListening()()
+                        .then(async::inline_scheduler(),
+                            [RefreshMultiplayerContinuationEvent]()
+                            {
+                                CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
+
+                                // TODO: Support getting errors from RetrieveAllEntities
+                                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
+
+                                // Success!
+                                RefreshMultiplayerContinuationEvent->set({});
+                            })
+                        .then(async::inline_scheduler(),
+                            csp::common::continuations::InvokeIfExceptionInChain(
+                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                                {
+                                    // Error case
+                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                    RefreshMultiplayerContinuationEvent->set(Error);
+                                    return;
+                                },
+                                csp::systems::SystemsManager::Get().GetLogSystem()));
+                });
+        });
+}
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 {

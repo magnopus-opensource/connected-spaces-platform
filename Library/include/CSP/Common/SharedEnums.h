@@ -95,6 +95,21 @@ enum class EResponseCodes : uint16_t
 
 } // namespace csp::web
 
+namespace csp::multiplayer
+{
+
+/// @brief Enum used to indicate the failure state of a multiplayer request.
+enum class ErrorCode
+{
+    None,
+    Unknown,
+    NotConnected,
+    AlreadyConnected,
+    SpaceUserLimitExceeded
+};
+
+} // namespace csp::multiplayer
+
 namespace csp::systems
 {
 

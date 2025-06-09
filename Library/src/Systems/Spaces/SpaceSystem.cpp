@@ -21,6 +21,7 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -253,68 +254,6 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
     };
 }
 
-void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
-    String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
-{
-    // This method must be a member function as it exploits friendship.
-    // A refactor to a regular continuation would be appreciated, for that to be the case it needs to use public mechanisms only.
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    SystemsManager.GetSpaceEntitySystem()->Initialise();
-    auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
-
-    // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
-    // This hopefully will change in a future version when CHS support it.
-    MultiplayerConnection->StopListening(
-        [MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
-        {
-            if (Error != csp::multiplayer::ErrorCode::None)
-            {
-                RefreshMultiplayerContinuationEvent->set(Error);
-                return;
-            }
-
-            CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StopListening success");
-            MultiplayerConnection->SetScopes(SpaceId,
-                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
-                {
-                    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes callback");
-                    if (Error != csp::multiplayer::ErrorCode::None)
-                    {
-                        RefreshMultiplayerContinuationEvent->set(Error);
-                        return;
-                    }
-                    else
-                    {
-                        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes was called successfully");
-                    }
-
-                    MultiplayerConnection->StartListening()()
-                        .then(async::inline_scheduler(),
-                            [RefreshMultiplayerContinuationEvent]()
-                            {
-                                CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                // TODO: Support getting errors from RetrieveAllEntities
-                                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
-
-                                // Success!
-                                RefreshMultiplayerContinuationEvent->set({});
-                            })
-                        .then(async::inline_scheduler(),
-                            csp::common::continuations::InvokeIfExceptionInChain(
-                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
-                                {
-                                    // Error case
-                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
-                                    RefreshMultiplayerContinuationEvent->set(Error);
-                                    return;
-                                },
-                                csp::systems::SystemsManager::Get().GetLogSystem()));
-                });
-        });
-}
-
 /* EnterSpace Continuations */
 auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem)
 {
@@ -385,7 +324,7 @@ auto SpaceSystem::FireEnterSpaceEvent(Space& OutCurrentSpace)
 
 auto SpaceSystem::RefreshMultiplayerScopes()
 {
-    return [this](const SpaceResult& SpaceResult)
+    return [](const SpaceResult& SpaceResult)
     {
         CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::RefreshMultiplayerScopes");
 
@@ -393,7 +332,10 @@ auto SpaceSystem::RefreshMultiplayerScopes()
         /* This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
         auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
         auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
-        RefreshMultiplayerConnectionToEnactScopeChange(SpaceResult.GetSpace().Id, RefreshMultiplayerConnectionEvent);
+
+        csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RefreshMultiplayerConnectionToEnactScopeChange(
+            SpaceResult.GetSpace().Id, RefreshMultiplayerConnectionEvent);
+
         return RefreshMultiplayerConnectionContinuation;
     };
 }

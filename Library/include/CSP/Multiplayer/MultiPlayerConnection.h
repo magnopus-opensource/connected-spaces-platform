@@ -74,16 +74,6 @@ enum class ConnectionState
     Disconnected
 };
 
-/// @brief Enum used to indicate the failure state of a multiplayer request.
-enum class ErrorCode
-{
-    None,
-    Unknown,
-    NotConnected,
-    AlreadyConnected,
-    SpaceUserLimitExceeded
-};
-
 /// @ingroup Multiplayer
 /// @brief Handling of all multiplayer connection functionality, such as connect, disconnect, entity replication and network events.
 class CSP_API MultiplayerConnection
