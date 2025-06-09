@@ -8,4 +8,4 @@ rem Generate projects
 del Makefile
 del UnitTestingBinary.make
 del mimalloc.make
-"../modules/premake/bin/release/premake5.exe" gmake2 --generate_wasm
+"../modules/premake/bin/release/premake5.exe" gmake --generate_wasm
