@@ -689,6 +689,7 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         std::nullopt, // PartialName
         std::nullopt, // GroupOwnerIds
         std::nullopt, // ExcludeGroupOwnerIds
+        std::nullopt, // ExcludeIds
         std::nullopt, // Users
         IsDiscoverable, // Discoverable
         std::nullopt, // AutoModerator
