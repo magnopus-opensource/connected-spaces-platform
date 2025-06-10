@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 
+UNITY_VERSION = "2022.2.16"
 
 def get_editor_path_cachefile_path():
     filename = "editor_filepath.cfg"
@@ -32,7 +33,7 @@ def find_unity_installation():
     installed_editors = reversed(result.stdout.strip().splitlines())
 
     for e in installed_editors:
-        if "2020.3." in e or "2021.3" in e:
+        if UNITY_VERSION in e:
             version, path = e.split(",")
             version = version.strip()
             path = path.strip()[len("installed at ") :]
@@ -51,7 +52,7 @@ def find_unity_installation():
 
             return
 
-    print("Could not find compatible Unity installation! Please install any version of Unity 2020.3.")
+    print(f"Could not find compatible Unity installation! Please install Unity {UNITY_VERSION}")
     sys.exit(1)
 
 
