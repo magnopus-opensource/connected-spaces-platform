@@ -135,17 +135,11 @@ def main():
     # Copy CSP DLL and C# wrapper code into dummy package
     shutil.copy("../Binaries/x64/Debug/ConnectedSpacesPlatform_D.dll", dummy_package_path)
 
-    csharp_src_path = "../../Library/CSharpWrapper/src/"
-    files = os.listdir(csharp_src_path)
+    csharp_src_path = "../../Library/CSharpWrapper/src"
+    shutil.copytree(csharp_src_path, dummy_package_source_path, dirs_exist_ok=True)
 
-    for f in files:
-        shutil.copy(os.path.join(csharp_src_path, f), dummy_package_source_path)
-
-    csharp_src_path = "../../Tools/WrapperGenerator/Output/CSharp/"
-    files = os.listdir(csharp_src_path)
-
-    for f in files:
-        shutil.copy(os.path.join(csharp_src_path, f), dummy_package_generated_source_path)
+    csharp_src_path = "../../Tools/WrapperGenerator/Output/CSharp"
+    shutil.copytree(csharp_src_path, dummy_package_generated_source_path, dirs_exist_ok=True)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--test_output_path", default=os.path.join(current_directory, "unity_test_results.xml"))
