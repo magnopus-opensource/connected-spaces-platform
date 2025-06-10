@@ -2,7 +2,6 @@
 Checks:          'clang-diagnostic-*,clang-analyzer-*,*,-cppcoreguidelines-pro-type-vararg,-hicpp-special-member-functions,-readability-inconsistent-declaration-parameter-name,-llvm-include-order,-clang-diagnostic-deprecated-declarations,-llvmlibc-callee-namespace,-llvmlibc-restrict-system-libc-headers,-fuchsia-*,-clang-diagnostic-error,-llvmlibc-implementation-in-namespace,-modernize-use-trailing-return-type,-hicpp-use-equals-default,-modernize-use-equals-delete,-cppcoreguidelines-owning-memory,-hicpp-vararg'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
 CheckOptions:
   - key:             abseil-string-find-startswith.AbseilStringsMatchHeader
     value:           'absl/strings/match.h'
