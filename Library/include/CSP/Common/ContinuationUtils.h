@@ -62,6 +62,43 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
     };
 }
+
+/*
+ * Checks the multiplayer::Errorcode of a (passed by continuation) code.
+ * If not a success, logs an error and aborts continuation.
+ * Otherwise, logs a success message and continues. Does not pass anything to the next continuation.
+ * Error context objects are optional, if unset, default values Failed, 500, and Unknown are used
+ *
+ * This being here, and not in multiplayer, is non-ideal, and a symptom of the fact that we have not yet
+ * factored our Result types to have the concept of a multiplayer result.
+ * This allows us to verify multiplayer functionality across the api-bounds, which is a bit of a leaky
+ * abstraction, but pragmatically necessary to do the modularization.
+ */
+template <typename ErrorResultT>
+inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
+    ErrorResultT ErrorResult, csp::common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+{
+    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogSystem, LogLevel](
+               const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
+    {
+        if (ErrorCode.has_value())
+        {
+            // Error Case. We have an error message, abort
+            std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
+            if (Callback)
+            {
+                Callback(ErrorResult);
+            }
+            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
+        }
+        else
+        {
+            // Success Case
+            LogSystem->LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
+        }
+    };
+}
+
 }
 
 CSP_END_IGNORE

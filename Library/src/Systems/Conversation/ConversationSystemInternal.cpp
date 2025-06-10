@@ -883,7 +883,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 7. Send multiplayer event
         .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBus))
-        .then(multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
+        .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
             MakeInvalid<multiplayer::AnnotationResult>(), csp::systems::SystemsManager::Get().GetLogSystem()))
         // 8. Process result
@@ -910,7 +910,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Send multiplayer event
         .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBus))
-        .then(multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
+        .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(),
             csp::systems::SystemsManager::Get().GetLogSystem()))
         // 4. Delete annoation asset
@@ -1034,7 +1034,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 7. Send multiplayer event
         .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBus))
-        .then(multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
+        .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
             csp::systems::SystemsManager::Get().GetLogSystem()))
         // 8. Process result
@@ -1063,7 +1063,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Send multiplayer event
         .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBus))
-        .then(multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
+        .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(),
             csp::systems::SystemsManager::Get().GetLogSystem()))
         // 4. Delete annoation asset

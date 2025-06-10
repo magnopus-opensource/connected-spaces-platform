@@ -23,41 +23,10 @@ CSP_START_IGNORE
 #include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Multiplayer/ErrorCodeStrings.h"
 #include <signalrclient/signalr_value.h>
 
 namespace csp::multiplayer::continuations
 {
-/*
- * Checks the multiplayer::Errorcode of a (passed by continuation) code.
- * If not a success, logs an error and aborts continuation.
- * Otherwise, logs a success message and continues. Does not pass anything to the next continuation.
- * Error context objects are optional, if unset, default values Failed, 500, and Unknown are used
- */
-template <typename ErrorResultT>
-inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
-    ErrorResultT ErrorResult, csp::common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
-{
-    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogSystem, LogLevel](
-               const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
-    {
-        if (ErrorCode.has_value())
-        {
-            // Error Case. We have an error message, abort
-            std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            if (Callback)
-            {
-                Callback(ErrorResult);
-            }
-            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
-        }
-        else
-        {
-            // Success Case
-            LogSystem->LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
-        }
-    };
-}
 
 /* Continuations out of SignalR Invoke come back as a task<tuple<value, exception_ptr>>
    This function transforms that into just a value, rethrowing the exception if it's populated. */

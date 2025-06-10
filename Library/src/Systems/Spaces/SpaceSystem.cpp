@@ -29,7 +29,6 @@
 #include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
-#include "Multiplayer/ErrorCodeStrings.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
@@ -369,7 +368,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
         .then(async::inline_scheduler(), RefreshMultiplayerScopes())
         .then(async::inline_scheduler(),
-            multiplayer::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
+            common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", MakeInvalid<NullResult>(),
                 csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
