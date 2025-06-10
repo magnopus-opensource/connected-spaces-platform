@@ -43,8 +43,6 @@
 #include <rapidjson/rapidjson.h>
 #include <thread>
 
-// This file also needs split, but only in an extremely minor way. Will be done in a later commit
-#include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Systems/ContinuationUtils.h"
 
 using namespace csp;
