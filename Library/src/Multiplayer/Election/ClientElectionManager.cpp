@@ -295,8 +295,6 @@ ClientProxy* ClientElectionManager::FindClientUsingId(int64_t ClientId)
 
 void ClientElectionManager::Update()
 {
-    //	CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::Update called");
-
     switch (TheElectionState)
     {
     case ElectionState::Idle:
