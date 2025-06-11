@@ -54,7 +54,7 @@ class CSP_API TextSpaceComponent : public ComponentBase, public ITransformCompon
 public:
     /// @brief Constructs the text space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    TextSpaceComponent(SpaceEntity* Parent);
+    TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the text  this text component refers to.
     /// @return The text this text component refers to.

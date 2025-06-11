@@ -45,7 +45,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");

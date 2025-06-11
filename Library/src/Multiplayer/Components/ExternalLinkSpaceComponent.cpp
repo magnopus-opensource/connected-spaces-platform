@@ -17,13 +17,11 @@
 
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 
-#include <Debug/Logging.h>
-
 namespace csp::multiplayer
 {
 
-ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ExternalLink, Parent)
+ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::ExternalLink, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl)] = "";

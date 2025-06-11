@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Fog, Parent)
+FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Fog, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)] = static_cast<int64_t>(FogMode::Linear);
     Properties[static_cast<uint32_t>(FogPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };

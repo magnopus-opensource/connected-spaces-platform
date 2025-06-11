@@ -77,7 +77,7 @@ class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
 public:
     /// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AnimatedModelSpaceComponent(SpaceEntity* Parent);
+    AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /* clang-format off */
 	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]

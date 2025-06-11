@@ -94,7 +94,7 @@ class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IEnableab
 public:
     /// @brief Constructs the video player component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    VideoPlayerSpaceComponent(SpaceEntity* Parent);
+    VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the name of this video player.
     /// @return The name of this video player.

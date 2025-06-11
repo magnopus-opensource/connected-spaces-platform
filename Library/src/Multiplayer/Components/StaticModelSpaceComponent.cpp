@@ -16,15 +16,14 @@
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include <memory>
 
 namespace csp::multiplayer
 {
 
-StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::StaticModel, Parent)
+StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::StaticModel, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";

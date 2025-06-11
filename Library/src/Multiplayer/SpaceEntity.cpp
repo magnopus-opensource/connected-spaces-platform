@@ -712,81 +712,83 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
 {
     ComponentBase* Component;
 
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = new StaticModelSpaceComponent(this);
+        Component = new StaticModelSpaceComponent(LogSystem, this);
         break;
     case ComponentType::AnimatedModel:
-        Component = new AnimatedModelSpaceComponent(this);
+        Component = new AnimatedModelSpaceComponent(LogSystem, this);
         break;
     case ComponentType::VideoPlayer:
-        Component = new VideoPlayerSpaceComponent(this);
+        Component = new VideoPlayerSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Image:
-        Component = new ImageSpaceComponent(this);
+        Component = new ImageSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ExternalLink:
-        Component = new ExternalLinkSpaceComponent(this);
+        Component = new ExternalLinkSpaceComponent(LogSystem, this);
         break;
     case ComponentType::AvatarData:
-        Component = new AvatarSpaceComponent(this);
+        Component = new AvatarSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Light:
-        Component = new LightSpaceComponent(this);
+        Component = new LightSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ScriptData:
-        Component = new ScriptSpaceComponent(this);
+        Component = new ScriptSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Button:
-        Component = new ButtonSpaceComponent(this);
+        Component = new ButtonSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Custom:
-        Component = new CustomSpaceComponent(this);
+        Component = new CustomSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Portal:
-        Component = new PortalSpaceComponent(this);
+        Component = new PortalSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Conversation:
-        Component = new ConversationSpaceComponent(this);
+        Component = new ConversationSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Audio:
-        Component = new AudioSpaceComponent(this);
+        Component = new AudioSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Spline:
-        Component = new SplineSpaceComponent(this);
+        Component = new SplineSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Collision:
-        Component = new CollisionSpaceComponent(this);
+        Component = new CollisionSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Reflection:
-        Component = new ReflectionSpaceComponent(this);
+        Component = new ReflectionSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Fog:
-        Component = new FogSpaceComponent(this);
+        Component = new FogSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ECommerce:
-        Component = new ECommerceSpaceComponent(this);
+        Component = new ECommerceSpaceComponent(LogSystem, this);
         break;
     case ComponentType::CinematicCamera:
-        Component = new CinematicCameraSpaceComponent(this);
+        Component = new CinematicCameraSpaceComponent(LogSystem, this);
         break;
     case ComponentType::FiducialMarker:
-        Component = new FiducialMarkerSpaceComponent(this);
+        Component = new FiducialMarkerSpaceComponent(LogSystem, this);
         break;
     case ComponentType::GaussianSplat:
-        Component = new GaussianSplatSpaceComponent(this);
+        Component = new GaussianSplatSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Text:
-        Component = new TextSpaceComponent(this);
+        Component = new TextSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Hotspot:
-        Component = new HotspotSpaceComponent(this);
+        Component = new HotspotSpaceComponent(LogSystem, this);
         break;
     default:
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning,
-            csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
+        CSP_LOG_MSG(
+            csp::common::LogLevel::Warning, csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
         return nullptr;
     }
     }
@@ -1103,7 +1105,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
     }
 
     // 3. Handle any component deletions
-    ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
+    ComponentBase DeletionComponent(ComponentType::Delete, csp::systems::SystemsManager::Get().GetLogSystem(), const_cast<SpaceEntity*>(this));
 
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {

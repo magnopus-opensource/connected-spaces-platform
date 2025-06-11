@@ -58,7 +58,7 @@ class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnablea
 public:
     /// @brief Creates an external link component that can be added to an existing space entity.
     /// @param Parent - The space entity to which this new component will belong to.
-    ExternalLinkSpaceComponent(SpaceEntity* Parent);
+    ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the name of this external link component.
     [[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]] const csp::common::String& GetName() const;

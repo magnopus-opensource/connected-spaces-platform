@@ -67,7 +67,7 @@ class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdParty
 public:
     /// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CollisionSpaceComponent(SpaceEntity* Parent);
+    CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup ITransformComponent
     /// @{
