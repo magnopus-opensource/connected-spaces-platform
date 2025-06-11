@@ -73,7 +73,7 @@ class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComp
 public:
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AudioSpaceComponent(SpaceEntity* Parent);
+    AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup IPositionComponent
     /// @{

@@ -91,7 +91,7 @@ class CSP_API LightSpaceComponent : public ComponentBase,
 public:
     /// @brief Constructs the light space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    LightSpaceComponent(SpaceEntity* Parent);
+    LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the type of light of this light component.
     /// @return The type of light of this light component.

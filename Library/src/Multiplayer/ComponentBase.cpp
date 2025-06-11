@@ -16,11 +16,14 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 
 #include "CSP/Common/List.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h "
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
+
+#include <fmt/format.h>
 
 namespace csp::multiplayer
 {
@@ -32,15 +35,17 @@ ComponentBase::ComponentBase()
     , Id(0)
     , Type(ComponentType::Invalid)
     , ScriptInterface(nullptr)
+    , LogSystem(nullptr)
 {
     InitialiseProperties();
 }
 
-ComponentBase::ComponentBase(ComponentType Type, SpaceEntity* Parent)
+ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : Parent(Parent)
     , Id(0)
     , Type(Type)
     , ScriptInterface(nullptr)
+    , LogSystem(LogSystem)
 {
     InitialiseProperties();
 }
@@ -66,7 +71,10 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
         return Properties[Key];
     }
 
-    CSP_LOG_ERROR_FORMAT("No Property with this key: %d", Key);
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("No Property with this key: {}", Key).c_str());
+    }
 
     return InvalidValue;
 }
@@ -80,7 +88,10 @@ bool ComponentBase::GetBooleanProperty(uint32_t Key) const
         return RepVal.GetBool();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Boolean type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Boolean type");
+    }
 
     return false;
 }
@@ -94,7 +105,10 @@ int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
         return RepVal.GetInt();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Integer type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Integer type");
+    }
 
     return 0;
 }
@@ -108,7 +122,10 @@ float ComponentBase::GetFloatProperty(uint32_t Key) const
         return RepVal.GetFloat();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Float type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Float type");
+    }
 
     return 0.0f;
 }
@@ -122,7 +139,10 @@ const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
         return RepVal.GetString();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid String type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid String type");
+    }
 
     return ReplicatedValue::GetDefaultString();
 }
@@ -136,7 +156,10 @@ const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) cons
         return RepVal.GetVector2();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector2 type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector2 type");
+    }
 
     return ReplicatedValue::GetDefaultVector2();
 }
@@ -150,7 +173,10 @@ const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) cons
         return RepVal.GetVector3();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector3 type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector3 type");
+    }
 
     return ReplicatedValue::GetDefaultVector3();
 }
@@ -164,7 +190,10 @@ const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) cons
         return RepVal.GetVector4();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector4 type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector4 type");
+    }
 
     return ReplicatedValue::GetDefaultVector4();
 }
@@ -178,7 +207,10 @@ const csp::common::Map<csp::common::String, ReplicatedValue>& ComponentBase::Get
         return RepVal.GetStringMap();
     }
 
-    CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid String Map type");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid String Map type");
+    }
 
     return ReplicatedValue::GetDefaultStringMap();
 }
@@ -187,15 +219,26 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 {
     if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
     {
-        CSP_LOG_ERROR_FORMAT("ValueType is unexpected. Expected: %d Received: %d", static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
-            static_cast<uint32_t>(Value.GetReplicatedValueType()));
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("ValueType is unexpected. Expected: {0} Received: {1}", static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
+                    static_cast<uint32_t>(Value.GetReplicatedValueType()))
+                    .c_str());
+        }
     }
 
     // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
     if (!GetParent()->IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-            GetParent()->GetName().c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
+                    GetParent()->GetName())
+                    .c_str());
+        }
+
         return;
     }
 
@@ -255,7 +298,10 @@ void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, E
     else
     {
         // Already registered
-        CSP_LOG_ERROR_FORMAT("Action %s already registered\n", InAction.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} already registered\n", InAction).c_str());
+        }
     }
 }
 
@@ -267,7 +313,10 @@ void ComponentBase::UnregisterActionHandler(const csp::common::String& InAction)
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Action %s not found\n", InAction.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Action {} not found\n", InAction).c_str());
+        }
     }
 }
 

@@ -53,7 +53,7 @@ class CSP_API ScriptSpaceComponent : public ComponentBase
 public:
     /// @brief Constructs the script space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ScriptSpaceComponent(SpaceEntity* Parent);
+    ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Retrieves the source of the script of this script component.
     /// @return The script source of this script component.

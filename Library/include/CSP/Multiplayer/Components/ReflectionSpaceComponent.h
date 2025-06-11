@@ -57,7 +57,7 @@ class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionC
 public:
     /// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ReflectionSpaceComponent(SpaceEntity* Parent);
+    ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Get the name of the Reflection component.
     /// @return csp::common::String specifying the component name.

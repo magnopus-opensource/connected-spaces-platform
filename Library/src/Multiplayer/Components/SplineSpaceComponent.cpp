@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "tinysplinecxx.h"
 
 namespace csp::multiplayer
 {
-SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Spline, Parent)
+SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Spline, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
 
@@ -50,7 +50,10 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
     }
     else
     {
-        CSP_LOG_ERROR_MSG("Waypoints not Set.");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Waypoints not Set.");
+        }
 
         return {};
     }

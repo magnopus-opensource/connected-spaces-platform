@@ -17,7 +17,6 @@
 
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Debug/Logging.h"
 
 using namespace csp::systems;
 

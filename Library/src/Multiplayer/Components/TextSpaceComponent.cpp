@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Text, Parent)
+TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Text, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(TextPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(TextPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };

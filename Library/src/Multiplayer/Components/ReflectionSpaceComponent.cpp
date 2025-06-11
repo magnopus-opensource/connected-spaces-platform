@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Reflection, Parent)
+ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Reflection, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)] = "";
