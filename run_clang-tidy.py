@@ -8,20 +8,24 @@ import sys
 VERBOSE = True
 PLATFORM = "x64"
 CONFIGURATION = "DebugDLL"
-# todo: get path to MSBuild.exe from env var? os.getenv('MY_SUPER_DUPER_ENV_VAR')
+
+# We're using Visual Studio Professional 2022 on both the CI and locally, so at this point there is no need to read this path dynamically.
 MSBUILD_EXE = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\MSBuild.exe"
 
 EXTENSIONS_TO_SCAN = [".h", ".hh", ".hpp", ".hxx", ".c", ".cc", ".cpp", ".cxx"] # case-insensitive search. add new formats in lower case.
 LOCATIONS_TO_SCAN = ["Library", "MultiplayerTestRunner", "Tests"]
 LOCATIONS_TO_EXCLUDE = ["ThirdParty", "modules"] # case-insensitive search
 
+errors_in_location = [False] * len (LOCATIONS_TO_SCAN)
 
-for location in LOCATIONS_TO_SCAN:
+for index, location in enumerate(LOCATIONS_TO_SCAN):
 
     if VERBOSE: print("Processing location " + location + "...")
 
     if (location == "Library"):
-        clang_tidy_name = "ConnectedSpacesPlatform_D"
+        clang_tidy_name = "ConnectedSpacesPlatform"
+        if "Debug" in CONFIGURATION:
+            clang_tidy_name += "_D"
         target_name = ".\\ConnectedSpacesPlatform.sln"
     else:
         clang_tidy_name = location
@@ -33,13 +37,19 @@ for location in LOCATIONS_TO_SCAN:
         shutil.rmtree(compile_file_path)
         if VERBOSE: print("compile_commands.json was successfully removed from " + compile_file_path)
 
-    # This command fails to actually build the project, but we don't care as we just want to generate compile_commands.json
-    # We run clang-tidy later on with a lot more degrees of freedom (like excludng files) than what would be possible with this.
-    subprocess.run([MSBUILD_EXE,
+    # This command fails to actually build the project on the x64 platform, but we don't care as we just want to generate compile_commands.json. So we're happy that it fails quickly.
+    # We run clang-tidy later on with a lot more degrees of freedom (like excluding files) than what would be possible with this.
+    # Note if we ever want to run this on the Android platform: the command below "just works" and does not create an intermediary compile_commands.json file.
+    # However, it scans all the files, including modules and third parties, which we can't exclude this way.
+    command_to_run = [MSBUILD_EXE,
                     "/t:ClangTidy",
                     "/p:Configuration=" + CONFIGURATION,
                     "/p:Platform=" + PLATFORM,
-                    target_name])
+                    target_name]
+    if VERBOSE:
+        print("Generating compile_commands.json file with command...")
+        print(command_to_run)
+    subprocess.run(command_to_run)
     if os.path.exists(compile_file_path):
         if VERBOSE: print("compile_commands.json was successfully generated for " + location + ".")
     else:
@@ -69,6 +79,17 @@ for location in LOCATIONS_TO_SCAN:
         if VERBOSE: print("Clang-tidy command has finished running on " + location + ".")
 
     except subprocess.CalledProcessError as e:
+        errors_in_location[index] = True
         for line in str(e.output).split("\\n"):
             print(line)
         if VERBOSE: print("Clang-tidy command has finished running on " + location + " with at least one error.")
+
+if any(errors_in_location):
+    print("\nSummary of errors:")
+    for index, errlocation in enumerate(errors_in_location):
+        if errlocation:
+            print("\tThere were errors in location " + LOCATIONS_TO_SCAN[index] + ".")
+    sys.exit(-1)
+
+# That's all, folks!
+sys.exit(os.EX_OK)
