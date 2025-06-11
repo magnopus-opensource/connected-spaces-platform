@@ -64,12 +64,11 @@ for location in LOCATIONS_TO_SCAN:
         print(command_to_run)
 
     try:
-        subprocess.run(command_to_run)
+        output = subprocess.check_output(command_to_run)
+        print(output) # todo: check what is in there once we have a run without errors (when?...)
         if VERBOSE: print("Clang-tidy command has finished running on " + location + ".")
 
-        # todo! we have to process the output in order to retrieve all the errors and warnings that clang-tidy found
-        # output = subprocess.check_output(command_to_run)
-        # print(str(output)) # this is completely unreadable
-
     except subprocess.CalledProcessError as e:
-        print(e.output)
+        for line in str(e.output).split("\\n"):
+            print(line)
+        if VERBOSE: print("Clang-tidy command has finished running on " + location + " with at least one error.")
