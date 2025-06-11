@@ -2969,7 +2969,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr };
+    SpaceEntity Entity { nullptr, nullptr };
 
     // Ensure the lock error message is called when we try and lock an entity that is already locked
     const csp::common::String LockErrorMsg = "Entity is already locked.";
@@ -2984,7 +2984,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr };
+    SpaceEntity Entity { nullptr, nullptr };
 
     // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
     const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";

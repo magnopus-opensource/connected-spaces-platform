@@ -260,12 +260,12 @@ MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { r
 namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
-        const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, csp::common::LogSystem& LogSystem, uint64_t NetworkId,
+        const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
-            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
+            &SpaceEntitySystem, &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
@@ -304,7 +304,7 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
 {
     return [Name, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform, IsVisible,
+        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, *LogSystem, NetworkId, Name, Transform,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
@@ -345,7 +345,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
         std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this,
-            NetworkId, Name, Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+            *LogSystem, NetworkId, Name, Transform, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
@@ -606,7 +606,7 @@ SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::val
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(EntitySystem);
+    const auto NewEntity = new SpaceEntity(EntitySystem, LogSystem);
     NewEntity->FromObjectMessage(Message);
 
     EntitySystem->AddEntity(NewEntity);
@@ -1498,8 +1498,8 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result);
-        auto* NewObject
-            = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+        auto* NewObject = new SpaceEntity(
+            this, LogSystem, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
 
         if (InParent.HasValue())
         {
