@@ -421,15 +421,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
         csp::systems::LocalScriptSystem* LocalScriptSystem = SystemsManager.GetLocalScriptSystem();
         if (LocalScriptSystem)
         {   
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->SetSpaceId(SpaceId)");
             LocalScriptSystem->SetSpaceId(SpaceId);
             // Try initialization but don't block if it fails
             try {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->Initialize();");
                 LocalScriptSystem->Initialize();
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem->LoadScriptModulesWithTimeout();");
                 // Use the timeout version which is WASM safe
-                LocalScriptSystem->LoadScriptModulesWithTimeout(10000); // Immediate return in WASM
+                LocalScriptSystem->LoadScriptModules(); // Immediate return in WASM
             } 
             catch (const std::exception& e) {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Script initialization error: %s", e.what());
@@ -1928,4 +1925,5 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         ResponseHandler // ResponseHandler
     );
 }
-} // namespace csp::systems
+
+}

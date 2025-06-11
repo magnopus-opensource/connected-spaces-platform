@@ -80,10 +80,7 @@ public:
     void LoadScriptModules();
     void RunScript(const csp::common::String& Path);
 
-    /// @brief Load script modules with a timeout to prevent hanging
-    /// @param TimeoutMs Maximum time in milliseconds to wait for loading to complete
-    /// @return True if loading completed successfully, false if it timed out or failed
-    bool LoadScriptModulesWithTimeout(uint32_t TimeoutMs);
+
 
 private:
     /// @brief The QuickJS context for script execution
