@@ -207,7 +207,35 @@ void ObjectMessage::Deserialize(SignalRDeserializer& Deserializer)
         Deserializer.ReadValue(IsPersistent);
         Deserializer.ReadValue(OwnerId);
         Deserializer.ReadValue(ParentId);
-        Deserializer.ReadValue(Components);
+
+        // Deserialize components
+        if (Deserializer.NextValueIsNull() == false)
+        {
+            Components = std::map<PropertyKeyType, ItemComponentData> {};
+
+            size_t ComponentsSize = 0;
+            Deserializer.StartReadUintMap(ComponentsSize);
+
+            for (size_t i = 0; i < ComponentsSize; ++i)
+            {
+                try
+                {
+                    std::pair<PropertyKeyType, ItemComponentData> ComponentKeyValue;
+                    Deserializer.ReadKeyValue(ComponentKeyValue);
+
+                    (*Components)[ComponentKeyValue.first] = ComponentKeyValue.second;
+                }
+                catch (const std::exception&)
+                {
+                }
+            }
+
+            Deserializer.EndReadUintMap();
+        }
+        else
+        {
+            Deserializer.Skip();
+        }
     }
     Deserializer.EndReadArray();
 }
@@ -285,7 +313,34 @@ void ObjectPatch::Deserialize(SignalRDeserializer& Deserializer)
             Deserializer.EndReadArray();
         }
 
-        Deserializer.ReadValue(Components);
+        // Deserialize components
+        if (Deserializer.NextValueIsNull() == false)
+        {
+            Components = std::map<PropertyKeyType, ItemComponentData> {};
+
+            size_t ComponentsSize = 0;
+            Deserializer.StartReadUintMap(ComponentsSize);
+
+            for (size_t i = 0; i < ComponentsSize; ++i)
+            {
+                try
+                {
+                    std::pair<PropertyKeyType, ItemComponentData> ComponentKeyValue;
+                    Deserializer.ReadKeyValue(ComponentKeyValue);
+
+                    (*Components)[ComponentKeyValue.first] = ComponentKeyValue.second;
+                }
+                catch (const std::exception&)
+                {
+                }
+            }
+
+            Deserializer.EndReadUintMap();
+        }
+        else
+        {
+            Deserializer.Skip();
+        }
     }
     Deserializer.EndReadArray();
 }
