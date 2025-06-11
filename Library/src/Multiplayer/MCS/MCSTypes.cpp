@@ -109,6 +109,38 @@ namespace
             throw std::invalid_argument("Trying to deserialize unsupported ItemComponentDataType");
         }
     }
+
+    void DeserializeComponents(SignalRDeserializer& Deserializer, std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
+    {
+        if (Deserializer.NextValueIsNull() == false)
+        {
+            Components = std::map<PropertyKeyType, ItemComponentData> {};
+
+            size_t ComponentsSize = 0;
+            Deserializer.StartReadUintMap(ComponentsSize);
+
+            for (size_t i = 0; i < ComponentsSize; ++i)
+            {
+                try
+                {
+                    std::pair<PropertyKeyType, ItemComponentData> ComponentKeyValue;
+                    Deserializer.ReadKeyValue(ComponentKeyValue);
+
+                    (*Components)[ComponentKeyValue.first] = ComponentKeyValue.second;
+                }
+                catch (const std::exception&)
+                {
+                }
+            }
+
+            Deserializer.EndReadUintMap();
+        }
+        else
+        {
+            Components = std::nullopt;
+            Deserializer.Skip();
+        }
+    }
 }
 
 ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
@@ -207,7 +239,7 @@ void ObjectMessage::Deserialize(SignalRDeserializer& Deserializer)
         Deserializer.ReadValue(IsPersistent);
         Deserializer.ReadValue(OwnerId);
         Deserializer.ReadValue(ParentId);
-        Deserializer.ReadValue(Components);
+        DeserializeComponents(Deserializer, Components);
     }
     Deserializer.EndReadArray();
 }
@@ -285,7 +317,7 @@ void ObjectPatch::Deserialize(SignalRDeserializer& Deserializer)
             Deserializer.EndReadArray();
         }
 
-        Deserializer.ReadValue(Components);
+        DeserializeComponents(Deserializer, Components);
     }
     Deserializer.EndReadArray();
 }
