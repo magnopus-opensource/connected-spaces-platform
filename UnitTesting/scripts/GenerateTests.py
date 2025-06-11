@@ -22,7 +22,7 @@ def main():
 
     # Initialise Jinja environment
     env = Environment(
-        loader=FileSystemLoader("templates/tests/csharp"), extensions=["jinja2_workarounds.MultiLineInclude"]
+        loader=FileSystemLoader("templates/tests/csharp")
     )
 
     # Fix config values for C#

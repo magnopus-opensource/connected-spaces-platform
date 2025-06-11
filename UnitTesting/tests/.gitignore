@@ -3,5 +3,6 @@ csharp/Assets/Tests/generated/
 csharp/Assets/Tests/generated.meta
 csharp/Library/
 csharp/Logs/
+csharp/ProjectSettings/
 csharp/Packages/connected-spaces-platform.dummy/
 csharp/UserSettings/
