@@ -9,7 +9,7 @@
       import { ready, CSPFoundation, Systems } from './node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
       import { initializeCSP } from './shared/csp-initializer.js';
       (async () => {
-        // Get email and password from query parameters
+        // Get spaceID from query parameters
         const params = new URLSearchParams(window.location.search);
         const useDebugCSP = params.get('useDebugCsp');
         const spaceId = params.get(`spaceId`)
