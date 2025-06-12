@@ -80,6 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
     const csp::common::String UserName = "Player 1";
     const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const bool IsVisible = true;
     const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String UserAvatarId = "MyCoolAvatar";
     const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
@@ -91,7 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
         // Create object to represent the portal
         csp::common::String ObjectName = "Object 1";
@@ -118,7 +119,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
