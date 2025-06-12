@@ -37,8 +37,8 @@
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
+#include "Common/Web/Uri.h"
 #include "Debug/Logging.h"
-#include "Web/Uri.h"
 
 #include <algorithm>
 #include <async++.h>

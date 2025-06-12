@@ -21,8 +21,8 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Variant.h"
+#include "CSP/Common/Web/HTTPResponseCodes.h"
 #include "CSP/Systems/WebService.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 
 #include <functional>
 

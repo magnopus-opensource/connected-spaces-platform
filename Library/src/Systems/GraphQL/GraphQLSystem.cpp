@@ -16,8 +16,8 @@
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/Web/GraphQLApi/GraphQLApi.h"
 #include "Services/ApiBase/ApiBase.h"
-#include "Web/GraphQLApi/GraphQLApi.h"
 
 #include <sstream>
 

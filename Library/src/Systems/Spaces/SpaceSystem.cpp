@@ -18,12 +18,12 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Web/HTTPResponseCodes.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 #include "Common/CallHelpers.h"
 #include "Common/Continuations.h"
 #include "Common/Convert.h"
@@ -689,6 +689,7 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         std::nullopt, // PartialName
         std::nullopt, // GroupOwnerIds
         std::nullopt, // ExcludeGroupOwnerIds
+        std::nullopt, // ExcludeIds
         std::nullopt, // Users
         IsDiscoverable, // Discoverable
         std::nullopt, // AutoModerator

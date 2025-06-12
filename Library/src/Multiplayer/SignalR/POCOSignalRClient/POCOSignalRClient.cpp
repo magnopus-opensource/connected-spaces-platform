@@ -16,8 +16,8 @@
 #include "POCOSignalRClient.h"
 
 #include "CSP/CSPFoundation.h"
+#include "Common/Web/HttpAuth.h"
 #include "Debug/Logging.h"
-#include "Web/HttpAuth.h"
 
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>

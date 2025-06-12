@@ -16,8 +16,8 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 
 #include "CSP/Systems/Spaces/Space.h"
+#include "Common/Web/HttpResponse.h"
 #include "Debug/Logging.h"
-#include "Web/HttpResponse.h"
 
 namespace csp::systems
 {

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/GraphQLApi/GraphQLApi.h"
+#include "Common/Web/GraphQLApi/GraphQLApi.h"
 
 #include "CSP/CSPFoundation.h"
-#include "Web/HttpAuth.h"
-#include "Web/HttpPayload.h"
-#include "Web/WebClient.h"
+#include "Common/Web/HttpAuth.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::systems::graphqlservice
 {

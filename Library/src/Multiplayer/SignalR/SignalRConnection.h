@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "Web/Uri.h"
+#include "Common/Web/Uri.h"
 
 #include <Multiplayer/SignalR/ISignalRConnection.h>
 #include <atomic>

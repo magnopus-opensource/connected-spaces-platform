@@ -20,15 +20,15 @@
 #include "TestHelpers.h"
 
 #ifdef CSP_WASM
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
-#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
 
 #include <emscripten/emscripten.h>
 #include <emscripten/fetch.h>
 #include <emscripten/threading.h>
 #else
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
-#include "Web/POCOWebClient/POCOWebClient.h"
 #endif
 
 #include "gtest/gtest.h"

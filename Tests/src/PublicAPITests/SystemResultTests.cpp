@@ -16,11 +16,11 @@
 
 #include "Awaitable.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Web/HTTPResponseCodes.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
@@ -28,13 +28,13 @@
 
 #include "gtest/gtest.h"
 #include <Common/CallHelpers.h>
-#include <Web/HttpRequest.h>
-#include <Web/WebClient.h>
+#include <Common/Web/HttpRequest.h>
+#include <Common/Web/WebClient.h>
 
 #ifdef CSP_WASM
-#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #else
-#include "Web/POCOWebClient/POCOWebClient.h"
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
 #endif
 
 using namespace csp::common;

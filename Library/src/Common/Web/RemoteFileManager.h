@@ -13,11 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/Json.h"
+#pragma once
+
+#include "CSP/Common/CancellationToken.h"
+#include "Common/DateTime.h"
+#include "Common/Web/WebClient.h"
+#include "Services/PrototypeService/AssetFileDto.h"
 
 namespace csp::web
 {
 
-// Todo :- More complex types will be handled here with template specialisations
+class RemoteFileManager
+{
+public:
+    RemoteFileManager(csp::web::WebClient* InWebClient);
+    ~RemoteFileManager();
+
+    void GetFile(
+        const csp::common::String& FileUrl, csp::services::ResponseHandlerPtr ResponseHandler, csp::common::CancellationToken& CancellationToken);
+    void GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler);
+
+private:
+    csp::web::WebClient* WebClient;
+};
 
 } // namespace csp::web
