@@ -20,18 +20,7 @@ static void {{ delegate.name }}Function(
     var tcs = (TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>)_handle.Target;
     var _this = ({{ class_name }})tcs.Task.AsyncState;
 
-    var task_result = 
-        {{# has_multiple_results }}({{/ has_multiple_results }}
-        {{# results }}
-            {{# type.is_pointer_or_reference }}
-                _{{ name }}.Pointer == IntPtr.Zero ? null : new {{# type }}{{> Type }}{{/ type }}(_{{ name }})
-            {{/ type.is_pointer_or_reference }}
-            {{^ type.is_pointer_or_reference }}
-                _{{ name }}
-            {{/ type.is_pointer_or_reference }}
-            {{> Comma }}
-        {{/ results }}
-        {{# has_multiple_results }}){{/ has_multiple_results }};
+    var task_result = {{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type.is_pointer_or_reference }}new {{# type }}{{> Type }}{{/ type }}({{/ type.is_pointer_or_reference }}_{{ name }}{{# type.is_pointer_or_reference }}){{/ type.is_pointer_or_reference }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }};
     {{# results }}{{# type.is_result_base }}
     if (task_result.GetResultCode() == Csp.Systems.EResultCode.InProgress)
     {
