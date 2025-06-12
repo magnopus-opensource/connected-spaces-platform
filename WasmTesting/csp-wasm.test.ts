@@ -1,5 +1,5 @@
 import './pretend-to-be-a-browser'
-import  {CreateTestUser, LaunchTestPage, TEST_ACCOUNT_PASSWORD} from './testhelpers'
+import  {CreatePublicTestSpace, CreateTestUser, LoginAsUser, LaunchTestPage, DeleteSpace, LogoutUser, TEST_ACCOUNT_PASSWORD} from './testhelpers'
 
 import { test } from 'uvu';
 import * as assert from 'uvu/assert';
@@ -16,18 +16,38 @@ test.before(async () => {
 
 test ('Login', async() => {
   const user = await CreateTestUser();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD })
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
   console.log(errors);
 
   assert.ok(consoleMessages.some(e => e.includes('Successfully logged in')));
   assert.ok(errors.length == 0); //Should be no errors
+
+  //Cleanup
+  await LogoutUser(user);
+})
+
+test ('EnterSpace', async() => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+  const spaceId = await CreatePublicTestSpace();
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/EnterSpace.html', USE_DEBUG_CSP, null, spaceId)
+
+  console.log(consoleMessages);
+  console.log(errors);
+
+  assert.ok(consoleMessages.some(e => e.includes('Successfully entered space')));
+  assert.ok(errors.length == 0); //Should be no errors
+
+  //Cleanup
+  await DeleteSpace(spaceId);
+  await LogoutUser(user);
 })
 
 test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
   const user = await CreateTestUser();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadLogCallbackLogin.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD })
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadLogCallbackLogin.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -40,3 +60,13 @@ test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
 });
 
 test.run();
+
+/*
+ * Some ideas for further tests that would be good here
+ * 
+ * Test avatar creation
+ * Test space creation and deletion
+ * Create a SpaceEntity in a space
+ * Add/Remove a component to a space entity
+ * Execute a script
+ */
