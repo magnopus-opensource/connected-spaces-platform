@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/MaintenanceApi/MaintenanceApi.h"
+#include "Common/Web/MaintenanceApi/MaintenanceApi.h"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
-#include "Web/HttpPayload.h"
-#include "Web/WebClient.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::systems::maintenanceservice
 {

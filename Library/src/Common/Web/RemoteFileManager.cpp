@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/RemoteFileManager.h"
+#include "Common/Web/RemoteFileManager.h"
 
-#include "Web/HttpAuth.h"
-#include "Web/HttpPayload.h"
-#include "Web/WebClient.h"
+#include "Common/Web/HttpAuth.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::web
 {

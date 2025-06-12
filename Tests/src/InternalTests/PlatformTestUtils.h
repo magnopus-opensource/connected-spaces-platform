@@ -15,8 +15,8 @@
  */
 
 #include "../PublicAPITests/UserSystemTestHelpers.h"
+#include "Common/Web/WebClient.h"
 #include "Multiplayer/WebSocketClient.h"
-#include "Web/WebClient.h"
 
 csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri);
 
