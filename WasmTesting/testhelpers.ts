@@ -134,22 +134,14 @@ export async function LaunchTestPage(
     //Build a URL argument list.
     //This is a bit rough and ready, since credentials and spaceID are both optional and we need to handle the formatting
     //There's almost certainly a better way to do this, probably even a native JS way specifically for URL arguments.
-    var args = "";
+    var args = `?useDebugCsp=${encodeURIComponent(useDebugCSP)}`;
 
     if (userCredentials !== null && userCredentials.email && userCredentials.password) {
-      args = `?useDebugCsp=${encodeURIComponent(useDebugCSP)}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
+      args = `${args}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
     }
 
     if (spaceId != null) {
-
-      if (args.length == 0){
-        args = `?`;
-      }
-      else {
-        args = `${args}&`
-      }
-
-      args = `${args}spaceId=${encodeURIComponent(spaceId)}`;
+      args = `${args}&spaceId=${encodeURIComponent(spaceId)}`;
     }
 
     // Append the arguments to the HTML file path
