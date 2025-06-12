@@ -42,5 +42,8 @@ DEFINE_SCRIPT_PROPERTY_VEC4(AvatarSpaceComponent, HeadRotation);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, float, float, WalkRunBlendPercentage);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, float, float, TorsoTwistAlpha);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::AvatarPlayMode, int32_t, AvatarPlayMode);
+DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::LocomotionModel, int32_t, LocomotionModel);
+DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsARVisible);
 
 } // namespace csp::multiplayer
