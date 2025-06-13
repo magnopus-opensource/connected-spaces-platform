@@ -17,7 +17,7 @@
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "CSP/Common/fmt_Formatters.h "
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
