@@ -47,7 +47,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     csp::common::String TestApplicationOrigin = "UE::CSP";
     MyCustomComponent.SetApplicationOrigin(TestApplicationOrigin);
@@ -58,7 +58,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");
@@ -73,7 +73,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ReplacePropertyWithNewTypeTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");
@@ -92,7 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ReplacePropertyWithNewTypeTest)
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 0);
 
@@ -139,9 +139,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
 
-    std::vector<ComponentBase*> Components { new AnimatedModelSpaceComponent(MySpaceEntity), new ButtonSpaceComponent(MySpaceEntity),
-        new ImageSpaceComponent(MySpaceEntity), new LightSpaceComponent(MySpaceEntity), new StaticModelSpaceComponent(MySpaceEntity),
-        new VideoPlayerSpaceComponent(MySpaceEntity) };
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    std::vector<ComponentBase*> Components { new AnimatedModelSpaceComponent(LogSystem, MySpaceEntity),
+        new ButtonSpaceComponent(LogSystem, MySpaceEntity), new ImageSpaceComponent(LogSystem, MySpaceEntity),
+        new LightSpaceComponent(LogSystem, MySpaceEntity), new StaticModelSpaceComponent(LogSystem, MySpaceEntity),
+        new VideoPlayerSpaceComponent(LogSystem, MySpaceEntity) };
 
     for (auto Component : Components)
     {
@@ -165,9 +168,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
 
-    std::vector<ComponentBase*> Components { new AnimatedModelSpaceComponent(MySpaceEntity), new AudioSpaceComponent(MySpaceEntity),
-        new CollisionSpaceComponent(MySpaceEntity), new FogSpaceComponent(MySpaceEntity), new LightSpaceComponent(MySpaceEntity),
-        new ReflectionSpaceComponent(MySpaceEntity), new StaticModelSpaceComponent(MySpaceEntity) };
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    std::vector<ComponentBase*> Components { new AnimatedModelSpaceComponent(LogSystem, MySpaceEntity),
+        new AudioSpaceComponent(LogSystem, MySpaceEntity), new CollisionSpaceComponent(LogSystem, MySpaceEntity),
+        new FogSpaceComponent(LogSystem, MySpaceEntity), new LightSpaceComponent(LogSystem, MySpaceEntity),
+        new ReflectionSpaceComponent(LogSystem, MySpaceEntity), new StaticModelSpaceComponent(LogSystem, MySpaceEntity) };
 
     for (auto Component : Components)
     {
@@ -190,7 +196,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
-    CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+    CustomSpaceComponent MyCustomComponent(csp::systems::SystemsManager::Get().GetLogSystem(), MySpaceEntity);
 
     EXPECT_EQ(MyCustomComponent.GetComponentName(), "");
 

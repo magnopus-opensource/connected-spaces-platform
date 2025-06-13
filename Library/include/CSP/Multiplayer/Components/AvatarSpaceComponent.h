@@ -89,7 +89,7 @@ class CSP_API AvatarSpaceComponent : public ComponentBase
 public:
     /// @brief Constructs the avatar space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AvatarSpaceComponent(SpaceEntity* Parent);
+    AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.

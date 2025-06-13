@@ -48,7 +48,7 @@ class ClientElectionManager
     /** @endcond */
 
 public:
-    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem* LogSystem);
+    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem);
     ~ClientElectionManager();
 
     void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
@@ -109,7 +109,7 @@ private:
 
 private:
     SpaceEntitySystem* SpaceEntitySystemPtr;
-    csp::common::LogSystem* LogSystemPtr;
+    csp::common::LogSystem& LogSystem;
     class ClientElectionEventHandler* EventHandler;
 
     ClientMap Clients;

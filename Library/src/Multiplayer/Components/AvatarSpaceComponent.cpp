@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::AvatarData, Parent)
+AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::AvatarData, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId)] = "";

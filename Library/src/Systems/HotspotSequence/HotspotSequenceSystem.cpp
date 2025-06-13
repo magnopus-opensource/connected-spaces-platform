@@ -87,9 +87,9 @@ namespace
 
 } // namespace
 
-HotspotSequenceSystem::HotspotSequenceSystem(
-    csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem, csp::multiplayer::EventBus* EventBus)
-    : SystemBase(EventBus)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
+    csp::multiplayer::EventBus* EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(EventBus, LogSystem)
 {
     this->SequenceSystem = SequenceSystem;
     this->SpaceSystem = SpaceSystem;
@@ -313,8 +313,8 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
     SequenceSystem->GetAllSequencesContainingItems({ ItemCopy }, "GroupId", { MySpaceSystem->GetCurrentSpace().Id }, GetSequencesCallback);
 }
 
-HotspotSequenceSystem::HotspotSequenceSystem()
-    : SystemBase(nullptr, nullptr)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, nullptr, LogSystem)
 {
     SpaceSystem = nullptr;
     SequenceSystem = nullptr;
@@ -346,7 +346,7 @@ void HotspotSequenceSystem::DeregisterSystemCallback()
 
 void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
+    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { LogSystem };
     SequenceDeserialiser.Parse(EventValues);
 
     // There are a variety of sequence types.
@@ -357,7 +357,7 @@ void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValu
     {
         if (HotspotSequenceChangedCallback)
         {
-            csp::multiplayer::SequenceHotspotChangedEventDeserialiser HotspotDeserialiser;
+            csp::multiplayer::SequenceHotspotChangedEventDeserialiser HotspotDeserialiser { LogSystem };
             HotspotDeserialiser.Parse(EventValues);
             HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());
         }

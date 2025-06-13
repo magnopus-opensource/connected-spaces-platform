@@ -21,7 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "CallHelpers.h"
+#include "Common/CallHelpers.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -43,14 +43,14 @@ namespace chs = csp::services::generated::userservice;
 namespace csp::systems
 {
 
-SettingsSystem::SettingsSystem()
-    : SystemBase(nullptr, nullptr)
+SettingsSystem::SettingsSystem(csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, nullptr, LogSystem)
     , SettingsAPI(nullptr)
 {
 }
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+SettingsSystem::SettingsSystem(web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     SettingsAPI = new chs::SettingsApi(InWebClient);
 }

@@ -56,8 +56,8 @@ public:
     CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback);
 
 private:
-    MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
+    MaintenanceSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~MaintenanceSystem();
 
     csp::services::ApiBase* MaintenanceAPI;

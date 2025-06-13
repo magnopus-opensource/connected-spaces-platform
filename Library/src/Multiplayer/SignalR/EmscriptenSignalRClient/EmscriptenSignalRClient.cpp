@@ -15,7 +15,7 @@
  */
 #include "EmscriptenSignalRClient.h"
 
-#include "Debug/Logging.h"
+#include "CSP/CSPFoundation.h"
 #include "Web/HttpAuth.h"
 
 #include <assert.h>

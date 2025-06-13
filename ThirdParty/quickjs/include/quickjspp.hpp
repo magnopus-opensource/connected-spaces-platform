@@ -29,6 +29,11 @@
 	#include <filesystem>
 #endif
 
+//!!!! Absolutely catastrophic, introduces a reverse dependency in a LIBRARY FILE.
+// All modification to this file must be removed. (This dependency was transient before ... can you believe it?!)
+// (We could maybe make this _less_ bad by using JS_SetRuntimeOpaque to psuedo inject the logger ... but why would you))
+#include "Debug/Logging.h"
+
 
 #if defined(__cpp_rtti)
 	#define QJSPP_TYPENAME(...) (typeid(__VA_ARGS__).name())

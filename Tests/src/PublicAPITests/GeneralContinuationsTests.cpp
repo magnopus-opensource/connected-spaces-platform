@@ -177,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     EXPECT_CALL(MockLogger.MockLogCallback, Call(SuccessMsg)).Times(1);
 
     csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(MockResultCallback.AsStdFunction(), SuccessMsg.c_str(),
-        MakeInvalid<NullResult>(), csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)({});
+        MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)({});
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOrErrorFromErrorCodeWhenError)
@@ -199,7 +199,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
         ASSERT_ANY_THROW(
             csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(MockResultCallback.AsStdFunction(), SuccessMsg.c_str(),
-                MakeInvalid<NullResult>(), csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
+                MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
 
         ::testing::Mock::VerifyAndClearExpectations(&MockResultCallback);
         ::testing::Mock::VerifyAndClearExpectations(&MockLogger.MockLogCallback);
@@ -215,7 +215,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
         ASSERT_ANY_THROW(
             csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(MockResultCallback.AsStdFunction(), SuccessMsg.c_str(),
-                MakeInvalid<NullResult>(), csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
+                MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
     }
 }
 

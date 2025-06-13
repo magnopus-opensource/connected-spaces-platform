@@ -17,6 +17,11 @@
 
 #include "CSP/Systems/Script/ScriptSystem.h"
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
 class ScriptSystem;
@@ -30,14 +35,15 @@ class SpaceEntitySystem;
 class EntityScriptBinding : public csp::systems::IScriptBinding
 {
 public:
-    EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
+    EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);
     virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
 
-    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
+    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);
     static void RemoveBinding(EntityScriptBinding* InEntityBinding);
 
 private:
     SpaceEntitySystem* EntitySystem;
+    csp::common::LogSystem& LogSystem;
 };
 
 } // namespace csp::multiplayer

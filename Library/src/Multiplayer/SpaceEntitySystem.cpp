@@ -17,6 +17,7 @@
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
@@ -24,11 +25,8 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/Sequence/SequenceSystem.h"
-#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "MCS/MCSTypes.h"
@@ -59,7 +57,7 @@ namespace
 
 const csp::common::String SequenceTypeName = "EntityHierarchy";
 
-uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
+uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common::LogSystem& LogSystem)
 {
     uint64_t EntityId = 0;
 
@@ -73,7 +71,7 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
         {
             if (IdValue.is_uinteger())
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
+                LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("Entity Id={}", IdValue.as_uinteger()).c_str());
                 EntityId = IdValue.as_uinteger();
                 break;
             }
@@ -83,7 +81,7 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
     }
     else
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array")
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array");
     }
 
     return EntityId;
@@ -184,7 +182,25 @@ class DirtyComponent;
 
 using namespace std::chrono;
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem)
+SpaceEntitySystem::SpaceEntitySystem(csp::common::LogSystem& LogSystem)
+    : EntitiesLock(new std::recursive_mutex)
+    , MultiplayerConnectionInst(nullptr)
+    , Connection(nullptr)
+    , LogSystem(LogSystem)
+    , EventHandler(nullptr)
+    , ElectionManager(nullptr)
+    , TickEntitiesLock(new std::mutex)
+    , PendingAdds(nullptr)
+    , PendingRemoves(nullptr)
+    , PendingOutgoingUpdateUniqueSet(nullptr)
+    , PendingIncomingUpdates(nullptr)
+    , EnableEntityTick(false)
+    , LastTickTime(std::chrono::system_clock::now())
+    , EntityPatchRate(90)
+{
+}
+
+SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
@@ -227,7 +243,7 @@ void SpaceEntitySystem::Initialise()
 
     EnableLeaderElection();
 
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this);
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, LogSystem);
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -260,12 +276,12 @@ MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { r
 namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
-        const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, csp::common::LogSystem& LogSystem, uint64_t NetworkId,
+        const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
-            &SpaceEntitySystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
+            &SpaceEntitySystem, &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
@@ -289,9 +305,9 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
     return Connection->Invoke("GenerateObjectIds", Params, {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
-            [](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
+            [&LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
             {
-                const auto NetworkId = ParseGenerateObjectIDsResult(Result);
+                const auto NetworkId = ParseGenerateObjectIDsResult(Result, LogSystem);
                 return NetworkId;
             })
         .share();
@@ -303,7 +319,7 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
 {
     return [Name, Transform, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform,
+        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, LogSystem, NetworkId, Name, Transform,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
@@ -344,7 +360,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
         std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this,
-            NetworkId, Name, Transform, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+            LogSystem, NetworkId, Name, Transform, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
@@ -378,9 +394,9 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
         .then(CreateNewLocalAvatar(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& Except)
+            [Callback, &LogSystem = this->LogSystem](const std::exception& Except)
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to create Avatar. Exception: %s", Except.what());
+                LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", Except.what()).c_str());
                 Callback(nullptr);
             },
             LogSystem));
@@ -395,7 +411,8 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 {
     const auto& Children = Entity->GetChildEntities()->ToArray();
 
-    const std::function LocalCallback = [Callback](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
+    const std::function LocalCallback
+        = [Callback, &LogSystem = this->LogSystem](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
     {
         try
         {
@@ -406,7 +423,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
+            LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to destroy entity. Exception: {}", e.what()).c_str());
             Callback(false);
         }
 
@@ -567,7 +584,7 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
     if (SpaceEntityCreatedCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
     SpaceEntityCreatedCallback = std::move(Callback);
@@ -577,7 +594,7 @@ void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Call
 {
     if (InitialEntitiesRetrievedCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
     }
 
     InitialEntitiesRetrievedCallback = std::move(Callback);
@@ -587,7 +604,7 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 {
     if (ScriptSystemReadyCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
+        LogSystem.LogMsg(common::LogLevel::Warning, "ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
     }
 
     ScriptSystemReadyCallback = std::move(Callback);
@@ -605,7 +622,7 @@ SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::val
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(EntitySystem);
+    const auto NewEntity = new SpaceEntity(EntitySystem, &LogSystem);
     NewEntity->FromObjectMessage(Message);
 
     EntitySystem->AddEntity(NewEntity);
@@ -629,7 +646,7 @@ void SpaceEntitySystem::BindOnObjectMessage()
             }
             else
             {
-                LogSystem->LogMsg(
+                LogSystem.LogMsg(
                     common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
             }
         });
@@ -736,7 +753,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
             }
             else
             {
-                LogSystem->LogMsg(
+                LogSystem.LogMsg(
                     common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
             }
         }
@@ -818,7 +835,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
     if (!EntityToUpdate->IsModifiable())
     {
-        LogSystem->LogMsg(common::LogLevel::Error,
+        LogSystem.LogMsg(common::LogLevel::Error,
             fmt::format("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
                 EntityToUpdate->GetName())
                 .c_str());
@@ -1115,7 +1132,8 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnectionInst->StopListening(
-        [MultiplayerConnection = MultiplayerConnectionInst, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent](
+            csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
             {
@@ -1123,11 +1141,11 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                 return;
             }
 
-            CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StopListening success");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem](csp::multiplayer::ErrorCode Error)
                 {
-                    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes callback");
+                    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
                     {
                         RefreshMultiplayerContinuationEvent->set(Error);
@@ -1135,14 +1153,14 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                     }
                     else
                     {
-                        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "SetScopes was called successfully");
+                        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "SetScopes was called successfully");
                     }
 
                     MultiplayerConnection->StartListening()()
                         .then(async::inline_scheduler(),
-                            [RefreshMultiplayerContinuationEvent]()
+                            [RefreshMultiplayerContinuationEvent, &LogSystem]()
                             {
-                                CSP_LOG_MSG(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
+                                LogSystem.LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
                                 // TODO: Support getting errors from RetrieveAllEntities
                                 csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
@@ -1159,7 +1177,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                                     RefreshMultiplayerContinuationEvent->set(Error);
                                     return;
                                 },
-                                csp::systems::SystemsManager::Get().GetLogSystem()));
+                                *csp::systems::SystemsManager::Get().GetLogSystem()));
                 });
         });
 }
@@ -1182,7 +1200,7 @@ bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
 {
     // Run script on a remote leader...
-    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("RunScriptRemotely Script='{}'", ScriptText).c_str());
 
     ClientProxy* LeaderProxy = ElectionManager->GetLeader();
 
@@ -1247,7 +1265,7 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
 
 void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {
-    const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+    const std::function LocalCallback = [&LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {
         try
         {
@@ -1258,7 +1276,8 @@ void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> Pendin
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Failed to send list of entity update due to a signalr exception! Exception: {}", e.what()).c_str());
         }
     };
 
@@ -1326,7 +1345,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
                 if (!PendingEntity->IsModifiable())
                 {
-                    LogSystem->LogMsg(common::LogLevel::Error,
+                    LogSystem.LogMsg(common::LogLevel::Error,
                         fmt::format(
                             "Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
                             PendingEntity->GetName())
@@ -1408,7 +1427,7 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
     }
     else
     {
-        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
+        LogSystem.LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
     }
 }
 
@@ -1480,8 +1499,8 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
 void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
     const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-    const std::function LocalIDCallback
-        = [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+    const std::function LocalIDCallback = [this, InName, InParent, InSpaceTransform, Callback, &LogSystem = this->LogSystem](
+                                              const signalr::value& Result, const std::exception_ptr& Except)
     {
         try
         {
@@ -1492,13 +1511,13 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
         }
         catch (const std::exception& e)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+            LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
             Callback(nullptr);
         }
 
-        auto ID = ParseGenerateObjectIDsResult(Result);
-        auto* NewObject
-            = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+        auto ID = ParseGenerateObjectIDsResult(Result, LogSystem);
+        auto* NewObject = new SpaceEntity(
+            this, &LogSystem, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
 
         if (InParent.HasValue())
         {
@@ -1511,7 +1530,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-            = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
         {
             try
             {
@@ -1522,7 +1541,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             }
             catch (const std::exception& e)
             {
-                CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
+                LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
                 Callback(nullptr);
             }
 
@@ -1599,7 +1618,8 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
         if (!EntityFound)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", Patch.GetId());
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Failed to find an entity with ID {} when recieved a patch message.", Patch.GetId()).c_str());
         }
     }
 }
@@ -1615,7 +1635,7 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
     }
     catch (const std::exception& e)
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
+        LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("{0} Exception: {1}", ExceptionDescription.c_str(), e.what()).c_str());
     }
 }
 } // namespace csp::multiplayer

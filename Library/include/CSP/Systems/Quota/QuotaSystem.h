@@ -89,8 +89,8 @@ public:
     CSP_ASYNC_RESULT void GetTierFeaturesQuota(TierNames TierName, FeaturesQuotaCallback Callback);
 
 private:
-    QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient);
+    QuotaSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~QuotaSystem();
 
     csp::services::ApiBase* QuotaTierAssignmentAPI;

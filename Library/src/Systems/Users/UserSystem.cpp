@@ -31,7 +31,7 @@
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
 
-#include <CallHelpers.h>
+#include <Common/CallHelpers.h>
 
 namespace chs_user = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
@@ -81,8 +81,8 @@ csp::common::String FormatScopesForURL(csp::common::Array<csp::common::String> S
     return FormattedScopes;
 }
 
-UserSystem::UserSystem()
-    : SystemBase(nullptr, nullptr)
+UserSystem::UserSystem(csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, nullptr, LogSystem)
     , AuthenticationAPI(nullptr)
     , ProfileAPI(nullptr)
     , PingAPI(nullptr)
@@ -90,8 +90,8 @@ UserSystem::UserSystem()
 {
 }
 
-UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus)
-    : SystemBase(InWebClient, InEventBus)
+UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, InEventBus, LogSystem)
     , RefreshTokenChangedCallback(nullptr)
 {
     AuthenticationAPI = new chs_user::AuthenticationApi(InWebClient);
@@ -820,7 +820,7 @@ void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser;
+    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
     UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 }

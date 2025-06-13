@@ -61,7 +61,7 @@ class CSP_API ImageSpaceComponent : public ComponentBase, public ITransformCompo
 public:
     /// @brief Constructs the image space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ImageSpaceComponent(SpaceEntity* Parent);
+    ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the name of this image space component.
     /// @return The name of this image space component.

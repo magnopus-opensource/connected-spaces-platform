@@ -63,7 +63,7 @@ class CSP_API FogSpaceComponent : public ComponentBase, public IThirdPartyCompon
 public:
     /// @brief Constructs the fog space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    FogSpaceComponent(SpaceEntity* Parent);
+    FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Retrieves the type of fog currently used by this fog component.
     /// @return The modality of fog currently used by this component.

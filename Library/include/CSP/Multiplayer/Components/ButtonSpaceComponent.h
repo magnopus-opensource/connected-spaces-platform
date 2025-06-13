@@ -53,7 +53,7 @@ class CSP_API ButtonSpaceComponent : public ComponentBase, public IEnableableCom
 public:
     /// @brief Constructs the button space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ButtonSpaceComponent(SpaceEntity* Parent);
+    ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the text of the label of this button.
     /// @return The text on the label of this button.

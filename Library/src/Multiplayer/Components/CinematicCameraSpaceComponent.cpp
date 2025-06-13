@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::CinematicCamera, Parent)
+CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::CinematicCamera, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(CinematicCameraPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(CinematicCameraPropertyKeys::Rotation)] = csp::common::Vector4::Identity();

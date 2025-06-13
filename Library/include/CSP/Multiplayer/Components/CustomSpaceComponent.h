@@ -43,7 +43,7 @@ class CSP_API CustomSpaceComponent : public ComponentBase
 public:
     /// @brief Constructs the custom space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CustomSpaceComponent(SpaceEntity* Parent);
+    CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets a string that identifies the application origin.
     /// @return The application origin for which this component has been generated.

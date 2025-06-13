@@ -58,7 +58,7 @@ class CSP_API CinematicCameraSpaceComponent : public ComponentBase,
 public:
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    CinematicCameraSpaceComponent(SpaceEntity* Parent);
+    CinematicCameraSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gived the sensor size and focal length, return the horizonal fov
     /// @return FOV in radians

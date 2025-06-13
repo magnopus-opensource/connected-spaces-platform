@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Light, Parent)
+LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Light, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(LightPropertyKeys::LightType)] = static_cast<int64_t>(LightType::Point);
     Properties[static_cast<uint32_t>(LightPropertyKeys::Color)] = csp::common::Vector3 { 255, 255, 255 };

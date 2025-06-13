@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 #include "CSP/Systems/SystemBase.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
 #include "Multiplayer/EventSerialisation.h"
 
 namespace csp::systems
 {
 
-SystemBase::SystemBase()
+SystemBase::SystemBase(csp::common::LogSystem& LogSystem)
     : WebClient(nullptr)
     , EventBusPtr(nullptr)
+    , LogSystem(LogSystem)
 {
 }
 
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus)
+SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : WebClient(InWebClient)
     , EventBusPtr(InEventBus)
+    , LogSystem(LogSystem)
 {
     RegisterSystemCallback();
 }
 
-SystemBase::SystemBase(csp::multiplayer::EventBus* InEventBus)
+SystemBase::SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : WebClient(nullptr)
     , EventBusPtr(InEventBus)
+    , LogSystem(LogSystem)
 {
     RegisterSystemCallback();
 }
@@ -63,7 +67,7 @@ void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::EventDeserialiser Deserialiser;
+    csp::multiplayer::EventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
 
     SystemCallback(true, Deserialiser.GetEventData());
