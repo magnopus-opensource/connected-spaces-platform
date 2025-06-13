@@ -349,16 +349,16 @@ std::optional<EShaderType> GetShaderTypeFromMaterialCollectionArray(
     return {};
 }
 
-AssetSystem::AssetSystem()
-    : SystemBase(nullptr, nullptr)
+AssetSystem::AssetSystem(csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, nullptr, LogSystem)
     , PrototypeAPI(nullptr)
     , AssetDetailAPI(nullptr)
     , FileManager(nullptr)
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
-    : SystemBase(InWebClient, InEventBus)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus, common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, InEventBus, LogSystem)
 {
     PrototypeAPI = new chs::PrototypeApi(InWebClient);
     AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
@@ -1789,7 +1789,7 @@ void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
+    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
 
     const csp::multiplayer::AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();

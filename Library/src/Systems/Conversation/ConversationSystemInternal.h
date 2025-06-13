@@ -50,7 +50,7 @@ public:
     CSP_END_IGNORE
 
     ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
-        csp::multiplayer::EventBus* InEventBus);
+        csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
 
     ~ConversationSystemInternal();
 

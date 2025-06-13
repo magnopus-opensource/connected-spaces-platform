@@ -340,9 +340,9 @@ namespace
     }
 }
 
-ConversationSystemInternal::ConversationSystemInternal(
-    systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem, systems::UserSystem* UserSystem, multiplayer::EventBus* EventBus)
-    : SystemBase(EventBus)
+ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
+    systems::UserSystem* UserSystem, multiplayer::EventBus* EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(EventBus, LogSystem)
     , AssetSystem { AssetSystem }
     , SpaceSystem { SpaceSystem }
     , UserSystem { UserSystem }

@@ -138,8 +138,8 @@ public:
         double ResolveTime, const csp::common::Array<csp::common::String>& Tags, AnchorResolutionResultCallback Callback);
 
 private:
-    AnchorSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AnchorSystem(csp::web::WebClient* InWebClient);
+    AnchorSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT AnchorSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~AnchorSystem();
 
     csp::services::ApiBase* AnchorsAPI;

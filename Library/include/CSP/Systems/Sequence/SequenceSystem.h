@@ -125,8 +125,8 @@ public:
     CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
 private:
-    SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SequenceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
+    SequenceSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    SequenceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~SequenceSystem();
 
     csp::services::ApiBase* SequenceAPI;
