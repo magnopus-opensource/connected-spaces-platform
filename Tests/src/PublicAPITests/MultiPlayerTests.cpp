@@ -16,6 +16,7 @@
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
@@ -43,8 +44,6 @@
 #include <chrono>
 #include <filesystem>
 #include <thread>
-
-#include <async++.h>
 
 #include "Mocks/SignalRConnectionMock.h"
 

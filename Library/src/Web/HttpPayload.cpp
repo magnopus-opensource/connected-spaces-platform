@@ -16,7 +16,7 @@
 #include "Web/HttpPayload.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/StlString.h"
 #include "Debug/Logging.h"
 #include "Web/HttpAuth.h"
@@ -36,7 +36,7 @@ HttpPayload::HttpPayload()
 
     if (ResponseContent.find("Unset") != std::string::npos)
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+        CSP_LOG_MSG(csp::common::LogLevel::Warning,
             "ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
     }
 

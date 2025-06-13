@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
@@ -29,57 +30,6 @@ class ApiResponseBase;
 
 namespace csp::systems
 {
-
-/// @brief Code to indicate the result of a request.
-/// Request results should be checked for a success by clients before using any other accessors.
-enum class EResultCode : uint8_t
-{
-    Init,
-    InProgress,
-    Success,
-    Failed
-};
-
-enum class ERequestFailureReason
-{
-    Unknown = -1,
-    None = 0,
-    AddUserToSpaceDenied,
-    UserSpaceAccessDenied,
-    UserSpaceBannedAccessDenied,
-    UserSpaceFullAccessDenied,
-    UserSpaceInviteExpired,
-    SpacePublicNameDuplicate,
-    UserMaxSpaceLimitReached,
-    UserAccountLocked,
-    UserMissingPassword,
-    UserUnverifiedEmail,
-    UserBannedFromSpace,
-    UserInvalidEmailDomain,
-    UserInvalidThirdPartyAuth,
-    UserAgeNotVerified,
-    UserGuestLoginDisallowed,
-    UserAgoraLimitReached,
-    UserOpenAILimitReached,
-    UserTicketedSpacesLimitReached,
-    UserSpaceConcurrentUsersLimitReached,
-    PrototypeReservedKeysNotAllowed,
-    AssetInvalidFileContents,
-    AssetInvalidFileType,
-    AssetAudioVideoLimitReached,
-    AssetObjectCaptureLimitReached,
-    AssetTotalUploadSizeLimitReached,
-    TicketUnknownNumber,
-    TicketEmailMismatch,
-    TicketVendorOAuthFailure,
-    TicketOAuthTokenInvalid,
-    TicketAlreadyApplied,
-    ShopifyConnectionBroken,
-    ShopifyInvalidStoreName,
-    UserShopifyLimitReached,
-    UserTokenRefreshFailed,
-    InvalidSequenceKey,
-};
 
 /// @brief Base class for a HTTP request result.
 class CSP_API ResultBase

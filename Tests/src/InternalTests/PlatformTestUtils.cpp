@@ -165,6 +165,6 @@ void InitialiseFoundation()
     emscripten_sync_run_in_main_runtime_thread(EM_FUNC_SIG_V, InitialiseFoundationInternal);
 
     // remove logging on wasm to prevent corruption of the output xml report as this is sent through stdout
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::NoLogging);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::NoLogging);
 #endif
 }

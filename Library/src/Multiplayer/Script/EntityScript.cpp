@@ -43,7 +43,7 @@ EntityScript::~EntityScript() { Shutdown(); }
 
 bool EntityScript::Invoke()
 {
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "EntityScript::Invoke called for %s", Entity->GetName().c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "EntityScript::Invoke called for %s", Entity->GetName().c_str());
 
     CheckBinding();
 
@@ -100,9 +100,9 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
 
 void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 {
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "EntityScript::SetScriptSource called for %s\nSource:", Entity->GetName().c_str(),
+    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "EntityScript::SetScriptSource called for %s\nSource:", Entity->GetName().c_str(),
         InScriptSource.c_str());
-    CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "--EndScriptSource--");
+    CSP_LOG_MSG(csp::common::LogLevel::VeryVerbose, "--EndScriptSource--");
 
     if (EntityScriptComponent == nullptr)
     {
@@ -174,7 +174,7 @@ void EntityScript::Shutdown()
 
 void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
 {
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "OnSourceChanged: %s\n", InScriptSource.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "OnSourceChanged: %s\n", InScriptSource.c_str());
 
     if (EntityScriptComponent != nullptr)
     {
@@ -215,7 +215,7 @@ void EntityScript::SubscribeToPropertyChange(int32_t ComponentId, int32_t Proper
 
     if (It == PropertyMap.end())
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "SubscribeToPropertyChange: (%d, %d) %s\n", ComponentId, PropertyKey, Message.c_str());
+        CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "SubscribeToPropertyChange: (%d, %d) %s\n", ComponentId, PropertyKey, Message.c_str());
 
         PropertyMap.insert(PropertyChangeMap::value_type(Key, Message));
     }
@@ -243,7 +243,7 @@ void EntityScript::SubscribeToMessage(const csp::common::String Message, const c
 
     if (It == MessageMap.end())
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "SubscribeToMessage: %s -> %s\n", Message.c_str(), OnMessageCallback.c_str());
+        CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "SubscribeToMessage: %s -> %s\n", Message.c_str(), OnMessageCallback.c_str());
 
         MessageMap.insert(SubscribedMessageMap::value_type(Message, OnMessageCallback));
     }
@@ -263,7 +263,7 @@ void EntityScript::PostMessageToScript(const csp::common::String Message, const 
 
         if (Message != SCRIPT_MSG_ENTITY_TICK)
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "PostMessageToScript: %s\n", ScriptText.c_str());
+            CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "PostMessageToScript: %s\n", ScriptText.c_str());
         }
 
         RunScript(ScriptText.c_str());

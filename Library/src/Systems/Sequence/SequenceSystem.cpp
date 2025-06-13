@@ -71,7 +71,7 @@ void SequenceSystem::CreateSequence(const String& SequenceKey, const String& Ref
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
             "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
@@ -95,7 +95,7 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
             "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
@@ -118,14 +118,14 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 {
     if (!ValidateKey(OldSequenceKey))
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
             "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", OldSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
     if (!ValidateKey(NewSequenceKey))
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
             "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", NewSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
@@ -165,7 +165,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
     {
         if (!ValidateKey(InSequenceKeys[i]))
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
                 "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", InSequenceKeys[i].c_str());
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
             return;
@@ -239,7 +239,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 {
     if (!ValidateKey(SequenceKey))
     {
-        CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error,
             "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
@@ -261,7 +261,7 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
     {
         if (!ValidateKey(InSequenceKeys[i]))
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
                 "Cannot delete Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"",
                 InSequenceKeys[i].c_str());
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));

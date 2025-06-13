@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <async++.h>
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include <exception>
 #include <functional>
 #include <map>

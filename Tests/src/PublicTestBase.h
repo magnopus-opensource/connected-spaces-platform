@@ -22,6 +22,7 @@ namespace
 {
 constexpr char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
 
+// If you're trying to run with localMCS, set `MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081` after having launched the maglocal docker instance.
 const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
 {
     const auto EnvironmentVariable = std::getenv(EnvironmentKey);

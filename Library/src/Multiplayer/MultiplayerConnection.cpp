@@ -16,12 +16,13 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"
-#include "Common/Continuations.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
@@ -37,11 +38,9 @@
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
-#include "Debug/Logging.h"
 #include "Web/Uri.h"
 
 #include <algorithm>
-#include <async++.h>
 #include <chrono>
 #include <exception>
 #include <future>
@@ -155,10 +154,11 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 }
 
 /// @brief MultiplayerConnection
-MultiplayerConnection::MultiplayerConnection()
+MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem* LogSystem)
     : Connection(nullptr)
     , WebSocketClient(nullptr)
     , NetworkEventManager(new NetworkEventManagerImpl(this))
+    , LogSystem(LogSystem)
     , ClientId(0)
     , Connected(false)
 {
@@ -198,6 +198,7 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
     EventBusPtr = InBoundConnection.EventBusPtr;
     Connected = (InBoundConnection.Connected) ? true : false;
+    LogSystem = InBoundConnection.LogSystem;
 }
 
 namespace
@@ -220,7 +221,7 @@ namespace
                     }
                 }
 
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "Connection Interrupted.");
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Connection Interrupted.");
             });
     }
 }
@@ -265,7 +266,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
 
         Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
 
@@ -300,12 +301,12 @@ auto MultiplayerConnection::RequestClientId()
                 return;
             }
 
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
+            CSP_LOG_FORMAT(csp::common::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
 
             ClientIdRequestedEvent->set(Result.as_uinteger());
         };
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling GetClientId");
 
         Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
@@ -339,7 +340,7 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
             StartListeningEvent->set();
         };
 
-        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
+        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StartListening");
         Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
 
         return StartListeningContinuation;
@@ -406,7 +407,8 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
                 {
                     auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(Except);
                     DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
-                }));
+                },
+                LogSystem));
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
@@ -456,7 +458,7 @@ async::task<void> MultiplayerConnection::Start() const
 {
     if (Connection == nullptr)
     {
-        csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.");
+        csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.", LogSystem);
     }
 
     // Shared pointer to keep alive in local callback
@@ -584,7 +586,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
+    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StopListening");
 
     Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
@@ -628,7 +630,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
     Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);

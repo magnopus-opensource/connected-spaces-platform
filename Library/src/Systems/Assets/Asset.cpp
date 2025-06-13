@@ -57,7 +57,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::ANNOTATION_THUMBNAIL;
     else
     {
-        CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
+        CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Type!");
         return csp::systems::EAssetType::IMAGE;
     }
 }
@@ -70,7 +70,7 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
     }
     else
     {
-        CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+        CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Platform!");
         return EAssetPlatform::DEFAULT;
     }
 }
@@ -83,7 +83,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
         return "Default";
     }
 
-    CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+    CSP_LOG_MSG(common::LogLevel::Error, "Unsupported Asset Platform!");
     return "Default";
 }
 

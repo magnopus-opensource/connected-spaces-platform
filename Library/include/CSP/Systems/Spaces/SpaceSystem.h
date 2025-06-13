@@ -19,7 +19,6 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Spaces/Site.h"
@@ -27,6 +26,7 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
+#include <memory>
 #include <optional>
 
 namespace csp::services
@@ -387,14 +387,8 @@ private:
     // EnterSpace Continuations
     auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
-    // Wraps RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
+    // Wraps SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
     auto RefreshMultiplayerScopes();
-
-    /* Stop the multiplayer connetion, change scope, start listening again
-       Not ideal, we'd rather not have to go to all this effort.
-       Used in EnterSpace. */
-    void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
-        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

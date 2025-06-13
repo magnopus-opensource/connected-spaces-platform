@@ -74,7 +74,7 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
         if (MaintenanceInfoResponses.Size() == 0)
         {
-            CSP_LOG_MSG(LogLevel::Verbose, "No future maintenance windows are defined by the services");
+            CSP_LOG_MSG(common::LogLevel::Verbose, "No future maintenance windows are defined by the services");
         }
 
         // Sort maintenance windows by latest date
@@ -94,7 +94,7 @@ const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
     }
     else
     {
-        CSP_LOG_MSG(LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
+        CSP_LOG_MSG(common::LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
         return GetDefaultMaintenanceInfo();
     }
 }

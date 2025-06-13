@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Enums common between all the libraries that make up CSP.
+ * These tend to merely be types for data exchange between libraries.
+ * Don't get too hung up on namespaces
+ */
+
 #pragma once
 #include <cstdint>
+#include <string>
 
 namespace csp::web
 {
@@ -87,3 +95,113 @@ enum class EResponseCodes : uint16_t
 };
 
 } // namespace csp::web
+
+namespace csp::multiplayer
+{
+
+/// @brief Enum used to indicate the failure state of a multiplayer request.
+enum class ErrorCode
+{
+    None,
+    Unknown,
+    NotConnected,
+    AlreadyConnected,
+    SpaceUserLimitExceeded
+};
+
+inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
+{
+    std::string ErrorCodeString;
+    switch (ErrorCode)
+    {
+    case csp::multiplayer::ErrorCode::None:
+    {
+        ErrorCodeString = "None";
+        break;
+    }
+    case csp::multiplayer::ErrorCode::Unknown:
+    {
+        ErrorCodeString = "Unknown";
+        break;
+    }
+    case csp::multiplayer::ErrorCode::NotConnected:
+    {
+        ErrorCodeString = "NotConnected";
+        break;
+    }
+    case csp::multiplayer::ErrorCode::AlreadyConnected:
+    {
+        ErrorCodeString = "AlreadyConnected";
+        break;
+    }
+    case csp::multiplayer::ErrorCode::SpaceUserLimitExceeded:
+    {
+        ErrorCodeString = "SpaceUserLimitExceeded";
+        break;
+    }
+    default:
+    {
+        ErrorCodeString = std::string("Unknown error code. Value") + std::to_string(static_cast<unsigned int>(ErrorCode));
+        break;
+    }
+    }
+
+    return ErrorCodeString;
+}
+
+} // namespace csp::multiplayer
+
+namespace csp::systems
+{
+
+/// @brief Code to indicate the result of a request.
+/// Request results should be checked for a success by clients before using any other accessors.
+enum class EResultCode : uint8_t
+{
+    Init,
+    InProgress,
+    Success,
+    Failed
+};
+
+enum class ERequestFailureReason
+{
+    Unknown = -1,
+    None = 0,
+    AddUserToSpaceDenied,
+    UserSpaceAccessDenied,
+    UserSpaceBannedAccessDenied,
+    UserSpaceFullAccessDenied,
+    UserSpaceInviteExpired,
+    SpacePublicNameDuplicate,
+    UserMaxSpaceLimitReached,
+    UserAccountLocked,
+    UserMissingPassword,
+    UserUnverifiedEmail,
+    UserBannedFromSpace,
+    UserInvalidEmailDomain,
+    UserInvalidThirdPartyAuth,
+    UserAgeNotVerified,
+    UserGuestLoginDisallowed,
+    UserAgoraLimitReached,
+    UserOpenAILimitReached,
+    UserTicketedSpacesLimitReached,
+    UserSpaceConcurrentUsersLimitReached,
+    PrototypeReservedKeysNotAllowed,
+    AssetInvalidFileContents,
+    AssetInvalidFileType,
+    AssetAudioVideoLimitReached,
+    AssetObjectCaptureLimitReached,
+    AssetTotalUploadSizeLimitReached,
+    TicketUnknownNumber,
+    TicketEmailMismatch,
+    TicketVendorOAuthFailure,
+    TicketOAuthTokenInvalid,
+    TicketAlreadyApplied,
+    ShopifyConnectionBroken,
+    ShopifyInvalidStoreName,
+    UserShopifyLimitReached,
+    UserTokenRefreshFailed,
+    InvalidSequenceKey,
+};
+} // namespace csp::systems

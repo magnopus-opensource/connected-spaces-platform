@@ -385,7 +385,7 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     static_cast<int>(UploadResult.GetResultCode()), UploadResult.GetHttpResultCode());
                             }
 
@@ -505,7 +505,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                             }
 

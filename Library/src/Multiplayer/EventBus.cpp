@@ -22,7 +22,7 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 
-#include <async++.h>
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include <limits>
 #include <memory>
 #include <optional>
@@ -68,7 +68,7 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
         }
         else
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "This system is already registered for %s.", EventName.c_str());
+            CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "This system is already registered for %s.", EventName.c_str());
         }
         return;
     }
@@ -98,7 +98,7 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, Paramete
         if (CallbacksNetworkEventMap[EventName])
         {
             // We cannot compare callbacks, so we can't know whether it is the same callback that is already set. Therefore, we always update it
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "The callback set for %s was overwritten with a new callback.", EventName.c_str());
+            CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "The callback set for %s was overwritten with a new callback.", EventName.c_str());
         }
     }
 
@@ -131,13 +131,13 @@ void EventBus::StartEventMessageListening()
     {
         if (Result.is_null())
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "Event values were empty.");
+            CSP_LOG_MSG(csp::common::LogLevel::VeryVerbose, "Event values were empty.");
             return;
         }
 
         if (CallbacksNetworkEventMap.empty() && SystemsNetworkEventMap.empty())
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "Event map was empty.");
+            CSP_LOG_MSG(csp::common::LogLevel::VeryVerbose, "Event map was empty.");
             return;
         }
 
@@ -147,7 +147,7 @@ void EventBus::StartEventMessageListening()
         if (CallbacksNetworkEventMap.find(EventType) == CallbacksNetworkEventMap.end()
             && SystemsNetworkEventMap.find(EventType) == SystemsNetworkEventMap.end())
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Event %s is no longer registered to, discarding...", EventType.c_str());
+            CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "Event %s is no longer registered to, discarding...", EventType.c_str());
             return;
         }
 

@@ -409,7 +409,7 @@ void SpaceEntity::MarkForUpdate()
     }
     else
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
     }
 }
 
@@ -444,7 +444,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 
         if (ScriptComponent)
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+            CSP_LOG_MSG(csp::common::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
 
             // Return the existing script component
             return ScriptComponent;
@@ -785,7 +785,7 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     default:
     {
-        CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+        CSP_LOG_MSG(csp::common::LogLevel::Warning,
             csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
         return nullptr;
     }

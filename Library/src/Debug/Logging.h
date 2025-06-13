@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 
 #include <string>
@@ -59,7 +59,7 @@ namespace csp::profile
 {
 constexpr const int CSP_MAX_LOG_FORMAT_LEN = 1024;
 
-template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& FormatStr, Args... args)
+template <typename... Args> void LogMsg(const csp::common::LogLevel Level, const csp::common::String& FormatStr, Args... args)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
@@ -84,18 +84,18 @@ template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, cons
 #define CSP_LOG_ERROR_MSG(MSG)                                                                                                                       \
     if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
     {                                                                                                                                                \
-        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Error, MSG);                                              \
+        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Error, MSG);                                               \
     }
 
-#define CSP_LOG_ERROR_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Error, FORMAT_STR, __VA_ARGS__)
+#define CSP_LOG_ERROR_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::common::LogLevel::Error, FORMAT_STR, __VA_ARGS__)
 
 #define CSP_LOG_WARN_MSG(MSG)                                                                                                                        \
     if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
     {                                                                                                                                                \
-        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Warning, MSG);                                            \
+        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Warning, MSG);                                             \
     }
 
-#define CSP_LOG_WARN_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Warning, FORMAT_STR, __VA_ARGS__)
+#define CSP_LOG_WARN_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::common::LogLevel::Warning, FORMAT_STR, __VA_ARGS__)
 
 #if CSP_PROFILING_ENABLED
 

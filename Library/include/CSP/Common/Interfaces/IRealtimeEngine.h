@@ -232,4 +232,5 @@ public:
  * SpaceEntitySystem::SetScriptSystemReadyCallback (Should rename to SetScriptLeaderReadyCallback)
  * SpaceEntitySystem::GetMultiplayerConnectionInstance
  * SystemsManager::GetEventBus (Rename EventBus -> NetworkEventBus)
+ * SpaceEntitySystem::RefreshMultiplayerConnection
  */

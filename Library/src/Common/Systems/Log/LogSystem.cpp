@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Systems/Log/LogSystem.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
 #include "Common/Logger.h"
-#include "Debug/Logging.h"
 
 #if defined(CSP_ANDROID)
 #include <android/log.h>
 #endif
 
-namespace csp::systems
+namespace csp::common
 {
 
 struct LogCallbacks
@@ -57,13 +56,13 @@ void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallbac
 
 void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = InEndCallback; }
 
-void LogSystem::SetSystemLevel(const csp::systems::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
+void LogSystem::SetSystemLevel(const csp::common::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
 
-csp::systems::LogLevel LogSystem::GetSystemLevel() { return SystemLevel; }
+csp::common::LogLevel LogSystem::GetSystemLevel() { return SystemLevel; }
 
-bool LogSystem::LoggingEnabled(const csp::systems::LogLevel Level) { return Level <= SystemLevel; }
+bool LogSystem::LoggingEnabled(const csp::common::LogLevel Level) { return Level <= SystemLevel; }
 
-void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage)
+void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::String& InMessage)
 {
     if (!LoggingEnabled(Level))
     {

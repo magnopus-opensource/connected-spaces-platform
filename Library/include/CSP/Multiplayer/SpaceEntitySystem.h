@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
@@ -26,7 +27,9 @@
 #include <deque>
 #include <functional>
 #include <list>
+#include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 
 namespace async
@@ -34,6 +37,7 @@ namespace async
 CSP_START_IGNORE
 template <typename T> class task;
 template <typename T> class shared_task;
+template <typename T> class event_task;
 CSP_END_IGNORE
 }
 
@@ -47,6 +51,11 @@ class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Te
 class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
 class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
 class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+
+namespace csp::common
+{
+class LogSystem;
+}
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -294,6 +303,14 @@ public:
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
+    /// @brief "Refreshes" (ie, turns on an off again), the multiplayer connection, in order to refresh scopes.
+    /// This shouldn't be neccesary, we should devote some effort to checking if it still is at some point
+    /// @param SpaceId csp::Common:String& : The Id of the space to refresh
+    /// @param RefreshMultiplayerContinuationEvent : std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> Continuation event
+    /// that populates an optional error code on failure. Error is empty on success.
+    CSP_NO_EXPORT void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
+        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
+
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
     using SpaceEntityQueue = std::deque<SpaceEntity*>;
 
@@ -326,7 +343,7 @@ public:
 
     /// @brief SpaceEntitySystem constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
-    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -353,6 +370,7 @@ private:
 
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
+    csp::common::LogSystem* LogSystem;
 
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
