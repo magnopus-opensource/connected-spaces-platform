@@ -67,7 +67,7 @@ void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::EventDeserialiser Deserialiser;
+    csp::multiplayer::EventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
 
     SystemCallback(true, Deserialiser.GetEventData());

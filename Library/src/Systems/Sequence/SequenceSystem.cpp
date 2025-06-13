@@ -335,7 +335,7 @@ void SequenceSystem::DeregisterSystemCallback()
 
 void SequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
+    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { LogSystem };
     SequenceDeserialiser.Parse(EventValues);
 
     if (SequenceChangedCallback)

@@ -820,7 +820,7 @@ void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser;
+    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
     UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 }
