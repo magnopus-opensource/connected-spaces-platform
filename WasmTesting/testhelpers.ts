@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Systems } from 'connected-spaces-platform.web';
+import { Systems, Common } from 'connected-spaces-platform.web';
 import * as assert from 'uvu/assert';
 import puppeteer, { LaunchOptions } from 'puppeteer';
 
@@ -26,6 +26,76 @@ export async function CreateTestUser(): Promise<Systems.ProfileResult> {
   assert.is(user.getHttpResultCode(), 201, "Creating temporary test user failed, got non-success return code.");
   return user;
 }
+
+export async function LoginAsUser(creds: Systems.ProfileResult){
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+
+  // Logs or errors are validated in the invoking test.
+  const loginResult = await userSystem.login('', creds.getProfile().email, TEST_ACCOUNT_PASSWORD, true);
+  if (loginResult.getResultCode() == Systems.EResultCode.Success){
+    console.log("Successfully logged in");
+  }
+  else {
+    console.error("Failed to log in");
+    throw new Error("Failed to login");
+  }
+
+  loginResult.delete();
+}
+
+export async function LogoutUser(creds: Systems.ProfileResult){
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+
+  // Logs or errors are validated in the invoking test.
+  const loginResult = await userSystem.logout();
+  if (loginResult.getResultCode() == Systems.EResultCode.Success){
+    console.log("Successfully logged out");
+  }
+  else {
+    console.warn("Failed to log out");
+  }
+
+  loginResult.delete();
+}
+
+export async function CreatePublicTestSpace(): Promise<string> {
+  const spaceSystem = Systems.SystemsManager.get().getSpaceSystem();
+
+  let metadata = Common.Map.ofStringAndString();
+  metadata.set("site", "Void");
+
+  const spaceResult = await spaceSystem.createSpace(
+    uuidv4(),
+    "This is a wasm test space",
+    Systems.SpaceAttributes.Public,
+    null,
+    metadata,
+    null,
+    null
+  );
+  console.log(spaceResult.getSpace().id);
+
+  if (spaceResult.getResultCode() === Systems.EResultCode.Success) {
+    return spaceResult.getSpace().id;
+  }
+  spaceResult.delete();
+  throw new Error("Failed to create space");
+}
+
+export async function DeleteSpace(spaceId : string) : Promise<void> {
+  const spaceSystem = Systems.SystemsManager.get().getSpaceSystem();
+
+  let spaceDeleteResult =  await spaceSystem.deleteSpace(spaceId);
+
+  if (spaceDeleteResult.getResultCode() === Systems.EResultCode.Success) {
+    console.log("Succesfully deleted space.");
+  }
+  else {
+    console.warn("Failed to delete space");
+  }
+  spaceDeleteResult.delete();
+}
+
 export interface PageTestResult {
     errors: Error[];
     consoleMessages: string[];
@@ -41,6 +111,7 @@ export async function LaunchTestPage(
     htmlPath: string,
     useDebugCSP: boolean,
     userCredentials: UserCreds | null,
+    spaceId : string | null,
     launchOptions: LaunchOptions = {
       headless: true,
       args: [
@@ -60,10 +131,22 @@ export async function LaunchTestPage(
     page.on('pageerror', e => errors.push(e));
     page.on('console', msg => consoleMessages.push(msg.text()));
 
-    if (userCredentials != null && userCredentials.email && userCredentials.password) {
-        htmlPath = `${htmlPath}?useDebugCsp=${encodeURIComponent(useDebugCSP)}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
+    //Build a URL argument list.
+    //This is a bit rough and ready, since credentials and spaceID are both optional and we need to handle the formatting
+    //There's almost certainly a better way to do this, probably even a native JS way specifically for URL arguments.
+    var args = `?useDebugCsp=${encodeURIComponent(useDebugCSP)}`;
+
+    if (userCredentials !== null && userCredentials.email && userCredentials.password) {
+      args = `${args}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
     }
-        
+
+    if (spaceId != null) {
+      args = `${args}&spaceId=${encodeURIComponent(spaceId)}`;
+    }
+
+    // Append the arguments to the HTML file path
+    htmlPath = `${htmlPath}${args}`;
+ 
     console.log('Loading test page: ', htmlPath)
     
     await page.goto(htmlPath, { waitUntil });
