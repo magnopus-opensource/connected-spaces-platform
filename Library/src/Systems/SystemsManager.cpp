@@ -168,6 +168,7 @@ void SystemsManager::DestroySystems()
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
     delete SpaceEntitySystem;
+    delete ConversationSystem;
     delete HotspotSequenceSystem;
     delete SequenceSystem;
     delete QuotaSystem;
