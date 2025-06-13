@@ -1142,7 +1142,7 @@ void ConversationSystemInternal::DeregisterSystemCallback()
 
 void ConversationSystemInternal::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    csp::multiplayer::ConversationEventDeserialiser Deserialiser;
+    csp::multiplayer::ConversationEventDeserialiser Deserialiser { LogSystem };
     Deserialiser.Parse(EventValues);
 
     const multiplayer::ConversationEventParams& Params = Deserialiser.GetEventParams();
