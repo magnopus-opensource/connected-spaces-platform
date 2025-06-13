@@ -187,7 +187,7 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -219,7 +219,7 @@ private:
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class EventBus* EventBusPtr;
-    csp::common::LogSystem* LogSystem;
+    csp::common::LogSystem& LogSystem;
 
     uint64_t ClientId;
 
