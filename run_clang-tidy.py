@@ -6,16 +6,34 @@ import sys
 
 # todo: make these command-line arguments?
 VERBOSE = True
-USE_MSBUILD_CLANGTIDY = True
-USE_CLANGPLUSPLUS = not USE_MSBUILD_CLANGTIDY
-
 PLATFORM = "x64"
 CONFIGURATION = "DebugDLL"
-COMPILE_FILE_NAME = "compile_commands.json"
+
+CALLING_METHOD = 0
+# 0: use MSBuild with the ClangTidy target to generate the compile file, than call clang-tidy.exe directly
+# 1: use clang++ to generate the compile file, then call clang-tidy.exe directly
+# 2: use the RunCodeAnalysis and RunClangTidy keywords with MSBuild to run clang-tidy while building
+
+match CALLING_METHOD:
+    case 0:
+        USE_MSBUILD_CLANGTIDY = True
+        USE_CLANGPLUSPLUS = False
+        USE_MSBUILD_STATICANALYSIS_CLANGTIDY = False
+    case 1:
+        USE_MSBUILD_CLANGTIDY = False
+        USE_CLANGPLUSPLUS = True
+        USE_MSBUILD_STATICANALYSIS_CLANGTIDY = False
+    case 2:
+        USE_MSBUILD_CLANGTIDY = False
+        USE_CLANGPLUSPLUS = False
+        USE_MSBUILD_STATICANALYSIS_CLANGTIDY = True
+    case _:
+        print("Unsupported calling method. Aborting...")
+        sys.exit(-1)
 
 TEMP_O = "temp.o"
 TEMP_O_JSON = TEMP_O + ".json"
-
+COMPILE_FILE_NAME = "compile_commands.json"
 
 # We're using Visual Studio Professional 2022 on both the CI and locally, so at this point there is no need to read this path dynamically.
 MSBUILD_EXE = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\MSBuild\\Current\\Bin\\MSBuild.exe"
@@ -114,7 +132,10 @@ for index, location in enumerate(LOCATIONS_TO_SCAN):
         if VERBOSE: print("compile_commands.json was successfully created.")
 
     # run clang-tidy
-    if VERBOSE: print("Starting clang-tidy on " + location + "... Found " + str(len(files_to_scan)) + " files to process." )
+    if VERBOSE:
+        print("Starting clang-tidy on " + location + "...")
+    if not USE_MSBUILD_STATICANALYSIS_CLANGTIDY:
+        print("Found " + str(len(files_to_scan)) + " files to process." )
 
     compile_file_location = ""
     if USE_CLANGPLUSPLUS:
@@ -122,7 +143,17 @@ for index, location in enumerate(LOCATIONS_TO_SCAN):
     if USE_MSBUILD_CLANGTIDY:
         compile_file_location = ".\\" + location + "\\Intermediate\\" + PLATFORM + "\\" + CONFIGURATION + "\\" + clang_tidy_name + ".ClangTidy\\"
 
-    command_to_run = ["clang-tidy.exe", "--config-file=.clang-tidy", "-p=" + compile_file_location] + files_to_scan
+    if USE_MSBUILD_STATICANALYSIS_CLANGTIDY:
+        command_to_run = [MSBUILD_EXE,
+                          "/t:Rebuild",
+                          "/p:Configuration=" + CONFIGURATION,
+                          "/p:Platform=" + PLATFORM,
+                          "/p:RunCodeAnalysis=true",
+                          "/p:RunClangTidy=true",
+                          target_name] # todo: it might not make sense to run on the 3 locations here (the solution command does everything?)
+
+    else:
+        command_to_run = ["clang-tidy.exe", "--config-file=.clang-tidy", "-p=" + compile_file_location] + files_to_scan
     if VERBOSE:
         print("Running clang-tidy command on " + location + "...")
         print(command_to_run)
