@@ -73,7 +73,6 @@ public:
     csp::common::String RefreshToken;
     csp::common::String UserId;
     csp::common::String DeviceId;
-    csp::common::Array<csp::common::String> OrganizationIds;
 
 private:
     void CopyStateFrom(const LoginState& OtherState);
@@ -103,6 +102,9 @@ class CSP_API LoginStateResult : public ResultBase
 
 public:
     [[nodiscard]] const LoginState& GetLoginState() const;
+    CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode)
+        , State(nullptr) {};
 
 private:
     LoginStateResult();
@@ -163,6 +165,23 @@ public:
 
     /// @brief If the token is configured for sharing of the user's screen.
     bool ShareScreen;
+};
+
+/// @brief Data structure for a custom service proxy posting, giving service name, operation name, set help and parameters
+class CSP_API TokenInfoParams
+{
+public:
+    /// @brief The service name for the requested token.
+    csp::common::String ServiceName;
+
+    /// @brief The operation name for the requested token.
+    csp::common::String OperationName;
+
+    /// @brief Whether to set help.
+    bool SetHelp;
+
+    /// @brief Map of parameters required for the operation on the service
+    csp::common::Map<csp::common::String, csp::common::String> Parameters;
 };
 
 typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;

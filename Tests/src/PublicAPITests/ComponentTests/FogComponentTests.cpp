@@ -41,7 +41,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 {
     SetRandSeed();
@@ -49,7 +50,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -71,7 +71,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the fog
     csp::common::String ObjectName = "Object 1";
@@ -128,9 +128,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 {
     SetRandSeed();
@@ -138,7 +136,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -160,7 +157,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the fog
     csp::common::String ObjectName = "Object 1";
@@ -189,8 +186,8 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 		fog.isVolumetric = true;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(FogScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(FogScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -214,6 +211,3 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

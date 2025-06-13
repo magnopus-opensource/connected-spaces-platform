@@ -10,6 +10,7 @@ function SignalRClient.AddProject()
     kind "StaticLib"
     language "C++"
     cppdialect "C++11"
+	warnings "Off"
 
     files {
         "%{prj.location}/**.h",

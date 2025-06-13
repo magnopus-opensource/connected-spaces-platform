@@ -36,6 +36,6 @@ DEFINE_SCRIPT_PROPERTY_STRING(ReflectionSpaceComponent, AssetCollectionId);
 DEFINE_SCRIPT_PROPERTY_VEC3(ReflectionSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(ReflectionSpaceComponent, Position);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(ReflectionSpaceComponent, csp::multiplayer::ReflectionShape, int64_t, ReflectionShape);
+DEFINE_SCRIPT_PROPERTY_TYPE(ReflectionSpaceComponent, csp::multiplayer::ReflectionShape, int32_t, ReflectionShape);
 
 } // namespace csp::multiplayer

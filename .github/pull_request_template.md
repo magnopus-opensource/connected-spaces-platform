@@ -1,2 +1,2 @@
 Please write a short description of what this change does and what problem it solves.
-For more information, see our [CONTRIBUTING](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/.github/CONTRIBUTING.md) page.
+For more information, see our [CONTRIBUTING](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/.github/CONTRIBUTING.md) page.

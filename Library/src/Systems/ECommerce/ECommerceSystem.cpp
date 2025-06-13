@@ -62,10 +62,10 @@ ECommerceSystem::ECommerceSystem()
 ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    ShopifyAPI = CSP_NEW chs::ShopifyApi(InWebClient);
+    ShopifyAPI = new chs::ShopifyApi(InWebClient);
 }
 
-ECommerceSystem::~ECommerceSystem() { CSP_DELETE(ShopifyAPI); }
+ECommerceSystem::~ECommerceSystem() { delete (ShopifyAPI); }
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {
@@ -206,7 +206,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
         auto CartLinesUpdate = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
         auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
 
-        for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
+        for (size_t i = 0; i < CartInformation.CartLines.Size(); ++i)
         {
 
             csp::common::String CartLineId = CartInformation.CartLines[i].CartLineId;

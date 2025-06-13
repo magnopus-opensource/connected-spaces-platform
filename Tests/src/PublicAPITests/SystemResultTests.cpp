@@ -40,9 +40,6 @@
 using namespace csp::common;
 using namespace csp::systems;
 
-namespace SystemResultsTest
-{
-
 typedef std::function<void(const NullResult& Result)> NullResultCallback;
 
 #ifdef CSP_WASM
@@ -113,30 +110,28 @@ void NullResultTestFunction(NullResultCallback Callback)
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SYSTEMRESULT_TESTS || RUN_SYSTEMRESULT_NULLRESULT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, NullResultTest)
 {
     NullResultCallback NullTestCallback
         = [this](const NullResult& _Result) { EXPECT_EQ(_Result.GetResultCode(), csp::systems::EResultCode::Success); };
     NullResultTestFunction(NullTestCallback);
 }
-#endif
 
 // BaseResult
-#if RUN_ALL_UNIT_TESTS || RUN_SYSTEMRESULT_TESTS || RUN_SYSTEMRESULT_BASERESULT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 {
     const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
     const csp::common::String MyTestPayload = "1234";
 
-    auto* WebClient = CSP_NEW TestWebClient(80, csp::web::ETransferProtocol::HTTP);
+    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP);
     EXPECT_TRUE(WebClient != nullptr);
 
     ResponseReceiver Receiver;
 
     // Synthesise a response to feed to ApiResponseBase
-    csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(),
-        csp::web::HttpPayload(MyTestPayload), &Receiver, csp::common::CancellationToken::Dummy());
+    csp::web::HttpPayload MyHttpPayload(MyTestPayload);
+    csp::web::HttpRequest MyTestRequest = csp::web::HttpRequest(
+        WebClient, csp::web::ERequestVerb::GET, csp::web::Uri(), MyHttpPayload, &Receiver, csp::common::CancellationToken::Dummy());
     MyTestRequest.SetRequestProgress(1.0f);
     MyTestRequest.SetResponseCode(MyTestResponseCode);
 
@@ -154,6 +149,3 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
     EXPECT_EQ(MyRequest->GetPayload().GetContent(), "1234");
     EXPECT_EQ(ResponseBase.GetResponseCode(), csp::services::EResponseCode::ResponseSuccess);
 }
-#endif
-
-} // namespace SystemResultsTest

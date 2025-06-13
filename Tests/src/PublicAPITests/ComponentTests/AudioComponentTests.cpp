@@ -34,12 +34,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace
-{
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_AUDIO_TESTS || RUN_AUDIO_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 {
     SetRandSeed();
@@ -47,7 +43,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -69,7 +64,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -138,9 +133,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_AUDIO_TESTS || RUN_AUDIO_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 {
     SetRandSeed();
@@ -148,7 +141,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -170,7 +162,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -201,8 +193,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		audio.volume = 0.75;
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -225,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.75;
     )xx";
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
@@ -233,8 +225,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = -2.75;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
@@ -243,8 +235,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 1.0;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
 
@@ -252,8 +244,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 		var audio = ThisEntity.getAudioComponents()[0];
 		audio.volume = 0.0;
     )xx";
-    CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(AudioScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
@@ -265,6 +257,3 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

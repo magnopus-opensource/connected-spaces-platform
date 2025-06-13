@@ -17,6 +17,7 @@
 #include "CSP/Systems/Spaces/Space.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "Common/Convert.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -54,6 +55,11 @@ void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::
     {
         BasicSpace.Description = Dto.GetDescription();
     }
+
+    if (Dto.HasTags())
+    {
+        BasicSpace.Tags = csp::common::Convert(Dto.GetTags());
+    }
 }
 
 void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
@@ -79,42 +85,24 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
         Space.Description = Dto.GetDescription();
     }
 
+    if (Dto.HasTags())
+    {
+        Space.Tags = csp::common::Convert(Dto.GetTags());
+    }
+
     if (Dto.HasUsers())
     {
-        auto& users = Dto.GetUsers();
-        Space.UserIds = Array<String>(users.size());
-
-        for (int i = 0; i < users.size(); ++i)
-        {
-            Space.UserIds[i] = users[i];
-        }
+        Space.UserIds = csp::common::Convert(Dto.GetUsers());
     }
 
     if (Dto.HasModerators())
     {
-        auto& Moderators = Dto.GetModerators();
-        Space.ModeratorIds = Array<String>(Moderators.size());
-
-        for (int i = 0; i < Moderators.size(); ++i)
-        {
-            Space.ModeratorIds[i] = Moderators[i];
-        }
+        Space.ModeratorIds = csp::common::Convert(Dto.GetModerators());
     }
 
     if (Dto.HasBannedUsers())
     {
-        auto& users = Dto.GetBannedUsers();
-        Space.BannedUserIds = Array<String>(users.size());
-
-        for (int i = 0; i < users.size(); ++i)
-        {
-            Space.BannedUserIds[i] = users[i];
-        }
-    }
-
-    if (Dto.HasOrganizationId())
-    {
-        Space.OrganizationId = Dto.GetOrganizationId();
+        Space.BannedUserIds = csp::common::Convert(Dto.GetBannedUsers());
     }
 }
 
@@ -122,6 +110,13 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 
 namespace csp::systems
 {
+
+bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
+{
+    return std::any_of(UserIds.cbegin(), UserIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || std::any_of(ModeratorIds.cbegin(), ModeratorIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || UserId == OwnerId;
+}
 
 const Space& SpaceResult::GetSpace() const { return Space; }
 
@@ -253,11 +248,7 @@ void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
 
 const Map<String, String>& SpaceMetadataResult::GetMetadata() const { return Metadata; }
 
-const Array<String>& SpaceMetadataResult::GetTags() const { return Tags; }
-
 void SpaceMetadataResult::SetMetadata(const Map<String, String>& InMetadata) { Metadata = InMetadata; }
-
-void SpaceMetadataResult::SetTags(const Array<String>& InTags) { Tags = InTags; }
 
 Array<String>& PendingInvitesResult::GetPendingInvitesEmails() { return PendingInvitesEmailAddresses; }
 
@@ -279,9 +270,39 @@ void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiR
         std::vector<chs_users::GroupInviteDto>& PendingInvitesArray = PendingInvitesResponse->GetArray();
         PendingInvitesEmailAddresses = Array<String>(PendingInvitesArray.size());
 
-        for (auto idx = 0; idx < PendingInvitesArray.size(); ++idx)
+        for (size_t idx = 0; idx < PendingInvitesArray.size(); ++idx)
         {
             PendingInvitesEmailAddresses[idx] = PendingInvitesArray[idx].GetEmail();
+        }
+    }
+}
+
+Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() { return AcceptedInvitesUserIds; }
+
+const Array<String>& AcceptedInvitesResult::GetAcceptedInvitesUserIds() const { return AcceptedInvitesUserIds; }
+
+void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto* AcceptedInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        // Build the Dto from the response Json
+        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent());
+
+        // Extract data from response in our accepted invites array
+        std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
+        AcceptedInvitesUserIds = Array<String>(AcceptedInvitesArray.size());
+
+        for (size_t idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
+        {
+            if (AcceptedInvitesArray[idx].HasId())
+            {
+                AcceptedInvitesUserIds[idx] = AcceptedInvitesArray[idx].GetId();
+            }
         }
     }
 }
@@ -294,7 +315,7 @@ void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& I
 
 void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
 
-const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
+bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
 
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return GeoLocation; }
 
@@ -315,7 +336,7 @@ void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, 
         const auto& GeoFence = Dto.GetGeofence();
         GeoLocation.GeoFence = csp::common::Array<csp::systems::GeoLocation>(GeoFence.size());
 
-        for (int idx = 0; idx < GeoFence.size(); ++idx)
+        for (size_t idx = 0; idx < GeoFence.size(); ++idx)
         {
             csp::systems::GeoLocation GeoFenceLocation;
             GeoFenceLocation.Latitude = GeoFence[idx]->GetLatitude();
@@ -360,7 +381,7 @@ void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiRespon
         std::vector<chs_spatial::PointOfInterestDto>& POIDtos = GeoLocationPOIsResponse->GetArray();
         GeoLocations = Array<SpaceGeoLocation>(POIDtos.size());
 
-        for (auto idx = 0; idx < POIDtos.size(); ++idx)
+        for (size_t idx = 0; idx < POIDtos.size(); ++idx)
         {
             SpaceGeoLocation GeoLocation;
             GeoLocation.Id = POIDtos[idx].GetId();

@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -41,7 +40,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)] = static_cast<int64_t>(LocomotionModel::Grounded);
 
-    SetScriptInterface(CSP_NEW AvatarSpaceComponentScriptInterface(this));
+    SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAvatarId() const
@@ -84,7 +83,7 @@ void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode), static_cast<int64_t>(Value));
 }
 
-const int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
+int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
 {
     return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
 }
@@ -114,7 +113,7 @@ void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl), Value);
 }
 
-const bool AvatarSpaceComponent::GetIsHandIKEnabled() const
+bool AvatarSpaceComponent::GetIsHandIKEnabled() const
 {
     return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled));
 }
@@ -151,7 +150,7 @@ void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation), Value);
 }
 
-const float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
+float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
 {
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage));
 }
@@ -161,7 +160,7 @@ void AvatarSpaceComponent::SetWalkRunBlendPercentage(float Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage), Value);
 }
 
-const float AvatarSpaceComponent::GetTorsoTwistAlpha() const
+float AvatarSpaceComponent::GetTorsoTwistAlpha() const
 {
     return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha));
 }

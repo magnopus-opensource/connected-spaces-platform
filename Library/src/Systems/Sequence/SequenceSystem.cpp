@@ -107,7 +107,7 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
         = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->apiV1SequencesPut(SequenceKey, // NewKey
+        ->apiV1SequencesPut(csp::common::Encode::URI(SequenceKey), // NewKey
             SequenceInfo, // Dto
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
@@ -158,7 +158,7 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 
 void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys, const Optional<String>& InKeyRegex,
     const Optional<String>& InReferenceType, const Array<String>& InReferenceIds,
-    const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequencesResultCallback Callback)
+    const csp::common::Map<csp::common::String, csp::common::String>& /*MetaData*/, SequencesResultCallback Callback)
 {
     Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
     for (size_t i = 0; i < InSequenceKeys.Size(); i++)
@@ -182,7 +182,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
         Regex = csp::common::Encode::URI(*InKeyRegex);
     }
 
-    if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
+    if ((InReferenceType.HasValue() && InReferenceIds.IsEmpty()) || (!InReferenceIds.IsEmpty() && !InReferenceType.HasValue()))
     {
         CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -291,14 +291,14 @@ SequenceSystem::SequenceSystem()
 SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
     : SystemBase(InWebClient, InEventBus)
 {
-    SequenceAPI = CSP_NEW chs::SequenceApi(InWebClient);
+    SequenceAPI = new chs::SequenceApi(InWebClient);
 
     RegisterSystemCallback();
 }
 
 SequenceSystem::~SequenceSystem()
 {
-    CSP_DELETE(SequenceAPI);
+    delete (SequenceAPI);
 
     DeregisterSystemCallback();
 }
@@ -311,6 +311,12 @@ void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler C
 
 void SequenceSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!SequenceChangedCallback)
     {
         return;

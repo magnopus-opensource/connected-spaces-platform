@@ -4,7 +4,7 @@ include "Library/premake5.lua"
 
 
 if not Tests then
-	Tests = {}
+    Tests = {}
         
     function Tests.AddProject()
         project "Tests"
@@ -24,9 +24,10 @@ if not Tests then
         externalincludedirs { 
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
+            "%{wks.location}/ThirdParty/googlemock/include",
             "%{wks.location}/ThirdParty/uuid-v4",
-			"%{wks.location}/ThirdParty/tiny-process-library/install/include",
-			"%{wks.location}/MultiplayerTestRunner/include"
+            "%{wks.location}/ThirdParty/tiny-process-library/install/include",
+            "%{wks.location}/MultiplayerTestRunner/include"
         }   
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"
@@ -47,12 +48,9 @@ if not Tests then
 
         -- Compile support for MessagePack
         defines { "USE_MSGPACK" }
-       
-        -- If we're running on a build agent, we want to run *all* the tests
-        if CSP.IsRunningOnTeamCityAgent() and not CSP.IsWebAssemblyGeneration() then
-            result = iif(CSP.IsRunningNightlyBuild(), "RUN_NIGHTLY_TESTS", "RUN_ALL_UNIT_TESTS")
-            defines { result }
-        end
+		
+		-- We're building LibAsync statically and need this
+		defines { "LIBASYNC_STATIC" }
         
         -- Config for platforms
         filter "platforms:x64"
@@ -63,9 +61,7 @@ if not Tests then
 
             defines {
                 "CSP_WASM",
-                "USE_STD_MALLOC=1",
-                "SKIP_INTERNAL_TESTS",
-                "RUN_PLATFORM_TESTS"    -- enable platform tests by default for wasm
+                "USE_STD_MALLOC=1"
             }
 
             buildoptions {
@@ -135,22 +131,19 @@ if not Tests then
             }
         filter {}
 
-		links { "%{wks.location}/ThirdParty/tiny-process-library/install/lib/tiny-process-library" }
+        links { "%{wks.location}/ThirdParty/tiny-process-library/install/lib/tiny-process-library" }
             
         filter "configurations:*DLL*"
             links {
                 "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_main_md",
-                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_md"
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_md",
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gmock_md"
             }
         filter "configurations:*Static*"
             links {
                 "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_main_mt",
-                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_mt"
-            }
-        filter "platforms:wasm"
-            links {
-                "%{wks.location}/ThirdParty/googletest/lib/wasm/gtest_main",
-                "%{wks.location}/ThirdParty/googletest/lib/wasm/gtest"
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_mt",
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gmock_mt"
             }
         filter {}
 
@@ -164,13 +157,13 @@ if not Tests then
         -- The tests project depend on ConnectedSpacesPlatform first finishing in order to be able to guarantee the DLLs exist before we copy them
         -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
         dependson {"ConnectedSpacesPlatform"}
-		-- We call the multiplayer test runner in our tests
-		dependson {"MultiplayerTestRunner"}
+        -- We call the multiplayer test runner in our tests
+        dependson {"MultiplayerTestRunner"}
 
         filter "platforms:x64"
             postbuildcommands {
                 "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}", -- CSP
-				"{COPY} %{wks.location}\\MultiplayerTestRunner\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}" --MultiplayerTestRunner
+                "{COPY} %{wks.location}\\MultiplayerTestRunner\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}" --MultiplayerTestRunner
             }
         filter {}
 

@@ -32,22 +32,20 @@
 #include "gtest/gtest.h"
 #include <CSP/Multiplayer/Components/CustomSpaceComponent.h>
 #include <CSP/Multiplayer/Components/SplineSpaceComponent.h>
-#include <Memory/Memory.h>
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>
 
 using namespace csp::multiplayer;
 
+void OnUserCreated(SpaceEntity* InUser);
+
 namespace
 {
 
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
-
-void OnUserCreated(SpaceEntity* InUser);
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+} // namespace
 
 void OnUserCreated(SpaceEntity* InUser)
 {
@@ -60,7 +58,6 @@ void OnUserCreated(SpaceEntity* InUser)
     std::cerr << "OnUserCreated" << std::endl;
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPTSYSTEM_SCRIPT_BINDING_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -81,7 +78,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
 
     ScriptSystem.CreateContext(ContextId);
 
-    qjs::Context* Context = (qjs::Context*)ScriptSystem.GetContext(ContextId);
     qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem.GetModule(ContextId, "CSPTest");
 
     Module->function("RunFunction", Fn);
@@ -110,9 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
     ScriptSystem.DestroyContext(ContextId);
     ScriptSystem.Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_CREATE_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 {
     SetRandSeed();
@@ -120,7 +114,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -143,7 +136,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // we'll be using this in a few places below as part of the test, so we declare it upfront
     const std::string ScriptText = R"xx(
@@ -175,9 +168,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         Object->QueueUpdate();
@@ -193,9 +186,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 {
     SetRandSeed();
@@ -203,7 +194,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -224,7 +214,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -243,7 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -295,7 +285,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     // Create an AnimatedModelComponent and have the script update it's position
     {
-        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -309,11 +299,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         EXPECT_EQ(AnimatedModelComponent->GetPosition().X, 10.f);
@@ -330,9 +320,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_AVATAR_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 {
     SetRandSeed();
@@ -340,7 +327,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -363,7 +349,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -402,8 +388,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -427,9 +413,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_LOG_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 {
     SetRandSeed();
@@ -437,7 +421,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -460,7 +443,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -482,8 +465,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     std::string AvatarOKOScriptText = R"xx(
 
@@ -493,8 +476,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-    Avatar->GetScript()->Invoke();
+    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().Invoke();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -504,9 +487,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_DELETE_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 {
     SetRandSeed();
@@ -514,7 +495,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -536,7 +516,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -581,7 +561,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -612,9 +592,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_DELETE_AND_CHANGE_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 {
     // Test for: OB-864
@@ -624,7 +602,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -646,7 +623,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -694,7 +671,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -722,9 +699,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_ADD_SECOND_SCRIPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 {
     // Test for OB-1407
@@ -733,7 +708,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -753,7 +727,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -772,7 +746,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -827,12 +801,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     bool PatchPending = true;
-    CreatedObject->SetPatchSentCallback([&PatchPending](bool ok) { PatchPending = false; });
+    CreatedObject->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
 
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
 
@@ -863,7 +837,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     // Re-add script component
     ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
     ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
 
@@ -884,9 +858,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_DELTA_TIME_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 {
     SetRandSeed();
@@ -894,7 +866,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -917,7 +888,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -965,11 +936,11 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
     }
 
@@ -982,9 +953,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_CUSTOM_COMPONENT_SCRIPT_INTERFACE_SUBSCRIPTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubscriptionTest)
 {
     SetRandSeed();
@@ -992,7 +960,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1012,7 +979,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
+    auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
     auto EntitiesReadyCallback = [](bool Ok)
     {
@@ -1031,7 +998,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
     EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
@@ -1092,8 +1059,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
-    CreatedObject->GetScript()->SetScriptSource(ScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(ScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -1115,9 +1082,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MULTIPLE_SCRIPT_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 {
     SetRandSeed();
@@ -1125,7 +1090,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1149,7 +1113,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -1177,8 +1141,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     auto [SpaceEntity] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     // Attempt to add 2 script components
-    auto Comp1 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
-    auto Comp2 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
+    SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
+    SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
 
     SpaceEntity->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -1193,10 +1157,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // This test will be fixed and re-instated as part of OF-1539
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MODIFY_EXISTING_SCRIPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 {
     SetRandSeed();
@@ -1204,6 +1166,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1263,7 +1226,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
     bool EntityHasBeenRecreated = false;
     // we're gonna wanna wait till the entity is created before we can do our test
-    EntitySystem->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* Object) { EntityHasBeenRecreated = true; });
+    EntitySystem->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* /*Object*/) { EntityHasBeenRecreated = true; });
 
     // spin till we recreate the entity from phase 1 locally, having received it back from CHS
     while (EntityHasBeenRecreated == false)
@@ -1288,9 +1251,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
         // phew! now we have that we can attempt to modify script source again and re-invoke - this is the part that we really want to test
         // can we successfully modify a pre-existing script, and re-invoke it without script errors?
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        Object->GetScript()->Invoke();
+        Object->GetScript().Invoke();
 
-        const bool ScriptHasErrors = Object->GetScript()->HasError();
+        const bool ScriptHasErrors = Object->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
     }
 
@@ -1300,6 +1263,3 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

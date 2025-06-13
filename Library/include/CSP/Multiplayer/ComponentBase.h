@@ -42,34 +42,36 @@ class ComponentScriptInterface;
 /// Values with _DEPRECATED appended to their name should not be used. They are retained only for backwards compatibility.
 enum class ComponentType
 {
-    Invalid,
-    Core,
-    UIController_DEPRECATED,
-    StaticModel,
-    AnimatedModel,
-    MediaSurface_DEPRECATED,
-    VideoPlayer,
-    ImageSequencer_DEPRECATED,
-    ExternalLink,
-    AvatarData,
-    Light,
-    Button,
-    Image,
-    ScriptData,
-    Custom,
-    Conversation,
-    Portal,
-    Audio,
-    Spline,
-    Collision,
-    Reflection,
-    Fog,
-    ECommerce,
-    FiducialMarker,
-    GaussianSplat,
-    Text,
-    Hotspot,
-    CinematicCamera
+    Invalid = 0,
+    Core = 1,
+    UIController_DEPRECATED = 2,
+    StaticModel = 3,
+    AnimatedModel = 4,
+    MediaSurface_DEPRECATED = 5,
+    VideoPlayer = 6,
+    ImageSequencer_DEPRECATED = 7,
+    ExternalLink = 8,
+    AvatarData = 9,
+    Light = 10,
+    Button = 11,
+    Image = 12,
+    ScriptData = 13,
+    Custom = 14,
+    Conversation = 15,
+    Portal = 16,
+    Audio = 17,
+    Spline = 18,
+    Collision = 19,
+    Reflection = 20,
+    Fog = 21,
+    ECommerce = 22,
+    FiducialMarker = 23,
+    GaussianSplat = 24,
+    Text = 25,
+    Hotspot = 26,
+    CinematicCamera = 27,
+    // spare values
+    Delete = 56
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
@@ -107,7 +109,7 @@ public:
 
     /// @brief Get the ComponentType of the component.
     /// @return The type of the component as an enum.
-    ComponentType GetComponentType();
+    ComponentType GetComponentType() const;
 
     /// @brief Get a map of the replicated values defined for this component.
     ///
@@ -115,7 +117,7 @@ public:
     /// intended to be defined in the inherited component as an enum of available properties keys.
     ///
     /// @return A map of the replicated values, keyed by their unique key.
-    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties();
+    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties() const;
 
     /// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
     /// @return A pointer to the parent SpaceEntity.
@@ -152,9 +154,9 @@ protected:
     ComponentBase(ComponentType Type, SpaceEntity* Parent);
 
     const ReplicatedValue& GetProperty(uint32_t Key) const;
-    const bool GetBooleanProperty(uint32_t Key) const;
-    const int64_t GetIntegerProperty(uint32_t Key) const;
-    const float GetFloatProperty(uint32_t Key) const;
+    bool GetBooleanProperty(uint32_t Key) const;
+    int64_t GetIntegerProperty(uint32_t Key) const;
+    float GetFloatProperty(uint32_t Key) const;
     const csp::common::String& GetStringProperty(uint32_t Key) const;
     const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
     const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
@@ -166,6 +168,10 @@ protected:
     void SetProperties(const csp::common::Map<uint32_t, ReplicatedValue>& Value);
 
     virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
+
+    // Called when a component has first been created locally, or when the component
+    // is first deserialized, after it's properties have been set.
+    virtual void OnCreated();
 
     // Called whenever an entity is removed from the system.
     // Used to shutdown any behavior managed by the entity.

@@ -47,10 +47,6 @@ project "UnitTestingBinary"
         "%{prj.location}/../Library/include/CSP/Common/Array.h",
         "%{prj.location}/../Library/include/CSP/Common/String.h",
         "%{prj.location}/../Library/src/Common/String.cpp",
-        "%{prj.location}/../Library/src/Memory/DllAllocator.cpp",
-        "%{prj.location}/../Library/src/Memory/Memory.h",
-        "%{prj.location}/../Library/src/Memory/Memory.cpp",
-        "%{prj.location}/../Library/src/Memory/MemoryManager.cpp"
     }
 
     externalincludedirs {
@@ -59,14 +55,10 @@ project "UnitTestingBinary"
         "%{prj.location}/../Library/include",
         "%{prj.location}/../Library/src"
     }
-    
+
     filter "platforms:x64"
         targetname "ConnectedSpacesPlatform_D"
         kind "SharedLib"
-
-        externalincludedirs {
-            "%{prj.location}/../ThirdParty/mimalloc/include"
-        }
 
         defines {
             "CSP_WINDOWS",
@@ -77,9 +69,9 @@ project "UnitTestingBinary"
             "MultiProcessorCompile"
         }
 
-        links {
-            "mimalloc"
-        }
+		disablewarnings { "4251" } -- C4251 is a warning about not having a dll interface for a declspec export class.
+		                           -- Docs state "You can ignore C4251 if your class is derived from a type in the C++ Standard Library", which we are (std::optional)
+		
     filter "platforms:wasm"
         targetname "ConnectedSpacesPlatform_WASM.js"
         kind "None"
@@ -145,24 +137,3 @@ project "UnitTestingBinary"
             "]"
         }
     filter {}
-
-
-project "mimalloc"
-    filter "platforms:x64" 
-        kind "StaticLib"
-
-        language "C++"
-        cppdialect "C++17"
-
-        files {
-            "%{prj.location}/../ThirdParty/mimalloc/include/**.h",
-            "%{prj.location}/../ThirdParty/mimalloc/src/static.c"
-        }
-
-        externalincludedirs { 
-            "%{prj.location}/../ThirdParty/mimalloc/include",
-            "%{prj.location}/../ThirdParty/mimalloc/src",
-        }
-    filter "platforms:wasm"
-        kind "None"
-    filter{}

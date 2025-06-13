@@ -52,10 +52,10 @@ SettingsSystem::SettingsSystem()
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    SettingsAPI = CSP_NEW chs::SettingsApi(InWebClient);
+    SettingsAPI = new chs::SettingsApi(InWebClient);
 }
 
-SettingsSystem::~SettingsSystem() { CSP_DELETE(SettingsAPI); }
+SettingsSystem::~SettingsSystem() { delete (SettingsAPI); }
 
 void SettingsSystem::SetSettingValue(const String& InContext, const String& InKey, const String& InValue, NullResultCallback Callback) const
 {
@@ -263,7 +263,7 @@ void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback 
         const auto& BlockedSpacesArray = Result.GetValue();
 
         // Ignore if space already blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        for (size_t i = 0; i < BlockedSpacesArray.Size(); ++i)
         {
             if (BlockedSpacesArray[i] == InSpaceID)
             {
@@ -301,7 +301,7 @@ void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallba
         auto FoundSpace = false;
 
         // Ignore if space not blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        for (size_t i = 0; i < BlockedSpacesArray.Size(); ++i)
         {
             if (BlockedSpacesArray[i] == InSpaceID)
             {
@@ -829,7 +829,8 @@ void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier
     rapidjson::Document Json;
     Json.SetObject();
     Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
-    Json.AddMember("identifier", rapidjson::Value(InIdentifier.c_str(), InIdentifier.Length()), Json.GetAllocator());
+    Json.AddMember(
+        "identifier", rapidjson::Value(InIdentifier.c_str(), static_cast<rapidjson::SizeType>(InIdentifier.Length())), Json.GetAllocator());
     rapidjson::StringBuffer Buffer;
     rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
     Json.Accept(Writer);

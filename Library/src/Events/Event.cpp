@@ -17,7 +17,6 @@
 
 #include "Common/StlString.h"
 #include "Common/Wrappers.h"
-#include "Memory/Memory.h"
 
 #include <map>
 
@@ -35,9 +34,9 @@ public:
     void AddFloat(const char* Key, const float Value);
     void AddBool(const char* Key, const bool Value);
 
-    const int GetInt(const char* Key) const;
+    int GetInt(const char* Key) const;
     const char* GetString(const char* Key) const;
-    const float GetFloat(const char* Key) const;
+    float GetFloat(const char* Key) const;
     bool GetBool(const char* Key) const;
 
 private:
@@ -87,14 +86,14 @@ private:
         {
             if (ParamType == TypeString)
             {
-                CSP_FREE(StringParam);
+                std::free(StringParam);
             }
         }
 
         void SetString(const char* InString)
         {
             size_t StringLen = strlen(InString);
-            StringParam = (char*)CSP_ALLOC(StringLen + 1);
+            StringParam = (char*)std::malloc(StringLen + 1);
 
             STRCPY(StringParam, StringLen + 1, InString);
         }
@@ -110,8 +109,7 @@ private:
         };
     };
 
-    using ParamMap
-        = std::map<csp::StlString, EventParam, std::less<csp::StlString>, csp::memory::StlAllocator<std::pair<const csp::StlString, EventParam>>>;
+    using ParamMap = std::map<csp::StlString, EventParam, std::less<csp::StlString>>;
 
     ParamMap Parameters;
 };
@@ -148,7 +146,7 @@ void EventPayloadImpl::AddBool(const char* Key, const bool Value)
     Parameters.insert(ParamMap::value_type(Key, Param));
 }
 
-const int EventPayloadImpl::GetInt(const char* Key) const
+int EventPayloadImpl::GetInt(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
     if (it != Parameters.end())
@@ -172,7 +170,7 @@ const char* EventPayloadImpl::GetString(const char* Key) const
     return nullptr;
 }
 
-const float EventPayloadImpl::GetFloat(const char* Key) const
+float EventPayloadImpl::GetFloat(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
     if (it != Parameters.end())
@@ -198,11 +196,11 @@ bool EventPayloadImpl::GetBool(const char* Key) const
 
 Event::Event(const EventId& InId)
     : Id(InId)
-    , Impl(CSP_NEW EventPayloadImpl())
+    , Impl(new EventPayloadImpl())
 {
 }
 
-Event::~Event() { CSP_DELETE(Impl); }
+Event::~Event() { delete (Impl); }
 
 void Event::AddInt(const char* Key, const int Value) { Impl->AddInt(Key, Value); }
 
@@ -212,11 +210,11 @@ void Event::AddFloat(const char* Key, const float Value) { Impl->AddFloat(Key, V
 
 void Event::AddBool(const char* Key, const bool Value) { Impl->AddBool(Key, Value); }
 
-const int Event::GetInt(const char* Key) const { return Impl->GetInt(Key); }
+int Event::GetInt(const char* Key) const { return Impl->GetInt(Key); }
 
 const char* Event::GetString(const char* Key) const { return Impl->GetString(Key); }
 
-const float Event::GetFloat(const char* Key) const { return Impl->GetFloat(Key); }
+float Event::GetFloat(const char* Key) const { return Impl->GetFloat(Key); }
 
 bool Event::GetBool(const char* Key) const { return Impl->GetBool(Key); }
 

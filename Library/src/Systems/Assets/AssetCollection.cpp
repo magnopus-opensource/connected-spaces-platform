@@ -63,7 +63,7 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
         auto& Tags = Dto.GetTags();
         AssetCollection.Tags = csp::common::Array<csp::common::String>(Tags.size());
 
-        for (int i = 0; i < Tags.size(); ++i)
+        for (size_t i = 0; i < Tags.size(); ++i)
         {
             AssetCollection.Tags[i] = Tags[i];
         }
@@ -75,8 +75,8 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 
         for (auto& Pair : Metadata)
         {
-            auto& Metadata = AssetCollection.GetMetadataMutable();
-            Metadata[Pair.first] = Pair.second;
+            auto& MetadataMutable = AssetCollection.GetMetadataMutable();
+            MetadataMutable[Pair.first] = Pair.second;
         }
     }
 
@@ -109,11 +109,6 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
     {
         AssetCollection.IsUnique = Dto.GetHighlander();
     }
-
-    if (Dto.HasOrganizationId())
-    {
-        AssetCollection.OrganizationId = Dto.GetOrganizationId();
-    }
 }
 
 } // namespace
@@ -125,7 +120,7 @@ AssetCollection::AssetCollection()
     : Type(EAssetCollectionType::DEFAULT)
     , IsUnique(false)
 {
-    Metadata = CSP_NEW csp::common::Map<csp::common::String, csp::common::String>();
+    Metadata = new csp::common::Map<csp::common::String, csp::common::String>();
 }
 
 AssetCollection::AssetCollection(const AssetCollection& Other)
@@ -134,7 +129,7 @@ AssetCollection::AssetCollection(const AssetCollection& Other)
     *this = Other;
 }
 
-AssetCollection::~AssetCollection() { CSP_DELETE(Metadata); }
+AssetCollection::~AssetCollection() { delete (Metadata); }
 
 AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
 {
@@ -151,7 +146,6 @@ AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
     UpdatedAt = Other.UpdatedAt;
     IsUnique = Other.IsUnique;
     Version = Other.Version;
-    OrganizationId = Other.OrganizationId;
 
     *Metadata = *Other.Metadata;
 
@@ -165,6 +159,8 @@ const csp::common::Map<csp::common::String, csp::common::String>& AssetCollectio
 AssetCollection& AssetCollectionResult::GetAssetCollection() { return AssetCollection; }
 
 const AssetCollection& AssetCollectionResult::GetAssetCollection() const { return AssetCollection; }
+
+void AssetCollectionResult::SetAssetCollection(const systems::AssetCollection& Collection) { AssetCollection = Collection; }
 
 void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
@@ -238,6 +234,18 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
                 ResultTotalCount = ConvertedTotalCount;
             }
         }
+    }
+}
+uint64_t AssetCollectionCountResult::GetCount() const { return Count; }
+void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    const auto* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        Count = std::stoull(Response->GetPayload().GetContent().c_str());
     }
 }
 } // namespace csp::systems

@@ -72,7 +72,7 @@ Key components of the layer include:
 
 * **Security & Access Control:** Ensures data security and proper access control measures.
 
-* **Groups, Organizations, and Social Connections:** Facilitates social interactions and organizational structures.
+* **Groups and Social Connections:** Facilitates social interactions and group structures.
 
 * **Referential Object Definitions and Instances:** Manages objects and their references within the platform.
 
@@ -122,7 +122,7 @@ We will cover user account creation, how to log in and out via the API, how user
 
 This series introduces the notion of what a space is, in the context of CSP.
 
-You will learn how spaces are structured, how content relates to them, and gain an addition overview of space scene hierarchies.
+You will learn how spaces are structured, how content relates to them, and gain insights into space scene hierarchies. We will also cover multiplayer architectural design, event handling, and how entities, components, and avatars work together to provide a seamless multi-user experience within a space.
 
 ```eval_rst
 .. toctree::
@@ -131,7 +131,9 @@ You will learn how spaces are structured, how content relates to them, and gain 
 
    spaces/management
    spaces/assets
+   spaces/multiplayer_architecture
    spaces/entities
+   spaces/events
 ```
 
 ## Physical and Digital Realities

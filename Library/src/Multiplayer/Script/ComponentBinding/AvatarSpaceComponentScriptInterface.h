@@ -32,17 +32,17 @@ public:
 
     DECLARE_SCRIPT_PROPERTY(std::string, AvatarId);
     DECLARE_SCRIPT_PROPERTY(std::string, UserId);
-    DECLARE_SCRIPT_PROPERTY(int64_t, State);
-    DECLARE_SCRIPT_PROPERTY(int64_t, AvatarMeshIndex);
+    DECLARE_SCRIPT_PROPERTY(int32_t, State);
+    DECLARE_SCRIPT_PROPERTY(int32_t, AvatarMeshIndex);
     DECLARE_SCRIPT_PROPERTY(std::string, AgoraUserId);
     DECLARE_SCRIPT_PROPERTY(std::string, CustomAvatarUrl);
     DECLARE_SCRIPT_PROPERTY(bool, IsHandIKEnabled);
     DECLARE_SCRIPT_PROPERTY(Vector3, TargetHandIKTargetLocation);
-    DECLARE_SCRIPT_PROPERTY(Vector3, HandRotation);
-    DECLARE_SCRIPT_PROPERTY(Vector3, HeadRotation);
+    DECLARE_SCRIPT_PROPERTY(Vector4, HandRotation);
+    DECLARE_SCRIPT_PROPERTY(Vector4, HeadRotation);
     DECLARE_SCRIPT_PROPERTY(float, WalkRunBlendPercentage);
     DECLARE_SCRIPT_PROPERTY(float, TorsoTwistAlpha);
-    DECLARE_SCRIPT_PROPERTY(int64_t, AvatarPlayMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, AvatarPlayMode);
 };
 
 } // namespace csp::multiplayer

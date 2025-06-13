@@ -39,7 +39,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_USE_SPLINE_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 {
     SetRandSeed();
@@ -47,7 +48,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -67,16 +67,14 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 
     const csp::common::String UserName = "Player 1";
     const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String UserAvatarId = "MyCoolAvatar";
-    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
     {
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Ensure we're in the first space
         EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
@@ -133,9 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_SPLINE_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 {
     SetRandSeed();
@@ -143,7 +139,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -165,7 +160,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the spline
     csp::common::String ObjectName = "Object 1";
@@ -191,8 +186,8 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 		
     )xx";
 
-    CreatedObject->GetScript()->SetScriptSource(SplineScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript().SetScriptSource(SplineScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
 
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -209,6 +204,3 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

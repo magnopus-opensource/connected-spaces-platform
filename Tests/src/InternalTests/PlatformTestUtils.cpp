@@ -61,11 +61,11 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Ur
     };
 
 #ifdef CSP_WASM
-    auto* WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientEmscripten();
+    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
 
     std::thread TestThread([&]() { WebSocketClient->Start(Uri.c_str(), Fn); });
 #else
-    auto* WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientPOCO();
+    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
     WebSocketClient->Start(Uri.c_str(), Fn);
 #endif
 
@@ -131,7 +131,7 @@ void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
 {
     bool finished2 = false;
 
-    auto Fn2 = [&](const std::string& S, bool result)
+    auto Fn2 = [&](const std::string& /*S*/, bool result)
     {
         finished2 = true;
         EXPECT_TRUE(result);

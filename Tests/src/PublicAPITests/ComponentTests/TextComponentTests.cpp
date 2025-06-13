@@ -40,7 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_TEXT_TESTS || RUN_TEXT_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 {
     SetRandSeed();
@@ -48,7 +49,6 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -70,7 +70,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the text
     csp::common::String ObjectName = "Object 1";
@@ -154,9 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_TEXT_TESTS || RUN_TEXT_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 {
     SetRandSeed();
@@ -164,7 +162,6 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -186,7 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the text
     csp::common::String ObjectName = "Object 1";
@@ -222,8 +219,8 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     )xx";
 
     ScriptComponent->SetScriptSource(TextScriptText.c_str());
-    CreatedObject->GetScript()->Invoke();
-    const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+    CreatedObject->GetScript().Invoke();
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
     EntitySystem->ProcessPendingEntityOperations();
 
@@ -260,6 +257,3 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

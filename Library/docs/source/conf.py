@@ -89,10 +89,12 @@ html_context = {
     'display_github': True,
     'github_user': 'magnopus-opensource',
     'github_repo': 'connected-spaces-platform',
-    'github_version': 'develop/Library/docs/source/',
+    'github_version': 'main/Library/docs/source/',
 }
 
 html_static_path = ['_static']
+
+html_extra_path = ['robots.txt']
 
 # This function is called for every parsed file (markdowns included).
 def read_rst(app, docname, source):

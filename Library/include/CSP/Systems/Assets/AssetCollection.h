@@ -102,9 +102,6 @@ public:
     // NOTE: Why is this here?
     csp::common::String Version;
 
-    // The ID of the organization which owns this asset collection
-    csp::common::String OrganizationId;
-
 private:
     // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
     // internal STL map's destructor invokes client application's deallocators when they override 'delete'
@@ -130,6 +127,13 @@ public:
     /// @brief Retrieves the asset collection result.
     /// @return AssetCollection : const ref of asset collection class
     const AssetCollection& GetAssetCollection() const;
+
+    CSP_NO_EXPORT void SetAssetCollection(const csp::systems::AssetCollection& Collection);
+
+    CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    AssetCollectionResult() = default;
 
 private:
     AssetCollectionResult(void*) {};
@@ -180,6 +184,37 @@ private:
     uint64_t ResultTotalCount = 0;
 };
 
+/// @ingroup Asset System
+class CSP_API AssetCollectionCountResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Represents the count of asset collections that meet he criteria provided from AssetSystem::GetAssetCollectionCount
+    /// @return uint64_t : The number of asset collections found
+    uint64_t GetCount() const;
+
+protected:
+    AssetCollectionCountResult() = delete;
+    AssetCollectionCountResult(void*)
+        : Count { 0 } {};
+
+private:
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    CSP_NO_EXPORT AssetCollectionCountResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
+        , Count { 0 } {};
+
+    uint64_t Count;
+};
+
 /// @brief Callback containing asset collection.
 /// @param Result AssetCollectionResult : result class
 typedef std::function<void(const AssetCollectionResult& Result)> AssetCollectionResultCallback;
@@ -187,5 +222,9 @@ typedef std::function<void(const AssetCollectionResult& Result)> AssetCollection
 /// @brief Callback containing array of asset collections.
 /// @param Result AssetCollectionsResult : result class
 typedef std::function<void(const AssetCollectionsResult& Result)> AssetCollectionsResultCallback;
+
+/// @brief Callback containing number of asset collections.
+/// @param Result AssetCollectionCountResult : result class
+typedef std::function<void(const AssetCollectionCountResult& Result)> AssetCollectionCountResultCallback;
 
 } // namespace csp::systems

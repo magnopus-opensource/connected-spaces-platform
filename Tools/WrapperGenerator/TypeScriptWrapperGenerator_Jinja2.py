@@ -76,8 +76,7 @@ class TypeScriptWrapperGenerator_Jinja2:
 
         # Initialise Jinja environment and add custom filters
         env = Environment(
-            loader=FileSystemLoader('Templates/TypeScript'),
-            extensions=['jinja2_workarounds.MultiLineInclude']
+            loader=FileSystemLoader('Templates/TypeScript')
         )
 
         def register_type(type, _env = env):

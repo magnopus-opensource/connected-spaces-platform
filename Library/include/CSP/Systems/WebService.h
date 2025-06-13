@@ -91,6 +91,11 @@ public:
     /// @brief Virtual destructor.
     virtual ~ResultBase() = default;
 
+    // @brief Equality operator
+    bool operator==(const ResultBase& other) const;
+    // @brief Inequality operator
+    bool operator!=(const ResultBase& other) const;
+
     /// @brief Called when progress has been updated.
     /// @param ApiResponse const ApiResponseBase* : Response received from the request
     CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);
@@ -101,11 +106,11 @@ public:
 
     /// @brief Status of this response.
     /// @return EResultCode
-    const EResultCode GetResultCode() const;
+    EResultCode GetResultCode() const;
 
     /// @brief Result of http request.
     /// @return uint16_t
-    const uint16_t GetHttpResultCode() const;
+    uint16_t GetHttpResultCode() const;
 
     /// @brief Body of the response.
     const csp::common::String& GetResponseBody() const;

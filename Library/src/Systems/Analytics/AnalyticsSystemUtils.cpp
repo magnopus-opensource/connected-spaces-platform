@@ -15,8 +15,6 @@
  */
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 
-#include "Memory/Memory.h"
-
 namespace csp::systems
 {
 
@@ -52,11 +50,11 @@ void AnalyticsEvent::AddBool(csp::common::String Key, bool Value)
     Parameters[Key] = Metric;
 }
 
-const int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameters[Key].GetInt(); }
+int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameters[Key].GetInt(); }
 
 const csp::common::String& AnalyticsEvent::GetString(csp::common::String Key) const { return Parameters[Key].GetString(); }
 
-const float AnalyticsEvent::GetFloat(csp::common::String Key) const { return Parameters[Key].GetFloat(); }
+float AnalyticsEvent::GetFloat(csp::common::String Key) const { return Parameters[Key].GetFloat(); }
 
 bool AnalyticsEvent::GetBool(csp::common::String Key) const { return Parameters[Key].GetBool(); }
 
@@ -69,7 +67,7 @@ AnalyticsEvent::AnalyticsEvent(const csp::common::String& Tag)
 {
 }
 
-AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag) { return CSP_NEW AnalyticsEvent(Tag); }
+AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag) { return new AnalyticsEvent(Tag); }
 
-void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event) { CSP_DELETE(Event); }
+void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event) { delete (Event); }
 } // namespace csp::systems

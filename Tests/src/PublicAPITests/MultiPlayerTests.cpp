@@ -27,7 +27,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
+#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
 #include "SpaceSystemTestHelpers.h"
@@ -44,6 +44,10 @@
 #include <filesystem>
 #include <thread>
 
+#include <async++.h>
+
+#include "Mocks/SignalRConnectionMock.h"
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
@@ -58,7 +62,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem);
 std::atomic_bool IsTestComplete;
 std::atomic_bool IsDisconnected;
 std::atomic_bool IsReadyForUpdate;
-SpaceEntity* TestUser;
+SpaceEntity* TestSpaceEntity;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit = 20000;
@@ -80,7 +84,7 @@ void InitialiseTestingConnection()
     IsTestComplete = false;
     IsDisconnected = false;
     IsReadyForUpdate = false;
-    TestUser = nullptr;
+    TestSpaceEntity = nullptr;
 
     WaitForTestTimeoutCountMs = 0;
     ReceivedEntityUpdatesCount = 0;
@@ -163,8 +167,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
 
-    TestUser = InUser;
-    TestUser->SetUpdateCallback(
+    TestSpaceEntity = InUser;
+    TestSpaceEntity->SetUpdateCallback(
         [InUser](SpaceEntity* UpdatedUser, SpaceEntityUpdateFlags InUpdateFlags, csp::common::Array<ComponentUpdateInfo> InComponentUpdateInfoArray)
         {
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_NAME)
@@ -186,7 +190,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
             if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS)
             {
-                for (int i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
+                for (size_t i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
                 {
                     uint16_t ComponentID = InComponentUpdateInfoArray[i].ComponentId;
 
@@ -197,7 +201,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                         const csp::common::Map<uint32_t, ReplicatedValue>& Properties = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
                         const csp::common::Array<uint32_t>* PropertyKeys = Properties.Keys();
 
-                        for (int j = 0; j < PropertyKeys->Size(); ++j)
+                        for (size_t j = 0; j < PropertyKeys->Size(); ++j)
                         {
                             if (j >= 3) // We only randomise the first 3 properties, so we don't really need to print any more
                             {
@@ -236,19 +240,19 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                             }
                         }
 
-                        CSP_DELETE(PropertyKeys);
+                        delete (PropertyKeys);
                     }
                 }
             }
 
-            if (InUser == TestUser)
+            if (InUser == TestSpaceEntity)
             {
                 ReceivedEntityUpdatesCount++;
                 IsReadyForUpdate = true;
             }
         });
 
-    TestUser->SetDestroyCallback(
+    TestSpaceEntity->SetDestroyCallback(
         [](bool Ok)
         {
             if (Ok)
@@ -261,9 +265,15 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     SetRandomProperties(InUser, EntitySystem);
 }
+
+struct RAIIMockLogger
+{
+    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
+    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
+    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
+};
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 {
     SetRandSeed();
@@ -271,7 +281,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -285,10 +294,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
+    bool CallbackCalled = false;
+
+    Connection->SetConnectionCallback([&CallbackCalled](const csp::common::String& /*Message*/) { CallbackCalled = true; });
+
     csp::common::String UserId;
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
+
+    WaitForCallback(CallbackCalled);
+    EXPECT_TRUE(CallbackCalled);
 
     // Create space
     csp::systems::Space Space;
@@ -301,7 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
@@ -318,9 +334,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 {
     SetRandSeed();
@@ -328,7 +342,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -354,12 +367,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
     InitialiseTestingConnection();
 
+    auto Headers = Connection->Connection->HTTPHeaders();
+    ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
+
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -369,9 +385,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_KEEPALIVE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 {
     SetRandSeed();
@@ -379,8 +393,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -408,7 +420,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     WaitForTestTimeoutCountMs = 0;
     int KeepAliveInterval = 200;
@@ -427,9 +439,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITYREPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 {
     SetRandSeed();
@@ -437,8 +447,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -468,7 +476,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     OnConnect(EntitySystem);
 
@@ -485,13 +493,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
         {
             if (IsReadyForUpdate)
             {
-                SetRandomProperties(TestUser, EntitySystem);
+                SetRandomProperties(TestSpaceEntity, EntitySystem);
             }
         }
         else if (ReceivedEntityUpdatesCount == NumberOfEntityUpdateTicks && IsReadyForUpdate) // Send a final update that doesn't change the data
         {
             IsReadyForUpdate = false;
-            EntitySystem->QueueEntityUpdate(TestUser);
+            EntitySystem->QueueEntityUpdate(TestSpaceEntity);
         }
         else
         {
@@ -509,9 +517,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SELF_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 {
     SetRandSeed();
@@ -519,7 +525,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -556,7 +561,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
         SpaceTransform ObjectTransform
             = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
         auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
@@ -572,7 +577,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
         bool EntityUpdated = false;
 
         CreatedObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == "Object 1")
                 {
@@ -610,9 +615,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 {
     SetRandSeed();
@@ -620,7 +623,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -644,7 +646,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -686,9 +688,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_CREATOR_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 {
     SetRandSeed();
@@ -696,7 +696,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -720,7 +719,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Creator 1";
     const SpaceTransform& UserTransform
@@ -762,9 +761,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_MANY_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
 {
     /*
@@ -779,7 +776,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -812,14 +808,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser1.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     MultiplayerTestRunnerProcess CreateAvatarRunner2
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
               .SetSpaceId(Space.Id.c_str())
               .SetLoginEmail(TestUser2.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
-              .SetTimeoutInSeconds(60);
+              .SetTimeoutInSeconds(60)
+              .SetEndpoint(EndpointBaseURI());
 
     std::array<MultiplayerTestRunnerProcess, 2> Runners = { CreateAvatarRunner, CreateAvatarRunner2 };
     std::array<std::future<void>, 2> ReadyForAssertionsFutures = { Runners[0].ReadyForAssertionsFuture(), Runners[1].ReadyForAssertionsFuture() };
@@ -838,7 +836,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
 
         if (Status == std::future_status::timeout)
         {
-            FAIL("CreateAvatar process timed out before it was ready for assertions.");
+            FAIL() << "CreateAvatar process timed out before it was ready for assertions.";
         }
     }
 
@@ -857,9 +855,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AVATAR_MOVEMENT_DIRECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 {
     SetRandSeed();
@@ -867,7 +863,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -891,7 +886,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -927,9 +922,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_CREATE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 {
     SetRandSeed();
@@ -937,8 +930,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -968,7 +959,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform
@@ -991,9 +982,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_ADDCOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 {
     SetRandSeed();
@@ -1001,7 +990,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1025,7 +1013,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -1033,7 +1021,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     bool PatchPending = true;
-    Object->SetPatchSentCallback([&PatchPending](bool ok) { PatchPending = false; });
+    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
 
     const csp::common::String ModelAssetId = "NotARealId";
 
@@ -1094,9 +1082,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 {
     SetRandSeed();
@@ -1104,7 +1090,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1128,7 +1113,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -1136,7 +1121,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
     bool PatchPending = true;
-    Object->SetPatchSentCallback([&PatchPending](bool ok) { PatchPending = false; });
+    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
 
     const csp::common::String ModelAssetId = "NotARealId";
 
@@ -1194,10 +1179,132 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpace)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+
+    auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    bool PatchPending = true;
+    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
+
+    auto* ComponentToKeep = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
+    ComponentToKeep->SetComponentName("ComponentNameKeep");
+    auto KeepKey = ComponentToKeep->GetId();
+    auto* ComponentToDelete = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
+    ComponentToDelete->SetComponentName("ComponentNameDelete");
+    auto DeleteKey = ComponentToDelete->GetId();
+    Object->QueueUpdate();
+
+    while (PatchPending)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+
+    PatchPending = true;
+
+    // Ensure values are set correctly
+    EXPECT_EQ(ComponentToKeep->GetComponentName(), "ComponentNameKeep");
+    EXPECT_EQ(ComponentToDelete->GetComponentName(), "ComponentNameDelete");
+
+    auto& Components = *Object->GetComponents();
+
+    EXPECT_EQ(Components.Size(), 2);
+    EXPECT_TRUE(Components.HasKey(KeepKey));
+    EXPECT_TRUE(Components.HasKey(DeleteKey));
+
+    // Delete component
+    Object->RemoveComponent(ComponentToDelete->GetId());
+    Object->QueueUpdate();
+    while (PatchPending)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+    EXPECT_FALSE(PatchPending);
+
+    // Check deletion has happened
+    auto& RealComponents = *Object->GetComponents();
+
+    EXPECT_EQ(RealComponents.Size(), 1);
+    EXPECT_TRUE(RealComponents.HasKey(KeepKey));
+    EXPECT_FALSE(RealComponents.HasKey(DeleteKey));
+
+    // Exit space and enter again, making sure the entities have been created
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Wait a few seconds for the CHS database to update
+    std::this_thread::sleep_for(std::chrono::seconds(8));
+
+    bool EntitiesCreated = false;
+
+    auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+    {
+        EntitiesCreated = true;
+        EXPECT_TRUE(Success);
+    };
+
+    EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+    auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+    WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+    EXPECT_TRUE(EntitiesCreated);
+
+    // Retrieve components in space
+    SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+    EXPECT_TRUE(FoundEntity != nullptr);
+    auto& FoundComponents = *FoundEntity->GetComponents();
+
+    // Check the right component has been deleted
+    EXPECT_EQ(FoundComponents.Size(), 1);
+    EXPECT_TRUE(FoundComponents.HasKey(KeepKey));
+    EXPECT_FALSE(FoundComponents.HasKey(DeleteKey));
+    EXPECT_EQ(FoundEntity->GetComponent(0)->GetComponentName(), "ComponentNameKeep");
+
+    // Exit space
+    auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
 
 // This test currently requires manual steps and will be reviewed as part of OF-1535.
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -1207,7 +1314,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -1245,7 +1351,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [Avatar]
         = Awaitable(&SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode)
@@ -1253,14 +1359,14 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
-    float TestTime = 0;
+    long long TestTime = 0;
 
     // Interrupt connection here
     while (!Interrupted && TestTime < 60)
     {
         std::this_thread::sleep_for(50ms);
 
-        SetRandomProperties(TestUser, EntitySystem);
+        SetRandomProperties(TestSpaceEntity, EntitySystem);
 
         Current = std::chrono::steady_clock::now();
         TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
@@ -1276,9 +1382,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     // Log out
     Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {
     // Test for OB-1046
@@ -1291,7 +1395,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1314,7 +1417,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create 3 seperate objects to ensure there is too many updates for the rate limiter to process in one tick
 
@@ -1323,17 +1426,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
     auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent = (ImageSpaceComponent*)CreatedObject->AddComponent(ComponentType::Image);
+    CreatedObject->AddComponent(ComponentType::Image);
     CreatedObject->QueueUpdate();
 
     // Create object 2
     auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent2 = (ImageSpaceComponent*)CreatedObject2->AddComponent(ComponentType::Image);
+    CreatedObject2->AddComponent(ComponentType::Image);
     CreatedObject2->QueueUpdate();
 
     // Create object 3
     auto [CreatedObject3] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-    auto* ImageComponent3 = (ImageSpaceComponent*)CreatedObject3->AddComponent(ComponentType::Image);
+    CreatedObject3->AddComponent(ComponentType::Image);
     CreatedObject3->QueueUpdate();
 
     // Destroy Entites
@@ -1351,9 +1454,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_SELECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 {
     SetRandSeed();
@@ -1361,7 +1462,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -1385,7 +1485,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -1419,7 +1519,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 // Derived type that allows us to access protected members of SpaceEntitySystem
 class InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
@@ -1438,7 +1537,6 @@ public:
 };
 
 // Disabled by default as it can be slow
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 {
     SetRandSeed();
@@ -1446,14 +1544,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1534,9 +1628,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INVALID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 {
     SetRandSeed();
@@ -1544,14 +1636,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1571,9 +1659,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    bool AssetDetailBlobChangedCallbackCalled = false;
     csp::common::String CallbackAssetId;
 
     const csp::common::String ObjectName = "Object 1";
@@ -1583,7 +1670,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
     const csp::common::String ModelAssetId = "NotARealId";
 
-    auto* LightSpaceComponentInstance = (LightSpaceComponent*)Object->AddComponent(ComponentType::Invalid);
+    Object->AddComponent(ComponentType::Invalid);
 
     // Process component creation
     Object->QueueUpdate();
@@ -1597,77 +1684,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    csp::common::String UserId;
-
-    // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
-
-    // Create space object
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [SpaceEntity] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-    // Create second space object
-    csp::common::String ObjectName2 = "Object 2";
-    auto [SpaceEntity2] = AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
-
-    auto Component1 = SpaceEntity->AddComponent(ComponentType::AnimatedModel);
-    auto Component2 = SpaceEntity2->AddComponent(ComponentType::AnimatedModel);
-
-    SpaceEntity->QueueUpdate();
-    SpaceEntity2->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
-
-    auto FoundComponent = EntitySystem->FindComponentById(Component1->GetId());
-
-    EXPECT_TRUE(FoundComponent != nullptr);
-    EXPECT_EQ(Component1->GetId(), FoundComponent->GetId());
-
-    FoundComponent = EntitySystem->FindComponentById(Component2->GetId());
-
-    EXPECT_TRUE(FoundComponent != nullptr);
-    EXPECT_EQ(Component2->GetId(), FoundComponent->GetId());
-
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-#endif
 
 void RunParentEntityReplicationTest(bool Local)
 {
@@ -1676,7 +1692,6 @@ void RunParentEntityReplicationTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -1709,7 +1724,7 @@ void RunParentEntityReplicationTest(bool Local)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
     auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
@@ -1727,7 +1742,7 @@ void RunParentEntityReplicationTest(bool Local)
 
         CreatedChildEntity1->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -1770,7 +1785,7 @@ void RunParentEntityReplicationTest(bool Local)
 
         CreatedChildEntity2->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -1807,7 +1822,7 @@ void RunParentEntityReplicationTest(bool Local)
 
         CreatedChildEntity1->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -1842,7 +1857,7 @@ void RunParentEntityReplicationTest(bool Local)
 
         CreatedChildEntity2->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -1884,25 +1899,20 @@ void RunParentEntityReplicationTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityLocalReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for ParentId and ChildEntities
     RunParentEntityReplicationTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GLOBAL_POSITION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -1912,8 +1922,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -1945,18 +1953,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     SpaceTransform ObjectTransformExpected
         = { csp::common::Vector3 { 2, 1, 1 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
 
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
-
     bool ChildEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        [&ChildEntityUpdated, ChildEntityName](
+            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
             if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
@@ -1991,7 +1997,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     // When performing quaternion operations, W can be negative, so no point checking
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result) {});
+    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1999,9 +2005,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_ROTATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2011,8 +2015,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2039,23 +2041,21 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     csp::common::String ChildEntityName = "ChildEntity";
     // Parent has a position [0,0,0], and 1.507 radian (90 degree) rotation around the y axis
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
 
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
-
     bool ChildEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        [&ChildEntityUpdated, ChildEntityName](
+            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
             if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
@@ -2090,7 +2090,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result) {});
+    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -2098,9 +2098,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_SCALE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2110,8 +2108,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2140,24 +2136,22 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     // Create a parent, positioned at the origin, rotated 90 degrees, with a scale of -0.5 on x axis and 0.5 on Y/Z axes
     // child created at a position of [1,0,0], no rotation, and scale of 1
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
     SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
-    SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, -0.5 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
+    SpaceTransform ObjectTransformExpected = { csp::common::Vector3 { 0, 0, -0.5f }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f },
+        csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
 
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
-
     bool ChildEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        [&ChildEntityUpdated, ChildEntityName](
+            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
             if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
@@ -2192,7 +2186,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result) {});
+    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -2200,9 +2194,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_TRANSFORM_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
@@ -2212,8 +2204,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2239,24 +2229,22 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     csp::common::String ParentEntityName = "ParentEntity";
     csp::common::String ChildEntityName = "ChildEntity";
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformChild
         = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
     SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
+        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
 
-    uint64_t ParentEntityId = CreatedParentEntity->GetId();
-    uint64_t ChildEntityId = CreatedChildEntity->GetId();
-
     bool ChildEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        [&ChildEntityUpdated, ChildEntityName](
+            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
             if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
@@ -2286,7 +2274,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == ObjectTransformActual.Rotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == ObjectTransformActual.Scale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result) {});
+    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -2294,10 +2282,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_ENTER_SPACE_REPLICATION_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
+// This test is to be fixed as part of OF-1651.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
 {
     // Tests the SpaceEntitySystem::OnAllEntitiesCreated
     // for ParentId and ChildEntities
@@ -2306,8 +2293,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2337,7 +2322,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
     auto [CreatedChildEntity] = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
@@ -2356,7 +2341,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     bool ChildEntityUpdated = false;
 
     CreatedChildEntity->SetUpdateCallback(
-        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        [&ChildEntityUpdated, ChildEntityName](
+            SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
         {
             if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
             {
@@ -2380,6 +2366,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
     // Log out
     LogOut(UserSystem);
+
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 
     // Log in again
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
@@ -2423,7 +2411,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentChildDeletionTest(bool Local)
 {
@@ -2432,7 +2419,6 @@ void RunParentChildDeletionTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -2465,7 +2451,7 @@ void RunParentChildDeletionTest(bool Local)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
     auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
@@ -2477,7 +2463,7 @@ void RunParentChildDeletionTest(bool Local)
 
         CreatedChildEntity1->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -2510,7 +2496,7 @@ void RunParentChildDeletionTest(bool Local)
 
         CreatedChildEntity2->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -2589,25 +2575,20 @@ void RunParentChildDeletionTest(bool Local)
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentChildDeletionTest(false);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_OBJECT_PARENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 {
     SetRandSeed();
@@ -2615,8 +2596,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Log in
@@ -2645,7 +2624,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
     auto [CreatedChildEntity] = AWAIT(CreatedParentEntity, CreateChildEntity, ChildEntityName, ObjectTransform);
@@ -2663,7 +2642,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
 void RunParentDeletionTest(bool Local)
 {
@@ -2672,7 +2650,6 @@ void RunParentDeletionTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -2706,7 +2683,7 @@ void RunParentDeletionTest(bool Local)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
     auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
@@ -2718,7 +2695,7 @@ void RunParentDeletionTest(bool Local)
 
         CreatedChildEntity1->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
                 {
@@ -2747,7 +2724,7 @@ void RunParentDeletionTest(bool Local)
 
         CreatedChildEntity2->SetUpdateCallback(
             [&ChildEntityUpdated, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
                 {
@@ -2772,7 +2749,7 @@ void RunParentDeletionTest(bool Local)
 
         CreatedChildEntity1->SetUpdateCallback(
             [&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (ChildEntityUpdated)
                 {
@@ -2791,7 +2768,7 @@ void RunParentDeletionTest(bool Local)
 
         CreatedChildEntity2->SetUpdateCallback(
             [&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
             {
                 if (ChildEntityUpdated2)
                 {
@@ -2892,20 +2869,633 @@ void RunParentDeletionTest(bool Local)
     LogOut(UserSystem);
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentLocalDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(true);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentDeletionTest)
 {
     // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
     // for deletion of child and parent entities
     RunParentDeletionTest(false);
 }
-#endif
+
+namespace
+{
+class MockMultiplayerErrorCallback
+{
+public:
+    MOCK_METHOD(void, Call, (csp::multiplayer::ErrorCode), ());
+};
+
+class MockConnectionCallback
+{
+public:
+    MOCK_METHOD(void, Call, (const csp::common::String&), ());
+};
+
+void StartAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Start).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+void StopAlwaysSucceeds(SignalRConnectionMock& SignalRMock)
+{
+    ON_CALL(SignalRMock, Stop).WillByDefault([](std::function<void(std::exception_ptr)> Callback) { Callback(nullptr); });
+}
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+
+    // The start function will throw internally
+    EXPECT_CALL(*SignalRMock, Start)
+        .WillOnce([](std::function<void(std::exception_ptr)> Callback) { Callback(std::make_exception_ptr(std::runtime_error("mock exception"))); });
+
+    // Then the error callback we be called with an unknown error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::Unknown));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::Start, Error when starting SignalR connection.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    // Invoke function for delete objects errors
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillOnce(
+            [](const std::string& /*DeleteObjectsMethodName*/, const signalr::value& /*DeleteEntityMessage*/,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                Callback(Value, Except);
+                return async::make_task(std::make_tuple(Value, Except));
+            });
+
+    // Then the error callback we be called with an no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message (weird)
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback,
+        Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Fail getting client Id
+                    auto Value = signalr::value("Irrelevant value from GetClientId");
+                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    Callback(Value, Except);
+                    return async::make_task(std::make_tuple(Value, Except));
+                }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(
+        MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
+                }
+                else if (HubMethodName == "GetClientId")
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
+                }
+                else if (HubMethodName == "StartListening")
+                {
+                    // Fail to start listening
+                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    Callback(signalr::value(std::uint64_t(0)), Except);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), Except));
+                }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
+            });
+
+    // Then the error callback we be called with no error code
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(csp::multiplayer::ErrorCode::None));
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
+
+    Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+
+    // Start and stop will call their callbacks
+    StartAlwaysSucceeds(*SignalRMock);
+    StopAlwaysSucceeds(*SignalRMock);
+
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+                std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                if (HubMethodName == "DeleteObjects")
+                {
+                    // Succeed deleting objects
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
+                    Callback(Value, nullptr);
+                    return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
+                }
+                else if ((HubMethodName == "GetClientId") || (HubMethodName == "StartListening"))
+                {
+                    // Succeed getting client Id
+                    Callback(signalr::value(std::uint64_t(0)), nullptr);
+                    return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
+                }
+
+                // Just a default case, shouldn't matter
+                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
+            });
+
+    // Then the error callback will be called with no error
+    MockMultiplayerErrorCallback MockErrorCallback;
+    EXPECT_CALL(MockErrorCallback, Call(ErrorCode::None));
+
+    // And the connection callback with be called
+    MockConnectionCallback MockSuccessConnectionCallback;
+    EXPECT_CALL(MockSuccessConnectionCallback, Call(csp::common::String("Successfully connected to SignalR hub.")));
+
+    // And the disconnection callback will not be called
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
+
+    Connection->SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
+    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // ParseMultiplayerError is odd, it seems only concerned with understanding this "Scopes_ConcurrentUsersQuota error"
+    // I'm actually not sure if CHS even still throws this format of errors, this could be completely redundant...
+    auto [ErrorCodeTooManyUsers, MsgTooManyUsers] = Connection->ParseMultiplayerError(std::runtime_error("error code: Scopes_ConcurrentUsersQuota"));
+    EXPECT_EQ(ErrorCodeTooManyUsers, csp::multiplayer::ErrorCode::SpaceUserLimitExceeded);
+    EXPECT_EQ(MsgTooManyUsers, "error code: Scopes_ConcurrentUsersQuota");
+
+    auto [ErrorCodeUnknown, MsgUnknown] = Connection->ParseMultiplayerError(std::runtime_error("Some unknown error"));
+    EXPECT_EQ(ErrorCodeUnknown, csp::multiplayer::ErrorCode::Unknown);
+    EXPECT_EQ(MsgUnknown, "Some unknown error");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    SpaceEntity Entity { nullptr };
+
+    // Ensure the lock error message is called when we try and lock an entity that is already locked
+    const csp::common::String LockErrorMsg = "Entity is already locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
+
+    // Set the entity as locked first
+    Entity.EntityLock = LockType::UserAgnostic;
+    // Check that we error if we try to lock again
+    Entity.Lock();
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    SpaceEntity Entity { nullptr };
+
+    // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
+    const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(UnlockErrorMsg)).Times(1);
+
+    Entity.Unlock();
+}
+
+void RunEntityLockTest(bool Local)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+    EntitySystem->SetEntityPatchRateLimitEnabled(false);
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // If local is false, test DeserialiseFromPatch functionality
+    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
+
+    {
+        // Create Entity
+        const csp::common::String EntityName = "Entity";
+        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+        // New entity should default to unlocked
+        EXPECT_FALSE(CreatedEntity->IsLocked());
+
+        // Test entity locks correctly
+        {
+            bool EntityUpdated = false;
+
+            CreatedEntity->SetUpdateCallback(
+                [&EntityUpdated, CreatedEntity](
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    {
+                        EntityUpdated = true;
+                    }
+                });
+
+            // Lock Entity
+            CreatedEntity->Lock();
+
+            // Entity shouldn't be locked until we apply our patch
+            EXPECT_FALSE(CreatedEntity->IsLocked());
+
+            // Apply patch
+            CreatedEntity->QueueUpdate();
+            EntitySystem->ProcessPendingEntityOperations();
+
+            WaitForCallbackWithUpdate(EntityUpdated, EntitySystem);
+            EXPECT_TRUE(EntityUpdated);
+
+            // Entity should be locked now
+            EXPECT_TRUE(CreatedEntity->IsLocked());
+        }
+
+        // Test entity unlocks correctly
+        {
+            bool EntityUpdated = false;
+
+            CreatedEntity->SetUpdateCallback(
+                [&EntityUpdated, CreatedEntity](
+                    SpaceEntity* /*Entity*/, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& /*UpdateInfo*/)
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_LOCK_TYPE)
+                    {
+                        EntityUpdated = true;
+                    }
+                });
+
+            // Unlock Entity
+            CreatedEntity->Unlock();
+
+            // Entity should still be locked until we apply our patch
+            EXPECT_TRUE(CreatedEntity->IsLocked());
+
+            // Apply patch
+            CreatedEntity->QueueUpdate();
+            EntitySystem->ProcessPendingEntityOperations();
+
+            WaitForCallbackWithUpdate(EntityUpdated, EntitySystem);
+            EXPECT_TRUE(EntityUpdated);
+
+            // Entity shouldn't be locked now
+            EXPECT_FALSE(CreatedEntity->IsLocked());
+        }
+    }
+
+    // Exit space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockLocalTest)
+{
+    // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
+    // for EntityLock property
+    RunEntityLockTest(true);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockTest)
+{
+    // Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+    // for EntityLock property
+    RunEntityLockTest(false);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+    EntitySystem->SetEntityPatchRateLimitEnabled(false);
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        const csp::common::String EntityName = "Entity";
+        const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+        auto [CreatedEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+    }
+
+    // Re-enter space to ensure updates were made to the server
+    {
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Log out
+        LogOut(UserSystem);
+
+        // Wait a few seconds for the CHS database to update
+        std::this_thread::sleep_for(std::chrono::seconds(8));
+
+        // Log in again
+        LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+        // Enter space
+        bool EntitiesCreated = false;
+
+        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+        {
+            EntitiesCreated = true;
+            EXPECT_TRUE(Success);
+        };
+
+        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+        EXPECT_TRUE(EntitiesCreated);
+    }
+
+    // Ensure Entity is still locked
+    {
+        SpaceEntity* Entity = EntitySystem->GetEntityByIndex(0);
+        EXPECT_TRUE(Entity->IsLocked());
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockAddComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the add component error message is logged when we try to add a component to a locked entity.
+            static const csp::common::String AddComponentErrorMsg = "Entity is locked. New components can not be added to a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(AddComponentErrorMsg)).Times(1);
+
+            // Attempt to add a component to a locked entity
+            auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+
+            EXPECT_EQ(NewComponent, nullptr);
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockRemoveComponentTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter a space and lock an entity
+    {
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Create Entity
+        csp::multiplayer::SpaceEntity* CreatedEntity = CreateTestObject(EntitySystem);
+
+        // Add a component to the entity
+        auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
+        EXPECT_NE(NewComponent, nullptr);
+
+        // Lock Entity
+        CreatedEntity->Lock();
+
+        // Apply patch
+        CreatedEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        // Entity should be locked now
+        EXPECT_TRUE(CreatedEntity->IsLocked());
+
+        {
+            // Ensure the remove component error message is logged when we try to remove a component from a locked entity.
+            static const csp::common::String RemoveComponentErrorMsg = "Entity is locked. Components can not be removed from a locked Entity.";
+
+            RAIIMockLogger MockLogger {};
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(RemoveComponentErrorMsg)).Times(1);
+
+            // Attempt to remove a component from a locked entity
+            CreatedEntity->RemoveComponent(NewComponent->GetId());
+        }
+
+        // Exit Space
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}

@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 #include <chrono>
 
-#if RUN_ALL_UNIT_TESTS || RUN_DATE_TIME_TESTS || RUN_DATE_TIME_STRING_CONVERSION_TESTS
 CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, UTCStringConversion)
 {
     {
@@ -91,9 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, UTCStringConversion)
         EXPECT_EQ(UTCTime->tm_sec, 54);
     }
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_DATE_TIME_TESTS || RUN_DATE_TIME_COMPARSION
 CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, Comparison)
 {
     using namespace std::chrono_literals;
@@ -105,4 +102,12 @@ CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, Comparison)
     const csp::common::DateTime FutureDateTime(TimeFuture);
     ASSERT_GE(FutureDateTime, CurrentDateTime);
 }
-#endif
+
+CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, String)
+{
+    // Ensure test string respects ISO 8601/RFC 3339 standards
+    const csp::common::String TestTimeString = "2021-01-01T00:00:00Z";
+
+    const csp::common::DateTime TestTime(TestTimeString);
+    EXPECT_EQ(TestTime.GetUtcString(), TestTimeString);
+}

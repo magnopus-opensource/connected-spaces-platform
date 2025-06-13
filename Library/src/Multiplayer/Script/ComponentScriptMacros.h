@@ -37,6 +37,15 @@
                                                                                                                                                      \
     std::string COMP##ScriptInterface::Get##NAME() const { return (std::string)((COMP*)Component)->Get##NAME().c_str(); }
 
+#define DEFINE_SCRIPT_PROPERTY_STRING_ADAPTNAME(COMP, SCRIPTFUNCNAME, UNDERLYINGNAME)                                                                \
+    void COMP##ScriptInterface::Set##SCRIPTFUNCNAME(std::string Value)                                                                               \
+    {                                                                                                                                                \
+        ((COMP*)Component)->Set##UNDERLYINGNAME((csp::common::String)Value.c_str());                                                                 \
+        SendPropertyUpdate();                                                                                                                        \
+    }                                                                                                                                                \
+                                                                                                                                                     \
+    std::string COMP##ScriptInterface::Get##SCRIPTFUNCNAME() const { return (std::string)((COMP*)Component)->Get##UNDERLYINGNAME().c_str(); }
+
 #define DEFINE_SCRIPT_PROPERTY_VEC2(COMP, NAME)                                                                                                      \
     ComponentScriptInterface::Vector2 COMP##ScriptInterface::Get##NAME() const                                                                       \
     {                                                                                                                                                \

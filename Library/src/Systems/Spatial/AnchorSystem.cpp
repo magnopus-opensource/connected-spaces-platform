@@ -34,10 +34,10 @@ AnchorSystem::AnchorSystem()
 AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
 {
-    AnchorsAPI = CSP_NEW chs::AnchorsApi(InWebClient);
+    AnchorsAPI = new chs::AnchorsApi(InWebClient);
 }
 
-AnchorSystem::~AnchorSystem() { CSP_DELETE(AnchorsAPI); }
+AnchorSystem::~AnchorSystem() { delete (AnchorsAPI); }
 
 void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorProvider, const csp::common::String& ThirdPartyAnchorId,
     const csp::common::String& AssetCollectionId, const csp::systems::GeoLocation& Location, const csp::systems::OlyAnchorPosition& Position,
@@ -85,7 +85,7 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
     {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);
@@ -162,7 +162,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
     {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        for (size_t idx = 0; idx < Keys->Size(); ++idx)
         {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);

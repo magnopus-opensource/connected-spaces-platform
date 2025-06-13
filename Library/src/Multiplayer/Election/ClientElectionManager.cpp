@@ -26,7 +26,6 @@
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
-#include "Memory/Memory.h"
 #include "signalrclient/signalr_value.h"
 
 namespace csp::multiplayer
@@ -61,7 +60,7 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
 
 ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem)
     : SpaceEntitySystemPtr(InSpaceEntitySystem)
-    , EventHandler(CSP_NEW ClientElectionEventHandler(this))
+    , EventHandler(new ClientElectionEventHandler(this))
     , TheConnectionState(ConnectionState::Disconnected)
     , TheElectionState(ElectionState::Idle)
     , LocalClient(nullptr)
@@ -79,16 +78,16 @@ ClientElectionManager::~ClientElectionManager()
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-    CSP_DELETE(EventHandler);
+    delete (EventHandler);
 
     for (const auto& Client : Clients)
     {
         ClientProxy* Proxy = Client.second;
-        CSP_DELETE(Proxy);
+        delete (Proxy);
     }
 }
 
-void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
 
@@ -113,7 +112,7 @@ void ClientElectionManager::OnDisconnect()
     for (const auto& Client : Clients)
     {
         ClientProxy* Proxy = Client.second;
-        CSP_DELETE(Proxy);
+        delete (Proxy);
     }
 
     UnBindNetworkEvents();
@@ -149,25 +148,25 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
     }
 }
 
-void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars)
+void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnClientAdd called : ClientId=%d", ClientAvatar->GetOwnerId());
     AddClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars)
+void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
 {
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnClientRemove called : ClientId=%d", ClientAvatar->GetOwnerId());
     RemoveClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
     // @Todo - This event allows us to track individual object ownership
 }
 
-void ClientElectionManager::OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects)
+void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
     // @Todo - This event allows us to track individual object ownership
@@ -218,7 +217,7 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 
     if (Clients.find(ClientId) == Clients.end())
     {
-        Client = CSP_NEW ClientProxy(ClientId, this);
+        Client = new ClientProxy(ClientId, this);
         Clients.insert(ClientMap::value_type(ClientId, Client));
 
         if ((LocalClient != nullptr) && (Leader != nullptr))
@@ -257,7 +256,7 @@ void ClientElectionManager::RemoveClientUsingId(int64_t ClientId)
             LocalClient = nullptr;
         }
 
-        CSP_DELETE(Client);
+        delete (Client);
         Clients.erase(ClientId);
     }
     else
@@ -474,7 +473,7 @@ bool ClientElectionManager::IsConnected() const
         return false;
     }
 
-    return Connection->Connected;
+    return Connection->IsConnected();
 }
 
 void ClientElectionManager::BindNetworkEvents()
@@ -483,10 +482,10 @@ void ClientElectionManager::BindNetworkEvents()
     EventBus* EventBus = SystemsManager.GetEventBus();
 
     EventBus->ListenNetworkEvent(
-        ClientElectionMessage, [this](bool ok, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
+        ClientElectionMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
 
     EventBus->ListenNetworkEvent(
-        RemoteRunScriptMessage, [this](bool ok, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
+        RemoteRunScriptMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()

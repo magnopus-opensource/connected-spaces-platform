@@ -13,6 +13,7 @@ include "ThirdParty/poco/NETSSL_OpenSSL/premake5.lua"
 include "ThirdParty/signalrclient/premake5.lua"
 include "ThirdParty/mimalloc/premake5.lua"
 include "ThirdParty/quickjs/premake5.lua"
+include "ThirdParty/asyncplusplus/premake5.lua"
 include "modules/premake5.lua"
 
 
@@ -78,6 +79,7 @@ if not Project then
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
             "%{wks.location}/ThirdParty/glm",
+			"%{wks.location}/ThirdParty/asyncplusplus/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"
@@ -109,7 +111,8 @@ if not Project then
             "POCO_UTIL_NO_INIFILECONFIGURATION",
             "POCO_UTIL_NO_JSONCONFIGURATION",
             "POCO_UTIL_NO_XMLCONFIGURATION",
-            "POCO_NET_NO_IPv6"
+            "POCO_NET_NO_IPv6",
+			"LIBASYNC_STATIC"
         }
 
         filter "platforms:not wasm"
@@ -122,7 +125,7 @@ if not Project then
         
         -- Needed for dynamic_cast
         rtti("On")
-        
+		
         -- Config for platforms
         filter "platforms:x64"
             defines { 
@@ -166,6 +169,15 @@ if not Project then
                 "USE_STD_MALLOC=1"
             }
             staticruntime("On")
+			
+			buildoptions {
+				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
+				"-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+				"-Wno-missing-field-initializers", -- Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+				"-Wno-unknown-pragmas", --Not the greatest. This is to try and suppress a signalR warning, even though the signalR project dosen't emit warnings (I think this error is a bit unique cause of preprocessor stuff)
+				"-Wno-error=nonportable-include-path", --Include paths dont match file structure. Should get around to fixing
+				"-Wno-error=format-security" --In logging, __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str()) is unnaceptable for some reason.
+            }
 
             linkoptions { "-lm" } -- For gcc's math lib
 
@@ -199,6 +211,12 @@ if not Project then
             libdirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/Mac"
             }
+			
+			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
+			-- These disables are to do with warnings in generated code that we should get around to dealing with.
+			xcodebuildsettings {
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
+			}
 
             links { 
                 "ssl",
@@ -214,6 +232,12 @@ if not Project then
             externalincludedirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/ios"
             }
+			
+			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
+			-- These disables are to do with warnings in generated code that we should get around to dealing with.
+			xcodebuildsettings {
+				["WARNING_CFLAGS"] = "-Wextra -Wno-error=deprecated-declarations -Wno-braced-scalar-init -Wno-missing-field-initializers -Wno-ignored-qualifiers"
+			}
 
             links {
                 "ssl",            
@@ -226,11 +250,15 @@ if not Project then
                 "CSP_WASM",
                 "USE_STD_MALLOC=1"
             }
-
+			
             buildoptions {
                 "--no-entry",           -- remove default library entry point
                 "-pthread",             -- enable threading
-                "-fwasm-exceptions"     -- enable native wasm exceptions
+                "-fwasm-exceptions",    -- enable native wasm exceptions
+                "-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
+                "-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+                "-Wno-missing-field-initializers", -- Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+                "-Wno-ignored-qualifiers" -- Don't warn against ignored qualifiers, e.g. "const qualifier on return type has no effect" (because of the wrapper generator)
             }
 
             linkoptions { 
@@ -242,7 +270,6 @@ if not Project then
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
                 "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
-                "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
                 "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
@@ -266,10 +293,17 @@ if not Project then
                 "]",
                 --"-sUSE_ES6_IMPORT_META=0"                                       -- disable use of import.meta as it is not yet supported everywhere
             }
-
+            
             links {
                 "websocket.js"
             }
+        -- Compile with or without node support. Node support is used for headless testing.
+        -- In theory, applications should be able to consume emscripten libraries with node compiled in no problem, but it hasn't worked out that way in practice.
+        filter { "platforms:wasm", "options:wasm_with_node" }
+            linkoptions {"-sENVIRONMENT='web,worker,node'" }   
+        filter { "platforms:wasm", "not options:wasm_with_node" }
+            linkoptions { "-sENVIRONMENT='web,worker'" }   
+
         filter { "platforms:wasm", "configurations:*Debug*" }
             buildoptions {
                 "-gdwarf-5",
@@ -298,7 +332,8 @@ if not Project then
         links {
             "signalrclient",
             "quickjs",
-			"tinyspline"
+			"tinyspline",
+			"asyncplusplus"
         }
 
         filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx", "platforms:not ios" }
@@ -354,6 +389,7 @@ if not Project then
             SignalRClient.AddProject()
             QuickJS.AddProject()
 			TinySpline.AddProject()
+			AsyncPlusPlus.AddProject()
         end
         
         --Add the following projects only for a non WebAssembly project generation

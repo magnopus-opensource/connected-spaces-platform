@@ -125,20 +125,19 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_GET_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 {
     InitialiseFoundation();
 
     HttpPayload Payload;
 
-    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_PUT_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 {
     InitialiseFoundation();
@@ -150,14 +149,13 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
     JsonDoc.AddMember("job", "builder", JsonDoc.GetAllocator());
 
     Payload.SetContent(JsonDoc);
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POST_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 {
     InitialiseFoundation();
@@ -171,25 +169,24 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
     Payload.SetContent(JsonDoc);
 
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_DELETE_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -260,7 +257,6 @@ private:
 };
 
 // This test will be fixed and reenabled as part of OF-1536
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POLLING_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -271,9 +267,9 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 
         WebClient* Client;
 #ifdef CSP_WASM
-        Client = CSP_NEW csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-        Client = CSP_NEW TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
         EXPECT_TRUE(Client != nullptr);
 
@@ -312,7 +308,6 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -371,50 +366,46 @@ private:
     std::thread::id ThreadId;
 };
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_RETRY_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
 {
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_404_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 {
     InitialiseFoundation();
 
     HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/apiiii/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_400_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 {
     InitialiseFoundation();
 
     HttpPayload Payload;
     Payload.AddContent("{ \"email\": \"test@olympus\" }");
+    Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/register", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseBadRequest);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
 // Current fails on wasm platform tests due to CORS policy.
 #ifndef CSP_WASM
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_USER_AGENT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
     InitialiseFoundation();
@@ -422,7 +413,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     HttpPayload Payload;
     ResponseReceiver Receiver;
 
-    auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP);
     EXPECT_TRUE(WebClient != nullptr);
 
     WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
@@ -442,12 +433,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     csp::CSPFoundation::Shutdown();
 }
 #endif
-#endif
 
 #include "CSP/Systems/SystemsManager.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
 
-#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_403_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 {
     InitialiseFoundation();
@@ -458,8 +447,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 
     HttpPayload Payload;
     RunWebClientTest<RetryResponseReceiver>(
-        "https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
+        (std::string(EndpointBaseURI()) + "/mag-user/appsettings").c_str(), ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseForbidden);
 
     csp::CSPFoundation::Shutdown();
 }
-#endif

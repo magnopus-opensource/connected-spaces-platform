@@ -16,6 +16,7 @@
 
 #include "CreateAvatar.h"
 
+#include "uuid_v4.h"
 #include <CSP/Multiplayer/SpaceEntitySystem.h>
 #include <CSP/Multiplayer/SpaceTransform.h>
 #include <CSP/Systems/Spaces/SpaceSystem.h>
@@ -33,11 +34,11 @@ void RunTest()
     csp::systems::Space Space;
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
-    constexpr const char* UniqueSpaceName = "MakeThisReallyUniqueBeforeCommit";
-    constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
+    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
+    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid.str();
 
     // Create avater
     csp::common::String UserName = "Player 1";
@@ -47,7 +48,7 @@ void RunTest()
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
@@ -55,8 +56,11 @@ void RunTest()
     EntitySystem.CreateAvatar(UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
         [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
-    csp::multiplayer::SpaceEntity* Avatar = ResultFuture.get();
+    ResultFuture.get();
 
     EntitySystem.ProcessPendingEntityOperations();
+
+    // This is a hail mary attempt to get this to stop being flaky on CI. CHS is known to sometimes have a processing delay, which is unfortunate.
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 }
 } // namespace CreateAvatar

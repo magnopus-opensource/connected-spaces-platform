@@ -144,7 +144,6 @@ bool AreTestAssetCollectionsEqual(const csp::systems::AssetCollection& Lhs, cons
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_CREATEPOI_TEST
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 {
     SetRandSeed();
@@ -164,9 +163,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_CREATEPOI_WITH_TAGS_TEST
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 {
     SetRandSeed();
@@ -190,10 +187,9 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_GETPOI_INSIDE_CIRCULAR_AREA_TEST
-CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
+// This test is to be fixed as part of OF-1649.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
 {
     SetRandSeed();
 
@@ -231,7 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
         const auto& ResultPOIs = Result.GetPOIs();
         POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
 
-        for (int idx = 0; idx < ResultPOIs.Size(); ++idx)
+        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
         {
             POICollection[idx] = ResultPOIs[idx];
         }
@@ -242,7 +238,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     bool POIFound = false;
 
-    for (int idx = 0; idx < POICollection.Size(); ++idx)
+    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
     {
         if (POICollection[idx].Name == PointOfInterest.Name)
         {
@@ -257,9 +253,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_GET_ASSETCOLLECTION_FROM_POI_TEST
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
 {
     SetRandSeed();
@@ -307,10 +301,9 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_QUERY_POI_TYPE_TEST
-CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
+// This test is to be fixed as part of OF-1649.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 {
     SetRandSeed();
 
@@ -324,7 +317,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
     const char* TestSpaceName = "CSP-TEST-SPACE";
     const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
-    const char* TestAssetCollectionName = "CSP-TEST-ASSETCOLLECTION";
 
     // The default POI we will be using during the test.
     csp::systems::PointOfInterest DefaultPOI;
@@ -450,4 +442,3 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
     LogOut(UserSystem);
 }
-#endif

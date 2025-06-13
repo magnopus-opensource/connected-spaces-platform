@@ -232,13 +232,40 @@ csp::common::String* CSPFoundation::DeviceId = nullptr;
 csp::common::String* CSPFoundation::ClientUserAgentString = nullptr;
 csp::common::String* CSPFoundation::Tenant = nullptr;
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+namespace
 {
-    if (IsInitialised)
+    // Take the input endpoint to the cloud services, and get the multiplayer URIS
+    std::string TranslateEndpointRootURIToMultiplayerServiceUri(const std::string& EndpointRootURI)
     {
-        return false;
-    }
+        /* This is not the best, we've hard encoded how the root uri and the multiplayer uri relate, which is no real guarantee.
+         * We should probably take the multiplayer too separately
+         * Remember, this transformation needs to work on both "http://ogs-internal.cloud" sorts of formats, as well as "http://localhost:8081" sort
+         * of formats
+         *
+         * Even if we're doing it this way, we should still be using a URI library to do all this transformation, not doing it as fragile raw strings.
+         * We've got POCO, but we're wanting to remove it ... so didn't want to bleed it into CSPFoundation right now. :(
+         */
 
+        // Check if ogs exists, if so insert "-multiplayer" after it.
+        std::string MultiplayerServiceURI = EndpointRootURI;
+        const std::string OgsFindTarget = "ogs";
+        const size_t OgsFindPos = MultiplayerServiceURI.find(OgsFindTarget, 0);
+        if (OgsFindPos != std::string::npos)
+        {
+            const std::string MultiplayerServiceInsert = "-multiplayer";
+            MultiplayerServiceURI.insert(OgsFindPos + OgsFindTarget.length(), MultiplayerServiceInsert);
+        }
+
+        // Append the hub location
+        const std::string SignalRHubLocation = "/mag-multiplayer/hubs/v1/multiplayer";
+        MultiplayerServiceURI = MultiplayerServiceURI + SignalRHubLocation;
+
+        return MultiplayerServiceURI;
+    }
+}
+
+EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI)
+{
     // remove last char if a slash
     std::string RootURI(EndpointRootURI.c_str());
     while (RootURI.rbegin() != RootURI.rend() && (*RootURI.rbegin() == '\\' || *RootURI.rbegin() == '/'))
@@ -246,33 +273,38 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
         RootURI.resize(RootURI.length() - 1);
     }
 
-    Tenant = CSP_NEW csp::common::String(InTenant);
-
     const std::string UserServiceURI = RootURI + "/mag-user";
     const std::string PrototypeServiceURI = RootURI + "/mag-prototype";
     const std::string SpatialDataServiceURI = RootURI + "/mag-spatialdata";
     const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
     const std::string TrackingServiceURI = RootURI + "/mag-tracking";
 
-    // The multiplayer service now has its own hostname, ogs-multiplayer
-    const std::string Hostname = "ogs", MultiplayerHostname = Hostname + "-multiplayer";
-    // This constructs the multiplayer URI by adding -multiplayer after ogs and appending
-    // the rest of RootURI. This accounts for other hostnames like ogs-internal, etc.
-    const std::string RootMultiplayerURI
-        = RootURI.substr(0, RootURI.find(Hostname)) + MultiplayerHostname + RootURI.substr(RootURI.find(Hostname) + Hostname.length());
-    const std::string MultiplayerServiceURI = RootMultiplayerURI + "/mag-multiplayer/hubs/v1/multiplayer";
+    const std::string MultiplayerServiceURI = TranslateEndpointRootURIToMultiplayerServiceUri(RootURI);
 
-    Endpoints = CSP_NEW EndpointURIs();
-    ClientUserAgentInfo = CSP_NEW ClientUserAgent();
-    DeviceId = CSP_NEW csp::common::String("");
-    ClientUserAgentString = CSP_NEW csp::common::String("");
+    EndpointURIs EndpointsURI;
+    EndpointsURI.UserServiceURI = CSP_TEXT(UserServiceURI.c_str());
+    EndpointsURI.PrototypeServiceURI = CSP_TEXT(PrototypeServiceURI.c_str());
+    EndpointsURI.SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
+    EndpointsURI.MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
+    EndpointsURI.AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
+    EndpointsURI.TrackingServiceURI = CSP_TEXT(TrackingServiceURI.c_str());
 
-    Endpoints->UserServiceURI = CSP_TEXT(UserServiceURI.c_str());
-    Endpoints->PrototypeServiceURI = CSP_TEXT(PrototypeServiceURI.c_str());
-    Endpoints->SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
-    Endpoints->MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
-    Endpoints->AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
-    Endpoints->TrackingServiceURI = CSP_TEXT(TrackingServiceURI.c_str());
+    return EndpointsURI;
+}
+
+bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+{
+    if (IsInitialised)
+    {
+        return false;
+    }
+
+    Tenant = new csp::common::String(InTenant);
+
+    Endpoints = new EndpointURIs(CreateEndpointsFromRoot(EndpointRootURI));
+    ClientUserAgentInfo = new ClientUserAgent();
+    DeviceId = new csp::common::String("");
+    ClientUserAgentString = new csp::common::String("");
 
     csp::systems::SystemsManager::Instantiate();
 
@@ -307,11 +339,11 @@ bool CSPFoundation::Shutdown()
     csp::events::EventSystem::Get().UnRegisterAllListeners();
     csp::systems::SystemsManager::Destroy();
 
-    CSP_DELETE(Tenant);
-    CSP_DELETE(Endpoints);
-    CSP_DELETE(ClientUserAgentInfo);
-    CSP_DELETE(DeviceId);
-    CSP_DELETE(ClientUserAgentString);
+    delete (Tenant);
+    delete (Endpoints);
+    delete (ClientUserAgentInfo);
+    delete (DeviceId);
+    delete (ClientUserAgentString);
 
     return true;
 }
@@ -380,11 +412,11 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
         GetClientUserAgentInfo().ClientOS.c_str());
 }
 
-void Free(void* Pointer) { CSP_FREE(Pointer); }
+void Free(void* Pointer) { std::free(Pointer); }
 
 void* ModuleHandle = nullptr;
 
-void* GetFunctionAddress(const csp::common::String& Name)
+void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
 {
 #if defined(CSP_WASM)
     return nullptr;

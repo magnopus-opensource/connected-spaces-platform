@@ -18,7 +18,6 @@
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 #include "Events/EventSystem.h"
-#include "Memory/Memory.h"
 
 // #include <atomic_queue/atomic_queue.h>
 
@@ -35,7 +34,7 @@ public:
 
     ~AnalyticsSystemImpl() { }
 
-    void OnEvent(const csp::events::Event& InEvent) override
+    void OnEvent(const csp::events::Event& /*InEvent*/) override
     {
         /* std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
 
@@ -53,7 +52,7 @@ public:
         }*/
     }
 
-    void Log(AnalyticsEvent* Event)
+    void Log(AnalyticsEvent* /*Event*/)
     {
         /* if (Provider)
         {
@@ -63,7 +62,7 @@ public:
 
     void RegisterProvider(IAnalyticsProvider* InProvider) { Provider = InProvider; }
 
-    void DeregisterProvider(IAnalyticsProvider* InProvider)
+    void DeregisterProvider(IAnalyticsProvider* /*InProvider*/)
     {
         /* if (Provider == InProvider)
         {
@@ -81,7 +80,7 @@ private:
 };
 
 AnalyticsSystem::AnalyticsSystem()
-    : Impl { CSP_NEW AnalyticsSystemImpl() }
+    : Impl { new AnalyticsSystemImpl() }
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
 }
@@ -89,7 +88,7 @@ AnalyticsSystem::AnalyticsSystem()
 AnalyticsSystem::~AnalyticsSystem()
 {
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
-    CSP_DELETE(Impl);
+    delete (Impl);
 }
 
 void AnalyticsSystem::Log(AnalyticsEvent* Event) { Impl->Log(Event); }

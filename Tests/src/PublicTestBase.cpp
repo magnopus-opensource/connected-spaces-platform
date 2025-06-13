@@ -42,6 +42,39 @@ void PublicTestBase::TearDown()
 {
     ::testing::Test::TearDown();
 
+    if (!csp::CSPFoundation::GetIsInitialised())
+    {
+        fprintf(stderr, "%s\n",
+            "csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
+
+        return;
+    }
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
+    csp::CSPFoundation::Shutdown();
+}
+
+template <typename T> void PublicTestBaseWithParam<T>::SetUp()
+{
+    ::testing::Test::SetUp();
+
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+
+    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+}
+
+template <typename T> void PublicTestBaseWithParam<T>::TearDown()
+{
+    ::testing::Test::TearDown();
+
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
     AWAIT(Connection, SetAllowSelfMessagingFlag, false);
@@ -57,3 +90,6 @@ void PublicTestBase::TearDown()
     csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
     csp::CSPFoundation::Shutdown();
 }
+
+// Explicit instantiations
+template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;

@@ -18,7 +18,6 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/Convert.h"
-#include "Memory/Memory.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/AssetFileDto.h"
 #include "Services/PrototypeService/Dto.h"
@@ -52,6 +51,10 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
     else if (DTOAssetDetailType == "Material")
         return csp::systems::EAssetType::MATERIAL;
+    else if (DTOAssetDetailType == "Annotation")
+        return csp::systems::EAssetType::ANNOTATION;
+    else if (DTOAssetDetailType == "AnnotationThumbnail")
+        return csp::systems::EAssetType::ANNOTATION_THUMBNAIL;
     else
     {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
@@ -174,6 +177,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         Asset.MimeType = Dto.GetMimeType();
     }
 }
+
 } // namespace csp::systems
 
 namespace csp::systems
@@ -225,6 +229,8 @@ void BufferAssetDataSource::SetUploadContent(
 Asset& AssetResult::GetAsset() { return Asset; }
 
 const Asset& AssetResult::GetAsset() const { return Asset; }
+
+void AssetResult::SetAsset(const csp::systems::Asset& SetAsset) { this->Asset = SetAsset; }
 
 void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
@@ -286,7 +292,6 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     ResultBase::OnResponse(ApiResponse);
 
     const auto* Response = ApiResponse->GetResponse();
-    const auto& Headers = Response->GetPayload().GetHeaders();
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {

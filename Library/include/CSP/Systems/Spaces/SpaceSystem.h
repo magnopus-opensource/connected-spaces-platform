@@ -27,6 +27,8 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
+#include <optional>
+
 namespace csp::services
 {
 
@@ -41,14 +43,13 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory
+namespace async
 {
-
 CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
+template <typename T> class event_task;
+template <typename T> class task;
 CSP_END_IGNORE
-
-} // namespace csp::memory
+}
 
 namespace csp::systems
 {
@@ -61,7 +62,6 @@ class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
-    friend void csp::memory::Delete<SpaceSystem>(SpaceSystem* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 
@@ -73,6 +73,8 @@ public:
     /// @brief Enter a space if you have permission to, based on the Space settings.
     /// This includes setting scopes (and toggling event listening in order to set the scope).
     /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
+    /// If user does not have permission to discover or enter the space, callback will be called with EResultCode::Failed and
+    /// ERequestFailureReason::UserSpaceAccessDenied
     /// @param Space Space : space to enter into
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
@@ -133,12 +135,13 @@ public:
     /// @param Description csp::common::Optional<csp::common::String> : if a new description is provided it will be used to update the Space
     /// description
     /// @param Type csp::common::Optional<csp::systems::SpaceType> : if a new type is provided it will be used to update the Space type
+    /// @param Tags csp::common::Optional<csp::common::Array<csp::common::String>> : If new tags are provided they will be used to update the Space
     /// @param Callback BasicSpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& SpaceId, const csp::common::Optional<csp::common::String>& Name,
         const csp::common::Optional<csp::common::String>& Description, const csp::common::Optional<SpaceAttributes>& Type,
-        BasicSpaceResultCallback Callback);
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, BasicSpaceResultCallback Callback);
 
-    /// @brief Deletes a given space and the corresponding UserService group.
+    /// @brief Deletes a given space and the associated objects that belong to it. Including UserService group, Metadata, and Thumbnail.
     /// @param Space Space : space to delete
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
@@ -155,10 +158,17 @@ public:
     /// @param ResultsSkip csp::common::Optional<int> : number of result entries that will be skipped from the result. For no skip pass nullptr.
     /// @param ResultsMax csp::common::Optional<int> : maximum number of result entries to be retrieved. For all available result entries pass
     /// nullptr.
+    /// @param MustContainTags csp::common::Optional<csp::common::Array<csp::common::String>> : Array of tags that must be present in retrieved
+    /// spaces. For no mandatory tags pass nullptr.
+    /// @param MustExcludeTags csp::common::Optional<csp::common::Array<csp::common::String>> : Array of tags that must not be present in retrieved
+    /// spaces. For no excluded tags pass nullptr.
+    /// @param MustIncludeAllTags csp::common::Optional<bool> : Whether all tags in @param MustContainTags must be present in retrieved spaces.
     /// @param Callback SpacesResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetSpacesByAttributes(const csp::common::Optional<bool>& IsDiscoverable, const csp::common::Optional<bool>& IsArchived,
         const csp::common::Optional<bool>& RequiresInvite, const csp::common::Optional<int>& ResultsSkip,
-        const csp::common::Optional<int>& ResultsMax, BasicSpacesResultCallback Callback);
+        const csp::common::Optional<int>& ResultsMax, const csp::common::Optional<csp::common::Array<csp::common::String>>& MustContainTags,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& MustExcludeTags, const csp::common::Optional<bool>& MustIncludeAllTags,
+        BasicSpacesResultCallback Callback);
 
     /// @brief Retrieves space details corresponding to the provided Space IDs
     /// @param RequestedSpaceIDs csp::common::Array<csp::common::String> : array of Space IDs for which the space details will be retrieved
@@ -174,6 +184,7 @@ public:
     /// @param SpaceId csp::common::String : unique ID of Space
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetSpace(const csp::common::String& SpaceId, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> GetSpace(const csp::common::String& SpaceId);
 
     /// @brief Invites a given email to a specific space.
     /// @param Space Space : space to invite to
@@ -193,11 +204,17 @@ public:
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void BulkInviteToSpace(
         const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback);
+    CSP_NO_EXPORT async::task<NullResult> BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers);
 
     /// @brief Returns an array of obfuscated email addresses, addresses of users that have not yet accepted the space invite
     /// @param Space Space : Space for which the invites where sent
     /// @param Callback PendingInvitesResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetPendingUserInvites(const csp::common::String& SpaceId, PendingInvitesResultCallback Callback);
+
+    /// @brief Returns an array of ids of users that accepted the space invite
+    /// @param Space Space : Space for which the invites where sent
+    /// @param Callback AcceptedInvitesResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetAcceptedUserInvites(const csp::common::String& SpaceId, AcceptedInvitesResultCallback Callback);
 
     /// @brief Removes a user from a space by the user's unique ID.
     /// @param Space Space : space to remove user from
@@ -210,6 +227,7 @@ public:
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId);
 
     /// @brief Creates new Site information and associates it with the Space.
     /// @param Space Space : Space to associate the Site information with
@@ -244,12 +262,9 @@ public:
     /// @brief Updates the Space metadata information with the new one provided
     /// @param SpaceId csp::common::String : ID of Space for which the metadata will be updated
     /// @param NewMetadata csp::common::String : New metadata information that will replace the previous one
-    /// @param Tags csp::common::Array<csp::common::String> : Array of strings that will replace the tags on the space. If unset, the existing tags on
-    /// the AssetCollection will be unmodified.
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& SpaceId,
-        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, NullResultCallback Callback);
+        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata, NullResultCallback Callback);
 
     /// @brief Retrieves Spaces metadata information
     /// @param Spaces csp::common::Array<Space> : Spaces for which metadata will be retrieved
@@ -338,8 +353,6 @@ private:
     // Space Metadata
     void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
     void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-    void AddMetadata(const csp::common::String& SpaceId, const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, NullResultCallback Callback);
     void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     // Space Thumbnail
@@ -351,6 +364,37 @@ private:
     void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+
+    // CreateSpace Continuations
+    async::task<SpaceResult> CreateSpaceGroupInfo(const csp::common::String& Name, const csp::common::String& Description, SpaceAttributes Attributes,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags);
+    std::function<async::task<AssetCollectionResult>()> CreateSpaceMetadataAssetCollection(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata);
+    async::task<AssetCollectionResult> CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space);
+    std::function<async::task<AssetResult>()> CreateSpaceThumbnailAsset(
+        const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAsset(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data);
+    std::function<async::task<UriResult>(const AssetResult& Result)> UploadSpaceThumbnailAssetWithBuffer(
+        const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data);
+    std::function<async::task<UriResult>()> CreateAndUploadSpaceThumbnailWithBufferToSpace(
+        const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data);
+    std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
+        SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
+
+    // EnterSpace Continuations
+    auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
+    auto FireEnterSpaceEvent(Space& OutCurrentSpace);
+    // Wraps RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
+    auto RefreshMultiplayerScopes();
+
+    /* Stop the multiplayer connetion, change scope, start listening again
+       Not ideal, we'd rather not have to go to all this effort.
+       Used in EnterSpace. */
+    void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
+        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_MAP_TESTS)
-
 #include "CSP/Common/Map.h"
 
 #include "CSP/Common/Optional.h"
 #include "TestHelpers.h"
 
-#include <Memory/Memory.h>
 #include <gtest/gtest.h>
 
 using namespace csp::common;
@@ -206,7 +203,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysTest)
     EXPECT_EQ(MyKeys->Size(), 3);
     EXPECT_FALSE(MyKeys->Data() == nullptr);
 
-    CSP_FREE(const_cast<Array<int>*>(MyKeys));
+    std::free(const_cast<Array<int>*>(MyKeys));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
@@ -219,7 +216,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
     EXPECT_EQ(MyValues->Size(), 3);
     EXPECT_FALSE(MyValues->Data() == nullptr);
 
-    CSP_FREE(const_cast<Array<String>*>(MyValues));
+    std::free(const_cast<Array<String>*>(MyValues));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)
@@ -233,5 +230,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)
 
     EXPECT_EQ(MyMap.Size(), 0);
 }
-
-#endif

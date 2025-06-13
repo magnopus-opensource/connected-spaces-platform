@@ -15,6 +15,7 @@
  */
 
 #include "Common/Encode.h"
+
 #include <string>
 
 namespace csp::common
@@ -68,7 +69,7 @@ csp::common::String Decode::URI(const csp::common::String& UriToDecode, bool Dou
     std::string EncodedString(UriToDecode.c_str());
     std::string RawString;
 
-    for (int i = 0; i < EncodedString.length(); i++)
+    for (size_t i = 0; i < EncodedString.length(); i++)
     {
         if (EncodedString[i] != '%')
         {

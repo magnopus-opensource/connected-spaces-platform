@@ -15,7 +15,6 @@
  */
 #include "Web/HttpRequest.h"
 
-#include "Memory/Memory.h"
 #include "Web/WebClient.h"
 
 namespace csp::web
@@ -37,7 +36,7 @@ HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::we
 {
     if (&CancellationToken == &csp::common::CancellationToken::Dummy())
     {
-        this->CancellationToken = CSP_NEW csp::common::CancellationToken();
+        this->CancellationToken = new csp::common::CancellationToken();
         OwnsCancellationToken = true;
     }
     else
@@ -51,16 +50,16 @@ HttpRequest::~HttpRequest()
 {
     if (OwnsCancellationToken)
     {
-        CSP_DELETE(CancellationToken);
+        delete (CancellationToken);
     }
 
     if ((Callback != nullptr) && Callback->ShouldDelete())
     {
-        CSP_DELETE(Callback);
+        delete (Callback);
     }
 }
 
-const ERequestVerb HttpRequest::GetVerb() const { return Verb; }
+ERequestVerb HttpRequest::GetVerb() const { return Verb; }
 
 const csp::web::Uri& HttpRequest::GetUri() const { return Uri; }
 
@@ -87,9 +86,9 @@ void HttpRequest::WriteResponseData(size_t Offset, const char* Data, size_t Data
     Response.GetMutablePayload().WriteContent(Offset, Data, DataLength);
 }
 
-void HttpRequest::SetResponseProgress(float Progress)
+void HttpRequest::SetResponseProgress(float ReponseProgress)
 {
-    Response.GetProgress().SetProgressPercentage(Progress);
+    Response.GetProgress().SetProgressPercentage(ReponseProgress);
 
     if (Callback)
     {
@@ -176,7 +175,7 @@ uint32_t HttpRequest::GetRetryCount() const { return RetryCount; }
 
 void HttpRequest::SetSendDelay(const std::chrono::milliseconds InSendDelay) { SendDelay = InSendDelay; }
 
-const std::chrono::milliseconds HttpRequest::GetSendDelay() { return SendDelay; }
+std::chrono::milliseconds HttpRequest::GetSendDelay() { return SendDelay; }
 
 void HttpRequest::EnableAutoRetry(bool Enable) { IsAutoRetryEnabled = Enable; }
 

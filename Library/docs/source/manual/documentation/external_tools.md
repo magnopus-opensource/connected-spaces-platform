@@ -6,7 +6,7 @@ Clang is clever in the way that it searches for the format file upto the root of
 
 There is a Visual Studio Extension [available ](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat&ssr=false#overview).
 
-You can run Clang Format on the whole project by using [this python script](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Tools/Formatter/RunFormatter.py). Simply run this from anywhere and it will apply to the whole project.
+You can run Clang Format on the whole project by using [this python script](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/Tools/Formatter/RunFormatter.py). Simply run this from anywhere and it will apply to the whole project.
 
 To create a runnable external tool, simply go to **Tools -> External Tools... -> Add**
 >  - Title: Clang-Format File

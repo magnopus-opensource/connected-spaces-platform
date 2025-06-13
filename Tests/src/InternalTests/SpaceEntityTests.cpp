@@ -32,7 +32,6 @@
 #include "gtest/gtest.h"
 #include <CSP/Multiplayer/Components/CustomSpaceComponent.h>
 #include <CSP/Multiplayer/Components/SplineSpaceComponent.h>
-#include <Memory/Memory.h>
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>
@@ -41,9 +40,6 @@ using namespace csp::multiplayer;
 
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -55,7 +51,6 @@ void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySy
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
     auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
@@ -78,7 +73,6 @@ void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySy
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_UPDATE_SPACE_ENTITY_GLOBAL_POSITION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest)
 {
     SetRandSeed();
@@ -86,7 +80,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -118,7 +111,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -168,7 +161,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
         EXPECT_EQ(ChildObject->GetGlobalPosition(), csp::common::Vector3(11, 11, 11));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -176,7 +169,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
         ChildObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -219,9 +212,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_UPDATE_SPACE_ENTITY_GLOBAL_ROTATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest)
 {
     SetRandSeed();
@@ -229,7 +219,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -261,7 +250,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -311,7 +300,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
         EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(20, 20, 20, -20));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -319,7 +308,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
         ChildObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -362,9 +351,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_UPDATE_SPACE_ENTITY_GLOBAL_SCALE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 {
     SetRandSeed();
@@ -372,7 +358,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -404,7 +389,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -454,7 +439,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
         EXPECT_EQ(ChildObject->GetGlobalScale(), csp::common::Vector3(20, 20, 20));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -462,7 +447,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
         ChildObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -505,9 +490,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_UPDATE_SPACE_ENTITY_PARENT_ID_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 {
     SetRandSeed();
@@ -515,7 +497,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -547,7 +528,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -597,7 +578,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
         EXPECT_NE(Object, ChildObject->GetParentEntity());
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -605,7 +586,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
         Object->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -647,9 +628,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_REMOVE_SPACE_ENTITY_PARENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 {
     SetRandSeed();
@@ -657,7 +635,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -689,7 +666,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -737,7 +714,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
         EXPECT_EQ(Object, ChildObject->GetParentEntity());
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -745,7 +722,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
         ChildObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -787,9 +764,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_GET_ROOT_HIERARCHY_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 {
     SetRandSeed();
@@ -797,7 +771,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -829,7 +802,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
@@ -878,7 +851,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
         EXPECT_EQ(ChildObject->GetPosition(), csp::common::Vector3::Zero());
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-        ChildObject->GetScript()->Invoke();
+        ChildObject->GetScript().Invoke();
 
         csp::CSPFoundation::Tick();
 
@@ -886,7 +859,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
         ChildObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
-        const bool ScriptHasErrors = ChildObject->GetScript()->HasError();
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
@@ -928,5 +901,3 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
     // Log out
     LogOut(UserSystem);
 }
-
-#endif

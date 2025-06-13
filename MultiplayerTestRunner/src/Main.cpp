@@ -19,6 +19,7 @@
 #include "CLIArgs.h"
 #include "LoginRAII.h"
 #include "RunnableTests/CreateAvatar.h"
+#include "RunnableTests/CreateConversation.h"
 #include "SpaceRAII.h"
 #include "Utils.h"
 
@@ -60,6 +61,9 @@ void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_p
     case TestIdentifier::CREATE_AVATAR:
         CreateAvatar::RunTest();
         break;
+    case TestIdentifier::CREATE_CONVERSATION:
+        CreateConversation::RunTest();
+        break;
     default:
         throw Utils::ExceptionWithCode(
             MultiplayerTestRunner::ErrorCodes::INVALID_TEST_SPECIFIER, "Could not find test specifier in RunTest, this is probably a bug.");
@@ -99,6 +103,7 @@ int main(int argc, char* argv[])
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(argc, argv);
 
         // Get setup with CSP and CHS.
+        std::cout << "Initializing Multiplayer Test Runner with Endpoint : " << Settings.Endpoint << std::flush;
         Utils::InitialiseCSPWithUserAgentInfo(Settings.Endpoint.c_str());
 
         // Log in

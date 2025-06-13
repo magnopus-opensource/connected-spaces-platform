@@ -23,7 +23,10 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 #include "CallHelpers.h"
+#include "Common/Continuations.h"
+#include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/ErrorCodeStrings.h"
@@ -35,8 +38,12 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 
-#include <iostream>
+#include <async++.h>
+#include <exception>
+#include <memory>
+#include <optional>
 #include <rapidjson/rapidjson.h>
+#include <thread>
 
 using namespace csp;
 using namespace csp::common;
@@ -48,22 +55,6 @@ namespace
 {
 
 constexpr const int MAX_SPACES_RESULTS = 100;
-
-void CreateSpace(chs::GroupApi* GroupAPI, const String& Name, const String& Description, csp::systems::SpaceAttributes Attributes,
-    csp::systems::SpaceResultCallback Callback)
-{
-    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
-    GroupInfo->SetName(Name);
-    GroupInfo->SetDescription(Description);
-    GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-    GroupInfo->SetGroupType("space");
-
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
-
-    GroupAPI->apiV1GroupsPost(GroupInfo, ResponseHandler);
-}
 
 } // namespace
 
@@ -81,228 +72,365 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
     , CurrentSpace()
 {
-    GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
-    SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(InWebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
 }
 
-SpaceSystem::~SpaceSystem() { CSP_DELETE(GroupAPI); }
+SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
 
+/* CreateSpace Continuations */
+async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
+    const String& Name, const String& Description, SpaceAttributes Attributes, const Optional<Array<String>>& Tags)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
+    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
+    GroupInfo->SetName(Name);
+    GroupInfo->SetDescription(Description);
+    GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    GroupInfo->SetGroupType("space");
+
+    if (Tags.HasValue())
+    {
+        GroupInfo->SetTags(csp::common::Convert(Tags).value());
+    }
+
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsPost(GroupInfo, ResponseHandler);
+
+    return OnCompleteTask;
+}
+
+std::function<async::task<AssetCollectionResult>()> SpaceSystem::CreateSpaceMetadataAssetCollection(
+    const std::shared_ptr<SpaceResult>& Space, const csp::common::Map<csp::common::String, csp::common::String>& Metadata)
+{
+    return [Space, Metadata]() -> async::task<AssetCollectionResult>
+    {
+        const auto Id = Space->GetSpace().Id;
+        const auto Name = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(Id);
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+        // Don't assign this AssetCollection to a space so any user can retrieve the metadata without joining the space
+        return AssetSystem->CreateAssetCollection(Id, nullptr, Name, Metadata, EAssetCollectionType::FOUNDATION_INTERNAL, nullptr);
+    };
+}
+
+async::task<AssetCollectionResult> SpaceSystem::CreateSpaceThumbnailAssetCollection(const std::shared_ptr<SpaceResult>& Space)
+{
+    const auto SpaceId = Space->GetSpace().Id;
+    const auto Name = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
+    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+    // don't associate this asset collection with a particular space so that it can be retrieved by guest users without joining the space
+    return AssetSystem->CreateAssetCollection(SpaceId, nullptr, Name, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Array<String>({ SpaceId }));
+}
+
+std::function<async::task<AssetResult>()> SpaceSystem::CreateSpaceThumbnailAsset(
+    const std::shared_ptr<SpaceResult>& Space, const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult)
+{
+    return [Space, AssetCollectionResult]() -> async::task<AssetResult>
+    {
+        const auto SpaceId = Space->GetSpace().Id;
+        const auto Name = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceId);
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+        return AssetSystem->CreateAsset(AssetCollectionResult->GetAssetCollection(), Name, nullptr, nullptr, EAssetType::IMAGE);
+    };
+}
+
+std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAsset(
+    const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, FileAssetDataSource& Data)
+{
+    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    {
+        Asset UploadAsset = Result.GetAsset();
+        UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
+        UploadAsset.MimeType = Data.GetMimeType();
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+        return AssetSystem->UploadAssetDataEx(
+            AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
+    };
+}
+
+std::function<async::task<UriResult>(const AssetResult& Result)> SpaceSystem::UploadSpaceThumbnailAssetWithBuffer(
+    const std::shared_ptr<AssetCollectionResult>& AssetCollectionResult, const csp::systems::BufferAssetDataSource& Data)
+{
+    return [AssetCollectionResult, Data](const AssetResult& Result) -> async::task<UriResult>
+    {
+        Asset UploadAsset = Result.GetAsset();
+        UploadAsset.FileName = SpaceSystemHelpers::GetUniqueSpaceThumbnailAssetName(SpaceSystemHelpers::GetAssetFileExtension(Data.GetMimeType()));
+        UploadAsset.MimeType = Data.GetMimeType();
+        auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+        return AssetSystem->UploadAssetDataEx(
+            AssetCollectionResult->GetAssetCollection(), UploadAsset, Data, csp::common::CancellationToken::Dummy());
+    };
+}
+
+std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbnailToSpace(
+    const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<csp::systems::FileAssetDataSource>& Data)
+{
+    return [Space, Data, this]() -> async::task<UriResult>
+    {
+        if (!Data.HasValue())
+        {
+            // In the event the optional is null we still want to return success to continue the chain.
+            return async::make_task(UriResult(EResultCode::Success, 200));
+        }
+
+        const auto SpaceId = Space->GetSpace().Id;
+        auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
+
+        NullResultCallback Callback;
+
+        return CreateSpaceThumbnailAssetCollection(Space)
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset collection.",
+                "Failed to create space thumbnail asset collection.", {}, {}, {}))
+            .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
+            .then(CreateSpaceThumbnailAsset(Space, ThumbnailAssetCollection))
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset.",
+                "Failed to create space thumbnail asset.", {}, {}, {}))
+            .then(UploadSpaceThumbnailAsset(ThumbnailAssetCollection, *Data))
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully upload space thumbnail asset.",
+                "Failed to upload space thumbnail asset.", {}, {}, {}));
+    };
+}
+
+std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace(
+    const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data)
+{
+    return [Space, Data, this]() -> async::task<UriResult>
+    {
+        const auto SpaceId = Space->GetSpace().Id;
+        auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
+
+        NullResultCallback Callback;
+
+        return CreateSpaceThumbnailAssetCollection(Space)
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset collection.",
+                "Failed to create space thumbnail asset collection.", {}, {}, {}))
+            .then(csp::common::continuations::GetResultFromContinuation<AssetCollectionResult>(ThumbnailAssetCollection))
+            .then(CreateSpaceThumbnailAsset(Space, ThumbnailAssetCollection))
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset.",
+                "Failed to create space thumbnail asset.", {}, {}, {}))
+            .then(UploadSpaceThumbnailAssetWithBuffer(ThumbnailAssetCollection, Data))
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(Callback,
+                "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully upload space thumbnail asset.",
+                "Failed to upload space thumbnail asset.", {}, {}, {}));
+    };
+}
+
+std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNeccesary(
+    SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const Optional<InviteUserRoleInfoCollection>& InviteUsers)
+{
+    return [SpaceSystem, Space, InviteUsers]() -> async::task<NullResult>
+    {
+        if (!InviteUsers.HasValue())
+        {
+            // In the event the optional is null we still want to return success to continue the chain.
+            return async::make_task(NullResult(EResultCode::Success, 200));
+        }
+
+        const auto SpaceId = Space->GetSpace().Id;
+
+        NullResultCallback Callback;
+
+        return SpaceSystem->BulkInviteToSpace(SpaceId, *InviteUsers)
+            .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(Callback,
+                "SpaceSystem::BulkInviteUsersToSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}));
+    };
+}
+
+void SpaceSystem::RefreshMultiplayerConnectionToEnactScopeChange(
+    String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
+{
+    // This method must be a member function as it exploits friendship.
+    // A refactor to a regular continuation would be appreciated, for that to be the case it needs to use public mechanisms only.
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    SystemsManager.GetSpaceEntitySystem()->Initialise();
+    auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
+
+    // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+    // This hopefully will change in a future version when CHS support it.
+    MultiplayerConnection->StopListening(
+        [MultiplayerConnection, SpaceId, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+        {
+            if (Error != csp::multiplayer::ErrorCode::None)
+            {
+                RefreshMultiplayerContinuationEvent->set(Error);
+                return;
+            }
+
+            CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
+            MultiplayerConnection->SetScopes(SpaceId,
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent](csp::multiplayer::ErrorCode Error)
+                {
+                    CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes callback");
+                    if (Error != csp::multiplayer::ErrorCode::None)
+                    {
+                        RefreshMultiplayerContinuationEvent->set(Error);
+                        return;
+                    }
+                    else
+                    {
+                        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
+                    }
+
+                    MultiplayerConnection->StartListening()()
+                        .then(async::inline_scheduler(),
+                            [RefreshMultiplayerContinuationEvent]()
+                            {
+                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
+
+                                // TODO: Support getting errors from RetrieveAllEntities
+                                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
+
+                                // Success!
+                                RefreshMultiplayerContinuationEvent->set({});
+                            })
+                        .then(async::inline_scheduler(),
+                            csp::common::continuations::InvokeIfExceptionInChain(
+                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                                {
+                                    // Error case
+                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                    RefreshMultiplayerContinuationEvent->set(Error);
+                                    return;
+                                }));
+                });
+        });
+}
+
+/* EnterSpace Continuations */
+auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem)
+{
+    return [Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::AddUserToSpaceIfNecessary");
+
+        /* Once we have permissions to discover a space, attempt to enter it */
+        const auto& SpaceToJoin = GetSpaceResult.GetSpace();
+
+        const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+        const bool JoiningSpaceRequiresInvite = HasFlag(SpaceToJoin.Attributes, SpaceAttributes::RequiresInvite);
+
+        // The user is known to the space if they are a user, moderator or creator. This is important if the space requires an invite.
+        const bool UserIsRecognizedBySpace = SpaceToJoin.UserIsKnownToSpace(UserId);
+
+        /* If we need permissions, check that the user has permission to enter this specific space */
+        if (JoiningSpaceRequiresInvite && !UserIsRecognizedBySpace)
+        {
+            csp::common::continuations::LogHTTPErrorAndCancelContinuation(Callback,
+                "Logged in user does not have permission to join this space. Failed to add to space.", EResultCode::Failed,
+                csp::web::EResponseCodes::ResponseForbidden, ERequestFailureReason::UserSpaceAccessDenied);
+        }
+
+        /* By this point,you should be allowed to join the space
+               Add the user to the space even if they are already added */
+
+        auto UserAddedToSpaceChainStartEvent = std::make_shared<async::event_task<SpaceResult>>();
+        auto UserAddedToSpaceChainContinuation = UserAddedToSpaceChainStartEvent->get_task();
+        // AddUserToSpace does not give a callback (feels like it should...) if the user is already added to the space.
+        // Branch so we always continue, using an event so we can forward the continuation no matter what branch.
+        if (!UserIsRecognizedBySpace)
+        {
+            CSP_LOG_MSG(csp::systems::LogLevel::Log, "Adding user to space.");
+
+            // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
+            SpaceSystem.AddUserToSpace(SpaceToJoin.Id, UserId)
+                .then(async::inline_scheduler(),
+                    [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
+                    { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
+        }
+        else
+        {
+            CSP_LOG_MSG(csp::systems::LogLevel::Log, "No need to add user to space.");
+
+            // Just pass along the previous result
+            UserAddedToSpaceChainStartEvent->set(GetSpaceResult);
+        }
+
+        return UserAddedToSpaceChainContinuation;
+    };
+}
+
+auto SpaceSystem::FireEnterSpaceEvent(Space& OutCurrentSpace)
+{
+    return [&OutCurrentSpace](const SpaceResult& SpaceResult)
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::FireEnterSpaceEvent");
+
+        /* We're here. The space knows about us. We're definately in the allowed users. Let's join! */
+        csp::events::Event* EnterSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
+        EnterSpaceEvent->AddString("SpaceId", SpaceResult.GetSpace().Id);
+        csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
+        OutCurrentSpace = SpaceResult.GetSpace();
+        return SpaceResult;
+    };
+}
+
+auto SpaceSystem::RefreshMultiplayerScopes()
+{
+    return [this](const SpaceResult& SpaceResult)
+    {
+        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::RefreshMultiplayerScopes");
+
+        /* Refresh the multiplayer connection to force the scopes to change */
+        /* This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
+        auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
+        auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
+        RefreshMultiplayerConnectionToEnactScopeChange(SpaceResult.GetSpace().Id, RefreshMultiplayerConnectionEvent);
+        return RefreshMultiplayerConnectionContinuation;
+    };
+}
+
+/*
+ * ** EnterSpace Flow **
+ * GetSpace
+ * AssertRequestSuccessOrError (GetSpace Validation)
+ * AddUserToSpaceIfNecessary
+ * AssertRequestSuccessOrError (AddUserToSpace Validation)
+ * FireEnterSpaceEvent
+ * RefreshMultiplayerScopes
+ * AssertRequestSuccessOrErrorFromErrorCode (RefreshMultiplayerScopes Validation)
+ * ReportSuccess
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, resets state)
+ */
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace");
 
-    SpaceResultCallback GetSpaceCallback = [Callback, SpaceId, this](const SpaceResult& GetSpaceResult)
-    {
-        if (GetSpaceResult.GetResultCode() == EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (GetSpaceResult.GetResultCode() == EResultCode::Failed)
-        {
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace fail");
-            NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
-            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-            return;
-        }
-
-        CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace success");
-
-        const auto& RefreshedSpace = GetSpaceResult.GetSpace();
-
-        CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s %s", RefreshedSpace.Name.c_str(), RefreshedSpace.Id.c_str());
-
-        const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
-
-        if (!HasFlag(RefreshedSpace.Attributes, SpaceAttributes::RequiresInvite))
-        {
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, "!HasFlag");
-
-            AddUserToSpace(SpaceId, UserId,
-                [Callback, SpaceId, GetSpaceResult, RefreshedSpace, this](const SpaceResult& Result)
-                {
-                    if (Result.GetResultCode() == EResultCode::InProgress)
-                    {
-                        return;
-                    }
-
-                    CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace");
-
-                    NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-
-                    if (Result.GetResultCode() == EResultCode::Success)
-                    {
-                        CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace success");
-                        CurrentSpace = RefreshedSpace;
-
-                        csp::events::Event* EnterSpaceEvent
-                            = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
-                        EnterSpaceEvent->AddString("SpaceId", SpaceId);
-                        csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
-                    }
-                    else
-                    {
-                        CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace fail!!!!");
-                    }
-
-                    auto& SystemsManager = csp::systems::SystemsManager::Get();
-                    SystemsManager.GetSpaceEntitySystem()->Initialise();
-                    auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
-
-                    // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
-                    // This hopefully will change in a future version when CHS support it.
-                    MultiplayerConnection->StopListening(
-                        [this, MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                        {
-                            if (Error != csp::multiplayer::ErrorCode::None)
-                            {
-                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening error");
-                                CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
-                                    csp::multiplayer::ErrorCodeToString(Error).c_str());
-                                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                                return;
-                            }
-
-                            CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
-
-                            MultiplayerConnection->SetScopes(SpaceId,
-                                [this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                                {
-                                    if (Error != csp::multiplayer::ErrorCode::None)
-                                    {
-                                        CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes error");
-                                        CSP_LOG_ERROR_FORMAT(
-                                            "Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
-                                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                                        return;
-                                    }
-                                    else
-                                    {
-                                        CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
-                                    }
-
-                                    MultiplayerConnection->StartListening(
-                                        [this, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                                        {
-                                            if (Error != csp::multiplayer::ErrorCode::None)
-                                            {
-                                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
-                                                CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
-                                                    csp::multiplayer::ErrorCodeToString(Error).c_str());
-                                                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                                                return;
-                                            }
-
-                                            CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                            // TODO: Support getting errors from RetrieveAllEntities
-                                            csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
-
-                                            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-                                        });
-                                });
-                        });
-                });
-        }
-        else
-        {
-            // First check if the user is the owner
-            bool EnterSuccess = RefreshedSpace.OwnerId == UserId;
-
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, " EnterSuccess:");
-            CSP_LOG_MSG(csp::systems::LogLevel::Log, std::to_string(EnterSuccess).c_str());
-
-            // If the user is not the owner check are they a moderator
-            if (!EnterSuccess)
-            {
-                EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
-
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "ModeratorIds: fail");
-            }
-
-            // Finally check all users in the group
-            if (!EnterSuccess)
-            {
-                EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.UserIds);
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "UserIds: fail");
-            }
-
-            NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
-
-            if (EnterSuccess)
-            {
-                CurrentSpace = GetSpaceResult.GetSpace();
-                csp::events::Event* EnterSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
-                EnterSpaceEvent->AddString("SpaceId", SpaceId);
-                csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
-            }
-            else
-            {
-                CSP_LOG_MSG(csp::systems::LogLevel::Log, "EnterSuccess fail");
-            }
-
-            auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-
-            // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
-            // This hopefully will change in a future version when CHS support it.
-            MultiplayerConnection->StopListening(
-                [this, MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                {
-                    if (Error != csp::multiplayer::ErrorCode::None)
-                    {
-                        CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 error");
-                        CSP_LOG_ERROR_FORMAT(
-                            "Error stopping listening in order to set scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
-                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                        return;
-                    }
-
-                    CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 success");
-
-                    MultiplayerConnection->SetScopes(SpaceId,
-                        [this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                        {
-                            if (Error != csp::multiplayer::ErrorCode::None)
-                            {
-                                CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes2 fail");
-                                CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
-                                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                                return;
-                            }
-                            else
-                            {
-                                CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
-                            }
-
-                            auto& SystemsManager = csp::systems::SystemsManager::Get();
-                            SystemsManager.GetSpaceEntitySystem()->Initialise();
-
-                            MultiplayerConnection->StartListening(
-                                [this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
-                                {
-                                    if (Error != csp::multiplayer::ErrorCode::None)
-                                    {
-                                        CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
-                                        CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
-                                            csp::multiplayer::ErrorCodeToString(Error).c_str());
-                                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-                                        return;
-                                    }
-
-                                    CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                    // TODO: Support getting errors from RetrieveAllEntities
-                                    csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
-
-                                    INVOKE_IF_NOT_NULL(Callback, InternalResult);
-                                });
-                        });
-                });
-        }
-    };
-
-    GetSpace(SpaceId, GetSpaceCallback);
+    GetSpace(SpaceId)
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
+                "SpaceSystem::EnterSpace, successfully discovered space.",
+                "Logged in user does not have permission to discover this space. Failed to enter space.", {}, {}, {}))
+        .then(async::inline_scheduler(), AddUserToSpaceIfNecessary(Callback, *this))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
+                "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
+                "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
+        .then(async::inline_scheduler(), RefreshMultiplayerScopes())
+        .then(async::inline_scheduler(),
+            csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(Callback,
+                "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed,
+                csp::web::EResponseCodes::ResponseInternalServerError, ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
+        .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully entered space."))
+        .then(async::inline_scheduler(),
+            csp::common::continuations::InvokeIfExceptionInChain(
+                [&CurrentSpace = CurrentSpace](const std::exception& /*Except*/) { CurrentSpace = {}; }));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
@@ -359,237 +487,115 @@ bool SpaceSystem::IsInSpace() { return !CurrentSpace.Id.IsEmpty(); }
 
 const Space& SpaceSystem::GetCurrentSpace() const { return CurrentSpace; }
 
+/*
+ * ** CreateSpace Flow **
+ * CreateSpace
+ * AssertRequestSuccessOrError (CreateSpace Validation)
+ * CreateSpaceMetadataAssetCollection
+ * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
+ * CreateAndUploadSpaceThumbnailToSpace
+ * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailToSpace Validation)
+ * BulkInviteUsersToSpaceIfNeccesary
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpaceIfNeccesary Validation)
+ * Promotes the created space through the SpaceResultCallback
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
+ */
 void SpaceSystem::CreateSpace(const String& Name, const String& Description, SpaceAttributes Attributes,
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const Optional<FileAssetDataSource>& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    CSP_PROFILE_SCOPED();
+    auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
-    SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
-    {
-        if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (CreateSpaceResult.GetResultCode() == EResultCode::Failed)
-        {
-            INVOKE_IF_NOT_NULL(Callback, CreateSpaceResult);
-
-            return;
-        }
-
-        const auto& Space = CreateSpaceResult.GetSpace();
-        const auto& SpaceId = Space.Id;
-
-        NullResultCallback BulkInviteCallback = [Callback, SpaceId, CreateSpaceResult, this](const NullResult& _BulkInviteResult)
-        {
-            if (_BulkInviteResult.GetResultCode() == EResultCode::InProgress)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
+            Callback, "SpaceSystem::CreateSpace, successfully created space.", "Failed to create space.", {}, {}, {}))
+        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpaceResult, Metadata))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "SpaceSystem::CreateSpace, successfully created space metadata asset collection.", "Failed to create space metadata asset collection.",
+            {}, {}, {}))
+        .then(CreateAndUploadSpaceThumbnailToSpace(CurrentSpaceResult, Thumbnail))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
+            Callback, "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
+            Callback, "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
+        .then(
+            [CurrentSpaceResult, Callback]()
             {
-                return;
-            }
+                CSP_LOG_MSG(LogLevel::Log,
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
-            SpaceResult InternalResult(_BulkInviteResult);
-
-            if (_BulkInviteResult.GetResultCode() == EResultCode::Failed)
+                INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
+            })
+        .then(csp::common::continuations::InvokeIfExceptionInChain(
+            [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                // Delete the space, its metadata and tuhmbnail as the space wasn't created how the user requested
-                RemoveSpaceThumbnail(SpaceId, nullptr);
-                RemoveMetadata(SpaceId, nullptr);
-                DeleteSpace(SpaceId, nullptr);
-            }
+                auto NullResultCallback
+                    = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-            if (_BulkInviteResult.GetResultCode() == EResultCode::Success)
-            {
-                InternalResult.SetSpace(CreateSpaceResult.GetSpace());
-            }
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-        };
-
-        NullResultCallback UploadSpaceThumbnailCallback
-            = [Callback, SpaceId, InviteUsers, CreateSpaceResult, BulkInviteCallback, this](const NullResult& _UploadThumbnailResult)
-        {
-            if (_UploadThumbnailResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            SpaceResult InternalResult(_UploadThumbnailResult);
-
-            if (_UploadThumbnailResult.GetResultCode() == EResultCode::Failed)
-            {
-                // Delete the space and its metadata as the space wasn't created how the user requested
-                RemoveMetadata(SpaceId, nullptr);
-                DeleteSpace(SpaceId, nullptr);
-
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-                return;
-            }
-
-            if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
-            {
-                BulkInviteToSpace(SpaceId, *InviteUsers, BulkInviteCallback);
-            }
-            else
-            {
-                InternalResult.SetSpace(CreateSpaceResult.GetSpace());
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-            }
-        };
-
-        NullResultCallback AddMetadataCallback = [Callback, SpaceId, Thumbnail, InviteUsers, CreateSpaceResult, UploadSpaceThumbnailCallback,
-                                                     BulkInviteCallback, this](const NullResult& _AddMetadataResult)
-        {
-            if (_AddMetadataResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            SpaceResult InternalResult(_AddMetadataResult);
-
-            if (_AddMetadataResult.GetResultCode() == EResultCode::Failed)
-            {
-                // Delete the space as it can be considered broken without any space metadata
-                DeleteSpace(SpaceId, nullptr);
-
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-                return;
-            }
-
-            if (Thumbnail.HasValue())
-            {
-                AddSpaceThumbnail(SpaceId, *Thumbnail, UploadSpaceThumbnailCallback);
-            }
-            else if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
-            {
-                BulkInviteToSpace(SpaceId, *InviteUsers, BulkInviteCallback);
-            }
-            else
-            {
-                InternalResult.SetSpace(CreateSpaceResult.GetSpace());
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-            }
-        };
-
-        AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
-    };
-
-    ::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
+                Callback(MakeInvalid<SpaceResult>());
+            }));
 }
 
+/*
+ * ** CreateSpaceWithBuffer Flow **
+ * CreateSpace
+ * AssertRequestSuccessOrError (CreateSpace Validation)
+ * CreateSpaceMetadataAssetCollection
+ * AssertRequestSuccessOrError (CreateSpaceMetadataAssetCollection Validation)
+ * CreateAndUploadSpaceThumbnailWithBufferToSpace
+ * AssertRequestSuccessOrError (CreateAndUploadSpaceThumbnailWithBufferToSpace Validation)
+ * BulkInviteUsersToSpaceIfNeccesary
+ * AssertRequestSuccessOrErrorFromErrorCode (BulkInviteUsersToSpaceIfNeccesary Validation)
+ * Promotes the created space through the SpaceResultCallback
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, rolls back partial state)
+ */
 void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Description, SpaceAttributes Attributes,
     const Optional<InviteUserRoleInfoCollection>& InviteUsers, const Map<String, String>& Metadata, const BufferAssetDataSource& Thumbnail,
     const Optional<Array<String>>& Tags, SpaceResultCallback Callback)
 {
-    CSP_PROFILE_SCOPED();
+    auto CurrentSpaceResult = std::make_shared<SpaceResult>();
 
-    SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
-    {
-        if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (CreateSpaceResult.GetResultCode() == EResultCode::Failed)
-        {
-            INVOKE_IF_NOT_NULL(Callback, CreateSpaceResult);
-
-            return;
-        }
-
-        const auto& Space = CreateSpaceResult.GetSpace();
-        const auto& SpaceId = Space.Id;
-
-        NullResultCallback BulkInviteCallback = [Callback, SpaceId, CreateSpaceResult, this](const NullResult& _BulkInviteResult)
-        {
-            if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
+    CreateSpaceGroupInfo(Name, Description, Attributes, Tags)
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created space.", "Failed to create space.", {}, {}, {}))
+        .then(csp::common::continuations::GetResultFromContinuation<SpaceResult>(CurrentSpaceResult))
+        .then(CreateSpaceMetadataAssetCollection(CurrentSpaceResult, Metadata))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(Callback,
+            "SpaceSystem::CreateSpaceWithBuffer, successfully created space metadata asset collection.",
+            "Failed to create space metadata asset collection.", {}, {}, {}))
+        .then(CreateAndUploadSpaceThumbnailWithBufferToSpace(CurrentSpaceResult, Thumbnail))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<UriResult>(
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
+        .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
+        .then(csp::common::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
+            Callback, "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
+        .then(
+            [CurrentSpaceResult, Callback]()
             {
-                return;
-            }
+                CSP_LOG_MSG(LogLevel::Log,
+                    csp::common::StringFormat("Successfully created space: %s", static_cast<const char*>(CurrentSpaceResult->GetSpace().Name)));
 
-            SpaceResult InternalResult(_BulkInviteResult);
-
-            if (_BulkInviteResult.GetResultCode() == EResultCode::Failed)
+                INVOKE_IF_NOT_NULL(Callback, *CurrentSpaceResult);
+            })
+        .then(csp::common::continuations::InvokeIfExceptionInChain(
+            [this, CurrentSpaceResult, Callback](const std::exception& /*Except*/)
             {
-                // Delete the space, its metadata and tuhmbnail as the space wasn't created how the user requested
-                RemoveSpaceThumbnail(SpaceId, nullptr);
-                RemoveMetadata(SpaceId, nullptr);
-                DeleteSpace(SpaceId, nullptr);
-            }
-            else
-            {
-                InternalResult.SetSpace(CreateSpaceResult.GetSpace());
-            }
+                auto NullResultCallback
+                    = [](const csp::systems::NullResult& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; };
 
-            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-        };
+                this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-        NullResultCallback UploadSpaceThumbnailCallback
-            = [Callback, SpaceId, InviteUsers, CreateSpaceResult, BulkInviteCallback, this](const NullResult& _UploadThumbnailResult)
-        {
-            if (_UploadThumbnailResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            SpaceResult InternalResult(_UploadThumbnailResult);
-
-            if (_UploadThumbnailResult.GetResultCode() == EResultCode::Failed)
-            {
-                // Delete the space and its metadata and the space wasn't created how the user requested
-                RemoveMetadata(SpaceId, nullptr);
-                DeleteSpace(SpaceId, nullptr);
-
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-                return;
-            }
-
-            if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
-            {
-                BulkInviteToSpace(SpaceId, *InviteUsers, BulkInviteCallback);
-            }
-            else
-            {
-                InternalResult.SetSpace(CreateSpaceResult.GetSpace());
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-            }
-        };
-
-        NullResultCallback AddMetadataCallback
-            = [Callback, SpaceId, Thumbnail, UploadSpaceThumbnailCallback, this](const NullResult& _AddMetadataResult)
-        {
-            if (_AddMetadataResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            SpaceResult InternalResult(_AddMetadataResult);
-
-            if (_AddMetadataResult.GetResultCode() == EResultCode::Failed)
-            {
-                // Delete the space as it can be considered broken without any space metadata
-                DeleteSpace(SpaceId, nullptr);
-
-                INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-                return;
-            }
-
-            AddSpaceThumbnailWithBuffer(SpaceId, Thumbnail, UploadSpaceThumbnailCallback);
-        };
-
-        AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
-    };
-
-    ::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
+                Callback(MakeInvalid<SpaceResult>());
+            }));
 }
 
 void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Name, const Optional<String>& Description,
-    const Optional<SpaceAttributes>& Attributes, BasicSpaceResultCallback Callback)
+    const Optional<SpaceAttributes>& Attributes, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+    BasicSpaceResultCallback Callback)
 {
     CSP_PROFILE_SCOPED();
 
@@ -614,6 +620,11 @@ void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Nam
         RequiresInvite = HasFlag(*Attributes, SpaceAttributes::RequiresInvite);
     }
 
+    if (Tags.HasValue())
+    {
+        LiteGroupInfo->SetTags(csp::common::Convert(Tags).value());
+    }
+
     // Note that these are required fields from a services point of view.
     LiteGroupInfo->SetDiscoverable(IsDiscoverable);
     LiteGroupInfo->SetRequiresInvite(RequiresInvite);
@@ -629,47 +640,10 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 {
     CSP_PROFILE_SCOPED();
 
-    const String InGroupId = SpaceId;
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    // Delete space metadata AssetCollection first, as users without super-user will not be able to do so after the space is deleted
-    NullResultCallback RemoveMetadataCallback = [Callback, InGroupId, this](const NullResult& RemoveMetadataResult)
-    {
-        if (RemoveMetadataResult.GetResultCode() == EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (RemoveMetadataResult.GetResultCode() == EResultCode::Failed)
-        {
-            INVOKE_IF_NOT_NULL(Callback, RemoveMetadataResult);
-
-            return;
-        }
-
-        NullResultCallback RemoveSpaceThumbnailCallback = [Callback, InGroupId, this](const NullResult& RemoveSpaceThumbnailResult)
-        {
-            if (RemoveSpaceThumbnailResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            if (RemoveSpaceThumbnailResult.GetResultCode() == EResultCode::Failed)
-            {
-                INVOKE_IF_NOT_NULL(Callback, RemoveSpaceThumbnailResult);
-
-                return;
-            }
-
-            csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-                Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
-
-            static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(InGroupId, ResponseHandler);
-        };
-
-        RemoveSpaceThumbnail(InGroupId, RemoveSpaceThumbnailCallback);
-    };
-
-    RemoveMetadata(InGroupId, RemoveMetadataCallback);
+    static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(SpaceId, ResponseHandler);
 }
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
@@ -684,7 +658,10 @@ void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 }
 
 void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, const Optional<bool>& InIsArchived,
-    const Optional<bool>& InRequiresInvite, const Optional<int>& InResultsSkip, const Optional<int>& InResultsMax, BasicSpacesResultCallback Callback)
+    const Optional<bool>& InRequiresInvite, const Optional<int>& InResultsSkip, const Optional<int>& InResultsMax,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& MustContainTags,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& MustExcludeTags, const csp::common::Optional<bool>& InMustIncludeAllTags,
+    BasicSpacesResultCallback Callback)
 {
     auto IsDiscoverable = InIsDiscoverable.HasValue() ? *InIsDiscoverable : std::optional<bool>(std::nullopt);
     auto IsArchived = InIsArchived.HasValue() ? *InIsArchived : std::optional<bool>(std::nullopt);
@@ -697,6 +674,12 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         CSP_LOG_WARN_FORMAT("Provided value `%i` for ResultsMax exceeded max value and was reduced to `%i`.", *InResultsMax, MAX_SPACES_RESULTS);
     }
 
+    auto Tags
+        = MustContainTags.HasValue() ? csp::common::Convert(MustContainTags).value() : std::optional<std::vector<csp::common::String>>(std::nullopt);
+    auto ExcludedTags
+        = MustExcludeTags.HasValue() ? csp::common::Convert(MustExcludeTags).value() : std::optional<std::vector<csp::common::String>>(std::nullopt);
+    auto MustIncludeAllTags = InMustIncludeAllTags.HasValue() ? *InMustIncludeAllTags : std::optional<bool>(std::nullopt);
+
     csp::services::ResponseHandlerPtr ResponseHandler
         = GroupAPI->CreateHandler<BasicSpacesResultCallback, BasicSpacesResult, void, csp::services::DtoArray<chs::GroupLiteDto>>(Callback, nullptr);
 
@@ -706,12 +689,16 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable, 
         std::nullopt, // PartialName
         std::nullopt, // GroupOwnerIds
         std::nullopt, // ExcludeGroupOwnerIds
+        std::nullopt, // ExcludeIds
         std::nullopt, // Users
         IsDiscoverable, // Discoverable
         std::nullopt, // AutoModerator
         RequiresInvite, // RequiresInvite
         IsArchived, // Archived
-        std::nullopt, // OrganizationIds
+        std::nullopt, // OrganizationIds (no longer used)
+        Tags, // Tags
+        ExcludedTags, // ExcludedTags
+        MustIncludeAllTags, // TagsAll
         ResultsSkip, // Skip
         ResultsMax, // Limit
         ResponseHandler);
@@ -731,7 +718,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
     std::vector<String> SpaceIds;
     SpaceIds.reserve(RequestedSpaceIDs.Size());
 
-    for (auto idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
+    for (size_t idx = 0; idx < RequestedSpaceIDs.Size(); ++idx)
     {
         SpaceIds.push_back(RequestedSpaceIDs[idx]);
     }
@@ -757,16 +744,34 @@ void SpaceSystem::GetSpace(const String& SpaceId, SpaceResultCallback Callback)
     if (SpaceId.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("No space id given");
-
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceResult>());
-
         return;
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(Callback, nullptr);
+        = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdGet(SpaceId, ResponseHandler);
+}
+
+async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
+{
+    async::event_task<SpaceResult> OnCompleteEvent;
+    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+    if (SpaceId.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("No space id given");
+        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdGet(SpaceId, ResponseHandler);
+
+    return OnCompleteTask;
 }
 
 void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId, const String& Email, const Optional<bool>& IsModeratorRole,
@@ -805,6 +810,26 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const InviteUserRoleI
         SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites, ResponseHandler);
 }
 
+async::task<NullResult> SpaceSystem::BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers)
+{
+    async::event_task<NullResult> OnCompleteEvent;
+    async::task<NullResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+    std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites
+        = systems::SpaceSystemHelpers::GenerateGroupInvites(InviteUsers.InviteUserRoleInfos);
+
+    auto EmailLinkUrlParam = !InviteUsers.EmailLinkUrl.IsEmpty() ? (InviteUsers.EmailLinkUrl) : std::optional<String>(std::nullopt);
+    auto SignupUrlParam = !InviteUsers.SignupUrl.IsEmpty() ? (InviteUsers.SignupUrl) : std::optional<String>(std::nullopt);
+
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        [](const NullResult&) {}, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(
+        SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites, ResponseHandler);
+
+    return OnCompleteTask;
+}
+
 void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -812,6 +837,15 @@ void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesRes
             Callback, nullptr);
 
     static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesGet(SpaceId, ResponseHandler);
+}
+
+void SpaceSystem::GetAcceptedUserInvites(const String& SpaceId, AcceptedInvitesResultCallback Callback)
+{
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = GroupAPI->CreateHandler<AcceptedInvitesResultCallback, AcceptedInvitesResult, void, csp::services::DtoArray<chs::GroupInviteDto>>(
+            Callback, nullptr);
+
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesAcceptedGet(SpaceId, ResponseHandler);
 }
 
 void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId, SpaceResultCallback Callback)
@@ -843,6 +877,33 @@ void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const Strin
 
             static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupCodesGroupCodeUsersUserIdPut(SpaceCode, UserId, ResponseHandler);
         });
+}
+
+async::task<SpaceResult> SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId)
+{
+    // Because we react in a continuation, we need to keep the event alive, hence shared ptr.
+    std::shared_ptr<async::event_task<SpaceResult>> OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
+    async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    GetSpace(SpaceId).then(async::inline_scheduler(),
+        [UserId, OnCompleteEvent, this](const SpaceResult& Result) mutable
+        {
+            // .then continuations are only called for success of failure (completion), no need to handle inprogress
+            if (Result.GetResultCode() == EResultCode::Failed)
+            {
+                OnCompleteEvent->set(Result); // Set the failure result for error handling
+                return;
+            }
+
+            const csp::common::String& SpaceCode = Result.GetSpaceCode();
+
+            csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
+                [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+            static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupCodesGroupCodeUsersUserIdPut(SpaceCode, UserId, ResponseHandler);
+        });
+
+    return OnCompleteTask;
 }
 
 void SpaceSystem::RemoveUserFromSpace(const String& SpaceId, const String& UserId, NullResultCallback Callback)
@@ -900,8 +961,8 @@ void SpaceSystem::UpdateUserRole(const String& SpaceId, const UserRoleInfo& NewU
     }
     else if (NewUserRole == SpaceUserRole::User)
     {
-        // TODO: When the Client will be able to change the space owner role get a fresh Space object to see if the NewUserRoleInfo.UserId is still a
-        // space owner
+        // TODO: When the Client will be able to change the space owner role get a fresh Space object to see if the NewUserRoleInfo.UserId is
+        // still a space owner
         if (SpaceId == NewUserRoleInfo.UserId)
         {
             // An owner must firstly pass the space ownership to someone else before it can become a user
@@ -946,8 +1007,7 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
     GetSpace(SpaceId, GetSpaceCallback);
 }
 
-void SpaceSystem::UpdateSpaceMetadata(
-    const String& SpaceId, const Map<String, String>& NewMetadata, const Optional<Array<String>>& Tags, NullResultCallback Callback)
+void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, String>& NewMetadata, NullResultCallback Callback)
 {
     if (SpaceId.IsEmpty())
     {
@@ -958,7 +1018,7 @@ void SpaceSystem::UpdateSpaceMetadata(
         return;
     }
 
-    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata, Tags](const AssetCollectionResult& Result)
+    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
     {
         if (Result.GetResultCode() == EResultCode::InProgress)
         {
@@ -982,7 +1042,7 @@ void SpaceSystem::UpdateSpaceMetadata(
         };
 
         const auto& AssetCollection = Result.GetAssetCollection();
-        AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, Tags, UpdateAssetCollCallback);
+        AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, {}, UpdateAssetCollCallback);
     };
 
     GetMetadataAssetCollection(SpaceId, MetadataAssetCollCallback);
@@ -1000,14 +1060,13 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
             Map<String, Array<String>> SpacesTags;
             const auto& AssetCollections = Result.GetAssetCollections();
 
-            for (int i = 0; i < AssetCollections.Size(); ++i)
+            for (size_t i = 0; i < AssetCollections.Size(); ++i)
             {
                 const auto& AssetCollection = AssetCollections[i];
 
                 auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
                 SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
-                SpacesTags[SpaceId] = AssetCollection.Tags;
             }
 
             InternalResult.SetMetadata(SpacesMetadata);
@@ -1040,7 +1099,6 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
             const auto& AssetCollection = Result.GetAssetCollection();
 
             InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
-            InternalResult.SetTags(AssetCollection.Tags);
         }
 
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1268,29 +1326,12 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
     auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
     Array<String> PrototypeNames(SpaceIds.Size());
 
-    for (auto item = 0; item < SpaceIds.Size(); ++item)
+    for (size_t item = 0; item < SpaceIds.Size(); ++item)
     {
         PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
     }
 
     AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
-}
-
-void SpaceSystem::AddMetadata(
-    const csp::common::String& SpaceId, const Map<String, String>& Metadata, const Optional<Array<String>>& Tags, NullResultCallback Callback)
-{
-    AssetCollectionResultCallback CreateAssetCollCallback = [Callback](const AssetCollectionResult& Result)
-    {
-        NullResult InternalResult(Result);
-        INVOKE_IF_NOT_NULL(Callback, InternalResult);
-    };
-
-    auto MetadataAssetCollectionName = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
-    auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-    // Don't assign this AssetCollection to a space so any user can retrieve the metadata without joining the space
-    AssetSystem->CreateAssetCollection(
-        SpaceId, nullptr, MetadataAssetCollectionName, Metadata, EAssetCollectionType::FOUNDATION_INTERNAL, Tags, CreateAssetCollCallback);
 }
 
 void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callback)
@@ -1397,7 +1438,8 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
     const String SpaceThumbnailAssetCollectionName = SpaceSystemHelpers::GetSpaceThumbnailAssetCollectionName(SpaceId);
     const auto Tag = Array<String>({ SpaceId });
 
-    // don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this space
+    // don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this
+    // space
     AssetSystem->CreateAssetCollection(
         SpaceId, nullptr, SpaceThumbnailAssetCollectionName, nullptr, EAssetCollectionType::SPACE_THUMBNAIL, Tag, CreateAssetCollCallback);
 }
@@ -1592,7 +1634,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
                     return;
                 }
 
-                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult, AssetSystem](const NullResult& DeleteAssetCollResult)
+                NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult](const NullResult& DeleteAssetCollResult)
                 {
                     if (DeleteAssetCollResult.GetResultCode() == EResultCode::InProgress)
                     {
@@ -1834,7 +1876,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         std::vector<String> GroupIds;
         GroupIds.reserve(MemberGroupIds->Size());
 
-        for (int i = 0; i < MemberGroupIds->Size(); ++i)
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
         {
             GroupIds.push_back(MemberGroupIds->operator[](i));
         }
@@ -1851,5 +1893,4 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         ResponseHandler // ResponseHandler
     );
 }
-
 } // namespace csp::systems

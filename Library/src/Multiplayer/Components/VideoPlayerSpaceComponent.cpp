@@ -18,7 +18,6 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
 namespace
@@ -53,7 +52,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)] = static_cast<int64_t>(0);
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)] = true;
 
-    SetScriptInterface(CSP_NEW VideoPlayerSpaceComponentScriptInterface(this));
+    SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const
@@ -206,26 +205,6 @@ VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() cons
 void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(Value));
-}
-
-uint16_t VideoPlayerSpaceComponent::GetMeshComponentId() const
-{
-    return GetIntegerProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId));
-}
-
-void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
-{
-    SpaceEntity* Entity = GetParent();
-    SpaceEntitySystem* EntitySystem = Entity->GetSpaceEntitySystem();
-
-    ComponentBase* FoundComponent = EntitySystem->FindComponentById(Value);
-
-    if (FoundComponent == nullptr)
-    {
-        return;
-    }
-
-    SetProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId), static_cast<int64_t>(Value));
 }
 
 /* IVisibleComponent */

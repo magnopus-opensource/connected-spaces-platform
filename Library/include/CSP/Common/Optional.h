@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <functional>
 #include <utility>
@@ -28,11 +27,7 @@ CSP_NO_EXPORT
 namespace
 {
 
-template <typename T> void DefaultDestructor(T* Pointer)
-{
-    Pointer->~T();
-    csp::memory::DllFree(Pointer);
-}
+template <typename T> void DefaultDestructor(T* Pointer) { delete Pointer; }
 
 } // namespace
 /** @endcond */
@@ -76,8 +71,7 @@ public:
     template <typename U> Optional(const U& InValue)
     {
         static_assert(std::is_constructible<T, U>::value, "Inner type not constructible from argument type!");
-        Value = (T*)csp::memory::DllAlloc(sizeof(T));
-        new (Value) T(InValue);
+        Value = new T(InValue);
 
         ValueDestructor = DefaultDestructor<T>;
     }
@@ -86,8 +80,7 @@ public:
     /// @param InValue const T& : Reference to construct optional with
     Optional(const T& InValue)
     {
-        Value = (T*)csp::memory::DllAlloc(sizeof(T));
-        new (Value) T(InValue);
+        Value = new T(InValue);
 
         ValueDestructor = DefaultDestructor<T>;
     }
@@ -96,9 +89,7 @@ public:
     /// @param InValue T&& : Rvalue reference to construct optional with
     Optional(T&& InValue)
     {
-        Value = (T*)csp::memory::DllAlloc(sizeof(T));
-        new (Value) T(InValue);
-
+        Value = new T(std::move(InValue));
         ValueDestructor = DefaultDestructor<T>;
     }
 
@@ -108,8 +99,7 @@ public:
     {
         if (Other.HasValue())
         {
-            Value = (T*)csp::memory::DllAlloc(sizeof(T));
-            new (Value) T(*(Other.Value));
+            Value = new T(*Other.Value);
         }
         else
         {
@@ -125,8 +115,7 @@ public:
     {
         if (Other.HasValue())
         {
-            Value = (T*)csp::memory::DllAlloc(sizeof(T));
-            new (Value) T(std::move(*(Other.Value)));
+            Value = new T(std::move(*Other.Value)); // move the object, not the pointer
         }
         else
         {
@@ -167,8 +156,7 @@ public:
             ValueDestructor(Value);
         }
 
-        Value = (T*)csp::memory::DllAlloc(sizeof(T));
-        new (Value) T(InValue);
+        Value = new T(InValue);
 
         return *this;
     }
@@ -185,8 +173,7 @@ public:
 
         if (Other.HasValue())
         {
-            Value = (T*)csp::memory::DllAlloc(sizeof(T));
-            new (Value) T(*Other.Value);
+            Value = new T(*Other.Value);
         }
         else
         {

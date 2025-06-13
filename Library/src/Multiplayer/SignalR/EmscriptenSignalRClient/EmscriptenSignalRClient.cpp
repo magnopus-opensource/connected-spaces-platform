@@ -36,7 +36,7 @@ constexpr const unsigned short SOCKET_CLOSE_CODE = 1000; // TODO random number f
 constexpr const char* SOCKET_CLOSE_REASON = "Close";
 constexpr const char* URL_QUERY_SEPARATOR = "?";
 
-EM_BOOL onSocketOpened(int EventType, const EmscriptenWebSocketOpenEvent* WebsocketEvent, void* UserData)
+EM_BOOL onSocketOpened([[maybe_unused]] int EventType, [[maybe_unused]] const EmscriptenWebSocketOpenEvent* WebsocketEvent, void* UserData)
 {
     EMS_LOG("EMS onSocketOpened");
 
@@ -49,7 +49,7 @@ EM_BOOL onSocketOpened(int EventType, const EmscriptenWebSocketOpenEvent* Websoc
     return EM_TRUE;
 }
 
-EM_BOOL onSocketError(int EventType, const EmscriptenWebSocketErrorEvent* WebsocketEvent, void* UserData)
+EM_BOOL onSocketError([[maybe_unused]] int EventType, [[maybe_unused]] const EmscriptenWebSocketErrorEvent* WebsocketEvent, void* UserData)
 {
     // TODO handle the socket error
     EMS_LOG("EMS onSocketError");
@@ -64,7 +64,7 @@ EM_BOOL onSocketError(int EventType, const EmscriptenWebSocketErrorEvent* Websoc
     return EM_TRUE;
 }
 
-EM_BOOL onSocketClosed(int EventType, const EmscriptenWebSocketCloseEvent* WebsocketEvent, void* UserData)
+EM_BOOL onSocketClosed([[maybe_unused]] int EventType, const EmscriptenWebSocketCloseEvent* WebsocketEvent, void* UserData)
 {
     EMS_FORMATTED_LOG("EMS onSocketClosed Reason: %s", WebsocketEvent->reason);
 
@@ -83,7 +83,7 @@ EM_BOOL onSocketClosed(int EventType, const EmscriptenWebSocketCloseEvent* Webso
 /*
    Runs on main thread
  */
-EM_BOOL onDataReceived(int EventType, const EmscriptenWebSocketMessageEvent* WebsocketEvent, void* UserData)
+EM_BOOL onDataReceived([[maybe_unused]] int EventType, const EmscriptenWebSocketMessageEvent* WebsocketEvent, void* UserData)
 {
     EMS_FORMATTED_LOG("EMS onDataReceived NumBytes: %d, isText: %d", WebsocketEvent->numBytes, (int)WebsocketEvent->isText);
 
@@ -184,7 +184,7 @@ std::string CSPWebSocketClientEmscripten::GetWebSocketConnectURL(const std::stri
         std::string WebSocketEndpoint = InitialUrl.substr(0, QueryParamPos);
 
         WebSocketConnectURL = WebSocketEndpoint + "?access_token=" + std::string(csp::web::HttpAuth::GetAccessToken().c_str())
-            + "&X-AssetPlatform=" + std::string(csp::CSPFoundation::GetClientUserAgentString().c_str());
+            + "&X-DeviceUDID=" + std::string(csp::CSPFoundation::GetDeviceId().c_str());
         EMS_FORMATTED_LOG("WebSocket connect URL: %s", WebSocketConnectURL.c_str());
     }
     else
@@ -195,7 +195,7 @@ std::string CSPWebSocketClientEmscripten::GetWebSocketConnectURL(const std::stri
     return WebSocketConnectURL;
 }
 
-size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, uint32_t NumRecvBytes, EM_BOOL IsPlainText)
+size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, uint32_t NumRecvBytes, [[maybe_unused]] EM_BOOL IsPlainText)
 {
     std::string CallbackMessage;
     bool CallbackHasData = false;
@@ -209,7 +209,7 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     // Handshake needs to be handled differently as it is in JSON format
     if (!ReceivedHandshake)
     {
-        int Idx;
+        uint32_t Idx;
         for (Idx = 0; Idx < NumRecvBytes; ++Idx)
         {
             // JSON messages are terminated with the 0x1E character
@@ -229,8 +229,8 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     }
     else
     {
-        auto Length = 0;
-        int Idx;
+        uint32_t Length = 0;
+        uint32_t Idx;
 
         for (Idx = 0; Idx < 5; ++Idx)
         {

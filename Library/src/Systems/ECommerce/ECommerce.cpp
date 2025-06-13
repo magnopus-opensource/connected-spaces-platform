@@ -47,7 +47,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
         auto VariantProductInformation = Dto.GetVariants();
         ProductInfo.Variants = common::Array<ProductVariantInfo>(VariantProductInformation.size());
 
-        for (int i = 0; i < VariantProductInformation.size(); ++i)
+        for (size_t i = 0; i < VariantProductInformation.size(); ++i)
         {
             ProductInfo.Variants[i].Id = VariantProductInformation[i]->GetId();
             ProductInfo.Variants[i].Title = VariantProductInformation[i]->GetTitle();
@@ -101,7 +101,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
                 ProductInfo.Variants[i].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
 
-                for (int n = 0; n < VariantOptionInformation.size(); ++n)
+                for (size_t n = 0; n < VariantOptionInformation.size(); ++n)
                 {
                     ProductInfo.Variants[i].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
                     ProductInfo.Variants[i].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
@@ -149,7 +149,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
         ProductInfo.Tags = common::Array<common::String>(TagsProductInformation.size());
 
-        for (int i = 0; i < TagsProductInformation.size(); ++i)
+        for (size_t i = 0; i < TagsProductInformation.size(); ++i)
         {
             ProductInfo.Tags[i] = TagsProductInformation[i];
         }
@@ -165,7 +165,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
         ProductInfo.Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
 
-        for (int i = 0; i < MediaProductInformation.size(); ++i)
+        for (size_t i = 0; i < MediaProductInformation.size(); ++i)
         {
             if (MediaProductInformation[i]->HasAlt())
             {
@@ -204,13 +204,13 @@ void ProductInfoDtoToProductInfoVariantCollection(
     ProductInfoCollection = common::Array<csp::systems::ProductInfo>(ProductInfoCollection.Size());
     int TotalVariantIndex = 0; // Count the total number of variants included in the product Dto's
 
-    for (int DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
+    for (size_t DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
     {
         const chs_aggregation::ShopifyProductDto& Dto = DtoArray[DtoCount];
 
         if (Dto.HasVariants()) // if there are no variants, we don't process the dto (shouldn't happen)
         {
-            for (int VariantCount = 0; VariantCount < Dto.GetVariants().size();
+            for (size_t VariantCount = 0; VariantCount < Dto.GetVariants().size();
                  VariantCount++) // Loop each variant in the product dto and store the info into the indexed output array
             {
                 auto VariantProductInformation = Dto.GetVariants()[VariantCount];
@@ -273,7 +273,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Variants[0].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
 
-                    for (int n = 0; n < VariantOptionInformation.size(); ++n)
+                    for (size_t n = 0; n < VariantOptionInformation.size(); ++n)
                     {
                         ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
                         ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
@@ -318,7 +318,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Tags = common::Array<common::String>(TagsProductInformation.size());
 
-                    for (int j = 0; j < TagsProductInformation.size(); ++j)
+                    for (size_t j = 0; j < TagsProductInformation.size(); ++j)
                     {
                         ProductInfoCollection[TotalVariantIndex].Tags[j] = TagsProductInformation[j];
                     }
@@ -334,7 +334,7 @@ void ProductInfoDtoToProductInfoVariantCollection(
 
                     ProductInfoCollection[TotalVariantIndex].Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
 
-                    for (int j = 0; j < MediaProductInformation.size(); ++j)
+                    for (size_t j = 0; j < MediaProductInformation.size(); ++j)
                     {
                         if (MediaProductInformation[j]->HasAlt())
                         {
@@ -406,7 +406,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
         auto DtoLines = CartDto.GetLines();
         Cart.CartLines = csp::common::Array<csp::systems::CartLine>(DtoLines.size());
 
-        for (auto i = 0; i < DtoLines.size(); ++i)
+        for (size_t i = 0; i < DtoLines.size(); ++i)
         {
             auto CartLineDto = *DtoLines[i];
 
@@ -506,7 +506,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 void ShopifyStoreDtoArrayToShopifyStoreInfoArray(
     const std::vector<chs_aggregation::ShopifyStorefrontDto>& StoreDtos, csp::common::Array<csp::systems::ShopifyStoreInfo>& Stores)
 {
-    for (int i = 0; i < StoreDtos.size(); i++)
+    for (size_t i = 0; i < StoreDtos.size(); i++)
     {
         const chs_aggregation::ShopifyStorefrontDto& StoreDto = StoreDtos[i];
         csp::systems::ShopifyStoreInfo& Store = Stores[i];
@@ -673,8 +673,8 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
         std::vector<chs_aggregation::ShopifyProductDto>& ProductsArray = ProductCollectionResponse->GetArray();
 
         // Loop through products to count the variants, we want 1 output product per variant
-        int VariantCount = 0;
-        for (int DtoCount = 0; DtoCount < ProductsArray.size(); DtoCount++)
+        size_t VariantCount = 0;
+        for (size_t DtoCount = 0; DtoCount < ProductsArray.size(); DtoCount++)
         {
             VariantCount += ProductsArray[DtoCount].GetVariants().size();
         }

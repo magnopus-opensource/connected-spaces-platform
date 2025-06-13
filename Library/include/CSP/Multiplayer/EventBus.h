@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include <map>
+#include <optional>
 
 namespace csp::systems
 {
@@ -30,14 +31,13 @@ class SystemBase;
 
 } // namespace csp::systems
 
-namespace csp::memory
+namespace async
 {
-
 CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
+template <typename T> class event_task;
+template <typename T> class task;
 CSP_END_IGNORE
-
-} // namespace csp::memory
+}
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -51,13 +51,6 @@ enum class ErrorCode;
 class CSP_API EventBus
 {
 public:
-    /** @cond DO_NOT_DOCUMENT */
-    friend class csp::systems::SpaceSystem;
-    friend class csp::systems::SystemsManager;
-    friend class MultiplayerConnection;
-    friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
-    /** @endcond */
-
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
     // The callback used to register to listen to events.
@@ -69,6 +62,8 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEvent(
         const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT async::task<std::optional<csp::multiplayer::ErrorCode>> SendNetworkEvent(
+        const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args);
 
     /// @brief Sends a network event by EventName, to TargetClientId.
     /// @param EventName csp::common::String : The identifying name for the event.
@@ -97,11 +92,15 @@ public:
     /// @brief Instructs the event bus to start listening to messages
     void StartEventMessageListening();
 
+    /// @brief EventBus constructor
+    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
+    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection);
+
+    /// @brief EventBus destructor
+    CSP_NO_EXPORT ~EventBus();
+
 private:
     EventBus();
-    ~EventBus();
-
-    EventBus(MultiplayerConnection* InMultiplayerConnection);
 
     class MultiplayerConnection* MultiplayerConnectionInst;
 

@@ -40,7 +40,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_PROPERTY_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();
@@ -54,9 +55,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 
     EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 {
     SetRandSeed();
@@ -64,14 +63,12 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
     const char* TestSpaceName2 = "OLY-UNITTEST-SPACE-REWIND-2";
-    const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
 
     const csp::common::String ObjectName = "Object 1";
     const csp::common::String ApplicationOrigin = "Application Origin 1";
@@ -100,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Create object to represent the Custom fields
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -187,15 +184,16 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         EntitySystem->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Ensure component data has been written to database by chs before entering the space again
+        // This is due to an enforced 2 second chs database write delay
+        std::this_thread::sleep_for(7s);
     }
+
+    std::this_thread::sleep_for(std::chrono::seconds(7));
 
     // Re-Enter space and verify contents
     {
-        // Reload the space and verify the contents match
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
         // Retrieve all entities
         auto GotAllEntities = false;
         SpaceEntity* LoadedObject;
@@ -210,6 +208,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
                 }
             });
 
+        // Reload the space and verify the contents match
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
         // Wait until loaded
         auto Start = std::chrono::steady_clock::now();
         auto Current = std::chrono::steady_clock::now();
@@ -223,7 +225,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
             TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
         }
 
-        EXPECT_TRUE(GotAllEntities);
+        ASSERT_TRUE(GotAllEntities);
 
         const auto& Components = *LoadedObject->GetComponents();
 
@@ -281,6 +283,3 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

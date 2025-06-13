@@ -21,11 +21,14 @@
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
+#include "Common/Convert.h"
 #include "Common/UUIDGenerator.h"
 #include "Multiplayer/ErrorCodeStrings.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
+#include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
+#include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
 
 #include <CallHelpers.h>
@@ -91,22 +94,22 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Event
     : SystemBase(InWebClient, InEventBus)
     , RefreshTokenChangedCallback(nullptr)
 {
-    AuthenticationAPI = CSP_NEW chs_user::AuthenticationApi(InWebClient);
-    ProfileAPI = CSP_NEW chs_user::ProfileApi(InWebClient);
-    PingAPI = CSP_NEW chs_user::PingApi(InWebClient);
-    ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
-    StripeAPI = CSP_NEW chs_user::StripeApi(InWebClient);
+    AuthenticationAPI = new chs_user::AuthenticationApi(InWebClient);
+    ProfileAPI = new chs_user::ProfileApi(InWebClient);
+    PingAPI = new chs_user::PingApi(InWebClient);
+    ExternalServiceProxyApi = new chs_aggregation::ExternalServiceProxyApi(InWebClient);
+    StripeAPI = new chs_user::StripeApi(InWebClient);
 
     RegisterSystemCallback();
 }
 
 UserSystem::~UserSystem()
 {
-    CSP_DELETE(PingAPI);
-    CSP_DELETE(ProfileAPI);
-    CSP_DELETE(AuthenticationAPI);
-    CSP_DELETE(ExternalServiceProxyApi);
-    CSP_DELETE(StripeAPI);
+    delete (PingAPI);
+    delete (ProfileAPI);
+    delete (AuthenticationAPI);
+    delete (ExternalServiceProxyApi);
+    delete (StripeAPI);
 
     DeregisterSystemCallback();
 }
@@ -118,6 +121,19 @@ void UserSystem::SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback C
 void UserSystem::Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
     const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
 {
+    if (UserName.IsEmpty() && Email.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::Login, One of either Username or Email must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+    if (Password.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::Login, Password must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+
     if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
     {
         CurrentLoginState.State = ELoginState::LoginRequested;
@@ -155,7 +171,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -180,6 +196,13 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
 
 void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
 {
+    if (UserId.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("UserSystem::LoginWithRefreshToken, UserId must not be empty.");
+        Callback(MakeInvalid<LoginStateResult>());
+        return;
+    }
+
     if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
     {
         CurrentLoginState.State = ELoginState::LoginRequested;
@@ -208,7 +231,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else
             {
@@ -296,7 +319,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
             }
             else
             {
@@ -421,7 +444,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
             };
 
             auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(ErrorCallback);
+            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
         }
         else
         {
@@ -690,6 +713,20 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
 }
 
+void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
+{
+    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
+    TokenInfo->SetServiceName(Params.ServiceName);
+    TokenInfo->SetOperationName(Params.OperationName);
+    TokenInfo->SetHelp(Params.SetHelp);
+    TokenInfo->SetParameters(Convert(Params.Parameters));
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
+            Callback, nullptr);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
+}
+
 void UserSystem::ResendVerificationEmail(
     const csp::common::String& InEmail, const csp::common::Optional<csp::common::String>& InRedirectUrl, NullResultCallback Callback)
 {
@@ -754,6 +791,12 @@ void UserSystem::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbac
 
 void UserSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register UserSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!UserPermissionsChangedCallback)
     {
         return;

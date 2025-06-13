@@ -20,7 +20,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/WebSocketClient.h"
 
 #ifdef CSP_WASM
@@ -68,7 +67,7 @@ void CSPWebsocketClient::stop(std::function<void(std::exception_ptr)> callback)
     CSPWebSocketClientPtr->Stop(LocalCallback);
 }
 
-void CSPWebsocketClient::send(const std::string& payload, signalr::transfer_format format, std::function<void(std::exception_ptr)> callback)
+void CSPWebsocketClient::send(const std::string& payload, signalr::transfer_format /*format*/, std::function<void(std::exception_ptr)> callback)
 {
     IWebSocketClient::CallbackHandler LocalCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Stop Error"))); };
@@ -146,13 +145,14 @@ private:
 CSPHttpClient::CSPHttpClient()
 {
 #ifdef CSP_WASM
-    WebClientHttps = CSP_NEW csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS);
 #else
-    WebClientHttps = CSP_NEW csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS);
 #endif
 }
 
-void CSPHttpClient::send(const std::string& url, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
+void CSPHttpClient::send(
+    const std::string& /*url*/, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
 {
     CSP_PROFILE_SCOPED();
 

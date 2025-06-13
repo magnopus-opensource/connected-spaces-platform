@@ -82,7 +82,11 @@ if not CSP then
         -- C++
         language "C++"
         cppdialect "C++17"
-        
+		
+		flags {"FatalWarnings"}
+		warnings "Extra" -- corresponds to level /W4
+		externalwarnings "Off"
+			
         -- Standard debug/release config settings
         filter "configurations:*Debug*"
             defines { "DEBUG" }

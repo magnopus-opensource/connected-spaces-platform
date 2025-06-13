@@ -38,6 +38,15 @@ ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, 
 {
 }
 
+bool ResultBase::operator==(const ResultBase& other) const
+{
+    return GetResultCode() == other.GetResultCode() && GetHttpResultCode() == other.GetHttpResultCode()
+        && GetRequestProgress() == other.GetRequestProgress() && GetResponseProgress() == other.GetResponseProgress()
+        && GetFailureReason() == other.GetFailureReason() && GetResponseBody() == other.GetResponseBody();
+}
+
+bool ResultBase::operator!=(const ResultBase& other) const { return !(*this == other); }
+
 void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 {
     if (ApiResponse)
@@ -78,9 +87,9 @@ void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
     }
 }
 
-const EResultCode ResultBase::GetResultCode() const { return Result; }
+EResultCode ResultBase::GetResultCode() const { return Result; }
 
-const uint16_t ResultBase::GetHttpResultCode() const { return HttpResponseCode; }
+uint16_t ResultBase::GetHttpResultCode() const { return HttpResponseCode; }
 
 const csp::common::String& ResultBase::GetResponseBody() const { return ResponseBody; }
 

@@ -20,12 +20,19 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Systems/WebService.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 
 namespace csp::multiplayer
 {
 
-class ConversationSystem;
+class ConversationSpaceComponent;
 
+}
+
+namespace csp::systems
+{
+
+class ConversationSystemInternal;
 }
 
 namespace csp::services
@@ -48,7 +55,7 @@ class CSP_API NullResult : public csp::systems::ResultBase
     friend class SpaceSystem;
     friend class SettingsSystem;
     friend class UserSystem;
-    friend class csp::multiplayer::ConversationSystem;
+    friend class csp::multiplayer::ConversationSpaceComponent;
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
     CSP_END_IGNORE
@@ -59,6 +66,10 @@ public:
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
     CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode)) {};
+    CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
 protected:
     CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
@@ -101,7 +112,8 @@ class CSP_API StringResult : public csp::systems::ResultBase
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
     friend class UserSystem;
-    friend class csp::multiplayer::ConversationSystem;
+    friend class csp::multiplayer::ConversationSpaceComponent;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

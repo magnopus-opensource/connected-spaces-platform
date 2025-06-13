@@ -16,7 +16,6 @@
 #pragma once
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Memory/Memory.h"
 
 #include <string>
 #include <vector>
@@ -89,7 +88,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
         const auto& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
-        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        for (size_t i = 0; i < ComponentKeys->Size(); ++i)
         {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
@@ -99,7 +98,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
             }
         }
 
-        CSP_DELETE(ComponentKeys);
+        delete (ComponentKeys);
     }
 
     return Components;

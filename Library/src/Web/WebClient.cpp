@@ -18,7 +18,6 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Json.h"
-#include "Memory/Memory.h"
 #include "Services/ApiBase/ApiBase.h"
 
 #include <chrono>
@@ -29,10 +28,10 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, bool AutoRefresh)
     : RootPort(InPort)
-    , LoginState(nullptr)
     , UserSystem(nullptr)
+    , LoginState(nullptr)
     , RefreshNeeded(false)
     , RefreshStarted(false)
     , AutoRefreshEnabled(AutoRefresh)
@@ -164,7 +163,7 @@ void WebClient::RefreshIfExpired()
 void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
     csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
 {
-    auto* Request = CSP_NEW csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+    auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
 
 #ifdef CSP_WASM
     RefreshIfExpired();
@@ -187,7 +186,7 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 #endif
 }
 
-void WebClient::AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay)
+void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {
     RefreshIfExpired();
 
@@ -366,7 +365,7 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 
     if (Request->DecRefCount() == 0)
     {
-        CSP_DELETE(Request);
+        delete (Request);
     }
 }
 #endif
@@ -458,7 +457,7 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     }
     else
     {
-        for (auto i = 0; i < Errors.Size(); ++i)
+        for (size_t i = 0; i < Errors.Size(); ++i)
         {
             CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
                 Response.GetRequest()->GetUri().GetAsString(), ResponseCode, Errors[i].c_str());

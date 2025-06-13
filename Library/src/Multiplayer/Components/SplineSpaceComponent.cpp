@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "tinysplinecxx.h"
 
@@ -27,7 +26,7 @@ SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent)
 {
     Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
 
-    SetScriptInterface(CSP_NEW SplineSpaceComponentScriptInterface(this));
+    SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
 
 csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)
@@ -37,7 +36,7 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
     {
         std::vector<tinyspline::real> Internalpoints;
 
-        for (int i = 0; i < ListPoints.Size(); ++i)
+        for (size_t i = 0; i < ListPoints.Size(); ++i)
         {
             Internalpoints.push_back(static_cast<double>(ListPoints[i].X));
             Internalpoints.push_back(static_cast<double>(ListPoints[i].Y));
@@ -75,7 +74,7 @@ void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vec
 {
     SetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)Waypoints.Size());
 
-    for (int i = 0; i < Waypoints.Size(); ++i)
+    for (size_t i = 0; i < Waypoints.Size(); ++i)
     {
         SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
     }

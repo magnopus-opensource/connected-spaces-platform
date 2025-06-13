@@ -46,7 +46,7 @@ public:
 class ResponseReceiver : public csp::web::IHttpResponseHandler
 {
 public:
-    void OnHttpResponse(csp::web::HttpResponse& InResponse) override { }
+    void OnHttpResponse(csp::web::HttpResponse& /*InResponse*/) override { }
 
     bool ShouldDelete() const override { return true; }
 };
@@ -80,7 +80,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
     bool HasIntegerParam = false;
     bool HasStringParam = false;
 
-    for (int i = 0; i < Values->Size(); ++i)
+    for (size_t i = 0; i < Values->Size(); ++i)
     {
         if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
         {
@@ -118,9 +118,9 @@ AnalyticsProviderGoogleUA::AnalyticsProviderGoogleUA(const csp::common::String& 
     , Start { std::chrono::steady_clock::now() }
 {
 #ifdef CSP_WASM
-    WebClient = CSP_NEW UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-    WebClient = CSP_NEW UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
 }
 
@@ -132,7 +132,7 @@ void AnalyticsProviderGoogleUA::Log(AnalyticsEvent* Event)
     uint64_t MS = std::chrono::duration_cast<std::chrono::milliseconds>(Current - Start).count();
     EventString += csp::common::String("&cm1=") + std::to_string(MS).c_str();
 
-    auto* Receiver = CSP_NEW ResponseReceiver;
+    auto* Receiver = new ResponseReceiver;
 
     csp::web::HttpPayload Payload;
     Payload.SetContent(EventString);

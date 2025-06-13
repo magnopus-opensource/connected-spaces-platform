@@ -31,7 +31,12 @@ using namespace csp::systems;
 
 // These tests currently require manual steps and will be reviewed as part of OF-1535.
 
+namespace
+{
+
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+} // namespace
 
 csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {
@@ -57,7 +62,6 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 /*These test are currently internal tests because they utilise that is currently only available
 through internal CSP infrastructure.*/
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
     /*Steps needed to be performed before running this test are:
@@ -114,7 +118,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
     EXPECT_EQ(Result.GetProductInfo().Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProductInfo().Media[i].Url, ImageUrl);
@@ -124,7 +128,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
     }
     EXPECT_EQ(Result.GetProductInfo().Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, VariantIds[i]);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, VariantTitleAndOptionValue[i]);
@@ -137,7 +141,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
+        for (size_t n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
         {
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, OptionsName);
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
@@ -149,9 +153,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_BY_VARIANT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
 {
     /*Steps needed to be performed before running this test are:
@@ -210,7 +212,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
     EXPECT_EQ(Result.GetProducts()[0].Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
     {
         EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, ImageUrl);
@@ -220,7 +222,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
     }
     EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
+    for (size_t i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
     {
         auto& Variant = Result.GetProducts()[0].Variants[i];
         EXPECT_EQ(Variant.Id, VariantIds[i]);
@@ -236,7 +238,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
         EXPECT_EQ(Variant.Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Variant.Options.Size(); ++n)
+        for (size_t n = 0; n < Variant.Options.Size(); ++n)
         {
             EXPECT_EQ(Variant.Options[n].Name, OptionsName);
             EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);
@@ -245,9 +247,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 {
     SetRandSeed();
@@ -305,9 +305,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformation
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATEANDGETCART_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 {
     SetRandSeed();
@@ -363,9 +361,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATECART_BADINPUTS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 {
     SetRandSeed();
@@ -387,9 +383,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETCART_BADINPUTS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 {
     SetRandSeed();
@@ -412,9 +406,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
     LogOut(UserSystem);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 {
     SetRandSeed();
@@ -464,7 +455,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
 
     // Add local cart lines
-    for (int i = 0; i < VariantIds.Size(); ++i)
+    for (size_t i = 0; i < VariantIds.Size(); ++i)
     {
         auto CartLine = csp::systems::CartLine();
         CartLine.Quantity = 1;
@@ -494,7 +485,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
@@ -502,8 +493,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     };
 }
 
-#endif
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 {
     SetRandSeed();
@@ -579,7 +568,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
@@ -615,7 +604,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
@@ -623,9 +612,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     };
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 {
     SetRandSeed();
@@ -701,7 +687,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i)
+    for (size_t i = 0; i < CartLines.Size(); ++i)
     {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
@@ -737,9 +723,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
     EXPECT_EQ(DeleteCartLinesCart.TotalQuantity, 0);
 }
 
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDSHOPIFYSTORE_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 {
     SetRandSeed();
@@ -802,9 +785,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETSHOPIFYSTORES_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 {
     SetRandSeed();
@@ -854,4 +835,3 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 
     LogOut(UserSystem);
 }
-#endif

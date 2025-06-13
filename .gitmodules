@@ -5,9 +5,6 @@
 [submodule "modules/googletest"]
 	path = modules/googletest
 	url = https://github.com/google/googletest
-[submodule "modules/mimalloc"]
-	path = modules/mimalloc
-	url = https://github.com/microsoft/mimalloc
 [submodule "modules/poco"]
 	path = modules/poco
 	url = https://github.com/pocoproject/poco

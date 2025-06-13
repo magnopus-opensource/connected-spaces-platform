@@ -37,8 +37,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
-    DECLARE_SCRIPT_PROPERTY(int64_t, DisplayMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, BillboardMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, DisplayMode);
     DECLARE_SCRIPT_PROPERTY(bool, IsEmissive);
 
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);

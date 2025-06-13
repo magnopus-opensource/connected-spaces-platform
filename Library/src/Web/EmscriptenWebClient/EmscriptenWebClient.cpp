@@ -32,7 +32,7 @@ namespace
 void GetResponseHeaders(emscripten_fetch_t* Fetch, csp::common::Map<csp::common::String, csp::common::String>& OutHeadersMap)
 {
     auto Length = emscripten_fetch_get_response_headers_length(Fetch);
-    auto Buf = CSP_NEW char[Length + 1];
+    auto Buf = new char[Length + 1];
     emscripten_fetch_get_response_headers(Fetch, Buf, Length + 1);
     auto Headers = emscripten_fetch_unpack_response_headers(Buf);
 
@@ -67,7 +67,7 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
     auto& Payload = Response.GetMutablePayload();
     auto* Keys = Headers.Keys();
 
-    for (int i = 0; i < Keys->Size(); ++i)
+    for (rapidjson::SizeType i = 0; i < Keys->Size(); ++i)
     {
         auto Key = Keys->operator[](i).ToLower();
         auto Value = Headers[Key].ToLower();
@@ -75,12 +75,12 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
         Payload.AddHeader(Key, Value);
     }
 
-    CSP_DELETE(Keys);
+    delete Keys;
 
     Request->GetCallback()->OnHttpResponse(Response);
     // DO NOT DO THIS! This will delete Payload.Content twice
     // CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
-    CSP_DELETE(Request);
+    delete Request;
     emscripten_fetch_close(Fetch);
 }
 
@@ -120,16 +120,20 @@ EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProto
     std::srand(std::time(nullptr));
 }
 
-std::string EmscriptenWebClient::MD5Hash(const void* Data, const size_t Size) { assert(false && "Not implemented!"); }
+std::string EmscriptenWebClient::MD5Hash(const void* /*Data*/, const size_t /*Size*/)
+{
+    assert(false && "Not implemented!");
+    return "MD5Hash Not Implemented";
+}
 
 void EmscriptenWebClient::SetFileUploadContentFromFile(
-    HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
+    HttpPayload* /*Payload*/, const char* /*FilePath*/, const char* /*Version*/, const csp::common::String& /*MediaType*/)
 {
     assert(false && "Not implemented!");
 }
 
 void EmscriptenWebClient::SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource,
-    const csp::common::String& FileName, const char* Version, const csp::common::String& MediaType)
+    const csp::common::String& FileName, const char* /*Version*/, const csp::common::String& MediaType)
 {
     std::ostringstream strm;
     strm << "MIME_boundary_" << std::rand();
@@ -147,7 +151,7 @@ void EmscriptenWebClient::SetFileUploadContentFromString(HttpPayload* Payload, c
 
 // This function is deliberately written this way to reduce the number of allocations and string copying. Do not change it!
 void EmscriptenWebClient::SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength,
-    const csp::common::String& FileName, const char* Version, const csp::common::String& MediaType)
+    const csp::common::String& FileName, const char* /*Version*/, const csp::common::String& MediaType)
 {
     constexpr const char Boundary[] = "MIME_boundary_FileFromBuffer";
     constexpr size_t BoundaryLen = CStringLength(Boundary);
@@ -224,18 +228,18 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
         auto& Payload = Request.GetPayload();
         auto& Headers = Payload.GetHeaders();
         int i = 0;
-        auto** HeadersBuf = CSP_NEW char * [Headers.size() * 2 + 1];
+        auto** HeadersBuf = new char*[Headers.size() * 2 + 1];
 
         for (auto& Header : Headers)
         {
             auto Len = Header.first.size();
-            auto* Key = CSP_NEW char[Len + 1];
+            auto* Key = new char[Len + 1];
             strcpy(Key, Header.first.c_str());
 
             HeadersBuf[i++] = Key;
 
             Len = Header.second.size();
-            auto* Val = CSP_NEW char[Len + 1];
+            auto* Val = new char[Len + 1];
             strcpy(Val, Header.second.c_str());
 
             HeadersBuf[i++] = Val;

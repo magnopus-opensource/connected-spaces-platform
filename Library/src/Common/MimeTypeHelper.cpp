@@ -16,9 +16,8 @@
 
 #include "CSP/Common/MimeTypeHelper.h"
 
-#include "Memory/Memory.h"
-
 #include <cctype>
+#include <memory>
 
 namespace csp::common
 {
@@ -38,9 +37,9 @@ String& MimeTypeHelper::GetMimeType(const String& FilePath)
 
     auto LowerChars = std::make_unique<char[]>(Length);
 
-    for (auto i = 0; i < Length; ++i)
+    for (size_t i = 0; i < Length; ++i)
     {
-        LowerChars[i] = std::tolower(Chars[i]);
+        LowerChars[i] = static_cast<char>(std::tolower(Chars[i]));
     }
 
     String LowerExtension(LowerChars.get(), Length);

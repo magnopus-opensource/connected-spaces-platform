@@ -23,7 +23,6 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -147,7 +146,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
@@ -162,7 +161,7 @@ public:
 
     EntityScriptInterface* GetEntityById(int64_t EntityId)
     {
-        EntityScriptInterface* ScriptInterface;
+        EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
         {
             EntitySystem->LockEntityUpdate();
@@ -170,7 +169,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId)
+                if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;
@@ -185,7 +184,7 @@ public:
 
     EntityScriptInterface* GetEntityByName(std::string EntityName)
     {
-        EntityScriptInterface* ScriptInterface;
+        EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
         {
             EntitySystem->LockEntityUpdate();
@@ -213,7 +212,7 @@ public:
         {
             EntitySystem->LockEntityUpdate();
 
-            for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+            for (size_t i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
             {
                 SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
                 RootHierarchyEntities.push_back(Entity->GetScriptInterface());
@@ -250,7 +249,7 @@ EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem)
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem)
 {
-    EntityScriptBinding* ScriptBinding = CSP_NEW EntityScriptBinding(InEntitySystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem);
     csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
     ScriptSystem->RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
@@ -465,7 +464,11 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(ConversationSpaceComponent, IsActive, "isActive")
         .PROPERTY_GET_SET(ConversationSpaceComponent, Position, "position")
-        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation");
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Title, "title")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, Resolved, "resolved")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraPosition, "conversationCameraPosition")
+        .PROPERTY_GET_SET(ConversationSpaceComponent, ConversationCameraRotation, "conversationCameraRotation");
 
     Module->class_<AudioSpaceComponentScriptInterface>("AudioSpaceComponent")
         .constructor<>()
@@ -600,8 +603,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
-    Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
     // Always import OKO module into scripts
     std::stringstream ss;

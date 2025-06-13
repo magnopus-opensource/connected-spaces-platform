@@ -17,13 +17,13 @@
 
 #include "CSP/CSPFoundation.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Web/HttpAuth.h"
 
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/NetException.h>
+#include <Poco/URI.h>
 #include <chrono>
 #include <stdexcept>
 #include <thread>
@@ -37,8 +37,8 @@ namespace csp::multiplayer
 {
 
 CSPWebSocketClientPOCO::CSPWebSocketClientPOCO() noexcept
-    : StopFlag(false)
-    , PocoWebSocket(nullptr)
+    : PocoWebSocket(nullptr)
+    , StopFlag(false)
 {
 }
 
@@ -48,45 +48,65 @@ CSPWebSocketClientPOCO::~CSPWebSocketClientPOCO()
     Stop(nullptr);
 }
 
-void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callback)
+CSPWebSocketClientPOCO::ParsedURIInfo CSPWebSocketClientPOCO::ParseMultiplayerServiceUriEndPoint(const std::string& MultiplayerServiceUriEndpoint)
+{
+    Poco::URI EndpointURI { MultiplayerServiceUriEndpoint.c_str() };
+
+    // It's common folk may provide a "localhost:port/path/path" sort of string, with omits the protocol, just make sure one's there.
+    if ((EndpointURI.getScheme() != "https") && (EndpointURI.getScheme() != "http"))
+    {
+        throw std::runtime_error("CSPWebSocketclientPOCO::ParsedURIInfo, Expected `https` or `http` scheme, found neither.");
+    }
+
+    CSPWebSocketClientPOCO::ParsedURIInfo Out;
+    Out.Endpoint = EndpointURI.toString();
+    Out.Protocol = EndpointURI.getScheme();
+    Out.Domain = EndpointURI.getHost();
+    Out.Path = EndpointURI.getPath();
+    Out.Port = EndpointURI.getPort();
+
+    return Out;
+}
+
+void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler Callback)
 {
     CSP_PROFILE_SCOPED();
 
-    std::string endpoint = csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str();
-    auto index = endpoint.find(':');
-    std::string protocol = endpoint.substr(0, index);
-    index += 3; // "://"
-    auto endIndex = endpoint.find('/', index);
-    std::string domain = endpoint.substr(index, endIndex - index);
-    index = endIndex;
-    std::string path = endpoint.substr(index);
-
-    Poco::Net::HTTPClientSession* cs;
-
-    if (protocol == "https")
-    {
-        cs = CSP_NEW Poco::Net::HTTPSClientSession(domain, 443);
-    }
-    else
-    {
-        cs = CSP_NEW Poco::Net::HTTPClientSession(domain, 80);
-    }
-
-    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
-    Poco::Net::HTTPResponse response;
-
-    if (csp::web::HttpAuth::GetAccessToken().c_str() != nullptr)
-    {
-        char Str[1024];
-        snprintf(Str, 1024, "Bearer %s", csp::web::HttpAuth::GetAccessToken().c_str());
-        request.set("Authorization", Str);
-    }
-
-    StopFlag = false;
-
     try
     {
-        PocoWebSocket = CSP_NEW Poco::Net::WebSocket(*cs, request, response);
+        CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint
+            = ParseMultiplayerServiceUriEndPoint(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str());
+
+        auto domain = ParsedEndpoint.Domain;
+        auto protocol = ParsedEndpoint.Protocol;
+        auto path = ParsedEndpoint.Path;
+        auto endpoint = ParsedEndpoint.Endpoint;
+        auto port = ParsedEndpoint.Port;
+
+        std::unique_ptr<Poco::Net::HTTPClientSession> cs;
+
+        if (protocol == "https")
+        {
+            cs = std::make_unique<Poco::Net::HTTPSClientSession>(domain, port);
+        }
+        else
+        {
+            cs = std::make_unique<Poco::Net::HTTPClientSession>(domain, port);
+        }
+
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
+        Poco::Net::HTTPResponse response;
+
+        if (csp::web::HttpAuth::GetAccessToken().c_str() != nullptr)
+        {
+            char Str[1024];
+            snprintf(Str, 1024, "Bearer %s", csp::web::HttpAuth::GetAccessToken().c_str());
+            request.set("Authorization", Str);
+        }
+
+        StopFlag = false;
+
+        PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
         // Receive worker thread
         ReceiveThread = std::thread([this]() { ReceiveThreadFunc(); });
 
@@ -99,8 +119,6 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 
         Callback(false);
     }
-
-    CSP_DELETE(cs);
 }
 
 void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
@@ -140,7 +158,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
             CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
         }
 
-        CSP_DELETE(PocoWebSocket);
+        delete (PocoWebSocket);
         PocoWebSocket = nullptr;
     }
     else
@@ -207,7 +225,7 @@ void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
 void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 {
     bool HandshakeReceived = false;
-    auto* Buffer = (char*)CSP_ALLOC(INITIAL_BUFFER_SIZE);
+    auto* Buffer = (char*)std::malloc(INITIAL_BUFFER_SIZE);
     auto CurrentBufferSize = INITIAL_BUFFER_SIZE;
     auto CurrentBufferIndex = 0;
     auto SkipWait = false;
@@ -243,7 +261,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             // Resize buffer if needed
             if (CurrentBufferIndex + RECEIVE_BLOCK_SIZE > CurrentBufferSize)
             {
-                auto* NewBuffer = CSP_REALLOC(Buffer, CurrentBufferSize * 2);
+                auto* NewBuffer = std::realloc(Buffer, CurrentBufferSize * 2);
                 Buffer = static_cast<char*>(NewBuffer);
                 CurrentBufferSize = CurrentBufferSize * 2;
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);
@@ -263,7 +281,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             }
             catch (const std::exception& e)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError(e.what());
 
                 return;
@@ -278,7 +296,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
             }
             catch (const std::exception& e)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError(e.what());
 
                 return;
@@ -286,7 +304,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
             if (Received == 0)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError("Error: Socket closed by remote host.");
 
                 return;
@@ -296,7 +314,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
             if (Flags & Poco::Net::WebSocket::FrameOpcodes::FRAME_OP_CLOSE)
             {
-                CSP_FREE(Buffer);
+                std::free(Buffer);
                 HandleReceiveError("Error: Socket closed.");
 
                 return;
@@ -406,8 +424,6 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
         auto Callback = ReceiveCallback;
         Callback(CallbackMessage, true);
     }
-
-    StopFlag = false;
 }
 
 void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)

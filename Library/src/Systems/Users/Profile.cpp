@@ -38,11 +38,6 @@ void ProfileLiteDtoToBasicProfile(const chs::ProfileLiteDto& Dto, csp::systems::
     {
         Profile.DisplayName = Dto.GetDisplayName();
     }
-
-    if (Dto.HasPlatform())
-    {
-        Profile.LastPlatform = Dto.GetPlatform();
-    }
 }
 
 void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Profile)
@@ -57,11 +52,6 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
     if (Dto.HasLastDeviceId())
     {
         Profile.LastDeviceId = Dto.GetLastDeviceId();
-    }
-
-    if (Dto.HasLastPlatform())
-    {
-        Profile.LastPlatform = Dto.GetLastPlatform();
     }
 
     Profile.AvatarId = Dto.GetAvatarId();
@@ -88,7 +78,7 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
         auto ResponseRoles = Dto.GetRoles();
         Profile.Roles = csp::common::Array<csp::common::String>(ResponseRoles.size());
 
-        for (int i = 0; i < ResponseRoles.size(); ++i)
+        for (size_t i = 0; i < ResponseRoles.size(); ++i)
         {
             Profile.Roles[i] = ResponseRoles[i];
         }

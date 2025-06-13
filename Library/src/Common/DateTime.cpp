@@ -81,15 +81,28 @@ DateTime::DateTime(const csp::common::String& DateString)
     int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
     char OffsetModifier;
 #ifdef _MSC_VER
-    int _ = sscanf_s(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier, 1,
+    sscanf_s(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier, 1,
         &OffsetHours, &OffsetMinutes);
 #else
-    int _ = std::sscanf(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier,
+    std::sscanf(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier,
         &OffsetHours, &OffsetMinutes);
 #endif
 
-    std::tm TM = { Second, Minute, Hour, Day, Month - 1, Year - 1900 };
-    TM.tm_isdst = -1;
+    std::tm TM = {
+        Second, // tm_sec
+        Minute, // tm_min
+        Hour, // tm_hour
+        Day, // tm_mday
+        Month - 1, // tm_mon
+        Year - 1900, // tm_year
+        0, // tm_wday
+        0, // tm_yday
+        -1, // tm_isdst
+#ifndef CSP_WINDOWS
+        0, // tm_gmtoff
+        nullptr // tm_zone
+#endif
+    };
 
     if (OffsetModifier == '-')
     {
@@ -102,5 +115,17 @@ DateTime::DateTime(const csp::common::String& DateString)
 }
 
 const DateTime::Clock::time_point& DateTime::GetTimePoint() const { return TimePoint; }
+
+csp::common::String DateTime::GetUtcString() const
+{
+    std::time_t Now = std::chrono::system_clock::to_time_t(TimePoint);
+    std::tm UtcTime = *std::gmtime(&Now);
+
+    std::ostringstream UtcStream;
+    UtcStream << std::put_time(&UtcTime, "%Y-%m-%dT%H:%M:%SZ");
+
+    std::string UtcString = UtcStream.str();
+    return UtcString.c_str();
+}
 
 } // namespace csp::common

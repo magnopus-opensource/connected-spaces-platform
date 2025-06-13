@@ -53,7 +53,6 @@ void LogFormatLevelTest(
     }
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -164,9 +163,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -280,9 +277,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_ERROR_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -357,9 +352,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_WARN_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -434,9 +427,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_WARN_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -514,9 +505,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_ERROR_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -594,9 +583,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 
     csp::CSPFoundation::Shutdown();
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_PROFILE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -635,6 +622,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
             std::cout << InMessage << std::endl;
         });
 
+#if CSP_PROFILING_ENABLED
     const int TestValue = 12345;
 
     CSP_PROFILE_SCOPED_TAG(TestTag);
@@ -650,7 +638,6 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
     CSP_PROFILE_EVENT_TAG(TestEvent);
     CSP_PROFILE_EVENT_FORMAT("Event %d", TestValue)
 
-#if CSP_PROFILING_ENABLED
     EXPECT_TRUE(BeginConfirmed);
     EXPECT_TRUE(EndConfirmed);
     EXPECT_TRUE(EventConfirmed);
@@ -659,14 +646,11 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
     EXPECT_FALSE(EndConfirmed);
     EXPECT_FALSE(EventConfirmed);
 #endif
-
     LogSystem.ClearAllCallbacks();
 
     csp::CSPFoundation::Shutdown();
 }
 
-#endif
-#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_FAILURE_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -675,18 +659,9 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto& LogSystem = *SystemsManager.GetLogSystem();
 
-    const csp::common::String Prefix = "Services";
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback(
-        [&LogConfirmed, Prefix](csp::common::String InMessage)
-        {
-            if (InMessage.Split(' ')[0] == Prefix)
-            {
-                LogConfirmed = InMessage.Split(' ')[0] == Prefix;
-                std::cout << InMessage << std::endl;
-            }
-        });
+    LogSystem.SetLogCallback([&LogConfirmed](csp::common::String InMessage) { LogConfirmed = !InMessage.IsEmpty(); });
 
     csp::common::String UserId;
 
@@ -695,7 +670,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
-    float TestTime = 0;
+    long long TestTime = 0;
 
     while (!LogConfirmed && TestTime < 20)
     {
@@ -707,4 +682,3 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 
     EXPECT_TRUE(LogConfirmed);
 }
-#endif

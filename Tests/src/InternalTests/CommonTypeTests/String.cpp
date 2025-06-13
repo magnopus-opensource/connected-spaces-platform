@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_STRING_TESTS)
-
 #include "CSP/Common/String.h"
 #include "CSP/Common/List.h"
 
@@ -670,5 +668,3 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTes
         FAIL();
     }
 }
-
-#endif

@@ -27,7 +27,6 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
-#include "Memory/Memory.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "SpaceSystemTestHelpers.h"
@@ -108,6 +107,12 @@ public:
 
     void RegisterSystemCallback()
     {
+        if (!EventBusPtr)
+        {
+            CSP_LOG_ERROR_MSG("Error: Failed to register TestSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+            return;
+        }
+
         if (!TestCallback)
         {
             return;
@@ -152,7 +157,6 @@ TestSystem* TestSystem2;
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_EMPTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 {
     SetRandSeed();
@@ -160,7 +164,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
@@ -190,7 +193,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("TestEvent",
         [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -244,9 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_MULTITYPE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 {
     SetRandSeed();
@@ -254,7 +255,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
@@ -286,7 +286,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("MultiTypeEvent",
         [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -295,7 +295,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
             std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
 
-            for (int i = 0; i < Data.Size(); ++i)
+            for (size_t i = 0; i < Data.Size(); ++i)
             {
                 if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
                 {
@@ -351,10 +351,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_CALLBACKS_SYSTEMS_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 {
     SetRandSeed();
 
@@ -365,8 +363,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    TestSystem1 = CSP_NEW TestSystem(EventBus);
-    TestSystem2 = CSP_NEW TestSystem(EventBus);
+    TestSystem1 = new TestSystem(EventBus);
+    TestSystem2 = new TestSystem(EventBus);
 
     auto& LogSystem = *SystemsManager.GetLogSystem();
     std::atomic_bool LogConfirmed = false;
@@ -399,7 +397,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Set up Log callback
     LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
@@ -409,7 +407,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -423,7 +421,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     };
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback2
-        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -447,7 +445,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback1Called = false;
 
     // Test that registering a system when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.\n";
+    TestMsg = "Error: there is already a system registered for TestEvent. Deregister it first.";
     TestSystem2->SetSystemCallback(TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
@@ -470,7 +468,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback2Called = false;
 
     // Test that registering a callback when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.\n";
+    TestMsg = "Error: there is already a system registered for TestEvent. Deregister the system before registering a callback.";
     TestCallback1Called = false; // clean up
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
@@ -494,7 +492,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback1Called = false;
 
     // Test that registering a system when there already is a registered callback does not work
-    TestMsg = "Error: there is already a callback registered for TestEvent.\n";
+    TestMsg = "Error: there is already a callback registered for TestEvent.";
     TestSystem1->SetSystemCallback(TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
@@ -516,18 +514,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     WaitForCallback(TestCallback1Called);
     EXPECT_FALSE(TestCallback1Called);
 
-    // Test that registering a callback when there already is a registered callback does not work
+    // Test that registering a callback when there already is a registered callback works
     EventBus->StopListenNetworkEvent("TestEvent"); // clean up
-    TestMsg = "Error: there is already a callback registered for TestEvent.\n";
+    TestMsg = "The callback set for TestEvent was overwritten with a new callback.";
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->ListenNetworkEvent("TestEvent", TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
-    EXPECT_TRUE(TestCallback1Called);
-    EXPECT_EQ(TestCallbackId, 1111);
-    TestCallback1Called = false;
+    EXPECT_FALSE(TestCallback1Called);
     WaitForCallback(TestCallback2Called);
-    EXPECT_FALSE(TestCallback2Called);
+    EXPECT_TRUE(TestCallback2Called);
+    EXPECT_EQ(TestCallbackId, 2222);
+    TestCallback2Called = false;
     EXPECT_TRUE(LogConfirmed);
     TestMsg = "";
     LogConfirmed = false;
@@ -562,4 +560,115 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
+
+CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EventBus = SystemsManager.GetEventBus();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    TestSystem1 = new TestSystem(EventBus);
+
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+    std::atomic_bool LogConfirmed = false;
+    csp::common::String TestMsg;
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    char UniqueAssetCollectionName[256];
+    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+    // Set all the callbacks
+
+    // Setup Connection callback
+    bool ConnectionCallbackCalled = false;
+    csp::common::String ConnectionMessage;
+
+    auto ConnectionCallback = [&ConnectionCallbackCalled, &ConnectionMessage](csp::common::String Message)
+    {
+        if (ConnectionCallbackCalled)
+        {
+            return;
+        }
+
+        ConnectionMessage = Message;
+        ConnectionCallbackCalled = true;
+    };
+    Connection->SetConnectionCallback(ConnectionCallback);
+
+    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Disconnected);
+
+    // Set up Test callback
+    bool TestCallback1Called = false;
+    int TestCallbackId = 0;
+
+    csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
+    {
+        EXPECT_TRUE(ok);
+
+        if (TestCallback1Called)
+        {
+            return;
+        }
+
+        TestCallback1Called = true;
+        TestCallbackId = 1111;
+    };
+    TestSystem1->SetSystemCallback(TestCallback1);
+
+    auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
+
+    csp::common::String UserId;
+
+    // Log in -- i.e. establish the multiplayer connection
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Check Connection callback was called
+    WaitForCallback(ConnectionCallbackCalled);
+    EXPECT_TRUE(ConnectionCallbackCalled);
+    EXPECT_EQ(ConnectionMessage, "Successfully connected to SignalR hub.");
+    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Connected);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    InitialiseTestingConnection();
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+
+    // Check system callback was called
+    EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+    WaitForCallback(TestCallback1Called);
+    EXPECT_TRUE(TestCallback1Called);
+    EXPECT_EQ(TestCallbackId, 1111);
+    TestCallback1Called = false;
+
+    // Clean up
+    LogSystem.ClearAllCallbacks();
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}

@@ -38,7 +38,8 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-#if RUN_ALL_UNIT_TESTS || RUN_COLLISION_TESTS || RUN_MULTIPLAYER_COLLISION_COMPONENT_TEST
+} // namespace
+
 CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 {
     SetRandSeed();
@@ -46,7 +47,6 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
@@ -68,7 +68,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
@@ -127,6 +127,3 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     // Log out
     LogOut(UserSystem);
 }
-#endif
-
-} // namespace

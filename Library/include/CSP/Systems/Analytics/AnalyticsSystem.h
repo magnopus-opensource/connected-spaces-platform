@@ -26,15 +26,6 @@
 #include <thread>
 #include <vector>
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 
@@ -50,7 +41,6 @@ class CSP_API AnalyticsSystem
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
-    friend void csp::memory::Delete<AnalyticsSystem>(AnalyticsSystem* Ptr);
     /** @endcond */
     CSP_END_IGNORE
 

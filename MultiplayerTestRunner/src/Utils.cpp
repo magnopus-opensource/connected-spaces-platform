@@ -17,50 +17,60 @@
 #include "Utils.h"
 
 #include "../include/ErrorCodes.h"
+#include "uuid_v4.h"
 
+#include "CSP/Systems/Users/UserSystem.h"
 #include <CSP/CSPFoundation.h>
-#include <CSP/Common/String.h>
+#include <CSP/Systems/SystemsManager.h>
 #include <CSP/Systems/WebService.h> //For resultbase
 #include <filesystem>
 #include <fstream>
+#include <future>
 
 namespace Utils
 {
 
-/*
- * Load the test account credentials from a location adjacent to the binary
- * Currently only provides 2 accounts, will need to be extended for tests that require more than 2 agents.
- */
-TestAccountCredentials LoadTestAccountCredentials()
+std::string Utils::GetUniqueString()
 {
-    if (!std::filesystem::exists("test_account_creds.txt"))
+    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
+
+    return uuid.str();
+}
+
+/* Create a new user. Return the profile on success */
+csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::systems::EResultCode /*ExpectedResultCode*/ /* = Success */,
+    csp::systems::ERequestFailureReason /*ExpectedResultFailureCode*/ /* = None */)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& UserSystem = *SystemsManager.GetUserSystem();
+
+    std::promise<csp::systems::ProfileResult> ResultPromise;
+    std::future<csp::systems::ProfileResult> ResultFuture = ResultPromise.get_future();
+
+    std::string UniqueEmail = "testnopus.pokemon+" + GetUniqueString() + "@magnopus.com";
+    UserSystem.CreateUser(nullptr, nullptr, UniqueEmail.c_str(), GeneratedTestAccountPassword, false, AgeVerified, nullptr, nullptr,
+        [&ResultPromise](csp::systems::ProfileResult Result)
+        {
+            // Callbacks are called both in progress and at the end, guard against double promise sets
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                ResultPromise.set_value(Result);
+            }
+        });
+
+    csp::systems::ProfileResult CreatedProfile = ResultFuture.get();
+
+    if (CreatedProfile.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        constexpr const char* msg
-            = "test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
-              "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>";
-        throw ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::COULD_NOT_FIND_CREDENTIALS_FILE, msg);
+        return CreatedProfile.GetProfile();
     }
-
-    std::ifstream CredsFile;
-    CredsFile.open("test_account_creds.txt");
-
-    std::string DefaultLoginEmail, DefaultLoginPassword, AlternativeLoginEmail, AlternativeLoginPassword, SuperUserLoginEmail, SuperUserLoginPassword;
-
-    CredsFile >> DefaultLoginEmail >> DefaultLoginPassword;
-    CredsFile >> AlternativeLoginEmail >> AlternativeLoginPassword;
-    CredsFile >> SuperUserLoginEmail >> SuperUserLoginPassword;
-
-    if (DefaultLoginEmail.empty() || DefaultLoginPassword.empty() || AlternativeLoginEmail.empty() || AlternativeLoginPassword.empty()
-        || SuperUserLoginEmail.empty() || SuperUserLoginPassword.empty())
+    else
     {
-        constexpr const char* msg
-            = "test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
-              "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>";
-        throw ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::MALFORMED_CREDENTIALS_FILE, msg);
+        const std::string msg = "Failed to create user, got result code " + std::to_string(static_cast<uint8_t>(CreatedProfile.GetResultCode()))
+            + "\n Response Body: " + CreatedProfile.GetResponseBody().c_str();
+        throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::FAILED_TO_CREATE_USER, msg);
     }
-
-    return TestAccountCredentials { DefaultLoginEmail.c_str(), DefaultLoginPassword.c_str(), AlternativeLoginEmail.c_str(),
-        AlternativeLoginPassword.c_str(), SuperUserLoginEmail.c_str(), SuperUserLoginPassword.c_str() };
 }
 
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)

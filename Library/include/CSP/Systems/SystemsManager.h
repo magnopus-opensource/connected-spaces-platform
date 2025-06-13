@@ -42,9 +42,9 @@ class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
 class QuotaSystem;
-class OrganizationSystem;
 class SequenceSystem;
 class HotspotSequenceSystem;
+class ConversationSystemInternal;
 
 } // namespace csp::systems
 
@@ -62,15 +62,6 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory
-{
-
-CSP_START_IGNORE
-template <typename T> void Delete(T* Ptr);
-CSP_END_IGNORE
-
-} // namespace csp::memory
-
 namespace csp::systems
 {
 
@@ -81,7 +72,7 @@ class CSP_API SystemsManager
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::CSPFoundation;
-    friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
+    friend class csp::multiplayer::ConversationSpaceComponent;
     /** @endcond */
     CSP_END_IGNORE
 
@@ -148,10 +139,6 @@ public:
     /// @return QuotaSystem : pointer to the Quota system class
     QuotaSystem* GetQuotaSystem();
 
-    /// @brief Retrieves the Organization system.
-    /// @return OrganizationSystem : pointer to the Organization system class
-    OrganizationSystem* GetOrganizationSystem();
-
     /// @brief Retrieves the Sequence system.
     /// @return SequenceSystem : pointer to the Sequence system class
     SequenceSystem* GetSequenceSystem();
@@ -169,6 +156,8 @@ public:
 private:
     SystemsManager();
     ~SystemsManager();
+
+    ConversationSystemInternal* GetConversationSystem();
 
     static void Instantiate();
     static void Destroy();
@@ -198,9 +187,9 @@ private:
     EventTicketingSystem* EventTicketingSystem;
     ECommerceSystem* ECommerceSystem;
     QuotaSystem* QuotaSystem;
-    OrganizationSystem* OrganizationSystem;
     SequenceSystem* SequenceSystem;
     HotspotSequenceSystem* HotspotSequenceSystem;
+    ConversationSystemInternal* ConversationSystem;
 };
 
 } // namespace csp::systems

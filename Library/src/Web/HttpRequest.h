@@ -65,7 +65,7 @@ public:
         csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync = true);
     ~HttpRequest();
 
-    const ERequestVerb GetVerb() const;
+    ERequestVerb GetVerb() const;
     const csp::web::Uri& GetUri() const;
     HttpPayload& GetMutablePayload();
     const HttpPayload& GetPayload() const;
@@ -97,7 +97,7 @@ public:
     uint32_t GetRetryCount() const;
 
     void SetSendDelay(const std::chrono::milliseconds InSendDelay);
-    const std::chrono::milliseconds GetSendDelay();
+    std::chrono::milliseconds GetSendDelay();
 
     void Cancel();
     bool Cancelled();

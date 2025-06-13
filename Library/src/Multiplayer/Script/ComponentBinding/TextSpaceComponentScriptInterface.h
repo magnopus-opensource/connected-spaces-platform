@@ -38,7 +38,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsBackgroundVisible);
     DECLARE_SCRIPT_PROPERTY(uint32_t, Width);
     DECLARE_SCRIPT_PROPERTY(uint32_t, Height);
-    DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, BillboardMode);
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
     DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };

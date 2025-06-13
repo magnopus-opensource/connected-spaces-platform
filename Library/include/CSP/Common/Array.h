@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Memory/DllAllocator.h"
 
 #include <cassert>
 #include <cstring>
@@ -68,20 +67,6 @@ public:
         }
     }
 
-    /// @brief Constructs an array from a buffer.
-    /// @param Buffer const T* : Pointer to the beginning of the buffer
-    /// @param Size size_t : Number of elements in the buffer
-    CSP_NO_EXPORT Array(const T* Buffer, size_t Size)
-        : ArraySize(0)
-        , ObjectArray(nullptr)
-    {
-        if (Buffer != nullptr && Size > 0)
-        {
-            AllocArray(Size);
-            memcpy(ObjectArray, Buffer, Size * sizeof(T));
-        }
-    }
-
     /// @brief Copy constructor.
     /// @param Other const Array<T>& Other
     CSP_NO_EXPORT Array(const Array<T>& Other)
@@ -129,6 +114,15 @@ public:
     /// @brief Returns a const pointer to the start of the array.
     /// @return const T*
     CSP_NO_EXPORT const T* Data() const { return ObjectArray; }
+
+    // Iterators
+    CSP_NO_EXPORT T* begin() { return Data(); }
+    CSP_NO_EXPORT const T* begin() const { return Data(); }
+    CSP_NO_EXPORT const T* cbegin() const { return Data(); }
+
+    CSP_NO_EXPORT T* end() { return Data() + Size(); }
+    CSP_NO_EXPORT const T* end() const { return Data() + Size(); }
+    CSP_NO_EXPORT const T* cend() const { return Data() + Size(); }
 
     /// @brief Copy assignment.
     /// @param Other const Array<T>&
@@ -215,29 +209,7 @@ private:
     {
         if (ObjectArray == nullptr)
         {
-#ifndef CSP_DISABLE_OVERFLOW_CHECKING
-#ifdef _MSC_VER // MSVC
-            auto HighBits = __umulh(sizeof(T), Size);
-#else // GCC or Clang
-            auto MultiplyResult = static_cast<__uint128_t>(sizeof(T)) * static_cast<__uint128_t>(Size);
-            auto HighBits = static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
-#endif
-
-            if (HighBits > 0)
-            {
-                throw std::overflow_error("Size");
-            }
-#endif
-
-            auto BufferSize = sizeof(T) * Size;
-            ObjectArray = (T*)csp::memory::DllAlloc(BufferSize);
-
-            for (size_t i = 0; i < Size; ++i)
-            {
-                T* ObjectPtr = &ObjectArray[i];
-                new (ObjectPtr) T;
-            }
-
+            ObjectArray = new T[Size];
             ArraySize = Size;
         }
     }
@@ -245,17 +217,8 @@ private:
     /// @brief Frees memory for the array.
     void FreeArray()
     {
-        if (ObjectArray != nullptr)
-        {
-            for (size_t i = 0; i < ArraySize; ++i)
-            {
-                T* ObjectPtr = &ObjectArray[i];
-                ObjectPtr->~T();
-            }
-
-            csp::memory::DllFree(ObjectArray);
-            ObjectArray = nullptr;
-        }
+        delete[] ObjectArray;
+        ObjectArray = nullptr;
     }
 
     size_t ArraySize;

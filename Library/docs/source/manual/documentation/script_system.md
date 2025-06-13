@@ -2,7 +2,9 @@
 
 The entity-component-based nature of the CSP multiplayer architecture comprises individual components, such as Images, Videos and Buttons, which can be combined together to create unique pieces of content.
 
-The Connected Spaces Platform's [Script Component](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Library/include/CSP/Multiplayer/Components/ScriptSpaceComponent.h) and [Script System](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Library/include/CSP/Systems/Script/ScriptSystem.h) are what enables content creators to author complex and engaging interactions with this content via CSP client applications.
+```eval_rst
+The Connected Spaces Platform's :class:`csp::multiplayer::ScriptSpaceComponent` and :class:`csp::systems::ScriptSystem` are what enables content creators to author complex and engaging interactions with this content via CSP client applications.
+```
 
 The Script Component is the glue that holds these components together. Using the Script Component, creators can define the causal relationships between different components and triggering events.
 
@@ -13,12 +15,14 @@ The JavaScript code is compiled to bytecode and interpreted by [QuickJS Javascri
 
 To access the script on a CSP Entity we use the following:
 
-`EntityScript* Script = Entity->GetScript();`
+`EntityScript& Script = Entity.GetScript();`
 
 There are several useful things you can do with `EntityScript`, including updating the script, invoking it directly, checking for errors, and getting error messages back. For more information on the API, head over [here](https://builds.magnoboard.com/connected-spaces-platform/api/classcsp_1_1multiplayer_1_1_entity_script.html#class-documentation).
 
 ## Actions
-Scripts can invoke events, known as actions, to which client applications can respond directly to. At the client level, each component is responsible for defining and managing its own component actions using the `RegisterActionHandler` and `UnregisterActionHandler` functions on [ComponentBase](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Library/include/CSP/Multiplayer/ComponentBase.h).
+```eval_rst
+Scripts can invoke events, known as actions, to which client applications can respond directly to. At the client level, each component is responsible for defining and managing its own component actions using the `RegisterActionHandler` and `UnregisterActionHandler` functions on :class:`csp::multiplayer::ComponentBase`.
+```
 
 So if a script invoked an action like this...
 ```js

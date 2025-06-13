@@ -15,6 +15,7 @@
  */
 
 #include "Multiplayer/EventSerialisation.h"
+#include "MCS/MCSTypes.h"
 
 #include "Common/Encode.h"
 #include "Debug/Logging.h"
@@ -62,16 +63,6 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
     return SequenceUpdateType;
 }
 
-std::string RemoveIdPrefix(const std::string& Id)
-{
-    if (Id.size() > 5)
-    {
-        return Id.substr(5);
-    }
-
-    return Id;
-}
-
 csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
@@ -85,7 +76,7 @@ csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::Str
     const std::string SequenceKeyString(SequenceKey.c_str());
     // Match item after second ':' to get our parent Id.
     // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
-    const std::regex Expression("^(?:[^:]*\:){" + std::to_string(Index) + "}([^:]*)");
+    const std::regex Expression(R"(^(?:[^:]*\:){)" + std::to_string(Index) + R"(}([^:]*))");
     std::smatch Match;
     const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 
@@ -160,11 +151,11 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
         return ReplicatedValue;
     }
 
-    if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_BOOL)
+    if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_BOOL))
     {
         ReplicatedValue = Component.as_bool();
     }
-    else if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_INT64)
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_INT64))
     {
         if (Component.is_integer())
         {
@@ -175,15 +166,15 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
             ReplicatedValue = (int64_t)Component.as_uinteger();
         }
     }
-    else if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_DOUBLE)
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_DOUBLE))
     {
         ReplicatedValue = (float)Component.as_double();
     }
-    else if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING)
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING))
     {
         ReplicatedValue = Component.as_string().c_str();
     }
-    else if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::FLOAT_ARRAY)
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::FLOAT_ARRAY))
     {
         auto& Array = Component.as_array();
 
@@ -201,7 +192,7 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
             CSP_LOG_ERROR_MSG("Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
         }
     }
-    else if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_UINT16)
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_UINT16))
     {
         ReplicatedValue = (int64_t)Component.as_uinteger();
     }
@@ -238,8 +229,13 @@ void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
 {
     EventDeserialiser::Parse(EventValues);
 
-    EventParams.MessageType = static_cast<ConversationMessageType>(EventData[0].GetInt());
-    EventParams.MessageValue = EventData[1].GetString();
+    EventParams.MessageType = static_cast<ConversationEventType>(EventData[0].GetInt());
+    EventParams.MessageInfo.ConversationId = EventData[1].GetString();
+    EventParams.MessageInfo.CreatedTimestamp = EventData[2].GetString();
+    EventParams.MessageInfo.EditedTimestamp = EventData[3].GetString();
+    EventParams.MessageInfo.UserId = EventData[4].GetString();
+    EventParams.MessageInfo.Message = EventData[5].GetString();
+    EventParams.MessageInfo.MessageId = EventData[6].GetString();
 }
 
 void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -273,7 +269,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
         {
             // Group Roles - needs specialised handling as the payload here contains an array of strings, which is atypical for events
             const std::vector<signalr::value>& RolesComponent(Components.at(GROUP_ROLES_ID).as_array());
-            if (RolesComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
+            if (RolesComponent[0].as_uinteger() == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING_ARRAY))
             {
                 const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
 
