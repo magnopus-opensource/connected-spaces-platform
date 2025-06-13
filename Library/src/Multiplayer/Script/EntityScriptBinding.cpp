@@ -16,13 +16,13 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common//Systems/Log/LogSystem.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -230,7 +230,7 @@ private:
     SpaceEntitySystem* EntitySystem;
 };
 
-void EntityScriptLog(qjs::rest<std::string> Args)
+void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSystem)
 {
     std::stringstream Str;
 
@@ -239,17 +239,18 @@ void EntityScriptLog(qjs::rest<std::string> Args)
         Str << Arg << " ";
     }
 
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "%s", Str.str().c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
-EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem)
+EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem)
     : EntitySystem(InEntitySystem)
+    , LogSystem(LogSystem)
 {
 }
 
-EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem)
+EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem)
 {
-    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
     csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
     ScriptSystem->RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
@@ -536,7 +537,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
     qjs::Context* Context = (qjs::Context*)ScriptSystem->GetContext(ContextId);
     qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
 
-    Module->function<&EntityScriptLog>("Log");
+    Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
 
     Module->class_<EntityScriptInterface>("Entity")
         .constructor<>()
