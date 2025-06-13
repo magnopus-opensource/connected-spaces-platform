@@ -138,7 +138,7 @@ void SystemsManager::CreateSystems()
 
     ScriptSystem->Initialise();
 
-    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(LogSystem);
+    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem);
     EventBus = MultiplayerConnection->GetEventBusPtr();
 
     AnalyticsSystem = new csp::systems::AnalyticsSystem();

@@ -343,7 +343,7 @@ public:
 
     /// @brief SpaceEntitySystem constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
-    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -366,11 +366,12 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
-    SpaceEntitySystem(); // needed for the wrapper generator
+    SpaceEntitySystem(csp::common::LogSystem& LogSystem); // needed for the wrapper generator
 
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
-    csp::common::LogSystem* LogSystem;
+
+    csp::common::LogSystem& LogSystem;
 
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;

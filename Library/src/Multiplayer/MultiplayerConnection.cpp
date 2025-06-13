@@ -154,7 +154,7 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 }
 
 /// @brief MultiplayerConnection
-MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem* LogSystem)
+MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     : Connection(nullptr)
     , WebSocketClient(nullptr)
     , NetworkEventManager(new NetworkEventManagerImpl(this))
@@ -188,6 +188,7 @@ MultiplayerConnection::~MultiplayerConnection()
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
+    : LogSystem(InBoundConnection.LogSystem)
 {
     Connection = InBoundConnection.Connection;
     WebSocketClient = InBoundConnection.WebSocketClient;
@@ -198,7 +199,6 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
     EventBusPtr = InBoundConnection.EventBusPtr;
     Connected = (InBoundConnection.Connected) ? true : false;
-    LogSystem = InBoundConnection.LogSystem;
 }
 
 namespace
