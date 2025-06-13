@@ -31,14 +31,14 @@ namespace csp::systems
 
 const char* ENGLISH_LANGUAGE_CODE = "EN";
 
-PointOfInterestSystem::PointOfInterestSystem()
-    : SystemBase(nullptr, nullptr)
+PointOfInterestSystem::PointOfInterestSystem(csp::common::LogSystem& LogSystem)
+    : SystemBase(nullptr, nullptr, LogSystem)
     , POIApiPtr(nullptr)
 {
 }
 
-PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, LogSystem)
 {
     POIApiPtr = new chs::PointOfInterestApi(InWebClient);
 }
