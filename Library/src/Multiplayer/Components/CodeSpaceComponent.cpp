@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
 
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -26,7 +27,7 @@ CodeSpaceComponent::CodeSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Code, Parent)
 {
     Properties[static_cast<uint32_t>(CodeComponentPropertyKeys::ScriptAssetPath)] = "";
-
+    SetScriptInterface(new CodeSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& CodeSpaceComponent::GetScriptAssetPath() const
@@ -34,7 +35,7 @@ const csp::common::String& CodeSpaceComponent::GetScriptAssetPath() const
     return GetStringProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::ScriptAssetPath));
 }
 
-void CodeSpaceComponent::SetScriptAssetPath(const csp::common::String& Value)
+void CodeSpaceComponent::SetScriptAssetPath(const csp::common::String Value)
 {
     SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::ScriptAssetPath), Value);
 }

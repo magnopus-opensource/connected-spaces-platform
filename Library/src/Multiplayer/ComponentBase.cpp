@@ -211,7 +211,6 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
     if (!Properties.HasKey(Key) || Properties[Key] != Value)
     {
         Properties[Key] = Value;
-
         Parent->AddDirtyComponent(this);
         Parent->OnPropertyChanged(this, Key);
     }

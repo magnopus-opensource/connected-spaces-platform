@@ -7,7 +7,175 @@
 CSP_NO_EXPORT
 namespace csp::systems
 {
-    // preact signals script code
-    // This code is a minified version of the Preact Signals library, which is used for state management in Preact applications.
-    CSP_NO_EXPORT csp::common::String SignalsScriptCode = "const t=Symbol.for('preact-signals'),e=32;function o(){if(_>1)return void _--;let t,e=!1;for(;void 0!==r;){let o=r;for(r=void 0,c++;void 0!==o;){const s=o._nextBatchedEffect;if(o._nextBatchedEffect=void 0,o._flags&=-3,!(8&o._flags)&&a(o))try{o._callback()}catch(o){e||(t=o,e=!0)}o=s}}if(c=0,_--,e)throw t}function s(t){if(_>0)return t();_++;try{return t()}finally{o()}}let i,r;function n(t){const e=i;i=void 0;try{return t()}finally{i=e}}let _=0,c=0,u=0;function f(t){if(void 0===i)return;let o=t._node;return void 0===o||o._target!==i?(o={_version:0,_source:t,_prevSource:i._sources,_nextSource:void 0,_target:i,_prevTarget:void 0,_nextTarget:void 0,_rollbackNode:o},void 0!==i._sources&&(i._sources._nextSource=o),i._sources=o,t._node=o,i._flags&e&&t._subscribe(o),o):-1===o._version?(o._version=0,void 0!==o._nextSource&&(o._nextSource._prevSource=o._prevSource,void 0!==o._prevSource&&(o._prevSource._nextSource=o._nextSource),o._prevSource=i._sources,o._nextSource=void 0,i._sources._nextSource=o,i._sources=o),o):void 0}function h(t,e){this._value=t,this._version=0,this._node=void 0,this._targets=void 0,this._watched=e?.watched,this._unwatched=e?.unwatched}h.prototype.brand=t,h.prototype._refresh=function(){return!0},h.prototype._subscribe=function(t){const e=this._targets;e!==t&&void 0===t._prevTarget&&(t._nextTarget=e,this._targets=t,void 0!==e?e._prevTarget=t:n((()=>{this._watched?.call(this)})))},h.prototype._unsubscribe=function(t){if(void 0!==this._targets){const e=t._prevTarget,o=t._nextTarget;void 0!==e&&(e._nextTarget=o,t._prevTarget=void 0),void 0!==o&&(o._prevTarget=e,t._nextTarget=void 0),t===this._targets&&(this._targets=o,void 0===o&&n((()=>{this._unwatched?.call(this)})))}},h.prototype.subscribe=function(t){return S((()=>{const e=this.value,o=i;i=void 0;try{t(e)}finally{i=o}}))},h.prototype.valueOf=function(){return this.value},h.prototype.toString=function(){return this.value+''},h.prototype.toJSON=function(){return this.value},h.prototype.peek=function(){const t=i;i=void 0;try{return this.value}finally{i=t}},Object.defineProperty(h.prototype,'value',{get(){const t=f(this);return void 0!==t&&(t._version=this._version),this._value},set(t){if(t!==this._value){if(c>100)throw new Error('Cycle detected');this._value=t,this._version++,u++,_++;try{for(let t=this._targets;void 0!==t;t=t._nextTarget)t._target._notify()}finally{o()}}}});export function signal(t,e){return new h(t,e)}function a(t){for(let e=t._sources;void 0!==e;e=e._nextSource)if(e._source._version!==e._version||!e._source._refresh()||e._source._version!==e._version)return!0;return!1}function l(t){for(let e=t._sources;void 0!==e;e=e._nextSource){const o=e._source._node;if(void 0!==o&&(e._rollbackNode=o),e._source._node=e,e._version=-1,void 0===e._nextSource){t._sources=e;break}}}function v(t){let e,o=t._sources;for(;void 0!==o;){const t=o._prevSource;-1===o._version?(o._source._unsubscribe(o),void 0!==t&&(t._nextSource=o._nextSource),void 0!==o._nextSource&&(o._nextSource._prevSource=t)):e=o,o._source._node=o._rollbackNode,void 0!==o._rollbackNode&&(o._rollbackNode=void 0),o=t}t._sources=e}function d(t,e){h.call(this,void 0),this._fn=t,this._sources=void 0,this._globalVersion=u-1,this._flags=4,this._watched=e?.watched,this._unwatched=e?.unwatched}function p(t,e){return new d(t,e)}function g(t){const e=t._cleanup;if(t._cleanup=void 0,'function'==typeof e){_++;const s=i;i=void 0;try{e()}catch(e){throw t._flags&=-2,t._flags|=8,y(t),e}finally{i=s,o()}}}function y(t){for(let e=t._sources;void 0!==e;e=e._nextSource)e._source._unsubscribe(e);t._fn=void 0,t._sources=void 0,g(t)}function b(t){if(i!==this)throw new Error('Out-of-order effect');v(this),i=t,this._flags&=-2,8&this._flags&&y(this),o()}function x(t){this._fn=t,this._cleanup=void 0,this._sources=void 0,this._nextBatchedEffect=void 0,this._flags=e}function S(t){const e=new x(t);try{e._callback()}catch(t){throw e._dispose(),t}return e._dispose.bind(e)}d.prototype=new h,d.prototype._refresh=function(){if(this._flags&=-3,1&this._flags)return!1;if((36&this._flags)===e)return!0;if(this._flags&=-5,this._globalVersion===u)return!0;if(this._globalVersion=u,this._flags|=1,this._version>0&&!a(this))return this._flags&=-2,!0;const t=i;try{l(this),i=this;const t=this._fn();(16&this._flags||this._value!==t||0===this._version)&&(this._value=t,this._flags&=-17,this._version++)}catch(t){this._value=t,this._flags|=16,this._version++}return i=t,v(this),this._flags&=-2,!0},d.prototype._subscribe=function(t){if(void 0===this._targets){this._flags|=36;for(let t=this._sources;void 0!==t;t=t._nextSource)t._source._subscribe(t)}h.prototype._subscribe.call(this,t)},d.prototype._unsubscribe=function(t){if(void 0!==this._targets&&(h.prototype._unsubscribe.call(this,t),void 0===this._targets)){this._flags&=-33;for(let t=this._sources;void 0!==t;t=t._nextSource)t._source._unsubscribe(t)}},d.prototype._notify=function(){if(!(2&this._flags)){this._flags|=6;for(let t=this._targets;void 0!==t;t=t._nextTarget)t._target._notify()}},Object.defineProperty(d.prototype,'value',{get(){if(1&this._flags)throw new Error('Cycle detected');const t=f(this);if(this._refresh(),void 0!==t&&(t._version=this._version),16&this._flags)throw this._value;return this._value}}),x.prototype._callback=function(){const t=this._start();try{if(8&this._flags)return;if(void 0===this._fn)return;const t=this._fn();'function'==typeof t&&(this._cleanup=t)}finally{t()}},x.prototype._start=function(){if(1&this._flags)throw new Error('Cycle detected');this._flags|=1,this._flags&=-9,g(this),l(this),_++;const t=i;return i=this,b.bind(this,t)},x.prototype._notify=function(){2&this._flags||(this._flags|=2,this._nextBatchedEffect=r,r=this)},x.prototype._dispose=function(){this._flags|=8,1&this._flags||y(this)};export{p as computed,S as effect,s as batch,n as untracked,h as Signal}";
+// preact signals script code
+// This code is a minified version of the Preact Signals library, which is used for state management in Preact applications.
+CSP_NO_EXPORT csp::common::String SignalsScriptCode
+    = "const t=Symbol.for('preact-signals'),e=32;function o(){if(_>1)return void _--;let t,e=!1;for(;void 0!==r;){let o=r;for(r=void 0,c++;void "
+      "0!==o;){const s=o._nextBatchedEffect;if(o._nextBatchedEffect=void "
+      "0,o._flags&=-3,!(8&o._flags)&&a(o))try{o._callback()}catch(o){e||(t=o,e=!0)}o=s}}if(c=0,_--,e)throw t}function s(t){if(_>0)return "
+      "t();_++;try{return t()}finally{o()}}let i,r;function n(t){const e=i;i=void 0;try{return t()}finally{i=e}}let _=0,c=0,u=0;function "
+      "f(t){if(void 0===i)return;let o=t._node;return void 0===o||o._target!==i?(o={_version:0,_source:t,_prevSource:i._sources,_nextSource:void "
+      "0,_target:i,_prevTarget:void 0,_nextTarget:void 0,_rollbackNode:o},void "
+      "0!==i._sources&&(i._sources._nextSource=o),i._sources=o,t._node=o,i._flags&e&&t._subscribe(o),o):-1===o._version?(o._version=0,void "
+      "0!==o._nextSource&&(o._nextSource._prevSource=o._prevSource,void "
+      "0!==o._prevSource&&(o._prevSource._nextSource=o._nextSource),o._prevSource=i._sources,o._nextSource=void "
+      "0,i._sources._nextSource=o,i._sources=o),o):void 0}function h(t,e){this._value=t,this._version=0,this._node=void 0,this._targets=void "
+      "0,this._watched=e?.watched,this._unwatched=e?.unwatched}h.prototype.brand=t,h.prototype._refresh=function(){return!0},h.prototype._subscribe="
+      "function(t){const e=this._targets;e!==t&&void 0===t._prevTarget&&(t._nextTarget=e,this._targets=t,void "
+      "0!==e?e._prevTarget=t:n((()=>{this._watched?.call(this)})))},h.prototype._unsubscribe=function(t){if(void 0!==this._targets){const "
+      "e=t._prevTarget,o=t._nextTarget;void 0!==e&&(e._nextTarget=o,t._prevTarget=void 0),void 0!==o&&(o._prevTarget=e,t._nextTarget=void "
+      "0),t===this._targets&&(this._targets=o,void 0===o&&n((()=>{this._unwatched?.call(this)})))}},h.prototype.subscribe=function(t){return "
+      "S((()=>{const e=this.value,o=i;i=void 0;try{t(e)}finally{i=o}}))},h.prototype.valueOf=function(){return "
+      "this.value},h.prototype.toString=function(){return this.value+''},h.prototype.toJSON=function(){return "
+      "this.value},h.prototype.peek=function(){const t=i;i=void 0;try{return "
+      "this.value}finally{i=t}},Object.defineProperty(h.prototype,'value',{get(){const t=f(this);return void "
+      "0!==t&&(t._version=this._version),this._value},set(t){if(t!==this._value){if(c>100)throw new Error('Cycle "
+      "detected');this._value=t,this._version++,u++,_++;try{for(let t=this._targets;void "
+      "0!==t;t=t._nextTarget)t._target._notify()}finally{o()}}}});export function signal(t,e){return new h(t,e)}function a(t){for(let "
+      "e=t._sources;void "
+      "0!==e;e=e._nextSource)if(e._source._version!==e._version||!e._source._refresh()||e._source._version!==e._version)return!0;return!1}function "
+      "l(t){for(let e=t._sources;void 0!==e;e=e._nextSource){const o=e._source._node;if(void "
+      "0!==o&&(e._rollbackNode=o),e._source._node=e,e._version=-1,void 0===e._nextSource){t._sources=e;break}}}function v(t){let "
+      "e,o=t._sources;for(;void 0!==o;){const t=o._prevSource;-1===o._version?(o._source._unsubscribe(o),void "
+      "0!==t&&(t._nextSource=o._nextSource),void 0!==o._nextSource&&(o._nextSource._prevSource=t)):e=o,o._source._node=o._rollbackNode,void "
+      "0!==o._rollbackNode&&(o._rollbackNode=void 0),o=t}t._sources=e}function d(t,e){h.call(this,void 0),this._fn=t,this._sources=void "
+      "0,this._globalVersion=u-1,this._flags=4,this._watched=e?.watched,this._unwatched=e?.unwatched}function p(t,e){return new d(t,e)}function "
+      "g(t){const e=t._cleanup;if(t._cleanup=void 0,'function'==typeof e){_++;const s=i;i=void 0;try{e()}catch(e){throw "
+      "t._flags&=-2,t._flags|=8,y(t),e}finally{i=s,o()}}}function y(t){for(let e=t._sources;void "
+      "0!==e;e=e._nextSource)e._source._unsubscribe(e);t._fn=void 0,t._sources=void 0,g(t)}function b(t){if(i!==this)throw new Error('Out-of-order "
+      "effect');v(this),i=t,this._flags&=-2,8&this._flags&&y(this),o()}function x(t){this._fn=t,this._cleanup=void 0,this._sources=void "
+      "0,this._nextBatchedEffect=void 0,this._flags=e}function S(t){const e=new x(t);try{e._callback()}catch(t){throw e._dispose(),t}return "
+      "e._dispose.bind(e)}d.prototype=new "
+      "h,d.prototype._refresh=function(){if(this._flags&=-3,1&this._flags)return!1;if((36&this._flags)===e)return!0;if(this._flags&=-5,this._"
+      "globalVersion===u)return!0;if(this._globalVersion=u,this._flags|=1,this._version>0&&!a(this))return this._flags&=-2,!0;const "
+      "t=i;try{l(this),i=this;const "
+      "t=this._fn();(16&this._flags||this._value!==t||0===this._version)&&(this._value=t,this._flags&=-17,this._version++)}catch(t){this._value=t,"
+      "this._flags|=16,this._version++}return i=t,v(this),this._flags&=-2,!0},d.prototype._subscribe=function(t){if(void "
+      "0===this._targets){this._flags|=36;for(let t=this._sources;void "
+      "0!==t;t=t._nextSource)t._source._subscribe(t)}h.prototype._subscribe.call(this,t)},d.prototype._unsubscribe=function(t){if(void "
+      "0!==this._targets&&(h.prototype._unsubscribe.call(this,t),void 0===this._targets)){this._flags&=-33;for(let t=this._sources;void "
+      "0!==t;t=t._nextSource)t._source._unsubscribe(t)}},d.prototype._notify=function(){if(!(2&this._flags)){this._flags|=6;for(let "
+      "t=this._targets;void 0!==t;t=t._nextTarget)t._target._notify()}},Object.defineProperty(d.prototype,'value',{get(){if(1&this._flags)throw new "
+      "Error('Cycle detected');const t=f(this);if(this._refresh(),void 0!==t&&(t._version=this._version),16&this._flags)throw this._value;return "
+      "this._value}}),x.prototype._callback=function(){const t=this._start();try{if(8&this._flags)return;if(void 0===this._fn)return;const "
+      "t=this._fn();'function'==typeof t&&(this._cleanup=t)}finally{t()}},x.prototype._start=function(){if(1&this._flags)throw new Error('Cycle "
+      "detected');this._flags|=1,this._flags&=-9,g(this),l(this),_++;const t=i;return "
+      "i=this,b.bind(this,t)},x.prototype._notify=function(){2&this._flags||(this._flags|=2,this._nextBatchedEffect=r,r=this)},x.prototype._dispose="
+      "function(){this._flags|=8,1&this._flags||y(this)};export{p as computed,S as effect,s as batch,n as untracked,h as Signal}";
+
+CSP_NO_EXPORT csp::common::String RegistryScriptCode = R"(
+     import { signal } from "@preact/signals-core";
+    import { Log } from 'csp';
+
+    const createSignalsFromAttributes = (uuid, attributes, signalsCache) => {
+        /*
+            const attributes = {
+                aString: { type:'string', default: 'hello world', description: 'a string attribute'},
+                aNumber: { type:'number', default: 42, min:0, max:100, description: 'number attribute'},
+                aBoolean: { type:'boolean', default: true, description: 'boolean attribute'},
+                aColor: { type:'color', default: [1, 0.5, 0], description: 'color attribute'},
+                aVector: { type:'vector', default:[1, 2, 3], description: 'vector attribute'},
+                aEntity: { type:'entity', default:undefined, description: 'A separate entity'},
+            }
+            */
+        const signals = {};
+        // if the type is an entity, then create a shared signal
+        // otherwise the signal is owned by the code component and indexed by its uuid
+        // entities are index by their id
+        for (const [key, attribute] of Object.entries(attributes)) {
+            if (attribute.type === "entity") {
+                const entity = TheEntitySystem.getEntityById(attribute.default);
+                if (!entity) {
+                    Log(
+                    `Entity with ID ${attribute.default} not found for attribute ${key}.`
+                    );
+                    continue;
+                }
+                const entityId = entity.id;
+                const entityKey = `entity_${entityId}`;
+                // if the entity signal already exists, reuse it
+                if (signalsCache.has(entityKey)) {
+                    signals[key] = signalsCache.get(entityKey);
+                } else {
+                    signals[key] = signal(entity);
+                    signalsCache.set(entityKey, signals[key]);
+                }
+            } else {
+                signals[key] = signal(attribute.default);
+                // create a new signal for the attribute
+                signalsCache.set(`${uuid}_${key}`, signals[key]);
+            }
+        }
+        return signals;
+    };
+
+    export const createScriptRegistry = () => {
+        const timeDelta = signal(0);
+        const timeStamp = signal(0);
+        const scriptRegistry = new Map();
+        const addCodeComponent = async (entityId) => {
+            removeCodeComponent(entityId);
+            const entity = TheEntitySystem.getEntityById(entityId);
+            const codeComponent = entity.getCodeComponents()[0];
+            if (!codeComponent) {
+                Log(`Code component with ID ${entityId} not found.`);
+                return;
+            }
+            const path = codeComponent.scriptAssetPath;
+            if (!path) {
+                Log(`Code component ${codeComponent.name} has no script path.`);
+                return;
+            }
+            Log(`Adding code component: ${codeComponent.name}`);
+            const scriptModule = await import(codeComponent.scriptAssetPath);
+            const createScript = scriptModule.script ?? (() => () => {});
+            // create a new copy of the script so that it can be reused in other components
+            const script = createScript();
+            if (typeof script !== "function") {
+                Log(
+                    `Script at ${path} does not export a valid function. Ensure the script property is a function that returns your script function`
+                );
+                return;
+            }
+            const attributes = createSignalsFromAttributes(
+                scriptModule.attributes ?? {}
+            );
+            attributes.timeDelta = timeDelta;
+            // store a copy of the code component script, and execute it from here
+            scriptRegistry.set(codeComponent.uuid, {
+                scriptAssetPath: path,
+                metadata: scriptModule.metadata ?? {
+                    name: codeComponent.name,
+                    path,
+                },
+                attributes,
+                script,
+            });
+            // one time execution of the script, this will allow any signals to bind to their effects
+            // and initiate reactivity
+            script({ attributes });
+        };
+
+        const removeCodeComponent = (entityId) => {
+            const codeComponent = TheEntitySystem.getEntityById(entityId);
+            if (codeComponent) {
+                scriptRegistry.delete(codeComponent.uuid);
+            }
+            Log(`Removing code component: ${codeComponent.name}`);
+        };
+
+        const tick = (timeStamp) => {
+            if (timeStamp.peek() === 0) {
+                // first tick, set the timeDelta to 0
+                timeDelta.value = 0;
+                return;
+            }
+            timeDelta.value = timeStamp;
+        };
+
+        return { addCodeComponent, removeCodeComponent, tick };
+    };
+
+    )";
+
 }

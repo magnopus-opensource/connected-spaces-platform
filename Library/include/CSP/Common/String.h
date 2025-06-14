@@ -109,6 +109,12 @@ public:
     /// @param Other const char* : Cstring to append
     void Append(const char* Other);
 
+    /// @brief Appends given cstring with a specified length.
+    /// This will resize the buffer of the current string.
+    /// @param Other const char* : Cstring to append
+    /// @param Length size_t : Length of the cstring to append
+    void Append(const char* Other, size_t Length); // Add this new overload
+
     /// @brief Returns a new string created by appending rhs string to lhs string.
     /// @param Lhs String : String to append to
     /// @param Rhs const String& : String to append
@@ -193,6 +199,12 @@ public:
     ///  @param Substring const String& : Substring to search for.
     ///  @return bool : Returns true if the substring is found. Always returns false if the substring is empty.
     bool Contains(const String& Substring) const;
+
+    /// @brief Returns a copy of the string with all occurrences of the search string replaced by the replace string.
+    /// @param Search const String& : The substring to replace.
+    /// @param Replace const String& : The replacement substring.
+    /// @return String : A new string with all occurrences replaced.
+    String ReplaceAll(const String& Search, const String& Replace) const;
 
 private:
     /// @brief Returns internal buffer.

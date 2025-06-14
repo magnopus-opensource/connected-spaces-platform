@@ -31,6 +31,9 @@ CodeSpaceComponentScriptInterface::CodeSpaceComponentScriptInterface(CodeSpaceCo
 {
 }
 
+
+DEFINE_SCRIPT_PROPERTY_STRING(CodeSpaceComponent, ScriptAssetPath);
+
 uint32_t CodeSpaceComponentScriptInterface::GetAttributeSubscriptionKey(const std::string& Key)
 {
     return static_cast<CodeSpaceComponent*>(Component)->GetAttributeSubscriptionKey(Key.c_str());

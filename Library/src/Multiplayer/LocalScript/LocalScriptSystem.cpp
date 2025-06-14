@@ -15,24 +15,25 @@
  */
 #include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Multiplayer/LocalScript/signals.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
-#include "Multiplayer/Script/EntityScriptBinding.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
-#include "quickjspp.hpp"
-#include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Multiplayer/LocalScript/signals.h"
-#include <functional>
-#include <string>
+#include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "Debug/Logging.h"
+#include "Multiplayer/Script/EntityScriptBinding.h"
+#include "quickjspp.hpp"
 #include <algorithm>
 #include <async++.h>
 #include <chrono>
 #include <exception>
+#include <functional>
 #include <future>
 #include <limits>
+#include <string>
 #include <thread>
+
 
 using namespace std;
 
@@ -48,7 +49,7 @@ LocalScriptSystem::LocalScriptSystem(csp::multiplayer::SpaceEntitySystem* InEnti
     ScriptBinding = nullptr;
 }
 
-LocalScriptSystem::~LocalScriptSystem() 
+LocalScriptSystem::~LocalScriptSystem()
 {
     delete Context;
     delete Runtime;
@@ -58,65 +59,98 @@ LocalScriptSystem::~LocalScriptSystem()
 void LocalScriptSystem::Initialize()
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Log, "LocalScriptSystem cleanup");
-    try {
-        if (ScriptBinding != nullptr) {
+    try
+    {
+        if (ScriptBinding != nullptr)
+        {
             delete ScriptBinding;
             ScriptBinding = nullptr;
         }
-        if (Context != nullptr) {
+        if (Context != nullptr)
+        {
             delete Context;
             Context = nullptr;
         }
-        if (Runtime != nullptr) {
+        if (Runtime != nullptr)
+        {
             delete Runtime;
             Runtime = nullptr;
         }
-        Runtime = new qjs::Runtime(); 
+        Runtime = new qjs::Runtime();
         Context = new qjs::Context(*Runtime);
         ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
+        // Set the custom module loader on the context
+        Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
+        {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loading module: %s", filename.data());
+            csp::common::String Url = csp::common::String(filename.data(), filename.length());
+            if (LoadedScripts.HasKey(Url.c_str()))
+            {
+                const auto& source_code = LoadedScripts[Url];
+                return qjs::Context::ModuleData { Url.c_str(), source_code.c_str(), std::nullopt };
+            }
+            if (Url == "@preact/signals-core")
+            {
+                // Return the CSP signals module
+                return qjs::Context::ModuleData { Url.c_str(), csp::systems::SignalsScriptCode.c_str(), std::nullopt };
+            }
+            // Return empty module if not found
+            return qjs::Context::ModuleData { Url.c_str(), "", std::nullopt };
+        };
+
         // Built in library
         qjs::Context::Module& CSP_Module = Context->addModule("csp");
         Context->eval(csp::systems::SignalsScriptCode.c_str(), "@preact/signals-core", JS_EVAL_TYPE_MODULE);
+        // Context->eval(csp::systems::RegistryScriptCode.c_str(), "@csp/registry", JS_EVAL_TYPE_MODULE);
+        // Context->eval(csp::systems::ScriptRef.c_str(), "@csp/script-registry", JS_EVAL_TYPE_MODULE);
+
         // Bind the existing script functions to the context
         ScriptBinding->BindLocalScriptRoot(Context, &CSP_Module);
-
-        // Set the custom module loader on the context
-        Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
-            {
-                csp::common::String Url = csp::common::String(filename.data(), filename.length());
-                if (LoadedScripts.HasKey(Url.c_str()))
-                {
-                    const auto& source_code = LoadedScripts[Url];
-                    return qjs::Context::ModuleData{Url.c_str(), source_code.c_str(), std::nullopt};
-                }
-                if (Url == "@preact/signals-core") {
-                    // Return the CSP signals module
-                    return qjs::Context::ModuleData{ Url.c_str(), csp::systems::SignalsScriptCode.c_str(), std::nullopt };
-                }
-                // Return empty module if not found
-                return qjs::Context::ModuleData{ Url.c_str(), "", std::nullopt};
-            };
-
-    } catch (qjs::exception& e) { // Catch by reference
+    }
+    catch (qjs::exception& e)
+    { // Catch by reference
         CSP_LOG_ERROR_MSG("QuickJS exception");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
-    } catch (...) {
+    }
+    catch (...)
+    {
         CSP_LOG_ERROR_MSG("Unknown C++ exception caught.");
     }
 }
 
-void LocalScriptSystem::TickAnimationFrame(int32_t timestamp) {
-    if (Context != nullptr) {
+void LocalScriptSystem::ParseAttributes(csp::multiplayer::CodeSpaceComponent* CodeComponent)
+{
+
+    if (LoadedScripts.HasKey(CodeComponent->GetScriptAssetPath().c_str()))
+    {
+        const auto& source_code = LoadedScripts[CodeComponent->GetScriptAssetPath().c_str()];
+        (void)source_code;
+    }
+}
+
+void LocalScriptSystem::TickAnimationFrame(int32_t timestamp)
+{
+    if (Context != nullptr)
+    {
         std::stringstream ss;
-        ss <<   "scriptRegistry.tick(" << timestamp << ");\n";
-        try {
-            Context->eval(ss.str(),"<eval>", JS_EVAL_TYPE_MODULE);
-        } catch (qjs::exception& e) {
+        ss << "scriptRegistry.tick(" << timestamp << ");\n";
+        try
+        {
+            Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+        }
+        catch (qjs::exception& e)
+        {
             CSP_LOG_ERROR_MSG("QuickJS exception while running script");
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception& e)
+        {
             CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
-        } catch (...) {
+        }
+        catch (...)
+        {
             CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
         }
     }
@@ -131,24 +165,103 @@ void LocalScriptSystem::LoadScriptModules()
         CSP_LOG_ERROR_MSG("Failed to get AssetSystem");
         return;
     }
-    
+
     // Create callback for processing loaded scripts
-    auto scriptLoadedCallback = [this](const csp::systems::LocalScriptResult& Result) {
+    auto scriptLoadedCallback = [this](const csp::systems::LocalScriptResult& Result)
+    {
         if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
             // Get all the loaded scripts
             const auto& scripts = Result.GetLocalScripts();
             // Store the scripts in the class instance to ensure they remain in memory
             this->LoadedScripts = scripts;
+            std::stringstream ss;
+            ss << "import { createScriptRegistry } from '/scripts/engine/registry.js';\n";
+            ss << "const scriptRegistry = createScriptRegistry();\n";
+            ss << "globalThis.scriptRegistry = scriptRegistry;\n";
+            Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
         }
-        else 
+        else
         {
             CSP_LOG_ERROR_FORMAT("Failed to load scripts: Result code %d", (int)Result.GetResultCode());
         }
     };
-    
+
     // Load scripts from the asset system
     assetSystem->LoadScripts(this->SpaceId, scriptLoadedCallback);
+}
+
+void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
+{
+    std::stringstream ss;
+    // import every script from loadedScripts, replace the forward slash with underscore
+    for (size_t i = 0; i < this->LoadedScripts.Keys()->Size(); ++i)
+    {
+        csp::common::String Key = this->LoadedScripts.Keys()->operator[](i);
+        // Replace forward slashes with underscores for the import path
+        csp::common::String scriptPath = Key.ReplaceAll("/", "_"); // Remove leading slash for import path
+        scriptPath = scriptPath.ReplaceAll("-", "_");
+        scriptPath = scriptPath.ReplaceAll(" ", "_");
+        scriptPath = scriptPath.substr(0, scriptPath.Length() - 4);
+        ss << "import * as " << scriptPath << " from '" << Key << "';\n";
+    }
+    ss << "\n";
+    for (size_t i = 0; i < this->LoadedScripts.Keys()->Size(); ++i)
+    {
+        csp::common::String Key = this->LoadedScripts.Keys()->operator[](i);
+        // Replace forward slashes with underscores for the import path
+        csp::common::String scriptPath = Key.ReplaceAll("/", "_");
+        scriptPath = scriptPath.ReplaceAll("-", "_");
+        scriptPath = scriptPath.ReplaceAll(" ", "_");
+        scriptPath = scriptPath.substr(0, scriptPath.Length() - 4);
+        ss << "globalThis[\"" << scriptPath << "\"] = " << scriptPath << ";\n";
+    }
+
+    ss << "scriptRegistry.addCodeComponent(" << EntityId << ");\n";
+    std::string out = ss.str();
+    try {
+        Context->eval(out, "<import>", JS_EVAL_TYPE_MODULE);
+    } catch (qjs::exception& e)
+    {
+        CSP_LOG_ERROR_FORMAT("main script:\n%s", out.c_str());
+    }
+    catch (const std::exception& e)
+    {
+        CSP_LOG_ERROR_FORMAT("main script:\n%s", out.c_str());
+    }
+    catch (...)
+    {
+        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
+    }
+}
+
+void LocalScriptSystem::Eval(const csp::common::String& Code, const csp::common::String& Path)
+{
+    (void)Path;
+    // Initialize the script system and local context
+    if (Context == nullptr || Runtime == nullptr)
+    {
+        CSP_LOG_ERROR_MSG("LocalScriptSystem not initialized. Call Initialize() first.");
+        return;
+    }
+
+    // Evaluate the script in the context
+    try
+    {
+        Context->eval(Code.c_str());
+    }
+    catch (qjs::exception& e)
+    {
+        CSP_LOG_ERROR_MSG("QuickJS exception while running script");
+    }
+    catch (const std::exception& e)
+    {
+        CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
+    }
+    catch (...)
+    {
+        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
+    }
 }
 
 void LocalScriptSystem::RunScript(const csp::common::String& Path)
@@ -170,13 +283,20 @@ void LocalScriptSystem::RunScript(const csp::common::String& Path)
     const auto& scriptSource = LoadedScripts[Path];
 
     // Evaluate the script in the context
-    try {
+    try
+    {
         Context->eval(scriptSource.c_str(), Path.c_str(), JS_EVAL_TYPE_MODULE);
-    } catch (qjs::exception& e) {
+    }
+    catch (qjs::exception& e)
+    {
         CSP_LOG_ERROR_MSG("QuickJS exception while running script");
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
-    } catch (...) {
+    }
+    catch (...)
+    {
         CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
     }
 }

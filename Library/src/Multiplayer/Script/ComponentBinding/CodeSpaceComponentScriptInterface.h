@@ -29,6 +29,7 @@ class CodeSpaceComponent;
 class CodeSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
+    DECLARE_SCRIPT_PROPERTY(std::string, ScriptAssetPath);
     CodeSpaceComponentScriptInterface(CodeSpaceComponent* InComponent = nullptr);
     uint32_t GetAttributeSubscriptionKey(const std::string& Key);
     bool HasAttribute(const std::string& Key) const;

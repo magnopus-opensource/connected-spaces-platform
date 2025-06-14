@@ -36,7 +36,7 @@ enum class CodeScopeType
 /// @brief Enumerates the list of properties that can be replicated for a script component.
 enum class CodeComponentPropertyKeys
 {
-    ScriptAssetPath = 1,
+    ScriptAssetPath,
     CodeScopeType,
     Attributes,
     Num
@@ -57,7 +57,7 @@ public:
 
     /// @brief Sets the Path of the Script asset this Script component refers to.
     /// @param Value The Path of the Script asset this Script component refers to.
-    void SetScriptAssetPath(const csp::common::String& Value);
+    void SetScriptAssetPath(const csp::common::String Value);
 
     /// @brief Gets the scope within which this script operates. 
     /// LocalPlayMode: Only executes in playmode, can not write to global state, cannot write to replicated entities

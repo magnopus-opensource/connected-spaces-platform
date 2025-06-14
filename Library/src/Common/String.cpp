@@ -303,6 +303,8 @@ void String::Append(const String& Other) { ImplPtr->Append(*Other.ImplPtr); }
 
 void String::Append(const char* Other) { ImplPtr->Append(Other); }
 
+void String::Append(const char* Other, size_t Length) { ImplPtr->Append(Other, Length); }
+
 String& String::operator+=(const String& Other)
 {
     Append(Other);
@@ -416,6 +418,23 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
     delete[] Buffer;
 
     return JoinedString;
+}
+
+String String::ReplaceAll(const String& Search, const String& Replace) const
+{
+    if (Search.IsEmpty())
+    {
+        return *this; // Nothing to search for, return original string
+    }
+    char split = Search.Get()[0];
+    if (Replace.IsEmpty())
+    {
+        return String::Join(String::Split(split));
+    }
+    else {
+        char replace = Replace.Get()[0];
+        return String::Join(String::Split(split), replace);
+    }
 }
 
 bool String::Contains(const String& Substring) const

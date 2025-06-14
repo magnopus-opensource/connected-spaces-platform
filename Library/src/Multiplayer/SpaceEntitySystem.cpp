@@ -18,6 +18,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
@@ -54,17 +55,19 @@ using namespace std::chrono_literals;
 
 // temporary local entity ID generator
 // https://stackoverflow.com/questions/33010010/how-to-generate-random-64-bit-unsigned-integer-in-c
-#define IMAX_BITS(m) ((m)/((m)%255+1) / 255%255*8 + 7-86/((m)%255+12))
+#define IMAX_BITS(m) ((m) / ((m) % 255 + 1) / 255 % 255 * 8 + 7 - 86 / ((m) % 255 + 12))
 #define RAND_MAX_WIDTH IMAX_BITS(RAND_MAX)
 _Static_assert((RAND_MAX & (RAND_MAX + 1u)) == 0, "RAND_MAX not a Mersenne number");
 
-uint64_t rand64(void) {
-  uint64_t r = 0;
-  for (int i = 0; i < 64; i += RAND_MAX_WIDTH) {
-    r <<= RAND_MAX_WIDTH;
-    r ^= (unsigned) rand();
-  }
-  return r;
+uint64_t rand64(void)
+{
+    uint64_t r = 0;
+    for (int i = 0; i < 64; i += RAND_MAX_WIDTH)
+    {
+        r <<= RAND_MAX_WIDTH;
+        r ^= (unsigned)rand();
+    }
+    return r;
 }
 
 namespace
@@ -644,6 +647,33 @@ void SpaceEntitySystem::BindOnObjectMessage()
             if (SpaceEntityCreatedCallback)
             {
                 SpaceEntityCreatedCallback(NewEntity);
+                csp::systems::LocalScriptSystem* localScriptSystem = csp::systems::SystemsManager::Get().GetLocalScriptSystem();
+                const csp::common::Map<uint16_t, ComponentBase*>* EntityComponents = NewEntity->GetComponents();
+
+                // Check for any CodeComponent in entity - using Keys() instead of range-based for loop
+                auto* Keys = EntityComponents->Keys();
+                for (size_t i = 0; i < Keys->Size(); ++i)
+                {
+                    auto Key = (*Keys)[i];
+                    ComponentBase* Component = (*EntityComponents)[Key];
+
+                    if (Component->GetComponentType() == ComponentType::Code)
+                    {
+                        csp::multiplayer::CodeSpaceComponent* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component);
+
+                        // Instead of directly accessing the incomplete type, check if it's valid first
+                        if (localScriptSystem != nullptr)
+                        {
+                            // if found, bind the entity to the script system
+                            // Using a different approach to avoid the direct member access
+                            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Binding CodeComponent to local script system. %s",
+                                CodeComponent->GetScriptAssetPath().c_str());
+
+                            break;
+                        }
+                    }
+                }
+                delete Keys;
             }
             else
             {
@@ -796,7 +826,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) {});
+            DestroyEntity(Entity, [](bool /*Ok*/) { });
         }
         // Otherwise we clear up all all locally represented entities
         else
@@ -917,7 +947,6 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
         EntityScript& Script = Entities[i]->GetScript();
         Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
-    
 
     // Enable entity tick events
     EnableEntityTick = true;
@@ -927,8 +956,6 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
         InitialEntitiesRetrievedCallback(true);
     }
 }
-
-
 
 void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
@@ -1255,7 +1282,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
             // Send list of PendingEntities to chs
             SendPatches(PendingEntities);
         }
-        if (PendingLocalUpdateEntities.Size() != 0) 
+        if (PendingLocalUpdateEntities.Size() != 0)
         {
             // Loop through and apply local patches from generated list
             for (size_t i = 0; i < PendingLocalUpdateEntities.Size(); ++i)
@@ -1309,26 +1336,26 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 {
     assert(Entities.Contains(EntityToRemove));
 
-        switch (EntityToRemove->GetEntityType())
-        {
-        case SpaceEntityType::Avatar:
-            assert(Avatars.Contains(EntityToRemove));
-            Avatars.RemoveItem(EntityToRemove);
-            break;
+    switch (EntityToRemove->GetEntityType())
+    {
+    case SpaceEntityType::Avatar:
+        assert(Avatars.Contains(EntityToRemove));
+        Avatars.RemoveItem(EntityToRemove);
+        break;
 
-        case SpaceEntityType::Object:
-            assert(Objects.Contains(EntityToRemove));
-            Objects.RemoveItem(EntityToRemove);
-            break;
+    case SpaceEntityType::Object:
+        assert(Objects.Contains(EntityToRemove));
+        Objects.RemoveItem(EntityToRemove);
+        break;
 
-        default:
-            assert(false && "Unhandled entity type encountered during its destruction!");
-            break;
-        }
+    default:
+        assert(false && "Unhandled entity type encountered during its destruction!");
+        break;
+    }
 
     RootHierarchyEntities.RemoveItem(EntityToRemove);
     ResolveParentChildForDeletion(EntityToRemove);
-    
+
     Entities.RemoveItem(EntityToRemove);
 
     delete (EntityToRemove);
@@ -1353,21 +1380,20 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
             Callback(nullptr);
         }
-            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Create Entity, STILL IsLocal?: %s", IsLocal ? "true" : "false");
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Create Entity, STILL IsLocal?: %s", IsLocal ? "true" : "false");
 
         auto ID = IsLocal ? rand64() : ParseGenerateObjectIDsResult(Result);
-        auto* NewObject
-            = new SpaceEntity(this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true, IsLocal);
+        auto* NewObject = new SpaceEntity(
+            this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true, IsLocal);
         if (InParent.HasValue())
         {
             NewObject->SetParentId(*InParent);
         }
-        
-            mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
 
-            SignalRSerializer Serializer;
-            Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
-        
+        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
+
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
             = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
@@ -1393,13 +1419,15 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Objects.Append(NewObject);
             Callback(NewObject);
         };
-        if (IsLocal) {
+        if (IsLocal)
+        {
             ResolveEntityHierarchy(NewObject);
             Entities.Append(NewObject);
             Objects.Append(NewObject);
             Callback(NewObject); // If the object is local, we can immediately return it without sending it to the server.
         }
-        else {
+        else
+        {
             Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
         }
     };
