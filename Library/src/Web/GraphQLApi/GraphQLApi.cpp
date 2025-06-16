@@ -24,7 +24,7 @@ namespace csp::systems::graphqlservice
 {
 
 GraphQLApi::GraphQLApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)
+    : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationService)
 {
 }
 
@@ -33,7 +33,7 @@ GraphQLApi::~GraphQLApi() { }
 void GraphQLApi::Query(
     csp::common::String QueryText, csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& CancellationToken) const
 {
-    csp::web::Uri Uri(*RootUri + "/graphql");
+    csp::web::Uri Uri((ServiceDefinition->GetURI() + "/graphql").c_str());
     csp::web::HttpPayload Payload;
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
     Payload.SetContent(QueryText);
