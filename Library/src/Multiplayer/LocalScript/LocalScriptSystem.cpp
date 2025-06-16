@@ -138,6 +138,8 @@ void LocalScriptSystem::TickAnimationFrame(float timestamp)
     {
         return;
     }
+    // This is the javascript "Event Loop"
+    // needed to process promises and async/await operations
     while (Runtime->isJobPending()) {
         Runtime->executePendingJob();
     }
