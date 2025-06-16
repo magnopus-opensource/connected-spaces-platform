@@ -67,7 +67,7 @@ void UserSystem::Login(const String& UserName, const csp::common::String& Email,
 		}
 		
 		// Make the login call and handle response
-		static_cast<AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginPost(Request, ResponseHandler);
+		static_cast<AuthenticationApi*>(AuthenticationAPI)->usersLoginPost(Request, ResponseHandler);
 	}
 }
 ```
@@ -159,7 +159,7 @@ if (UserHasVerifiedAge.HasValue()) {
 }
 	
 // Make the call to log in as guest
-static_cast<AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginAsGuestPost(Request, ResponseHandler);
+static_cast<AuthenticationApi*>(AuthenticationAPI)->usersLoginAsGuestPost(Request, ResponseHandler);
 ```
 
 ### Key Points
@@ -238,7 +238,7 @@ void UserSystem::Logout(NullResultCallback Callback) {
         MultiplayerConnection->Disconnect(ErrorCallback);
         
         // Handle logout response
-        static_cast<AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLogoutPost(Request, ResponseHandler);
+        static_cast<AuthenticationApi*>(AuthenticationAPI)->usersLogoutPost(Request, ResponseHandler);
 	}
 }
 ```
