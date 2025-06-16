@@ -122,7 +122,7 @@ EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
     return GlobalRot;
 }
 
-int64_t EntityScriptInterface::GetParentId()
+int32_t EntityScriptInterface::GetParentId()
 {
     if (const auto Parent = Entity->GetParentEntity())
     {
@@ -132,7 +132,7 @@ int64_t EntityScriptInterface::GetParentId()
     return 0;
 }
 
-void EntityScriptInterface::SetParentId(int64_t ParentId)
+void EntityScriptInterface::SetParentId(int32_t ParentId)
 {
     if (Entity)
     {
@@ -204,7 +204,7 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalScale() const
 
 const std::string EntityScriptInterface::GetName() const { return Entity->GetName().c_str(); }
 
-int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
+int32_t EntityScriptInterface::GetId() const { return static_cast<int32_t>(Entity->GetId()); }
 
 void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
 {
@@ -220,6 +220,9 @@ void EntityScriptInterface::PostMessageToScript(std::string Message, std::string
 {
     Entity->GetScript().PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
 }
+
+
+
 
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 {

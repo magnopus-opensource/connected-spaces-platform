@@ -29,6 +29,7 @@
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
@@ -44,11 +45,11 @@
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
+
 
 namespace csp::multiplayer
 {
@@ -58,8 +59,9 @@ using SpaceEntityList = csp::common::List<SpaceEntity*>;
 class EntitySystemScriptInterface
 {
 public:
-    EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr)
-        : EntitySystem(InEntitySystem)
+    EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr,
+                                qjs::Context* InContext = nullptr)
+        : EntitySystem(InEntitySystem), Context(InContext)
     {
     }
 
@@ -226,22 +228,75 @@ public:
         return RootHierarchyEntities;
     }
 
-    void CreateEntity(std::string Name)
-    {
-        if (EntitySystem)
-        {
+    // void CreateEntity(std::string Name)
+    // {
+    //     if (EntitySystem)
+    //     {
+    //         EntitySystem->LockEntityUpdate();
+    //         EntitySystem->CreateLocalObject(Name.c_str(), SpaceTransform(),
+    //             [this](SpaceEntity* Entity)
+    //             {
+    //                 EntitySystem->UnlockEntityUpdate();
+    //                 EntitySystem->FireEntityCreatedEvent(Entity);
+    //             });
+    //     }
+    // }
+
+    qjs::Value CreateEntity(const std::string& name) {
+        qjs::Context* m_ctx = this->Context;
+        // 1. Create a Promise and get its resolving functions.
+        // We use the stored context member 'm_ctx'.
+        JSValue funcs[2];
+        JSValue promise = JS_NewPromiseCapability(m_ctx->ctx, funcs);
+
+    qjs::Value resolve_func(m_ctx->ctx, std::move(funcs[0]));
+    qjs::Value reject_func(m_ctx->ctx, std::move(funcs[1]));
+
+        // 2. Start the asynchronous C++ operation.
+        if (EntitySystem) {
             EntitySystem->LockEntityUpdate();
-            EntitySystem->CreateLocalObject(Name.c_str(), SpaceTransform(), [this](SpaceEntity* Entity) {
-                EntitySystem->UnlockEntityUpdate();
-                EntitySystem->FireEntityCreatedEvent(Entity);
-            });
+            EntitySystem->CreateLocalObject(name.c_str(), SpaceTransform(),
+                // The C++ lambda now captures the JS functions.
+                // We also capture m_ctx to use its helper functions.
+                [this, resolve_func, reject_func, m_ctx](SpaceEntity* entity) {
+                    this->EntitySystem->UnlockEntityUpdate();
+
+                    // 3. When done, resolve or reject the promise.
+                    if (entity) {
+                        this->EntitySystem->FireEntityCreatedEvent(entity);
+                        
+                        // Use the stored context to create the new JS value
+                        auto js_entity = m_ctx->newValue(entity->GetScriptInterface());
+
+                        // Call the 'resolve' function
+                        JSValueConst argv[] = { js_entity.v };
+                        JSValue result = JS_Call(m_ctx->ctx, resolve_func.v, JS_UNDEFINED, 1, argv);
+                        JS_FreeValue(m_ctx->ctx, result);
+                    } else {
+                        auto error = m_ctx->newValue("Failed to create entity in C++");
+                        JSValueConst argv[] = { error.v };
+                        JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
+                        JS_FreeValue(m_ctx->ctx, result);
+                    }
+                }
+            );
+        } else {
+            // Immediately reject if the system isn't available
+             auto error = m_ctx->newValue("EntitySystem not initialized.");
+             JSValueConst argv[] = { error.v };
+             JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
+             JS_FreeValue(m_ctx->ctx, result);
         }
+
+        // 4. Return the promise object IMMEDIATELY to JavaScript.
+        return qjs::Value(m_ctx->ctx, std::move(promise));
     }
 
     std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
 
 private:
     SpaceEntitySystem* EntitySystem;
+    qjs::Context* Context;
 };
 
 void EntityScriptLog(qjs::rest<std::string> Args)
@@ -558,7 +613,8 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntityScriptInterface::PostMessageToScript>("postMessage")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
         .fun<&EntityScriptInterface::CreateComponentOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("createLightComponent")
-        .fun<&EntityScriptInterface::CreateComponentOfType<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>>("createStaticModelComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>>(
+            "createStaticModelComponent")
         .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<CodeSpaceComponentScriptInterface, ComponentType::Code>>("getCodeComponents")
@@ -635,7 +691,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 
     BindInternal(Module);
 
-    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem, Context);
     Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
     // Always import OKO module into scripts
@@ -654,13 +710,12 @@ void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Contex
 {
     BindInternal(Module);
     // This is temporary
-    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem, Context);
 
     // Always import CSP module into scripts
     std::stringstream ss;
     ss << "import * as csp from 'csp'; globalThis.csp = csp;";
     Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
-
 }
 
 } // namespace csp::multiplayer

@@ -52,15 +52,15 @@ public:
 
     Vector4 GetGlobalRotation() const;
 
-    int64_t GetParentId();
-    void SetParentId(int64_t ParentId);
+    int32_t GetParentId();
+    void SetParentId(int32_t ParentId);
 
     void RemoveParentEntity();
 
     SpaceEntity* GetParentEntity() const;
 
     const std::string GetName() const;
-    int64_t GetId() const;
+    int32_t GetId() const;
 
     void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
 

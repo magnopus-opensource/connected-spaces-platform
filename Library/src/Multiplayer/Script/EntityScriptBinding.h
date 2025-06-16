@@ -35,12 +35,14 @@ public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
     void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module);
     virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
+    
 
     static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
     static void RemoveBinding(EntityScriptBinding* InEntityBinding);
 
 private:
     SpaceEntitySystem* EntitySystem;
+    qjs::Context* Context;
 };
 
 } // namespace csp::multiplayer

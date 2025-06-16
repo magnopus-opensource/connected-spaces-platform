@@ -65,7 +65,7 @@ public:
     /// @brief Destroy the instance of LocalScriptSystem.
     ~LocalScriptSystem();
 
-    void TickAnimationFrame(int32_t timestamp);
+    void TickAnimationFrame(float timestamp);
 
     using ModuleSourceMap = std::map<std::string, std::string>;
 

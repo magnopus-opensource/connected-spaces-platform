@@ -59,10 +59,10 @@ using namespace std::chrono_literals;
 #define RAND_MAX_WIDTH IMAX_BITS(RAND_MAX)
 _Static_assert((RAND_MAX & (RAND_MAX + 1u)) == 0, "RAND_MAX not a Mersenne number");
 
-uint64_t rand64(void)
+uint32_t rand32(void)
 {
-    uint64_t r = 0;
-    for (int i = 0; i < 64; i += RAND_MAX_WIDTH)
+    uint32_t r = 0;
+    for (int i = 0; i < 32; i += RAND_MAX_WIDTH)
     {
         r <<= RAND_MAX_WIDTH;
         r ^= (unsigned)rand();
@@ -1382,7 +1382,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
         }
         CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Create Entity, STILL IsLocal?: %s", IsLocal ? "true" : "false");
 
-        auto ID = IsLocal ? rand64() : ParseGenerateObjectIDsResult(Result);
+        auto ID = IsLocal ? rand32() : ParseGenerateObjectIDsResult(Result);
         auto* NewObject = new SpaceEntity(
             this, SpaceEntityType::Object, ID, InName, InSpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true, IsLocal);
         if (InParent.HasValue())

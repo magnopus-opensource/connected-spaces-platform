@@ -47,6 +47,7 @@ LocalScriptSystem::LocalScriptSystem(csp::multiplayer::SpaceEntitySystem* InEnti
     Runtime = nullptr;
     Context = nullptr;
     ScriptBinding = nullptr;
+    
 }
 
 LocalScriptSystem::~LocalScriptSystem()
@@ -131,28 +132,33 @@ void LocalScriptSystem::ParseAttributes(csp::multiplayer::CodeSpaceComponent* Co
     }
 }
 
-void LocalScriptSystem::TickAnimationFrame(int32_t timestamp)
+void LocalScriptSystem::TickAnimationFrame(float timestamp)
 {
-    if (Context != nullptr)
+    if (Runtime == nullptr || Context == nullptr)
     {
-        std::stringstream ss;
-        ss << "scriptRegistry.tick(" << timestamp << ");\n";
-        try
-        {
-            Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
-        }
-        catch (qjs::exception& e)
-        {
-            CSP_LOG_ERROR_MSG("QuickJS exception while running script");
-        }
-        catch (const std::exception& e)
-        {
-            CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
-        }
-        catch (...)
-        {
-            CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
-        }
+        return;
+    }
+    while (Runtime->isJobPending()) {
+        Runtime->executePendingJob();
+    }
+
+    std::stringstream ss;
+    ss << "typeof scriptRegistry !== 'undefined' && scriptRegistry.tick(" << timestamp << ");\n";
+    try
+    {
+        Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    }
+    catch (qjs::exception& e)
+    {
+        CSP_LOG_ERROR_MSG("QuickJS exception while running script");
+    }
+    catch (const std::exception& e)
+    {
+        CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
+    }
+    catch (...)
+    {
+        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
     }
 }
 
