@@ -18,20 +18,58 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
+#include <string>
+
 namespace csp
 {
+
+class CSP_API MCSServiceDefinition
+{
+public:
+    MCSServiceDefinition()
+        : URI("")
+        , Version(0)
+    {
+    }
+
+    MCSServiceDefinition(const csp::common::String& InURI, const uint32_t InVersion)
+        : URI(InURI)
+        , Version(InVersion)
+    {
+    }
+
+    /// @brief Gets the root URI for the service endpoint.
+    /// @return csp::common::String : The root URI of the service endpoint.
+    const csp::common::String GetURI() const { return URI; }
+    /// @brief Sets the URI for the service endpoint.
+    /// @param InURI csp::common::String : URI for service endpoint.
+    void SetURI(const csp::common::String& InURI) { URI = InURI; }
+
+    /// @brief Gets the current version of the service endpoint.
+    /// @return int32_t : Representing the current version of the service endpoint.
+    const int32_t GetVersion() const { return Version; }
+    /// @brief Sets the current Version for the service endpoint.
+    /// @param InVersion uint32_t : Version for service endpoint.
+    CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
+
+private:
+    csp::common::String URI;
+    uint32_t Version;
+};
 
 /// @brief Holds supported endpoint uris used by Foundation.
 class CSP_API EndpointURIs
 {
 public:
-    csp::common::String UserServiceURI;
-    csp::common::String PrototypeServiceURI;
-    csp::common::String SpatialDataServiceURI;
-    csp::common::String MultiplayerServiceURI;
-    csp::common::String AggregationServiceURI;
-    csp::common::String TrackingServiceURI;
-    csp::common::String MaintenanceWindowURI;
+    MCSServiceDefinition UserService;
+    MCSServiceDefinition PrototypeService;
+    MCSServiceDefinition SpatialDataService;
+    MCSServiceDefinition MultiplayerService;
+    MCSServiceDefinition AggregationService;
+    MCSServiceDefinition TrackingService;
+    MCSServiceDefinition MaintenanceWindow;
+
+private:
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.
