@@ -15,8 +15,6 @@
  */
 #include "POCOSignalRClient.h"
 
-#include "CSP/CSPFoundation.h"
-#include "Common/Web/HttpAuth.h"
 #include "Debug/Logging.h"
 
 #include <Poco/Net/HTTPRequest.h>
@@ -36,9 +34,10 @@ constexpr const size_t RECEIVE_BLOCK_SIZE = 4096;
 namespace csp::multiplayer
 {
 
-CSPWebSocketClientPOCO::CSPWebSocketClientPOCO() noexcept
+CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(const std::string& AccessToken) noexcept
     : PocoWebSocket(nullptr)
     , StopFlag(false)
+    , AccessToken { AccessToken }
 {
 }
 
@@ -97,12 +96,9 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
         Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
         Poco::Net::HTTPResponse response;
 
-        if (csp::web::HttpAuth::GetAccessToken().c_str() != nullptr)
-        {
-            char Str[1024];
-            snprintf(Str, 1024, "Bearer %s", csp::web::HttpAuth::GetAccessToken().c_str());
-            request.set("Authorization", Str);
-        }
+        char Str[1024];
+        snprintf(Str, 1024, "Bearer %s", AccessToken.c_str());
+        request.set("Authorization", Str);
 
         StopFlag = false;
 
