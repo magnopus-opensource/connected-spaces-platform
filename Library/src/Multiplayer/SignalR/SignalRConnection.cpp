@@ -56,7 +56,6 @@ public:
 
 SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient)
     : Connection(hub_connection_builder::create(BaseUri)
-                     .with_http_client_factory([](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(); })
                      .with_websocket_factory([WebsocketClient](const signalr_client_config&) { return WebsocketClient; })
                      .skip_negotiation(true)
                      .with_messagepack_hub_protocol()
