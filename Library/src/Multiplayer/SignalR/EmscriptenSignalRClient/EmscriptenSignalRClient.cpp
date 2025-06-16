@@ -16,7 +16,6 @@
 #include "EmscriptenSignalRClient.h"
 
 #include "Debug/Logging.h"
-#include "Web/HttpAuth.h"
 
 #include <assert.h>
 #include <iostream>
@@ -108,8 +107,9 @@ EM_BOOL onDataReceived([[maybe_unused]] int EventType, const EmscriptenWebSocket
     return EM_TRUE;
 }
 
-CSPWebSocketClientEmscripten::CSPWebSocketClientEmscripten() noexcept
+CSPWebSocketClientEmscripten::CSPWebSocketClientEmscripten(const std::string& AccessToken) noexcept
     : ReceivedHandshake(false)
+    , AccessToken { AccessToken }
 {
 }
 
@@ -183,8 +183,8 @@ std::string CSPWebSocketClientEmscripten::GetWebSocketConnectURL(const std::stri
     {
         std::string WebSocketEndpoint = InitialUrl.substr(0, QueryParamPos);
 
-        WebSocketConnectURL = WebSocketEndpoint + "?access_token=" + std::string(csp::web::HttpAuth::GetAccessToken().c_str())
-            + "&X-DeviceUDID=" + std::string(csp::CSPFoundation::GetDeviceId().c_str());
+        WebSocketConnectURL
+            = WebSocketEndpoint + "?access_token=" + AccessToken + "&X-DeviceUDID=" + std::string(csp::CSPFoundation::GetDeviceId().c_str());
         EMS_FORMATTED_LOG("WebSocket connect URL: %s", WebSocketConnectURL.c_str());
     }
     else

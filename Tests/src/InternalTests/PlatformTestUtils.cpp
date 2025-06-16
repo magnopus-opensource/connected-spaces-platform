@@ -50,7 +50,7 @@ void PlatformTestWait(bool& finished)
     }
 }
 
-csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri)
+csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri, const csp::common::String& AccessToken)
 {
     bool finished = false;
 
@@ -65,7 +65,7 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Ur
 
     std::thread TestThread([&]() { WebSocketClient->Start(Uri.c_str(), Fn); });
 #else
-    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
+    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str());
     WebSocketClient->Start(Uri.c_str(), Fn);
 #endif
 
