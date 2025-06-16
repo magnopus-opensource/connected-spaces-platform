@@ -154,7 +154,7 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
-    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
