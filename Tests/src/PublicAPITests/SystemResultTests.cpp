@@ -27,7 +27,7 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
-#include <Common/CallHelpers.h>
+#include <CallHelpers.h>
 #include <Common/Web/HttpRequest.h>
 #include <Common/Web/WebClient.h>
 
