@@ -34,18 +34,22 @@ namespace {{ definition.translated_namespace }}
         {{> Template/NativeDelegateInstance }}
 {{/ definition.methods }}
 
-        readonly bool
+        private static bool
 {{# template_parameters }}
             Is{{ name }}ProxyClass{{> Comma }}
 {{/ template_parameters }}
             ;
 
-        void InitialiseNativeDelegates()
+        static {{ definition.name }}()
         {
 {{# template_parameters }}
             string {{ name }}TypeName;
 
-            if (typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}))) {
+{{# template_parameters }}
+            Is{{ name }}ProxyClass = typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}));
+{{/ template_parameters }}
+
+            if (Is{{ name }}ProxyClass) {
                 {{ name }}TypeName = GetSafeTypeName(typeof({{ name }}));
             }
             else if (typeof({{ name }}).IsEnum)
@@ -76,11 +80,6 @@ namespace {{ definition.translated_namespace }}
         internal {{ definition.name }}(NativePointer ptr)
             : base(ptr)
         {
-            InitialiseNativeDelegates();
-            
-{{# template_parameters }}
-            Is{{ name }}ProxyClass = typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}));
-{{/ template_parameters }}
         }
 
 {{# definition.methods }}
