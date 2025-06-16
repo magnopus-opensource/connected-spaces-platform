@@ -40,9 +40,12 @@ bool ReplicatedValueImpl::operator<(const ReplicatedValueImpl& Other) const
                     using LT = std::decay_t<decltype(Lhs)>;
                     using RT = std::decay_t<decltype(Rhs)>;
 
-                    if constexpr (std::is_integral_v<LT> && std::is_integral_v<RT>)
+                    if constexpr (!(std::is_same_v<LT, bool> || std::is_same_v<RT, bool>))
                     {
-                        Result = (std::get<LT>(Value) < std::get<RT>(Other.Value));
+                        if constexpr (std::is_integral_v<LT> && std::is_integral_v<RT>)
+                        {
+                            Result = (std::get<LT>(Value) < std::get<RT>(Other.Value));
+                        }
                     }
                 },
                 Other.Value);
@@ -65,9 +68,12 @@ bool ReplicatedValueImpl::operator>(const ReplicatedValueImpl& Other) const
                     using LT = std::decay_t<decltype(Lhs)>;
                     using RT = std::decay_t<decltype(Rhs)>;
 
-                    if constexpr (std::is_integral_v<LT> && std::is_integral_v<RT>)
+                    if constexpr (!(std::is_same_v<LT, bool> || std::is_same_v<RT, bool>))
                     {
-                        Result = (std::get<LT>(Value) > std::get<RT>(Other.Value));
+                        if constexpr (std::is_integral_v<LT> && std::is_integral_v<RT>)
+                        {
+                            Result = (std::get<LT>(Value) > std::get<RT>(Other.Value));
+                        }
                     }
                 },
                 Other.Value);

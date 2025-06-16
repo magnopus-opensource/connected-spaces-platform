@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/ReplicatedValue.h"
+#include "Multiplayer/ReplicatedValueImpl.h"
 
 namespace csp::multiplayer
 {
@@ -25,7 +26,7 @@ static const csp::common::Map<csp::common::String, ReplicatedValue> InvalidStrin
 ReplicatedValue::ReplicatedValue()
 {
     ReplicatedType = ReplicatedValueType::InvalidType;
-    Impl = CSP_NEW ReplicatedValueImpl();
+    Impl = new ReplicatedValueImpl();
 }
 
 ReplicatedValue::~ReplicatedValue() { }
@@ -33,64 +34,69 @@ ReplicatedValue::~ReplicatedValue() { }
 ReplicatedValue::ReplicatedValue(bool InValue)
     : ReplicatedType(ReplicatedValueType::Boolean)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(float InValue)
     : ReplicatedType(ReplicatedValueType::Float)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(int64_t InValue)
     : ReplicatedType(ReplicatedValueType::Integer)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const char* InValue)
     : ReplicatedType(ReplicatedValueType::String)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::String& InValue)
     : ReplicatedType(ReplicatedValueType::String)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector2& InValue)
     : ReplicatedType(ReplicatedValueType::Vector2)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue)
     : ReplicatedType(ReplicatedValueType::Vector3)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector4& InValue)
     : ReplicatedType(ReplicatedValueType::Vector4)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InValue);
+    Impl = new ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue)
     : ReplicatedType(ReplicatedValueType::StringMap)
 {
-    Impl = CSP_NEW ReplicatedValueImpl(InMapValue);
+    Impl = new ReplicatedValueImpl(InMapValue);
 }
 
 ReplicatedValue::ReplicatedValue(const ReplicatedValue& OtherValue)
 {
     this->ReplicatedType = OtherValue.ReplicatedType;
-    this->Impl = CSP_NEW ReplicatedValueImpl(OtherValue.Impl);
+    this->Impl = new ReplicatedValueImpl(OtherValue.Impl);
 }
 
-ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue) { return *this; }
+ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
+{
+    this->ReplicatedType = InValue.ReplicatedType;
+    *this->Impl = *InValue.Impl;
+    return *this;
+}
 
 bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const { return (*Impl) == OtherValue.Impl; }
 bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const { return (*this == OtherValue) == false; }
@@ -200,6 +206,8 @@ const csp::common::Vector4& ReplicatedValue::GetVector4() const
 }
 
 const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return InvalidVector4; }
+
+csp::common::Map<csp::common::String, ReplicatedValue> m;
 
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {

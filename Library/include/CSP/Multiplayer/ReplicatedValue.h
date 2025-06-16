@@ -15,8 +15,6 @@
  */
 #pragma once
 
-#include "Common/ReplicatedValueImpl.h"
-
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
@@ -237,8 +235,6 @@ public:
 private:
     ReplicatedValueType ReplicatedType;
     ReplicatedValueImpl* Impl;
-
-    CSP_END_IGNORE
 };
 
 } // namespace csp::multiplayer

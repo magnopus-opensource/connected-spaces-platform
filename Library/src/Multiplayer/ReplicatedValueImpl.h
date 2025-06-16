@@ -20,6 +20,8 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 
+#include "CSP/Multiplayer/ReplicatedValue.h"
+
 #include <variant>
 
 namespace csp::multiplayer
@@ -27,22 +29,22 @@ namespace csp::multiplayer
 
 class ReplicatedValueImpl;
 
-using ReplicatedValueImplType
-    = std::variant<bool, float, int64_t, csp::common::String, csp::common::Vector2, csp::common::Vector3, csp::common::Vector4>;
+using ReplicatedValueImplType = std::variant<bool, float, int64_t, csp::common::String, csp::common::Vector2, csp::common::Vector3,
+    csp::common::Vector4, csp::common::Map<csp::common::String, ReplicatedValue>>;
 
 class ReplicatedValueImpl
 {
 public:
     ReplicatedValueImpl() = default;
-    template <class T> ReplicatedValueImpl(T InValue);
+    CSP_NO_EXPORT template <class T> ReplicatedValueImpl(T InValue);
 
     /// @param Other ReplicatedValue : Other replicated value to set this one to.
     ReplicatedValueImpl(const ReplicatedValueImpl& Other);
 
     // TODO: rule of 5
 
-    template <class T> void Set(T InValue);
-    template <class T> T Get() const;
+    CSP_NO_EXPORT template <class T> void Set(T InValue);
+    CSP_NO_EXPORT template <class T> const T& Get() const;
 
     /// @brief Assignment operator overload.
     /// @param Other ReplicatedValue : Other replicated value to set this one to.
@@ -68,9 +70,9 @@ private:
     ReplicatedValueImplType Value;
 };
 
-template <class T> inline ReplicatedValueImpl::ReplicatedValueImpl(T InValue) { Value = InValue; }
+CSP_NO_EXPORT template <class T> inline ReplicatedValueImpl::ReplicatedValueImpl(T InValue) { Value = InValue; }
 
-template <class T> inline void ReplicatedValueImpl::Set(T InValue) { Value = InValue; }
+CSP_NO_EXPORT template <class T> inline void ReplicatedValueImpl::Set(T InValue) { Value = InValue; }
 
-template <class T> inline T ReplicatedValueImpl::Get() const { return std::get<T>(Value); }
+CSP_NO_EXPORT template <class T> inline const T& ReplicatedValueImpl::Get() const { return std::get<T>(Value); }
 }

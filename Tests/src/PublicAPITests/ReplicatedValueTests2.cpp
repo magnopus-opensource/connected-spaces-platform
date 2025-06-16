@@ -20,14 +20,16 @@
 
 using namespace csp::multiplayer;
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, InvalidTest)
+// Invalid
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, InvalidTest)
 {
     ReplicatedValue MyValue;
 
     EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::InvalidType);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, BoolConstructorTest)
+// Bool
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, BoolConstructorTest)
 {
     ReplicatedValue MyValue(true);
 
@@ -35,7 +37,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, BoolConstructorTest)
     EXPECT_TRUE(MyValue.GetBool() == true);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetBoolTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetBoolTest)
 {
     ReplicatedValue MyValue;
     MyValue.SetBool(true);
@@ -44,7 +46,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetBoolTest)
     EXPECT_TRUE(MyValue.GetBool() == true);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, BoolAssignmentTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, BoolAssignmentTest)
 {
     ReplicatedValue MyValue;
     MyValue = true;
@@ -53,7 +55,35 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, BoolAssignmentTest)
     EXPECT_TRUE(MyValue.GetBool() == true);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, IntConstructorTest)
+// Float
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, FloatConstructorTest)
+{
+    ReplicatedValue MyValue(12345.6789f);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
+    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetFloatTest)
+{
+    ReplicatedValue MyValue;
+    MyValue.SetFloat(12345.6789f);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
+    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, FloatAssignmentTest)
+{
+    ReplicatedValue MyValue;
+    MyValue = 12345.6789f;
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
+    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
+}
+
+// Int
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, IntConstructorTest)
 {
     const int64_t MyInt = 42;
     ReplicatedValue MyValue(MyInt);
@@ -62,7 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, IntConstructorTest)
     EXPECT_TRUE(MyValue.GetInt() == 42);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetIntTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetIntTest)
 {
     const int64_t MyInt = 42;
     ReplicatedValue MyValue;
@@ -72,7 +102,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetIntTest)
     EXPECT_TRUE(MyValue.GetInt() == 42);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, IntAssignmentTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, IntAssignmentTest)
 {
     const int64_t MyInt = 42;
     ReplicatedValue MyValue;
@@ -82,52 +112,8 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, IntAssignmentTest)
     EXPECT_TRUE(MyValue.GetInt() == 42);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, FloatConstructorTest)
-{
-    ReplicatedValue MyValue(12345.6789f);
-
-    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
-    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetFloatTest)
-{
-    ReplicatedValue MyValue;
-    MyValue.SetFloat(12345.6789f);
-
-    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
-    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, FloatAssignmentTest)
-{
-    ReplicatedValue MyValue;
-    MyValue = 12345.6789f;
-
-    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Float);
-    EXPECT_TRUE(MyValue.GetFloat() == 12345.6789f);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, Vector3ConstructorTest)
-{
-    const csp::common::Vector3 Vector3(5.0f, 1.0f, 3.0f);
-    ReplicatedValue MyValue(Vector3);
-
-    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector3);
-    EXPECT_TRUE(MyValue.GetVector3() == Vector3);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetVector3Test)
-{
-    const csp::common::Vector3 Vector3(5.0f, 1.0f, 3.0f);
-    ReplicatedValue MyValue;
-    MyValue.SetVector3(Vector3);
-
-    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector3);
-    EXPECT_TRUE(MyValue.GetVector3() == Vector3);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringConstructorTest)
+// String
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, StringConstructorTest)
 {
     const csp::common::String MyString("This is a string");
 
@@ -137,7 +123,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringConstructorTest)
     EXPECT_TRUE(MyValue.GetString() == MyString);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetStringTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetStringTest)
 {
     const csp::common::String MyString("This is a string");
 
@@ -148,7 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetStringTest)
     EXPECT_TRUE(MyValue.GetString() == MyString);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringAssignmentTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, StringAssignmentTest)
 {
     const csp::common::String MyString("This is a string");
 
@@ -159,7 +145,8 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringAssignmentTest)
     EXPECT_TRUE(MyValue.GetString() == MyString);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralConstructorTest)
+// String literal
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, StringLiteralConstructorTest)
 {
     ReplicatedValue MyValue("This is a string");
 
@@ -167,7 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralConstructorTest)
     EXPECT_TRUE(MyValue.GetString() == "This is a string");
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetStringLiteralTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetStringLiteralTest)
 {
     ReplicatedValue MyValue;
     MyValue.SetString("This is a string");
@@ -176,7 +163,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetStringLiteralTest)
     EXPECT_TRUE(MyValue.GetString() == "This is a string");
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralAssignmentTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, StringLiteralAssignmentTest)
 {
     ReplicatedValue MyValue;
     MyValue = "This is a string";
@@ -185,7 +172,98 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralAssignmentTest)
     EXPECT_TRUE(MyValue.GetString() == "This is a string");
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapConstructorTest)
+// Vector2
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector2ConstructorTest)
+{
+    const csp::common::Vector2 Vector2(5.0f, 1.0f);
+    ReplicatedValue MyValue(Vector2);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector2);
+    EXPECT_TRUE(MyValue.GetVector2() == Vector2);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetVector2Test)
+{
+    const csp::common::Vector2 Vector2(5.0f, 1.0f);
+    ReplicatedValue MyValue;
+    MyValue.SetVector2(Vector2);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector2);
+    EXPECT_TRUE(MyValue.GetVector2() == Vector2);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector2AssignmentTest)
+{
+    const csp::common::Vector2 Vector2(5.0f, 1.0f);
+    ReplicatedValue MyValue;
+    MyValue = Vector2;
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector2);
+    EXPECT_TRUE(MyValue.GetVector2() == Vector2);
+}
+
+// Vector3
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector3ConstructorTest)
+{
+    const csp::common::Vector3 Vector3(5.0f, 1.0f, 3.0f);
+    ReplicatedValue MyValue(Vector3);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector3);
+    EXPECT_TRUE(MyValue.GetVector3() == Vector3);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetVector3Test)
+{
+    const csp::common::Vector3 Vector3(5.0f, 1.0f, 3.0f);
+    ReplicatedValue MyValue;
+    MyValue.SetVector3(Vector3);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector3);
+    EXPECT_TRUE(MyValue.GetVector3() == Vector3);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector3AssignmentTest)
+{
+    const csp::common::Vector3 Vector3(5.0f, 1.0f, 3.0f);
+    ReplicatedValue MyValue;
+    MyValue = Vector3;
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector3);
+    EXPECT_TRUE(MyValue.GetVector3() == Vector3);
+}
+
+// Vector4
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector4ConstructorTest)
+{
+    const csp::common::Vector4 Vector4(5.0f, 1.0f, 3.0f, 2.0f);
+    ReplicatedValue MyValue(Vector4);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector4);
+    EXPECT_TRUE(MyValue.GetVector4() == Vector4);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetVector4Test)
+{
+    const csp::common::Vector4 Vector4(5.0f, 1.0f, 3.0f, 2.0f);
+    ReplicatedValue MyValue;
+    MyValue.SetVector4(Vector4);
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector4);
+    EXPECT_TRUE(MyValue.GetVector4() == Vector4);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, Vector4AssignmentTest)
+{
+    const csp::common::Vector4 Vector4(5.0f, 1.0f, 3.0f, 2.0f);
+    ReplicatedValue MyValue;
+    MyValue = Vector4;
+
+    EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Vector4);
+    EXPECT_TRUE(MyValue.GetVector4() == Vector4);
+}
+
+// String Map
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MapConstructorTest)
 {
     csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
     MyMap["Key1"] = "Test1";
@@ -198,7 +276,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapConstructorTest)
     EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetMapTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, SetMapTest)
 {
     ReplicatedValue MyValue;
     csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
@@ -212,7 +290,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetMapTest)
     EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapAssignmentTest)
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTests, MapAssignmentTest)
 {
     ReplicatedValue MyValue;
     csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
