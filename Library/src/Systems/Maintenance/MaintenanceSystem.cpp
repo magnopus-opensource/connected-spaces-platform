@@ -17,7 +17,7 @@
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Common/CallHelpers.h"
+#include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"

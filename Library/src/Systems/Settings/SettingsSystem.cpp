@@ -21,7 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Common/CallHelpers.h"
+#include "CallHelpers.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
