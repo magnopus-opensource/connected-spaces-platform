@@ -18,10 +18,10 @@
 
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/CallHelpers.h"
-#include "Common/Web/MaintenanceApi/MaintenanceApi.h"
 #include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"
+#include "Web/MaintenanceApi/MaintenanceApi.h"
 
 namespace chs = csp::systems::maintenanceservice;
 
