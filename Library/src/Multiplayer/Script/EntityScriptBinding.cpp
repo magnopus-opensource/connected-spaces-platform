@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "Debug/Logging.h"
+
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/List.h"
@@ -50,7 +51,6 @@
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
-
 namespace csp::multiplayer
 {
 
@@ -59,9 +59,9 @@ using SpaceEntityList = csp::common::List<SpaceEntity*>;
 class EntitySystemScriptInterface
 {
 public:
-    EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr,
-                                qjs::Context* InContext = nullptr)
-        : EntitySystem(InEntitySystem), Context(InContext)
+    EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr, qjs::Context* InContext = nullptr)
+        : EntitySystem(InEntitySystem)
+        , Context(InContext)
     {
     }
 
@@ -242,53 +242,49 @@ public:
     //     }
     // }
 
-    qjs::Value CreateEntity(const std::string& name) {
+    /**
+    * Creates a new entity in the system and returns a promise to javascript.
+    */
+    qjs::Value CreateEntity(const std::string& name)
+    {
         qjs::Context* m_ctx = this->Context;
         // 1. Create a Promise and get its resolving functions.
         // We use the stored context member 'm_ctx'.
         JSValue funcs[2];
+        // create a promise, this can be used with async/await in JavaScript
         JSValue promise = JS_NewPromiseCapability(m_ctx->ctx, funcs);
 
-    qjs::Value resolve_func(m_ctx->ctx, std::move(funcs[0]));
-    qjs::Value reject_func(m_ctx->ctx, std::move(funcs[1]));
+        // called on success
+        qjs::Value resolve_func(m_ctx->ctx, std::move(funcs[0]));
+        // called on failure
+        qjs::Value reject_func(m_ctx->ctx, std::move(funcs[1]));
+        EntitySystem->LockEntityUpdate();
+        EntitySystem->CreateLocalObject(name.c_str(), SpaceTransform(),
+            [this, resolve_func, reject_func, m_ctx](SpaceEntity* entity)
+            {
+                this->EntitySystem->UnlockEntityUpdate();
 
-        // 2. Start the asynchronous C++ operation.
-        if (EntitySystem) {
-            EntitySystem->LockEntityUpdate();
-            EntitySystem->CreateLocalObject(name.c_str(), SpaceTransform(),
-                // The C++ lambda now captures the JS functions.
-                // We also capture m_ctx to use its helper functions.
-                [this, resolve_func, reject_func, m_ctx](SpaceEntity* entity) {
-                    this->EntitySystem->UnlockEntityUpdate();
+                if (entity)
+                {
+                    // needed to ensure the system knows about the new entity
+                    this->EntitySystem->FireEntityCreatedEvent(entity);
+                    // Put out new entity into the promise resolution
+                    auto js_entity = m_ctx->newValue(entity->GetScriptInterface());
 
-                    // 3. When done, resolve or reject the promise.
-                    if (entity) {
-                        this->EntitySystem->FireEntityCreatedEvent(entity);
-                        
-                        // Use the stored context to create the new JS value
-                        auto js_entity = m_ctx->newValue(entity->GetScriptInterface());
-
-                        // Call the 'resolve' function
-                        JSValueConst argv[] = { js_entity.v };
-                        JSValue result = JS_Call(m_ctx->ctx, resolve_func.v, JS_UNDEFINED, 1, argv);
-                        JS_FreeValue(m_ctx->ctx, result);
-                    } else {
-                        auto error = m_ctx->newValue("Failed to create entity in C++");
-                        JSValueConst argv[] = { error.v };
-                        JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
-                        JS_FreeValue(m_ctx->ctx, result);
-                    }
+                    // Call the 'resolve' function
+                    JSValueConst argv[] = { js_entity.v };
+                    JSValue result = JS_Call(m_ctx->ctx, resolve_func.v, JS_UNDEFINED, 1, argv);
+                    JS_FreeValue(m_ctx->ctx, result);
                 }
-            );
-        } else {
-            // Immediately reject if the system isn't available
-             auto error = m_ctx->newValue("EntitySystem not initialized.");
-             JSValueConst argv[] = { error.v };
-             JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
-             JS_FreeValue(m_ctx->ctx, result);
-        }
-
-        // 4. Return the promise object IMMEDIATELY to JavaScript.
+                else
+                {
+                    auto error = m_ctx->newValue("Failed to create entity in C++");
+                    JSValueConst argv[] = { error.v };
+                    JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
+                    JS_FreeValue(m_ctx->ctx, result);
+                }
+            });
+        // Return the promise to JavaScript.
         return qjs::Value(m_ctx->ctx, std::move(promise));
     }
 
