@@ -367,12 +367,13 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
-    SpaceEntitySystem(csp::common::LogSystem& LogSystem); // needed for the wrapper generator
+    SpaceEntitySystem(); // needed for the wrapper generator
 
     MultiplayerConnection* MultiplayerConnectionInst;
     csp::multiplayer::ISignalRConnection* Connection;
 
-    csp::common::LogSystem& LogSystem;
+    // Should not be null
+    csp::common::LogSystem* LogSystem;
 
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;

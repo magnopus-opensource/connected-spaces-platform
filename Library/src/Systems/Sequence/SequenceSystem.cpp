@@ -282,14 +282,14 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
         );
 }
 
-SequenceSystem::SequenceSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, LogSystem)
+SequenceSystem::SequenceSystem()
+    : SystemBase(nullptr, nullptr, nullptr)
     , SequenceAPI(nullptr)
 {
 }
 
 SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, InEventBus, LogSystem)
+    : SystemBase(InWebClient, InEventBus, &LogSystem)
 {
     SequenceAPI = new chs::SequenceApi(InWebClient);
 
@@ -335,7 +335,7 @@ void SequenceSystem::DeregisterSystemCallback()
 
 void SequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { LogSystem };
+    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { *LogSystem };
     SequenceDeserialiser.Parse(EventValues);
 
     if (SequenceChangedCallback)

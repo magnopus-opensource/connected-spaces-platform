@@ -23,8 +23,8 @@ namespace chs = csp::services::generated::trackingservice;
 
 namespace csp::systems
 {
-QuotaSystem::QuotaSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, LogSystem)
+QuotaSystem::QuotaSystem()
+    : SystemBase(nullptr, nullptr, nullptr)
     , QuotaTierAssignmentAPI(nullptr)
     , QuotaManagementAPI(nullptr)
     , QuotaActivityAPI(nullptr)
@@ -32,7 +32,7 @@ QuotaSystem::QuotaSystem(csp::common::LogSystem& LogSystem)
 }
 
 QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     QuotaManagementAPI = new chs::QuotaManagementApi(InWebClient);
     QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);

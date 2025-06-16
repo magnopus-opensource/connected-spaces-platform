@@ -346,7 +346,7 @@ public:
     ///@}
 
 private:
-    SpaceSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~SpaceSystem();
 

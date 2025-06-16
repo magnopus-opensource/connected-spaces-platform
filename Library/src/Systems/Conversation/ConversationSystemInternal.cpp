@@ -342,7 +342,7 @@ namespace
 
 ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
     systems::UserSystem* UserSystem, multiplayer::EventBus* EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(EventBus, LogSystem)
+    : SystemBase(EventBus, &LogSystem)
     , AssetSystem { AssetSystem }
     , SpaceSystem { SpaceSystem }
     , UserSystem { UserSystem }
@@ -1142,7 +1142,7 @@ void ConversationSystemInternal::DeregisterSystemCallback()
 
 void ConversationSystemInternal::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    csp::multiplayer::ConversationEventDeserialiser Deserialiser { LogSystem };
+    csp::multiplayer::ConversationEventDeserialiser Deserialiser { *LogSystem };
     Deserialiser.Parse(EventValues);
 
     const multiplayer::ConversationEventParams& Params = Deserialiser.GetEventParams();

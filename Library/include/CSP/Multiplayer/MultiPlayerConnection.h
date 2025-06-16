@@ -219,6 +219,7 @@ private:
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class EventBus* EventBusPtr;
+
     csp::common::LogSystem& LogSystem;
 
     uint64_t ClientId;

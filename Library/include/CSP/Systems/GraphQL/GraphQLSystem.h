@@ -63,7 +63,7 @@ public:
     CSP_ASYNC_RESULT void RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback ApiResponse);
 
 private:
-    GraphQLSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    GraphQLSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~GraphQLSystem();
 

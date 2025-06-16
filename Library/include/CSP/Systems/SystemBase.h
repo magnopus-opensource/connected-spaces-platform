@@ -54,8 +54,8 @@ class CSP_API CSP_NO_DISPOSE SystemBase
     friend class csp::multiplayer::MultiplayerConnection;
 
 protected:
-    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
-    CSP_NO_EXPORT SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
 
     csp::web::WebClient* WebClient;
     csp::multiplayer::EventBus* EventBusPtr;
@@ -80,10 +80,12 @@ public:
 
 protected:
     // EM, June2025: Having this on system base makes it quite simple to quit using the singleton macros in all the systems if we wanted to.
-    csp::common::LogSystem& LogSystem;
+    // Should NOT be null. The only reason this is a pointer is because we can't get the wrapper gen work required to support reference injections
+    // done...
+    csp::common::LogSystem* LogSystem;
 
 private:
-    SystemBase(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    SystemBase(); // This constructor is only provided to appease the wrapper generator and should not be used
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler SystemCallback;
 };

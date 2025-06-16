@@ -157,7 +157,6 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
-/// @brief MultiplayerConnection
 MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     : Connection(nullptr)
     , WebSocketClient(nullptr)

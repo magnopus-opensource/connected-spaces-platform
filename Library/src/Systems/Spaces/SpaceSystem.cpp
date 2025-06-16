@@ -61,15 +61,15 @@ constexpr const int MAX_SPACES_RESULTS = 100;
 namespace csp::systems
 {
 
-SpaceSystem::SpaceSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, LogSystem)
+SpaceSystem::SpaceSystem()
+    : SystemBase(nullptr, nullptr, nullptr)
     , GroupAPI(nullptr)
     , SpaceAPI(nullptr)
 {
 }
 
 SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
     , CurrentSpace()
 {
     GroupAPI = new chs::GroupApi(InWebClient);

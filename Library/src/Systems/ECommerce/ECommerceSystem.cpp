@@ -53,14 +53,14 @@ void RemoveUrl(csp::common::String& Url)
 namespace csp::systems
 {
 
-ECommerceSystem::ECommerceSystem(csp::common::LogSystem& LogSystem)
-    : SystemBase(nullptr, nullptr, LogSystem)
+ECommerceSystem::ECommerceSystem()
+    : SystemBase(nullptr, nullptr, nullptr)
     , ShopifyAPI(nullptr)
 {
 }
 
 ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     ShopifyAPI = new chs::ShopifyApi(InWebClient);
 }

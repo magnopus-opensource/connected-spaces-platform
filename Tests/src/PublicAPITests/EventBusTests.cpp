@@ -98,7 +98,7 @@ public:
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback;
 
     TestSystem(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
-        : SystemBase(nullptr, InEventBus, LogSystem)
+        : SystemBase(nullptr, InEventBus, &LogSystem)
     {
         RegisterSystemCallback();
     }
@@ -139,7 +139,7 @@ public:
             return;
         }
 
-        csp::multiplayer::EventDeserialiser Deserialiser { LogSystem };
+        csp::multiplayer::EventDeserialiser Deserialiser { *LogSystem };
         Deserialiser.Parse(EventValues);
 
         TestCallback(true, Deserialiser.GetEventData());

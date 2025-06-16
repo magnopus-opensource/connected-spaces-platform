@@ -37,7 +37,7 @@ namespace csp::systems
 {
 
 EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     EventTicketingAPI = new chs::TicketedSpaceApi(InWebClient);
 }

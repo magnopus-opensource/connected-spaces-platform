@@ -350,7 +350,7 @@ public:
     CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
 private:
-    AssetSystem(csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, common::LogSystem& LogSystem);
     ~AssetSystem();
 
