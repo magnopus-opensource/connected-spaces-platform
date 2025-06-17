@@ -5,7 +5,5 @@ public {{ definition.name }}({{# parameters }}{{# type }}{{> Type }}{{/ type }} 
     {{/ parameters }}
     ))
 {
-{{# template_parameters }}
-    Is{{ name }}ProxyClass = typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}));
-{{/ template_parameters }}
 }
+    
