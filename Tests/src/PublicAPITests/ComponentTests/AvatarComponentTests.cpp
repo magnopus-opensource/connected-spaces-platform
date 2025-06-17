@@ -71,11 +71,11 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     const csp::common::String& UserName = "Creator 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.11f, 2.22f, 3.33f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = false;
-    AvatarState UserAvatarState = AvatarState::Idle;
+    const bool IsVisible = false;
+    const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "Creator1Avatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
+    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
     auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
@@ -113,21 +113,21 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
 
     // Set new AvatarSpaceComponent property values
     constexpr const char* NewAvatarId = "TestAvatarId";
-    AvatarState NewAvatarState = AvatarState::Flying;
-    AvatarPlayMode NewAvatarPlayMode = AvatarPlayMode::VR;
-    LocomotionModel NewAvatarLocomotionModel = LocomotionModel::FreeCamera;
-    bool NewIsVisible = true;
-    bool NewIsARVisible = false;
-    int64_t NewAvatarMeshIndex = 42;
-    csp::common::String NewAgoraUserId = "AgoraUser123";
-    csp::common::String NewCustomAvatarUrl = "https://example.com/avatar.png";
-    bool NewIsHandIKEnabled = true;
-    csp::common::Vector3 NewTargetHandIKTargetLocation = { 0.1f, 0.2f, 0.3f };
-    csp::common::Vector4 NewHandRotation = { 0.1f, 0.2f, 0.3f, 1.0f };
-    csp::common::Vector4 NewHeadRotation = { 0.4f, 0.5f, 0.6f, 1.0f };
-    float NewWalkRunBlendPercentage = 0.75f;
-    float NewTorsoTwistAlpha = 0.5f;
-    csp::common::Vector3 NewMovementDirection = { 0.0f, 1.0f, 0.0f };
+    const AvatarState NewAvatarState = AvatarState::Flying;
+    const AvatarPlayMode NewAvatarPlayMode = AvatarPlayMode::VR;
+    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::FreeCamera;
+    const bool NewIsVisible = true;
+    const bool NewIsARVisible = false;
+    const int64_t NewAvatarMeshIndex = 42;
+    const csp::common::String NewAgoraUserId = "AgoraUser123";
+    const csp::common::String NewCustomAvatarUrl = "https://example.com/avatar.png";
+    const bool NewIsHandIKEnabled = true;
+    const csp::common::Vector3 NewTargetHandIKTargetLocation = { 0.1f, 0.2f, 0.3f };
+    const csp::common::Vector4 NewHandRotation = { 0.1f, 0.2f, 0.3f, 1.0f };
+    const csp::common::Vector4 NewHeadRotation = { 0.4f, 0.5f, 0.6f, 1.0f };
+    const float NewWalkRunBlendPercentage = 0.75f;
+    const float NewTorsoTwistAlpha = 0.5f;
+    const csp::common::Vector3 NewMovementDirection = { 0.0f, 1.0f, 0.0f };
 
     AvatarComponent->SetAvatarId(NewAvatarId);
     AvatarComponent->SetState(NewAvatarState);
@@ -203,11 +203,11 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     const csp::common::String& UserName = "Creator 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.11f, 2.22f, 3.33f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    bool IsVisible = false;
-    AvatarState UserAvatarState = AvatarState::Idle;
+    const bool IsVisible = false;
+    const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "Creator1Avatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
+    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
     auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
