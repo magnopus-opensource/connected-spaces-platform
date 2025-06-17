@@ -83,12 +83,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -96,8 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
@@ -222,12 +215,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -235,8 +222,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
@@ -361,12 +347,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -374,8 +354,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
@@ -500,12 +479,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -513,8 +486,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
@@ -638,12 +610,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -651,8 +617,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
@@ -774,12 +739,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -787,8 +746,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::atomic_bool ScriptSystemReady = false;
 
