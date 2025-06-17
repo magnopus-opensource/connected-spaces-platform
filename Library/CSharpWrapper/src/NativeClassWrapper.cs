@@ -60,6 +60,16 @@ namespace Csp
             }
 
             var attr = (NativeClassWrapperAttribute)Attribute.GetCustomAttribute(type, typeof(NativeClassWrapperAttribute));
+            if (attr == null || string.IsNullOrEmpty(attr.SafeName))
+            {
+                throw new InvalidOperationException($"Type {type.Name} does not have a NativeClassWrapperAttribute.");
+            }
+
+            if (attr.Template)
+            {
+                throw new NotImplementedException($"Templated type {type.Name} is not supported through runtime reflection.");
+            }
+
             return attr?.SafeName ?? throw new InvalidOperationException($"Type {type.Name} does not have a NativeClassAttribute with a SafeName.");
         }
 
@@ -86,9 +96,18 @@ namespace Csp
     {
         public string SafeName { get; }
 
+        public bool Template { get; }
+
         public NativeClassWrapperAttribute(string safeName)
         {
             SafeName = safeName;
+            Template = false;
+        }
+
+        public NativeClassWrapperAttribute(string safeName, bool template)
+        {
+            SafeName = safeName;
+            Template = template;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace {{ definition.translated_namespace }}
 {{/ definition.methods }}
     }
 
-    [NativeClassWrapper("{{ definition.full_safe_type_name }}{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}")]
+    [NativeClassWrapper("{{ definition.full_safe_type_name }}, true")]
     {{> DocComments }}
     public class {{ definition.name }}<
 {{# template_parameters }}
