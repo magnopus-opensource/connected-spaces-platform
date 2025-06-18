@@ -23,7 +23,7 @@
 namespace csp::systems::maintenanceservice
 {
 MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationService)
+    : ApiBase(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
 {
 }
 
