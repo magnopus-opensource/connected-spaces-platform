@@ -23,7 +23,7 @@
 namespace csp
 {
 
-/// @brief Holds endpoint description used in requests for all Magnopus Serives.
+/// @brief Holds endpoint description used in requests for all Magnopus Services.
 class CSP_API ServiceDefinition
 {
 public:
