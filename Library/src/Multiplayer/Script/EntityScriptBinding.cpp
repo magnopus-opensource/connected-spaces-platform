@@ -346,7 +346,10 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AvatarSpaceComponent, HeadRotation, "headRotation")
         .PROPERTY_GET_SET(AvatarSpaceComponent, WalkRunBlendPercentage, "walkRunBlendPercentage")
         .PROPERTY_GET_SET(AvatarSpaceComponent, TorsoTwistAlpha, "torsoTwistAlpha")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarPlayMode, "avatarPlayMode");
+        .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarPlayMode, "avatarPlayMode")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, LocomotionModel, "locomotionModel")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible");
 
     Module->class_<ExternalLinkSpaceComponentScriptInterface>("ExternalLinkSpaceComponent")
         .constructor<>()
