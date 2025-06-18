@@ -218,7 +218,7 @@ using ResponseHandlerPtr = ApiResponseHandlerBase*;
 class ApiBase
 {
 public:
-    ApiBase(csp::web::WebClient* InWebClient, const csp::MCSServiceDefinition& InServiceDefinition)
+    ApiBase(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition)
         : WebClient(InWebClient)
         , ServiceDefinition(InServiceDefinition)
     {
@@ -238,7 +238,7 @@ public:
     }
 
     csp::web::WebClient* WebClient;
-    const MCSServiceDefinition& ServiceDefinition;
+    const ServiceDefinition& ServiceDefinition;
 };
 
 //
