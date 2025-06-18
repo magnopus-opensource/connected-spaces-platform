@@ -41,14 +41,14 @@ public:
 
     /// @brief Gets the URI for the service endpoint.
     /// @return csp::common::String : URI of the service endpoint.
-    const csp::common::String GetURI() const { return URI; }
+    csp::common::String GetURI() const { return URI; }
     /// @brief Sets the URI for the service endpoint.
     /// @param InURI csp::common::String : URI for service endpoint.
     void SetURI(const csp::common::String& InURI) { URI = InURI; }
 
     /// @brief Gets the current version of the service endpoint.
     /// @return int32_t : Representing the current version of the service endpoint.
-    const int32_t GetVersion() const { return Version; }
+    int32_t GetVersion() const { return Version; }
     /// @brief Sets the current Version for the service endpoint.
     /// @param InVersion uint32_t : Version for service endpoint.
     CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
