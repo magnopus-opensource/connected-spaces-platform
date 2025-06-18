@@ -1,0 +1,29 @@
+template <typename T> class CSP_API TemplateTestClass {
+public:
+    TemplateTestClass() {}
+
+    void SetValue(const T& Value) {
+        _value = alue;
+    }
+
+    /* These functions will not compile
+    const T& GetValue() const {
+        return value;
+    }
+
+    T GetValue() {
+        return value;
+    }
+    */
+
+    T& operator[](int index) {
+        return value;
+    }
+
+    const T& operator[](int index) const {
+        return value;
+    }
+
+private:
+    T value;
+};
