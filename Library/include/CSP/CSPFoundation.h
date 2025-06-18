@@ -23,6 +23,7 @@
 namespace csp
 {
 
+/// @brief Holds endpoint description used in requests for all Magnopus Serives.
 class CSP_API MCSServiceDefinition
 {
 public:
@@ -38,8 +39,8 @@ public:
     {
     }
 
-    /// @brief Gets the root URI for the service endpoint.
-    /// @return csp::common::String : The root URI of the service endpoint.
+    /// @brief Gets the URI for the service endpoint.
+    /// @return csp::common::String : URI of the service endpoint.
     const csp::common::String GetURI() const { return URI; }
     /// @brief Sets the URI for the service endpoint.
     /// @param InURI csp::common::String : URI for service endpoint.
