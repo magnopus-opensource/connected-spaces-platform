@@ -73,7 +73,6 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
     {
         if (LogSystem != nullptr)
         {
-            // Review Q, this error is weird ... we're already calling CreateConversation...?
             LogSystem->LogMsg(csp::common::LogLevel::Error, "This component already has an associated conversation.");
         }
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
