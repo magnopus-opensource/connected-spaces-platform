@@ -1175,7 +1175,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
     }
 
     // 3. Handle any component deletions
-    ComponentBase DeletionComponent(ComponentType::Delete, csp::systems::SystemsManager::Get().GetLogSystem(), const_cast<SpaceEntity*>(this));
+    ComponentBase DeletionComponent(ComponentType::Delete, LogSystem, const_cast<SpaceEntity*>(this));
 
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {
