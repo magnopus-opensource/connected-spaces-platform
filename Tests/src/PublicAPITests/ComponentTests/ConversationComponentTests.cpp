@@ -578,8 +578,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
 
-    static const csp::common::String AlreadyHasConversationErrorLog = "This component does not have an associated conversation. "
-                                                                      "Call CreateConversation to create a new conversation for this component";
+    static const csp::common::String AlreadyHasConversationErrorLog = "This component already has an associated conversation.";
 
     // Ensure CreateConversation errors and logs appropriately when a conversation has already been created
     {
