@@ -24,16 +24,16 @@ namespace csp
 {
 
 /// @brief Holds endpoint description used in requests for all Magnopus Serives.
-class CSP_API MCSServiceDefinition
+class CSP_API ServiceDefinition
 {
 public:
-    MCSServiceDefinition()
+    ServiceDefinition()
         : URI("")
         , Version(0)
     {
     }
 
-    MCSServiceDefinition(const csp::common::String& InURI, const uint32_t InVersion)
+    ServiceDefinition(const csp::common::String& InURI, const uint32_t InVersion)
         : URI(InURI)
         , Version(InVersion)
     {
@@ -62,15 +62,13 @@ private:
 class CSP_API EndpointURIs
 {
 public:
-    MCSServiceDefinition UserService;
-    MCSServiceDefinition PrototypeService;
-    MCSServiceDefinition SpatialDataService;
-    MCSServiceDefinition MultiplayerService;
-    MCSServiceDefinition AggregationService;
-    MCSServiceDefinition TrackingService;
-    MCSServiceDefinition MaintenanceWindow;
-
-private:
+    ServiceDefinition UserService;
+    ServiceDefinition PrototypeService;
+    ServiceDefinition SpatialDataService;
+    ServiceDefinition MultiplayerService;
+    ServiceDefinition AggregationService;
+    ServiceDefinition TrackingService;
+    ServiceDefinition MaintenanceWindow;
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.
