@@ -157,7 +157,7 @@ Consider the method GetAssetCollectionById in the AssetSystem class, which demon
 void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetCollectionResultCallback Callback)
 {
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdGet(AssetCollectionId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdGet(AssetCollectionId, ResponseHandler);
 }
 ```
 

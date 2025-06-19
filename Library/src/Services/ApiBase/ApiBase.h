@@ -218,9 +218,9 @@ using ResponseHandlerPtr = ApiResponseHandlerBase*;
 class ApiBase
 {
 public:
-    ApiBase(csp::web::WebClient* InWebClient, const csp::common::String* InRootUri)
+    ApiBase(csp::web::WebClient* InWebClient, const csp::ServiceDefinition& InServiceDefinition)
         : WebClient(InWebClient)
-        , RootUri(InRootUri)
+        , ServiceDefinition(InServiceDefinition)
     {
     }
 
@@ -238,7 +238,7 @@ public:
     }
 
     csp::web::WebClient* WebClient;
-    const csp::common::String* RootUri;
+    const ServiceDefinition& ServiceDefinition;
 };
 
 //

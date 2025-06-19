@@ -100,7 +100,7 @@ Request->SetInitialSettings({InitialSettings});
 * Finally, CSP will invoke the services endpoint to create the user profile, passing the `CreateUserRequest` object, and a callback to handle the response.
 
 ```
-static_cast<ProfileApi*>(ProfileAPI)->apiV1UsersPost(Request, ResponseHandler);
+static_cast<ProfileApi*>(ProfileAPI)->usersPost(Request, ResponseHandler);
 ```
 
 Here is a simplified example of the CreateUser method in action:
@@ -131,7 +131,7 @@ void UserSystem::CreateUser(const Optional<String>& UserName,
 	InitialSettings->SetSettings({{"Newsletter", ReceiveNewsletter ? "true" : "false"}});
 	Request->SetInitialSettings({InitialSettings});
 
-	static_cast<ProfileApi*>(ProfileAPI)->apiV1UsersPost(Request, ResponseHandler);
+	static_cast<ProfileApi*>(ProfileAPI)->usersPost(Request, ResponseHandler);
 }
 ```
 
@@ -228,7 +228,7 @@ void UserSystem::UpdateUserDisplayName(const String& UserId,
                                 void, chs_user::ProfileDto>(Callback, nullptr,
                                 csp::web::EResponseCodes::ResponseOk);
 
-   static_cast<ProfileApi*>(ProfileAPI)->apiV1UsersDisplayNamePatch(Request, ResponseHandler);
+   static_cast<ProfileApi*>(ProfileAPI)->usersDisplayNamePatch(Request, ResponseHandler);
 }
 ```
 
