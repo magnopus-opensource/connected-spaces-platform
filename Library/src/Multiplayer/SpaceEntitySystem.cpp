@@ -259,7 +259,7 @@ namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(csp::systems::UserSystem& UserSystem,
         csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, uint64_t NetworkId, const csp::common::String& Name,
-        const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
+        const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId, bool IsTransferable, bool IsPersistent,
         const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState, csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(
@@ -270,6 +270,7 @@ namespace
         AvatarComponent->SetState(AvatarState);
         AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
         AvatarComponent->SetUserId(UserSystem.GetLoginState().UserId);
+        AvatarComponent->SetIsVisible(IsVisible);
 
         return NewAvatar;
     }
@@ -296,12 +297,12 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
 }
 
 std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SpaceEntitySystem::SendNewAvatarObjectMessage(
-    const csp::common::String& Name, const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState,
+    const csp::common::String& Name, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState,
     AvatarPlayMode AvatarPlayMode)
 {
-    return [Name, Transform, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
+    return [Name, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform,
+        auto NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
@@ -315,10 +316,10 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
 }
 
 std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> SpaceEntitySystem::CreateNewLocalAvatar(
-    const csp::common::String& Name, const SpaceTransform& Transform, const csp::common::String& AvatarId, AvatarState AvatarState,
+    const csp::common::String& Name, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState,
     AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback)
 {
-    return [Name, Transform, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
+    return [Name, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
                std::tuple<async::shared_task<uint64_t>, async::task<void>> NetworkIdFromChain)
     {
         uint64_t NetworkId = std::get<0>(NetworkIdFromChain).get();
@@ -342,7 +343,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
         std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(*csp::systems::SystemsManager::Get().GetUserSystem(), *this,
-            NetworkId, Name, Transform, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
+            NetworkId, Name, Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
         // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
@@ -359,7 +360,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
     };
 }
 
-void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, AvatarState InState,
+void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, bool IsVisible, AvatarState InState,
     const csp::common::String& InAvatarId, AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback)
 {
 
@@ -368,13 +369,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 
     // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
     async::task<void> SerializeAndSendChain
-        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode))
+        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(InName, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode))
               .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 
     // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
-        .then(CreateNewLocalAvatar(InName, InSpaceTransform, InAvatarId, InState, InAvatarPlayMode, Callback))
+        .then(CreateNewLocalAvatar(InName, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& Except)
             {

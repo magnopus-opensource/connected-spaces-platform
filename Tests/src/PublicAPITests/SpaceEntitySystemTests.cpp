@@ -147,10 +147,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage("Username", UserTransform, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+            SpaceEntitySystem->SendNewAvatarObjectMessage(
+                "Username", UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
@@ -188,10 +190,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage("Username", UserTransform, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+            SpaceEntitySystem->SendNewAvatarObjectMessage(
+                "Username", UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
@@ -235,10 +239,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
     const uint64_t Id = 55;
     const SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
 
     EXPECT_CALL(MockCallback, Call(::testing::_))
         .WillOnce(::testing::Invoke(
-            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, &UserTransform](SpaceEntity* CreatedSpaceEntity)
+            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, &UserTransform, IsVisible](SpaceEntity* CreatedSpaceEntity)
             {
                 ASSERT_NE(CreatedSpaceEntity, nullptr);
                 ASSERT_EQ(CreatedSpaceEntity->GetId(), Id);
@@ -254,6 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
                 ASSERT_EQ(AvatarComponent->GetAvatarId(), AvatarId);
                 ASSERT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode);
                 ASSERT_EQ(AvatarComponent->GetState(), AvatarState);
+                ASSERT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
             }));
 
     async::spawn(async::inline_scheduler(),
@@ -262,7 +268,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
             return std::make_tuple(async::make_task(uint64_t { 55 }).share(), async::make_task());
         }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->CreateNewLocalAvatar(Username, UserTransform, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
+            SpaceEntitySystem->CreateNewLocalAvatar(
+                Username, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
@@ -301,8 +308,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
 
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
 
-    SpaceEntitySystem->CreateAvatar("Username", UserTransform, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
+    SpaceEntitySystem->CreateAvatar(
+        "Username", UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
