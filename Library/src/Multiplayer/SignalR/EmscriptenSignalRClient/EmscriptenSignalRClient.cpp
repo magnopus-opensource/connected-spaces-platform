@@ -182,8 +182,7 @@ std::string CSPWebSocketClientEmscripten::GetWebSocketConnectURL(const std::stri
     {
         std::string WebSocketEndpoint = InitialUrl.substr(0, QueryParamPos);
 
-        WebSocketConnectURL
-            = WebSocketEndpoint + "?access_token=" + AccessToken + "&X-DeviceUDID=" + std::string(csp::CSPFoundation::GetDeviceId().c_str());
+        WebSocketConnectURL = WebSocketEndpoint + "?access_token=" + AccessToken + "&X-DeviceUDID=" + DeviceId;
         EMS_FORMATTED_LOG("WebSocket connect URL: %s", WebSocketConnectURL.c_str());
     }
     else
