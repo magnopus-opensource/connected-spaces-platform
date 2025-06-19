@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/String.h"
 
 #include <functional>
@@ -35,7 +36,7 @@ public:
 };
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
-class CSP_API ScriptSystem
+class CSP_API ScriptSystem : csp::common::IJSScriptRunner
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
@@ -54,7 +55,7 @@ public:
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptText : The script to execute.
     /// @return a boolean representing success running the script.
-    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText);
+    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override;
     /// @brief Attempts to execute a script from a given file path in the given context.
     /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptFilePath  : The file path of the script to execute.

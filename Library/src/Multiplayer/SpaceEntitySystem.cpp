@@ -202,7 +202,8 @@ SpaceEntitySystem::SpaceEntitySystem()
 {
 }
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
+SpaceEntitySystem::SpaceEntitySystem(
+    MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
@@ -218,7 +219,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
 {
-    Initialise();
+    Initialise(RemoteScriptRunner);
 }
 
 SpaceEntitySystem::~SpaceEntitySystem()
@@ -236,14 +237,14 @@ SpaceEntitySystem::~SpaceEntitySystem()
     delete (PendingIncomingUpdates);
 }
 
-void SpaceEntitySystem::Initialise()
+void SpaceEntitySystem::Initialise(csp::common::IJSScriptRunner& RemoteScriptRunner)
 {
     if (IsInitialised)
     {
         return;
     }
 
-    EnableLeaderElection();
+    EnableLeaderElection(RemoteScriptRunner);
 
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *LogSystem);
 
@@ -1092,11 +1093,11 @@ bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, Spac
     return false;
 }
 
-void SpaceEntitySystem::EnableLeaderElection()
+void SpaceEntitySystem::EnableLeaderElection(csp::common::IJSScriptRunner& RemoteScriptRunner)
 {
     if (ElectionManager == nullptr)
     {
-        ElectionManager = new ClientElectionManager(this, *LogSystem);
+        ElectionManager = new ClientElectionManager(this, *LogSystem, RemoteScriptRunner);
     }
 }
 

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
@@ -271,7 +272,9 @@ public:
     bool SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity);
 
     /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
+    /// @param RemoteScriptRunner IJSScriptRunner : Object capable of running a script. Called to execute scripts when the leader election system
+    /// receives a remote script run event.
+    void EnableLeaderElection(csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief Disable Leader Election feature.
     void DisableLeaderElection();
@@ -337,14 +340,18 @@ public:
     CSP_NO_EXPORT void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /// @brief Initialise the SpaceEntitySystem
-    CSP_NO_EXPORT void Initialise();
+    /// @param RemoteScriptRunner IJSScriptRunner : Object capable of running a script. Called to execute scripts when the leader election system
+    /// receives a remote script run event.
+    CSP_NO_EXPORT void Initialise(csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief Shut down the SpaceEntitySystem
     CSP_NO_EXPORT void Shutdown();
 
     /// @brief SpaceEntitySystem constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
-    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
+    /// @param
+    CSP_NO_EXPORT SpaceEntitySystem(
+        MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();

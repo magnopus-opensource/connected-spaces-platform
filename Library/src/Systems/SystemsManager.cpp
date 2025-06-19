@@ -160,7 +160,7 @@ void SystemsManager::CreateSystems()
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus, *LogSystem);
 
     // Not a SystemBase inheritor (to become IRealtimeEngine anyway)
-    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, *LogSystem);
+    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, *LogSystem, *ScriptSystem);
 }
 
 void SystemsManager::DestroySystems()

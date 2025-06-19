@@ -28,9 +28,6 @@
 #include "signalrclient/signalr_value.h"
 #include <fmt/format.h>
 
-// Only used to access the script system ... needs broken.
-#include "CSP/Systems/SystemsManager.h"
-
 namespace csp::multiplayer
 {
 
@@ -61,7 +58,8 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
     }
 }
 
-ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem)
+ClientElectionManager::ClientElectionManager(
+    SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
     : SpaceEntitySystemPtr(InSpaceEntitySystem)
     , LogSystem(LogSystem)
     , EventHandler(new ClientElectionEventHandler(this))
@@ -69,6 +67,7 @@ ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySys
     , TheElectionState(ElectionState::Idle)
     , LocalClient(nullptr)
     , Leader(nullptr)
+    , RemoteScriptRunner(JSScriptRunner)
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -218,7 +217,6 @@ ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* Cli
 
 ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 {
-
     LogSystem.LogMsg(
         csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", ClientId).c_str());
 
@@ -537,9 +535,7 @@ void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<Repl
     {
         if (IsLocalClientLeader())
         {
-            // Ach! What to do about this eh...
-            csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-            TheScriptSystem->RunScript(ContextId, ScriptText);
+            RemoteScriptRunner.RunScript(ContextId, ScriptText);
         }
         else
         {
