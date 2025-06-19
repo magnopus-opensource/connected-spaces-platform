@@ -105,7 +105,7 @@ EM_BOOL onDataReceived([[maybe_unused]] int EventType, const EmscriptenWebSocket
     return EM_TRUE;
 }
 
-CSPWebSocketClientEmscripten::CSPWebSocketClientEmscripten(const std::string& AccessToken, , const std::string& DeviceId) noexcept
+CSPWebSocketClientEmscripten::CSPWebSocketClientEmscripten(const std::string& AccessToken, const std::string& DeviceId) noexcept
     : ReceivedHandshake(false)
     , AccessToken { AccessToken }
     , DeviceId { DeviceId }
