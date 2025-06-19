@@ -19,7 +19,6 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/WebSocketClient.h"
 
 #ifdef CSP_WASM
@@ -30,6 +29,9 @@
 
 #include <stdexcept>
 #include <thread>
+
+// Only used in this file for profiling macros. Still needs broken
+#include "Debug/Logging.h"
 
 using namespace signalr;
 

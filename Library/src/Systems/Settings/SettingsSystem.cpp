@@ -44,13 +44,13 @@ namespace csp::systems
 {
 
 SettingsSystem::SettingsSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , SettingsAPI(nullptr)
 {
 }
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+SettingsSystem::SettingsSystem(web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     SettingsAPI = new chs::SettingsApi(InWebClient);
 }

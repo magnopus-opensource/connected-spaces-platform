@@ -15,17 +15,17 @@
  */
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
-#include <Debug/Logging.h>
 #include <algorithm>
 #include <functional>
 
 namespace csp::multiplayer
 {
 
-CustomSpaceComponent::CustomSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Custom, Parent) //, NumProperties(2)
+CustomSpaceComponent::CustomSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Custom, LogSystem, Parent) //, NumProperties(2)
 {
     Properties[static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin)] = "";
 
@@ -170,7 +170,10 @@ void CustomSpaceComponent::RemoveKey(const csp::common::String& Key)
     }
     else
     {
-        CSP_LOG_ERROR_MSG("Key Not Found.");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Key Not Found.");
+        }
     }
 }
 

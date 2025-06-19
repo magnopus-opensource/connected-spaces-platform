@@ -26,13 +26,13 @@ namespace csp::systems
 {
 
 AnchorSystem::AnchorSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , AnchorsAPI(nullptr)
 {
 }
 
-AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     AnchorsAPI = new chs::AnchorsApi(InWebClient);
 }

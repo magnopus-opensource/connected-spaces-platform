@@ -17,13 +17,12 @@
 
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Debug/Logging.h"
 
 namespace csp::multiplayer
 {
 
-ScriptSpaceComponent::ScriptSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ScriptData, Parent)
+ScriptSpaceComponent::ScriptSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::ScriptData, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource)] = "";
     Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)] = static_cast<int64_t>(0);

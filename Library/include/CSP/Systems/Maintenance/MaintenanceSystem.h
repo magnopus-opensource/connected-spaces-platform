@@ -57,7 +57,7 @@ public:
 
 private:
     MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
+    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~MaintenanceSystem();
 
     csp::services::ApiBase* MaintenanceAPI;

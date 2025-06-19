@@ -57,7 +57,7 @@ class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableCom
 public:
     /// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    PortalSpaceComponent(SpaceEntity* Parent);
+    PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Retrieves the space ID that this portal points to.
     /// @note When the user uses the portal, it should be able to leave the current space and enter the one

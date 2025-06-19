@@ -16,6 +16,8 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
@@ -43,7 +45,6 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Common/Convert.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -52,8 +53,12 @@
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
+#include <fmt/format.h>
 #include <glm/gtc/quaternion.hpp>
 #include <thread>
+
+// Ach, not quite broken yet
+#include "CSP/Systems/SystemsManager.h"
 
 using namespace std::chrono;
 
@@ -100,13 +105,14 @@ SpaceEntity::SpaceEntity()
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, nullptr)
+    , Script(this, nullptr, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
+    , LogSystem(nullptr)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
@@ -122,15 +128,16 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, InEntitySystem)
+    , Script(this, InEntitySystem, LogSystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
+    , LogSystem(LogSystem)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
-    const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent)
-    : SpaceEntity(EntitySystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
+    const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent)
+    : SpaceEntity(EntitySystem, LogSystem)
 {
     this->Id = Id;
     this->Type = Type;
@@ -162,9 +169,14 @@ void SpaceEntity::SetName(const csp::common::String& Value)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -213,9 +225,14 @@ void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -250,9 +267,14 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -279,9 +301,14 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -303,9 +330,14 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -323,9 +355,14 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -409,7 +446,10 @@ void SpaceEntity::MarkForUpdate()
     }
     else
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
+        }
     }
 }
 
@@ -431,7 +471,10 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_MSG("Entity is locked. New components can not be added to a locked Entity.");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. New components can not be added to a locked Entity.");
+        }
 
         return nullptr;
     }
@@ -444,7 +487,10 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 
         if (ScriptComponent)
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+            }
 
             // Return the existing script component
             return ScriptComponent;
@@ -468,7 +514,10 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
 {
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_MSG("Entity is locked. Components can not be removed from a locked Entity.");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. Components can not be removed from a locked Entity.");
+        }
 
         return;
     }
@@ -482,7 +531,10 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
     }
     else
     {
-        CSP_LOG_ERROR_MSG("RemoveComponent: No Component with the specified key found!");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "RemoveComponent: No Component with the specified key found!");
+        }
     }
 }
 
@@ -715,78 +767,81 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
     switch (InstantiateType)
     {
     case ComponentType::StaticModel:
-        Component = new StaticModelSpaceComponent(this);
+        Component = new StaticModelSpaceComponent(LogSystem, this);
         break;
     case ComponentType::AnimatedModel:
-        Component = new AnimatedModelSpaceComponent(this);
+        Component = new AnimatedModelSpaceComponent(LogSystem, this);
         break;
     case ComponentType::VideoPlayer:
-        Component = new VideoPlayerSpaceComponent(this);
+        Component = new VideoPlayerSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Image:
-        Component = new ImageSpaceComponent(this);
+        Component = new ImageSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ExternalLink:
-        Component = new ExternalLinkSpaceComponent(this);
+        Component = new ExternalLinkSpaceComponent(LogSystem, this);
         break;
     case ComponentType::AvatarData:
-        Component = new AvatarSpaceComponent(this);
+        Component = new AvatarSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Light:
-        Component = new LightSpaceComponent(this);
+        Component = new LightSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ScriptData:
-        Component = new ScriptSpaceComponent(this);
+        Component = new ScriptSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Button:
-        Component = new ButtonSpaceComponent(this);
+        Component = new ButtonSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Custom:
-        Component = new CustomSpaceComponent(this);
+        Component = new CustomSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Portal:
-        Component = new PortalSpaceComponent(this);
+        Component = new PortalSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Conversation:
-        Component = new ConversationSpaceComponent(this);
+        Component = new ConversationSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Audio:
-        Component = new AudioSpaceComponent(this);
+        Component = new AudioSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Spline:
-        Component = new SplineSpaceComponent(this);
+        Component = new SplineSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Collision:
-        Component = new CollisionSpaceComponent(this);
+        Component = new CollisionSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Reflection:
-        Component = new ReflectionSpaceComponent(this);
+        Component = new ReflectionSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Fog:
-        Component = new FogSpaceComponent(this);
+        Component = new FogSpaceComponent(LogSystem, this);
         break;
     case ComponentType::ECommerce:
-        Component = new ECommerceSpaceComponent(this);
+        Component = new ECommerceSpaceComponent(LogSystem, this);
         break;
     case ComponentType::CinematicCamera:
-        Component = new CinematicCameraSpaceComponent(this);
+        Component = new CinematicCameraSpaceComponent(LogSystem, this);
         break;
     case ComponentType::FiducialMarker:
-        Component = new FiducialMarkerSpaceComponent(this);
+        Component = new FiducialMarkerSpaceComponent(LogSystem, this);
         break;
     case ComponentType::GaussianSplat:
-        Component = new GaussianSplatSpaceComponent(this);
+        Component = new GaussianSplatSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Text:
-        Component = new TextSpaceComponent(this);
+        Component = new TextSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Hotspot:
-        Component = new HotspotSpaceComponent(this);
+        Component = new HotspotSpaceComponent(LogSystem, this);
         break;
     default:
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning,
-            csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(InstantiateType)));
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(
+                csp::common::LogLevel::Warning, fmt::format("Unknown Component type of value: {}", static_cast<uint32_t>(InstantiateType)).c_str());
+        }
         return nullptr;
     }
     }
@@ -851,15 +906,23 @@ void SpaceEntity::Lock()
 {
     if (IsLocked())
     {
-        CSP_LOG_ERROR_MSG("Entity is already locked.")
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is already locked.");
+        }
         return;
     }
 
     if (!IsModifiable())
     {
-        CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                             "owner of. Entity name: %s",
-            Name.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name)
+                    .c_str());
+        }
         return;
     }
 
@@ -873,7 +936,10 @@ void SpaceEntity::Unlock()
 {
     if (IsLocked() == false)
     {
-        CSP_LOG_ERROR_MSG("Entity is not currently locked.")
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is not currently locked.");
+        }
         return;
     }
 
@@ -936,7 +1002,10 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
     }
     else
     {
-        CSP_LOG_ERROR_MSG("DestroyComponent: Key Does Not Exist")
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "DestroyComponent: Key Does Not Exist");
+        }
     }
 }
 
@@ -1015,8 +1084,11 @@ void SpaceEntity::ResolveParentChildRelationship()
         }
         else
         {
-            CSP_LOG_ERROR_FORMAT(
-                "SpaceEntity unable to find parent for entity: %s. Please report if this issue is encountered.", std::to_string(GetId()).c_str());
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("SpaceEntity unable to find parent for entity: {}. Please report if this issue is encountered.", GetId()).c_str());
+            }
             return;
         }
     }
@@ -1103,7 +1175,7 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
     }
 
     // 3. Handle any component deletions
-    ComponentBase DeletionComponent(ComponentType::Delete, const_cast<SpaceEntity*>(this));
+    ComponentBase DeletionComponent(ComponentType::Delete, LogSystem, const_cast<SpaceEntity*>(this));
 
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {

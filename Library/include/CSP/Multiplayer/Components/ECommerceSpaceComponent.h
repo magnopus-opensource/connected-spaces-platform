@@ -43,7 +43,7 @@ class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionCo
 public:
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    ECommerceSpaceComponent(SpaceEntity* Parent);
+    ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// \addtogroup ITransformComponent
     /// @{

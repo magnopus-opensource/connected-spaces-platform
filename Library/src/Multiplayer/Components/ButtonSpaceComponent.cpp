@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ButtonSpaceComponent::ButtonSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Button, Parent)
+ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Button, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::LabelText)] = "";
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IconAssetId)] = "";

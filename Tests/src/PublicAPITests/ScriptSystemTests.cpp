@@ -35,6 +35,7 @@
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>
+#include <gmock/gmock.h>
 
 using namespace csp::multiplayer;
 
@@ -42,6 +43,18 @@ void OnUserCreated(SpaceEntity* InUser);
 
 namespace
 {
+
+/* We need to unset the mock logger before CSP shuts down,
+ * because you get interdependent memory errors in the "Foundation shutdown"
+ * log if you don't. (Another reason we don't want to be starting/stopping
+ * ALL of CSP in these tests really.)
+ */
+struct RAIIMockLogger
+{
+    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
+    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
+    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
+};
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -460,7 +473,16 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
 
-    std::string AvatarScriptText = R"xx(
+    RAIIMockLogger MockLogger;
+    // Expect 2 logs
+    // The script logger naeively adds spaces to allow lots of arguments to be passed, which is why the test data has a weird trailing space.
+    csp::common::String CSPLogMsg = "Testing CSP.Log ";
+    csp::common::String OKOLogMsg = "Testing OKO.Log ";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(CSPLogMsg));
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(OKOLogMsg));
+
+    std::string AvatarCSPLogScriptText = R"xx(
 
         import * as CSP from "CSP";
 
@@ -468,10 +490,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().SetScriptSource(AvatarCSPLogScriptText.c_str());
     Avatar->GetScript().Invoke();
 
-    std::string AvatarOKOScriptText = R"xx(
+    std::string AvatarOKOLogScriptText = R"xx(
 
         import * as OKO from "OKO";
 
@@ -479,7 +501,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().SetScriptSource(AvatarOKOLogScriptText.c_str());
     Avatar->GetScript().Invoke();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
