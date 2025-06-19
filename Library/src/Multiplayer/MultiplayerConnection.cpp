@@ -351,7 +351,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
+    const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -366,9 +367,9 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
     }
 
 #ifdef CSP_WASM
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(AccessToken.c_str());
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(AccessToken.c_str(), DeviceId.c_str());
 #else
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), LogSystem);
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), LogSystem);
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 

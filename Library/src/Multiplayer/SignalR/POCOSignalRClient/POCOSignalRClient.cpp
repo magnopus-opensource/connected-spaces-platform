@@ -36,10 +36,12 @@ constexpr const size_t RECEIVE_BLOCK_SIZE = 4096;
 namespace csp::multiplayer
 {
 
-CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(const std::string& AccessToken, csp::common::LogSystem& LogSystem) noexcept
+CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(
+    const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept
     : PocoWebSocket(nullptr)
     , StopFlag(false)
     , AccessToken { AccessToken }
+    , DeviceId { DeviceId }
     , LogSystem(LogSystem)
 {
 }

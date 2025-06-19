@@ -27,7 +27,7 @@ namespace csp::multiplayer
 class CSPWebSocketClientEmscripten : public IWebSocketClient
 {
 public:
-    CSPWebSocketClientEmscripten(const std::string& AccessToken) noexcept;
+    CSPWebSocketClientEmscripten(const std::string& AccessToken, const std::string& DeviceId) noexcept;
     ~CSPWebSocketClientEmscripten() {};
 
     void Start(const std::string& Url, CallbackHandler Callback) override;
@@ -52,6 +52,7 @@ private:
     ReceiveHandler ReceiveCallback;
     bool ReceivedHandshake;
     std::string AccessToken;
+    std::string DeviceId;
 };
 
 } // namespace csp::multiplayer

@@ -171,8 +171,8 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(
-                    ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(), LoginStateRes.GetLoginState().AccessToken);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
+                    LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -232,8 +232,8 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(
-                    ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(), LoginStateRes.GetLoginState().AccessToken);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
+                    LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
             }
             else
             {
@@ -321,8 +321,8 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(
-                    ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(), LoginStateRes.GetLoginState().AccessToken);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
+                    LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
             }
             else
             {
@@ -447,8 +447,8 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
             };
 
             auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(
-                ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(), LoginStateRes.GetLoginState().AccessToken);
+            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
+                LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
         }
         else
         {

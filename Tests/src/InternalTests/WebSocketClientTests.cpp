@@ -42,7 +42,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str());
+    auto* WebSocket = WebSocketStart(
+        csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
 
     // Stop
     WebSocketStop(WebSocket);
@@ -64,7 +65,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str());
+    auto* WebSocket = WebSocketStart(
+        csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
 
     // Send
     WebSocketSend(WebSocket, "test");
@@ -89,7 +91,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str());
+    auto* WebSocket = WebSocketStart(
+        csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI, csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
 
     // Receive
     WebSocketSendReceive(WebSocket);
