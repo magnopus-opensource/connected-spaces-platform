@@ -89,7 +89,7 @@ public:
     /// This constructor should not be called directly. Instead, use the SpaceEntity::AddComponent function.
     /// @param Parent csp::multiplayer::SpaceEntity* : The Space entity that owns this component. This will also register the component to the entity.
     /// @pre Parent must not be null.
-    ConversationSpaceComponent(SpaceEntity* Parent);
+    ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Creates a conversation represented by this component.
     /// @param Message const csp::common::String& : The message to be stored.

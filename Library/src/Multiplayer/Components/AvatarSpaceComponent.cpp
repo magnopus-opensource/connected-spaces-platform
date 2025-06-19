@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::AvatarData, Parent)
+AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::AvatarData, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId)] = "";
@@ -39,6 +38,8 @@ AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode)] = static_cast<int64_t>(AvatarPlayMode::Default);
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)] = static_cast<int64_t>(LocomotionModel::Grounded);
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)] = true;
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
@@ -189,5 +190,13 @@ void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)
 {
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(Value));
 }
+
+bool AvatarSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)); }
+
+void AvatarSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible), InValue); }
+
+bool AvatarSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)); }
+
+void AvatarSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible), InValue); }
 
 } // namespace csp::multiplayer

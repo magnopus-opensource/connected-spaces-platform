@@ -45,8 +45,8 @@ public:
     /** @endcond */
     CSP_END_IGNORE
 
-    HotspotSequenceSystem(
-        csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem, csp::multiplayer::EventBus* InEventBus);
+    HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
+        csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     /// @brief Create a Hotspot group
     /// @param GroupName csp::common::String : The unique grouping name
     /// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
@@ -105,7 +105,8 @@ public:
     CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
 private:
-    HotspotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    HotspotSequenceSystem(
+        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
     csp::systems::SequenceSystem* SequenceSystem;
     csp::systems::SpaceSystem* SpaceSystem;
 

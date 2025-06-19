@@ -82,7 +82,7 @@ csp::common::String FormatScopesForURL(csp::common::Array<csp::common::String> S
 }
 
 UserSystem::UserSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , AuthenticationAPI(nullptr)
     , ProfileAPI(nullptr)
     , PingAPI(nullptr)
@@ -90,8 +90,8 @@ UserSystem::UserSystem()
 {
 }
 
-UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus)
-    : SystemBase(InWebClient, InEventBus)
+UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, InEventBus, &LogSystem)
     , RefreshTokenChangedCallback(nullptr)
 {
     AuthenticationAPI = new chs_user::AuthenticationApi(InWebClient);
@@ -824,7 +824,7 @@ void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser;
+    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser { *LogSystem };
     Deserialiser.Parse(EventValues);
     UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 }

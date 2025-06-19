@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 #include "POCOSignalRClient.h"
-
-#include "Debug/Logging.h"
-
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/URI.h>
 #include <chrono>
+#include <fmt/format.h>
 #include <stdexcept>
 #include <thread>
+
+// For the profiling stuff ... needs broken, or just removed.
+#include <Debug/Logging.h>
 
 using namespace std::chrono_literals;
 
@@ -34,10 +36,11 @@ constexpr const size_t RECEIVE_BLOCK_SIZE = 4096;
 namespace csp::multiplayer
 {
 
-CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(const std::string& AccessToken) noexcept
+CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(const std::string& AccessToken, csp::common::LogSystem& LogSystem) noexcept
     : PocoWebSocket(nullptr)
     , StopFlag(false)
     , AccessToken { AccessToken }
+    , LogSystem(LogSystem)
 {
 }
 
@@ -110,8 +113,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
     }
     catch (std::exception& e)
     {
-        CSP_UNUSED(e);
-        CSP_LOG_ERROR_FORMAT("Exception %s", e.what());
+        LogSystem.LogMsg(csp::common::LogLevel::Error, e.what());
 
         Callback(false);
     }
@@ -151,7 +153,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
         }
         catch (const std::exception&)
         {
-            CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to close socket.");
         }
 
         delete (PocoWebSocket);
@@ -195,7 +197,7 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
     }
     catch (const std::exception&)
     {
-        CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to send data to socket.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Failed to send data to socket.");
     }
 
     Callback(Succeeded);
@@ -260,7 +262,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
                 auto* NewBuffer = std::realloc(Buffer, CurrentBufferSize * 2);
                 Buffer = static_cast<char*>(NewBuffer);
                 CurrentBufferSize = CurrentBufferSize * 2;
-                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);
+                LogSystem.LogMsg(csp::common::LogLevel::Log, fmt::format("Resizing receive buffer to {}", CurrentBufferSize).c_str());
             }
 
             try
@@ -424,7 +426,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
 void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)
 {
-    CSP_LOG_ERROR_MSG(Message.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Error, Message.c_str());
 
     if (ReceiveCallback)
     {

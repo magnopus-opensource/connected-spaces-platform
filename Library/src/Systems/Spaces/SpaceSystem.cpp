@@ -62,14 +62,14 @@ namespace csp::systems
 {
 
 SpaceSystem::SpaceSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , GroupAPI(nullptr)
     , SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
     , CurrentSpace()
 {
     GroupAPI = new chs::GroupApi(InWebClient);
@@ -368,12 +368,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
         .then(async::inline_scheduler(),
             common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", MakeInvalid<NullResult>(),
-                csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
+                *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
         .then(async::inline_scheduler(),
             csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace](const std::exception& /*Except*/)
                 { CurrentSpace = {}; },
-                csp::systems::SystemsManager::Get().GetLogSystem()));
+                *csp::systems::SystemsManager::Get().GetLogSystem()));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
@@ -481,7 +481,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
 
                 Callback(MakeInvalid<SpaceResult>());
             },
-            csp::systems::SystemsManager::Get().GetLogSystem()));
+            *csp::systems::SystemsManager::Get().GetLogSystem()));
 }
 
 /*
@@ -535,7 +535,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 
                 Callback(MakeInvalid<SpaceResult>());
             },
-            csp::systems::SystemsManager::Get().GetLogSystem()));
+            *csp::systems::SystemsManager::Get().GetLogSystem()));
 }
 
 void SpaceSystem::UpdateSpace(const String& SpaceId, const Optional<String>& Name, const Optional<String>& Description,

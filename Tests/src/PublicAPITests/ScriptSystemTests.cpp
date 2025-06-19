@@ -35,6 +35,7 @@
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>
+#include <gmock/gmock.h>
 
 using namespace csp::multiplayer;
 
@@ -42,6 +43,18 @@ void OnUserCreated(SpaceEntity* InUser);
 
 namespace
 {
+
+/* We need to unset the mock logger before CSP shuts down,
+ * because you get interdependent memory errors in the "Foundation shutdown"
+ * log if you don't. (Another reason we don't want to be starting/stopping
+ * ALL of CSP in these tests really.)
+ */
+struct RAIIMockLogger
+{
+    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
+    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
+    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
+};
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -242,12 +255,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -354,11 +368,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -448,16 +463,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
 
-    std::string AvatarScriptText = R"xx(
+    RAIIMockLogger MockLogger;
+    // Expect 2 logs
+    // The script logger naeively adds spaces to allow lots of arguments to be passed, which is why the test data has a weird trailing space.
+    csp::common::String CSPLogMsg = "Testing CSP.Log ";
+    csp::common::String OKOLogMsg = "Testing OKO.Log ";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(CSPLogMsg));
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(OKOLogMsg));
+
+    std::string AvatarCSPLogScriptText = R"xx(
 
         import * as CSP from "CSP";
 
@@ -465,10 +490,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().SetScriptSource(AvatarCSPLogScriptText.c_str());
     Avatar->GetScript().Invoke();
 
-    std::string AvatarOKOScriptText = R"xx(
+    std::string AvatarOKOLogScriptText = R"xx(
 
         import * as OKO from "OKO";
 
@@ -476,7 +501,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     )xx";
 
-    Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
+    Avatar->GetScript().SetScriptSource(AvatarOKOLogScriptText.c_str());
     Avatar->GetScript().Invoke();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -521,12 +546,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -628,12 +654,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -755,12 +782,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -893,12 +921,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1007,12 +1036,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1118,12 +1148,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;

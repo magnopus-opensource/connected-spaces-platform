@@ -22,6 +22,11 @@
 #include <map>
 #include <optional>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
 
@@ -94,7 +99,7 @@ public:
 
     /// @brief EventBus constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
-    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection);
+    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
 
     /// @brief EventBus destructor
     CSP_NO_EXPORT ~EventBus();
@@ -106,6 +111,8 @@ private:
 
     std::map<csp::common::String, ParameterisedCallbackHandler> CallbacksNetworkEventMap;
     std::map<csp::common::String, csp::systems::SystemBase*> SystemsNetworkEventMap;
+
+    csp::common::LogSystem& LogSystem;
 };
 
 } // namespace csp::multiplayer

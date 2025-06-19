@@ -15,8 +15,6 @@
  */
 #include "EmscriptenSignalRClient.h"
 
-#include "Debug/Logging.h"
-
 #include <assert.h>
 #include <iostream>
 

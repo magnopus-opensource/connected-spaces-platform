@@ -17,7 +17,6 @@
 
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
 namespace
@@ -28,8 +27,8 @@ constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 namespace csp::multiplayer
 {
 
-VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::VideoPlayer, Parent)
+VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::VideoPlayer, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId)] = "";

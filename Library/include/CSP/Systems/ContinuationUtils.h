@@ -131,7 +131,7 @@ namespace detail
         {
             async::spawn([]() { return; })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), *csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename ExceptionHandlerCallable>
@@ -139,7 +139,7 @@ namespace detail
         {
             async::spawn([]() { throw std::runtime_error(""); })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), *csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename ExceptionHandlerCallable>
@@ -153,7 +153,7 @@ namespace detail
                         ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                 })
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), *csp::systems::SystemsManager::Get().GetLogSystem()));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
@@ -168,7 +168,7 @@ namespace detail
                 })
                 .then(std::forward<IntermediateStepCallable>(IntermediateStep))
                 .then(csp::common::continuations::InvokeIfExceptionInChain(
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), csp::systems::SystemsManager::Get().GetLogSystem()));
+                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), *csp::systems::SystemsManager::Get().GetLogSystem()));
         }
     }
 }

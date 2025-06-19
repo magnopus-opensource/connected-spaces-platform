@@ -54,13 +54,13 @@ namespace csp::systems
 {
 
 ECommerceSystem::ECommerceSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , ShopifyAPI(nullptr)
 {
 }
 
-ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     ShopifyAPI = new chs::ShopifyApi(InWebClient);
 }

@@ -15,11 +15,13 @@
  */
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
-
-#include "Debug/Logging.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/ResultHelpers.h"
+
+// Needs broken
+#include "CSP/Systems/SystemsManager.h"
 
 using namespace csp::systems;
 
@@ -28,13 +30,16 @@ namespace csp::multiplayer
 
 namespace
 {
-    bool EnsureValidConversationId(const csp::common::String& ConversationId)
+    bool EnsureValidConversationId(const csp::common::String& ConversationId, csp::common::LogSystem* LogSystem)
     {
         if (ConversationId.IsEmpty())
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Log,
-                "This component does not have an associated conversation. "
-                "Call CreateConversation to create a new conversation for this component");
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Log,
+                    "This component does not have an associated conversation. "
+                    "Call CreateConversation to create a new conversation for this component");
+            }
             return false;
         }
 
@@ -42,8 +47,8 @@ namespace
     }
 }
 
-csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Conversation, Parent)
+csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Conversation, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)] = "";
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)] = true;
@@ -64,8 +69,10 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
     if (!ConversationId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("This component does not have an associated conversation. "
-                          "Call CreateConversation to create a new conversation for this component");
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "This component already has an associated conversation.");
+        }
 
         if (Callback)
         {
@@ -93,7 +100,7 @@ void ConversationSpaceComponent::DeleteConversation(systems::NullResultCallback 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -110,7 +117,7 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -127,7 +134,7 @@ void ConversationSpaceComponent::DeleteMessage(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -145,7 +152,7 @@ void ConversationSpaceComponent::GetMessagesFromConversation(
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -162,7 +169,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -179,7 +186,7 @@ void ConversationSpaceComponent::UpdateConversation(const MessageUpdateParams& N
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -196,7 +203,7 @@ void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& Messa
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -214,7 +221,7 @@ void ConversationSpaceComponent::UpdateMessage(
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -231,7 +238,7 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -248,7 +255,7 @@ void ConversationSpaceComponent::GetConversationAnnotation(multiplayer::Annotati
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -267,7 +274,7 @@ void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::An
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -284,7 +291,7 @@ void ConversationSpaceComponent::DeleteConversationAnnotation(systems::NullResul
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -301,7 +308,7 @@ void ConversationSpaceComponent::GetAnnotation(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -320,7 +327,7 @@ void ConversationSpaceComponent::SetAnnotation(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -337,7 +344,7 @@ void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& Mes
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
@@ -354,7 +361,7 @@ void ConversationSpaceComponent::GetAnnotationThumbnailsForConversation(multipla
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
         if (Callback)
         {
