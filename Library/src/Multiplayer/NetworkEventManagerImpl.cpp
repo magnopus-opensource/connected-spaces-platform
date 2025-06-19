@@ -18,7 +18,6 @@
 
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
-#include "CallHelpers.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
@@ -46,7 +45,10 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 {
     if (Connection == nullptr)
     {
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
+        if (Callback)
+        {
+            Callback(ErrorCode::NotConnected);
+        }
 
         return;
     }
@@ -58,12 +60,18 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
         if (Except != nullptr)
         {
             auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
+            if (Callback)
+            {
+                Callback(Error);
+            }
 
             return;
         }
 
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+        if (Callback)
+        {
+            Callback(ErrorCode::None);
+        }
     };
 
     std::map<uint64_t, signalr::value> Components;

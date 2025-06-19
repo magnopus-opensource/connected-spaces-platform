@@ -41,7 +41,8 @@
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
-#include "Web/Uri.h"
+#include "Common/Web/Uri.h"
+#include "Debug/Logging.h"
 
 #include <algorithm>
 #include <chrono>
@@ -350,7 +351,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
+    const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -365,9 +367,9 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
     }
 
 #ifdef CSP_WASM
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(AccessToken.c_str(), DeviceId.c_str());
 #else
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(LogSystem);
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), LogSystem);
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 

@@ -22,7 +22,6 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
-#include "CSP/Systems/Assets/Asset.h"
 
 namespace csp::multiplayer
 {
@@ -94,12 +93,6 @@ public:
     /// @copydoc IEnableableComponent::SetIsEnabled()
     void SetIsEnabled(bool InValue) override;
     /// @}
-
-    /// @brief Retrieves the space thumbnail information associated with the space.
-    /// If the space does not have a thumbnail associated with it the result callback will be successful, the
-    /// HTTP res code will be ResponseNotFound and the Uri field inside the UriResult will be empty.
-    /// @param Callback UriResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void GetSpaceThumbnail(csp::systems::UriResultCallback Callback) const;
 };
 
 } // namespace csp::multiplayer

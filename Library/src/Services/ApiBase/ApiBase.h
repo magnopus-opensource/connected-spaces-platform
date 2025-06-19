@@ -17,11 +17,11 @@
 
 #include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Systems/WebService.h"
+#include "Common/Web/HttpResponse.h"
+#include "Common/Web/Json.h"
+#include "Common/Web/WebClient.h"
 #include "Debug/Logging.h"
 #include "Services/DtoBase/DtoBase.h"
-#include "Web/HttpResponse.h"
-#include "Web/Json.h"
-#include "Web/WebClient.h"
 
 #include <list>
 #include <memory>

@@ -17,8 +17,8 @@
 
 #include "CSP/Common/CancellationToken.h"
 #include "Common/DateTime.h"
+#include "Common/Web/WebClient.h"
 #include "Services/PrototypeService/AssetFileDto.h"
-#include "Web/WebClient.h"
 
 namespace csp::web
 {

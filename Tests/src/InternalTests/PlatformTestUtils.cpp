@@ -20,15 +20,15 @@
 #include "TestHelpers.h"
 
 #ifdef CSP_WASM
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
-#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
 
 #include <emscripten/emscripten.h>
 #include <emscripten/fetch.h>
 #include <emscripten/threading.h>
 #else
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
-#include "Web/POCOWebClient/POCOWebClient.h"
 #endif
 
 #include "gtest/gtest.h"
@@ -50,7 +50,8 @@ void PlatformTestWait(bool& finished)
     }
 }
 
-csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri)
+csp::multiplayer::IWebSocketClient* WebSocketStart(
+    const csp::common::String& Uri, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
     bool finished = false;
 
@@ -65,7 +66,8 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Ur
 
     std::thread TestThread([&]() { WebSocketClient->Start(Uri.c_str(), Fn); });
 #else
-    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(*csp::systems::SystemsManager::Get().GetLogSystem());
+    auto* WebSocketClient
+        = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
     WebSocketClient->Start(Uri.c_str(), Fn);
 #endif
 

@@ -174,7 +174,9 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     };
 
     PortalComponent->SetSpaceId(Space.Id);
-    PortalComponent->GetSpaceThumbnail(Callback);
+
+    // Get thumbnail using the space id.
+    SpaceSystem->GetSpaceThumbnail(PortalComponent->GetSpaceId(), Callback);
 
     WaitForCallback(HasThumbailResult);
     EXPECT_TRUE(HasThumbailResult);

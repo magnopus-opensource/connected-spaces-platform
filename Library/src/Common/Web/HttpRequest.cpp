@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/HttpRequest.h"
+#include "Common/Web/HttpRequest.h"
 
-#include "Web/WebClient.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::web
 {
