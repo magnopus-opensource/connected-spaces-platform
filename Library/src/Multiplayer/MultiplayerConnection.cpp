@@ -593,7 +593,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StopListening");
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, ("Calling " + MultiplayerHubMethodMap()[MultiplayerHubMethod::STOP_LISTENING]).c_str());
 
     Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::STOP_LISTENING], signalr::value(signalr::value_type::array), LocalCallback);
 }
