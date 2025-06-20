@@ -65,6 +65,7 @@ namespace csp::multiplayer
 class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
+class EventBus;
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -348,8 +349,8 @@ public:
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
-    CSP_NO_EXPORT SpaceEntitySystem(
-        MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::EventBus& EventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -453,6 +454,8 @@ private:
 
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
+    // May not be null
+    csp::multiplayer::EventBus* EventBus;
 };
 
 } // namespace csp::multiplayer
