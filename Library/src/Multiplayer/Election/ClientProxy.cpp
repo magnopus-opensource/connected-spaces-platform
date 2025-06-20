@@ -18,10 +18,9 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 
-// Needs broken
+// Just for Eventbus at this point
 #include "CSP/Systems/SystemsManager.h"
 
 #include <fmt/format.h>
@@ -29,7 +28,8 @@
 namespace csp::multiplayer
 {
 
-ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem)
+ClientProxy::ClientProxy(
+    ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
     : ElectionManagerPtr(ElectionManager)
     , State(ClientElectionState::Idle)
     , Id(Id)
@@ -37,6 +37,7 @@ ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, cs
     , Eid(0)
     , PendingElections(0)
     , LogSystem(LogSystem)
+    , ScriptRunner(ScriptRunner)
 {
 }
 
@@ -165,8 +166,7 @@ void ClientProxy::RunScript(int64_t ContextId, const csp::common::String& Script
     }
     else
     {
-        csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-        TheScriptSystem->RunScript(ContextId, ScriptText);
+        ScriptRunner.RunScript(ContextId, ScriptText);
     }
 }
 
