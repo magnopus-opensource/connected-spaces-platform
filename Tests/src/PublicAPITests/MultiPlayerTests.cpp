@@ -2878,7 +2878,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
                     return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "StartListening")
+                else if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::START_LISTENING])
                 {
                     // Fail to start listening
                     auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
@@ -2925,7 +2925,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if ((HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID]) || (HubMethodName == "StartListening"))
+                else if ((HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID])
+                    || (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::START_LISTENING]))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);

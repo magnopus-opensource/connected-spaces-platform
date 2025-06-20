@@ -345,7 +345,7 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
             StartListeningEvent->set();
         };
 
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, ("Calling " + MultiplayerHubMethodMap()[MultiplayerHubMethod::START_LISTENING]).c_str());
         Connection->Invoke(
             MultiplayerHubMethodMap()[MultiplayerHubMethod::START_LISTENING], signalr::value(signalr::value_type::array), LocalCallback);
 
