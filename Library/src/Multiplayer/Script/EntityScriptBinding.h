@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Common/Interfaces/IScriptBinding.h"
 
 namespace csp::common
 {
@@ -32,7 +32,7 @@ namespace csp::multiplayer
 
 class SpaceEntitySystem;
 
-class EntityScriptBinding : public csp::systems::IScriptBinding
+class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);

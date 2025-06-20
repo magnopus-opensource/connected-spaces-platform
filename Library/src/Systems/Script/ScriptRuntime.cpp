@@ -138,9 +138,9 @@ bool ScriptRuntime::ExistsInContext(int64_t ContextId, const csp::common::String
     return false;
 }
 
-void ScriptRuntime::RegisterScriptBinding(IScriptBinding* ScriptBinding) { Bindings.push_back(ScriptBinding); }
+void ScriptRuntime::RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.push_back(ScriptBinding); }
 
-void ScriptRuntime::UnregisterScriptBinding(IScriptBinding* ScriptBinding) { Bindings.remove(ScriptBinding); }
+void ScriptRuntime::UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.remove(ScriptBinding); }
 
 void ScriptRuntime::BindContext(ScriptContext* Context)
 {

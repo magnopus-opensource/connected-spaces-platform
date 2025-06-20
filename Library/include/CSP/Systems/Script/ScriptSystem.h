@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Interfaces/IScriptBinding.h"
 #include "CSP/Common/String.h"
 
 #include <functional>
@@ -26,13 +27,6 @@
 
 namespace csp::systems
 {
-
-class IScriptBinding
-{
-public:
-    virtual ~IScriptBinding() = default;
-    virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
-};
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
 class CSP_API ScriptSystem
@@ -63,19 +57,19 @@ public:
 
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
-    bool CreateContext(int64_t ContextId);
-    bool DestroyContext(int64_t ContextId);
-    bool BindContext(int64_t ContextId);
-    bool ResetContext(int64_t ContextId);
+    bool CreateContext(int64_t ContextId) override;
+    bool DestroyContext(int64_t ContextId) override;
+    bool BindContext(int64_t ContextId) override;
+    bool ResetContext(int64_t ContextId) override;
     bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
     void* GetContext(int64_t ContextId);
     void* GetModule(int64_t ContextId, const csp::common::String& ModuleName);
-    void RegisterScriptBinding(IScriptBinding* ScriptBinding);
-    void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
-    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source);
+    void RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override;
+    void UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override;
+    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source) override;
     void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
     bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
-    void ClearModuleSource(csp::common::String ModuleUrl);
+    void ClearModuleSource(csp::common::String ModuleUrl) override;
     csp::common::String GetModuleSource(csp::common::String ModuleUrl);
     size_t GetNumImportedModules(int64_t ContextId) const;
     const char* GetImportedModule(int64_t ContextId, size_t Index) const;
