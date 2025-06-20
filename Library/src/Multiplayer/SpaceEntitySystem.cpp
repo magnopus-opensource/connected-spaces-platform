@@ -246,7 +246,7 @@ void SpaceEntitySystem::Initialise()
 
     EnableLeaderElection();
 
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *LogSystem);
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *LogSystem, *ScriptRunner);
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -264,7 +264,7 @@ void SpaceEntitySystem::Shutdown()
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
-    EntityScriptBinding::RemoveBinding(ScriptBinding);
+    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);

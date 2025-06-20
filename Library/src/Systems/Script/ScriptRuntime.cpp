@@ -146,7 +146,7 @@ void ScriptRuntime::BindContext(ScriptContext* Context)
 {
     for (auto Binding : Bindings)
     {
-        Binding->Bind(Context->GetId(), TheScriptSystem);
+        Binding->Bind(Context->GetId(), *TheScriptSystem);
     }
 }
 
