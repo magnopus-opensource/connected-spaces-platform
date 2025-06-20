@@ -69,7 +69,8 @@ namespace csp::systems
 {
 
 ScriptSystem::ScriptSystem()
-    : TheScriptRuntime(nullptr)
+    : csp::common::IJSScriptRunner()
+    , TheScriptRuntime(nullptr)
 {
 }
 
