@@ -144,12 +144,13 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem);
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
-        const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+        SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
+        bool IsPersistent);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();

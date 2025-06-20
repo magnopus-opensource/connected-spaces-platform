@@ -105,14 +105,14 @@ SpaceEntity::SpaceEntity()
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, nullptr, nullptr)
+    , Script(this, nullptr, nullptr, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(nullptr)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
@@ -128,16 +128,17 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSyst
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, InEntitySystem, LogSystem)
+    , Script(this, InEntitySystem, &ScriptRunner, LogSystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(LogSystem)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
-    const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent)
-    : SpaceEntity(EntitySystem, LogSystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+    SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
+    bool IsTransferable, bool IsPersistent)
+    : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
 {
     this->Id = Id;
     this->Type = Type;
