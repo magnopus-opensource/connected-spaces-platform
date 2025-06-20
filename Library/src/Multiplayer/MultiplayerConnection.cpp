@@ -247,8 +247,9 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
             if (Except != nullptr)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-                EntitiesDeletedEvent->set_exception(std::make_exception_ptr(ErrorCodeException(
-                    Error, "MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
+                EntitiesDeletedEvent->set_exception(std::make_exception_ptr(ErrorCodeException(Error,
+                    "MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \""
+                        + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS] + "\" invocation.")));
                 return;
             }
 
@@ -270,7 +271,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
 
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, ("Calling " + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS]).c_str());
 
         Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS], DeleteEntityMessage, LocalCallback);
 
