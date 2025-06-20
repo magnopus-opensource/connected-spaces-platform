@@ -197,10 +197,12 @@ SpaceEntitySystem::SpaceEntitySystem()
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
+    , ScriptRunner(nullptr)
 {
 }
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
+SpaceEntitySystem::SpaceEntitySystem(
+    MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
@@ -215,6 +217,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
+    , ScriptRunner(&ScriptRunner)
 {
     Initialise();
 }
@@ -1094,7 +1097,7 @@ void SpaceEntitySystem::EnableLeaderElection()
 {
     if (ElectionManager == nullptr)
     {
-        ElectionManager = new ClientElectionManager(this, *LogSystem);
+        ElectionManager = new ClientElectionManager(this, *LogSystem, *ScriptRunner);
     }
 }
 
