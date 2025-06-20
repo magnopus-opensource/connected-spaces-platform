@@ -20,16 +20,12 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
 #include "Events/Event.h"
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "signalrclient/signalr_value.h"
 #include <fmt/format.h>
-
-// Only used to access the script system ... needs broken.
-#include "CSP/Systems/SystemsManager.h"
 
 namespace csp::multiplayer
 {
@@ -61,7 +57,8 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
     }
 }
 
-ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem)
+ClientElectionManager::ClientElectionManager(
+    SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
     : SpaceEntitySystemPtr(InSpaceEntitySystem)
     , LogSystem(LogSystem)
     , EventHandler(new ClientElectionEventHandler(this))
@@ -69,6 +66,7 @@ ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySys
     , TheElectionState(ElectionState::Idle)
     , LocalClient(nullptr)
     , Leader(nullptr)
+    , RemoteScriptRunner(JSScriptRunner)
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -218,7 +216,6 @@ ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* Cli
 
 ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 {
-
     LogSystem.LogMsg(
         csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", ClientId).c_str());
 
@@ -226,7 +223,7 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 
     if (Clients.find(ClientId) == Clients.end())
     {
-        Client = new ClientProxy(ClientId, this, LogSystem);
+        Client = new ClientProxy(ClientId, this, LogSystem, RemoteScriptRunner);
         Clients.insert(ClientMap::value_type(ClientId, Client));
 
         if ((LocalClient != nullptr) && (Leader != nullptr))
@@ -537,9 +534,7 @@ void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<Repl
     {
         if (IsLocalClientLeader())
         {
-            // Ach! What to do about this eh...
-            csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-            TheScriptSystem->RunScript(ContextId, ScriptText);
+            RemoteScriptRunner.RunScript(ContextId, ScriptText);
         }
         else
         {

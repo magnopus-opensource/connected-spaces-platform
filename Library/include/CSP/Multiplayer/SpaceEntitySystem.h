@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
@@ -344,7 +345,11 @@ public:
 
     /// @brief SpaceEntitySystem constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
-    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
+    /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
+    /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
+    /// election system
+    CSP_NO_EXPORT SpaceEntitySystem(
+        MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -445,6 +450,9 @@ private:
     bool EntityPatchRateLimitEnabled = true;
 
     bool IsInitialised = false;
+
+    // May not be null
+    csp::common::IJSScriptRunner* ScriptRunner;
 };
 
 } // namespace csp::multiplayer

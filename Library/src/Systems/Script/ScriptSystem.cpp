@@ -69,7 +69,8 @@ namespace csp::systems
 {
 
 ScriptSystem::ScriptSystem()
-    : TheScriptRuntime(nullptr)
+    : csp::common::IJSScriptRunner()
+    , TheScriptRuntime(nullptr)
 {
 }
 
@@ -161,9 +162,9 @@ void* ScriptSystem::GetModule(int64_t ContextId, const csp::common::String& Modu
     return (void*)TheScriptContext->GetModule(ModuleName)->Module;
 }
 
-void ScriptSystem::RegisterScriptBinding(IScriptBinding* ScriptBinding) { TheScriptRuntime->RegisterScriptBinding(ScriptBinding); }
+void ScriptSystem::RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { TheScriptRuntime->RegisterScriptBinding(ScriptBinding); }
 
-void ScriptSystem::UnregisterScriptBinding(IScriptBinding* ScriptBinding) { TheScriptRuntime->UnregisterScriptBinding(ScriptBinding); }
+void ScriptSystem::UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { TheScriptRuntime->UnregisterScriptBinding(ScriptBinding); }
 
 void ScriptSystem::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
 {
