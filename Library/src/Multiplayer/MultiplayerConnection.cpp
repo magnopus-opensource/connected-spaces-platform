@@ -272,7 +272,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
 
-        Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
+        Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS], DeleteEntityMessage, LocalCallback);
 
         return EntitiesDeletedContinuation;
     };
@@ -312,7 +312,7 @@ auto MultiplayerConnection::RequestClientId()
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling GetClientId");
 
-        Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
+        Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID], signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
     };
 }
@@ -345,7 +345,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
         };
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
-        Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
+        Connection->Invoke(
+            MultiplayerHubMethodMap()[MultiplayerHubMethod::START_LISTENING], signalr::value(signalr::value_type::array), LocalCallback);
 
         return StartListeningContinuation;
     };
@@ -539,7 +540,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
     ParamsVec.push_back(ScopesVec);
     signalr::value Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke("SetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SET_SCOPES], Params, LocalCallback);
 }
 
 void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
@@ -566,7 +567,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 
     std::vector<signalr::value> ParamsVec;
     signalr::value Params = signalr::value(std::move(ParamsVec));
-    Connection->Invoke("ResetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::RESET_SCOPES], Params, LocalCallback);
 }
 
 void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
@@ -593,7 +594,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StopListening");
 
-    Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
+    Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::STOP_LISTENING], signalr::value(signalr::value_type::array), LocalCallback);
 }
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
@@ -638,7 +639,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
-    Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING], InvokeArguments, LocalCallback);
 }
 
 bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelfMessaging; }
