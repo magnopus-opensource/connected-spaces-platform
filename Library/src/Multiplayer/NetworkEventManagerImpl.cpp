@@ -172,7 +172,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
     std::vector<signalr::value> InvokeArguments;
     InvokeArguments.push_back(EventMessage);
 
-    ISignalRConnectionPtr->Invoke("SendEventMessage", InvokeArguments, LocalCallback);
+    ISignalRConnectionPtr->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SEND_EVENT_MESSAGE], InvokeArguments, LocalCallback);
 }
 
 } // namespace csp::multiplayer
