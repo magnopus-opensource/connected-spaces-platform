@@ -311,7 +311,7 @@ auto MultiplayerConnection::RequestClientId()
             ClientIdRequestedEvent->set(Result.as_uinteger());
         };
 
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling GetClientId");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, ("Calling " + MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID]).c_str());
 
         Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID], signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
@@ -637,7 +637,8 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+    LogSystem.LogMsg(
+        csp::common::LogLevel::Verbose, ("Calling " + MultiplayerHubMethodMap()[MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING]).c_str());
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
     Connection->Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING], InvokeArguments, LocalCallback);

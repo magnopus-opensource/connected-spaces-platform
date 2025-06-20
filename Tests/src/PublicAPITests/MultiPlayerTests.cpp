@@ -2823,10 +2823,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "GetClientId")
+                else if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID])
                 {
                     // Fail getting client Id
-                    auto Value = signalr::value("Irrelevant value from GetClientId");
+                    auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID]);
                     auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
                     Callback(Value, Except);
                     return async::make_task(std::make_tuple(Value, Except));
@@ -2872,7 +2872,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "GetClientId")
+                else if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID])
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
@@ -2925,7 +2925,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if ((HubMethodName == "GetClientId") || (HubMethodName == "StartListening"))
+                else if ((HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID]) || (HubMethodName == "StartListening"))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
