@@ -57,7 +57,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
-    EXPECT_CALL(*SignalRMock, Invoke("GenerateObjectIds", ::testing::_, ::testing::_))
+    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GENERATE_OBJECT_IDS], ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>>
@@ -98,7 +98,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
-    EXPECT_CALL(*SignalRMock, Invoke("GenerateObjectIds", ::testing::_, ::testing::_))
+    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GENERATE_OBJECT_IDS], ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/, std::function<void(const signalr::value&, std::exception_ptr)> /**/) {
                 return async::make_task(
@@ -139,7 +139,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
-    EXPECT_CALL(*SignalRMock, Invoke("SendObjectMessage", ::testing::_, ::testing::_))
+    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SEND_OBJECT_MESSAGE], ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>>
@@ -180,7 +180,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
-    EXPECT_CALL(*SignalRMock, Invoke("SendObjectMessage", ::testing::_, ::testing::_))
+    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SEND_OBJECT_MESSAGE], ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>> {
