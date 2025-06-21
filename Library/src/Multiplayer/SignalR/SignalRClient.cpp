@@ -18,7 +18,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/String.h"
-#include "CSP/Systems/Users/UserSystem.h"
 #include "Multiplayer/WebSocketClient.h"
 
 #ifdef CSP_WASM
@@ -42,19 +41,10 @@ csp::multiplayer::IWebSocketClient* CSPWebSocketClientPtr = nullptr;
 
 void SetWebSocketClient(IWebSocketClient* InCSPWebSocketClientPtr) { CSPWebSocketClientPtr = InCSPWebSocketClientPtr; }
 
-CSPWebsocketClient::CSPWebsocketClient() noexcept
-    : UserSystem(nullptr)
-    , LoginState(nullptr)
-{
-    RefreshInitialised = false;
-}
+CSPWebsocketClient::CSPWebsocketClient() noexcept { RefreshInitialised = false; }
 
 void CSPWebsocketClient::start(const std::string& url, std::function<void(std::exception_ptr)> callback)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    UserSystem = SystemsManager.GetUserSystem();
-    LoginState = &UserSystem->GetLoginState();
-
     IWebSocketClient::CallbackHandler LocalCallback
         = [callback](bool ok) { ok ? callback(nullptr) : callback(std::make_exception_ptr(std::runtime_error("Socket Start Error"))); };
 
