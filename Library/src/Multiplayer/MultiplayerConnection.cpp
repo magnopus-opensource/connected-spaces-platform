@@ -32,9 +32,6 @@
 #include "NetworkEventManagerImpl.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
 
-// Needs broken
-#include "CSP/Systems/SystemsManager.h"
-
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
 #else
@@ -351,8 +348,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
-    const csp::common::String& DeviceId)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
+    csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -375,7 +372,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
 
     Connection = SignalRConnection;
     NetworkEventManager->SetConnection(Connection);
-    csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
+    SpaceEntitySystem.SetConnection(Connection);
 
     EventBusPtr->StartEventMessageListening();
 

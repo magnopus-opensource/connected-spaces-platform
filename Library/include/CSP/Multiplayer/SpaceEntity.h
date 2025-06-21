@@ -144,12 +144,13 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem);
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
-        const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+        SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
+        bool IsPersistent);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -438,8 +439,10 @@ public:
     CSP_NO_EXPORT void ClaimScriptOwnership();
 
     /// @brief Apply a local patch
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the SpaceEntitySystem state. Don't set this
+    /// unless you know what you are doing. (default: true)
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+    CSP_NO_EXPORT void ApplyLocalPatch(bool AllowSelfMessaging = false, bool InvokeUpdateCallback = true);
 
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
