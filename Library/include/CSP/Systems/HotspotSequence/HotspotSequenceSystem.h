@@ -85,9 +85,10 @@ public:
 
     /// @brief This will delete any groups which only contain this item
     /// For any groups which contanin the given item and additional items, it will just update the group by removing the given item.
-    /// @param ItemName csp::common::String : An item to update all sequences containing.
+    /// @param ItemID csp::common::String : An item to update all sequences containing. Can be retrieved from a HotspotSpaceComponent via
+    /// HotspotSpaceComponent::GetUniqueComponentId
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback Callback);
 
     // Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedParams&)> HotspotSequenceChangedCallbackHandler;
