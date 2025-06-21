@@ -38,59 +38,17 @@ namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
 
-LoginState::LoginState()
-    : State(ELoginState::LoggedOut)
-    , AccessTokenRefreshTime(new DateTime())
-{
-}
-
-LoginState::LoginState(const LoginState& OtherState) { CopyStateFrom(OtherState); }
-
-LoginState& LoginState::operator=(const LoginState& OtherState)
-{
-    CopyStateFrom(OtherState);
-
-    return *this;
-}
-
-void LoginState::CopyStateFrom(const LoginState& OtherState)
-{
-    State = OtherState.State;
-    AccessToken = OtherState.AccessToken;
-    RefreshToken = OtherState.RefreshToken;
-    UserId = OtherState.UserId;
-    DeviceId = OtherState.DeviceId;
-
-    // Must reallocate the access token when copying otherwise destructor of
-    // copied state will delete the original memory pointer potentially causing corruption
-    AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
-}
-
-LoginState::~LoginState() { delete (AccessTokenRefreshTime); }
-
-bool LoginState::RefreshNeeded() const
-{
-    if (AccessTokenRefreshTime->IsEpoch())
-    {
-        return false;
-    }
-
-    const auto CurrentTime = DateTime::UtcTimeNow();
-
-    return CurrentTime >= (*AccessTokenRefreshTime);
-}
-
 LoginStateResult::LoginStateResult()
     : State(nullptr)
 {
 }
 
-LoginStateResult::LoginStateResult(LoginState* InStatePtr)
+LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
     : State(InStatePtr)
 {
 }
 
-const LoginState& LoginStateResult::GetLoginState() const { return *State; }
+const csp::common::LoginState& LoginStateResult::GetLoginState() const { return *State; }
 
 void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
@@ -138,7 +96,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
                 return;
             }
 
-            *(State->AccessTokenRefreshTime) = RefreshTime;
+            State->SetAccessTokenRefreshTime(RefreshTime);
 
             // Signal login to anyone interested
             events::Event* LoginEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGIN_EVENT_ID);
@@ -168,7 +126,7 @@ LogoutResult::LogoutResult()
 {
 }
 
-LogoutResult::LogoutResult(LoginState* InStatePtr)
+LogoutResult::LogoutResult(csp::common::LoginState* InStatePtr)
     : NullResult(InStatePtr)
     , State(InStatePtr)
 {

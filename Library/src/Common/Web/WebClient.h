@@ -30,10 +30,14 @@
 #include <mutex>
 #include <unordered_set>
 
+namespace csp::common
+{
+class LoginState;
+}
+
 namespace csp::systems
 {
 
-class LoginState;
 class SystemsManager;
 class UserSystem;
 
@@ -117,7 +121,7 @@ private:
     void RefreshIfExpired();
     void PrintClientErrorResponseMessages(const HttpResponse& Response);
     csp::systems::UserSystem* UserSystem;
-    const csp::systems::LoginState* LoginState;
+    const csp::common::LoginState* LoginState;
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
 

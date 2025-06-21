@@ -24,6 +24,21 @@
 #include <cstdint>
 #include <string>
 
+namespace csp::common
+{
+/// @brief Enum which represents possible login states of a CSP client.
+enum class ELoginState : uint8_t
+{
+    LoginThirdPartyProviderDetailsRequested,
+    LoginRequested,
+    LoggedIn,
+    LogoutRequested,
+    LoggedOut,
+    Error,
+};
+
+}
+
 namespace csp::web
 {
 
