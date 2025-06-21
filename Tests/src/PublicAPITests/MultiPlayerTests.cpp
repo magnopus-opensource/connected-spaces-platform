@@ -135,7 +135,9 @@ void OnConnect(SpaceEntitySystem* EntitySystem)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem->CreateAvatar(UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
+    const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
+
+    EntitySystem->CreateAvatar(UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
         [EntitySystem](SpaceEntity* NewAvatar)
         {
             EXPECT_NE(NewAvatar, nullptr);
@@ -621,7 +623,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -689,7 +694,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -850,7 +858,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     auto& Components = *Avatar->GetComponents();
@@ -1276,8 +1287,10 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
-    auto [Avatar] = Awaitable(
-        &SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode)
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = Awaitable(&SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, LoginState, UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId, UserAvatarPlayMode)
                         .Await();
 
     auto Start = std::chrono::steady_clock::now();
@@ -1404,7 +1417,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     csp::common::String ObjectName = "Object 1";

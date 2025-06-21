@@ -261,7 +261,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -373,7 +375,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -468,7 +473,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -552,7 +560,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -660,7 +670,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -788,7 +800,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -927,7 +941,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1042,7 +1058,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1154,7 +1172,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
