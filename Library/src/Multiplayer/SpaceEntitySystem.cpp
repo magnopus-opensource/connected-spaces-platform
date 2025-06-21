@@ -373,7 +373,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
         SpaceEntity* ReleasedAvatar = NewAvatar.release();
         Entities.Append(ReleasedAvatar);
         Avatars.Append(ReleasedAvatar);
-        ReleasedAvatar->ApplyLocalPatch(false);
+        ReleasedAvatar->ApplyLocalPatch(GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag(), false);
 
         if (ElectionManager != nullptr)
         {
@@ -1392,7 +1392,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
             // Loop through and apply local patches from generated list
             for (size_t i = 0; i < PendingEntities.Size(); ++i)
             {
-                PendingEntities[i]->ApplyLocalPatch(true);
+                PendingEntities[i]->ApplyLocalPatch(GetMultiplayerConnectionInstance()->GetAllowSelfMessagingFlag(), true);
             }
         }
     }
