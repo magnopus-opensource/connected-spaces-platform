@@ -16,8 +16,6 @@
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
-#include "CSP/Systems/SystemsManager.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
@@ -97,14 +95,5 @@ void HotspotSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<u
 bool HotspotSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)); }
 
 void HotspotSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value); }
-
-void HotspotSpaceComponent::OnLocalDelete()
-{
-    auto CB = [](const csp::systems::NullResult& /*Result*/) {
-
-    };
-
-    systems::SystemsManager::Get().GetHotspotSequenceSystem()->RemoveItemFromGroups(GetUniqueComponentId(), CB);
-}
 
 } // namespace csp::multiplayer

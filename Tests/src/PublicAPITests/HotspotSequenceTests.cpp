@@ -751,150 +751,15 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         HotspotSystem->SetHotspotSequenceChangedCallback(CB);
 
         CreatedObject->RemoveComponent(HotspotComponent->GetId());
+
+        // Delete the hotspot from the sequence, has to be done explicitly
+        HotspotSystem->RemoveItemFromGroups(HotspotComponent->GetUniqueComponentId(), [](const csp::systems::NullResult /*Result*/) {});
+
         CreatedObject->QueueUpdate();
 
         WaitForCallbackWithUpdate(SequencesUpdated, EntitySystem);
 
         EXPECT_TRUE(SequencesUpdated);
-    }
-
-    // 1 group should be deleted, and one should have its key removed
-    {
-        csp::common::Array<csp::systems::HotspotGroup> RemainingGroups;
-        GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2 }, RemainingGroups);
-
-        EXPECT_EQ(RemainingGroups.Size(), 1);
-        EXPECT_EQ(RemainingGroups[0].Items.Size(), 1);
-        EXPECT_EQ(RemainingGroups[0].Items[0], TestItemName);
-    }
-
-    // Delete remaining group
-    DeleteHotspotGroup(HotspotSystem, TestGroupName2);
-
-    // Exit space
-    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponentTest)
-{
-    // Tests the deletion of corresponding sequences when an entity is deleted with a HotspotComponent
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-    auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
-
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
-
-    // Create object to represent the hotspot
-    csp::common::String ObjectName = "Object 1";
-    csp::multiplayer::SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-    bool ComponentAdded = false;
-
-    CreatedObject->SetUpdateCallback(
-        [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags /*Flags*/,
-            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
-        {
-            if (Entity->GetName() == ObjectName)
-            {
-                for (size_t i = 0; i < UpdateInfo.Size(); ++i)
-                {
-                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add)
-                    {
-                        ComponentAdded = true;
-                    }
-                }
-            }
-        });
-
-    // Create hotspot component
-    auto* HotspotComponent
-        = static_cast<csp::multiplayer::HotspotSpaceComponent*>(CreatedObject->AddComponent(csp::multiplayer::ComponentType::Hotspot));
-
-    CreatedObject->QueueUpdate();
-    WaitForCallbackWithUpdate(ComponentAdded, EntitySystem);
-
-    EXPECT_TRUE(ComponentAdded);
-
-    // Create Hotspot groups
-    csp::common::String TestGroupName1 = "CSP-UNITTEST-SEQUENCE-MAG1";
-    csp::common::String TestGroupName2 = "CSP-UNITTEST-SEQUENCE-MAG2";
-    csp::common::String TestItemName = "AnotherItem";
-
-    {
-        // Create 2 groups that contains the component
-
-        // Create one with only a single item to test deletion functionality
-        csp::systems::HotspotGroup HotspotGroup1;
-        CreateHotspotgroup(HotspotSystem, TestGroupName1, { HotspotComponent->GetUniqueComponentId() }, HotspotGroup1);
-
-        // Create one with an additional item to test update functionality
-        csp::systems::HotspotGroup HotspotGroup2;
-        CreateHotspotgroup(HotspotSystem, TestGroupName2, { HotspotComponent->GetUniqueComponentId(), TestItemName }, HotspotGroup2);
-
-        // Ensure the 2 groups are created correctly
-        csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-        GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2 }, FoundGroups);
-
-        EXPECT_EQ(FoundGroups.Size(), 2);
-    }
-
-    // Remove entity
-    {
-        bool SequenceDeleted = false;
-        bool SequenceUpdate = false;
-        bool SequencesUpdated = false;
-
-        auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
-                      const csp::multiplayer::SequenceHotspotChangedParams& Params)
-        {
-            if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
-            {
-                // Ensure we delete the group which only has one item
-                SequenceDeleted = true;
-            }
-            else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
-            {
-                // Ensure we update the sequence that has multiple items
-                SequenceUpdate = true;
-            }
-
-            SequencesUpdated = SequenceDeleted & SequenceUpdate;
-        };
-
-        HotspotSystem->SetHotspotSequenceChangedCallback(CB);
-
-        CreatedObject->Destroy([](bool /*Success*/) {});
-
-        WaitForCallbackWithUpdate(SequencesUpdated, EntitySystem);
     }
 
     // 1 group should be deleted, and one should have its key removed

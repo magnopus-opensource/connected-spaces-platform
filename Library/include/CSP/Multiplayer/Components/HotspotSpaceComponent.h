@@ -106,9 +106,6 @@ public:
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
     /// @}
-
-private:
-    void OnLocalDelete() override;
 };
 
 } // namespace csp::multiplayer
