@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Common/LoginState.h"
 #include "CSP/Systems/Users/Authentication.h"
 
 namespace csp::systems
@@ -33,11 +34,11 @@ class CSP_API LogoutResult : public NullResult
 
 private:
     LogoutResult();
-    LogoutResult(LoginState* InStatePtr);
+    LogoutResult(csp::common::LoginState* InStatePtr);
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    LoginState* State;
+    csp::common::LoginState* State;
 };
 
 /// @brief @brief Data class used to contain information requesting a user token
