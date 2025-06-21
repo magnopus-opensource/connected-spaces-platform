@@ -20,6 +20,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/CodeAttribute.h"
 
 namespace csp::multiplayer
 {
@@ -41,6 +42,7 @@ enum class CodeComponentPropertyKeys
     Attributes,
     Num
 };
+
 
 /// @ingroup CodeSpaceComponent
 /// @brief Data representation of a CodeSpaceComponent.
@@ -81,12 +83,14 @@ public:
     /// @brief Retrieves the replicated value of the property identified by the specified Key.
     /// @param Key The ID of the property of which the value will be retrieved.
     /// @return The value of the property identified by the provided Key.
-    const ReplicatedValue& GetAttribute(const csp::common::String& Key) const;
+   // csp::common::Map<csp::common::String, csp::multiplayer::CodeAttribute&> GetAttributes() const;
+    
+    csp::multiplayer::CodeAttribute* GetAttribute(const csp::common::String& Key) const;
 
     /// @brief Sets a custom property by specifying a unique Key and its relative property Value.
     /// @param Key Uniquely identifies this new property.
     /// @param Value The value to store for this new property.
-    void SetAttribute(const csp::common::String& Key, const ReplicatedValue& Value);
+    void SetAttribute(const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Value);
 
     /// @brief Removes the specified property by Key.
     /// @param Key The ID of the property that will be removed.
@@ -96,19 +100,6 @@ public:
     /// @return The list of available property keys.
     csp::common::List<csp::common::String> GetAttributeKeys() const;
 
-    /// @brief Returns the amount of properties currently stored in the list of replicated values.
-    /// @return How many properties are currently stored in the list of replicated values of this component.
-    int32_t GetNumProperties() const;
-
-    /// @brief Returns the hash of the provided Key.
-    /// @param Key The key for which an hash will be produced.
-    /// @return The resulting hash for the provided Key.
-    uint32_t GetAttributeSubscriptionKey(const csp::common::String& Key) const;
-
-protected:
-    void OnRemove() override;
-    void AddKey(const csp::common::String& Key);
-    void RemoveKey(const csp::common::String& Key);
 };
 
 } // namespace csp::multiplayer

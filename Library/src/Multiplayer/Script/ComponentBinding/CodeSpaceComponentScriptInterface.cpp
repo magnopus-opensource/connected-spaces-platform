@@ -15,7 +15,7 @@
  */
 
 #include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
-
+#include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Common/List.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -31,13 +31,7 @@ CodeSpaceComponentScriptInterface::CodeSpaceComponentScriptInterface(CodeSpaceCo
 {
 }
 
-
 DEFINE_SCRIPT_PROPERTY_STRING(CodeSpaceComponent, ScriptAssetPath);
-
-uint32_t CodeSpaceComponentScriptInterface::GetAttributeSubscriptionKey(const std::string& Key)
-{
-    return static_cast<CodeSpaceComponent*>(Component)->GetAttributeSubscriptionKey(Key.c_str());
-}
 
 bool CodeSpaceComponentScriptInterface::HasAttribute(const std::string& Key) const
 {
@@ -45,36 +39,10 @@ bool CodeSpaceComponentScriptInterface::HasAttribute(const std::string& Key) con
 }
 
 
-const std::variant<bool, int64_t, float, std::string, std::vector<float>> CodeSpaceComponentScriptInterface::GetAttribute(
+const csp::multiplayer::CodeAttribute* CodeSpaceComponentScriptInterface::GetAttribute(
     const std::string& Key)
 {
-    ReplicatedValue ReturnValue = static_cast<CodeSpaceComponent*>(Component)->GetAttribute(Key.c_str());
-
-    switch (ReturnValue.GetReplicatedValueType())
-    {
-    case ReplicatedValueType::Boolean:
-        return ReturnValue.GetBool();
-    case ReplicatedValueType::Integer:
-        return ReturnValue.GetInt();
-    case ReplicatedValueType::Float:
-        return ReturnValue.GetFloat();
-    case ReplicatedValueType::String:
-        return ReturnValue.GetString().c_str();
-    case ReplicatedValueType::Vector3:
-    {
-        std::vector<float> ReturnVector;
-        ReturnVector = { ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z };
-        return ReturnVector;
-    }
-    case ReplicatedValueType::Vector4:
-    {
-        std::vector<float> ReturnVector;
-        ReturnVector = { ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z };
-        return ReturnVector;
-    }
-    default:
-        throw std::runtime_error("Unknown ReplicatedValue type!");
-    }
+    return static_cast<csp::multiplayer::CodeSpaceComponent*>(Component)->GetAttribute(Key.c_str());
 }
 
 std::vector<std::string> CodeSpaceComponentScriptInterface::GetAttributeKeys()

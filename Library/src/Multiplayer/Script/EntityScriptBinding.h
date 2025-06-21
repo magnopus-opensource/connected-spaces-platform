@@ -16,8 +16,8 @@
 #pragma once
 
 #include "CSP/Systems/Script/ScriptSystem.h"
-#include "quickjspp.hpp"
 #include "Debug/Logging.h"
+#include "quickjspp.hpp"
 
 namespace csp::systems
 {

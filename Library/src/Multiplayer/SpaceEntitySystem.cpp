@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
@@ -923,12 +924,30 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 
     // Ensure entity list is up to date
     ProcessPendingEntityOperations();
+    csp::systems::LocalScriptSystem* localScriptSystem = csp::systems::SystemsManager::Get().GetLocalScriptSystem();
 
     // Register all scripts for import
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
         EntityScript& Script = Entities[i]->GetScript();
         Script.RegisterSourceAsModule();
+
+        SpaceEntity* entity = Entities[i];
+        const csp::common::Map<uint16_t, ComponentBase*>* EntityComponents = entity->GetComponents();
+
+        // Check for any CodeComponent in entity - using Keys() instead of range-based for loop
+        auto* Keys = EntityComponents->Keys();
+        for (size_t i = 0; i < Keys->Size(); ++i)
+        {
+            auto Key = (*Keys)[i];
+            ComponentBase* Component = (*EntityComponents)[Key];
+
+            if (Component->GetComponentType() == ComponentType::Code)
+            {
+                csp::multiplayer::CodeSpaceComponent* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component);
+                localScriptSystem->RegisterCodeComponentInRegistry(entity->GetId(), CodeComponent->GetScriptAssetPath());
+            }
+        }
     }
 
     // Bind and invoke all scripts

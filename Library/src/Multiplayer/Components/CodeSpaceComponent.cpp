@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "Multiplayer/Script/ComponentBinding/CodeSpaceComponentScriptInterface.h"
-
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
@@ -27,6 +27,8 @@ CodeSpaceComponent::CodeSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Code, Parent)
 {
     Properties[static_cast<uint32_t>(CodeComponentPropertyKeys::ScriptAssetPath)] = "";
+Properties[static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes)]
+        = csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue>();
     SetScriptInterface(new CodeSpaceComponentScriptInterface(this));
 }
 
@@ -50,141 +52,76 @@ void CodeSpaceComponent::SetCodeScopeType(CodeScopeType Scope)
     SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::CodeScopeType), static_cast<int64_t>(Scope));
 }
 
-void CodeSpaceComponent::OnRemove() {
-    // not implemented
-    CSP_LOG_ERROR_MSG("CodeSpaceComponent::OnRemove not implemented");
-}
+// csp::common::Map<csp::common::String, csp::multiplayer::CodeAttribute&> CodeSpaceComponent::GetAttributes() const
+// {
+//     csp::common::Map<csp::common::String, csp::multiplayer::CodeAttribute&> Overrides;
+//     auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    
+//     std::unique_ptr<csp::common::Array<csp::common::String>> Keys(const_cast<csp::common::Array<csp::common::String>*>(ReplicatedAttributes.Keys()));
 
-uint32_t CodeSpaceComponent::GetAttributeSubscriptionKey(const csp::common::String& Key) const
+//     for (size_t i = 0; i < Keys->Size(); ++i)
+//     {
+//         const auto& CurrentKey = (*Keys)[i];
+//         const csp::common::String& serializedAttribute = ReplicatedAttributes[CurrentKey].GetString();
+        
+//         // Directly create a CodeAttribute object (not a pointer) and add it to the map
+//         Overrides[CurrentKey] = csp::multiplayer::CodeAttribute::Deserialize(serializedAttribute);
+//     }
+
+//     return Overrides;
+// }
+//getAttribute 
+csp::multiplayer::CodeAttribute* CodeSpaceComponent::GetAttribute(const csp::common::String& Key) const
 {
-    // attempt to ensure no hash clashes with existing keys, but not bulletproof
-    return static_cast<uint32_t>(
-        static_cast<uint16_t>(std::hash<std::string> {}(Key.c_str())) + static_cast<uint16_t>(CodeComponentPropertyKeys::Num));
+    auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    if (ReplicatedAttributes.HasKey(Key))
+    {
+        const csp::common::String& serializedAttribute = ReplicatedAttributes[Key].GetString();
+        // Create a heap-allocated CodeAttribute that will persist after this function returns
+        CodeAttribute attribute = csp::multiplayer::CodeAttribute::Deserialize(serializedAttribute);
+        return new CodeAttribute(attribute); // Create a new heap-allocated copy
+    }
+    return nullptr; // Return nullptr if not found
 }
 
 bool CodeSpaceComponent::HasAttribute(const csp::common::String& Key) const
 {
-    const uint32_t PropertyKey = GetAttributeSubscriptionKey(Key);
-
-    return Properties.HasKey(PropertyKey);
-}
-
-const ReplicatedValue& CodeSpaceComponent::GetAttribute(const csp::common::String& Key) const
-{
-    const uint32_t PropertyKey = GetAttributeSubscriptionKey(Key);
-
-    return GetProperty(PropertyKey);
-}
-
-void CodeSpaceComponent::SetAttribute(const csp::common::String& Key, const ReplicatedValue& Value)
-{
-    if (Value.GetReplicatedValueType() != ReplicatedValueType::InvalidType)
-    {
-        const uint32_t PropertyKey = GetAttributeSubscriptionKey(Key);
-        if (!Properties.HasKey(PropertyKey))
-        {
-            AddKey(Key);
-        }
-        SetProperty(PropertyKey, Value);
-    }
-}
-
-void CodeSpaceComponent::RemoveAttribute(const csp::common::String& Key)
-{
-    const uint32_t PropertyKey = GetAttributeSubscriptionKey(Key);
-
-    if (Properties.HasKey(PropertyKey))
-    {
-        RemoveProperty(PropertyKey);
-        RemoveKey(Key);
-    }
+    auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    return ReplicatedAttributes.HasKey(Key);
 }
 
 csp::common::List<csp::common::String> CodeSpaceComponent::GetAttributeKeys() const
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes)))
+    auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    std::unique_ptr<csp::common::Array<csp::common::String>> Keys(const_cast<csp::common::Array<csp::common::String>*>(ReplicatedAttributes.Keys()));
+    
+    csp::common::List<csp::common::String> Result;
+    for (size_t i = 0; i < Keys->Size(); ++i)
     {
-        const auto& RepVal = GetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
-
-        if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String && !RepVal.GetString().IsEmpty())
-        {
-            return GetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes)).GetString().Split(',');
-        }
+        Result[i] = (*Keys)[i];
     }
-
-    return csp::common::List<csp::common::String>();
+    
+    return Result;
 }
 
-int32_t CodeSpaceComponent::GetNumProperties() const
+void CodeSpaceComponent::SetAttribute(const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Attribute)
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes)))
-    {
-        return static_cast<uint32_t>(Properties.Size() - 1);
-    }
-    else
-    {
-        return static_cast<uint32_t>(Properties.Size());
-    }
+    // Remove the unused variable warnings and implement the function
+    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedAttributes
+        = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    csp::common::String serializedAttribute = Attribute.Serialize();
+    multiplayer::ReplicatedValue ReplicatedValue;
+    ReplicatedValue.SetString(serializedAttribute);
+    ReplicatedAttributes[Key] = ReplicatedValue;
+    SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReplicatedAttributes);
 }
 
-void CodeSpaceComponent::AddKey(const csp::common::String& Value)
+void CodeSpaceComponent::RemoveAttribute(const csp::common::String& ModelPath)
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes)))
-    {
-        const auto& RepVal = GetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    ReplicatedAttributes.Remove(ModelPath);
 
-        if (RepVal.GetReplicatedValueType() != ReplicatedValueType::String)
-        {
-            return;
-        }
-
-        csp::common::String ReturnKeys = RepVal.GetString();
-
-        if (!ReturnKeys.IsEmpty())
-        {
-            ReturnKeys = ReturnKeys + "," + Value;
-            SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReturnKeys);
-        }
-        else
-        {
-            SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), Value);
-        }
-    }
-    else
-    {
-        SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), Value);
-    }
-}
-
-void CodeSpaceComponent::RemoveKey(const csp::common::String& Key)
-{
-    const csp::common::String& CurrentKeys = GetStringProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
-    csp::common::List<csp::common::String> KeyList = CurrentKeys.Split(',');
-    if (KeyList.Contains(Key))
-    {
-        csp::common::String ReturnKeys;
-        KeyList.RemoveItem(Key);
-        if (KeyList.Size() != 0)
-        {
-            for (size_t i = 0; i < KeyList.Size(); ++i)
-            {
-                if (i == 0)
-                {
-                    ReturnKeys = KeyList[i];
-                }
-                else
-                {
-                    ReturnKeys = ReturnKeys + "," + KeyList[i];
-                }
-            }
-        }
-
-        SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReturnKeys);
-    }
-    else
-    {
-        CSP_LOG_ERROR_MSG("Key Not Found.");
-    }
+    SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReplicatedAttributes);
 }
 
 } // namespace csp::multiplayer

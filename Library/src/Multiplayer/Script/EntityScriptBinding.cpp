@@ -15,8 +15,7 @@
  */
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Debug/Logging.h"
-
-
+#include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
@@ -50,6 +49,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
+#include "JSBindings.h"
 
 namespace csp::multiplayer
 {
@@ -228,23 +228,9 @@ public:
         return RootHierarchyEntities;
     }
 
-    // void CreateEntity(std::string Name)
-    // {
-    //     if (EntitySystem)
-    //     {
-    //         EntitySystem->LockEntityUpdate();
-    //         EntitySystem->CreateLocalObject(Name.c_str(), SpaceTransform(),
-    //             [this](SpaceEntity* Entity)
-    //             {
-    //                 EntitySystem->UnlockEntityUpdate();
-    //                 EntitySystem->FireEntityCreatedEvent(Entity);
-    //             });
-    //     }
-    // }
-
     /**
-    * Creates a new entity in the system and returns a promise to javascript.
-    */
+     * Creates a new entity in the system and returns a promise to javascript.
+     */
     qjs::Value CreateEntity(const std::string& name)
     {
         qjs::Context* m_ctx = this->Context;
@@ -330,6 +316,7 @@ void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding)
 }
 
 #define PROPERTY_GET_SET(COMP, METHOD, PROP) property<&COMP##ScriptInterface::Get##METHOD, &COMP##ScriptInterface::Set##METHOD>(PROP)
+#define PROPERTY_GET_SET_CLASS(COMP, METHOD, PROP) property<&COMP::Get##METHOD, &COMP::Set##METHOD>(PROP)
 #define PROPERTY_GET(COMP, METHOD, PROP) property<&COMP##ScriptInterface::Get##METHOD>(PROP)
 
 void BindComponents(qjs::Context::Module* Module)
@@ -521,7 +508,6 @@ void BindComponents(qjs::Context::Module* Module)
         .constructor<>()
         .base<ComponentScriptInterface>()
         .PROPERTY_GET(CodeSpaceComponent, ScriptAssetPath, "scriptAssetPath")
-        .fun<&CodeSpaceComponentScriptInterface::GetAttributeSubscriptionKey>("getAttributeSubscriptionKey")
         .fun<&CodeSpaceComponentScriptInterface::HasAttribute>("hasAttribute")
         .fun<&CodeSpaceComponentScriptInterface::GetAttribute>("getAttribute")
         .fun<&CodeSpaceComponentScriptInterface::GetAttributeKeys>("getAttributeKeys");
@@ -673,6 +659,19 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
+
+    Module->class_<csp::multiplayer::CodeAttribute>("CodeAttribute")
+        .constructor<>()
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Type, "type")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, StringValue, "stringValue")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, FloatValue, "floatValue")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, IntValue, "intValue")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, BoolValue, "boolValue")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector2Value, "vector2Value")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector3Value, "vector3Value")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector4Value, "vector4Value")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Min, "min")
+        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Max, "max");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)

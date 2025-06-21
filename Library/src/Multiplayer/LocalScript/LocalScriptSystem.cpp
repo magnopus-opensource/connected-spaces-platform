@@ -199,31 +199,40 @@ void LocalScriptSystem::LoadScriptModules()
     assetSystem->LoadScripts(this->SpaceId, scriptLoadedCallback);
 }
 
-void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
-{
+void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId, const csp::common::String& scriptAssetPath)
+{   
+    
     std::stringstream ss;
-    // import every script from loadedScripts, replace the forward slash with underscore
-    for (size_t i = 0; i < this->LoadedScripts.Keys()->Size(); ++i)
-    {
-        csp::common::String Key = this->LoadedScripts.Keys()->operator[](i);
+    
+
         // Replace forward slashes with underscores for the import path
-        csp::common::String scriptPath = Key.ReplaceAll("/", "_"); // Remove leading slash for import path
+        csp::common::String scriptPath = scriptAssetPath.ReplaceAll("/", "_"); // Remove leading slash for import path
         scriptPath = scriptPath.ReplaceAll("-", "_");
         scriptPath = scriptPath.ReplaceAll(" ", "_");
         scriptPath = scriptPath.substr(0, scriptPath.Length() - 4);
-        ss << "import * as " << scriptPath << " from '" << Key << "';\n";
-    }
-    ss << "\n";
-    for (size_t i = 0; i < this->LoadedScripts.Keys()->Size(); ++i)
-    {
-        csp::common::String Key = this->LoadedScripts.Keys()->operator[](i);
-        // Replace forward slashes with underscores for the import path
-        csp::common::String scriptPath = Key.ReplaceAll("/", "_");
-        scriptPath = scriptPath.ReplaceAll("-", "_");
-        scriptPath = scriptPath.ReplaceAll(" ", "_");
-        scriptPath = scriptPath.substr(0, scriptPath.Length() - 4);
-        ss << "globalThis[\"" << scriptPath << "\"] = " << scriptPath << ";\n";
-    }
+        ss << "const module = await import('" << scriptPath << "');\n";
+        ss << "const {attributes} = module;\n";
+        ss << R"(
+            const types = {
+                'string': 'setAttributeString',
+                'number': 'setAttributeFloat',
+                'slider': 'setAttributeFloat',
+                'boolean': 'setAttributeBoolean',
+                'vector3': 'setAttributeVector3',
+                'quaternion': 'setAttributeVector4',
+                'entity': 'setAttributeString',
+            };
+        })";
+        ss << R"(
+            for (const [key, value] of Object.entries(attributes)) {
+                const fn = types[value.type];
+                if (!fn) {  
+                    console.warn(`Unknown attribute type: ${value.type} for key: ${key}`);
+                    continue;
+                }
+                TheEntitySystem[fn](EntityId, key, value.type, value.defaultValue, value.min ?? 0, value.max ?? 0, value.description ?? '');
+            }
+        )";
 
     ss << "scriptRegistry.addCodeComponent(" << EntityId << ");\n";
     std::string out = ss.str();

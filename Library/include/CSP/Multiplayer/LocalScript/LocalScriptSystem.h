@@ -80,8 +80,7 @@ public:
 /// @brief Parses attributes from a CodeSpaceComponent
     /// @param CodeComponent The code component to parse attributes from
     void ParseAttributes(csp::multiplayer::CodeSpaceComponent* CodeComponent);
-    void RegisterCodeComponentInRegistry(uint64_t EntityId);
-
+    void RegisterCodeComponentInRegistry(uint64_t EntityId, const csp::common::String& scriptAssetPath);
     /// @brief Load and register script modules from the given space
     void LoadScriptModules();
     void RunScript(const csp::common::String& Path);
