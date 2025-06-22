@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 #include "Multiplayer/Script/EntityScriptBinding.h"
-#include "Debug/Logging.h"
-#include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
+#include "JSBindings.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -49,7 +49,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
-#include "JSBindings.h"
+
 
 namespace csp::multiplayer
 {
@@ -230,8 +230,57 @@ public:
 
     /**
      * Creates a new entity in the system and returns a promise to javascript.
+     * TODO SCRIPTS MUST NOT be able to delete entities they didn't create. Adapt the api to only allow the local object to be passed to it
+     * Restricting it to just local will suffice for this RnD project
      */
-    qjs::Value CreateEntity(const std::string& name)
+    qjs::Value DeleteLocalEntity(const uint32_t entityId)
+    {
+        qjs::Context* m_ctx = this->Context;
+        uint64_t EntityId = static_cast<uint64_t>(entityId);
+        SpaceEntity* EntityToDestroy = EntitySystem->FindSpaceEntityById(EntityId);
+        if (EntityToDestroy == nullptr || EntityToDestroy->IsLocal() == false)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found for deletion.", EntityId);
+            return qjs::Value(m_ctx->ctx, JS_UNDEFINED);
+        }
+
+        // 1. Create a Promise and get its resolving functions.
+        // We use the stored context member 'm_ctx'.
+        JSValue funcs[2];
+        // create a promise, this can be used with async/await in JavaScript
+        JSValue promise = JS_NewPromiseCapability(m_ctx->ctx, funcs);
+
+        // called on success
+        qjs::Value resolve_func(m_ctx->ctx, std::move(funcs[0]));
+        // called on failure
+        qjs::Value reject_func(m_ctx->ctx, std::move(funcs[1]));
+
+        EntitySystem->DestroyEntity(EntityToDestroy,
+            [resolve_func, reject_func, m_ctx](bool success)
+            {
+                if (success)
+                {
+                    // Call the 'resolve' function
+                    JSValueConst argv[] = { JS_UNDEFINED };
+                    JSValue result = JS_Call(m_ctx->ctx, resolve_func.v, JS_UNDEFINED, 0, argv);
+                    JS_FreeValue(m_ctx->ctx, result);
+                }
+                else
+                {
+                    auto error = m_ctx->newValue("Failed to delete entity in C++");
+                    JSValueConst argv[] = { error.v };
+                    JSValue result = JS_Call(m_ctx->ctx, reject_func.v, JS_UNDEFINED, 1, argv);
+                    JS_FreeValue(m_ctx->ctx, result);
+                }
+            });
+        // Return the promise to JavaScript.
+        return qjs::Value(m_ctx->ctx, std::move(promise));
+    }
+
+    /**
+     * Creates a new entity in the system and returns a promise to javascript.
+     */
+    qjs::Value CreateLocalEntity(const std::string& name)
     {
         qjs::Context* m_ctx = this->Context;
         // 1. Create a Promise and get its resolving functions.
@@ -651,7 +700,8 @@ void BindInternal(qjs::Context::Module* Module)
     Module->class_<EntitySystemScriptInterface>("EntitySystem")
         .constructor<>()
         .fun<&EntitySystemScriptInterface::GetFoundationVersion>("getFoundationVersion")
-        .fun<&EntitySystemScriptInterface::CreateEntity>("createEntity")
+        .fun<&EntitySystemScriptInterface::CreateLocalEntity>("createLocalEntity")
+        .fun<&EntitySystemScriptInterface::DeleteLocalEntity>("deleteLocalEntity")
         .fun<&EntitySystemScriptInterface::GetEntities>("getEntities")
         .fun<&EntitySystemScriptInterface::GetObjects>("getObjects")
         .fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
@@ -719,26 +769,25 @@ void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Contex
 // This needs to be in the global namespace for QuickJS to find it
 namespace qjs
 {
-    // Add specialization for CodeAttributeScriptInterface
-    template <>
-    struct js_traits<csp::multiplayer::CodeAttributeScriptInterface, void>
+// Add specialization for CodeAttributeScriptInterface
+template <> struct js_traits<csp::multiplayer::CodeAttributeScriptInterface, void>
+{
+    static JSValue wrap(JSContext* ctx, csp::multiplayer::CodeAttributeScriptInterface val)
     {
-        static JSValue wrap(JSContext* ctx, csp::multiplayer::CodeAttributeScriptInterface val)
+        // Create a new object with the class ID
+        JSValue obj = JS_NewObjectClass(ctx, csp::multiplayer::CodeAttributeScriptInterface::js_class_id);
+
+        // Store a copy of the val in the object
+        if (!JS_IsException(obj))
         {
-            // Create a new object with the class ID
-            JSValue obj = JS_NewObjectClass(ctx, csp::multiplayer::CodeAttributeScriptInterface::js_class_id);
-            
-            // Store a copy of the val in the object
-            if (!JS_IsException(obj))
-            {
-                // Allocate memory for the CodeAttributeScriptInterface
-                auto* p = new csp::multiplayer::CodeAttributeScriptInterface(val);
-                
-                // Set the C++ object pointer as property of the JS object
-                JS_SetOpaque(obj, p);
-            }
-            
-            return obj;
+            // Allocate memory for the CodeAttributeScriptInterface
+            auto* p = new csp::multiplayer::CodeAttributeScriptInterface(val);
+
+            // Set the C++ object pointer as property of the JS object
+            JS_SetOpaque(obj, p);
         }
-    };
+
+        return obj;
+    }
+};
 }

@@ -201,18 +201,18 @@ void LocalScriptSystem::LoadScriptModules()
 
 void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId, const csp::common::String& scriptAssetPath)
 {   
-    
-    std::stringstream ss;
-    
+    // Convert EntityId to string for proper concatenation
+    std::string entityIdStr = std::to_string(EntityId);
+    std::string scriptPathStr = scriptAssetPath.c_str();
 
-        // Replace forward slashes with underscores for the import path
-        csp::common::String scriptPath = scriptAssetPath.ReplaceAll("/", "_"); // Remove leading slash for import path
-        scriptPath = scriptPath.ReplaceAll("-", "_");
-        scriptPath = scriptPath.ReplaceAll(" ", "_");
-        scriptPath = scriptPath.substr(0, scriptPath.Length() - 4);
-        ss << "const module = await import('" << scriptPath << "');\n";
-        ss << "const {attributes} = module;\n";
-        ss << R"(
+    std::string out = R"(
+        import { Log } from 'csp';
+        
+            const scriptAssetPath = ')" + scriptPathStr + R"(';
+            const EntityId = ')" + entityIdStr + R"(';
+            const registerModule = async () => {
+            const module = await import(scriptAssetPath);
+            const {attributes} = module;
             const types = {
                 'string': 'setAttributeString',
                 'number': 'setAttributeFloat',
@@ -222,22 +222,24 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId, const
                 'quaternion': 'setAttributeVector4',
                 'entity': 'setAttributeString',
             };
-        })";
-        ss << R"(
             for (const [key, value] of Object.entries(attributes)) {
                 const fn = types[value.type];
                 if (!fn) {  
-                    console.warn(`Unknown attribute type: ${value.type} for key: ${key}`);
+                    Log(`Unknown attribute type: ${value.type} for key: ${key}`);
                     continue;
                 }
-                TheEntitySystem[fn](EntityId, key, value.type, value.defaultValue, value.min ?? 0, value.max ?? 0, value.description ?? '');
+               // TheEntitySystem[fn](EntityId, key, value.type, value.defaultValue, value.min ?? 0, value.max ?? 0, value.description ?? '');
             }
-        )";
-
-    ss << "scriptRegistry.addCodeComponent(" << EntityId << ");\n";
-    std::string out = ss.str();
+        };
+        Log(`Registering code component ${scriptAssetPath} for EntityId: ${EntityId}`);
+        registerModule().then(() => {
+          scriptRegistry.addCodeComponent(EntityId);
+        });
+    )";
+       
+    //CSP_LOG_FORMAT(csp::systems::LogLevel::Log,"main script:\n%s", out.c_str());
     try {
-        Context->eval(out, "<import>", JS_EVAL_TYPE_MODULE);
+        Context->eval(out, "<import>", JS_EVAL_TYPE_MODULE); // Fixed variable name from out2 to out
     } catch (qjs::exception& e)
     {
         CSP_LOG_ERROR_FORMAT("main script:\n%s", out.c_str());
