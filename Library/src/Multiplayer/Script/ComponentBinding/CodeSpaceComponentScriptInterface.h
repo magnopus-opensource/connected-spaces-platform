@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CodeAttributeScriptInterface.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 
 #include <string>
@@ -32,9 +33,8 @@ class CodeSpaceComponentScriptInterface : public ComponentScriptInterface
 public:
     DECLARE_SCRIPT_PROPERTY(std::string, ScriptAssetPath);
     CodeSpaceComponentScriptInterface(CodeSpaceComponent* InComponent = nullptr);
-   // uint32_t GetAttributeSubscriptionKey(const std::string& Key);
     bool HasAttribute(const std::string& Key) const;
-    const csp::multiplayer::CodeAttribute* GetAttribute(const std::string& Key);
+    CodeAttributeScriptInterface GetAttribute(const std::string& Key);
     std::vector<std::string> GetAttributeKeys();
 };
 

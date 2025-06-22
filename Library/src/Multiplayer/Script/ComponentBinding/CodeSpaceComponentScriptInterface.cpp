@@ -38,11 +38,14 @@ bool CodeSpaceComponentScriptInterface::HasAttribute(const std::string& Key) con
     return static_cast<CodeSpaceComponent*>(Component)->HasAttribute(Key.c_str());
 }
 
-
-const csp::multiplayer::CodeAttribute* CodeSpaceComponentScriptInterface::GetAttribute(
-    const std::string& Key)
+CodeAttributeScriptInterface CodeSpaceComponentScriptInterface::GetAttribute(const std::string& Key)
 {
-    return static_cast<csp::multiplayer::CodeSpaceComponent*>(Component)->GetAttribute(Key.c_str());
+    const CodeAttribute* attribute = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component)->GetAttribute(Key.c_str());
+    if (attribute)
+    {
+        return CodeAttributeScriptInterface(attribute);
+    }
+    return CodeAttributeScriptInterface();
 }
 
 std::vector<std::string> CodeSpaceComponentScriptInterface::GetAttributeKeys()

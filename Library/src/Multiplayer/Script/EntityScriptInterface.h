@@ -16,7 +16,6 @@
 #pragma once
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-
 #include <string>
 #include <vector>
 

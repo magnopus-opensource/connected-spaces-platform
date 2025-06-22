@@ -660,18 +660,18 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
-    Module->class_<csp::multiplayer::CodeAttribute>("CodeAttribute")
+    Module->class_<CodeAttributeScriptInterface>("CodeAttribute")
         .constructor<>()
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Type, "type")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, StringValue, "stringValue")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, FloatValue, "floatValue")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, IntValue, "intValue")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, BoolValue, "boolValue")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector2Value, "vector2Value")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector3Value, "vector3Value")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Vector4Value, "vector4Value")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Min, "min")
-        .PROPERTY_GET_SET_CLASS(csp::multiplayer::CodeAttribute, Max, "max");
+        .PROPERTY_GET(CodeAttribute, Type, "type")
+        .PROPERTY_GET(CodeAttribute, StringValue, "stringValue")
+        .PROPERTY_GET(CodeAttribute, FloatValue, "floatValue")
+        .PROPERTY_GET(CodeAttribute, IntValue, "intValue")
+        .PROPERTY_GET(CodeAttribute, BoolValue, "boolValue")
+        .PROPERTY_GET(CodeAttribute, Vector2Value, "vector2Value")
+        .PROPERTY_GET(CodeAttribute, Vector3Value, "vector3Value")
+        .PROPERTY_GET(CodeAttribute, Vector4Value, "vector4Value")
+        .PROPERTY_GET(CodeAttribute, Min, "min")
+        .PROPERTY_GET(CodeAttribute, Max, "max");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -714,3 +714,31 @@ void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Contex
 }
 
 } // namespace csp::multiplayer
+
+// Add the js_traits specialization after the namespace close
+// This needs to be in the global namespace for QuickJS to find it
+namespace qjs
+{
+    // Add specialization for CodeAttributeScriptInterface
+    template <>
+    struct js_traits<csp::multiplayer::CodeAttributeScriptInterface, void>
+    {
+        static JSValue wrap(JSContext* ctx, csp::multiplayer::CodeAttributeScriptInterface val)
+        {
+            // Create a new object with the class ID
+            JSValue obj = JS_NewObjectClass(ctx, csp::multiplayer::CodeAttributeScriptInterface::js_class_id);
+            
+            // Store a copy of the val in the object
+            if (!JS_IsException(obj))
+            {
+                // Allocate memory for the CodeAttributeScriptInterface
+                auto* p = new csp::multiplayer::CodeAttributeScriptInterface(val);
+                
+                // Set the C++ object pointer as property of the JS object
+                JS_SetOpaque(obj, p);
+            }
+            
+            return obj;
+        }
+    };
+}
