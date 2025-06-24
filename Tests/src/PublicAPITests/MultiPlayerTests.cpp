@@ -2779,7 +2779,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
             [](const std::string& /*DeleteObjectsMethodName*/, const signalr::value& /*DeleteEntityMessage*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS]);
+                auto Value = signalr::value("Irrelevant value from DeleteObjects");
                 auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
                 Callback(Value, Except);
                 return async::make_task(std::make_tuple(Value, Except));
@@ -2792,9 +2792,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
     // And the disconnection callback will be called with a message (weird)
     MockConnectionCallback MockDisconnectionCallback;
     EXPECT_CALL(MockDisconnectionCallback,
-        Call(csp::common::String(("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \""
-            + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS] + "\" invocation.")
-                                     .c_str())));
+        Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
     Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
@@ -2819,14 +2817,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
                 if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS])
                 {
                     // Succeed deleting objects
-                    auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS]);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
                 else if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID])
                 {
                     // Fail getting client Id
-                    auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::GET_CLIENT_ID]);
+                    auto Value = signalr::value("Irrelevant value from GetClientId");
                     auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
                     Callback(Value, Except);
                     return async::make_task(std::make_tuple(Value, Except));
@@ -2868,7 +2866,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
                 if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS])
                 {
                     // Succeed deleting objects
-                    auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS]);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
@@ -2921,7 +2919,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
                 if (HubMethodName == MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS])
                 {
                     // Succeed deleting objects
-                    auto Value = signalr::value("Irrelevant value from " + MultiplayerHubMethodMap()[MultiplayerHubMethod::DELETE_OBJECTS]);
+                    auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
