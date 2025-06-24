@@ -173,7 +173,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
     InvokeArguments.push_back(EventMessage);
 
     ISignalRConnectionPtr->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), InvokeArguments, LocalCallback);
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_EVENT_MESSAGE), InvokeArguments, LocalCallback);
 }
 
 } // namespace csp::multiplayer

@@ -2814,14 +2814,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
             [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::DELETE_OBJECTS))
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::GET_CLIENT_ID))
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
                 {
                     // Fail getting client Id
                     auto Value = signalr::value("Irrelevant value from GetClientId");
@@ -2863,20 +2863,20 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
             [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::DELETE_OBJECTS))
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::GET_CLIENT_ID))
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
                     return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::START_LISTENING))
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::START_LISTENING))
                 {
                     // Fail to start listening
                     auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
@@ -2916,15 +2916,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
             [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::DELETE_OBJECTS))
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if ((HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::GET_CLIENT_ID))
-                    || (HubMethodName == Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::START_LISTENING)))
+                else if ((HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
+                    || (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::START_LISTENING)))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);

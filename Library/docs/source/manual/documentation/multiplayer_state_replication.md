@@ -37,7 +37,7 @@ UpdatedEntity->SerialisePatch(Serialiser);
 auto SerialisedEntity = Serialiser.Finalise();
 
 std::vector<signalr::value> InvokeArguments = {SerialisedEntity};
-Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::SEND_OBJECT_PATCH), InvokeArguments, LocalCallback);
+Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCH), InvokeArguments, LocalCallback);
 ```
 
 The serializer is set to parse over the `SpaceEntity` data in a specific way in order to format the message correctly. it starts with the Dto metadata of `Id`, `OwnerId`, `Destroy`, `ParentId`.
