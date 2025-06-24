@@ -40,6 +40,23 @@
 
 namespace csp::multiplayer::mcs
 {
+class ItemComponentData;
+class ObjectMessage;
+}
+
+namespace csp::json
+{
+class JsonSerializer;
+class JsonDeserializer;
+} // namespace csp::json
+
+void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
+void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);
+
+namespace csp::multiplayer::mcs
+{
 /// @brief All supported MCS types
 enum class ItemComponentDataType : uint64_t
 {
@@ -128,6 +145,9 @@ public:
     bool operator==(const ItemComponentData& Other) const;
 
 private:
+    friend void ::ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
+
     ItemComponentDataVariant Value;
 };
 
@@ -156,6 +176,9 @@ public:
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
+    friend void ::ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
+    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);
+
     uint64_t Id = 0;
     uint64_t Type = 0;
     bool IsTransferable = false;
