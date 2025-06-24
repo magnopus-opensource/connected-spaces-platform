@@ -37,22 +37,77 @@ namespace Csp
         public static NativePointer Zero => new NativePointer(IntPtr.Zero, 0);
     }
 
-    public class NativeClassWrapper
+    public abstract class NativeClassWrapper
     {
         internal IntPtr _ptr;
         internal bool _ownsPtr;
         internal bool _disposed = false;
 
-        internal virtual string _safeTypeName { get; }
+        /// <summary>
+        /// Fetch the safe type name for a given type that has the NativeClassWrapperAttribute.
+        /// This is currently used by templated types (e.g. `Csp.Common.Array`) to find the corresponding
+        /// native methods through reflection.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown when the type is null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the type does not have a valid NativeClassWrapperAttribute.</exception>
+        internal static string GetSafeTypeName(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
+            var attr = (NativeClassWrapperAttribute)Attribute.GetCustomAttribute(type, typeof(NativeClassWrapperAttribute));
+            if (attr == null || string.IsNullOrEmpty(attr.SafeName))
+            {
+                throw new InvalidOperationException($"Type {type.Name} does not have a NativeClassWrapperAttribute.");
+            }
+
+            if (attr.Template)
+            {
+                throw new NotImplementedException($"Templated type {type.Name} is not supported through runtime reflection.");
+            }
+
+            return attr?.SafeName ?? throw new InvalidOperationException($"Type {type.Name} does not have a NativeClassAttribute with a SafeName.");
+        }
+
+        [Obsolete("NativeClassWrapper instances are now guaranteed to be valid")]
         public bool PointerIsValid => _ptr != IntPtr.Zero;
-
-        public NativeClassWrapper() { }
 
         internal NativeClassWrapper(NativePointer ptr)
         {
+            if (ptr.Pointer == IntPtr.Zero)
+            {
+                throw new ArgumentException("NativePointer cannot be zero.", nameof(ptr));
+            }
+
             _ptr = ptr.Pointer;
             _ownsPtr = ptr.OwnsOwnData;
+        }
+    }
+
+    /// <summary>
+    /// Used to decorate generated NativeClassWrapper classes to provide a way to look up the native type name.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    public class NativeClassWrapperAttribute : Attribute
+    {
+        public string SafeName { get; }
+
+        public bool Template { get; }
+
+        public NativeClassWrapperAttribute(string safeName)
+        {
+            SafeName = safeName;
+            Template = false;
+        }
+
+        public NativeClassWrapperAttribute(string safeName, bool template)
+        {
+            SafeName = safeName;
+            Template = template;
         }
     }
 }
