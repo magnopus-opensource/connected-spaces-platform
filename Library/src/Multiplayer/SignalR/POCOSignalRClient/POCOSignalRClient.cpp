@@ -79,7 +79,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
     try
     {
         CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint
-            = ParseMultiplayerServiceUriEndPoint(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str());
+            = ParseMultiplayerServiceUriEndPoint(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str());
 
         auto domain = ParsedEndpoint.Domain;
         auto protocol = ParsedEndpoint.Protocol;

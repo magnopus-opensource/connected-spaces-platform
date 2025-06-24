@@ -282,12 +282,12 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
     const std::string MultiplayerServiceURI = TranslateEndpointRootURIToMultiplayerServiceUri(RootURI);
 
     EndpointURIs EndpointsURI;
-    EndpointsURI.UserServiceURI = CSP_TEXT(UserServiceURI.c_str());
-    EndpointsURI.PrototypeServiceURI = CSP_TEXT(PrototypeServiceURI.c_str());
-    EndpointsURI.SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
-    EndpointsURI.MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
-    EndpointsURI.AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
-    EndpointsURI.TrackingServiceURI = CSP_TEXT(TrackingServiceURI.c_str());
+    EndpointsURI.UserService = ServiceDefinition(CSP_TEXT(UserServiceURI.c_str()), 1U);
+    EndpointsURI.PrototypeService = ServiceDefinition(CSP_TEXT(PrototypeServiceURI.c_str()), 1U);
+    EndpointsURI.SpatialDataService = ServiceDefinition(CSP_TEXT(SpatialDataServiceURI.c_str()), 1U);
+    EndpointsURI.AggregationService = ServiceDefinition(CSP_TEXT(AggregationServiceURI.c_str()), 1U);
+    EndpointsURI.TrackingService = ServiceDefinition(CSP_TEXT(TrackingServiceURI.c_str()), 1U);
+    EndpointsURI.MultiplayerService = ServiceDefinition(CSP_TEXT(MultiplayerServiceURI.c_str()), 1U);
 
     return EndpointsURI;
 }
