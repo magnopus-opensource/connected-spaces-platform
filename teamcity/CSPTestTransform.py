@@ -36,14 +36,14 @@ def process_junit_xml(input_path, output_path):
     testsuites = testsuites_root.findall("testsuite")
     for suite in testsuites:
         rename_attribute(suite, "disabled", "skipped")
-        
-        # We inject the test suite name into each test case name, 
+
+        # We inject the test suite name into each test case name,
         # separated by carets, for readability with our test reporting platform.
         test_suite_prefix = suite.get("name")
         test_suite_prefix = test_suite_prefix.replace(".", " > ")
 
         for case in suite.findall("testcase"):
-        
+
             # Test case name
             name = case.get("name", "")
             name = test_suite_prefix + " > " + split_camel_case(name)
@@ -52,7 +52,7 @@ def process_junit_xml(input_path, output_path):
             # Test case description
             if case.find("system-out") is None:
                 # CSP currently doesn't write test descriptions to their test XML
-                ET.SubElement(case, "system-out").text = "Placeholder test description."
+                ET.SubElement(case, "system-out").text = ""
 
             # Ignored test case
             status_attribute = case.get("status")
@@ -73,7 +73,7 @@ def process_junit_xml(input_path, output_path):
                 case.set("status", "Fail")
                 failure_text = failure_text + failure.get("message") + "\n\n"
                 case.remove(failure)
-            
+
             if failure_text != "":
                 ET.SubElement(case, "failure", attrib={"message": failure_text})
 
