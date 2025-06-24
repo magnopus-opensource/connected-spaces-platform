@@ -52,12 +52,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
-    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GENERATE_OBJECT_IDS], ::testing::_, ::testing::_))
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>>
@@ -93,12 +95,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
-    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::GENERATE_OBJECT_IDS], ::testing::_, ::testing::_))
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/, std::function<void(const signalr::value&, std::exception_ptr)> /**/) {
                 return async::make_task(
@@ -134,12 +138,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates a result and not an exception
-    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SEND_OBJECT_MESSAGE], ::testing::_, ::testing::_))
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>>
@@ -175,12 +181,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
     SpaceEntitySystem->SetConnection(SignalRMock.get());
 
     // SignalR populates an exception
-    EXPECT_CALL(*SignalRMock, Invoke(MultiplayerHubMethodMap()[MultiplayerHubMethod::SEND_OBJECT_MESSAGE], ::testing::_, ::testing::_))
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethodMap().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
                 std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>> {

@@ -197,6 +197,10 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
 
+    /// @brief Getter for the MultiplayerHubMethodMap
+    /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethodMap() { return MultiplayerHubMethods; }
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
@@ -233,6 +237,8 @@ private:
     uint32_t KeepAliveSeconds = 120;
 
     bool AllowSelfMessaging = false;
+
+    MultiplayerHubMethodMap MultiplayerHubMethods;
 };
 
 } // namespace csp::multiplayer

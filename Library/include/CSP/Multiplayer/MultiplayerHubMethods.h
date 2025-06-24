@@ -44,25 +44,33 @@ enum class MultiplayerHubMethod
 /// @brief Utility class to map input values from MultiplayerHubMethod to string representations.
 struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod, std::string>
 {
-    MultiplayerHubMethodMap()
+    explicit MultiplayerHubMethodMap()
     {
-        this->operator[](MultiplayerHubMethod::DELETE_OBJECTS) = "DeleteObjects";
-        this->operator[](MultiplayerHubMethod::GENERATE_OBJECT_IDS) = "GenerateObjectIds";
-        this->operator[](MultiplayerHubMethod::GET_CLIENT_ID) = "GetClientId";
-        this->operator[](MultiplayerHubMethod::PAGE_SCOPED_OBJECTS) = "PageScopedObjects";
-        this->operator[](MultiplayerHubMethod::RESET_SCOPES) = "ResetScopes";
-        this->operator[](MultiplayerHubMethod::SEND_EVENT_MESSAGE) = "SendEventMessage";
-        this->operator[](MultiplayerHubMethod::SEND_OBJECT_MESSAGE) = "SendObjectMessage";
-        this->operator[](MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND) = "SendObjectNotFound";
-        this->operator[](MultiplayerHubMethod::SEND_OBJECT_PATCH) = "SendObjectPatch";
-        this->operator[](MultiplayerHubMethod::SEND_OBJECT_PATCHES) = "SendObjectPatches";
-        this->operator[](MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING) = "SetAllowSelfMessaging";
-        this->operator[](MultiplayerHubMethod::SET_SCOPES) = "SetScopes";
-        this->operator[](MultiplayerHubMethod::START_LISTENING) = "StartListening";
-        this->operator[](MultiplayerHubMethod::STOP_LISTENING) = "StopListening";
+        this->insert({ MultiplayerHubMethod::DELETE_OBJECTS, "DeleteObjects" });
+        this->insert({ MultiplayerHubMethod::GENERATE_OBJECT_IDS, "GenerateObjectIds" });
+        this->insert({ MultiplayerHubMethod::GET_CLIENT_ID, "GetClientId" });
+        this->insert({ MultiplayerHubMethod::PAGE_SCOPED_OBJECTS, "PageScopedObjects" });
+        this->insert({ MultiplayerHubMethod::RESET_SCOPES, "ResetScopes" });
+        this->insert({ MultiplayerHubMethod::SEND_EVENT_MESSAGE, "SendEventMessage" });
+        this->insert({ MultiplayerHubMethod::SEND_OBJECT_MESSAGE, "SendObjectMessage" });
+        this->insert({ MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND, "SendObjectNotFound" });
+        this->insert({ MultiplayerHubMethod::SEND_OBJECT_PATCH, "SendObjectPatch" });
+        this->insert({ MultiplayerHubMethod::SEND_OBJECT_PATCHES, "SendObjectPatches" });
+        this->insert({ MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING, "SetAllowSelfMessaging" });
+        this->insert({ MultiplayerHubMethod::SET_SCOPES, "SetScopes" });
+        this->insert({ MultiplayerHubMethod::START_LISTENING, "StartListening" });
+        this->insert({ MultiplayerHubMethod::STOP_LISTENING, "StopListening" });
     }
 
     ~MultiplayerHubMethodMap() { }
+
+    std::string Get(const MultiplayerHubMethod& Method) const
+    {
+        if (auto search = this->find(Method); search != this->end())
+            return search->second;
+
+        return "";
+    }
 };
 
 } // namespace csp::multiplayer
