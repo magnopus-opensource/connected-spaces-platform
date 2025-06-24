@@ -15,12 +15,16 @@
  */
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
+#include <map>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <stack>
+#include <string>
+#include <vector>
 
 namespace csp::json
 {
@@ -91,11 +95,17 @@ private:
     void SerializeValue(bool Value);
     void SerializeValue(float Value);
     void SerializeValue(double Value);
+    void SerializeValue(const char* Value);
     void SerializeValue(const csp::common::String& Value);
     void SerializeValue(std::nullptr_t Value);
 
+    void SerializeValue(const std::string& Value);
+
     template <typename T> void SerializeValue(const csp::common::Array<T>& Value);
     template <typename T> void SerializeValue(const csp::common::List<T>& Value);
+
+    template <typename T> void SerializeValue(const std::vector<T>& Value);
+    template <typename T> void SerializeValue(const std::map<std::string, T>& Value);
 };
 
 class JsonDeserializer
@@ -177,8 +187,13 @@ private:
     void DeserializeValue(double& Value) const;
     void DeserializeValue(csp::common::String& Value) const;
 
+    void DeserializeValue(std::string& Value) const;
+
     template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
     template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
+
+    template <typename T> void DeserializeValue(std::vector<T>& Value) const;
+    template <typename T> void DeserializeValue(std::map<std::string, T>& Value) const;
 };
 
 template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Array<T>& Value)
@@ -205,12 +220,36 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
     Writer.EndArray();
 }
 
+template <typename T> inline void JsonSerializer::SerializeValue(const std::vector<T>& Value)
+{
+    Writer.StartArray();
+
+    for (size_t i = 0; i < Value.size(); ++i)
+    {
+        SerializeValue(Value[i]);
+    }
+
+    Writer.EndArray();
+}
+
+template <typename T> inline void JsonSerializer::SerializeValue(const std::map<std::string, T>& Value)
+{
+    Writer.StartObject();
+
+    for (const auto& Pair : Value)
+    {
+        SerializeMember(Pair.first.c_str(), Pair.second);
+    }
+
+    Writer.EndObject();
+}
+
 template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::Array<T>& Values) const
 {
-    int Size = ValueStack.top()->Size();
+    rapidjson::SizeType Size = ValueStack.top()->Size();
     Values = csp::common::Array<T>(Size);
 
-    for (int i = 0; i < Size; ++i)
+    for (rapidjson::SizeType i = 0; i < Size; ++i)
     {
         auto JsonValue = &(*ValueStack.top())[i];
         ValueStack.push(JsonValue);
@@ -225,9 +264,9 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
 
 template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::List<T>& Values) const
 {
-    int Size = ValueStack.top()->Size();
+    rapidjson::SizeType Size = ValueStack.top()->Size();
 
-    for (int i = 0; i < Size; ++i)
+    for (rapidjson::SizeType i = 0; i < Size; ++i)
     {
         auto JsonValue = &(*ValueStack.top())[i];
         ValueStack.push(JsonValue);
@@ -235,6 +274,41 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
         T NewVal;
         DeserializeValue(NewVal);
         Values.Append(NewVal);
+
+        ValueStack.pop();
+    }
+}
+
+template <typename T> inline void JsonDeserializer::DeserializeValue(std::vector<T>& Values) const
+{
+    rapidjson::SizeType Size = ValueStack.top()->Size();
+    Values.resize(Size);
+
+    for (rapidjson::SizeType i = 0; i < Size; ++i)
+    {
+        auto JsonValue = &(*ValueStack.top())[i];
+        ValueStack.push(JsonValue);
+
+        T NewVal;
+        DeserializeValue(NewVal);
+        Values[i] = NewVal;
+
+        ValueStack.pop();
+    }
+}
+
+template <typename T> inline void JsonDeserializer::DeserializeValue(std::map<std::string, T>& Values) const
+{
+    for (auto Itr = ValueStack.top()->MemberBegin(); Itr != ValueStack.top()->MemberEnd(); ++Itr)
+    {
+        const char* Key = Itr->name.GetString();
+
+        ValueStack.push(&Itr->value);
+
+        T NewVal;
+        DeserializeValue(NewVal);
+
+        Values[Key] = NewVal;
 
         ValueStack.pop();
     }
