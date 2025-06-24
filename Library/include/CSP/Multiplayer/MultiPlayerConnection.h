@@ -199,7 +199,7 @@ public:
 
     /// @brief Getter for the MultiplayerHubMethodMap
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
-    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() { return MultiplayerHubMethods; }
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
