@@ -5,9 +5,11 @@ import os
 
 from requests.auth import HTTPBasicAuth
 
-API_BASE_URL = "https://api.ttm4j.tricentis.com"
-
 def upload_test_report(args):
+
+    # URI we will be uploading to
+    API_BASE_URL = args.api_uri
+
     # The name of the test cycle. We prepend 'Automation' to help with user readability.
     cycle_name = 'Automation: ' + args.cycle_name
 
