@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/MultiplayerHubMethods.h"
 
 #include <atomic>
 #include <functional>
@@ -196,6 +197,10 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
 
+    /// @brief Getter for the MultiplayerHubMethodMap
+    /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
@@ -232,6 +237,8 @@ private:
     uint32_t KeepAliveSeconds = 120;
 
     bool AllowSelfMessaging = false;
+
+    MultiplayerHubMethodMap MultiplayerHubMethods;
 };
 
 } // namespace csp::multiplayer

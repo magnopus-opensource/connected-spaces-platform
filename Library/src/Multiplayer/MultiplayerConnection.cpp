@@ -154,7 +154,7 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
-    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
@@ -165,6 +165,7 @@ MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     , LogSystem(LogSystem)
     , ClientId(0)
     , Connected(false)
+    , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
     EventBusPtr = new EventBus(this, LogSystem);
 }
@@ -272,7 +273,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
 
-        Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
+        Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::DELETE_OBJECTS), DeleteEntityMessage, LocalCallback);
 
         return EntitiesDeletedContinuation;
     };
@@ -312,7 +313,7 @@ auto MultiplayerConnection::RequestClientId()
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling GetClientId");
 
-        Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
+        Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::GET_CLIENT_ID), signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
     };
 }
@@ -345,7 +346,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
         };
 
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
-        Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
+        Connection->Invoke(
+            MultiplayerHubMethods.Get(MultiplayerHubMethod::START_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
 
         return StartListeningContinuation;
     };
@@ -539,7 +541,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
     ParamsVec.push_back(ScopesVec);
     signalr::value Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke("SetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_SCOPES), Params, LocalCallback);
 }
 
 void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
@@ -566,7 +568,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 
     std::vector<signalr::value> ParamsVec;
     signalr::value Params = signalr::value(std::move(ParamsVec));
-    Connection->Invoke("ResetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::RESET_SCOPES), Params, LocalCallback);
 }
 
 void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
@@ -593,7 +595,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StopListening");
 
-    Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::STOP_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
 }
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
@@ -638,7 +640,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
-    Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING), InvokeArguments, LocalCallback);
 }
 
 bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelfMessaging; }
