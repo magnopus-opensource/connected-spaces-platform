@@ -27,7 +27,7 @@ def rename_attribute(element, old_name, new_name):
 
 def process_junit_xml(input_path, output_path):
     tree = ET.parse(input_path)
-    # We expect the route element to be <testsuites>
+    # We expect the root element to be <testsuites>
     testsuites_root = tree.getroot()
 
     # We express disabled tests as 'skipped'
