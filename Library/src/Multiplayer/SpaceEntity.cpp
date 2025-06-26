@@ -45,7 +45,7 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Common/Convert.h"
-#include "Multiplayer/MCS/MCSTypes.h"
+#include "Common/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"

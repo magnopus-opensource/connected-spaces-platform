@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/MCS/MCSTypes.h"
+#include "Common/MCS/MCSTypes.h"
 #include "TestHelpers.h"
 
 #include <gtest/gtest.h>

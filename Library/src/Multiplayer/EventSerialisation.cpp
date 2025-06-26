@@ -16,7 +16,7 @@
 
 #include "Multiplayer/EventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "MCS/MCSTypes.h"
+#include "Common/MCS/MCSTypes.h"
 
 #include "Common/Encode.h"
 #include "Multiplayer/MultiplayerConstants.h"

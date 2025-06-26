@@ -19,7 +19,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
-#include "MCS/MCSTypes.h"
+#include "Common/MCS/MCSTypes.h"
 
 #include <map>
 
