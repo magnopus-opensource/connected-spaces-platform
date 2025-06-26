@@ -57,7 +57,7 @@ CSP_NO_EXPORT
 
 namespace csp::profile
 {
-constexpr const int CSP_MAX_LOG_FORMAT_LEN = 1024;
+constexpr const int CSP_MAX_LOG_FORMAT_LEN = 1024*4;
 
 template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& FormatStr, Args... args)
 {

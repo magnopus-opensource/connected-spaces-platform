@@ -96,6 +96,8 @@ public:
     /// @param Key The ID of the property that will be removed.
     void RemoveAttribute(const csp::common::String& Key);
 
+    void ClearAttributes();
+
     /// @brief Retrieves the list of all the keys of the properties available in the list of replicated values.
     /// @return The list of available property keys.
     csp::common::List<csp::common::String> GetAttributeKeys() const;

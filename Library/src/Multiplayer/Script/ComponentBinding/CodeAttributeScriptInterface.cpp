@@ -37,7 +37,7 @@ CodeAttributeScriptInterface::CodeAttributeScriptInterface(const CodeAttribute* 
 // Special implementation for Type property to handle PropertyType enum
 void CodeAttributeScriptInterface::SetType(int32_t Value)
 {
-    mCodeAttribute.SetType(static_cast<PropertyType>(Value));
+    mCodeAttribute.SetType(static_cast<CodePropertyType>(Value));
 }
 
 int32_t CodeAttributeScriptInterface::GetType() const

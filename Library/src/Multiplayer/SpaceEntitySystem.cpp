@@ -947,7 +947,7 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
                 csp::multiplayer::CodeSpaceComponent* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component);
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Registering CodeComponent in local script system. %s",
                     CodeComponent->GetScriptAssetPath().c_str());
-                localScriptSystem->RegisterCodeComponentInRegistry(entity->GetId(), CodeComponent->GetScriptAssetPath());
+                localScriptSystem->RegisterCodeComponentInRegistry(entity->GetId());
             }
         }
     }

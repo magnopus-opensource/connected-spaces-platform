@@ -19,6 +19,7 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
+#include "CSP/Multiplayer/LocalScript/LocalScriptSystem.h"
 
 namespace csp::multiplayer
 {
@@ -51,26 +52,7 @@ void CodeSpaceComponent::SetCodeScopeType(CodeScopeType Scope)
 {
     SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::CodeScopeType), static_cast<int64_t>(Scope));
 }
-
-// csp::common::Map<csp::common::String, csp::multiplayer::CodeAttribute&> CodeSpaceComponent::GetAttributes() const
-// {
-//     csp::common::Map<csp::common::String, csp::multiplayer::CodeAttribute&> Overrides;
-//     auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
-    
-//     std::unique_ptr<csp::common::Array<csp::common::String>> Keys(const_cast<csp::common::Array<csp::common::String>*>(ReplicatedAttributes.Keys()));
-
-//     for (size_t i = 0; i < Keys->Size(); ++i)
-//     {
-//         const auto& CurrentKey = (*Keys)[i];
-//         const csp::common::String& serializedAttribute = ReplicatedAttributes[CurrentKey].GetString();
-        
-//         // Directly create a CodeAttribute object (not a pointer) and add it to the map
-//         Overrides[CurrentKey] = csp::multiplayer::CodeAttribute::Deserialize(serializedAttribute);
-//     }
-
-//     return Overrides;
-// }
-//getAttribute 
+ 
 csp::multiplayer::CodeAttribute* CodeSpaceComponent::GetAttribute(const csp::common::String& Key) const
 {
     auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
@@ -92,13 +74,14 @@ bool CodeSpaceComponent::HasAttribute(const csp::common::String& Key) const
 
 csp::common::List<csp::common::String> CodeSpaceComponent::GetAttributeKeys() const
 {
-    auto ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    common::Map<csp::common::String, csp::multiplayer::ReplicatedValue> ReplicatedAttributes = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
     std::unique_ptr<csp::common::Array<csp::common::String>> Keys(const_cast<csp::common::Array<csp::common::String>*>(ReplicatedAttributes.Keys()));
-    
+
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "CodeSpaceComponent::GetAttributeKeys: Found %zu keys", Keys->Size());
     csp::common::List<csp::common::String> Result;
     for (size_t i = 0; i < Keys->Size(); ++i)
     {
-        Result[i] = (*Keys)[i];
+        Result.Append((*Keys)[i]);
     }
     
     return Result;
@@ -114,6 +97,11 @@ void CodeSpaceComponent::SetAttribute(const csp::common::String& Key, const csp:
     ReplicatedValue.SetString(serializedAttribute);
     ReplicatedAttributes[Key] = ReplicatedValue;
     SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReplicatedAttributes);
+
+    csp::systems::LocalScriptSystem* localScriptSystem = csp::systems::SystemsManager::Get().GetLocalScriptSystem();
+    localScriptSystem->UpdateAttributeForEntity(this->GetParent()->GetId(), Key, Attribute);
+
+    this->GetParent()->MarkForUpdate();
 }
 
 void CodeSpaceComponent::RemoveAttribute(const csp::common::String& ModelPath)
@@ -122,6 +110,17 @@ void CodeSpaceComponent::RemoveAttribute(const csp::common::String& ModelPath)
     ReplicatedAttributes.Remove(ModelPath);
 
     SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReplicatedAttributes);
+    this->GetParent()->MarkForUpdate();
+}
+
+void CodeSpaceComponent::ClearAttributes()
+{
+    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedAttributes
+        = GetStringMapProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes));
+    ReplicatedAttributes.Clear();
+
+    SetProperty(static_cast<uint32_t>(CodeComponentPropertyKeys::Attributes), ReplicatedAttributes);
+    this->GetParent()->MarkForUpdate();
 }
 
 } // namespace csp::multiplayer

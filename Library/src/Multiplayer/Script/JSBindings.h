@@ -24,20 +24,20 @@
 namespace qjs
 {
 
-// js_traits for PropertyType enum
+// js_traits for CodePropertyType enum
 template<> 
-struct js_traits<csp::multiplayer::PropertyType, void> 
+struct js_traits<csp::multiplayer::CodePropertyType, void> 
 {
-    static JSValue wrap(JSContext* ctx, csp::multiplayer::PropertyType val) 
+    static JSValue wrap(JSContext* ctx, csp::multiplayer::CodePropertyType val) 
     {
         return JS_NewInt32(ctx, static_cast<int32_t>(val));
     }
     
-    static csp::multiplayer::PropertyType unwrap(JSContext* ctx, JSValueConst v) 
+    static csp::multiplayer::CodePropertyType unwrap(JSContext* ctx, JSValueConst v) 
     {
         int32_t val;
         JS_ToInt32(ctx, &val, v);
-        return static_cast<csp::multiplayer::PropertyType>(val);
+        return static_cast<csp::multiplayer::CodePropertyType>(val);
     }
 };
 

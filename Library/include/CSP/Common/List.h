@@ -160,7 +160,7 @@ public:
 
     /// @brief Copy assignment.
     /// @param Other const List<T>&
-    /// @return List<T>&
+    /// @return List<T>&`
     List<T>& operator=(const List<T>& Other)
     {
         if (this == &Other)

@@ -18,6 +18,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
+#include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -50,9 +51,45 @@
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
-
 namespace csp::multiplayer
 {
+
+// ConsoleInterface class to mimic JavaScript's console object
+class ConsoleInterface
+{
+public:
+    ConsoleInterface() { }
+
+    void Log(qjs::rest<std::string> args)
+    {
+        std::stringstream ss;
+        joinArgs(ss, args);
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "%s", ss.str().c_str());
+    }
+
+    void Warn(qjs::rest<std::string> args)
+    {
+        std::stringstream ss;
+        joinArgs(ss, args);
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "%s", ss.str().c_str());
+    }
+
+    void Error(qjs::rest<std::string> args)
+    {
+        std::stringstream ss;
+        joinArgs(ss, args);
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s", ss.str().c_str());
+    }
+
+private:
+    void joinArgs(std::stringstream& ss, const qjs::rest<std::string>& args)
+    {
+        for (const auto& arg : args)
+        {
+            ss << arg << " ";
+        }
+    }
+};
 
 using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -276,6 +313,369 @@ public:
         // Return the promise to JavaScript.
         return qjs::Value(m_ctx->ctx, std::move(promise));
     }
+
+    void SetAttributeString(uint64_t id, csp::common::String key, uint32_t type, csp::common::String value)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        // Use dynamic_cast instead of static_cast to safely convert ComponentBase to CodeSpaceComponent
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::STRING)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        attribute.SetStringValue(value);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+    void SetAttributeFloat(uint64_t id, csp::common::String key, uint32_t type, float min, float max, float value)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        // Use dynamic_cast instead of static_cast to safely convert ComponentBase to CodeSpaceComponent
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::NUMBER && attrib->GetType() != CodePropertyType::SLIDER)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Setting attribute %s with value %f and a min max or %f %f", key.c_str(), value, min, max);
+        attribute.SetFloatValue(value);
+        attribute.SetMin(min);
+        attribute.SetMax(max);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+    // setAttributeBoolean
+    void SetAttributeBoolean(uint64_t id, csp::common::String key, uint32_t type, bool value)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::BOOLEAN)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        attribute.SetBoolValue(value);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+    // setAttributeVector2
+    void SetAttributeVector2(uint64_t id, csp::common::String key, uint32_t type, const ComponentScriptInterface::Vector2& vec)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::VECTOR2)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        csp::common::Vector2 Value(vec[0], vec[1]);
+        attribute.SetVector2Value(Value);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+        // setAttributeVector3
+    void SetAttributeVector3(uint64_t id, csp::common::String key, uint32_t type, const ComponentScriptInterface::Vector3& vec)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::VECTOR3)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        csp::common::Vector3 Value(vec[0], vec[1], vec[2]);
+        attribute.SetVector3Value(Value);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+        // setAttributeVector4
+    void SetAttributeVector4(uint64_t id, csp::common::String key, uint32_t type, const ComponentScriptInterface::Vector4& vec)
+    {
+        if (key.IsEmpty())
+        {
+            CSP_LOG_ERROR_MSG("Cannot set attribute with empty key");
+            return;
+        }
+
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        if (codeComponent->HasAttribute(key))
+        {
+            CodeAttribute* attrib = codeComponent->GetAttribute(key);
+            if (attrib->GetType() != CodePropertyType::VECTOR4)
+            {
+                // If attribute type has changed, remove the old attribute and continue
+                codeComponent->RemoveAttribute(key);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // Create a new CodeAttribute and set it on the CodeSpaceComponent
+        // Since SetAttribute stores a serialized copy of the attribute,
+        // we don't need to worry about ownership transfer
+        CodeAttribute attribute;
+        attribute.SetType(static_cast<CodePropertyType>(type));
+        csp::common::Vector4 Value(vec[0], vec[1], vec[2], vec[3]);
+        attribute.SetVector4Value(Value);
+
+        // Pass the attribute by reference - the component will serialize it
+        codeComponent->SetAttribute(key, attribute);
+    }
+
+    void ClearAttributes(uint64_t id)
+    {
+        SpaceEntity* entity = EntitySystem->FindSpaceEntityById(id);
+        if (!entity)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", id);
+            return;
+        }
+
+        ComponentBase* baseComponent = entity->FindFirstComponentOfType(ComponentType::Code);
+        if (!baseComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", id);
+            return;
+        }
+
+        CodeSpaceComponent* codeComponent = static_cast<CodeSpaceComponent*>(baseComponent);
+        if (!codeComponent)
+        {
+            CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", id);
+            return;
+        }
+
+        codeComponent->ClearAttributes();
+    }
+
+    //
 
     /**
      * Creates a new entity in the system and returns a promise to javascript.
@@ -702,6 +1102,13 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntitySystemScriptInterface::GetFoundationVersion>("getFoundationVersion")
         .fun<&EntitySystemScriptInterface::CreateLocalEntity>("createLocalEntity")
         .fun<&EntitySystemScriptInterface::DeleteLocalEntity>("deleteLocalEntity")
+        .fun<&EntitySystemScriptInterface::SetAttributeString>("setAttributeString")
+        .fun<&EntitySystemScriptInterface::SetAttributeFloat>("setAttributeFloat")
+        .fun<&EntitySystemScriptInterface::SetAttributeBoolean>("setAttributeBoolean")
+        .fun<&EntitySystemScriptInterface::SetAttributeVector2>("setAttributeVector2")
+        .fun<&EntitySystemScriptInterface::SetAttributeVector3>("setAttributeVector3")
+        .fun<&EntitySystemScriptInterface::SetAttributeVector4>("setAttributeVector4")
+        .fun<&EntitySystemScriptInterface::ClearAttributes>("clearAttributes")
         .fun<&EntitySystemScriptInterface::GetEntities>("getEntities")
         .fun<&EntitySystemScriptInterface::GetObjects>("getObjects")
         .fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
@@ -722,6 +1129,12 @@ void BindInternal(qjs::Context::Module* Module)
         .PROPERTY_GET(CodeAttribute, Vector4Value, "vector4Value")
         .PROPERTY_GET(CodeAttribute, Min, "min")
         .PROPERTY_GET(CodeAttribute, Max, "max");
+
+    Module->class_<ConsoleInterface>("Console")
+        .constructor<>()
+        .fun<&ConsoleInterface::Log>("log")
+        .fun<&ConsoleInterface::Warn>("warn")
+        .fun<&ConsoleInterface::Error>("error");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -756,11 +1169,7 @@ void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Contex
     BindInternal(Module);
     // This is temporary
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem, Context);
-
-    // Always import CSP module into scripts
-    std::stringstream ss;
-    ss << "import * as csp from 'csp'; globalThis.csp = csp;";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    Context->global()["console"] = new ConsoleInterface(); // Add console here as well
 }
 
 } // namespace csp::multiplayer

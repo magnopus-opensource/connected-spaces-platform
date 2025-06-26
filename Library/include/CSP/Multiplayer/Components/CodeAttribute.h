@@ -10,13 +10,13 @@ namespace csp::multiplayer
 
 // Define enum for Type values, these relate to the code component ui attributes
 // not just data types
-enum class PropertyType
+enum class CodePropertyType
 {
     NUMBER = 0,
     STRING,
     VECTOR2,
     VECTOR3,
-    ROTATION,
+    VECTOR4,
     COLOR3,
     BOOLEAN,
     SLIDER,
@@ -43,8 +43,8 @@ public:
     CSP_NO_EXPORT static CodeAttribute Deserialize(const csp::common::String& serialized);
     
     // Getter and Setter methods for Type
-    PropertyType GetType() const;
-    void SetType(PropertyType type);
+    CodePropertyType GetType() const;
+    void SetType(CodePropertyType type);
     
     // Getter and Setter methods for StringValue
     const csp::common::String& GetStringValue() const;
@@ -83,7 +83,7 @@ public:
     void SetMax(float max);
     
 private:
-    PropertyType Type;
+    CodePropertyType Type;
     csp::common::String StringValue;
     float FloatValue;
     uint32_t IntValue;

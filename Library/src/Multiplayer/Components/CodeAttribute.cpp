@@ -1,13 +1,14 @@
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
+#include "Debug/Logging.h"
 #include <string>
 
 namespace csp::multiplayer
 {
 
 CodeAttribute::CodeAttribute()
-    : Type(PropertyType::NUMBER)
+    : Type(CodePropertyType::NUMBER)
     , StringValue("")
     , FloatValue(0.0f)
     , IntValue(0)
@@ -25,27 +26,27 @@ csp::common::String CodeAttribute::Serialize() const
     // Append the appropriate value based on the type
     switch(Type)
     {
-        case PropertyType::STRING:
+        case CodePropertyType::STRING:
             result += StringValue;
             break;
-        case PropertyType::NUMBER:
-        case PropertyType::SLIDER:
+        case CodePropertyType::NUMBER:
+        case CodePropertyType::SLIDER:
             result += csp::common::String(std::to_string(FloatValue).c_str());
             break;
-        case PropertyType::BOOLEAN:
+        case CodePropertyType::BOOLEAN:
             result += BoolValue ? "true" : "false";
             break;
-        case PropertyType::VECTOR2:
+        case CodePropertyType::VECTOR2:
             result += csp::common::String(std::to_string(Vector2Value.X).c_str()) + "," +
                       csp::common::String(std::to_string(Vector2Value.Y).c_str());
             break;
-        case PropertyType::VECTOR3:
-        case PropertyType::COLOR3:
+        case CodePropertyType::VECTOR3:
+        case CodePropertyType::COLOR3:
             result += csp::common::String(std::to_string(Vector3Value.X).c_str()) + "," +
                       csp::common::String(std::to_string(Vector3Value.Y).c_str()) + "," +
                       csp::common::String(std::to_string(Vector3Value.Z).c_str());
             break;
-        case PropertyType::ROTATION:
+        case CodePropertyType::VECTOR4:
             result += csp::common::String(std::to_string(Vector4Value.X).c_str()) + "," +
                       csp::common::String(std::to_string(Vector4Value.Y).c_str()) + "," +
                       csp::common::String(std::to_string(Vector4Value.Z).c_str()) + "," +
@@ -60,7 +61,7 @@ csp::common::String CodeAttribute::Serialize() const
     // Append Min and Max values
     result += "," + csp::common::String(std::to_string(Min).c_str()) + "," + 
               csp::common::String(std::to_string(Max).c_str());
-    
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Debug, "Serialized CodeAttribute: %s", result.c_str());
     return result;
 }
 
@@ -75,21 +76,21 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
     if (parts.Size() >= 4)
     {
         // Convert Type from string to enum
-        attribute.Type = static_cast<PropertyType>(std::stoi(parts[0].c_str()));
+        attribute.Type = static_cast<CodePropertyType>(std::stoi(parts[0].c_str()));
 
         switch(attribute.Type)
         {
-            case PropertyType::STRING:
+            case CodePropertyType::STRING:
                 attribute.StringValue = parts[1];
                 break;
-            case PropertyType::NUMBER:
-            case PropertyType::SLIDER:
+            case CodePropertyType::NUMBER:
+            case CodePropertyType::SLIDER:
                 attribute.FloatValue = std::stof(parts[1].c_str());
                 break;
-            case PropertyType::BOOLEAN:
+            case CodePropertyType::BOOLEAN:
                 attribute.BoolValue = (parts[1] == "true");
                 break;
-            case PropertyType::VECTOR2:
+            case CodePropertyType::VECTOR2:
                 if (parts.Size() >= 5) // Ensure we have enough parts
                 {
                     attribute.Vector2Value = csp::common::Vector2(
@@ -102,8 +103,8 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
                     return attribute;
                 }
                 break;
-            case PropertyType::VECTOR3:
-            case PropertyType::COLOR3:
+            case CodePropertyType::VECTOR3:
+            case CodePropertyType::COLOR3:
                 if (parts.Size() >= 6) // Ensure we have enough parts
                 {
                     attribute.Vector3Value = csp::common::Vector3(
@@ -117,7 +118,7 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
                     return attribute;
                 }
                 break;
-            case PropertyType::ROTATION:
+            case CodePropertyType::VECTOR4:
                 if (parts.Size() >= 7) // Ensure we have enough parts
                 {
                     attribute.Vector4Value = csp::common::Vector4(
@@ -144,13 +145,24 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
             attribute.Max = std::stof(parts[3].c_str());
         }
     }
-    
+    // log attribute contents
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Debug, "Deserialized CodeAttribute: Type=%d, StringValue=%s, FloatValue=%f, IntValue=%u, BoolValue=%s, Vector2Value=(%f, %f), Vector3Value=(%f, %f, %f), Vector4Value=(%f, %f, %f, %f), Min=%f, Max=%f",
+                   static_cast<int>(attribute.Type),
+                   attribute.StringValue.c_str(),
+                   attribute.FloatValue,
+                   attribute.IntValue,
+                   attribute.BoolValue ? "true" : "false",
+                   attribute.Vector2Value.X, attribute.Vector2Value.Y,
+                   attribute.Vector3Value.X, attribute.Vector3Value.Y, attribute.Vector3Value.Z,
+                   attribute.Vector4Value.X, attribute.Vector4Value.Y, attribute.Vector4Value.Z, attribute.Vector4Value.W,
+                   attribute.Min,
+                   attribute.Max);
     return attribute;
 }
 
 // Getters and Setters
-PropertyType CodeAttribute::GetType() const { return Type; }
-void CodeAttribute::SetType(PropertyType type) { Type = type; }
+CodePropertyType CodeAttribute::GetType() const { return Type; }
+void CodeAttribute::SetType(CodePropertyType type) { Type = type; }
 
 const csp::common::String& CodeAttribute::GetStringValue() const { return StringValue; }
 void CodeAttribute::SetStringValue(const csp::common::String& stringValue) { StringValue = stringValue; }

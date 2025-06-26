@@ -472,13 +472,19 @@ public:
     /// @param PropertyKey int32_t : the key of the property to update
     CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
 
+    /// @brief Gets the first component of the specified type.
+    /// @param Type 
+    /// @param SearchDirtyComponents 
+    /// @return 
+    ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
+
+
 private:
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
 
     void DestroyComponent(uint16_t Key);
 
-    ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
     void AddChildEntity(SpaceEntity* ChildEntity);
 

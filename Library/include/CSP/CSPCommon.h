@@ -98,4 +98,5 @@
 
 #ifdef CSP_WASM
 #include <emscripten/emscripten.h>
+#include <emscripten/console.h>
 #endif

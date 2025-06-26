@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
@@ -77,14 +78,11 @@ public:
         this->SpaceId = InSpaceId;
     }
 
-/// @brief Parses attributes from a CodeSpaceComponent
-    /// @param CodeComponent The code component to parse attributes from
-    void ParseAttributes(csp::multiplayer::CodeSpaceComponent* CodeComponent);
-    void RegisterCodeComponentInRegistry(uint64_t EntityId, const csp::common::String& scriptAssetPath);
+    void ParseAttributesForEntity(uint64_t EntityId);
+    void RegisterCodeComponentInRegistry(uint64_t EntityId);
     /// @brief Load and register script modules from the given space
     void LoadScriptModules();
-    void RunScript(const csp::common::String& Path);
-    void Eval(const csp::common::String& Code, const csp::common::String& Path);
+    CSP_NO_EXPORT void UpdateAttributeForEntity(uint64_t EntityId, const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Attribute);
 
 
 

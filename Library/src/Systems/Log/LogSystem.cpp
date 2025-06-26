@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Log/LogSystem.h"
-
 #include "Common/Logger.h"
 #include "Debug/Logging.h"
 
@@ -81,7 +80,18 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
     else
     {
 #if defined(CSP_WASM)
-        printf("%s\n", InMessage.c_str());
+        if (Level == csp::systems::LogLevel::Error)
+        {
+            emscripten_console_error(InMessage.c_str());
+        }
+        else if (Level == csp::systems::LogLevel::Warning)
+        {
+            emscripten_console_warn(InMessage.c_str());
+        }
+        else
+        {
+            emscripten_console_log(InMessage.c_str());
+        }
 #endif
 
 #if defined(CSP_ANDROID)
