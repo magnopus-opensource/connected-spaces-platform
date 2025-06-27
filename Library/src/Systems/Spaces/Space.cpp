@@ -62,6 +62,11 @@ void GroupLiteDtoToBasicSpace(const chs_users::GroupLiteDto& Dto, csp::systems::
     }
 }
 
+} // namespace
+
+namespace csp::systems
+{
+
 void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 {
     Space.Id = Dto.GetId();
@@ -105,11 +110,6 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
         Space.BannedUserIds = csp::common::Convert(Dto.GetBannedUsers());
     }
 }
-
-} // namespace
-
-namespace csp::systems
-{
 
 bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
 {

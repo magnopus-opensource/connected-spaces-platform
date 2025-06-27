@@ -26,7 +26,7 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace
+namespace csp::systems
 {
 void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Sequence)
 {
@@ -37,10 +37,6 @@ void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Seque
     Sequence.MetaData = Convert(Dto.GetMetadata());
 }
 
-} // namespace
-
-namespace csp::systems
-{
 const Sequence& csp::systems::SequenceResult::GetSequence() const { return Sequence; }
 
 void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

@@ -87,6 +87,11 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
     return "Default";
 }
 
+} // namespace csp::systems
+
+namespace csp::systems
+{
+
 void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset)
 {
     if (Dto.HasPrototypeId())
@@ -177,11 +182,6 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
         Asset.MimeType = Dto.GetMimeType();
     }
 }
-
-} // namespace csp::systems
-
-namespace csp::systems
-{
 
 Asset::Asset()
     : Type(EAssetType::MODEL)
