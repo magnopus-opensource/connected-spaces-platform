@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
@@ -80,7 +81,7 @@ public:
     void SetScriptScope(ScriptScope Scope);
 
 protected:
-    void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
+    void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
     void OnRemove() override;
 };
 

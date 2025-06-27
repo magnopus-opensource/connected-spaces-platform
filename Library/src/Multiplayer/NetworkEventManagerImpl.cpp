@@ -16,8 +16,8 @@
 
 #include "NetworkEventManagerImpl.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
@@ -40,8 +40,8 @@ NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultip
 
 void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection* InConnection) { Connection = InConnection; }
 
-void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Arguments,
-    uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
+void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName,
+    const csp::common::Array<csp::common::ReplicatedValue>& Arguments, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
     if (Connection == nullptr)
     {
@@ -80,7 +80,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
     {
         switch (Arguments[i].GetReplicatedValueType())
         {
-        case ReplicatedValueType::Boolean:
+        case csp::common::ReplicatedValueType::Boolean:
         {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetBool());
@@ -90,7 +90,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Integer:
+        case csp::common::ReplicatedValueType::Integer:
         {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetInt());
@@ -100,7 +100,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Float:
+        case csp::common::ReplicatedValueType::Float:
         {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetFloat());
@@ -110,7 +110,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::String:
+        case csp::common::ReplicatedValueType::String:
         {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetString().c_str());
@@ -120,7 +120,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector2:
+        case csp::common::ReplicatedValueType::Vector2:
         {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector2();
@@ -131,7 +131,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector3:
+        case csp::common::ReplicatedValueType::Vector3:
         {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector3();
@@ -142,7 +142,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector4:
+        case csp::common::ReplicatedValueType::Vector4:
         {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector4();

@@ -18,6 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
@@ -396,8 +397,8 @@ public:
     CSP_NO_EXPORT void SetEntityPatchSentCallbackParams(const bool Boolean);
 
     /// @brief Getter for the dirty properties
-    /// @return csp::common::Map<uint16_t, ReplicatedValue>
-    CSP_NO_EXPORT csp::common::Map<uint16_t, ReplicatedValue> GetDirtyProperties();
+    /// @return csp::common::Map<uint16_t, csp::common::ReplicatedValue>
+    CSP_NO_EXPORT csp::common::Map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties();
 
     /// @brief Getter for the transient deletion component IDs
     /// @return csp::common::List<uint16_t>
@@ -512,7 +513,7 @@ private:
     CallbackHandler EntityPatchSentCallback;
 
     csp::common::Map<uint16_t, ComponentBase*> Components;
-    csp::common::Map<uint16_t, ReplicatedValue> DirtyProperties;
+    csp::common::Map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
     csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
     uint16_t NextComponentId;
 

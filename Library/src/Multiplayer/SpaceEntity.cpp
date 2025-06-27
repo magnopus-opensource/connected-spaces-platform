@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/SpaceEntity.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
@@ -372,7 +373,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
 
     if (ThirdPartyPlatform != InThirdPartyPlatformType)
     {
-        DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = ReplicatedValue(static_cast<int64_t>(InThirdPartyPlatformType));
+        DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = csp::common::ReplicatedValue(static_cast<int64_t>(InThirdPartyPlatformType));
     }
 }
 
@@ -595,8 +596,9 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     // TODO: For the moment, we update all properties on a dirty component, in future we need to change this to per property
                     // replication. Components[DirtyComponents[i].Component->GetId()]->Properties = DirtyComponents[i].Component->DirtyProperties;
 
-                    /*const csp::common::Map<uint32_t, ReplicatedValue> DirtyComponentProperties = DirtyComponents[i].Component->DirtyProperties;
-                    const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys			  = DirtyComponentProperties.Keys();
+                    /*const csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyComponentProperties =
+                    DirtyComponents[i].Component->DirtyProperties; const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys
+                    = DirtyComponentProperties.Keys();
 
                     for (size_t j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
                     {
@@ -726,7 +728,7 @@ void SpaceEntity::SetEntityPatchSentCallbackParams(bool Boolean) { EntityPatchSe
 
 csp::common::Map<uint16_t, SpaceEntity::DirtyComponent> SpaceEntity::GetDirtyComponents() { return DirtyComponents; }
 
-csp::common::Map<uint16_t, csp::multiplayer::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
+csp::common::Map<uint16_t, csp::common::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
 
 csp::common::List<uint16_t> SpaceEntity::GetTransientDeletionComponentIds() { return TransientDeletionComponentIds; }
 
@@ -929,7 +931,7 @@ void SpaceEntity::Lock()
     std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
-    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
 }
 
 void SpaceEntity::Unlock()
@@ -946,7 +948,7 @@ void SpaceEntity::Unlock()
     std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
-    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::None));
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
 }
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
@@ -1330,7 +1332,7 @@ void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs
                     continue;
                 }
 
-                ReplicatedValue Property;
+                csp::common::ReplicatedValue Property;
                 MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->Properties[PatchComponentPair.first] = Property;
@@ -1374,7 +1376,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
                 continue;
             }
 
-            ReplicatedValue Property;
+            csp::common::ReplicatedValue Property;
             MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
             Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
@@ -1396,7 +1398,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
                     continue;
                 }
 
-                ReplicatedValue Property;
+                csp::common::ReplicatedValue Property;
                 MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->SetPropertyFromPatch(PatchComponentPair.first, Property);

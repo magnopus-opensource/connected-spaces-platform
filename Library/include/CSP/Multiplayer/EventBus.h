@@ -25,6 +25,7 @@
 namespace csp::common
 {
 class LogSystem;
+class ReplicatedValue;
 }
 
 namespace csp::systems
@@ -48,7 +49,6 @@ CSP_END_IGNORE
 namespace csp::multiplayer
 {
 
-class ReplicatedValue;
 enum class ErrorCode;
 
 /// @ingroup Multiplayer
@@ -59,23 +59,25 @@ public:
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
     // The callback used to register to listen to events.
-    typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
+    typedef std::function<void(bool, const csp::common::Array<csp::common::ReplicatedValue>&)> ParameterisedCallbackHandler;
 
     /// @brief Sends a network event by EventName to all currently connected clients.
     /// @param EventName csp::common::String : The identifying name for the event.
-    /// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
+    /// @param Args csp::common::Array<csp::common::ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event
+    /// payload.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_ASYNC_RESULT void SendNetworkEvent(
-        const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
+        const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
     CSP_NO_EXPORT async::task<std::optional<csp::multiplayer::ErrorCode>> SendNetworkEvent(
-        const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args);
+        const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args);
 
     /// @brief Sends a network event by EventName, to TargetClientId.
     /// @param EventName csp::common::String : The identifying name for the event.
-    /// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
+    /// @param Args csp::common::Array<csp::common::ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event
+    /// payload.
     /// @param TargetClientId uint64_t : The client ID to send the event to.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args,
+    CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
     /// @brief Registers a system to listen for the named event, where the system can define its

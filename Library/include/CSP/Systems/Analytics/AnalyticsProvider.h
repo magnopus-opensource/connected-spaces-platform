@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 
 class EventPayloadImpl;
@@ -22,7 +23,7 @@ class EventPayloadImpl;
 namespace csp::systems
 {
 
-using MetricValue = csp::multiplayer::ReplicatedValue;
+using MetricValue = csp::common::ReplicatedValue;
 
 /// @ingroup Analytics System
 /// @brief Interface for an Analytics Provider

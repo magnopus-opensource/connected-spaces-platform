@@ -17,9 +17,9 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -407,7 +407,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::common::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -421,7 +421,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     };
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback2
-        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
+        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::common::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 
@@ -612,7 +612,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& /*Params*/)
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::common::ReplicatedValue>& /*Params*/)
     {
         EXPECT_TRUE(ok);
 

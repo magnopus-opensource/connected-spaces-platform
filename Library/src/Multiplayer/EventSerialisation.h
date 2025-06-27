@@ -17,10 +17,10 @@
 #pragma once
 
 #include "CSP/Common/Array.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 
 #include <signalrclient/signalr_value.h>
 
@@ -54,16 +54,16 @@ public:
 
     // Returns the event data that has been synthesised from the parsed event
     // values that were parsed.
-    const csp::common::Array<csp::multiplayer::ReplicatedValue>& GetEventData() const { return EventData; }
+    const csp::common::Array<csp::common::ReplicatedValue>& GetEventData() const { return EventData; }
 
 protected:
     void ParseCommon(const std::vector<signalr::value>& EventValues);
 
-    csp::multiplayer::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
+    csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
 
     csp::common::String EventType;
     uint64_t SenderClientId;
-    csp::common::Array<csp::multiplayer::ReplicatedValue> EventData;
+    csp::common::Array<csp::common::ReplicatedValue> EventData;
 
     csp::common::LogSystem& LogSystem;
 };

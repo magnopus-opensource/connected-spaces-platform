@@ -64,7 +64,7 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::com
     return SequenceUpdateType;
 }
 
-csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
+csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
     return csp::common::Decode::URI(RawValue.GetString());
@@ -130,7 +130,7 @@ void EventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
     {
         const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
 
-        EventData = csp::common::Array<csp::multiplayer::ReplicatedValue>(Components.size());
+        EventData = csp::common::Array<csp::common::ReplicatedValue>(Components.size());
         int i = 0;
 
         for (auto& Component : Components)
@@ -143,9 +143,9 @@ void EventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
     }
 }
 
-csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const
+csp::common::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const
 {
-    csp::multiplayer::ReplicatedValue ReplicatedValue;
+    csp::common::ReplicatedValue ReplicatedValue;
 
     // Prevents serialization crashes for optional values where the actual value is null.
     if (Component.type() == signalr::value_type::null)
@@ -381,7 +381,7 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
     EventParams.Key = DecodeSequenceKey(EventData[1]);
 
     // Optional parameter for when a key is changed
-    if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
+    if (EventData[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
         // Sequence keys are URI encoded to support reserved characters.
         EventParams.NewKey = csp::common::Decode::URI(EventData[2].GetString());
@@ -415,7 +415,7 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
     {
         // When a key is changed (renamed) then we get an additional parameter describing the new key.
         // The usual event data describing the name in this instance will describe the _old_ key.
-        if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
+        if (EventData[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
         {
             const csp::common::String NewKey = DecodeSequenceKey(EventData[2]);
             EventParams.NewName = GetSequenceKeyIndex(NewKey, 2);

@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValue.h"
 
 #include <atomic>
 #include <chrono>

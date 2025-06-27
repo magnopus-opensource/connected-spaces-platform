@@ -16,6 +16,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
@@ -44,7 +45,7 @@ template class CSP_API csp::common::Array<csp::common::String>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentBase*>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::MessageInfo>;
-template class CSP_API csp::common::Array<csp::multiplayer::ReplicatedValue>;
+template class CSP_API csp::common::Array<csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Array<csp::systems::Anchor>;
 template class CSP_API csp::common::Array<csp::systems::AnchorResolution>;
 template class CSP_API csp::common::Array<csp::systems::Asset>;
@@ -68,7 +69,7 @@ template class CSP_API csp::common::List<csp::common::Vector3>;
 
 // csp::common::Map
 template class CSP_API csp::common::Map<uint16_t, csp::multiplayer::ComponentBase*>;
-template class CSP_API csp::common::Map<uint32_t, csp::multiplayer::ReplicatedValue>;
+template class CSP_API csp::common::Map<uint32_t, csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::String>;
 

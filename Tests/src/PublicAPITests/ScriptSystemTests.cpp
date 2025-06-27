@@ -1062,8 +1062,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     // Create audio component
     auto* CustomComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
 
-    CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(0)));
-    CustomComponent->SetCustomProperty("NumberChanged", ReplicatedValue(false));
+    CustomComponent->SetCustomProperty("Number", csp::common::ReplicatedValue(int64_t(0)));
+    CustomComponent->SetCustomProperty("NumberChanged", csp::common::ReplicatedValue(false));
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -1099,7 +1099,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 0);
     EXPECT_FALSE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
 
-    CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(100)));
+    CustomComponent->SetCustomProperty("Number", csp::common::ReplicatedValue(int64_t(100)));
 
     EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 100);
     EXPECT_TRUE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());

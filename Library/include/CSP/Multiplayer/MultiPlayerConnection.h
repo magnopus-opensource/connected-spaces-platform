@@ -42,6 +42,7 @@ CSP_END_IGNORE
 namespace csp::common
 {
 class LogSystem;
+class ReplicatedValue;
 }
 
 namespace csp::systems
@@ -57,7 +58,6 @@ class UserSystem;
 namespace csp::multiplayer
 {
 
-class ReplicatedValue;
 class SpaceEntitySystem;
 class ClientElectionManager;
 class ISignalRConnection;

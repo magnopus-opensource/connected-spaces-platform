@@ -23,7 +23,7 @@
 
 #include <functional>
 
-namespace csp::multiplayer
+namespace csp::common
 {
 
 /// @brief Enum representing the type of a replicated value.
@@ -64,32 +64,32 @@ public:
     /// @param InLongValue int64_t : Initial value.
     ReplicatedValue(int64_t InLongValue);
 
-    /// @brief Construct a ReplicatedValue based on a csp::common::String type derived from the given char*.
+    /// @brief Construct a ReplicatedValue based on a String type derived from the given char*.
     /// @param InLongValue int64_t : Initial value.
     CSP_NO_EXPORT ReplicatedValue(const char* InStringValue);
 
-    /// @brief Construct a ReplicatedValue based on an csp::common::String type.
-    /// @param InStringValue csp::common::String : Initial value.
-    ReplicatedValue(const csp::common::String& InStringValue);
+    /// @brief Construct a ReplicatedValue based on an String type.
+    /// @param InStringValue String : Initial value.
+    ReplicatedValue(const String& InStringValue);
 
-    /// @brief Construct a ReplicatedValue based on a csp::common::Vector2 type.
-    /// @param InVector2Value csp::common::Vector2 : Initial value.
-    ReplicatedValue(const csp::common::Vector2& InVector2Value);
+    /// @brief Construct a ReplicatedValue based on a Vector2 type.
+    /// @param InVector2Value Vector2 : Initial value.
+    ReplicatedValue(const Vector2& InVector2Value);
 
-    /// @brief Construct a ReplicatedValue based on a csp::common::Vector3 type.
-    /// @param InVector3Value csp::common::Vector3 : Initial value.
-    ReplicatedValue(const csp::common::Vector3& InVector3Value);
+    /// @brief Construct a ReplicatedValue based on a Vector3 type.
+    /// @param InVector3Value Vector3 : Initial value.
+    ReplicatedValue(const Vector3& InVector3Value);
 
-    /// @brief Construct a ReplicatedValue based on an csp::common::Vector4 type.
-    /// @param InVector4Value csp::common::Vector4 : Initial value.
-    ReplicatedValue(const csp::common::Vector4& InVector4Value);
+    /// @brief Construct a ReplicatedValue based on an Vector4 type.
+    /// @param InVector4Value Vector4 : Initial value.
+    ReplicatedValue(const Vector4& InVector4Value);
 
-    /// @brief Construct a ReplicatedValue based on an csp::common::Map type with a string value as the key.
-    /// @param InMapValue csp::common::Map : Initial value.
-    ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue);
+    /// @brief Construct a ReplicatedValue based on an Map type with a string value as the key.
+    /// @param InMapValue Map : Initial value.
+    ReplicatedValue(const Map<String, ReplicatedValue>& InMapValue);
 
     /// @brief Copy constructor
-    /// @param Other csp::multiplayer::ReplicatedValue& : The value to copy.
+    /// @param Other ReplicatedValue& : The value to copy.
     ReplicatedValue(const ReplicatedValue& Other);
 
     /// @brief Destroys the replicated value instance.
@@ -155,76 +155,76 @@ public:
     /// @brief Set a string value for this replicated value from a const char*, will overwrite and previous value.
     CSP_NO_EXPORT void SetString(const char* InValue);
 
-    ///@brief Set a string value for this replicated value from a csp::common::String&, will overwrite and previous value.
-    void SetString(const csp::common::String& InValue);
+    ///@brief Set a string value for this replicated value from a String&, will overwrite and previous value.
+    void SetString(const String& InValue);
 
-    /// @brief Get a csp::common::String& value from this replicated value, will assert if not a csp::common::String type.
+    /// @brief Get a String& value from this replicated value, will assert if not a String type.
     ///
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
-    /// @return csp::common::String&
-    const csp::common::String& GetString() const;
+    /// @return String&
+    const String& GetString() const;
 
     /// @brief Get a generic default string.
     /// @return The default string.
-    CSP_NO_EXPORT static const csp::common::String& GetDefaultString();
+    CSP_NO_EXPORT static const String& GetDefaultString();
 
-    /// @brief Set a Vector2 value for this replicated value from a csp::common::Vector2, will overwrite and previous value.
-    void SetVector2(const csp::common::Vector2& InValue);
+    /// @brief Set a Vector2 value for this replicated value from a Vector2, will overwrite and previous value.
+    void SetVector2(const Vector2& InValue);
 
-    /// @brief Get a csp::common::Vector2 value from this replicated value, will assert if not a csp::common::Vector2 type.
+    /// @brief Get a Vector2 value from this replicated value, will assert if not a Vector2 type.
     ///
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
-    /// @return csp::common::Vector2
-    const csp::common::Vector2& GetVector2() const;
+    /// @return Vector2
+    const Vector2& GetVector2() const;
 
     /// @brief Get a generic default Vector2.
     /// @return The default Vector2.
-    CSP_NO_EXPORT static const csp::common::Vector2& GetDefaultVector2();
+    CSP_NO_EXPORT static const Vector2& GetDefaultVector2();
 
-    /// @brief Set a Vector3 value for this replicated value from a csp::common::Vector3, will overwrite and previous value.
-    void SetVector3(const csp::common::Vector3& InValue);
+    /// @brief Set a Vector3 value for this replicated value from a Vector3, will overwrite and previous value.
+    void SetVector3(const Vector3& InValue);
 
-    /// @brief Get a csp::common::Vector3 value from this replicated value, will assert if not a csp::common::Vector3 type.
+    /// @brief Get a Vector3 value from this replicated value, will assert if not a Vector3 type.
     ///
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
-    /// @return csp::common::Vector3
-    const csp::common::Vector3& GetVector3() const;
+    /// @return Vector3
+    const Vector3& GetVector3() const;
 
     /// @brief Get a generic default Vector3.
     /// @return The default Vector3.
-    CSP_NO_EXPORT static const csp::common::Vector3& GetDefaultVector3();
+    CSP_NO_EXPORT static const Vector3& GetDefaultVector3();
 
-    /// @brief Set a Vector4 value for this replicated value from a csp::common::Vector4, will overwrite and previous value.
-    void SetVector4(const csp::common::Vector4& InValue);
+    /// @brief Set a Vector4 value for this replicated value from a Vector4, will overwrite and previous value.
+    void SetVector4(const Vector4& InValue);
 
-    /// @brief Get a csp::common::Vector4 value from this replicated value, will assert if not a csp::common::Vector4 type.
+    /// @brief Get a Vector4 value from this replicated value, will assert if not a Vector4 type.
     ///
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
-    /// @return csp::common::Vector4
-    const csp::common::Vector4& GetVector4() const;
+    /// @return Vector4
+    const Vector4& GetVector4() const;
 
     /// @brief Get a generic default Vector4.
     /// @return The default Vector4.
-    CSP_NO_EXPORT static const csp::common::Vector4& GetDefaultVector4();
+    CSP_NO_EXPORT static const Vector4& GetDefaultVector4();
 
-    /// @brief Get a csp::common::Map value with a string value as the key.
-    /// This will assert if not a csp::common::Map type with a string value as the key.
+    /// @brief Get a Map value with a string value as the key.
+    /// This will assert if not a Map type with a string value as the key.
     ///
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
-    /// @return csp::common::Map
-    const csp::common::Map<csp::common::String, ReplicatedValue>& GetStringMap() const;
+    /// @return Map
+    const Map<String, ReplicatedValue>& GetStringMap() const;
 
-    /// @brief Set a string Map value for this replicated value from a csp::common::Map, will overwrite any previous value.
-    void SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue);
+    /// @brief Set a string Map value for this replicated value from a Map, will overwrite any previous value.
+    void SetStringMap(const Map<String, ReplicatedValue>& InValue);
 
     /// @brief Get a generic default StringMap.
     /// @return The default StringMap.
-    CSP_NO_EXPORT static const csp::common::Map<csp::common::String, ReplicatedValue>& GetDefaultStringMap();
+    CSP_NO_EXPORT static const Map<String, ReplicatedValue>& GetDefaultStringMap();
 
     /// @brief returns the size of the stored internal value.
     /// @return size_t size of the internal value.
@@ -242,15 +242,15 @@ private:
         bool Bool;
         float Float;
         int64_t Int;
-        csp::common::String String;
-        csp::common::Vector2 Vector2;
-        csp::common::Vector3 Vector3;
-        csp::common::Vector4 Vector4;
-        csp::common::Map<csp::common::String, ReplicatedValue> StringMap;
+        String String;
+        Vector2 Vector2;
+        Vector3 Vector3;
+        Vector4 Vector4;
+        Map<csp::common::String, ReplicatedValue> StringMap;
     };
 
     InternalValue Value;
     CSP_END_IGNORE
 };
 
-} // namespace csp::multiplayer
+} // namespace csp::common

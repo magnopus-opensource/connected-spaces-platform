@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
@@ -61,12 +62,12 @@ public:
     /// @brief Retrieves the replicated value of the property identified by the specified Key.
     /// @param Key The ID of the property of which the value will be retrieved.
     /// @return The value of the property identified by the provided Key.
-    const ReplicatedValue& GetCustomProperty(const csp::common::String& Key) const;
+    const csp::common::ReplicatedValue& GetCustomProperty(const csp::common::String& Key) const;
 
     /// @brief Sets a custom property by specifying a unique Key and its relative property Value.
     /// @param Key Uniquely identifies this new property.
     /// @param Value The value to store for this new property.
-    void SetCustomProperty(const csp::common::String& Key, const ReplicatedValue& Value);
+    void SetCustomProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value);
 
     /// @brief Removes the specified property by Key.
     /// @param Key The ID of the property that will be removed.

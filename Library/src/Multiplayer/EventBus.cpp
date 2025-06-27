@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/EventBus.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemBase.h"
@@ -173,13 +174,13 @@ void EventBus::StartEventMessageListening()
 }
 
 void EventBus::SendNetworkEvent(
-    const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback)
+    const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback)
 {
     SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID, Callback);
 }
 
 async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEvent(
-    const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args)
+    const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
     async::task<std::optional<csp::multiplayer::ErrorCode>> OnCompleteTask = OnCompleteEvent->get_task();
@@ -200,8 +201,8 @@ async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEve
     return OnCompleteTask;
 }
 
-void EventBus::SendNetworkEventToClient(
-    const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
+void EventBus::SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
+    uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
     MultiplayerConnectionInst->GetNetworkEventManager()->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
 }
