@@ -135,7 +135,9 @@ class ItemComponentData : public ISignalRSerializable, public ISignalRDeserializ
 public:
     ItemComponentData();
     ItemComponentData(const ItemComponentDataVariant& Value);
-    // ItemComponentData(ItemComponentData&&) = default;
+    ItemComponentData(ItemComponentDataVariant&& Value);
+    ItemComponentData(const ItemComponentData&) = default;
+    ItemComponentData& operator=(ItemComponentData&&) = default;
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;

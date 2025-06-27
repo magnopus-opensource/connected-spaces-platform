@@ -176,6 +176,11 @@ ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
 {
 }
 
+ItemComponentData::ItemComponentData(ItemComponentDataVariant&& Value)
+    : Value { Value }
+{
+}
+
 void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
 {
     // 1. Write an array for type-value pair.
