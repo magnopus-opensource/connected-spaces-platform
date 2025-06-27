@@ -1177,16 +1177,15 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
     }
 
     // 3. Handle any component deletions
-    ComponentBase DeletionComponent(ComponentType::Delete, LogSystem, const_cast<SpaceEntity*>(this));
-
+    auto UpdatedComponents = ComponentPacker.GetComponents();
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {
-        DeletionComponent.Id = TransientDeletionComponentIds[i];
-        ComponentPacker.WriteValue(DeletionComponent.Id, &DeletionComponent);
+        UpdatedComponents[TransientDeletionComponentIds[i]]
+            = static_cast<mcs::ItemComponentData>(static_cast<uint64_t>(mcs::ItemComponentDataType::DELETE_COMPONENT));
     }
 
     // 4. Create the object patch using the required properties and our created components.
-    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), ComponentPacker.GetComponents() };
+    return mcs::ObjectPatch { Id, OwnerId, false, ShouldUpdateParent, Convert(ParentId), UpdatedComponents };
 }
 
 void SpaceEntity::FromObjectMessage(const mcs::ObjectMessage& Message)
