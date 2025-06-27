@@ -165,37 +165,66 @@ void LocalScriptSystem::LoadScriptModules()
 
 void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
 {
-    // Convert EntityId to string for proper concatenation
     std::string entityIdStr = std::to_string(EntityId);
-    std::string out = /*javascript*/ R"(
-        scriptRegistry.addCodeComponent(parseInt()"
-        + entityIdStr + R"(, 10));
-    )";
+    csp::multiplayer::CodeSpaceComponent* codeComponent = getCodeComponentForEntity(EntityId);
+    csp::common::List<csp::common::String> Keys = codeComponent->GetAttributeKeys();
+    std::string jsValue = "const attributes = {\n";
+    // iterate through the attributes and pass their values to the script registry
+    for (size_t i = 0; i < Keys.Size(); ++i)
+    {
+        
+        csp::multiplayer::CodeAttribute* attribute = codeComponent->GetAttribute(Keys[i]);
+        if (attribute != nullptr)
+        {
+            // for each attribute build a string representing a javascript object of the attributes
+            // to pass into addCodeComponent
+            jsValue += "   '" + Keys[i] + "': ";
+            switch (attribute->GetType())
+            {   
+                case csp::multiplayer::CodePropertyType::STRING:
+                    jsValue += "'" + std::string(attribute->GetStringValue().c_str()) + "'";
+                    break;
+                case csp::multiplayer::CodePropertyType::NUMBER:
+                case csp::multiplayer::CodePropertyType::SLIDER:
+                    jsValue += std::to_string(attribute->GetFloatValue());
+                    break;
+                case csp::multiplayer::CodePropertyType::BOOLEAN:
+
+                    jsValue += attribute->GetBoolValue() ? "true" : "false";
+                    break;
+                case csp::multiplayer::CodePropertyType::VECTOR2:
+                    jsValue += "[" + std::to_string(attribute->GetVector2Value().X) + ", " + std::to_string(attribute->GetVector2Value().Y) + "]";
+                    break;
+                case csp::multiplayer::CodePropertyType::VECTOR3:
+                case csp::multiplayer::CodePropertyType::COLOR3:
+                    jsValue += "[" + std::to_string(attribute->GetVector3Value().X) + ", " + std::to_string(attribute->GetVector3Value().Y) + ", "
+                        + std::to_string(attribute->GetVector3Value().Z) + "]";
+                    break;
+                case csp::multiplayer::CodePropertyType::VECTOR4:
+                    jsValue += "[" + std::to_string(attribute->GetVector4Value().X) + ", " + std::to_string(attribute->GetVector4Value().Y) + ", "
+                        + std::to_string(attribute->GetVector4Value().Z) + ", " + std::to_string(attribute->GetVector4Value().W) + "]";
+                    break; 
+                default:
+                    CSP_LOG_ERROR_FORMAT("Unknown attribute type: %d for entity %llu", static_cast<int>(attribute->GetType()), EntityId);
+                    continue; // Skip unknown types
+            }
+        }
+        // add comma and newline for next attribute
+        jsValue += ",\n";
+    }
+    jsValue += "};\n";
+    std::string out = jsValue + "scriptRegistry.addCodeComponent(parseInt(" + entityIdStr + ", 10), attributes);";
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Registering code component for entity %s w", out.c_str());
     evalScript(csp::common::String(out.c_str()));
 }
 
 void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
 {
     std::string entityIdStr = std::to_string(EntityId);
-    csp::multiplayer::SpaceEntity* entity = EntitySystem->FindSpaceEntityById(EntityId);
-    if (!entity)
-    {
-        CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", EntityId);
-        return;
-    }
-
-    // Use dynamic_cast instead of static_cast to safely convert ComponentBase to CodeSpaceComponent
-    csp::multiplayer::ComponentBase* baseComponent = entity->FindFirstComponentOfType(csp::multiplayer::ComponentType::Code);
-    if (!baseComponent)
-    {
-        CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", EntityId);
-        return;
-    }
-
-    csp::multiplayer::CodeSpaceComponent* codeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(baseComponent);
+    csp::multiplayer::CodeSpaceComponent* codeComponent = getCodeComponentForEntity(EntityId);
     if (!codeComponent)
     {
-        CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", EntityId);
+        // Error logging already done in getCodeComponentForEntity
         return;
     }
 
@@ -323,6 +352,32 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
         entityIdStr.c_str(), Key.c_str(), jsValue.c_str());
 
     evalScript(out);
+}
+
+csp::multiplayer::CodeSpaceComponent* LocalScriptSystem::getCodeComponentForEntity(uint64_t EntityId)
+{
+    csp::multiplayer::SpaceEntity* entity = EntitySystem->FindSpaceEntityById(EntityId);
+    if (!entity)
+    {
+        CSP_LOG_ERROR_FORMAT("Entity with ID %llu not found.", EntityId);
+        return nullptr;
+    }
+
+    csp::multiplayer::ComponentBase* baseComponent = entity->FindFirstComponentOfType(csp::multiplayer::ComponentType::Code);
+    if (!baseComponent)
+    {
+        CSP_LOG_ERROR_FORMAT("Entity with ID %llu does not have a Code component.", EntityId);
+        return nullptr;
+    }
+
+    csp::multiplayer::CodeSpaceComponent* codeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(baseComponent);
+    if (!codeComponent)
+    {
+        CSP_LOG_ERROR_FORMAT("Entity with ID %llu has a Code component, but it's not a CodeSpaceComponent.", EntityId);
+        return nullptr;
+    }
+
+    return codeComponent;
 }
 
 }

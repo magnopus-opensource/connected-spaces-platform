@@ -97,6 +97,11 @@ private:
     // Store loaded scripts to ensure they remain in memory
     csp::common::Map<csp::common::String, csp::common::String> LoadedScripts;
     void evalScript(const csp::common::String& script);
+    
+    /// @brief Helper function to get a Code component for an entity
+    /// @param EntityId The ID of the entity to find the code component for
+    /// @return Pointer to the CodeSpaceComponent if found, nullptr otherwise
+    csp::multiplayer::CodeSpaceComponent* getCodeComponentForEntity(uint64_t EntityId);
 };
 
 
