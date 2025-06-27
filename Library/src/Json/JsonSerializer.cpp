@@ -41,6 +41,24 @@ void JsonSerializer::SerializeValue(std::nullptr_t /*Value*/) { Writer.Null(); }
 
 void JsonSerializer::SerializeValue(const std::string& Value) { Writer.String(Value.c_str()); }
 
+std::string JsonDeserializer::GetMemberAsString(const char* Key) const
+{
+    auto JsonValue = &(*ValueStack.top())[Key];
+
+    rapidjson::StringBuffer Buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+    JsonValue->Accept(Writer);
+    return Buffer.GetString();
+}
+
+void JsonDeserializer::EnterMember(const char* Key) const
+{
+    auto JsonValue = &(*ValueStack.top())[Key];
+    ValueStack.push(JsonValue);
+}
+
+void JsonDeserializer::ExitMember() const { ValueStack.pop(); }
+
 void JsonDeserializer::DeserializeValue(int32_t& Value) const { Value = ValueStack.top()->GetInt(); }
 
 void JsonDeserializer::DeserializeValue(uint32_t& Value) const { Value = ValueStack.top()->GetUint(); }
