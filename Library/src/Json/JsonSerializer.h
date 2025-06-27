@@ -170,6 +170,11 @@ public:
     /// @return bool : Returns true if the key exists in this object.
     bool HasProperty(const char* Key) const { return ValueStack.top()->HasMember(Key); }
 
+    std::string GetMemberAsString(const char* Key) const;
+
+    void EnterMember(const char* Key) const;
+    void ExitMember() const;
+
 private:
     JsonDeserializer(const char* Data) { Doc.Parse(Data); }
 
