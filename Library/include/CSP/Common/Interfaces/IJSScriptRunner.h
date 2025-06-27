@@ -169,7 +169,7 @@ public:
 
     /**
      * @brief Set the javascript source code of a particular module
-     * @param ModuleUrl String : The URL of the module. This is an arbitrary accessor. It's may be a good idea to use something like the scenegraph
+     * @param ModuleUrl String : The URL of the module. This is an arbitrary accessor. It may be a good idea to use something like the scenegraph
      * path of an entity when setting up a module on any particular entity.
      * @param Source String: The javascript source code to set.
      * @pre ModuleURL must be unique.
