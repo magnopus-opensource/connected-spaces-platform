@@ -35,9 +35,20 @@ LocalScriptSystem::LocalScriptSystem(csp::multiplayer::SpaceEntitySystem* InEnti
     : EntitySystem(InEntitySystem)
 {
     this->SpaceId = "";
-    Runtime = nullptr;
+    Runtime = new qjs::Runtime();
     Context = nullptr;
     ScriptBinding = nullptr;
+    csp::systems::AssetSystem* assetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+    if (assetSystem)
+    {
+        assetSystem->SetAssetCodeChangedCallback([this](const csp::multiplayer::AssetDetailBlobParams& AssetParams)
+        {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Asset code changed for ID: %s, updating script", AssetParams.AssetId.c_str());
+            // Use the new method that takes AssetParams directly
+            UpdateScriptModule(AssetParams);
+            Initialize();
+        });
+    }
 }
 
 LocalScriptSystem::~LocalScriptSystem()
@@ -59,15 +70,11 @@ void LocalScriptSystem::Initialize()
         }
         if (Context != nullptr)
         {
+            // destroy the registry so that it can clean up any resources
+            evalScript("typeof scriptRegistry !== 'undefined' && scriptRegistry.destroy();");
             delete Context;
             Context = nullptr;
         }
-        if (Runtime != nullptr)
-        {
-            delete Runtime;
-            Runtime = nullptr;
-        }
-        Runtime = new qjs::Runtime();
         Context = new qjs::Context(*Runtime);
         ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
         // Set the custom module loader on the context
@@ -378,6 +385,50 @@ csp::multiplayer::CodeSpaceComponent* LocalScriptSystem::getCodeComponentForEnti
     }
 
     return codeComponent;
+}
+
+void LocalScriptSystem::UpdateScriptModule(const csp::multiplayer::AssetDetailBlobParams& AssetParams)
+{
+    // Get asset system to load a specific script
+    csp::systems::AssetSystem* assetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+    if (!assetSystem)
+    {
+        CSP_LOG_ERROR_MSG("Failed to get AssetSystem");
+        return;
+    }
+
+    // Create callback for processing the loaded script
+    auto scriptLoadedCallback = [this, AssetParams](const csp::systems::LocalScriptResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        {
+            // Get all the loaded scripts
+            const auto& scripts = Result.GetLocalScripts();
+            const auto scriptKeys = scripts.Keys();
+
+            for (size_t i = 0; i < scriptKeys->Size(); ++i)
+            {
+                const csp::common::String& scriptPath = scriptKeys->operator[](i);
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Updating script: %s", scriptPath.c_str());
+                // Update the script in our LoadedScripts map
+                this->LoadedScripts[scriptPath] = scripts[scriptPath];
+                this->Initialize(); // Reinitialize the script binding to ensure the new script is loaded
+                std::stringstream ss;
+                ss << "import { createScriptRegistry } from '/scripts/engine/registry.js';\n";
+                ss << "const scriptRegistry = createScriptRegistry();\n";
+                ss << "globalThis.scriptRegistry = scriptRegistry;\n";
+                Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+                EntitySystem->RegisterAllCodeComponents();
+            }
+        }
+        else
+        {
+            CSP_LOG_ERROR_FORMAT("Failed to load updated script: Result code %d", (int)Result.GetResultCode());
+        }
+    };
+
+    // Load the specific script from the asset system
+    assetSystem->LoadSingleScript(this->SpaceId, AssetParams, scriptLoadedCallback);
 }
 
 }

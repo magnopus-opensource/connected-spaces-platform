@@ -295,6 +295,11 @@ public:
         EntitySystem->DestroyEntity(EntityToDestroy,
             [resolve_func, reject_func, m_ctx](bool success)
             {
+                // We may have already shut down the context, so nothing needed here
+                if (m_ctx == nullptr)
+                {
+                    return;
+                }
                 if (success)
                 {
                     // Call the 'resolve' function

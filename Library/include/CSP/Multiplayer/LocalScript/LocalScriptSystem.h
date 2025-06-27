@@ -82,6 +82,10 @@ public:
     void RegisterCodeComponentInRegistry(uint64_t EntityId);
     /// @brief Load and register script modules from the given space
     void LoadScriptModules();
+
+    /// @brief Update a specific script module using asset details and reinitialize the components using it
+    /// @param AssetParams The asset parameters containing information about the updated script
+    void UpdateScriptModule(const csp::multiplayer::AssetDetailBlobParams& AssetParams);
     CSP_NO_EXPORT void UpdateAttributeForEntity(uint64_t EntityId, const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Attribute);
 
 

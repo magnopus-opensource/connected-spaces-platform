@@ -918,14 +918,9 @@ void SpaceEntitySystem::MarkEntityForUpdate(SpaceEntity* Entity)
     TickUpdateEntities.push_back(Entity);
 }
 
-void SpaceEntitySystem::OnAllEntitiesCreated()
+void SpaceEntitySystem::RegisterAllCodeComponents()
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    // Ensure entity list is up to date
-    ProcessPendingEntityOperations();
     csp::systems::LocalScriptSystem* localScriptSystem = csp::systems::SystemsManager::Get().GetLocalScriptSystem();
-
     // Register all scripts for import
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
@@ -951,6 +946,16 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
             }
         }
     }
+}
+
+void SpaceEntitySystem::OnAllEntitiesCreated()
+{
+    std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+    // Ensure entity list is up to date
+    ProcessPendingEntityOperations();
+
+    RegisterAllCodeComponents();
 
     // Bind and invoke all scripts
     for (size_t i = 0; i < Entities.Size(); ++i)

@@ -351,6 +351,11 @@ public:
     /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void LoadScripts(const csp::common::String& SpaceId, LocalScriptResultCallback Callback);
 
+    /// @brief Load a single script asset based on asset detail blob parameters.
+    /// @param SpaceId const csp::common::String& : The space id the local script is associated with.
+    /// @param AssetParams const csp::multiplayer::AssetDetailBlobParams& : Asset parameters containing the asset information.
+    /// @param Callback LocalScriptResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void LoadSingleScript(const csp::common::String& SpaceId, const csp::multiplayer::AssetDetailBlobParams& AssetParams, LocalScriptResultCallback Callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;

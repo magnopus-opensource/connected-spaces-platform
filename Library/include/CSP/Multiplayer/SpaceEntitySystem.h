@@ -302,6 +302,8 @@ public:
 
     CSP_NO_EXPORT void FireEntityCreatedEvent(SpaceEntity* Entity);
 
+    CSP_NO_EXPORT void RegisterAllCodeComponents();
+
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
     using SpaceEntityQueue = std::deque<SpaceEntity*>;
 

@@ -1907,6 +1907,109 @@ CSP_ASYNC_RESULT void AssetSystem::LoadScripts(const csp::common::String& SpaceI
         nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr, FindAssetCollectionsCB);
 }
 
+CSP_ASYNC_RESULT void AssetSystem::LoadSingleScript(const csp::common::String& SpaceId, const csp::multiplayer::AssetDetailBlobParams& AssetParams, csp::systems::LocalScriptResultCallback Callback)
+{
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loading single script with asset ID: %s", AssetParams.AssetId.c_str());
+
+    // 1. find asset collection for space
+    auto FindAssetCollectionsCB = [this, Callback, AssetParams](const AssetCollectionsResult& FindAssetCollectionsResult)
+    {   
+        if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
+        {
+            Callback(LocalScriptResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            return;
+        }
+
+        // Create a shared reference to prevent it going out of scope between callbacks
+        auto AssetCollections = std::make_shared<csp::common::Array<csp::systems::AssetCollection>>(FindAssetCollectionsResult.GetAssetCollections());
+
+        if ((*AssetCollections).Size() == 0)
+        {
+            // There are no asset collections for this space
+            CSP_LOG_ERROR_MSG("No asset collections found for the space");
+            Callback(LocalScriptResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            return;
+        }
+
+        // Create a map from ID to AssetCollection for easier lookup
+        auto AssetCollectionMap = std::make_shared<csp::common::Map<csp::common::String, csp::systems::AssetCollection>>();
+        
+        for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
+        {
+            (*AssetCollectionMap)[(*AssetCollections)[i].Id] = (*AssetCollections)[i];
+        }
+
+        // If AssetCollectionId is present in the AssetParams, we can directly get the asset
+        if (!AssetParams.AssetCollectionId.IsEmpty() && !AssetParams.AssetId.IsEmpty())
+        {
+            // Get the specific asset directly
+            auto GetAssetCB = [this, AssetCollectionMap, AssetParams, Callback](const AssetResult& GetAssetResult)
+            {
+                if (GetAssetResult.GetResultCode() != EResultCode::Success)
+                {
+                    CSP_LOG_ERROR_FORMAT("Failed to retrieve asset: %s", AssetParams.AssetId.c_str());
+                    Callback(LocalScriptResult(GetAssetResult.GetResultCode(), GetAssetResult.GetHttpResultCode()));
+                    return;
+                }
+
+                const Asset& FoundAsset = GetAssetResult.GetAsset();
+
+                // These are shared references to prevent going out of scope between callbacks
+                auto DownloadedLocalScripts = std::make_shared<csp::common::Map<csp::common::String, csp::common::String>>();
+                auto Failed = std::make_shared<bool>(false);
+
+                // Download the asset data
+                auto DownloadLocalScriptCallback = [this, Callback, FoundAsset, DownloadedLocalScripts, Failed, AssetCollectionMap](
+                    const AssetDataResult& DownloadResult)
+                {
+                    if (DownloadResult.GetResultCode() == EResultCode::InProgress)
+                    {
+                        return;
+                    }
+
+                    if (DownloadResult.GetResultCode() != EResultCode::Success)
+                    {
+                        CSP_LOG_ERROR_FORMAT("Failed to download script content: %s", FoundAsset.Id.c_str());
+                        Callback(LocalScriptResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+                        return;
+                    }
+
+                    const char* LocalScriptData = static_cast<const char*>(DownloadResult.GetData());
+                    size_t LocalScriptLength = DownloadResult.GetDataLength();
+
+                    csp::common::String LocalScript(LocalScriptData, LocalScriptLength);
+
+                    // Get the path for the local script, this is the "canonical" path
+                    // that will be used to store the script for the module loader
+                    csp::common::String path = GetAssetPath(FoundAsset, *AssetCollectionMap);
+                    
+                    // Store the local script in the map with its path as the key
+                    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Loaded single script: %s", path.c_str());
+                    (*DownloadedLocalScripts)[path] = LocalScript;
+
+                    // Return the result with the single loaded script
+                    LocalScriptResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
+                    Result.SetLocalScripts(*DownloadedLocalScripts);
+                    Callback(Result);
+                };
+
+                DownloadAssetData(FoundAsset, DownloadLocalScriptCallback);
+            };
+
+            GetAssetById(AssetParams.AssetCollectionId, AssetParams.AssetId, GetAssetCB);
+        }
+        else
+        {
+            // We don't have enough information to get the specific asset directly
+            CSP_LOG_ERROR_MSG("Insufficient asset information provided in AssetParams");
+            Callback(LocalScriptResult(EResultCode::Failed, 0));
+        }
+    };
+
+    FindAssetCollections(
+        nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr, FindAssetCollectionsCB);
+}
+
 void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
 {
     AssetDetailBlobChangedCallback = Callback;
@@ -1970,7 +2073,7 @@ void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         AssetDetailBlobChangedCallback(AssetParams);
     }
 
-    if (AssetCodeChangedCallback)
+    if (AssetParams.AssetType == systems::EAssetType::SCRIPT_LIBRARY && AssetCodeChangedCallback)
     {
         AssetCodeChangedCallback(AssetParams);
     }
