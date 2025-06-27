@@ -15,9 +15,9 @@
  */
 #include "ConversationSystemHelpers.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/DateTime.h"
 #include "Debug/Logging.h"
@@ -134,9 +134,9 @@ common::Map<common::String, common::String> GenerateMessageAssetCollectionMetada
     return MetadataMap;
 }
 
-csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
+csp::common::Array<common::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
 {
-    csp::common::Array<multiplayer::ReplicatedValue> Args(7);
+    csp::common::Array<common::ReplicatedValue> Args(7);
 
     Args[0] = static_cast<int64_t>(Params.MessageType);
     Args[1] = Params.MessageInfo.ConversationId;
