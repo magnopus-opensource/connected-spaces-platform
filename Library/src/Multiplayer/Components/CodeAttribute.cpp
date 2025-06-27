@@ -61,7 +61,7 @@ csp::common::String CodeAttribute::Serialize() const
     // Append Min and Max values
     result += "," + csp::common::String(std::to_string(Min).c_str()) + "," + 
               csp::common::String(std::to_string(Max).c_str());
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Debug, "Serialized CodeAttribute: %s", result.c_str());
+    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Serialized CodeAttribute: %s", result.c_str());
     return result;
 }
 
@@ -146,7 +146,7 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
         }
     }
     // log attribute contents
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Debug, "Deserialized CodeAttribute: Type=%d, StringValue=%s, FloatValue=%f, IntValue=%u, BoolValue=%s, Vector2Value=(%f, %f), Vector3Value=(%f, %f, %f), Vector4Value=(%f, %f, %f, %f), Min=%f, Max=%f",
+    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Deserialized CodeAttribute: Type=%d, StringValue=%s, FloatValue=%f, IntValue=%u, BoolValue=%s, Vector2Value=(%f, %f), Vector3Value=(%f, %f, %f), Vector4Value=(%f, %f, %f, %f), Min=%f, Max=%f",
                    static_cast<int>(attribute.Type),
                    attribute.StringValue.c_str(),
                    attribute.FloatValue,

@@ -96,6 +96,7 @@ private:
     //qjs::Context::Module* CSP_Module;
     // Store loaded scripts to ensure they remain in memory
     csp::common::Map<csp::common::String, csp::common::String> LoadedScripts;
+    void evalScript(const csp::common::String& script);
 };
 
 

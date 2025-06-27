@@ -24,15 +24,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "quickjspp.hpp"
-#include <algorithm>
 #include <async++.h>
-#include <chrono>
-#include <exception>
-#include <functional>
-#include <future>
-#include <limits>
-#include <string>
-#include <thread>
 
 using namespace std;
 
@@ -133,22 +125,7 @@ void LocalScriptSystem::TickAnimationFrame(float timestamp)
 
     std::stringstream ss;
     ss << "typeof scriptRegistry !== 'undefined' && scriptRegistry.tick(" << timestamp << ");\n";
-    try
-    {
-        Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
-    }
-    catch (qjs::exception& e)
-    {
-        CSP_LOG_ERROR_MSG("QuickJS exception while running script");
-    }
-    catch (const std::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
-    }
-    catch (...)
-    {
-        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while running script.");
-    }
+    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
 }
 
 void LocalScriptSystem::LoadScriptModules()
@@ -190,33 +167,13 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
 {
     // Convert EntityId to string for proper concatenation
     std::string entityIdStr = std::to_string(EntityId);
-
     std::string out = /*javascript*/ R"(
-        scriptRegistry.addCodeComponent(parseInt()" +entityIdStr + R"(, 10));
+        scriptRegistry.addCodeComponent(parseInt()"
+        + entityIdStr + R"(, 10));
     )";
-
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "main script:\n%s", out.c_str());
-    try
-    {
-        Context->eval(out, "<import>", JS_EVAL_TYPE_MODULE);
-    }
-    catch (qjs::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("QuickJS exception in code component registration: %s", out.c_str());
-    }
-    catch (const std::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("std::exception in code component registration: %s - %s", e.what(), out.c_str());
-    }
-    catch (...)
-    {
-        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while registering code component.");
-    }
+    evalScript(csp::common::String(out.c_str()));
 }
 
-// parseAttributesForEntity,
-// @param entityId
-// @para, callbackFn
 void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
 {
     std::string entityIdStr = std::to_string(EntityId);
@@ -242,7 +199,6 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
         return;
     }
 
-
     csp::common::String out = /*javascript*/ R"(
             const scriptAssetPath = ')"
         + codeComponent->GetScriptAssetPath() + R"(';
@@ -258,7 +214,7 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         console.warn(`No attributes found in module: ${scriptAssetPath}`);
                         return;
                     }
-                    
+
                     const {attributes} = module;
                     const typesToNumber = {
                         'number': 0,    // NUMBER = 0
@@ -276,22 +232,22 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         'vector2': 'setAttributeVector2',
                         'vector3': 'setAttributeVector3',
                         'vector4': 'setAttributeVector4',
-                        //'entity': 'setAttributeString',
+                        'color3': 'setAttributeVector3',
                     };
                     const numbericTypes = {
                         'number': 'setAttributeFloat',
                         'slider': 'setAttributeFloat',
                     };
-                    
+
                     // Parse EntityId as a number
                     const entityIdNum = parseInt(EntityId, 10);
-                    
+
                     console.log(`Registering ${Object.keys(attributes).length} attributes for entity ${entityIdNum}`);
                     TheEntitySystem.clearAttributes(entityIdNum);
                     for (const [key, value] of Object.entries(attributes)) {
                         let fn = normalTypes[value.type];
                         const typeNum = typesToNumber[value.type];
-                        
+
                         if (fn) {
                             TheEntitySystem[fn](entityIdNum, key, typeNum, value.defaultValue);
                         } else {
@@ -311,27 +267,15 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
             };
             registerModule();
     )";
+    evalScript(out);
+}
 
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "parseAttributesForEntity script:\n%s", out.c_str());
-    try
+void LocalScriptSystem::evalScript(const csp::common::String& script)
+{
+    JSValue v = Context->eval(script.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
+    if (JS_IsException(v))
     {
-        JSValue v = Context->eval(out.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
-        if (JS_IsException(v))
-        {
-            CSP_LOG_ERROR_FORMAT("QuickJS exception in parseAttributesForEntity: %s", out.c_str());
-        }
-    }
-    catch (qjs::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("QuickJS exception in parseAttributesForEntity: %s", out.c_str());
-    }
-    catch (const std::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("std::exception in parseAttributesForEntity: %s - %s", e.what(), out.c_str());
-    }
-    catch (...)
-    {
-        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while parsing attributes for entity.");
+        CSP_LOG_ERROR_FORMAT("QuickJS exception: %s", script.c_str());
     }
 }
 
@@ -340,68 +284,45 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
     // call the script registry in quickjs to update the attribute for the entity
     std::string entityIdStr = std::to_string(EntityId);
     std::string jsValue;
-    
+
     // Determine the correct value based on attribute type
     switch (Attribute.GetType())
     {
-        case csp::multiplayer::CodePropertyType::STRING:
-            jsValue = "'" + std::string(Attribute.GetStringValue().c_str()) + "'";
-            break;
-        case csp::multiplayer::CodePropertyType::BOOLEAN:
-            jsValue = Attribute.GetBoolValue() ? "true" : "false";
-            break;
-        case csp::multiplayer::CodePropertyType::NUMBER:
-        case csp::multiplayer::CodePropertyType::SLIDER:
-            jsValue = std::to_string(Attribute.GetFloatValue());
-            break;
-        case csp::multiplayer::CodePropertyType::VECTOR2:
-            // Vector2 as a JavaScript array
-            jsValue = "[" + std::to_string(Attribute.GetVector2Value().X) + 
-                      ", " + std::to_string(Attribute.GetVector2Value().Y) + "]";
-            break;
-        case csp::multiplayer::CodePropertyType::VECTOR3:
-        case csp::multiplayer::CodePropertyType::COLOR3:
-            jsValue = "[" + std::to_string(Attribute.GetVector3Value().X) + 
-                      ", " + std::to_string(Attribute.GetVector3Value().Y) + 
-                      ", " + std::to_string(Attribute.GetVector3Value().Z) + "]";
-            break;
-        case csp::multiplayer::CodePropertyType::VECTOR4:
-            jsValue = "[" + std::to_string(Attribute.GetVector4Value().X) + 
-                      ", " + std::to_string(Attribute.GetVector4Value().Y) + 
-                      ", " + std::to_string(Attribute.GetVector4Value().Z) + 
-                      ", " + std::to_string(Attribute.GetVector4Value().W) + "]";
-            break;
-        default:
-            CSP_LOG_ERROR_FORMAT("Unknown attribute type: %d", static_cast<int>(Attribute.GetType()));
-            return;
+    case csp::multiplayer::CodePropertyType::STRING:
+        jsValue = "'" + std::string(Attribute.GetStringValue().c_str()) + "'";
+        break;
+    case csp::multiplayer::CodePropertyType::BOOLEAN:
+        jsValue = Attribute.GetBoolValue() ? "true" : "false";
+        break;
+    case csp::multiplayer::CodePropertyType::NUMBER:
+    case csp::multiplayer::CodePropertyType::SLIDER:
+        jsValue = std::to_string(Attribute.GetFloatValue());
+        break;
+    case csp::multiplayer::CodePropertyType::VECTOR2:
+        // Vector2 as a JavaScript array
+        jsValue = "[" + std::to_string(Attribute.GetVector2Value().X) + ", " + std::to_string(Attribute.GetVector2Value().Y) + "]";
+        break;
+    case csp::multiplayer::CodePropertyType::VECTOR3:
+    case csp::multiplayer::CodePropertyType::COLOR3:
+        jsValue = "[" + std::to_string(Attribute.GetVector3Value().X) + ", " + std::to_string(Attribute.GetVector3Value().Y) + ", "
+            + std::to_string(Attribute.GetVector3Value().Z) + "]";
+        break;
+    case csp::multiplayer::CodePropertyType::VECTOR4:
+        jsValue = "[" + std::to_string(Attribute.GetVector4Value().X) + ", " + std::to_string(Attribute.GetVector4Value().Y) + ", "
+            + std::to_string(Attribute.GetVector4Value().Z) + ", " + std::to_string(Attribute.GetVector4Value().W) + "]";
+        break;
+    default:
+        CSP_LOG_ERROR_FORMAT("Unknown attribute type: %d", static_cast<int>(Attribute.GetType()));
+        return;
     }
-    
+
     // Create a formatted JavaScript string with proper variable interpolation
     csp::common::String out = csp::common::StringFormat(/*javascript*/ R"(
         scriptRegistry.updateAttributeForEntity(parseInt('%s', 10), '%s', %s);
-    )", entityIdStr.c_str(), Key.c_str(), jsValue.c_str());
-    
-    try
-    {
-        JSValue v = Context->eval(out.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
-        if (JS_IsException(v))
-        {
-            CSP_LOG_ERROR_FORMAT("QuickJS exception in updateAttributeForEntity: %s", out.c_str());
-        }
-    }
-    catch (qjs::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("QuickJS exception in updateAttributeForEntity: %s", out.c_str());
-    }
-    catch (const std::exception& e)
-    {
-        CSP_LOG_ERROR_FORMAT("std::exception in updateAttributeForEntity: %s - %s", e.what(), out.c_str());
-    }
-    catch (...)
-    {
-        CSP_LOG_ERROR_MSG("Unknown C++ exception caught while updating attribute for entity.");
-    }
+    )",
+        entityIdStr.c_str(), Key.c_str(), jsValue.c_str());
 
+    evalScript(out);
 }
 
-} // namespace csp::systems
+}
