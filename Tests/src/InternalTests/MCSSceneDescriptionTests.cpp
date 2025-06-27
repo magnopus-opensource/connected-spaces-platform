@@ -17,8 +17,12 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
+#include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Json/JsonSerializer.h"
+
+#include <filesystem>
+#include <fstream>
 
 using namespace csp::multiplayer;
 
@@ -160,4 +164,66 @@ CSP_INTERNAL_TEST(CSPEngine, MCSSceneDescriptionTests, ItemComponentDataSerializ
     csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
 
     EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, MCSSceneDescriptionTests, SceneDescriptionDeserializeTest)
+{
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-example.json");
+
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    std::string Json = SStream.str();
+
+    mcs::SceneDescription DeserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(Json.c_str(), DeserializedValue);
+
+    // Group
+    EXPECT_EQ(DeserializedValue.Group.GetId(), "66c65e8d9821e1cc2b51dc0d");
+    EXPECT_EQ(DeserializedValue.Group.GetCreatedBy(), "66a0033d6541645960bfffda");
+    EXPECT_EQ(DeserializedValue.Group.GetCreatedAt(), "2024-08-21T21:39:25.017+00:00");
+    EXPECT_EQ(DeserializedValue.Group.GetGroupOwnerId(), "66a0033d6541645960bfffda");
+    EXPECT_EQ(DeserializedValue.Group.GetGroupType(), "space");
+    EXPECT_EQ(DeserializedValue.Group.GetName(), "Abu Dhabi Airport");
+
+    EXPECT_EQ(DeserializedValue.Group.GetUsers().size(), 21);
+    EXPECT_EQ(DeserializedValue.Group.GetUsers()[0], "66a0033d6541645960bfffda");
+    EXPECT_EQ(DeserializedValue.Group.GetUsers()[20], "6823720f8f72b4d0fa153cfd");
+
+    EXPECT_EQ(DeserializedValue.Group.GetBannedUsers().size(), 0);
+
+    EXPECT_EQ(DeserializedValue.Group.GetModerators().size(), 20);
+    EXPECT_EQ(DeserializedValue.Group.GetModerators()[0], "669ac6673d223b140719c19e");
+    EXPECT_EQ(DeserializedValue.Group.GetModerators()[19], "6823720f8f72b4d0fa153cfd");
+
+    EXPECT_EQ(DeserializedValue.Group.GetDiscoverable(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetAutoModerator(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetRequiresInvite(), true);
+    EXPECT_EQ(DeserializedValue.Group.GetArchived(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetTags().size(), 0);
+    EXPECT_EQ(DeserializedValue.Group.GetIsCurrentUserOwner(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetIsCurrentUserMember(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetIsCurrentUserModerator(), false);
+    EXPECT_EQ(DeserializedValue.Group.GetIsCurrentUserBanned(), false);
+
+    // Objects
+    EXPECT_EQ(DeserializedValue.Objects[0].GetId(), 1484);
+    EXPECT_EQ(DeserializedValue.Objects[0].GetType(), 2);
+    EXPECT_EQ(DeserializedValue.Objects[0].GetIsTransferable(), false);
+    EXPECT_EQ(DeserializedValue.Objects[0].GetIsPersistent(), false);
+    // TODO: ownerid
+
+    // Prototypes
+
+    // AssetDetails
+
+    // Sequences
+    EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
 }

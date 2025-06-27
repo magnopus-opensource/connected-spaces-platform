@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +16,7 @@
  */
 
 #include "MCSSceneDescription.h"
-#include "MCSTypes.h"
+#include "Services/ApiBase/ApiBase.h"
 #include "Json/JsonSerializer.h"
 
 #include <map>
@@ -178,6 +179,39 @@ void DeserializeComponents(const csp::json::JsonDeserializer& Deserializer, std:
         OutComponents = UIntComponents;
     }
 }
+
+}
+
+void ToJson(csp::json::JsonSerializer& /* Deserializer*/, const csp::multiplayer::mcs::SceneDescription& /* Obj*/) { }
+
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj)
+{
+    Deserializer.EnterMember("Data");
+
+    std::string GroupJson = Deserializer.GetMemberAsString("Group");
+    Obj.Group.FromJson(GroupJson.c_str());
+
+    Deserializer.SafeDeserializeMember("ObjectMessages", Obj.Objects);
+
+    std::string PrototypesJson = Deserializer.GetMemberAsString("Prototypes");
+    csp::services::DtoArray<csp::services::generated::prototypeservice::PrototypeDto> PrototypesDto;
+    PrototypesDto.FromJson(PrototypesJson.c_str());
+
+    Obj.Prototypes = PrototypesDto.GetArray();
+
+    std::string AssetDetailsJson = Deserializer.GetMemberAsString("AssetDetails");
+    csp::services::DtoArray<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetailsDto;
+    AssetDetailsDto.FromJson(AssetDetailsJson.c_str());
+
+    Obj.AssetDetails = AssetDetailsDto.GetArray();
+
+    std::string SequencesJson = Deserializer.GetMemberAsString("Sequences");
+    csp::services::DtoArray<csp::services::generated::aggregationservice::SequenceDto> SequencesDto;
+    SequencesDto.FromJson(SequencesJson.c_str());
+
+    Obj.Sequences = SequencesDto.GetArray();
+
+    Deserializer.ExitMember();
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj)
@@ -230,7 +264,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer:
     Deserializer.SafeDeserializeMember("prefabId", Obj.Type);
     Deserializer.SafeDeserializeMember("isTransferable", Obj.IsTransferable);
     Deserializer.SafeDeserializeMember("isPersistent", Obj.IsPersistent);
-    Deserializer.SafeDeserializeMember("ownerUserId", Obj.OwnerId);
+    // Deserializer.SafeDeserializeMember("ownerUserId", Obj.OwnerId);
 
     uint64_t ParentId;
     Deserializer.SafeDeserializeMember("parentId", ParentId);

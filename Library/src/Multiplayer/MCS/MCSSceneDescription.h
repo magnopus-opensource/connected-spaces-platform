@@ -14,9 +14,26 @@
  * limitations under the License.
  */
 
+#include "MCSTypes.h"
+#include "Services/AggregationService/Dto.h"
+#include "Services/PrototypeService/Dto.h"
+#include "Services/UserService/Dto.h"
+
 #pragma once
 
 namespace csp::multiplayer::mcs
 {
+class SceneDescription
+{
+public:
+    csp::services::generated::userservice::GroupDto Group;
+    std::vector<ObjectMessage> Objects;
+    std::vector<csp::services::generated::prototypeservice::PrototypeDto> Prototypes;
+    std::vector<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetails;
+    std::vector<csp::services::generated::aggregationservice::SequenceDto> Sequences;
+};
 
 }
+
+void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::SceneDescription& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj);
