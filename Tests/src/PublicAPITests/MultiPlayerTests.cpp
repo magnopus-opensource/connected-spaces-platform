@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -134,7 +135,9 @@ void OnConnect(SpaceEntitySystem* EntitySystem)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem->CreateAvatar(UserName, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
+    const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
+
+    EntitySystem->CreateAvatar(UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
         [EntitySystem](SpaceEntity* NewAvatar)
         {
             EXPECT_NE(NewAvatar, nullptr);
@@ -620,7 +623,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -688,7 +694,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -849,7 +858,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     auto& Components = *Avatar->GetComponents();
@@ -1275,8 +1287,10 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
-    auto [Avatar] = Awaitable(
-        &SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode)
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = Awaitable(&SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, LoginState, UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId, UserAvatarPlayMode)
                         .Await();
 
     auto Start = std::chrono::steady_clock::now();
@@ -1403,7 +1417,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     csp::common::String ObjectName = "Object 1";
@@ -2743,6 +2760,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2759,13 +2777,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
     EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::Start, Error when starting SignalR connection.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2795,13 +2815,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
         Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2844,13 +2866,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
         MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2897,13 +2921,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
     EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2948,7 +2974,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
     EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
 
     Connection->SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, "", "");
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
@@ -2970,7 +2997,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr, csp::systems::SystemsManager::Get().GetLogSystem() };
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
 
     // Ensure the lock error message is called when we try and lock an entity that is already locked
     const csp::common::String LockErrorMsg = "Entity is already locked.";
@@ -2985,7 +3015,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr, csp::systems::SystemsManager::Get().GetLogSystem() };
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
 
     // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
     const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";

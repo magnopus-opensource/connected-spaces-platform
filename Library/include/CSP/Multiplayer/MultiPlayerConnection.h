@@ -44,15 +44,6 @@ namespace csp::common
 class LogSystem;
 }
 
-namespace csp::systems
-{
-
-class SpaceSystem;
-class SystemsManager;
-class UserSystem;
-
-} // namespace csp::systems
-
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
@@ -146,8 +137,10 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
     /// ownership of this pointer.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
-        const csp::common::String& DeviceId);
+    /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
+    /// flow, prior to entity fetches.
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise

@@ -267,11 +267,15 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
     DeregisterSystemCallback();
 }
 
-void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback /*Callback*/)
+void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback /*Callback*/)
 {
+    // E.M: It's very easy to get the argument you need to pass into this method wrong.
+    // The type provides no help, and you have to actually call GetUniqueComponentId on HotspotComponent
+    // to get a `parentId:componentId` pattern.
+
     systems::SpaceSystem* MySpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
     // This uses multiple async calls, so ensure this variable exists within this function
-    csp::common::String ItemCopy = ItemName;
+    csp::common::String ItemCopy = ItemID;
 
     auto GetSequencesCallback = [ItemCopy](const systems::SequencesResult& SequencesResult)
     {

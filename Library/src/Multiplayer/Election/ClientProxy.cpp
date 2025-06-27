@@ -18,18 +18,15 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
-
-// Needs broken
-#include "CSP/Systems/SystemsManager.h"
 
 #include <fmt/format.h>
 
 namespace csp::multiplayer
 {
 
-ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem)
+ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem, csp::multiplayer::EventBus& EventBus,
+    csp::common::IJSScriptRunner& ScriptRunner)
     : ElectionManagerPtr(ElectionManager)
     , State(ClientElectionState::Idle)
     , Id(Id)
@@ -37,6 +34,8 @@ ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, cs
     , Eid(0)
     , PendingElections(0)
     , LogSystem(LogSystem)
+    , ScriptRunner(ScriptRunner)
+    , EventBus(EventBus)
 {
 }
 
@@ -165,8 +164,7 @@ void ClientProxy::RunScript(int64_t ContextId, const csp::common::String& Script
     }
     else
     {
-        csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-        TheScriptSystem->RunScript(ContextId, ScriptText);
+        ScriptRunner.RunScript(ContextId, ScriptText);
     }
 }
 
@@ -200,9 +198,6 @@ void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    EventBus* EventBus = SystemsManager.GetEventBus();
-
     const int64_t MessageId = Eid++;
 
     const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [&LogSystem = this->LogSystem](ErrorCode Error)
@@ -216,14 +211,12 @@ void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t C
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("SendNetworkEventToClient Target={0} Source={1} Type={2}", TargetClientId, ClientId, EventType).c_str());
 
-    EventBus->SendNetworkEventToClient(ClientElectionMessage, { ReplicatedValue(EventType), ReplicatedValue(ClientId), ReplicatedValue(MessageId) },
+    EventBus.SendNetworkEventToClient(ClientElectionMessage, { ReplicatedValue(EventType), ReplicatedValue(ClientId), ReplicatedValue(MessageId) },
         TargetClientId, SignalRCallback);
 }
 
 void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    EventBus* EventBus = SystemsManager.GetEventBus();
 
     const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [&LogSystem = this->LogSystem](ErrorCode Error)
     {
@@ -236,7 +229,7 @@ void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t Conte
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("SendRemoteRunScriptEvent Target={0} ContextId={1} Script='{2}'", TargetClientId, ContextId, ScriptText).c_str());
 
-    EventBus->SendNetworkEventToClient(
+    EventBus.SendNetworkEventToClient(
         RemoteRunScriptMessage, { ReplicatedValue(ContextId), ReplicatedValue(ScriptText) }, TargetClientId, SignalRCallback);
 }
 

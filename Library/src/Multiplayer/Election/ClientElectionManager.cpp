@@ -20,16 +20,12 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
 #include "Events/Event.h"
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "signalrclient/signalr_value.h"
 #include <fmt/format.h>
-
-// Only used to access the script system ... needs broken.
-#include "CSP/Systems/SystemsManager.h"
 
 namespace csp::multiplayer
 {
@@ -61,7 +57,8 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
     }
 }
 
-ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem)
+ClientElectionManager::ClientElectionManager(
+    SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
     : SpaceEntitySystemPtr(InSpaceEntitySystem)
     , LogSystem(LogSystem)
     , EventHandler(new ClientElectionEventHandler(this))
@@ -69,6 +66,7 @@ ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySys
     , TheElectionState(ElectionState::Idle)
     , LocalClient(nullptr)
     , Leader(nullptr)
+    , RemoteScriptRunner(JSScriptRunner)
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
     csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -122,7 +120,7 @@ void ClientElectionManager::OnDisconnect()
     UnBindNetworkEvents();
 }
 
-void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars)
+void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, EventBus& EventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
@@ -143,7 +141,7 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
         LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("IsFirstClient=false : Num Avatars {}", Avatars.Size()).c_str());
     }
 
-    ClientProxy* Client = AddClientUsingAvatar(ClientAvatar);
+    ClientProxy* Client = AddClientUsingAvatar(ClientAvatar, EventBus);
     LocalClient = Client;
 
     if (IsFirstClient)
@@ -153,11 +151,11 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
     }
 }
 
-void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
+void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/, EventBus& EventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
-    AddClientUsingAvatar(ClientAvatar);
+    AddClientUsingAvatar(ClientAvatar, EventBus);
 }
 
 void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
@@ -179,7 +177,7 @@ void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const 
     // @Todo - This event allows us to track individual object ownership
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar)
+ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar, EventBus& EventBus)
 {
     if (ClientAvatar == nullptr)
     {
@@ -188,7 +186,7 @@ ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* Clie
     }
 
     const int64_t ClientId = static_cast<int64_t>(ClientAvatar->GetOwnerId());
-    return AddClientUsingId(ClientId);
+    return AddClientUsingId(ClientId, EventBus);
 }
 
 void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar)
@@ -216,9 +214,8 @@ ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* Cli
     return FindClientUsingId(ClientId);
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
+ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId, EventBus& EventBus)
 {
-
     LogSystem.LogMsg(
         csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", ClientId).c_str());
 
@@ -226,7 +223,7 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 
     if (Clients.find(ClientId) == Clients.end())
     {
-        Client = new ClientProxy(ClientId, this, LogSystem);
+        Client = new ClientProxy(ClientId, this, LogSystem, EventBus, RemoteScriptRunner);
         Clients.insert(ClientMap::value_type(ClientId, Client));
 
         if ((LocalClient != nullptr) && (Leader != nullptr))
@@ -537,9 +534,7 @@ void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<Repl
     {
         if (IsLocalClientLeader())
         {
-            // Ach! What to do about this eh...
-            csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-            TheScriptSystem->RunScript(ContextId, ScriptText);
+            RemoteScriptRunner.RunScript(ContextId, ScriptText);
         }
         else
         {
