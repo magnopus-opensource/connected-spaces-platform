@@ -16,6 +16,7 @@
 #include "AssetSystemTestHelpers.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"

@@ -71,10 +71,10 @@ int ReceivedEntityUpdatesCount;
 bool EventSent = false;
 bool EventReceived = false;
 
-ReplicatedValue ObjectFloatProperty;
-ReplicatedValue ObjectBoolProperty;
-ReplicatedValue ObjectIntProperty;
-ReplicatedValue ObjectStringProperty;
+csp::common::ReplicatedValue ObjectFloatProperty;
+csp::common::ReplicatedValue ObjectBoolProperty;
+csp::common::ReplicatedValue ObjectIntProperty;
+csp::common::ReplicatedValue ObjectStringProperty;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -91,9 +91,9 @@ void InitialiseTestingConnection()
     EventSent = false;
     EventReceived = false;
 
-    ObjectFloatProperty = ReplicatedValue(2.3f);
-    ObjectBoolProperty = ReplicatedValue(true);
-    ObjectIntProperty = ReplicatedValue(static_cast<int64_t>(42));
+    ObjectFloatProperty = csp::common::ReplicatedValue(2.3f);
+    ObjectBoolProperty = csp::common::ReplicatedValue(true);
+    ObjectIntProperty = csp::common::ReplicatedValue(static_cast<int64_t>(42));
     ObjectStringProperty = "My replicated string";
 }
 
@@ -198,7 +198,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                     {
                         std::cerr << "Component Updated: ID: " << ComponentID << std::endl;
 
-                        const csp::common::Map<uint32_t, ReplicatedValue>& Properties = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
+                        const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Properties
+                            = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
                         const csp::common::Array<uint32_t>* PropertyKeys = Properties.Keys();
 
                         for (size_t j = 0; j < PropertyKeys->Size(); ++j)
@@ -211,27 +212,27 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                             uint32_t PropertyID = PropertyKeys->operator[](j);
                             std::cerr << "\tProperty ID: " << PropertyID;
 
-                            const ReplicatedValue& Property = Properties[PropertyID];
+                            const csp::common::ReplicatedValue& Property = Properties[PropertyID];
 
                             switch (Property.GetReplicatedValueType())
                             {
-                            case ReplicatedValueType::Integer:
+                            case csp::common::ReplicatedValueType::Integer:
                                 std::cerr << "\tValue: " << Property.GetInt() << std::endl;
                                 break;
-                            case ReplicatedValueType::String:
+                            case csp::common::ReplicatedValueType::String:
                                 std::cerr << "\tValue: " << Property.GetString() << std::endl;
                                 break;
-                            case ReplicatedValueType::Float:
+                            case csp::common::ReplicatedValueType::Float:
                                 std::cerr << "\tValue: " << Property.GetFloat() << std::endl;
                                 break;
-                            case ReplicatedValueType::Boolean:
+                            case csp::common::ReplicatedValueType::Boolean:
                                 std::cerr << "\tValue: " << Property.GetBool() << std::endl;
                                 break;
-                            case ReplicatedValueType::Vector3:
+                            case csp::common::ReplicatedValueType::Vector3:
                                 std::cerr << "\tValue: {" << Property.GetVector3().X << ", " << Property.GetVector3().Y << ", "
                                           << Property.GetVector3().Z << "}" << std::endl;
                                 break;
-                            case ReplicatedValueType::Vector4:
+                            case csp::common::ReplicatedValueType::Vector4:
                                 std::cerr << "\tValue: {" << Property.GetVector4().X << ", " << Property.GetVector4().Y << ", "
                                           << Property.GetVector4().Z << ", " << Property.GetVector4().W << "}" << std::endl;
                                 break;

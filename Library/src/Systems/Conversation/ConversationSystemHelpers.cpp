@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 #include "ConversationSystemHelpers.h"
 
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -134,9 +133,9 @@ common::Map<common::String, common::String> GenerateMessageAssetCollectionMetada
     return MetadataMap;
 }
 
-csp::common::Array<common::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
+csp::common::Array<csp::common::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
 {
-    csp::common::Array<common::ReplicatedValue> Args(7);
+    csp::common::Array<csp::common::ReplicatedValue> Args(7);
 
     Args[0] = static_cast<int64_t>(Params.MessageType);
     Args[1] = Params.MessageInfo.ConversationId;

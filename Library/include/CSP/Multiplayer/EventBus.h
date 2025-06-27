@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
@@ -25,7 +26,6 @@
 namespace csp::common
 {
 class LogSystem;
-class ReplicatedValue;
 }
 
 namespace csp::systems

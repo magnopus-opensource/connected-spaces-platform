@@ -20,9 +20,13 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+
+namespace csp::multiplayer
+{
+class ReplicatedValue;
+}
 
 namespace csp::multiplayer
 {

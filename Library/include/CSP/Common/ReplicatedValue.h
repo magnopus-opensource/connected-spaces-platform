@@ -70,23 +70,23 @@ public:
 
     /// @brief Construct a ReplicatedValue based on an String type.
     /// @param InStringValue String : Initial value.
-    ReplicatedValue(const String& InStringValue);
+    ReplicatedValue(const csp::common::String& InStringValue);
 
     /// @brief Construct a ReplicatedValue based on a Vector2 type.
     /// @param InVector2Value Vector2 : Initial value.
-    ReplicatedValue(const Vector2& InVector2Value);
+    ReplicatedValue(const csp::common::Vector2& InVector2Value);
 
     /// @brief Construct a ReplicatedValue based on a Vector3 type.
     /// @param InVector3Value Vector3 : Initial value.
-    ReplicatedValue(const Vector3& InVector3Value);
+    ReplicatedValue(const csp::common::Vector3& InVector3Value);
 
     /// @brief Construct a ReplicatedValue based on an Vector4 type.
     /// @param InVector4Value Vector4 : Initial value.
-    ReplicatedValue(const Vector4& InVector4Value);
+    ReplicatedValue(const csp::common::Vector4& InVector4Value);
 
     /// @brief Construct a ReplicatedValue based on an Map type with a string value as the key.
     /// @param InMapValue Map : Initial value.
-    ReplicatedValue(const Map<String, ReplicatedValue>& InMapValue);
+    ReplicatedValue(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& InMapValue);
 
     /// @brief Copy constructor
     /// @param Other ReplicatedValue& : The value to copy.
@@ -217,14 +217,14 @@ public:
     /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
     ///
     /// @return Map
-    const Map<String, ReplicatedValue>& GetStringMap() const;
+    const csp::common::Map<String, csp::common::ReplicatedValue>& GetStringMap() const;
 
     /// @brief Set a string Map value for this replicated value from a Map, will overwrite any previous value.
-    void SetStringMap(const Map<String, ReplicatedValue>& InValue);
+    void SetStringMap(const csp::common::Map<String, csp::common::ReplicatedValue>& InValue);
 
     /// @brief Get a generic default StringMap.
     /// @return The default StringMap.
-    CSP_NO_EXPORT static const Map<String, ReplicatedValue>& GetDefaultStringMap();
+    CSP_NO_EXPORT static const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetDefaultStringMap();
 
     /// @brief returns the size of the stored internal value.
     /// @return size_t size of the internal value.
@@ -246,7 +246,7 @@ private:
         Vector2 Vector2;
         Vector3 Vector3;
         Vector4 Vector4;
-        Map<csp::common::String, ReplicatedValue> StringMap;
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> StringMap;
     };
 
     InternalValue Value;

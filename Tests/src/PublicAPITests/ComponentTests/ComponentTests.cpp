@@ -17,6 +17,7 @@
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"

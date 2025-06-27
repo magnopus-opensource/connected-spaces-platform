@@ -16,6 +16,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -55,10 +56,10 @@ int ReceivedEntityUpdatesCount;
 
 bool EventReceived = false;
 
-ReplicatedValue ObjectFloatProperty;
-ReplicatedValue ObjectBoolProperty;
-ReplicatedValue ObjectIntProperty;
-ReplicatedValue ObjectStringProperty;
+csp::common::ReplicatedValue ObjectFloatProperty;
+csp::common::ReplicatedValue ObjectBoolProperty;
+csp::common::ReplicatedValue ObjectIntProperty;
+csp::common::ReplicatedValue ObjectStringProperty;
 
 csp::common::String ConversationId;
 

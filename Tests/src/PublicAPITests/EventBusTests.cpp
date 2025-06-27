@@ -63,10 +63,10 @@ int ReceivedEntityUpdatesCount;
 bool EventSent = false;
 bool EventReceived = false;
 
-ReplicatedValue ObjectFloatProperty;
-ReplicatedValue ObjectBoolProperty;
-ReplicatedValue ObjectIntProperty;
-ReplicatedValue ObjectStringProperty;
+csp::common::ReplicatedValue ObjectFloatProperty;
+csp::common::ReplicatedValue ObjectBoolProperty;
+csp::common::ReplicatedValue ObjectIntProperty;
+csp::common::ReplicatedValue ObjectStringProperty;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -83,9 +83,9 @@ void InitialiseTestingConnection()
     EventSent = false;
     EventReceived = false;
 
-    ObjectFloatProperty = ReplicatedValue(2.3f);
-    ObjectBoolProperty = ReplicatedValue(true);
-    ObjectIntProperty = ReplicatedValue(static_cast<int64_t>(42));
+    ObjectFloatProperty = csp::common::ReplicatedValue(2.3f);
+    ObjectBoolProperty = csp::common::ReplicatedValue(true);
+    ObjectIntProperty = csp::common::ReplicatedValue(static_cast<int64_t>(42));
     ObjectStringProperty = "My replicated string";
 }
 
@@ -196,7 +196,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("TestEvent",
-        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        [](bool ok, csp::common::Array<csp::common::ReplicatedValue> Data)
         {
             EXPECT_TRUE(ok);
 
@@ -204,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
         });
 
     EventBus->ListenNetworkEvent("TestEvent",
-        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        [](bool ok, csp::common::Array<csp::common::ReplicatedValue> Data)
         {
             EXPECT_TRUE(ok);
 
@@ -289,7 +289,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     EventBus->ListenNetworkEvent("MultiTypeEvent",
-        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        [](bool ok, csp::common::Array<csp::common::ReplicatedValue> Data)
         {
             EXPECT_TRUE(ok);
 
@@ -297,15 +297,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
             for (size_t i = 0; i < Data.Size(); ++i)
             {
-                if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
+                if (Data[i].GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
                 {
                     printf("%s\n", Data[i].GetBool() ? "true" : "false");
                 }
-                else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Integer)
+                else if (Data[i].GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
                 {
                     printf("%lli\n", Data[i].GetInt());
                 }
-                else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Float)
+                else if (Data[i].GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
                 {
                     printf("%f\n", Data[i].GetFloat());
                 }
@@ -319,8 +319,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
             }
         });
 
-    ReplicatedValue EventInt((int64_t)-1);
-    ReplicatedValue EventFloat(1234.567890f);
+    csp::common::ReplicatedValue EventInt((int64_t)-1);
+    csp::common::ReplicatedValue EventFloat(1234.567890f);
 
     EventBus->SendNetworkEventToClient("MultiTypeEvent", { EventInt, EventFloat }, Connection->GetClientId(),
         [EventInt, EventFloat](ErrorCode Error)
