@@ -16,6 +16,11 @@
 
 #include "MCSTypes.h"
 
+#include "CSP/Systems/SystemsResult.h"
+#include "Services/MultiplayerService/Api.h"
+
+namespace chs_multiplayer = csp::services::generated::multiplayerservice;
+
 namespace csp::multiplayer::mcs
 {
 namespace
@@ -121,6 +126,8 @@ namespace
                 DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
             }
             break;
+        case ItemComponentDataType::DELETE_COMPONENT:
+            throw std::invalid_argument("Trying to deserialize already deleted ItemComponentDataType");
         default:
             throw std::invalid_argument("Trying to deserialize unsupported ItemComponentDataType");
         }
@@ -157,6 +164,11 @@ namespace
             Deserializer.Skip();
         }
     }
+}
+
+ItemComponentData::ItemComponentData()
+    : Value(nullptr)
+{
 }
 
 ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
@@ -216,6 +228,13 @@ void ItemComponentData::Deserialize(SignalRDeserializer& Deserializer)
 const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Value; }
 
 bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
+
+ItemComponentData& ItemComponentData::operator=(const ItemComponentData& Other)
+{
+    Value = Other.Value;
+
+    return *this;
+}
 
 ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
@@ -355,5 +374,37 @@ bool ObjectPatch::GetShouldUpdateParent() const { return ShouldUpdateParent; }
 std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
 
 const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ItemComponentData& ComponentResult::GetComponent() { return ComponentData; }
+
+const ItemComponentData& ComponentResult::GetComponent() const { return ComponentData; }
+
+void ComponentResult::SetComponent(const ItemComponentData& Component) { ComponentData = Component; }
+
+void ComponentResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto* PrototypeResponse = static_cast<chs_multiplayer::ObjectMessageDto*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        // Build the Dto from the response Json
+        PrototypeResponse->FromJson(Response->GetPayload().GetContent());
+
+        // ObjectMessageDtoToComponent(*PrototypeResponse, ComponentData); //TODO
+    }
+}
+
+void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback)
+{
+    services::ResponseHandlerPtr ResponseHandler
+        = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
+            Callback, nullptr);
+
+    static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
+}
 
 }

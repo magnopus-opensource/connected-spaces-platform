@@ -16,8 +16,11 @@
 
 #pragma once
 
+#include "CSP/CSPCommon.h"
+#include "CSP/Systems/SystemsResult.h"
 #include "Multiplayer/SignalRSerializer.h"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -104,10 +107,17 @@ enum class ItemComponentDataType : uint64_t
     // UINT16_ARRAY = 52,
     // NULLABLE_UINT16_ARRAY = 53,
     UINT16_DICTIONARY = 54,
-    STRING_DICTIONARY = 55
+    STRING_DICTIONARY = 55,
+    DELETE_COMPONENT = 56
 };
 
 class ItemComponentData;
+class ComponentResult;
+
+static csp::services::ApiBase* ComponentObjectMessageApi;
+typedef std::function<void(const ComponentResult& Result)> ComponentResultCallback;
+
+void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
 
 /// @brief Variant that holds all currently implemented MCS types by CSP.
 /// @details This should be updated if we need to support more of the above types in the future.
@@ -123,8 +133,9 @@ using PropertyKeyType = uint16_t;
 class ItemComponentData : public ISignalRSerializable, public ISignalRDeserializable
 {
 public:
-    ItemComponentData() = default;
+    ItemComponentData();
     ItemComponentData(const ItemComponentDataVariant& Value);
+    // ItemComponentData(ItemComponentData&&) = default;
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -132,6 +143,7 @@ public:
     const ItemComponentDataVariant& GetValue() const;
 
     bool operator==(const ItemComponentData& Other) const;
+    ItemComponentData& operator=(const ItemComponentData& Other);
 
 private:
     ItemComponentDataVariant Value;
@@ -201,6 +213,29 @@ private:
     std::optional<uint64_t> ParentId;
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
+
+class CSP_API ComponentResult : public csp::systems::ResultBase
+{
+public:
+    ItemComponentData& GetComponent();
+
+    const ItemComponentData& GetComponent() const;
+
+    CSP_NO_EXPORT void SetComponent(const ItemComponentData& Component);
+
+    CSP_NO_EXPORT ComponentResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    ComponentResult() = default;
+
+    ComponentResult(void*) {};
+
+private:
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    ItemComponentData ComponentData;
+};
+
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj);

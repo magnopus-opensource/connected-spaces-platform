@@ -127,6 +127,11 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
     {
         ReplicatedValue = (int64_t)Component.as_uinteger();
     }
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::DELETE_COMPONENT))
+    {
+        // Components to be deleted are set to ItemComponentDataType::DELETE_COMPONENT
+        ReplicatedValue = (int64_t)Component.as_uinteger(); //(int64_t) csp::multiplayer::mcs::ItemComponentDataType::DELETE_COMPONENT;
+    }
     else
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "Unsupported event argument type.");
