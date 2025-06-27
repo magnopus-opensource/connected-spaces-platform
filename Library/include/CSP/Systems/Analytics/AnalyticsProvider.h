@@ -15,7 +15,6 @@
  */
 #pragma once
 
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 
 class EventPayloadImpl;

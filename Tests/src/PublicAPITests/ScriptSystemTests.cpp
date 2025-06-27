@@ -15,7 +15,6 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"

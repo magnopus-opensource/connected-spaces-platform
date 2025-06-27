@@ -15,7 +15,6 @@
  */
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 

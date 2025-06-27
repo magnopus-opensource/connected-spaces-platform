@@ -17,7 +17,6 @@
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
 #include "CSP/Common/List.h"
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 

@@ -42,6 +42,7 @@ CSP_END_IGNORE
 namespace csp::common
 {
 class LogSystem;
+class ReplicatedValue;
 }
 
 namespace csp::systems

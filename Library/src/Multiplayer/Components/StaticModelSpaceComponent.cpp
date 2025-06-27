@@ -15,7 +15,6 @@
  */
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
-#include "CSP/Common/ReplicatedValue.h"
 
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include <memory>

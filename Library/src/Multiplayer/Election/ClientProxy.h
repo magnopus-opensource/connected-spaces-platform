@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include "CSP/Common/ReplicatedValue.h"
+
 #include <atomic>
 #include <chrono>
 #include <list>

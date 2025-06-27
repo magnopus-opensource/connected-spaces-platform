@@ -25,11 +25,6 @@
 
 namespace csp::multiplayer
 {
-class ReplicatedValue;
-}
-
-namespace csp::multiplayer
-{
 
 /// @brief Enumerates the supported scopes of a script.
 enum class ScriptScope

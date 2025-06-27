@@ -25,11 +25,6 @@
 
 namespace csp::multiplayer
 {
-class ReplicatedValue;
-}
-
-namespace csp::multiplayer
-{
 
 /// @brief Enumerates the list of properties that can be replicated for a custom component.
 enum class CustomComponentPropertyKeys

@@ -17,10 +17,10 @@
 
 namespace csp::common
 {
-static const Vector2 InvalidVector2 = Vector2();
-static const Vector3 InvalidVector3 = Vector3();
-static const Vector4 InvalidVector4 = Vector4();
-static const Map<String, ReplicatedValue> InvalidStringMap = Map<String, ReplicatedValue>();
+static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
+static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
+static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
+static const csp::common::Map<csp::common::String, ReplicatedValue> InvalidStringMap = csp::common::Map<csp::common::String, ReplicatedValue>();
 
 ReplicatedValue::ReplicatedValue() { ReplicatedType = ReplicatedValueType::InvalidType; }
 
@@ -60,31 +60,31 @@ ReplicatedValue::ReplicatedValue(const char* InValue)
     Value.String = InValue;
 }
 
-ReplicatedValue::ReplicatedValue(const String& InValue)
+ReplicatedValue::ReplicatedValue(const csp::common::String& InValue)
     : ReplicatedType(ReplicatedValueType::String)
 {
     Value.String = InValue;
 }
 
-ReplicatedValue::ReplicatedValue(const Vector2& InValue)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector2& InValue)
     : ReplicatedType(ReplicatedValueType::Vector2)
 {
     Value.Vector2 = InValue;
 }
 
-ReplicatedValue::ReplicatedValue(const Vector3& InValue)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue)
     : ReplicatedType(ReplicatedValueType::Vector3)
 {
     Value.Vector3 = InValue;
 }
 
-ReplicatedValue::ReplicatedValue(const Vector4& InValue)
+ReplicatedValue::ReplicatedValue(const csp::common::Vector4& InValue)
     : ReplicatedType(ReplicatedValueType::Vector4)
 {
     Value.Vector4 = InValue;
 }
 
-ReplicatedValue::ReplicatedValue(const Map<String, ReplicatedValue>& InMapValue)
+ReplicatedValue::ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue)
     : ReplicatedType(ReplicatedValueType::StringMap)
 {
     Value.StringMap = InMapValue;
@@ -311,79 +311,79 @@ void ReplicatedValue::SetString(const char* InValue)
     Value.String = InValue;
 }
 
-void ReplicatedValue::SetString(const String& InValue)
+void ReplicatedValue::SetString(const csp::common::String& InValue)
 {
     ReplicatedType = ReplicatedValueType::String;
     Value.String = InValue;
 }
 
-const String& ReplicatedValue::GetString() const
+const csp::common::String& ReplicatedValue::GetString() const
 {
     assert(ReplicatedType == ReplicatedValueType::String);
     return Value.String;
 }
 
-const String& ReplicatedValue::GetDefaultString()
+const csp::common::String& ReplicatedValue::GetDefaultString()
 {
-    static const String InvalidString = String();
+    static const csp::common::String InvalidString = csp::common::String();
     return InvalidString;
 }
 
-void ReplicatedValue::SetVector2(const Vector2& InValue)
+void ReplicatedValue::SetVector2(const csp::common::Vector2& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector2;
     Value.Vector2 = InValue;
 }
 
-const Vector2& ReplicatedValue::GetVector2() const
+const csp::common::Vector2& ReplicatedValue::GetVector2() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector2);
     return Value.Vector2;
 }
 
-const Vector2& ReplicatedValue::GetDefaultVector2() { return InvalidVector2; }
+const csp::common::Vector2& ReplicatedValue::GetDefaultVector2() { return InvalidVector2; }
 
-void ReplicatedValue::SetVector3(const Vector3& InValue)
+void ReplicatedValue::SetVector3(const csp::common::Vector3& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector3;
     Value.Vector3 = InValue;
 }
 
-const Vector3& ReplicatedValue::GetVector3() const
+const csp::common::Vector3& ReplicatedValue::GetVector3() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector3);
     return Value.Vector3;
 }
 
-const Vector3& ReplicatedValue::GetDefaultVector3() { return InvalidVector3; }
+const csp::common::Vector3& ReplicatedValue::GetDefaultVector3() { return InvalidVector3; }
 
-void ReplicatedValue::SetVector4(const Vector4& InValue)
+void ReplicatedValue::SetVector4(const csp::common::Vector4& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector4;
     Value.Vector4 = InValue;
 }
 
-const Vector4& ReplicatedValue::GetVector4() const
+const csp::common::Vector4& ReplicatedValue::GetVector4() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector4);
     return Value.Vector4;
 }
 
-const Vector4& ReplicatedValue::GetDefaultVector4() { return InvalidVector4; }
+const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return InvalidVector4; }
 
-const Map<String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
+const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {
     assert(ReplicatedType == ReplicatedValueType::StringMap);
     return Value.StringMap;
 }
 
-void ReplicatedValue::SetStringMap(const Map<String, ReplicatedValue>& InValue)
+void ReplicatedValue::SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue)
 {
     ReplicatedType = ReplicatedValueType::StringMap;
     Value.StringMap = InValue;
 }
 
-const Map<String, ReplicatedValue>& ReplicatedValue::GetDefaultStringMap() { return InvalidStringMap; }
+const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetDefaultStringMap() { return InvalidStringMap; }
 
 size_t ReplicatedValue::GetSizeOfInternalValue() { return sizeof(InternalValue); }
 

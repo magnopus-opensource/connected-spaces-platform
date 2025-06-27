@@ -15,6 +15,7 @@
  */
 #include "ConversationSystemHelpers.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/AssetCollection.h"

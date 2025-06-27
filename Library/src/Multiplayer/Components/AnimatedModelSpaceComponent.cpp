@@ -15,7 +15,6 @@
  */
 
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
-#include "CSP/Common/ReplicatedValue.h"
 
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
