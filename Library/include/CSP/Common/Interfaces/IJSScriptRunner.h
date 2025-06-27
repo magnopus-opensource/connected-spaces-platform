@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
 CSP_START_IGNORE
-#pragma once
 #pragma warning(push)
 #pragma warning(disable : 4702) // Unreachable code warning
 CSP_END_IGNORE
