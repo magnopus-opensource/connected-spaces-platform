@@ -15,16 +15,12 @@
  */
 #pragma once
 
-#include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Common/Interfaces/IScriptBinding.h"
 
 namespace csp::common
 {
 class LogSystem;
-}
-
-namespace csp::systems
-{
-class ScriptSystem;
+class IJSScriptRunner;
 }
 
 namespace csp::multiplayer
@@ -32,14 +28,15 @@ namespace csp::multiplayer
 
 class SpaceEntitySystem;
 
-class EntityScriptBinding : public csp::systems::IScriptBinding
+class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);
-    virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
+    void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
 
-    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);
-    static void RemoveBinding(EntityScriptBinding* InEntityBinding);
+    static EntityScriptBinding* BindEntitySystem(
+        SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+    static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
     SpaceEntitySystem* EntitySystem;

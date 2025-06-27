@@ -21,8 +21,6 @@
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
-#include "CSP/Systems/SystemsManager.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -248,20 +246,19 @@ EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp:
 {
 }
 
-EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
+    SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
     EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
-    csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-    ScriptSystem->RegisterScriptBinding(ScriptBinding);
+    ScriptRunner.RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
 }
 
-void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding)
+void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner)
 {
     if (csp::CSPFoundation::GetIsInitialised())
     {
-        csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-        ScriptSystem->UnregisterScriptBinding(InEntityBinding);
+        ScriptRunner.UnregisterScriptBinding(InEntityBinding);
     }
 }
 
@@ -527,15 +524,10 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
 
-void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
+void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
 {
-    if (ScriptSystem == nullptr)
-    {
-        ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
-    }
-
-    qjs::Context* Context = (qjs::Context*)ScriptSystem->GetContext(ContextId);
-    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
+    qjs::Context* Context = (qjs::Context*)ScriptRunner.GetContext(ContextId);
+    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptRunner.GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
 
     Module->function("Log", [&LogSystem = this->LogSystem](qjs::rest<std::string> Args) { EntityScriptLog(std::move(Args), LogSystem); });
 
