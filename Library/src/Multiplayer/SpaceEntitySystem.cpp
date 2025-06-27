@@ -307,7 +307,7 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
     const std::vector Arr { Param1 };
     const signalr::value Params(Arr);
 
-    return Connection->Invoke("GenerateObjectIds", Params, {})
+    return Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
@@ -333,7 +333,8 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return Connection->Invoke("SendObjectMessage", Serializer.Get());
+        return Connection->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get());
     };
 }
 
@@ -497,7 +498,8 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     LocalDestroyEntity(Entity);
 
     const std::vector InvokeArguments = { signalr::value(ObjectPatches) };
-    Connection->Invoke("SendObjectPatches", InvokeArguments, LocalCallback);
+    Connection->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), InvokeArguments, LocalCallback);
 }
 
 void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
@@ -690,13 +692,15 @@ void SpaceEntitySystem::BindOnRequestToSendObject()
                 const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except)
                 { HandleException(Except, "Failed to send server requested object."); };
 
-                Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
+                Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE),
+                    Serializer.Get(), LocalSendCallback);
             }
             else
             {
                 std::vector<signalr::value> const InvokeArguments = { EntityID };
 
-                Connection->Invoke("SendObjectNotFound", InvokeArguments);
+                Connection->Invoke(
+                    MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
             }
         });
 }
@@ -736,7 +740,7 @@ void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::functio
     ParamsVec.push_back(signalr::value((uint64_t)Limit)); // limit
     const auto Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke("PageScopedObjects", Params, Callback);
+    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
 }
 
 std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem::CreateRetrieveAllEntitiesCallback(int Skip)
@@ -1302,7 +1306,8 @@ void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> Pendin
     }
     Serializer.EndWriteArray();
 
-    Connection->Invoke("SendObjectPatches", Serializer.Get(), LocalCallback);
+    Connection->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), Serializer.Get(), LocalCallback);
 }
 
 void SpaceEntitySystem::ProcessPendingEntityOperations()
@@ -1560,7 +1565,8 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
             Callback(NewObject);
         };
 
-        Connection->Invoke("SendObjectMessage", Serializer.Get(), LocalSendCallback);
+        Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+            LocalSendCallback);
     };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
@@ -1568,7 +1574,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
     const std::vector Arr { Param1 };
 
     const signalr::value Params(Arr);
-    Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
+    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
 }
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
