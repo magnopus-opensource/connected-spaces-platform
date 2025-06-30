@@ -24,9 +24,22 @@
 namespace csp
 {
 SceneDescription::SceneDescription(
-    const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& /* EntitySystem*/)
+    const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem)
 {
     csp::systems::GroupDtoToSpace(MCSSceneDescription.Group, Space);
+
+    Entities = csp::common::Array<csp::multiplayer::SpaceEntity*>(MCSSceneDescription.Objects.size());
+
+    size_t ObjectsIndex = 0;
+    for (const auto& Object : MCSSceneDescription.Objects)
+    {
+        auto* Entity = new multiplayer::SpaceEntity { &EntitySystem };
+        Entity->FromObjectMessage(Object);
+
+        EntitySystem.AddEntity(Entity);
+        Entities[ObjectsIndex] = Entity;
+        ObjectsIndex++;
+    }
 
     AssetCollections = csp::common::Array<csp::systems::AssetCollection>(MCSSceneDescription.Prototypes.size());
 
@@ -37,12 +50,16 @@ SceneDescription::SceneDescription(
         PrototypesIndex++;
     }
 
+    Assets = csp::common::Array<csp::systems::Asset>(MCSSceneDescription.AssetDetails.size());
+
     size_t AssetDetailIndex = 0;
     for (const auto& AssetDetail : MCSSceneDescription.AssetDetails)
     {
         csp::systems::AssetDetailDtoToAsset(AssetDetail, Assets[AssetDetailIndex]);
         AssetDetailIndex++;
     }
+
+    Sequences = csp::common::Array<csp::systems::Sequence>(MCSSceneDescription.Sequences.size());
 
     size_t SequenceIndex = 0;
     for (const auto& Sequence : MCSSceneDescription.Sequences)

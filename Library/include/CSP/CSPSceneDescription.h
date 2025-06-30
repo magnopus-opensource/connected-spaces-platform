@@ -31,6 +31,7 @@ namespace csp
 
 class SceneDescription
 {
+public:
     SceneDescription(const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem);
 
     csp::systems::Space Space;
