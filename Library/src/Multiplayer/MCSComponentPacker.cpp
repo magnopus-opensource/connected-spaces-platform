@@ -25,16 +25,6 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
     return ComponentCount;
 }
 
-void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value)
-{
-    Value = std::get<uint64_t>(ComponentData.GetValue());
-}
-
-void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value)
-{
-    Value = std::get<int64_t>(ComponentData.GetValue());
-}
-
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value)
 {
     const auto& Vector = std::get<std::vector<float>>(ComponentData.GetValue());
