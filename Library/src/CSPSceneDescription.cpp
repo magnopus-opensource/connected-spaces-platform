@@ -64,7 +64,7 @@ SceneDescription::SceneDescription(const csp::multiplayer::mcs::SceneDescription
     size_t SequenceIndex = 0;
     for (const auto& Sequence : MCSSceneDescription.Sequences)
     {
-        csp::systems::SequenceDtoToSequence(Sequence, Sequences[AssetDetailIndex]);
+        csp::systems::SequenceDtoToSequence(Sequence, Sequences[SequenceIndex]);
         SequenceIndex++;
     }
 }
