@@ -1,0 +1,34 @@
+{
+	"CheckpointVersion": 1,
+	"CheckpointTimestamp": "2025-06-10 15:18:00",
+	"SpaceId": "66c65e8d9821e1cc2b51dc0d",
+	"tenantName": "KILN_01",
+	"Environment": "O2Prd", 
+	"Data": {
+		"Group": {
+		  "id": "66c65e8d9821e1cc2b51dc0d",
+		  "createdBy": "66a0033d6541645960bfffda",
+		  "createdAt": "2024-08-21T21:39:25.017+00:00",
+		  "groupOwnerId": "66a0033d6541645960bfffda",
+		  "groupType": "space",
+		  "name": "Abu Dhabi Airport",
+		  "users": [],
+		  "bannedUsers": [],
+		  "moderators": [],
+		  "discoverable": false,
+		  "autoModerator": false,
+		  "requiresInvite": true,
+		  "archived": false,
+		  "tags": [],
+		  "isCurrentUserOwner": false,
+		  "isCurrentUserMember": false,
+		  "isCurrentUserModerator": false,
+		  "isCurrentUserBanned": false
+		},
+		"ObjectMessages": [],
+		"Prototypes": [],
+		"AssetDetails": [],
+		"Sequences": [],
+		"Anchors": []
+	}
+}
