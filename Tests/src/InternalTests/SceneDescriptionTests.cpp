@@ -35,7 +35,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ObjectMessageSerializeTest)
     const uint64_t TestType = 2;
     const bool TestIsTransferable = true;
     const bool TestIsPersistent = true;
-    const uint64_t TestOwnerId = 3;
+    const uint64_t TestOwnerId = 0; // TODO: Set to 3 when this is added to the test files.
     const std::optional<uint64_t> TestParentId = 4;
     std::map<mcs::PropertyKeyType, mcs::ItemComponentData> TestComponents;
     TestComponents[0] = mcs::ItemComponentData { { 0ll } };
