@@ -23,8 +23,8 @@
 
 namespace csp
 {
-SceneDescription::SceneDescription(
-    const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem)
+SceneDescription::SceneDescription(const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription,
+    csp::multiplayer::SpaceEntitySystem& EntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
 {
     csp::systems::GroupDtoToSpace(MCSSceneDescription.Group, Space);
 
@@ -33,7 +33,7 @@ SceneDescription::SceneDescription(
     size_t ObjectsIndex = 0;
     for (const auto& Object : MCSSceneDescription.Objects)
     {
-        auto* Entity = new multiplayer::SpaceEntity(&EntitySystem);
+        auto* Entity = new multiplayer::SpaceEntity(&EntitySystem, RemoteScriptRunner, &LogSystem);
         Entity->FromObjectMessage(Object);
 
         EntitySystem.AddEntity(Entity);

@@ -169,6 +169,21 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
 
+class MockScriptRunner : public csp::common::IJSScriptRunner
+{
+    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override { return false; }
+    void RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override { }
+    void UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override { }
+    bool BindContext(int64_t ContextId) override { return false; }
+    bool ResetContext(int64_t ContextId) override { return false; }
+    void* GetContext(int64_t ContextId) override { return nullptr; }
+    void* GetModule(int64_t ContextId, const csp::common::String& ModuleName) override { return nullptr; }
+    bool CreateContext(int64_t ContextId) override { return false; }
+    bool DestroyContext(int64_t ContextId) override { return false; }
+    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source) override { }
+    void ClearModuleSource(csp::common::String ModuleUrl) override { }
+};
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeEmptyTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -196,10 +211,11 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
 
     // Convert to csp scene description
+    MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { &LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, &LogSystem };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
+    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
 
     EXPECT_EQ(SceneDescription.Entities.Size(), 0);
     EXPECT_EQ(SceneDescription.AssetCollections.Size(), 0);
@@ -329,10 +345,11 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
 
     // Convert to csp scene description
+    MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { &LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, &LogSystem };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
+    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
 
     // Test csp scene description values are correct
 
@@ -527,10 +544,11 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
 
     // Convert to csp scene description
+    MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { &LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, &LogSystem };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
+    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
 
     // Test csp scene description values are correct
 
