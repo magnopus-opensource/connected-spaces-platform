@@ -32,7 +32,8 @@ namespace csp
 class SceneDescription
 {
 public:
-    SceneDescription(const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem);
+    SceneDescription(const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem,
+        csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     csp::systems::Space Space;
     csp::common::Array<csp::multiplayer::SpaceEntity*> Entities;
