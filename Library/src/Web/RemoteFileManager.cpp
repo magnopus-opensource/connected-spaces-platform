@@ -15,9 +15,9 @@
  */
 #include "Web/RemoteFileManager.h"
 
-#include "Web/HttpAuth.h"
-#include "Web/HttpPayload.h"
-#include "Web/WebClient.h"
+#include "Common/Web/HttpAuth.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::web
 {

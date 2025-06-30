@@ -16,7 +16,6 @@
 
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
 #include <memory>
@@ -24,8 +23,8 @@
 namespace csp::multiplayer
 {
 
-AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::AnimatedModel, Parent)
+AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::AnimatedModel, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";

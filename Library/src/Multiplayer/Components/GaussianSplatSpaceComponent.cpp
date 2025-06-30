@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::GaussianSplat, Parent)
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::GaussianSplat, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)] = "";

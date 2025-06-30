@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
 #include <atomic>
@@ -26,6 +27,7 @@ namespace csp::common
 {
 
 class CancellationToken;
+class LogSystem;
 
 }
 
@@ -75,7 +77,7 @@ using ClientMap = std::map<ClientId, class ClientProxy*>;
 class ClientProxy
 {
 public:
-    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager);
+    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
 
     void UpdateState();
 
@@ -118,6 +120,9 @@ private:
     std::atomic_int PendingElections;
 
     std::chrono::system_clock::time_point ElectionStartTime;
+
+    csp::common::LogSystem& LogSystem;
+    csp::common::IJSScriptRunner& ScriptRunner;
 };
 
 } // namespace csp::multiplayer

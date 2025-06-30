@@ -24,6 +24,11 @@
 
 #include <signalrclient/signalr_value.h>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 
@@ -36,7 +41,7 @@ class EventDeserialiser
 {
 public:
     // Creates an empty event deserialiser.
-    EventDeserialiser();
+    EventDeserialiser(csp::common::LogSystem& LogSystem);
 
     // The generic means to populate this deserialiser's members given a set of event values.
     virtual void Parse(const std::vector<signalr::value>& EventValues);
@@ -59,12 +64,16 @@ protected:
     csp::common::String EventType;
     uint64_t SenderClientId;
     csp::common::Array<csp::multiplayer::ReplicatedValue> EventData;
+
+    csp::common::LogSystem& LogSystem;
 };
 
 // A specialised deserialiser for handling events triggered when an asset referenced by the space changes.
 class AssetChangedEventDeserialiser : public EventDeserialiser
 {
 public:
+    AssetChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
+
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
     const AssetDetailBlobParams& GetEventParams() const { return EventParams; }
@@ -77,6 +86,8 @@ private:
 class ConversationEventDeserialiser : public EventDeserialiser
 {
 public:
+    ConversationEventDeserialiser(csp::common::LogSystem& LogSystem);
+
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
     const ConversationEventParams& GetEventParams() const { return EventParams; }
@@ -89,6 +100,8 @@ private:
 class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
 {
 public:
+    UserPermissionsChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
+
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
     const UserPermissionsParams& GetEventParams() const { return EventParams; }
@@ -100,6 +113,8 @@ private:
 class SequenceChangedEventDeserialiser : public EventDeserialiser
 {
 public:
+    SequenceChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
+
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
     const SequenceChangedParams& GetEventParams() const { return EventParams; }
@@ -116,6 +131,8 @@ private:
 class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
 {
 public:
+    SequenceHotspotChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
+
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
     const SequenceHotspotChangedParams& GetEventParams() const { return EventParams; }

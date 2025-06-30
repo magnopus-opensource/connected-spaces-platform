@@ -15,8 +15,8 @@
  */
 #pragma once
 
-#include "Web/HttpPayload.h"
-#include "Web/Json.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/Json.h"
 
 #include <rapidjson/rapidjson.h>
 

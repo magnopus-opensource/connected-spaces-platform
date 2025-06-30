@@ -43,6 +43,9 @@ public:
     DECLARE_SCRIPT_PROPERTY(float, WalkRunBlendPercentage);
     DECLARE_SCRIPT_PROPERTY(float, TorsoTwistAlpha);
     DECLARE_SCRIPT_PROPERTY(int32_t, AvatarPlayMode);
+    DECLARE_SCRIPT_PROPERTY(int32_t, LocomotionModel);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };
 
 } // namespace csp::multiplayer

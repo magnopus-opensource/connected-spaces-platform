@@ -15,9 +15,9 @@
  */
 #include "CSP/Systems/Users/Profile.h"
 
+#include "Common/Web/HttpResponse.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Dto.h"
-#include "Web/HttpResponse.h"
 
 namespace chs = csp::services::generated::userservice;
 

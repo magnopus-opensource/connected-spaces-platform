@@ -15,9 +15,12 @@
  */
 #include "SignalRConnection.h"
 
-#include "Debug/Logging.h"
+#include "CSP/CSPFoundation.h"
 #include "SignalRClient.h"
 #include <memory>
+
+// Needs broken ... it's just for profiling we could probably just remove
+#include "Debug/Logging.h"
 
 #if ENABLE_SIGNALR_LOGGING
 #include <iostream>

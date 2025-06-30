@@ -17,7 +17,6 @@
 
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Debug/Logging.h"
 
 namespace csp::multiplayer
 {

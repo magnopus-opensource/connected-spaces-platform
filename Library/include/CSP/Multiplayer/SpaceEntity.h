@@ -39,6 +39,11 @@ class CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Tes
 #endif
 CSP_END_IGNORE
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 class EntityScriptInterface;
@@ -143,12 +148,13 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem);
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
-        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+        SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
+        bool IsPersistent);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -523,6 +529,9 @@ private:
 
     EntityScript Script;
     std::unique_ptr<EntityScriptInterface> ScriptInterface;
+
+    // May be null
+    csp::common::LogSystem* LogSystem = nullptr;
 
     CSP_START_IGNORE
     mutable std::mutex EntityMutexLock;

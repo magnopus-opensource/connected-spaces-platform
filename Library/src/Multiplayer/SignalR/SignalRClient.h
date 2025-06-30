@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #pragma once
-#include "Web/WebClient.h"
+#include "Common/Web/WebClient.h"
 
 #include <atomic>
 #include <signalrclient/http_client.h>

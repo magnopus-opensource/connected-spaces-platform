@@ -30,9 +30,9 @@ namespace csp::common::continuations
  * Print an error with provided string, and throw a cancellation error.
  */
 inline void LogErrorAndCancelContinuation(
-    std::string ErrorMsg, common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+    std::string ErrorMsg, common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    LogSystem->LogMsg(LogLevel, ErrorMsg.c_str());
+    LogSystem.LogMsg(LogLevel, ErrorMsg.c_str());
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
@@ -42,13 +42,13 @@ inline void LogErrorAndCancelContinuation(
  * and call a passed in callable, (probably a state-reset or cleanup function of some sort).
  * The callable is perfectly forwarded.
  */
-template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable, csp::common::LogSystem* LogSystem)
+template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable, csp::common::LogSystem& LogSystem)
 {
     static_assert(std::is_invocable_v<Callable, const std::exception&>,
         "InvokeIfExceptionCallable must be invocable with a single const std::exception& arg, if you need other state, try passing a capturing "
         "lambda.");
 
-    return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable), LogSystem](async::task<void> ExceptionTask)
+    return [InvokeIfExceptionCallable = std::forward<Callable>(InvokeIfExceptionCallable), &LogSystem](async::task<void> ExceptionTask)
     {
         try
         {
@@ -56,7 +56,7 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
         catch (const std::exception& exception)
         {
-            LogSystem->LogMsg(
+            LogSystem.LogMsg(
                 csp::common::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
             InvokeIfExceptionCallable(exception);
         }
@@ -76,9 +76,9 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
  */
 template <typename ErrorResultT>
 inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
-    ErrorResultT ErrorResult, csp::common::LogSystem* LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+    ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), LogSystem, LogLevel](
+    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem, LogLevel](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
     {
         if (ErrorCode.has_value())
@@ -94,7 +94,7 @@ inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<vo
         else
         {
             // Success Case
-            LogSystem->LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Log, SuccessMsg.c_str());
         }
     };
 }

@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::FiducialMarker, Parent)
+FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::FiducialMarker, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId)] = "";

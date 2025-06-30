@@ -16,12 +16,13 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/Script/ScriptSystem.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
+
+#include <fmt/format.h>
 
 namespace csp::multiplayer
 {
@@ -29,13 +30,15 @@ namespace csp::multiplayer
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
-EntityScript::EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
-    : ScriptSystem(csp::systems::SystemsManager::Get().GetScriptSystem())
-    , Entity(InEntity)
+EntityScript::EntityScript(
+    SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem)
+    : Entity(InEntity)
     , EntityScriptComponent(nullptr)
     , HasLastError(false)
     , HasBinding(false)
     , SpaceEntitySystemPtr(InSpaceEntitySystem)
+    , LogSystem(LogSystem)
+    , ScriptRunner(ScriptRunner)
 {
 }
 
@@ -43,7 +46,10 @@ EntityScript::~EntityScript() { Shutdown(); }
 
 bool EntityScript::Invoke()
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "EntityScript::Invoke called for %s", Entity->GetName().c_str());
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("EntityScript::Invoke called for {}", Entity->GetName()).c_str());
+    }
 
     CheckBinding();
 
@@ -61,7 +67,7 @@ bool EntityScript::Invoke()
 
         if (!ScriptSource.IsEmpty())
         {
-            HasLastError = !ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
+            HasLastError = !ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
         }
         else
         {
@@ -72,7 +78,10 @@ bool EntityScript::Invoke()
 
     if (HasLastError)
     {
-        CSP_LOG_ERROR_FORMAT("Script Error: %s", LastError.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Script Error: {}", LastError).c_str());
+        }
     }
 
     return !HasLastError;
@@ -89,7 +98,7 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
 
     if (RunScriptLocally)
     {
-        ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
+        ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
     }
     else
     {
@@ -100,9 +109,12 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
 
 void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "EntityScript::SetScriptSource called for %s\nSource:", Entity->GetName().c_str(),
-        InScriptSource.c_str());
-    CSP_LOG_MSG(csp::common::LogLevel::VeryVerbose, "--EndScriptSource--");
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("EntityScript::SetScriptSource called for {0}\nSource: {1}", Entity->GetName(), InScriptSource).c_str());
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, "--EndScriptSource--");
+    }
 
     if (EntityScriptComponent == nullptr)
     {
@@ -123,7 +135,7 @@ csp::common::String EntityScript::GetErrorText() { return LastError; }
 void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent)
 {
     EntityScriptComponent = InEnityScriptComponent;
-    ScriptSystem->CreateContext(Entity->GetId());
+    ScriptRunner->CreateContext(Entity->GetId());
 }
 
 csp::common::String EntityScript::GetScriptSource()
@@ -140,7 +152,7 @@ void EntityScript::RegisterSourceAsModule()
 {
     if (EntityScriptComponent != nullptr)
     {
-        ScriptSystem->SetModuleSource(Entity->GetName(), GetScriptSource());
+        ScriptRunner->SetModuleSource(Entity->GetName(), GetScriptSource());
     }
 }
 
@@ -168,23 +180,26 @@ uint64_t EntityScript::GetOwnerId() const
 
 void EntityScript::Shutdown()
 {
-    ScriptSystem->ClearModuleSource(Entity->GetName());
-    ScriptSystem->DestroyContext(Entity->GetId());
+    ScriptRunner->ClearModuleSource(Entity->GetName());
+    ScriptRunner->DestroyContext(Entity->GetId());
 }
 
 void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "OnSourceChanged: %s\n", InScriptSource.c_str());
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnSourceChanged: {}\n", InScriptSource).c_str());
+    }
 
     if (EntityScriptComponent != nullptr)
     {
         MessageMap.clear();
         PropertyMap.clear();
 
-        ScriptSystem->ResetContext(Entity->GetId());
+        ScriptRunner->ResetContext(Entity->GetId());
         HasBinding = false; // we've reset the context which means this script is no longer bound
 
-        ScriptSystem->SetModuleSource(Entity->GetName(), InScriptSource);
+        ScriptRunner->SetModuleSource(Entity->GetName(), InScriptSource);
 
         Bind();
     }
@@ -195,7 +210,7 @@ void EntityScript::Bind()
 {
     if (EntityScriptComponent != nullptr)
     {
-        ScriptSystem->BindContext(Entity->GetId());
+        ScriptRunner->BindContext(Entity->GetId());
         HasBinding = true;
     }
 }
@@ -215,7 +230,11 @@ void EntityScript::SubscribeToPropertyChange(int32_t ComponentId, int32_t Proper
 
     if (It == PropertyMap.end())
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "SubscribeToPropertyChange: (%d, %d) %s\n", ComponentId, PropertyKey, Message.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+                fmt::format("SubscribeToPropertyChange: ({0}, {1}) {2}\n", ComponentId, PropertyKey, Message).c_str());
+        }
 
         PropertyMap.insert(PropertyChangeMap::value_type(Key, Message));
     }
@@ -243,7 +262,10 @@ void EntityScript::SubscribeToMessage(const csp::common::String Message, const c
 
     if (It == MessageMap.end())
     {
-        CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "SubscribeToMessage: %s -> %s\n", Message.c_str(), OnMessageCallback.c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("SubscribeToMessage: {} -> {}\n", Message, OnMessageCallback).c_str());
+        }
 
         MessageMap.insert(SubscribedMessageMap::value_type(Message, OnMessageCallback));
     }
@@ -263,7 +285,10 @@ void EntityScript::PostMessageToScript(const csp::common::String Message, const 
 
         if (Message != SCRIPT_MSG_ENTITY_TICK)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::VeryVerbose, "PostMessageToScript: %s\n", ScriptText.c_str());
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("PostMessageToScript: {}\n", ScriptText).c_str());
+            }
         }
 
         RunScript(ScriptText.c_str());

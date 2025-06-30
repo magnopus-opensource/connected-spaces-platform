@@ -15,10 +15,16 @@
  */
 #pragma once
 
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/String.h"
 
 #include <map>
 #include <string>
+
+namespace csp::common
+{
+class LogSystem;
+}
 
 namespace csp::systems
 {
@@ -42,7 +48,8 @@ class CSP_API EntityScript
 public:
     // Don't want to be constructable by public users.
     CSP_START_IGNORE
-    EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem);
+    EntityScript(
+        SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem);
     CSP_END_IGNORE
 
     /// @brief Destroy the instance of EntityScript.
@@ -131,7 +138,6 @@ private:
 
     void CheckBinding();
 
-    csp::systems::ScriptSystem* ScriptSystem;
     SpaceEntity* Entity;
     ScriptSpaceComponent* EntityScriptComponent;
 
@@ -148,6 +154,12 @@ private:
     bool HasBinding;
 
     SpaceEntitySystem* SpaceEntitySystemPtr;
+
+    // may be null
+    csp::common::LogSystem* LogSystem = nullptr;
+
+    // may not be null
+    csp::common::IJSScriptRunner* ScriptRunner;
 };
 
 } // namespace csp::multiplayer

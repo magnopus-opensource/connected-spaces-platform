@@ -19,17 +19,19 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/WebSocketClient.h"
 
 #ifdef CSP_WASM
-#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #else
-#include "Web/POCOWebClient/POCOWebClient.h"
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
 #endif
 
 #include <stdexcept>
 #include <thread>
+
+// Only used in this file for profiling macros. Still needs broken
+#include "Debug/Logging.h"
 
 using namespace signalr;
 

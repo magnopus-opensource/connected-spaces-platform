@@ -19,7 +19,6 @@
 #include "CSP/Common/List.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Debug/Logging.h"
 
 using namespace csp::systems;
 

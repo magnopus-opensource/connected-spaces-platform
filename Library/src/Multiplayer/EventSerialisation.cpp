@@ -15,19 +15,20 @@
  */
 
 #include "Multiplayer/EventSerialisation.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "MCS/MCSTypes.h"
 
 #include "Common/Encode.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/MultiplayerConstants.h"
 
+#include <fmt/format.h>
 #include <regex>
 
 using namespace csp::multiplayer;
 
 namespace
 {
-ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
+ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::common::LogSystem& LogSystem)
 {
     ESequenceUpdateType SequenceUpdateType = ESequenceUpdateType::Invalid;
 
@@ -55,7 +56,7 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
     }
     default:
     {
-        CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "SequenceChangedEvent - Detected an unsupported update type.");
         break;
     }
     }
@@ -95,8 +96,9 @@ csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::Str
     return ParentIdString.c_str();
 }
 
-EventDeserialiser::EventDeserialiser()
+EventDeserialiser::EventDeserialiser(csp::common::LogSystem& LogSystem)
     : SenderClientId(0)
+    , LogSystem(LogSystem)
 {
 }
 
@@ -189,7 +191,8 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
         }
         else
         {
-            CSP_LOG_ERROR_MSG("Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
+            LogSystem.LogMsg(
+                csp::common::LogLevel::Error, "Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
         }
     }
     else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_UINT16))
@@ -198,10 +201,15 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
     }
     else
     {
-        CSP_LOG_ERROR_MSG("Unsupported event argument type.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Unsupported event argument type.");
     }
 
     return ReplicatedValue;
+}
+
+AssetChangedEventDeserialiser::AssetChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
+    : EventDeserialiser(LogSystem)
+{
 }
 
 void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -216,13 +224,18 @@ void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
     }
     else
     {
-        CSP_LOG_ERROR_MSG("AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
     }
 
     EventParams.AssetId = EventData[1].GetString();
     EventParams.Version = EventData[2].GetString();
     EventParams.AssetType = csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString());
     EventParams.AssetCollectionId = EventData[4].GetString();
+}
+
+ConversationEventDeserialiser::ConversationEventDeserialiser(csp::common::LogSystem& LogSystem)
+    : EventDeserialiser(LogSystem)
+{
 }
 
 void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -236,6 +249,11 @@ void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
     EventParams.MessageInfo.UserId = EventData[4].GetString();
     EventParams.MessageInfo.Message = EventData[5].GetString();
     EventParams.MessageInfo.MessageId = EventData[6].GetString();
+}
+
+UserPermissionsChangedEventDeserialiser::UserPermissionsChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
+    : EventDeserialiser(LogSystem)
+{
 }
 
 void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -294,7 +312,8 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
                     }
                     else
                     {
-                        CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
+                        LogSystem.LogMsg(csp::common::LogLevel::Error,
+                            "UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
                     }
 
                     EventParams.UserRoles[i++] = NewRole;
@@ -302,7 +321,8 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
             }
             else
             {
-                CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Failed to find the expected array of roles for a user when an event was received.");
+                LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    "UserPermissionsChangedEvent - Failed to find the expected array of roles for a user when an event was received.");
             }
         }
 
@@ -327,7 +347,8 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
             }
             else
             {
-                CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Detected an unsupported kind of role change. Defaulting to kind of change.");
+                LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    "UserPermissionsChangedEvent - Detected an unsupported kind of role change. Defaulting to kind of change.");
             }
         }
 
@@ -338,19 +359,24 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
     }
 }
 
+SequenceChangedEventDeserialiser::SequenceChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
+    : EventDeserialiser(LogSystem)
+{
+}
+
 void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
 {
     EventDeserialiser::Parse(EventValues);
 
     if (EventData.Size() != 3)
     {
-        CSP_LOG_ERROR_MSG("SequenceChangedEvent - Invalid arguments.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "SequenceChangedEvent - Invalid arguments.");
         return;
     }
 
     int64_t UpdateType = EventData[0].GetInt();
 
-    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
+    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
 
     EventParams.Key = DecodeSequenceKey(EventData[1]);
 
@@ -362,18 +388,24 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
     }
 }
 
+SequenceHotspotChangedEventDeserialiser::SequenceHotspotChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
+    : EventDeserialiser(LogSystem)
+{
+}
+
 void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
 {
     EventDeserialiser::Parse(EventValues);
 
     if (EventData.Size() != 3)
     {
-        CSP_LOG_ERROR_FORMAT("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got %i.", EventData.Size());
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", EventData.Size()).c_str());
         return;
     }
 
     int64_t UpdateType = EventData[0].GetInt();
-    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
+    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
 
     const csp::common::String Key = DecodeSequenceKey(EventData[1]);
     EventParams.SpaceId = GetSequenceKeyIndex(Key, 1);
@@ -390,7 +422,8 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
         }
         else
         {
-            CSP_LOG_ERROR_MSG("SequenceHotspotChangedEvent - The expected new name of the hotspot sequence was not found in the event payload.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                "SequenceHotspotChangedEvent - The expected new name of the hotspot sequence was not found in the event payload.");
         }
     }
 }

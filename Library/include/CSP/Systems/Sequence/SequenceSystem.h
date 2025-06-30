@@ -126,7 +126,7 @@ public:
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SequenceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
+    SequenceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~SequenceSystem();
 
     csp::services::ApiBase* SequenceAPI;

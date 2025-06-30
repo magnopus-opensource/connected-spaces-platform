@@ -18,20 +18,57 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
+#include <string>
+
 namespace csp
 {
+
+/// @brief Represents definition for identifying and versioning an external service endpoint..
+class CSP_API ServiceDefinition
+{
+public:
+    ServiceDefinition()
+        : URI("")
+        , Version(0)
+    {
+    }
+
+    ServiceDefinition(const csp::common::String& InURI, const uint32_t InVersion)
+        : URI(InURI)
+        , Version(InVersion)
+    {
+    }
+
+    /// @brief Gets the URI for the service endpoint.
+    /// @return csp::common::String : URI of the service endpoint.
+    csp::common::String GetURI() const { return URI; }
+    /// @brief Sets the URI for the service endpoint.
+    /// @param InURI csp::common::String : URI for service endpoint.
+    void SetURI(const csp::common::String& InURI) { URI = InURI; }
+
+    /// @brief Gets the current version of the service endpoint.
+    /// @return int32_t : Representing the current version of the service endpoint.
+    int32_t GetVersion() const { return Version; }
+    /// @brief Sets the current Version for the service endpoint.
+    /// @param InVersion uint32_t : Version for service endpoint.
+    CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
+
+private:
+    csp::common::String URI;
+    uint32_t Version;
+};
 
 /// @brief Holds supported endpoint uris used by Foundation.
 class CSP_API EndpointURIs
 {
 public:
-    csp::common::String UserServiceURI;
-    csp::common::String PrototypeServiceURI;
-    csp::common::String SpatialDataServiceURI;
-    csp::common::String MultiplayerServiceURI;
-    csp::common::String AggregationServiceURI;
-    csp::common::String TrackingServiceURI;
-    csp::common::String MaintenanceWindowURI;
+    ServiceDefinition UserService;
+    ServiceDefinition PrototypeService;
+    ServiceDefinition SpatialDataService;
+    ServiceDefinition MultiplayerService;
+    ServiceDefinition AggregationService;
+    ServiceDefinition TrackingService;
+    ServiceDefinition MaintenanceWindow;
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.

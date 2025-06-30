@@ -64,7 +64,7 @@ public:
 
 private:
     GraphQLSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient);
+    CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~GraphQLSystem();
 
     csp::services::ApiBase* GraphQLAPI;

@@ -19,9 +19,9 @@
 #include "TestHelpers.h"
 
 #ifdef CSP_WASM
-#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #else
-#include "Web/POCOWebClient/POCOWebClient.h"
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
 #endif
 
 #include "gtest/gtest.h"

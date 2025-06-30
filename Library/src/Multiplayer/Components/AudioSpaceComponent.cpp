@@ -15,9 +15,11 @@
  */
 
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
+
+#include <fmt/format.h>
 
 namespace
 {
@@ -30,8 +32,8 @@ constexpr const float DefaultVolume = 1.f;
 namespace csp::multiplayer
 {
 
-AudioSpaceComponent::AudioSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Audio, Parent)
+AudioSpaceComponent::AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Audio, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(AudioPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(AudioPropertyKeys::PlaybackState)] = static_cast<int64_t>(AudioPlaybackState::Reset);
@@ -117,7 +119,10 @@ void AudioSpaceComponent::SetVolume(float Value)
     }
     else
     {
-        CSP_LOG_ERROR_FORMAT("Invalid value for volume (%.2f). Must be from 0.0 to 1.0", Value);
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", Value).c_str());
+        }
     }
 }
 

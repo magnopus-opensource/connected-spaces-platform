@@ -15,14 +15,13 @@
  */
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Image, Parent)
+ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Image, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId)] = "";

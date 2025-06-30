@@ -16,14 +16,13 @@
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ECommerce, Parent)
+ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::ECommerce, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ECommercePropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(ECommercePropertyKeys::ProductId)] = "";

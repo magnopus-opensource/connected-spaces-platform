@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Web/HttpPayload.h"
+#include "Common/Web/HttpPayload.h"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Common/StlString.h"
+#include "Common/Web/HttpAuth.h"
 #include "Debug/Logging.h"
-#include "Web/HttpAuth.h"
 
 #include <cstdio>
 #include <rapidjson/stringbuffer.h>

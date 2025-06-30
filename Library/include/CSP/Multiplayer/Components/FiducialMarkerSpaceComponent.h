@@ -49,7 +49,7 @@ class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITrans
 public:
     /// @brief Constructs the fiducial marker space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    FiducialMarkerSpaceComponent(SpaceEntity* Parent);
+    FiducialMarkerSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the name of this fiducial marker space component.
     /// @return The name of this fiducial marker space component.

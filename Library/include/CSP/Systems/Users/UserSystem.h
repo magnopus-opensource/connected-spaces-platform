@@ -246,7 +246,7 @@ public:
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
+    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;

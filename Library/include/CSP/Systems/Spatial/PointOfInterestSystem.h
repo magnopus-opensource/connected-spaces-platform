@@ -87,8 +87,9 @@ public:
     ///@}
 
 protected:
-    PointOfInterestSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT PointOfInterestSystem(csp::web::WebClient* InWebClient);
+    PointOfInterestSystem(
+        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT PointOfInterestSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
 
     /// @brief Creates a new Point of Interest for storing the Space Site information. This functionality should only be accessed through the Space
     /// System.

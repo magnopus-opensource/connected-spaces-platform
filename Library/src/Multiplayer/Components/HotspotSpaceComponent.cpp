@@ -18,14 +18,13 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Hotspot, Parent)
+HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Hotspot, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };

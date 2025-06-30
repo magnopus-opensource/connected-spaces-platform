@@ -97,8 +97,8 @@ public:
     // Test callback
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback;
 
-    TestSystem(csp::multiplayer::EventBus* InEventBus)
-        : SystemBase(nullptr, InEventBus)
+    TestSystem(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
+        : SystemBase(nullptr, InEventBus, &LogSystem)
     {
         RegisterSystemCallback();
     }
@@ -139,7 +139,7 @@ public:
             return;
         }
 
-        csp::multiplayer::EventDeserialiser Deserialiser;
+        csp::multiplayer::EventDeserialiser Deserialiser { *LogSystem };
         Deserialiser.Parse(EventValues);
 
         TestCallback(true, Deserialiser.GetEventData());
@@ -362,11 +362,11 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    TestSystem1 = new TestSystem(EventBus);
-    TestSystem2 = new TestSystem(EventBus);
-
     auto& LogSystem = *SystemsManager.GetLogSystem();
+
+    TestSystem1 = new TestSystem(EventBus, LogSystem);
+    TestSystem2 = new TestSystem(EventBus, LogSystem);
+
     std::atomic_bool LogConfirmed = false;
     csp::common::String TestMsg;
 
@@ -571,10 +571,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SetCallbackBeforeConnectedTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-
-    TestSystem1 = new TestSystem(EventBus);
-
     auto& LogSystem = *SystemsManager.GetLogSystem();
+
+    TestSystem1 = new TestSystem(EventBus, LogSystem);
     std::atomic_bool LogConfirmed = false;
     csp::common::String TestMsg;
 

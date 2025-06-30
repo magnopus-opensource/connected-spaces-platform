@@ -21,7 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Systems/Assets/Asset.h"
+#include "CSP/Multiplayer/MultiplayerHubMethods.h"
 
 #include <atomic>
 #include <functional>
@@ -146,7 +146,8 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
     /// ownership of this pointer.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
+        const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -187,7 +188,7 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -195,6 +196,10 @@ public:
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
+
+    /// @brief Getter for the MultiplayerHubMethodMap
+    /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -219,7 +224,8 @@ private:
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class EventBus* EventBusPtr;
-    csp::common::LogSystem* LogSystem;
+
+    csp::common::LogSystem& LogSystem;
 
     uint64_t ClientId;
 
@@ -231,6 +237,8 @@ private:
     uint32_t KeepAliveSeconds = 120;
 
     bool AllowSelfMessaging = false;
+
+    MultiplayerHubMethodMap MultiplayerHubMethods;
 };
 
 } // namespace csp::multiplayer

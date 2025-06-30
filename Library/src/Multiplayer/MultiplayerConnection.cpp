@@ -17,13 +17,13 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"
-#include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/MultiplayerConstants.h"
@@ -32,17 +32,22 @@
 #include "NetworkEventManagerImpl.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
 
+// Needs broken
+#include "CSP/Systems/SystemsManager.h"
+
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
 #else
 #include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
-#include "Web/Uri.h"
+#include "Common/Web/Uri.h"
+#include "Debug/Logging.h"
 
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <fmt/format.h>
 #include <future>
 #include <iostream>
 #include <limits>
@@ -149,20 +154,20 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
 {
-    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
-/// @brief MultiplayerConnection
-MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem* LogSystem)
+MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     : Connection(nullptr)
     , WebSocketClient(nullptr)
     , NetworkEventManager(new NetworkEventManagerImpl(this))
     , LogSystem(LogSystem)
     , ClientId(0)
     , Connected(false)
+    , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
-    EventBusPtr = new EventBus(this);
+    EventBusPtr = new EventBus(this, LogSystem);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -188,6 +193,7 @@ MultiplayerConnection::~MultiplayerConnection()
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
+    : LogSystem(InBoundConnection.LogSystem)
 {
     Connection = InBoundConnection.Connection;
     WebSocketClient = InBoundConnection.WebSocketClient;
@@ -198,16 +204,15 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
     EventBusPtr = InBoundConnection.EventBusPtr;
     Connected = (InBoundConnection.Connected) ? true : false;
-    LogSystem = InBoundConnection.LogSystem;
 }
 
 namespace
 {
-    void RegisterNetworkInterruptedCallback(csp::multiplayer::ISignalRConnection* Connection,
+    void RegisterNetworkInterruptedCallback(csp::multiplayer::ISignalRConnection* Connection, csp::common::LogSystem& LogSystem,
         const MultiplayerConnection::NetworkInterruptionCallbackHandler& NetworkInterruptionCallback)
     {
         Connection->SetDisconnected(
-            [&NetworkInterruptionCallback](const std::exception_ptr& Except)
+            [&NetworkInterruptionCallback, &LogSystem](const std::exception_ptr& Except)
             {
                 if (Except)
                 {
@@ -221,7 +226,7 @@ namespace
                     }
                 }
 
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Connection Interrupted.");
+                LogSystem.LogMsg(csp::common::LogLevel::Log, "Connection Interrupted.");
             });
     }
 }
@@ -266,9 +271,9 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
 
         signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
 
-        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling DeleteObjects");
 
-        Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
+        Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::DELETE_OBJECTS), DeleteEntityMessage, LocalCallback);
 
         return EntitiesDeletedContinuation;
     };
@@ -291,7 +296,7 @@ auto MultiplayerConnection::RequestClientId()
         }
 
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
-            = [ClientIdRequestedEvent](signalr::value Result, std::exception_ptr Except)
+            = [ClientIdRequestedEvent, this](signalr::value Result, std::exception_ptr Except)
         {
             if (Except != nullptr)
             {
@@ -301,14 +306,14 @@ auto MultiplayerConnection::RequestClientId()
                 return;
             }
 
-            CSP_LOG_FORMAT(csp::common::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
+            LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("ClientId={}", Result.as_uinteger()).c_str());
 
             ClientIdRequestedEvent->set(Result.as_uinteger());
         };
 
-        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling GetClientId");
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling GetClientId");
 
-        Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
+        Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::GET_CLIENT_ID), signalr::value(signalr::value_type::array), LocalCallback);
         return ClientIdRequestedContinuation;
     };
 }
@@ -340,14 +345,16 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
             StartListeningEvent->set();
         };
 
-        CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StartListening");
-        Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
+        Connection->Invoke(
+            MultiplayerHubMethods.Get(MultiplayerHubMethod::START_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
 
         return StartListeningContinuation;
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
+    const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -362,9 +369,9 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
     }
 
 #ifdef CSP_WASM
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(AccessToken.c_str(), DeviceId.c_str());
 #else
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), LogSystem);
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
@@ -375,7 +382,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
     EventBusPtr->StartEventMessageListening();
 
     // We register the network interruption callback as a wrapper because we want to unwrap any signalR exceptions.
-    RegisterNetworkInterruptedCallback(Connection, NetworkInterruptionCallback);
+    RegisterNetworkInterruptedCallback(Connection, LogSystem, NetworkInterruptionCallback);
 
     /*
      * Start() - Start the SignalR socket connection
@@ -534,7 +541,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
     ParamsVec.push_back(ScopesVec);
     signalr::value Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke("SetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_SCOPES), Params, LocalCallback);
 }
 
 void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
@@ -561,7 +568,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 
     std::vector<signalr::value> ParamsVec;
     signalr::value Params = signalr::value(std::move(ParamsVec));
-    Connection->Invoke("ResetScopes", Params, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::RESET_SCOPES), Params, LocalCallback);
 }
 
 void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
@@ -586,9 +593,9 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling StopListening");
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StopListening");
 
-    Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::STOP_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
 }
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
@@ -630,10 +637,10 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
-    CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 
     const std::vector InvokeArguments = { signalr::value(InAllowSelfMessaging) };
-    Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);
+    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_ALLOW_SELF_MESSAGING), InvokeArguments, LocalCallback);
 }
 
 bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelfMessaging; }
