@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Enums common between all the libraries that make up CSP.
- * These tend to merely be types for data exchange between libraries.
- * Don't get too hung up on namespaces
- */
-
 #pragma once
 
 #include "CSP/CSPCommon.h"
