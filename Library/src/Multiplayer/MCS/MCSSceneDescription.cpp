@@ -266,7 +266,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer:
     Deserializer.SafeDeserializeMember("isPersistent", Obj.IsPersistent);
     // Deserializer.SafeDeserializeMember("ownerUserId", Obj.OwnerId);
 
-    uint64_t ParentId;
+    uint64_t ParentId = 0;
     Deserializer.SafeDeserializeMember("parentId", ParentId);
 
     if (ParentId != 0)
