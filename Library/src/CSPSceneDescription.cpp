@@ -33,7 +33,7 @@ SceneDescription::SceneDescription(
     size_t ObjectsIndex = 0;
     for (const auto& Object : MCSSceneDescription.Objects)
     {
-        auto* Entity = new multiplayer::SpaceEntity { &EntitySystem };
+        auto* Entity = new multiplayer::SpaceEntity(&EntitySystem);
         Entity->FromObjectMessage(Object);
 
         EntitySystem.AddEntity(Entity);
