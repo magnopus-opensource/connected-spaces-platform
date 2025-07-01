@@ -20,9 +20,10 @@
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 
 #include <signalrclient/signalr_value.h>
+#include <type_traits>
 
 namespace csp::common
 {
@@ -32,113 +33,27 @@ class LogSystem;
 namespace csp::multiplayer
 {
 
+// Utility method to extract the sequence key index, used in a few places for understanding sequence events.
 csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
-// Generic deserialiser for multiplayer events. It can be derived from and
-// its behavior can be overridden if specialised handling is needed for
-// certain events.
-class EventDeserialiser
-{
-public:
-    // Creates an empty event deserialiser.
-    EventDeserialiser(csp::common::LogSystem& LogSystem);
+// Deserialize the data general purpose event that requires no special custom deserialization.
+EventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-    // The generic means to populate this deserialiser's members given a set of event values.
-    virtual void Parse(const std::vector<signalr::value>& EventValues);
+// Specialized deserializataion for events triggered when an asset referenced by the space changes.
+AssetDetailBlobChangedEventData DeserializeAssetDetailBlobChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-    // Returns a string describing the type of event.
-    csp::common::String GetEventType() const { return EventType; }
+// Specialized deserializataion for events triggered when a conversation event happens.
+ConversationEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-    // Returns the unique integer identifer for the client from which the event was invoked.
-    uint64_t GetSenderClientId() const { return SenderClientId; }
+// Specialized deserializataion for events triggered when a user in the space's access permissions change.
+AccessControlChangedEventData DeserializeAccessControlChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-    // Returns the event data that has been synthesised from the parsed event
-    // values that were parsed.
-    const csp::common::Array<csp::multiplayer::ReplicatedValue>& GetEventData() const { return EventData; }
+// Specialized deserializataion for events triggered when a sequence in the space changes.
+SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-protected:
-    void ParseCommon(const std::vector<signalr::value>& EventValues);
-
-    csp::multiplayer::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
-
-    csp::common::String EventType;
-    uint64_t SenderClientId;
-    csp::common::Array<csp::multiplayer::ReplicatedValue> EventData;
-
-    csp::common::LogSystem& LogSystem;
-};
-
-// A specialised deserialiser for handling events triggered when an asset referenced by the space changes.
-class AssetChangedEventDeserialiser : public EventDeserialiser
-{
-public:
-    AssetChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
-
-    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-    const AssetDetailBlobParams& GetEventParams() const { return EventParams; }
-
-private:
-    AssetDetailBlobParams EventParams;
-};
-
-// A specialised deserialiser for handling events triggered when a conversation event happens.
-class ConversationEventDeserialiser : public EventDeserialiser
-{
-public:
-    ConversationEventDeserialiser(csp::common::LogSystem& LogSystem);
-
-    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-    const ConversationEventParams& GetEventParams() const { return EventParams; }
-
-private:
-    ConversationEventParams EventParams;
-};
-
-// A specialised deserialiser for handling events triggered when a user in the space's access permissions change.
-class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
-{
-public:
-    UserPermissionsChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
-
-    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-    const UserPermissionsParams& GetEventParams() const { return EventParams; }
-
-private:
-    UserPermissionsParams EventParams;
-};
-
-class SequenceChangedEventDeserialiser : public EventDeserialiser
-{
-public:
-    SequenceChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
-
-    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-    const SequenceChangedParams& GetEventParams() const { return EventParams; }
-
-private:
-    SequenceChangedParams EventParams;
-};
-
-/// A deserialiser for getting SequenceHotspot data from an event:
-/// UpdateType - The update type for the Sequence Hierarchy: Create, Update, Rename, Delete
-/// SpaceId - The unique identifer of the space this hotspot sequence relates to.
-/// Name - The name of the hotspot which has been changed.
-/// NewName - In the case of renames, describes the new name of the sequence.
-class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
-{
-public:
-    SequenceHotspotChangedEventDeserialiser(csp::common::LogSystem& LogSystem);
-
-    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-    const SequenceHotspotChangedParams& GetEventParams() const { return EventParams; }
-
-private:
-    SequenceHotspotChangedParams EventParams;
-};
+// Specialized deserializataion for events triggered when a hotspot sequence in the space changes.
+SequenceHotspotChangedEventData DeserializeSequenceHotspotChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer
