@@ -26,6 +26,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
 
@@ -43,19 +44,6 @@ void OnUserCreated(SpaceEntity* InUser);
 
 namespace
 {
-
-/* We need to unset the mock logger before CSP shuts down,
- * because you get interdependent memory errors in the "Foundation shutdown"
- * log if you don't. (Another reason we don't want to be starting/stopping
- * ALL of CSP in these tests really.)
- */
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
-};
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace

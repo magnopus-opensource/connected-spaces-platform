@@ -19,6 +19,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Mocks/SignalRConnectionMock.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 
 #include "signalrclient/signalr_value.h"
@@ -33,18 +34,6 @@ class MockEntityCreatedCallback
 {
 public:
     MOCK_METHOD(void, Call, (csp::multiplayer::SpaceEntity*), ());
-};
-
-/* We need to unset the mock logger before CSP shuts down,
- * because you get interdependent memory errors in the "Foundation shutdown"
- * log if you don't. (Another reason we don't want to be starting/stopping
- * ALL of CSP in these tests really.)
- */
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
 };
 
 }
