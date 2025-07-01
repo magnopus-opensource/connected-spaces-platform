@@ -110,6 +110,7 @@ public:
     CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);
 
     // Callback to receive sequence changes, contains a SequenceChangedParams with the details.
+    // SequenceChangeEventData will have a null HotspotData member.
     typedef std::function<void(const csp::multiplayer::SequenceChangedEventData&)> SequenceChangedCallbackHandler;
 
     /// @brief Sets a callback for a sequence changed event.

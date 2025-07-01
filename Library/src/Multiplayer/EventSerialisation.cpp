@@ -364,8 +364,10 @@ SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signa
 
     if (ParsedEvent.EventValues.Size() != 3)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "SequenceChangedEvent - Invalid arguments.");
-        throw std::invalid_argument("SequenceChangedEvent - Invalid arguments.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
+        throw std::invalid_argument(
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
     }
 
     int64_t UpdateType = ParsedEvent.EventValues[0].GetInt();
@@ -384,26 +386,14 @@ SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signa
     return ParsedEvent;
 }
 
-SequenceHotspotChangedEventData DeserializeSequenceHotspotChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+SequenceChangedEventData DeserializeSequenceHotspotChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    SequenceHotspotChangedEventData ParsedEvent {};
-    PopulateCommonEventData(EventValues, ParsedEvent);
+    SequenceChangedEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
 
-    if (ParsedEvent.EventValues.Size() != 3)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
-        throw std::invalid_argument(
-            fmt::format("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
-    }
+    ParsedEvent.HotspotData = csp::common::Optional(new HotspotEventData());
 
-    int64_t UpdateType = ParsedEvent.EventValues[0].GetInt();
-    ParsedEvent.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
-
-    const csp::common::String Key = DecodeSequenceKey(ParsedEvent.EventValues[1]);
-    ParsedEvent.SpaceId = GetSequenceKeyIndex(Key, 1);
-    ParsedEvent.Name = GetSequenceKeyIndex(Key, 2);
+    ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
+    ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);
 
     if (ParsedEvent.UpdateType == ESequenceUpdateType::Rename)
     {
@@ -411,8 +401,7 @@ SequenceHotspotChangedEventData DeserializeSequenceHotspotChangedEvent(
         // The usual event data describing the name in this instance will describe the _old_ key.
         if (ParsedEvent.EventValues[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
         {
-            const csp::common::String NewKey = DecodeSequenceKey(ParsedEvent.EventValues[2]);
-            ParsedEvent.NewName = GetSequenceKeyIndex(NewKey, 2);
+            ParsedEvent.HotspotData->NewName = GetSequenceKeyIndex(ParsedEvent.NewKey, 2);
         }
         else
         {

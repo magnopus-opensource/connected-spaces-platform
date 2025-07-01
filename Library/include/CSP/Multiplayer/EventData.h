@@ -114,6 +114,25 @@ enum class ESequenceUpdateType
     Invalid
 };
 
+// Additional data needed for the case where the sequence event is a hotspot sequence event.
+// Not great, symptom of the fact that these should be seperate events, + the fact that we cant (or don't want to) use RTTI on WASM.
+// This is used only inside SequenceChangedEventData
+class CSP_API HotspotEventData
+{
+public:
+    HotspotEventData() = default;
+    ~HotspotEventData() = default;
+
+    /// @brief The unique identifier of the space that this hotspot sequence belongs to.
+    csp::common::String SpaceId;
+
+    /// @brief The name of the hotspot group that has been changed.
+    csp::common::String Name;
+
+    /// @brief If a hotspot sequence is renamed, this will be the new name.
+    csp::common::String NewName;
+};
+
 class CSP_API SequenceChangedEventData : public EventData
 {
 public:
@@ -125,22 +144,9 @@ public:
 
     /// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
     csp::common::String NewKey;
-};
 
-class CSP_API SequenceHotspotChangedEventData : public EventData
-{
-public:
-    /// @brief The type of update to the sequence.
-    ESequenceUpdateType UpdateType;
-
-    /// @brief The unique identifier of the space that this hotspot sequence belongs to.
-    csp::common::String SpaceId;
-
-    /// @brief The name of the hotspot group that has been changed.
-    csp::common::String Name;
-
-    /// @brief If a hotspot sequence is renamed, this will be the new name.
-    csp::common::String NewName;
+    /// @brief Additional data if this sequence event is a hotspot sequence event. Will be non-empty in that case only.
+    csp::common::Optional<csp::multiplayer::HotspotEventData> HotspotData = nullptr;
 };
 
 // TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.

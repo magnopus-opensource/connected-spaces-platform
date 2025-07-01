@@ -90,9 +90,9 @@ public:
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback Callback);
 
-    // Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
-    // Releases ownership to the caller
-    typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedEventData&)> HotspotSequenceChangedCallbackHandler;
+    // Callback to receive hotspot sequence changes, contains a SequenceChangedEventData with the details.
+    // The SequenceChangedEventData will have a populate HotspotData member for the additional information neccesary to hotspots
+    typedef std::function<void(const csp::multiplayer::SequenceChangedEventData&)> HotspotSequenceChangedCallbackHandler;
 
     /// @brief Sets a callback to be fired when a hotspot sequence is changed.
     /// @param Callback HotspotSequenceChangedCallbackHandler: Callback to receive data for the hotspot sequence that has been changed.
