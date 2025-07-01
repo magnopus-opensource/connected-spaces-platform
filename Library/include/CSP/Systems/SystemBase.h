@@ -70,14 +70,6 @@ public:
     /// @brief Deregisters the system from listening for the default event.
     virtual void DeregisterSystemCallback();
 
-    /// @brief Deserialises the event values of the system.
-    /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT virtual void OnEvent(const std::vector<signalr::value>& EventValues);
-
-    /// @brief Sets a callback for a default event.
-    /// @param Callback csp::multiplayer::EventBus::ParameterisedCallbackHandler: Callback to receive data for the system that has been changed.
-    CSP_EVENT void SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback);
-
 protected:
     // EM, June2025: Having this on system base makes it quite simple to quit using the singleton macros in all the systems if we wanted to.
     // Should NOT be null. The only reason this is a pointer is because we can't get the wrapper gen work required to support reference injections
@@ -86,8 +78,6 @@ protected:
 
 private:
     SystemBase(); // This constructor is only provided to appease the wrapper generator and should not be used
-
-    csp::multiplayer::EventBus::ParameterisedCallbackHandler SystemCallback;
 };
 
 } // namespace csp::systems

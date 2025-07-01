@@ -16,7 +16,7 @@
 
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
@@ -322,25 +322,33 @@ void SequenceSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("SequenceChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)),
+        [this](const csp::multiplayer::EventData& EventData) { this->OnSequenceChangedEvent(EventData); });
 }
 
 void SequenceSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("SequenceChanged");
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)));
     }
 }
 
-void SequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void SequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData)
 {
-    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { *LogSystem };
-    SequenceDeserialiser.Parse(EventValues);
+    // This may be either a SequenceChangedEventData or a SequenceHotspotChangedEventData... we're only interested in non-hotspot.
+    // This is hacky, see Eventbus deserialisation for more.
 
-    if (SequenceChangedCallback)
+    // Cast to pointer, as we are not certain of the type
+    const csp::multiplayer::SequenceChangedEventData* SequenceEventData = dynamic_cast<const csp::multiplayer::SequenceChangedEventData*>(&EventData);
+
+    if (SequenceEventData && SequenceChangedCallback)
     {
-        SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
+        // We can cast directly, we're sure we're the correct type.
+        SequenceChangedCallback(static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData));
     }
 }
 

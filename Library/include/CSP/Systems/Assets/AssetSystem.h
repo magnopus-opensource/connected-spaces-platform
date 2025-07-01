@@ -21,7 +21,7 @@
 #include "CSP/Common/CancellationToken.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -328,7 +328,7 @@ public:
         const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback);
 
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
-    typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+    typedef std::function<void(const csp::multiplayer::AssetDetailBlobChangedEventData&)> AssetDetailBlobChangedCallbackHandler;
 
     // Callback to receive material changes, contains a MaterialChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
@@ -347,7 +347,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::multiplayer::EventData& EventData);
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
