@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
@@ -43,8 +44,24 @@ enum class EPermissionChangeType
     Invalid,
 };
 
+/// @brief Data deserialized from a general purpose event. Serves as the base type for all custom deserialized events.
+class CSP_API EventData
+{
+public:
+    virtual ~EventData() { }
+
+    /// @brief The name of the event that sent this EventData
+    csp::common::String EventName;
+
+    /// @brief The ID of the client that sent this EventData
+    uint64_t SenderClientId;
+
+    /// @brief The collection of values sent with this Event. May be empty.
+    csp::common::Array<csp::common::ReplicatedValue> EventValues;
+};
+
 /// @brief Describes the changes an asset has undergone when the client application is connected to a space.
-class CSP_API AssetDetailBlobParams
+class CSP_API AssetDetailBlobChangedEventData : public EventData
 {
 public:
     /// @brief The type of change this asset has undergone.
@@ -64,7 +81,7 @@ public:
 };
 
 /// @brief Class used to provide details of a conversation message that has been received whilst the client application is connected to a space.
-class CSP_API ConversationEventParams
+class CSP_API ConversationEventData : public EventData
 {
 public:
     ConversationEventType MessageType;
@@ -72,7 +89,7 @@ public:
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.
-class CSP_API UserPermissionsParams
+class CSP_API AccessControlChangedEventData : public EventData
 {
 public:
     /// @brief The unique identifier of the space for which a user's permissions have changed.
@@ -97,7 +114,7 @@ enum class ESequenceUpdateType
     Invalid
 };
 
-class CSP_API SequenceChangedParams
+class CSP_API SequenceChangedEventData : public EventData
 {
 public:
     /// @brief The type of update to the sequence.
@@ -110,7 +127,7 @@ public:
     csp::common::String NewKey;
 };
 
-class CSP_API SequenceHotspotChangedParams
+class CSP_API SequenceHotspotChangedEventData : public EventData
 {
 public:
     /// @brief The type of update to the sequence.
@@ -126,6 +143,8 @@ public:
     csp::common::String NewName;
 };
 
+// TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.
+// The annoyance is that ChangeType is defined for these EventDatas, gotta break that at some point.
 class CSP_API MaterialChangedParams
 {
 public:
