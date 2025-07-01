@@ -2000,17 +2000,17 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     csp::common::String CallbackAssetId;
 
     auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
+        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobChangedEventData& EventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(Params.ChangeType, EAssetChangeType::Created);
-        EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
+        EXPECT_EQ(EventData.ChangeType, EAssetChangeType::Created);
+        EXPECT_EQ(EventData.AssetType, csp::systems::EAssetType::MODEL);
 
-        CallbackAssetId = Params.AssetId;
+        CallbackAssetId = EventData.AssetId;
         AssetDetailBlobChangedCallbackCalled = true;
     };
 
@@ -2085,15 +2085,15 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
 
-    auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
+    auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobChangedEventData& EventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(Params.ChangeType, EAssetChangeType::Invalid);
-        EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::IMAGE);
+        EXPECT_EQ(EventData.ChangeType, EAssetChangeType::Invalid);
+        EXPECT_EQ(EventData.AssetType, csp::systems::EAssetType::IMAGE);
 
         AssetDetailBlobChangedCallbackCalled = true;
     };
@@ -2106,8 +2106,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     csp::common::ReplicatedValue Param4 = "";
     csp::common::ReplicatedValue Param5 = "";
 
-    EventBus->SendNetworkEventToClient("AssetDetailBlobChanged", { Param1, Param2, Param3, Param4, Param5 }, Connection->GetClientId(),
-        [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
+    EventBus->SendNetworkEventToClient(EventBus::StringFromNetworkEvent(EventBus::NetworkEvent::AssetDetailBlobChanged),
+        { Param1, Param2, Param3, Param4, Param5 }, Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
 
     // Wait for message
     WaitForCallback(AssetDetailBlobChangedCallbackCalled);

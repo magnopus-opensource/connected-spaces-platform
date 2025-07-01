@@ -491,19 +491,19 @@ void ClientElectionManager::BindNetworkEvents()
 {
     EventBus* EventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
-    EventBus->ListenNetworkEvent(
-        ClientElectionMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
+    EventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
+        [this](const EventData& EventData) { this->OnClientElectionEvent(EventData.EventValues); });
 
-    EventBus->ListenNetworkEvent(
-        RemoteRunScriptMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
+    EventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
+        [this](const EventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
     EventBus* EventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
-    EventBus->StopListenNetworkEvent(ClientElectionMessage);
-    EventBus->StopListenNetworkEvent(RemoteRunScriptMessage);
+    EventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
+    EventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 }
 
 void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)

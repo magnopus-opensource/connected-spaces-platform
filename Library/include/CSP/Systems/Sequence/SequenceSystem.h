@@ -17,7 +17,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/Sequence/Sequence.h"
 #include "CSP/Systems/SystemBase.h"
 
@@ -110,7 +110,7 @@ public:
     CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);
 
     // Callback to receive sequence changes, contains a SequenceChangedParams with the details.
-    typedef std::function<void(const csp::multiplayer::SequenceChangedParams&)> SequenceChangedCallbackHandler;
+    typedef std::function<void(const csp::multiplayer::SequenceChangedEventData&)> SequenceChangedCallbackHandler;
 
     /// @brief Sets a callback for a sequence changed event.
     /// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence that has been changed.
@@ -122,7 +122,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData);
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

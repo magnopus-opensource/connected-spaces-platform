@@ -19,7 +19,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/Convert.h"
@@ -810,27 +810,32 @@ void UserSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("AccessControlChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::AccessControlChanged)),
+        [this](const csp::multiplayer::EventData& EventData) { this->OnAccessControlChangedEvent(EventData); });
 }
 
 void UserSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("AccessControlChanged");
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::AccessControlChanged)));
     }
 }
 
-void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void UserSystem::OnAccessControlChangedEvent(const csp::multiplayer::EventData& EventData)
 {
     if (!UserPermissionsChangedCallback)
     {
         return;
     }
 
-    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-    UserPermissionsChangedCallback(Deserialiser.GetEventParams());
+    const csp::multiplayer::AccessControlChangedEventData& AccessControlChangedEventData
+        = static_cast<const csp::multiplayer::AccessControlChangedEventData&>(EventData);
+
+    UserPermissionsChangedCallback(AccessControlChangedEventData);
 }
 
 } // namespace csp::systems

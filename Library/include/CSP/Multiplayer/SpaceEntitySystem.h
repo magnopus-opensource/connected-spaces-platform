@@ -22,7 +22,7 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 
 #include <chrono>
 #include <deque>

@@ -16,7 +16,7 @@
 
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
@@ -337,34 +337,34 @@ void HotspotSequenceSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("SequenceChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)),
+        [this](const csp::multiplayer::EventData& EventData) { this->OnSequenceChangedEvent(EventData); });
 }
 
 void HotspotSequenceSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("SequenceChanged");
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)));
     }
 }
 
-void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData)
 {
-    csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser { *LogSystem };
-    SequenceDeserialiser.Parse(EventValues);
+    // This may be either a SequenceChangedEventData or a SequenceHotspotChangedEventData... we're only interested in hotspot.
+    // This is hacky, see Eventbus deserialisation for more.
 
-    // There are a variety of sequence types.
-    // Other CSP callbacks may also need to fire if the sequence change relates to a particular sequence type.
-    const csp::common::String Key = SequenceDeserialiser.GetEventParams().Key;
-    const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
-    if (SequenceType == "Hotspots")
+    // Cast to pointer, as we are not certain of the type
+    const csp::multiplayer::SequenceHotspotChangedEventData* HotspotEventData
+        = dynamic_cast<const csp::multiplayer::SequenceHotspotChangedEventData*>(&EventData);
+
+    if (HotspotEventData && HotspotSequenceChangedCallback)
     {
-        if (HotspotSequenceChangedCallback)
-        {
-            csp::multiplayer::SequenceHotspotChangedEventDeserialiser HotspotDeserialiser { *LogSystem };
-            HotspotDeserialiser.Parse(EventValues);
-            HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());
-        }
+        // We can cast directly, we're sure we're the correct type.
+        HotspotSequenceChangedCallback(static_cast<const csp::multiplayer::SequenceHotspotChangedEventData&>(EventData));
     }
 }
 

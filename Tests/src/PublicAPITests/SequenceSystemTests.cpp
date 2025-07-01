@@ -925,10 +925,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueSequenceName[256];
     SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
-    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::multiplayer::SequenceChangedEventData& EventData)
     {
-        EXPECT_EQ(Params.Key, UniqueSequenceName);
-        EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
+        EXPECT_EQ(EventData.Key, UniqueSequenceName);
+        EXPECT_EQ(EventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
 
         CallbackCalled = true;
     };
@@ -946,10 +946,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueUpdatedSequenceName[256];
     SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
-    auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedEventData& EventData)
     {
-        EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
-        EXPECT_EQ(Params.Key, std::string(UniqueUpdatedSequenceName).c_str());
+        EXPECT_EQ(EventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+        EXPECT_EQ(EventData.Key, std::string(UniqueUpdatedSequenceName).c_str());
 
         CallbackCalled = true;
     };
@@ -964,10 +964,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     EXPECT_TRUE(CallbackCalled);
 
     // Delete sequence
-    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedEventData& EventData)
     {
-        EXPECT_EQ(Params.Key, UniqueUpdatedSequenceName);
-        EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
+        EXPECT_EQ(EventData.Key, UniqueUpdatedSequenceName);
+        EXPECT_EQ(EventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
 
         CallbackCalled = true;
     };

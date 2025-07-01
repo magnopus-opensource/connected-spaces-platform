@@ -116,7 +116,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 
         bool EventSent = false;
 
-        EventBus->SendNetworkEventToClient("Conversation",
+        EventBus->SendNetworkEventToClient(EventBus::StringFromNetworkEvent(EventBus::NetworkEvent::Conversation),
             csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
@@ -151,7 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 
         bool EventSent = false;
 
-        EventBus->SendNetworkEventToClient("Conversation",
+        EventBus->SendNetworkEventToClient(EventBus::StringFromNetworkEvent(EventBus::NetworkEvent::Conversation),
             csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
@@ -206,7 +206,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
 
     bool EventSent = false;
 
-    EventBus->SendNetworkEventToClient("Conversation",
+    EventBus->SendNetworkEventToClient(EventBus::StringFromNetworkEvent(EventBus::NetworkEvent::Conversation),
         csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo), Connection->GetClientId(),
         [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 

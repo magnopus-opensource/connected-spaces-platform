@@ -1769,40 +1769,43 @@ void AssetSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::AssetDetailBlobChanged)),
+        [this](const csp::multiplayer::EventData& EventData) { this->OnAssetDetailBlobChangedEvent(EventData); });
 }
 
 void AssetSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
+
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::AssetDetailBlobChanged)));
     }
 }
 
-void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::multiplayer::EventData& EventData)
 {
     if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
     {
         return;
     }
 
-    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-
-    const csp::multiplayer::AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();
+    const csp::multiplayer::AssetDetailBlobChangedEventData& AssetDetailBlobChangedEventData
+        = static_cast<const csp::multiplayer::AssetDetailBlobChangedEventData&>(EventData);
 
     if (AssetDetailBlobChangedCallback)
     {
-        AssetDetailBlobChangedCallback(AssetParams);
+        AssetDetailBlobChangedCallback(AssetDetailBlobChangedEventData);
     }
 
-    if (AssetParams.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+    if (AssetDetailBlobChangedEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
     {
         csp::multiplayer::MaterialChangedParams MaterialParams;
-        MaterialParams.ChangeType = AssetParams.ChangeType;
-        MaterialParams.MaterialCollectionId = AssetParams.AssetCollectionId;
-        MaterialParams.MaterialId = AssetParams.AssetId;
+        MaterialParams.ChangeType = AssetDetailBlobChangedEventData.ChangeType;
+        MaterialParams.MaterialCollectionId = AssetDetailBlobChangedEventData.AssetCollectionId;
+        MaterialParams.MaterialId = AssetDetailBlobChangedEventData.AssetId;
 
         MaterialChangedCallback(MaterialParams);
     }

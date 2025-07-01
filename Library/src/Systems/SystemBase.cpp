@@ -60,23 +60,4 @@ void SystemBase::DeregisterSystemCallback()
     // Do nothing.
 }
 
-void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
-{
-    if (!SystemCallback)
-    {
-        return;
-    }
-
-    csp::multiplayer::EventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-
-    SystemCallback(true, Deserialiser.GetEventData());
-}
-
-void SystemBase::SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
-{
-    SystemCallback = Callback;
-    RegisterSystemCallback();
-}
-
 } // namespace csp::systems

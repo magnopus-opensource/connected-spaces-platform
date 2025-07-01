@@ -18,7 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
@@ -91,7 +91,8 @@ public:
     CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback Callback);
 
     // Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
-    typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedParams&)> HotspotSequenceChangedCallbackHandler;
+    // Releases ownership to the caller
+    typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedEventData&)> HotspotSequenceChangedCallbackHandler;
 
     /// @brief Sets a callback to be fired when a hotspot sequence is changed.
     /// @param Callback HotspotSequenceChangedCallbackHandler: Callback to receive data for the hotspot sequence that has been changed.
@@ -103,7 +104,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData);
 
 private:
     HotspotSequenceSystem(
