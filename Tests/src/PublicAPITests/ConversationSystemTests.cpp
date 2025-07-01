@@ -104,19 +104,20 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled1 = true; };
-        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled2 = true; };
+        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled1 = true; };
+        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        csp::multiplayer::ConversationEventParams Params;
+        csp::multiplayer::ConversationEventData Params;
         Params.MessageType = csp::multiplayer::ConversationEventType::NewConversation;
         Params.MessageInfo.ConversationId = ConversationComponent1->GetConversationId();
 
         bool EventSent = false;
 
-        EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
+        EventBus->SendNetworkEventToClient("Conversation",
+            csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
         WaitForCallback(EventSent);
@@ -138,19 +139,20 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled1 = true; };
-        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled2 = true; };
+        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled1 = true; };
+        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        csp::multiplayer::ConversationEventParams Params;
+        csp::multiplayer::ConversationEventData Params;
         Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
         Params.MessageInfo.ConversationId = ConversationComponent2->GetConversationId();
 
         bool EventSent = false;
 
-        EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
+        EventBus->SendNetworkEventToClient("Conversation",
+            csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
         WaitForCallback(EventSent);
@@ -198,14 +200,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     static constexpr const char* TestConversationId = "New Test Message";
 
     // Send an event to a yet to exist conversation component
-    csp::multiplayer::ConversationEventParams Params;
+    csp::multiplayer::ConversationEventData Params;
     Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
     Params.MessageInfo.ConversationId = TestConversationId;
 
     bool EventSent = false;
 
-    EventBus->SendNetworkEventToClient("Conversation", csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params),
-        Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
+    EventBus->SendNetworkEventToClient("Conversation",
+        csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo), Connection->GetClientId(),
+        [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
     WaitForCallback(EventSent);
 
@@ -226,7 +229,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
@@ -238,7 +241,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventData& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 

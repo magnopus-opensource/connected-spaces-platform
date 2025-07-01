@@ -26,7 +26,7 @@ namespace
     void SendConversationEvent(multiplayer::ConversationEventType EventType, const multiplayer::MessageInfo& EventInfo,
         multiplayer::EventBus* EventBus, multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler Callback)
     {
-        auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray({ EventType, EventInfo });
+        auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
         EventBus->SendNetworkEvent("Conversation", EventParams, Callback);
     }
 
@@ -244,7 +244,7 @@ namespace
         {
             const multiplayer::MessageInfo& EventInfo
                 = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection);
-            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray({ EventType, EventInfo });
+            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
             return EventBus->SendNetworkEvent("Conversation", EventParams);
         };
     }
@@ -255,7 +255,7 @@ namespace
         return [EventType, MessageCollection, EventBus]()
         {
             const multiplayer::MessageInfo& EventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection);
-            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray({ EventType, EventInfo });
+            auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
             return EventBus->SendNetworkEvent("Conversation", EventParams);
         };
     }
@@ -1121,28 +1121,28 @@ void ConversationSystemInternal::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("Conversation", this);
+    EventBusPtr->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
+                                        csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::Conversation)),
+        [this](const csp::multiplayer::EventData& EventData)
+        {
+            const csp::multiplayer::ConversationEventData& ConversationEventData
+                = dynamic_cast<const csp::multiplayer::ConversationEventData&>(EventData);
+            if (TrySendEvent(ConversationEventData) == false)
+            {
+                // If component doesn't exist, add it to the queue for processing later
+                std::unique_ptr<csp::multiplayer::ConversationEventData> EventDataCopy
+                    = std::make_unique<csp::multiplayer::ConversationEventData>(ConversationEventData);
+                Events.push_back(std::move(EventDataCopy));
+            }
+        });
 }
 
 void ConversationSystemInternal::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("Conversation");
-    }
-}
-
-void ConversationSystemInternal::OnEvent(const std::vector<signalr::value>& EventValues)
-{
-    csp::multiplayer::ConversationEventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-
-    const multiplayer::ConversationEventParams& Params = Deserialiser.GetEventParams();
-
-    if (TrySendEvent(Params) == false)
-    {
-        // If component doesn't exist, add it to the queue for processing later
-        Events.push_back(Params);
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
+            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::Conversation)));
     }
 }
 
@@ -1150,7 +1150,7 @@ void ConversationSystemInternal::FlushEvents()
 {
     for (auto It = std::begin(Events); It != std::end(Events);)
     {
-        if (TrySendEvent(*It))
+        if (TrySendEvent(**It))
         {
             // Event has now been processed, so remove
             Events.erase(It);
@@ -1162,7 +1162,7 @@ void ConversationSystemInternal::FlushEvents()
     }
 }
 
-bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationEventParams& Params)
+bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationEventData& Params)
 {
     for (const auto& Component : Components)
     {
