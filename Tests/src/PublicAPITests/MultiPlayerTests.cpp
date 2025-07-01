@@ -32,6 +32,7 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
+#include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -270,12 +271,6 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
     SetRandomProperties(InUser, EntitySystem);
 }
 
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
-};
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
