@@ -17,8 +17,8 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 
 #include <functional>
 
@@ -122,7 +122,7 @@ public:
     /// intended to be defined in the inherited component as an enum of available properties keys.
     ///
     /// @return A map of the replicated values, keyed by their unique key.
-    const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties() const;
+    const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* GetProperties() const;
 
     /// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
     /// @return A pointer to the parent SpaceEntity.
@@ -160,7 +160,7 @@ protected:
     // The LogSystem input may be null, components do not _have_ to log.
     ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
-    const ReplicatedValue& GetProperty(uint32_t Key) const;
+    const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;
     int64_t GetIntegerProperty(uint32_t Key) const;
     float GetFloatProperty(uint32_t Key) const;
@@ -168,13 +168,13 @@ protected:
     const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
     const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
     const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
-    const csp::common::Map<csp::common::String, ReplicatedValue>& GetStringMapProperty(uint32_t Key) const;
+    const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetStringMapProperty(uint32_t Key) const;
 
-    void SetProperty(uint32_t Key, const ReplicatedValue& Value);
+    void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
     void RemoveProperty(uint32_t Key);
-    void SetProperties(const csp::common::Map<uint32_t, ReplicatedValue>& Value);
+    void SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value);
 
-    virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
+    virtual void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value);
 
     // Called when a component has first been created locally, or when the component
     // is first deserialized, after it's properties have been set.
@@ -197,8 +197,8 @@ protected:
     SpaceEntity* Parent;
     uint16_t Id;
     ComponentType Type;
-    csp::common::Map<uint32_t, ReplicatedValue> Properties;
-    csp::common::Map<uint32_t, ReplicatedValue> DirtyProperties;
+    csp::common::Map<uint32_t, csp::common::ReplicatedValue> Properties;
+    csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyProperties;
 
     ComponentScriptInterface* ScriptInterface;
 

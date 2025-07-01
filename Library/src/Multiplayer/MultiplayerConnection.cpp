@@ -20,7 +20,7 @@
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"

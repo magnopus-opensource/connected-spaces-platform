@@ -473,7 +473,7 @@ void ConversationSpaceComponent::OnLocalDelete()
     DeleteConversation(Callback);
 }
 
-void ConversationSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value)
+void ConversationSpaceComponent::SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value)
 {
     ComponentBase::SetPropertyFromPatch(Key, Value);
 

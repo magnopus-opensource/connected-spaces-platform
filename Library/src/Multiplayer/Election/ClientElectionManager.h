@@ -74,8 +74,8 @@ private:
     void BindNetworkEvents();
     void UnBindNetworkEvents();
 
-    void OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data);
-    void OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data);
+    void OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
+    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
 
     ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar, EventBus& EventBus);
     void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);

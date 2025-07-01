@@ -506,7 +506,7 @@ void ClientElectionManager::UnBindNetworkEvents()
     EventBus->StopListenNetworkEvent(RemoteRunScriptMessage);
 }
 
-void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data)
+void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
 {
     // @Note This needs to be kept in sync with any changes to message format
     const int64_t EventType = static_cast<int64_t>(Data[0].GetInt());
@@ -521,7 +521,7 @@ void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<Repli
     }
 }
 
-void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data)
+void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
 {
     // @Note This needs to be kept in sync with any changes to message format
     const int64_t ContextId = static_cast<int64_t>(Data[0].GetInt());

@@ -64,7 +64,7 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::com
     return SequenceUpdateType;
 }
 
-csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
+csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
     return csp::common::Decode::URI(RawValue.GetString());
