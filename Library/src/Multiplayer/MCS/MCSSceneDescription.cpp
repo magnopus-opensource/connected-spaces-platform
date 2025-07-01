@@ -186,30 +186,7 @@ void ToJson(csp::json::JsonSerializer& /* Deserializer*/, const csp::multiplayer
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj)
 {
     Deserializer.EnterMember("Data");
-
-    std::string GroupJson = Deserializer.GetMemberAsString("Group");
-    Obj.Group.FromJson(GroupJson.c_str());
-
     Deserializer.SafeDeserializeMember("ObjectMessages", Obj.Objects);
-
-    std::string PrototypesJson = Deserializer.GetMemberAsString("Prototypes");
-    csp::services::DtoArray<csp::services::generated::prototypeservice::PrototypeDto> PrototypesDto;
-    PrototypesDto.FromJson(PrototypesJson.c_str());
-
-    Obj.Prototypes = PrototypesDto.GetArray();
-
-    std::string AssetDetailsJson = Deserializer.GetMemberAsString("AssetDetails");
-    csp::services::DtoArray<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetailsDto;
-    AssetDetailsDto.FromJson(AssetDetailsJson.c_str());
-
-    Obj.AssetDetails = AssetDetailsDto.GetArray();
-
-    std::string SequencesJson = Deserializer.GetMemberAsString("Sequences");
-    csp::services::DtoArray<csp::services::generated::aggregationservice::SequenceDto> SequencesDto;
-    SequencesDto.FromJson(SequencesJson.c_str());
-
-    Obj.Sequences = SequencesDto.GetArray();
-
     Deserializer.ExitMember();
 }
 

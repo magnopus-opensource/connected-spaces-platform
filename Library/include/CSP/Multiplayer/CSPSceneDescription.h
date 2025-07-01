@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Magnopus LLC
+ * Copyright 2023 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include "MCSTypes.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 
-#pragma once
-
-namespace csp::multiplayer::mcs
+namespace csp::multiplayer
 {
-class SceneDescription
+
+class CSPSceneDescription
 {
 public:
-    std::vector<ObjectMessage> Objects;
+    CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::SpaceEntitySystem& EntitySystem,
+        csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    csp::common::Array<csp::multiplayer::SpaceEntity*> Entities;
 };
 
 }
-
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::SceneDescription& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj);
