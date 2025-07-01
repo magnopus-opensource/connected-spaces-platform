@@ -82,7 +82,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
 
     for (size_t i = 0; i < Values->Size(); ++i)
     {
-        if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
+        if (Values->operator[](i).GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
         {
             if (HasIntegerParam)
             {
@@ -93,7 +93,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
             EventString += ValueTag;
             EventString += std::to_string(Values->operator[](i).GetInt()).c_str();
         }
-        else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String)
+        else if (Values->operator[](i).GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
         {
             if (HasStringParam)
             {

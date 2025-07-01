@@ -55,10 +55,10 @@ int ReceivedEntityUpdatesCount;
 
 bool EventReceived = false;
 
-ReplicatedValue ObjectFloatProperty;
-ReplicatedValue ObjectBoolProperty;
-ReplicatedValue ObjectIntProperty;
-ReplicatedValue ObjectStringProperty;
+csp::common::ReplicatedValue ObjectFloatProperty;
+csp::common::ReplicatedValue ObjectBoolProperty;
+csp::common::ReplicatedValue ObjectIntProperty;
+csp::common::ReplicatedValue ObjectStringProperty;
 
 csp::common::String ConversationId;
 

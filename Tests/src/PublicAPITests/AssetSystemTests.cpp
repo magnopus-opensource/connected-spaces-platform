@@ -2100,11 +2100,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
-    ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
-    ReplicatedValue Param2 = "";
-    ReplicatedValue Param3 = "";
-    ReplicatedValue Param4 = "";
-    ReplicatedValue Param5 = "";
+    csp::common::ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
+    csp::common::ReplicatedValue Param2 = "";
+    csp::common::ReplicatedValue Param3 = "";
+    csp::common::ReplicatedValue Param4 = "";
+    csp::common::ReplicatedValue Param5 = "";
 
     EventBus->SendNetworkEventToClient("AssetDetailBlobChanged", { Param1, Param2, Param3, Param4, Param5 }, Connection->GetClientId(),
         [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });

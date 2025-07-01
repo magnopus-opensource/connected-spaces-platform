@@ -16,9 +16,9 @@
 #pragma once
 
 #include "CSP/Common/Map.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "MCS/MCSTypes.h"
 
 #include <map>
@@ -38,7 +38,7 @@ public:
 
 private:
     mcs::ItemComponentData CreateItemComponentData(ComponentBase* Value);
-    mcs::ItemComponentData CreateItemComponentData(const ReplicatedValue& Value);
+    mcs::ItemComponentData CreateItemComponentData(const csp::common::ReplicatedValue& Value);
     mcs::ItemComponentData CreateItemComponentData(bool Value);
     mcs::ItemComponentData CreateItemComponentData(uint64_t Value);
     mcs::ItemComponentData CreateItemComponentData(int64_t Value);
@@ -47,7 +47,7 @@ private:
     mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector3& Value);
     mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector4& Value);
     mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector2& Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::Map<csp::common::String, ReplicatedValue>& Value);
+    mcs::ItemComponentData CreateItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
 
     // Case for enums
     template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> CreateItemComponentData(T Value);
@@ -68,15 +68,18 @@ public:
     uint64_t GetRuntimeComponentsCount() const;
 
     // Primitive types can be converted without changes
-    template <class T> static void CreateReplicatedValueFromType(const T& Type, ReplicatedValue& Value) { Value = ReplicatedValue(Type); }
+    template <class T> static void CreateReplicatedValueFromType(const T& Type, csp::common::ReplicatedValue& Value)
+    {
+        Value = csp::common::ReplicatedValue(Type);
+    }
 
-    static void CreateReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(uint64_t, ReplicatedValue&);
-    static void CreateReplicatedValueFromType(double, ReplicatedValue&);
-    static void CreateReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&);
-    static void CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(const std::vector<float>& Type, csp::common::ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(uint64_t, csp::common::ReplicatedValue&);
+    static void CreateReplicatedValueFromType(double, csp::common::ReplicatedValue&);
+    static void CreateReplicatedValueFromType(const std::string& Type, csp::common::ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, csp::common::ReplicatedValue&);
+    static void CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, csp::common::ReplicatedValue& Value);
+    static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value);
 
 private:
     template <typename T> void ReadValue(uint16_t Key, T& Value) const;
@@ -87,7 +90,7 @@ private:
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector3& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector4& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::String& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
+    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value);
 
     template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const;
 

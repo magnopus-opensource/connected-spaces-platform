@@ -90,24 +90,24 @@ void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData
     Value = String.c_str();
 }
 
-void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value)
+void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value)
 {
     std::visit([&Value](const auto& ValueType) { CreateReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::vector<float>& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::vector<float>& Type, csp::common::ReplicatedValue& Value)
 {
     if (Type.size() == 2)
     {
-        Value = ReplicatedValue { csp::common::Vector2 { Type[0], Type[1] } };
+        Value = csp::common::ReplicatedValue { csp::common::Vector2 { Type[0], Type[1] } };
     }
     else if (Type.size() == 3)
     {
-        Value = ReplicatedValue { csp::common::Vector3 { Type[0], Type[1], Type[2] } };
+        Value = csp::common::ReplicatedValue { csp::common::Vector3 { Type[0], Type[1], Type[2] } };
     }
     else if (Type.size() == 4)
     {
-        Value = ReplicatedValue { csp::common::Vector4 { Type[0], Type[1], Type[2], Type[3] } };
+        Value = csp::common::ReplicatedValue { csp::common::Vector4 { Type[0], Type[1], Type[2], Type[3] } };
     }
     else
     {
@@ -115,32 +115,33 @@ void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::vector<float
     }
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(uint64_t Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(uint64_t Type, csp::common::ReplicatedValue& Value)
 {
     // ReplicatedValue only supported signed integers.
     CreateReplicatedValueFromType(static_cast<int64_t>(Type), Value);
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(double, ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
+void MCSComponentUnpacker::CreateReplicatedValueFromType(double, csp::common::ReplicatedValue&) { throw std::runtime_error("Unsupported"); }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::string& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::string& Type, csp::common::ReplicatedValue& Value)
 {
-    Value = ReplicatedValue { csp::common::String { Type.c_str() } };
+    Value = csp::common::ReplicatedValue { csp::common::String { Type.c_str() } };
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, ReplicatedValue&)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, csp::common::ReplicatedValue&)
 {
     throw std::runtime_error("Unsupported");
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(
+    const std::map<std::string, mcs::ItemComponentData>& Type, csp::common::ReplicatedValue& Value)
 {
     // Convert string map of ItemComponentData to csp string map of ReplicatedValue.
-    csp::common::Map<csp::common::String, ReplicatedValue> Map;
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> Map;
 
     for (const auto& Pair : Type)
     {
-        ReplicatedValue ChildValue;
+        csp::common::ReplicatedValue ChildValue;
         CreateReplicatedValueFromType(Pair.second, ChildValue);
         Map[Pair.first.c_str()] = ChildValue;
     }
@@ -148,7 +149,7 @@ void MCSComponentUnpacker::CreateReplicatedValueFromType(const std::map<std::str
     CreateReplicatedValueFromType(Map, Value);
 }
 
-void MCSComponentUnpacker::CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value)
+void MCSComponentUnpacker::CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value)
 {
     std::visit([&Value](const auto& ValueType) { CreateReplicatedValueFromType(ValueType, Value); }, ComponentData.GetValue());
 }
@@ -177,37 +178,37 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase
 // as we can create compile-time checking by using std::visit and function overloads.
 // This will prevent us forgetting to update this when we add new types.
 // https://magnopus.atlassian.net/browse/OF-1511
-mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const ReplicatedValue& Value)
+mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::ReplicatedValue& Value)
 {
-    if (Value.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+    if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
     {
         return CreateItemComponentData(Value.GetBool());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Integer)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
     {
         return CreateItemComponentData(Value.GetInt());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Float)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
     {
         return CreateItemComponentData(Value.GetFloat());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::String)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
         return CreateItemComponentData(Value.GetString());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
     {
         return CreateItemComponentData(Value.GetVector3());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
     {
         return CreateItemComponentData(Value.GetVector4());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
     {
         return CreateItemComponentData(Value.GetVector2());
     }
-    else if (Value.GetReplicatedValueType() == ReplicatedValueType::StringMap)
+    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
     {
         return CreateItemComponentData(Value.GetStringMap());
     }
@@ -245,7 +246,7 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::co
     return mcs::ItemComponentData { std::vector<float> { Value.X, Value.Y } };
 }
 
-mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::Map<csp::common::String, ReplicatedValue>& Value)
+mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value)
 {
     std::map<std::string, mcs::ItemComponentData> Map;
     std::unique_ptr<common::Array<csp::common::String>> Keys(const_cast<common::Array<csp::common::String>*>(Value.Keys()));

@@ -298,7 +298,7 @@ protected:
     void OnRemove() override;
     void OnLocalDelete() override;
 
-    void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
+    void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
 
 private:
     void SetConversationId(const csp::common::String& Value);

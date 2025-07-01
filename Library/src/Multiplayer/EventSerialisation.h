@@ -17,10 +17,10 @@
 #pragma once
 
 #include "CSP/Common/Array.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 
 #include <signalrclient/signalr_value.h>
 

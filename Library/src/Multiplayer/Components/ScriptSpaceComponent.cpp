@@ -58,7 +58,7 @@ void ScriptSpaceComponent::SetScriptScope(ScriptScope Scope)
     SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope), static_cast<int64_t>(Scope));
 }
 
-void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value)
+void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value)
 {
     ComponentBase::SetPropertyFromPatch(Key, Value);
 

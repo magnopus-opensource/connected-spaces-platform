@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValue.h"
 
 #include <atomic>
 #include <chrono>

@@ -80,7 +80,7 @@ public:
     void SetScriptScope(ScriptScope Scope);
 
 protected:
-    void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
+    void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
     void OnRemove() override;
 };
 

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/Common/Map.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
