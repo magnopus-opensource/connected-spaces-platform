@@ -1126,7 +1126,7 @@ void ConversationSystemInternal::RegisterSystemCallback()
         [this](const csp::multiplayer::EventData& EventData)
         {
             const csp::multiplayer::ConversationEventData& ConversationEventData
-                = dynamic_cast<const csp::multiplayer::ConversationEventData&>(EventData);
+                = static_cast<const csp::multiplayer::ConversationEventData&>(EventData);
             if (TrySendEvent(ConversationEventData) == false)
             {
                 // If component doesn't exist, add it to the queue for processing later

@@ -52,8 +52,8 @@ AccessControlChangedEventData DeserializeAccessControlChangedEvent(const std::ve
 // Specialized deserializataion for events triggered when a sequence in the space changes.
 SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-// Specialized deserializataion for events triggered when a hotspot sequence in the space changes.
-SequenceHotspotChangedEventData DeserializeSequenceHotspotChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+// Specialized deserializataion for events triggered when a hotspot sequence in the space changes. Hacky because we cant use RTTI on WASM and the
+// Hotspot event uses the same event type as regular sequences
+SequenceChangedEventData DeserializeSequenceHotspotChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer

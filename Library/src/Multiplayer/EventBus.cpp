@@ -241,8 +241,7 @@ std::unique_ptr<EventData> EventBus::DeserialiseForEventType(NetworkEvent EventT
     case NetworkEvent::SequenceChanged:
     {
         // This is a massive hack, why is it like this? We shouldn't have a SequenceSystem and a HotspotSequenceSystem if they're so similar that they
-        // share event types. You just have to know to check if you get a SequenceChangedEventData or a HotspotSequenceChangedEventData via dynamic
-        // cast. Must be a better way...
+        // share event types. That or they're dissimilar enough to justify seperate events.
         std::unique_ptr<SequenceChangedEventData> SequenceEventData
             = std::make_unique<SequenceChangedEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
         const csp::common::String Key = SequenceEventData->Key;
@@ -250,8 +249,7 @@ std::unique_ptr<EventData> EventBus::DeserialiseForEventType(NetworkEvent EventT
         if (SequenceType == "Hotspots")
         {
             // If we're a hotspot sequence, send that deserialization packet along.
-            return std::make_unique<SequenceHotspotChangedEventData>(
-                csp::multiplayer::DeserializeSequenceHotspotChangedEvent(EventValues, LogSystem));
+            return std::make_unique<SequenceChangedEventData>(csp::multiplayer::DeserializeSequenceHotspotChangedEvent(EventValues, LogSystem));
         }
         // Otherwise, behave normaly
         return SequenceEventData;

@@ -342,10 +342,11 @@ void SequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::EventData& E
     // This may be either a SequenceChangedEventData or a SequenceHotspotChangedEventData... we're only interested in non-hotspot.
     // This is hacky, see Eventbus deserialisation for more.
 
-    // Cast to pointer, as we are not certain of the type
-    const csp::multiplayer::SequenceChangedEventData* SequenceEventData = dynamic_cast<const csp::multiplayer::SequenceChangedEventData*>(&EventData);
+    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData);
 
-    if (SequenceEventData && SequenceChangedCallback)
+    const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
+
+    if (!IsHotspotEvent && SequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
         SequenceChangedCallback(static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData));
