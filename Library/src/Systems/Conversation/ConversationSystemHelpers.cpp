@@ -15,9 +15,9 @@
  */
 #include "ConversationSystemHelpers.h"
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/DateTime.h"
 #include "Debug/Logging.h"
@@ -134,17 +134,18 @@ common::Map<common::String, common::String> GenerateMessageAssetCollectionMetada
     return MetadataMap;
 }
 
-csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params)
+csp::common::Array<common::ReplicatedValue> MessageInfoToReplicatedValueArray(
+    multiplayer::ConversationEventType ConversationEventType, const multiplayer::MessageInfo& MessageInfo)
 {
-    csp::common::Array<multiplayer::ReplicatedValue> Args(7);
+    csp::common::Array<common::ReplicatedValue> Args(7);
 
-    Args[0] = static_cast<int64_t>(Params.MessageType);
-    Args[1] = Params.MessageInfo.ConversationId;
-    Args[2] = Params.MessageInfo.CreatedTimestamp;
-    Args[3] = Params.MessageInfo.EditedTimestamp;
-    Args[4] = Params.MessageInfo.UserId;
-    Args[5] = Params.MessageInfo.Message;
-    Args[6] = Params.MessageInfo.MessageId;
+    Args[0] = static_cast<int64_t>(ConversationEventType);
+    Args[1] = MessageInfo.ConversationId;
+    Args[2] = MessageInfo.CreatedTimestamp;
+    Args[3] = MessageInfo.EditedTimestamp;
+    Args[4] = MessageInfo.UserId;
+    Args[5] = MessageInfo.Message;
+    Args[6] = MessageInfo.MessageId;
 
     return Args;
 }

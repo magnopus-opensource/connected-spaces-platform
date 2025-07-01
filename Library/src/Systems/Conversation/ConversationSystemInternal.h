@@ -19,7 +19,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventData.h"
 #include "CSP/Systems/SystemBase.h"
 
 #include <unordered_set>
@@ -53,6 +53,9 @@ public:
         csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
 
     ~ConversationSystemInternal();
+
+    ConversationSystemInternal(const ConversationSystemInternal& other) = delete;
+    ConversationSystemInternal& operator=(const ConversationSystemInternal& other) = delete;
 
     void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
 
@@ -110,16 +113,13 @@ public:
     void RegisterSystemCallback() override;
     /// @brief Deregisters the system from listening for the named event.
     void DeregisterSystemCallback() override;
-    /// @brief Deserialises the event values of the system.
-    /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
     // Attempt to flush any events that haven't been sent.
     // They may fail to send in situtations where the conversation component hasn't been created before the creation event fires.
     void FlushEvents();
 
 private:
-    bool TrySendEvent(const csp::multiplayer::ConversationEventParams& Params);
+    bool TrySendEvent(const csp::multiplayer::ConversationEventData& Params);
 
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
@@ -128,7 +128,7 @@ private:
     csp::multiplayer::EventBus* EventBus;
 
     std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
-    std::vector<csp::multiplayer::ConversationEventParams> Events;
+    std::vector<std::unique_ptr<csp::multiplayer::ConversationEventData>> Events;
 };
 
 }
