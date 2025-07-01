@@ -25,6 +25,44 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
     return ComponentCount;
 }
 
+void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value)
+{
+    std::visit(
+        [&Value](const auto& ValueType)
+        {
+            using Type = std::decay_t<decltype(ValueType)>;
+
+            if constexpr (std::is_same_v<Type, uint64_t>)
+            {
+                Value = static_cast<Type>(ValueType);
+            }
+            else if constexpr (std::is_same_v<Type, int64_t>)
+            {
+                Value = static_cast<Type>(ValueType);
+            }
+        },
+        ComponentData.GetValue());
+}
+
+void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value)
+{
+    std::visit(
+        [&Value](const auto& ValueType)
+        {
+            using Type = std::decay_t<decltype(ValueType)>;
+
+            if constexpr (std::is_same_v<Type, uint64_t>)
+            {
+                Value = static_cast<Type>(ValueType);
+            }
+            else if constexpr (std::is_same_v<Type, int64_t>)
+            {
+                Value = static_cast<Type>(ValueType);
+            }
+        },
+        ComponentData.GetValue());
+}
+
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value)
 {
     const auto& Vector = std::get<std::vector<float>>(ComponentData.GetValue());

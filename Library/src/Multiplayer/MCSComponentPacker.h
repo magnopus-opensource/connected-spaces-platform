@@ -81,13 +81,15 @@ public:
 private:
     template <typename T> void ReadValue(uint16_t Key, T& Value) const;
 
+    static void ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value);
+    static void ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector3& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector4& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::String& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
-    // This case handles int/uint/enum types.
-    template <typename T> static void ReadValue(const mcs::ItemComponentData& ComponentData, T& Value);
+
+    template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const;
 
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
@@ -116,18 +118,12 @@ template <typename T> inline void MCSComponentUnpacker::ReadValue(uint16_t Key, 
     ReadValue(ComponentData, Value);
 }
 
-template <typename T> inline void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value)
+template <typename T>
+inline std::enable_if_t<std::is_enum_v<T>> MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const
 {
-    std::visit(
-        [&Value](const auto& ValueType)
-        {
-            using VariantType = std::decay_t<decltype(ValueType)>;
-
-            if constexpr (std::is_convertible<VariantType, T>::value)
-            {
-                Value = static_cast<T>(ValueType);
-            }
-        },
-        ComponentData.GetValue());
+    uint64_t RawEnumValue = 0;
+    ReadValue(ComponentData, RawEnumValue);
+    Value = static_cast<T>(RawEnumValue);
 }
+
 }
