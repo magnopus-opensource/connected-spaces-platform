@@ -83,10 +83,10 @@ RunnerSettings ProcessCLI(int argc, char* argv[])
 
     App.add_option("-t,--test", TestIdentifier, "The test to run. See `include/TestIdentifiers.h` for available options.")->required();
     App.add_option(
-           "-e,--email", LoginEmail, "Login email for the test CHS account. The account must already exist. If it does not exist, errors out.`")
+           "-e,--email", LoginEmail, "Login email for the test MCS account. The account must already exist. If it does not exist, errors out.`")
         ->required();
     App.add_option(
-           "-p,--password", LoginPassword, "Password for the test CHS account. The account must already exist. If it does not exist, errors out.")
+           "-p,--password", LoginPassword, "Password for the test MCS account. The account must already exist. If it does not exist, errors out.")
         ->required();
     App.add_option("-s,--space", SpaceId,
         "SpaceId to use in the invoked test. If none is provided, creates a random space. If a space id is provided, the space is assumed "

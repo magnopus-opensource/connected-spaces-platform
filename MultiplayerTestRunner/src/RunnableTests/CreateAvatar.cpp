@@ -31,9 +31,6 @@ void RunTest()
 {
     using namespace csp::multiplayer;
 
-    // Create space
-    csp::systems::Space Space;
-
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
     auto& UserSystem = *SystemsManager.GetUserSystem();
