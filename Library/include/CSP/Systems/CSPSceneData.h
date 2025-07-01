@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-#include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 
-namespace csp::multiplayer::mcs
+namespace csp::systems
 {
-class SceneDescription;
-}
-
-namespace csp
-{
-
-class SceneDescription
+class CSPSceneData
 {
 public:
-    SceneDescription(const csp::multiplayer::mcs::SceneDescription& MCSSceneDescription, csp::multiplayer::SpaceEntitySystem& EntitySystem,
-        csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    CSPSceneData(const csp::common::String& SceneDescriptionJson);
 
     csp::systems::Space Space;
-    csp::common::Array<csp::multiplayer::SpaceEntity*> Entities;
     csp::common::Array<csp::systems::AssetCollection> AssetCollections;
     csp::common::Array<csp::systems::Asset> Assets;
     csp::common::Array<csp::systems::Sequence> Sequences;

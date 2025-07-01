@@ -17,9 +17,10 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
-#include "CSP/CSPSceneDescription.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Multiplayer/CSPSceneDescription.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/CSPSceneData.h"
 #include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Json/JsonSerializer.h"
@@ -28,6 +29,7 @@
 #include <fstream>
 
 using namespace csp::multiplayer;
+using namespace csp::systems;
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ObjectMessageSerializeTest)
 {
@@ -202,25 +204,18 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     std::string Json = SStream.str();
 
-    mcs::SceneDescription DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(Json.c_str(), DeserializedValue);
-
-    EXPECT_EQ(DeserializedValue.Objects.size(), 0);
-    EXPECT_EQ(DeserializedValue.Prototypes.size(), 0);
-    EXPECT_EQ(DeserializedValue.AssetDetails.size(), 0);
-    EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
-
-    // Convert to csp scene description
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
+
+    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
+    CSPSceneData SceneData { Json.c_str() };
 
     EXPECT_EQ(SceneDescription.Entities.Size(), 0);
-    EXPECT_EQ(SceneDescription.AssetCollections.Size(), 0);
-    EXPECT_EQ(SceneDescription.Assets.Size(), 0);
-    EXPECT_EQ(SceneDescription.Sequences.Size(), 0);
+    EXPECT_EQ(SceneData.AssetCollections.Size(), 0);
+    EXPECT_EQ(SceneData.Assets.Size(), 0);
+    EXPECT_EQ(SceneData.Sequences.Size(), 0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeTest)
@@ -241,134 +236,32 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
 
     std::string Json = SStream.str();
 
-    mcs::SceneDescription DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(Json.c_str(), DeserializedValue);
-
-    // Test the mcs scene description values are correct
-
-    // Group
-    csp::services::generated::userservice::GroupDto Group = DeserializedValue.Group;
-
-    EXPECT_EQ(Group.GetId(), "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Group.GetCreatedBy(), "66a0033d6541645960bfffda");
-    EXPECT_EQ(Group.GetCreatedAt(), "2024-08-21T21:39:25.017+00:00");
-    EXPECT_EQ(Group.GetGroupOwnerId(), "66a0033d6541645960bfffda");
-    EXPECT_EQ(Group.GetGroupType(), "space");
-    EXPECT_EQ(Group.GetName(), "Abu Dhabi Airport");
-    EXPECT_EQ(Group.GetUsers().size(), 21);
-    EXPECT_EQ(Group.GetUsers()[0], "66a0033d6541645960bfffda");
-    EXPECT_EQ(Group.GetUsers()[20], "6823720f8f72b4d0fa153cfd");
-    EXPECT_EQ(Group.GetBannedUsers().size(), 0);
-    EXPECT_EQ(Group.GetModerators().size(), 20);
-    EXPECT_EQ(Group.GetModerators()[0], "669ac6673d223b140719c19e");
-    EXPECT_EQ(Group.GetModerators()[19], "6823720f8f72b4d0fa153cfd");
-    EXPECT_EQ(Group.GetDiscoverable(), false);
-    EXPECT_EQ(Group.GetAutoModerator(), false);
-    EXPECT_EQ(Group.GetRequiresInvite(), true);
-    EXPECT_EQ(Group.GetArchived(), false);
-    EXPECT_EQ(Group.GetTags().size(), 0);
-    EXPECT_EQ(Group.GetIsCurrentUserOwner(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserMember(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserModerator(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserBanned(), false);
-
-    // Objects
-    EXPECT_EQ(DeserializedValue.Objects.size(), 74);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetId(), 1484);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetType(), 2);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetIsTransferable(), true);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetIsPersistent(), true);
-    // TODO: ownerid
-    EXPECT_EQ(DeserializedValue.Objects[0].GetParentId(), std::nullopt);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetComponents()->size(), 25);
-    EXPECT_EQ(std::get<std::string>(DeserializedValue.Objects[0].GetComponents()->find(64511)->second.GetValue()), "unavailableGates");
-
-    // Prototypes
-    EXPECT_EQ(DeserializedValue.Prototypes.size(), 88);
-
-    csp::services::generated::prototypeservice::PrototypeDto Prototype = DeserializedValue.Prototypes[0];
-    EXPECT_EQ(Prototype.GetName(), "Small_Kiosk_T.glb_536.4520788603719");
-    EXPECT_EQ(Prototype.GetTags().size(), 0);
-    EXPECT_EQ(Prototype.GetMetadata().size(), 1);
-    EXPECT_EQ(Prototype.GetMetadata().find("assetType")->second, csp::common::String { "staticmodel" });
-    EXPECT_EQ(Prototype.GetUiStrings().size(), 0);
-    EXPECT_EQ(Prototype.GetState().size(), 0);
-    EXPECT_EQ(Prototype.HasPointOfInterestId(), false);
-    EXPECT_EQ(Prototype.HasParentId(), false);
-    EXPECT_EQ(Prototype.GetHighlander(), false);
-    EXPECT_EQ(Prototype.GetType(), "Default");
-    EXPECT_EQ(Prototype.GetSystemOwned(), false);
-    EXPECT_EQ(Prototype.HasPrototypeOwnerId(), false);
-    EXPECT_EQ(Prototype.GetGroupIds().size(), 1);
-    EXPECT_EQ(Prototype.GetGroupIds()[0], "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Prototype.GetReadAccess().size(), 2);
-    EXPECT_EQ(Prototype.GetReadAccess()[0], "GroupId:66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Prototype.GetReadAccess()[1], "SystemRoleGroup:SuperUsers");
-    EXPECT_EQ(Prototype.GetWriteAccess().size(), 2);
-    EXPECT_EQ(Prototype.GetWriteAccess()[0], "GroupId:66c65e8d9821e1cc2b51dc0d:GroupRole:creator");
-    EXPECT_EQ(Prototype.GetWriteAccess()[1], "SystemRoleGroup:SuperUsers");
-    EXPECT_EQ(Prototype.HasOrganizationId(), false);
-    EXPECT_EQ(Prototype.GetCreatedBy(), "669ac6673d223b140719c19e");
-    EXPECT_EQ(Prototype.GetCreatedAt(), "2025-04-22T17:52:15.369+00:00");
-    EXPECT_EQ(Prototype.GetUpdatedBy(), "669ac6673d223b140719c19e");
-    EXPECT_EQ(Prototype.GetUpdatedAt(), "2025-04-22T17:52:15.369+00:00");
-    EXPECT_EQ(Prototype.GetId(), "6807d74f486cf8794b73f107");
-
-    // AssetDetails
-    EXPECT_EQ(DeserializedValue.AssetDetails.size(), 488);
-    csp::services::generated::prototypeservice::AssetDetailDto AssetDetail = DeserializedValue.AssetDetails[0];
-
-    EXPECT_EQ(AssetDetail.GetPrototypeId(), "6807d74f486cf8794b73f107");
-    EXPECT_EQ(AssetDetail.HasFileName(), false);
-    EXPECT_EQ(AssetDetail.GetName(), "Small_Kiosk_T_lod3.glb");
-    EXPECT_EQ(AssetDetail.GetLanguageCode(), "en-us");
-    EXPECT_EQ(AssetDetail.GetSupportedPlatforms().size(), 1);
-    EXPECT_EQ(AssetDetail.GetSupportedPlatforms()[0], "Default");
-    EXPECT_EQ(AssetDetail.GetStyle().size(), 2);
-    EXPECT_EQ(AssetDetail.GetStyle()[0], "Default");
-    EXPECT_EQ(AssetDetail.GetStyle()[1], "lod:3");
-    EXPECT_EQ(AssetDetail.GetAssetType(), "Model");
-    EXPECT_EQ(AssetDetail.HasThirdPartyReferenceId(), false);
-    EXPECT_EQ(AssetDetail.HasUri(), false);
-    EXPECT_EQ(AssetDetail.HasOriginalAssetUri(), false);
-    EXPECT_EQ(AssetDetail.HasChecksum(), false);
-    EXPECT_EQ(AssetDetail.HasVersion(), false);
-    EXPECT_EQ(AssetDetail.HasMimeType(), false);
-    EXPECT_EQ(AssetDetail.HasExternalUri(), false);
-    EXPECT_EQ(AssetDetail.HasExternalMimeType(), false);
-    EXPECT_EQ(AssetDetail.GetTags().size(), 1);
-    EXPECT_EQ(AssetDetail.GetTags()[0], "lod:3");
-    EXPECT_EQ(AssetDetail.GetSizeInBytes(), 0);
-    EXPECT_EQ(AssetDetail.GetId(), "6807d750b618cc273309a258");
-
-    // Sequences
-    EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
-
-    // Convert to csp scene description
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
+
+    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
+    CSPSceneData SceneData { Json.c_str() };
 
     // Test csp scene description values are correct
 
     // Space
-    EXPECT_EQ(SceneDescription.Space.Id, "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(SceneDescription.Space.CreatedBy, "66a0033d6541645960bfffda");
-    EXPECT_EQ(SceneDescription.Space.CreatedAt, "2024-08-21T21:39:25.017+00:00");
-    EXPECT_EQ(SceneDescription.Space.OwnerId, "66a0033d6541645960bfffda");
-    EXPECT_EQ(SceneDescription.Space.Name, "Abu Dhabi Airport");
-    EXPECT_EQ(SceneDescription.Space.UserIds.Size(), 21);
-    EXPECT_EQ(SceneDescription.Space.UserIds[0], "66a0033d6541645960bfffda");
-    EXPECT_EQ(SceneDescription.Space.UserIds[20], "6823720f8f72b4d0fa153cfd");
-    EXPECT_EQ(SceneDescription.Space.BannedUserIds.Size(), 0);
-    EXPECT_EQ(SceneDescription.Space.ModeratorIds.Size(), 20);
-    EXPECT_EQ(SceneDescription.Space.ModeratorIds[0], "669ac6673d223b140719c19e");
-    EXPECT_EQ(SceneDescription.Space.ModeratorIds[19], "6823720f8f72b4d0fa153cfd");
+    EXPECT_EQ(SceneData.Space.Id, "66c65e8d9821e1cc2b51dc0d");
+    EXPECT_EQ(SceneData.Space.CreatedBy, "66a0033d6541645960bfffda");
+    EXPECT_EQ(SceneData.Space.CreatedAt, "2024-08-21T21:39:25.017+00:00");
+    EXPECT_EQ(SceneData.Space.OwnerId, "66a0033d6541645960bfffda");
+    EXPECT_EQ(SceneData.Space.Name, "Abu Dhabi Airport");
+    EXPECT_EQ(SceneData.Space.UserIds.Size(), 21);
+    EXPECT_EQ(SceneData.Space.UserIds[0], "66a0033d6541645960bfffda");
+    EXPECT_EQ(SceneData.Space.UserIds[20], "6823720f8f72b4d0fa153cfd");
+    EXPECT_EQ(SceneData.Space.BannedUserIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.ModeratorIds.Size(), 20);
+    EXPECT_EQ(SceneData.Space.ModeratorIds[0], "669ac6673d223b140719c19e");
+    EXPECT_EQ(SceneData.Space.ModeratorIds[19], "6823720f8f72b4d0fa153cfd");
 
-    EXPECT_FALSE(csp::systems::HasFlag(SceneDescription.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    EXPECT_TRUE(csp::systems::HasFlag(SceneDescription.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    EXPECT_FALSE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
     // Entities
     EXPECT_EQ(SceneDescription.Entities.Size(), 74);
@@ -382,9 +275,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     EXPECT_FALSE(SpaceEntity->ParentId.HasValue());
 
     // AssetCollection
-    EXPECT_EQ(SceneDescription.AssetCollections.Size(), 88);
+    EXPECT_EQ(SceneData.AssetCollections.Size(), 88);
 
-    csp::systems::AssetCollection AssetCollection = SceneDescription.AssetCollections[0];
+    csp::systems::AssetCollection AssetCollection = SceneData.AssetCollections[0];
     EXPECT_EQ(AssetCollection.GetMetadataMutable().Size(), 1);
     EXPECT_EQ(AssetCollection.GetMetadataMutable()["assetType"], csp::common::String { "staticmodel" });
     EXPECT_EQ(AssetCollection.Id, "6807d74f486cf8794b73f107");
@@ -402,9 +295,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     EXPECT_EQ(AssetCollection.Version, "");
 
     // Asset
-    EXPECT_EQ(SceneDescription.Assets.Size(), 488);
+    EXPECT_EQ(SceneData.Assets.Size(), 488);
 
-    csp::systems::Asset Asset = SceneDescription.Assets[0];
+    csp::systems::Asset Asset = SceneData.Assets[0];
     EXPECT_EQ(Asset.AssetCollectionId, "6807d74f486cf8794b73f107");
     EXPECT_EQ(Asset.Id, "6807d750b618cc273309a258");
     EXPECT_EQ(Asset.FileName, "");
@@ -426,7 +319,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     EXPECT_EQ(Asset.ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::NONE);
 
     // Sequences
-    EXPECT_EQ(SceneDescription.Sequences.Size(), 0);
+    EXPECT_EQ(SceneData.Sequences.Size(), 0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeserializeTest)
@@ -447,123 +340,28 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     std::string Json = SStream.str();
 
-    mcs::SceneDescription DeserializedValue {};
-    csp::json::JsonDeserializer::Deserialize(Json.c_str(), DeserializedValue);
-
-    // Test the mcs scene description values are correct
-
-    // Group
-    csp::services::generated::userservice::GroupDto Group = DeserializedValue.Group;
-
-    EXPECT_EQ(Group.GetId(), "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Group.GetCreatedBy(), "66a0033d6541645960bfffda");
-    EXPECT_EQ(Group.GetCreatedAt(), "2024-08-21T21:39:25.017+00:00");
-    EXPECT_EQ(Group.GetGroupOwnerId(), "66a0033d6541645960bfffda");
-    EXPECT_EQ(Group.GetGroupType(), "space");
-    EXPECT_EQ(Group.GetName(), "Abu Dhabi Airport");
-    EXPECT_EQ(Group.GetUsers().size(), 0);
-    EXPECT_EQ(Group.GetBannedUsers().size(), 0);
-    EXPECT_EQ(Group.GetModerators().size(), 0);
-    EXPECT_EQ(Group.GetDiscoverable(), false);
-    EXPECT_EQ(Group.GetAutoModerator(), false);
-    EXPECT_EQ(Group.GetRequiresInvite(), true);
-    EXPECT_EQ(Group.GetArchived(), false);
-    EXPECT_EQ(Group.GetTags().size(), 0);
-    EXPECT_EQ(Group.GetIsCurrentUserOwner(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserMember(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserModerator(), false);
-    EXPECT_EQ(Group.GetIsCurrentUserBanned(), false);
-
-    // Objects
-    EXPECT_EQ(DeserializedValue.Objects.size(), 1);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetId(), 1484);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetType(), 2);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetIsTransferable(), true);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetIsPersistent(), true);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetComponents()->size(), 1);
-    // TODO: ownerid
-    EXPECT_EQ(DeserializedValue.Objects[0].GetParentId(), std::nullopt);
-    EXPECT_EQ(DeserializedValue.Objects[0].GetComponents()->size(), 1);
-
-    // Prototypes
-    EXPECT_EQ(DeserializedValue.Prototypes.size(), 1);
-
-    csp::services::generated::prototypeservice::PrototypeDto Prototype = DeserializedValue.Prototypes[0];
-    EXPECT_EQ(Prototype.GetName(), "Small_Kiosk_T.glb_536.4520788603719");
-    EXPECT_EQ(Prototype.GetTags().size(), 0);
-    EXPECT_EQ(Prototype.GetMetadata().size(), 1);
-    EXPECT_EQ(Prototype.GetMetadata().find("assetType")->second, csp::common::String { "staticmodel" });
-    EXPECT_EQ(Prototype.GetUiStrings().size(), 0);
-    EXPECT_EQ(Prototype.GetState().size(), 0);
-    EXPECT_EQ(Prototype.HasPointOfInterestId(), false);
-    EXPECT_EQ(Prototype.HasParentId(), false);
-    EXPECT_EQ(Prototype.GetHighlander(), false);
-    EXPECT_EQ(Prototype.GetType(), "Default");
-    EXPECT_EQ(Prototype.GetSystemOwned(), false);
-    EXPECT_EQ(Prototype.HasPrototypeOwnerId(), false);
-    EXPECT_EQ(Prototype.GetGroupIds().size(), 1);
-    EXPECT_EQ(Prototype.GetGroupIds()[0], "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Prototype.GetReadAccess().size(), 1);
-    EXPECT_EQ(Prototype.GetReadAccess()[0], "GroupId:66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(Prototype.GetWriteAccess().size(), 1);
-    EXPECT_EQ(Prototype.GetWriteAccess()[0], "GroupId:66c65e8d9821e1cc2b51dc0d:GroupRole:creator");
-    EXPECT_EQ(Prototype.HasOrganizationId(), false);
-    EXPECT_EQ(Prototype.GetCreatedBy(), "669ac6673d223b140719c19e");
-    EXPECT_EQ(Prototype.GetCreatedAt(), "2025-04-22T17:52:15.369+00:00");
-    EXPECT_EQ(Prototype.GetUpdatedBy(), "669ac6673d223b140719c19e");
-    EXPECT_EQ(Prototype.GetUpdatedAt(), "2025-04-22T17:52:15.369+00:00");
-    EXPECT_EQ(Prototype.GetId(), "6807d74f486cf8794b73f107");
-
-    // AssetDetails
-    EXPECT_EQ(DeserializedValue.AssetDetails.size(), 1);
-    csp::services::generated::prototypeservice::AssetDetailDto AssetDetail = DeserializedValue.AssetDetails[0];
-
-    EXPECT_EQ(AssetDetail.GetPrototypeId(), "6807d74f486cf8794b73f107");
-    EXPECT_EQ(AssetDetail.HasFileName(), false);
-    EXPECT_EQ(AssetDetail.GetName(), "Small_Kiosk_T_lod3.glb");
-    EXPECT_EQ(AssetDetail.GetLanguageCode(), "en-us");
-    EXPECT_EQ(AssetDetail.GetSupportedPlatforms().size(), 1);
-    EXPECT_EQ(AssetDetail.GetSupportedPlatforms()[0], "Default");
-    EXPECT_EQ(AssetDetail.GetStyle().size(), 1);
-    EXPECT_EQ(AssetDetail.GetStyle()[0], "Default");
-    EXPECT_EQ(AssetDetail.GetAssetType(), "Model");
-    EXPECT_EQ(AssetDetail.HasThirdPartyReferenceId(), false);
-    EXPECT_EQ(AssetDetail.HasUri(), false);
-    EXPECT_EQ(AssetDetail.HasOriginalAssetUri(), false);
-    EXPECT_EQ(AssetDetail.HasChecksum(), false);
-    EXPECT_EQ(AssetDetail.HasVersion(), false);
-    EXPECT_EQ(AssetDetail.HasMimeType(), false);
-    EXPECT_EQ(AssetDetail.HasExternalUri(), false);
-    EXPECT_EQ(AssetDetail.HasExternalMimeType(), false);
-    EXPECT_EQ(AssetDetail.GetTags().size(), 1);
-    EXPECT_EQ(AssetDetail.GetTags()[0], "lod:3");
-    EXPECT_EQ(AssetDetail.GetSizeInBytes(), 0);
-    EXPECT_EQ(AssetDetail.GetId(), "6807d750b618cc273309a258");
-
-    // Sequences
-    EXPECT_EQ(DeserializedValue.Sequences.size(), 0);
-
-    // Convert to csp scene description
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::SpaceEntitySystem EntitySystem { &Connection, LogSystem, ScriptRunner };
-    csp::SceneDescription SceneDescription { DeserializedValue, EntitySystem, LogSystem, ScriptRunner };
+
+    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
+    CSPSceneData SceneData { Json.c_str() };
 
     // Test csp scene description values are correct
 
     // Space
-    EXPECT_EQ(SceneDescription.Space.Id, "66c65e8d9821e1cc2b51dc0d");
-    EXPECT_EQ(SceneDescription.Space.CreatedBy, "66a0033d6541645960bfffda");
-    EXPECT_EQ(SceneDescription.Space.CreatedAt, "2024-08-21T21:39:25.017+00:00");
-    EXPECT_EQ(SceneDescription.Space.OwnerId, "66a0033d6541645960bfffda");
-    EXPECT_EQ(SceneDescription.Space.Name, "Abu Dhabi Airport");
-    EXPECT_EQ(SceneDescription.Space.UserIds.Size(), 0);
-    EXPECT_EQ(SceneDescription.Space.BannedUserIds.Size(), 0);
-    EXPECT_EQ(SceneDescription.Space.ModeratorIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.Id, "66c65e8d9821e1cc2b51dc0d");
+    EXPECT_EQ(SceneData.Space.CreatedBy, "66a0033d6541645960bfffda");
+    EXPECT_EQ(SceneData.Space.CreatedAt, "2024-08-21T21:39:25.017+00:00");
+    EXPECT_EQ(SceneData.Space.OwnerId, "66a0033d6541645960bfffda");
+    EXPECT_EQ(SceneData.Space.Name, "Abu Dhabi Airport");
+    EXPECT_EQ(SceneData.Space.UserIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.BannedUserIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.ModeratorIds.Size(), 0);
 
-    EXPECT_FALSE(csp::systems::HasFlag(SceneDescription.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    EXPECT_TRUE(csp::systems::HasFlag(SceneDescription.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    EXPECT_FALSE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
     // Entities
     EXPECT_EQ(SceneDescription.Entities.Size(), 1);
@@ -577,9 +375,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     EXPECT_FALSE(SpaceEntity->ParentId.HasValue());
 
     // AssetCollection
-    EXPECT_EQ(SceneDescription.AssetCollections.Size(), 1);
+    EXPECT_EQ(SceneData.AssetCollections.Size(), 1);
 
-    csp::systems::AssetCollection AssetCollection = SceneDescription.AssetCollections[0];
+    csp::systems::AssetCollection AssetCollection = SceneData.AssetCollections[0];
     EXPECT_EQ(AssetCollection.GetMetadataMutable().Size(), 1);
     EXPECT_EQ(AssetCollection.GetMetadataMutable()["assetType"], csp::common::String { "staticmodel" });
     EXPECT_EQ(AssetCollection.Id, "6807d74f486cf8794b73f107");
@@ -597,9 +395,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     EXPECT_EQ(AssetCollection.Version, "");
 
     // Asset
-    EXPECT_EQ(SceneDescription.Assets.Size(), 1);
+    EXPECT_EQ(SceneData.Assets.Size(), 1);
 
-    csp::systems::Asset Asset = SceneDescription.Assets[0];
+    csp::systems::Asset Asset = SceneData.Assets[0];
     EXPECT_EQ(Asset.AssetCollectionId, "6807d74f486cf8794b73f107");
     EXPECT_EQ(Asset.Id, "6807d750b618cc273309a258");
     EXPECT_EQ(Asset.FileName, "");
@@ -620,5 +418,5 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     EXPECT_EQ(Asset.ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::NONE);
 
     // Sequences
-    EXPECT_EQ(SceneDescription.Sequences.Size(), 0);
+    EXPECT_EQ(SceneData.Sequences.Size(), 0);
 }
