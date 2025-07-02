@@ -19,6 +19,8 @@
 
 namespace csp::multiplayer::mcs
 {
+/// @brief Internal mcs data structure which represents objects in a scene.
+/// This is created through the deserialization of a csp scene json file.
 class SceneDescription
 {
 public:
