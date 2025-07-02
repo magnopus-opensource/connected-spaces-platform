@@ -27,6 +27,8 @@ class JsonDeserializer;
 
 namespace csp::systems::mcs
 {
+/// @brief Internal mcs data structure which represents data in a scene.
+/// This is created through the deserialization of a csp scene json file.
 class SceneData
 {
 public:
