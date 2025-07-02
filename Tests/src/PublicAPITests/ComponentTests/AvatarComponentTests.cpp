@@ -77,7 +77,10 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
     const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -209,7 +212,10 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
     const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);

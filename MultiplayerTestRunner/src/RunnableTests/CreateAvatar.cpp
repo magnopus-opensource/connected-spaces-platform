@@ -21,6 +21,7 @@
 #include <CSP/Multiplayer/SpaceTransform.h>
 #include <CSP/Systems/Spaces/SpaceSystem.h>
 #include <CSP/Systems/SystemsManager.h>
+#include <CSP/Systems/Users/UserSystem.h>
 #include <future>
 
 namespace CreateAvatar
@@ -35,6 +36,7 @@ void RunTest()
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
+    auto& UserSystem = *SystemsManager.GetUserSystem();
 
     UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
     const UUIDv4::UUID uuid = uuidGenerator.getUUID();
@@ -54,7 +56,9 @@ void RunTest()
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
 
-    EntitySystem.CreateAvatar(UserName, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
+    const auto LoginState = UserSystem.GetLoginState();
+
+    EntitySystem.CreateAvatar(UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
         [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
     ResultFuture.get();

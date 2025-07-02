@@ -57,9 +57,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <thread>
 
-// Ach, not quite broken yet
-#include "CSP/Systems/SystemsManager.h"
-
 using namespace std::chrono;
 
 // Queue pending script property updates
@@ -552,10 +549,10 @@ void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
 
 void SpaceEntity::RemoveParentId() { ParentId = nullptr; }
 
-void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
+void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessaging)
 {
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-    if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
+    if (!AllowSelfMessaging)
     {
         std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
         std::scoped_lock ComponentsLocker(ComponentsLock);
@@ -884,7 +881,10 @@ bool SpaceEntity::Deselect()
 
 bool SpaceEntity::IsModifiable() const
 {
-    if (EntitySystem == nullptr || csp::systems::SystemsManager::Get().GetMultiplayerConnection() == nullptr)
+
+    // I do not know if we actually need to check multiplayer for nullness, this check was here when breaking dependencies ... one would hope it would
+    // be an invariant on EntitySystem.
+    if ((EntitySystem == nullptr) || (EntitySystem->GetMultiplayerConnectionInstance() == nullptr))
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
@@ -900,7 +900,7 @@ bool SpaceEntity::IsModifiable() const
         return false;
     }
 
-    return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
+    return (OwnerId == EntitySystem->GetMultiplayerConnectionInstance()->GetClientId() || IsTransferable);
 }
 
 void SpaceEntity::Lock()

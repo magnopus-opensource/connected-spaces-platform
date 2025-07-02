@@ -16,6 +16,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Mocks/SignalRConnectionMock.h"
 #include "TestHelpers.h"
@@ -155,10 +156,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
     bool IsVisible = true;
 
+    const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
+
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
             SpaceEntitySystem->SendNewAvatarObjectMessage(
-                "Username", UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+                "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
@@ -200,10 +203,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
     bool IsVisible = true;
 
+    const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
+
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
             SpaceEntitySystem->SendNewAvatarObjectMessage(
-                "Username", UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+                "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
@@ -270,6 +275,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
                 ASSERT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
             }));
 
+    const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
+
     async::spawn(async::inline_scheduler(),
         []()
         {
@@ -277,7 +284,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
         }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
             SpaceEntitySystem->CreateNewLocalAvatar(
-                Username, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
+                Username, LoginState, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
@@ -318,8 +325,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
     bool IsVisible = true;
 
+    const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
+
     SpaceEntitySystem->CreateAvatar(
-        "Username", UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
+        "Username", LoginState, UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.

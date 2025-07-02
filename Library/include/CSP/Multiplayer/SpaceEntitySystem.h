@@ -56,6 +56,7 @@ class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
 namespace csp::common
 {
 class LogSystem;
+class LoginState;
 }
 
 /// @brief Namespace that encompasses everything in the multiplayer system
@@ -65,6 +66,7 @@ namespace csp::multiplayer
 class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
+class EventBus;
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -100,8 +102,9 @@ public:
     /// @param InAvatarPlayMode AvatarPlayMode : The Initial AvatarPlayMode to set.
     /// @param Callback EntityCreatedCallback A callback that executes when the creation is complete,
     /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT void CreateAvatar(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, bool IsVisible, AvatarState InState,
-        const csp::common::String& InAvatarId, AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback);
+    CSP_ASYNC_RESULT void CreateAvatar(const csp::common::String& InName, const csp::common::LoginState& LoginState,
+        const SpaceTransform& InSpaceTransform, bool IsVisible, AvatarState InState, const csp::common::String& InAvatarId,
+        AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback);
 
     /// @brief Creates a SpaceEntity of type Object, and relevant default values.
     /// @param InName csp::common::String : The name to give the new SpaceEntity.
@@ -348,8 +351,8 @@ public:
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
-    CSP_NO_EXPORT SpaceEntitySystem(
-        MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::EventBus& EventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -424,10 +427,11 @@ private:
     CSP_START_IGNORE
     async::shared_task<uint64_t> RemoteGenerateNewAvatarId();
     std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name,
-        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
+        const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
+        AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
     std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> CreateNewLocalAvatar(const csp::common::String& Name,
-        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
-        EntityCreatedCallback Callback);
+        const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
+        AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
     class EntityScriptBinding* ScriptBinding;
@@ -453,6 +457,8 @@ private:
 
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
+    // May not be null
+    csp::multiplayer::EventBus* EventBus;
 };
 
 } // namespace csp::multiplayer

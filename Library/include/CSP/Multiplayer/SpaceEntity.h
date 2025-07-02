@@ -440,7 +440,9 @@ public:
 
     /// @brief Apply a local patch
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the SpaceEntitySystem state. Don't set this
+    /// unless you know what you are doing. (default: false)
+    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
