@@ -22,14 +22,22 @@
 
 namespace csp::systems
 {
+/// @brief CSPSceneData which represents all data that exists for a space.
+/// @details Created through the deserialization of a CSPSceneDescription Json.
 class CSPSceneData
 {
 public:
+    /// @brief Constructor for CSPSceneData by deserializing a SceneDescription json file.
+    /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
     CSPSceneData(const csp::common::String& SceneDescriptionJson);
 
+    /// @brief The space the scene data represents.
     csp::systems::Space Space;
+    /// @brief The asset collections for this scene.
     csp::common::Array<csp::systems::AssetCollection> AssetCollections;
+    /// @brief The assets for this scene.
     csp::common::Array<csp::systems::Asset> Assets;
+    /// @brief The sequences for this scene.
     csp::common::Array<csp::systems::Sequence> Sequences;
 };
 
