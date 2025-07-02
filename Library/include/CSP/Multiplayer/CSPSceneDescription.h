@@ -20,13 +20,20 @@
 
 namespace csp::multiplayer
 {
-
+/// @brief CSPSceneDescription which represents all entities that exists for a scene.
+/// @details Created through the deserialization of a CSPSceneDescription Json.
 class CSPSceneDescription
 {
 public:
+    /// @brief Constructor for CSPSceneDescription by deserializing a SceneDescription json file.
+    /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
+    /// @param EntitySystem csp::multiplayer::SpaceEntitySystem& : The SpaceEntitySystem for this session.
+    /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
+    /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
     CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::SpaceEntitySystem& EntitySystem,
         csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
+    /// @brief The Entities that exist for this scene.
     csp::common::Array<csp::multiplayer::SpaceEntity*> Entities;
 };
 
