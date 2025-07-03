@@ -20,6 +20,7 @@
 #include "LoginRAII.h"
 #include "RunnableTests/CreateAvatar.h"
 #include "RunnableTests/CreateConversation.h"
+#include "RunnableTests/EventBusPing.h"
 #include "SpaceRAII.h"
 #include "Utils.h"
 
@@ -63,6 +64,9 @@ void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_p
         break;
     case TestIdentifier::CREATE_CONVERSATION:
         CreateConversation::RunTest();
+        break;
+    case TestIdentifier::EVENT_BUS_PING:
+        EventBusPing::RunTest();
         break;
     default:
         throw Utils::ExceptionWithCode(

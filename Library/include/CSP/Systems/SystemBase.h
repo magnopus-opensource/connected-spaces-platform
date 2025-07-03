@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 
 namespace csp::common
 {
@@ -32,7 +32,7 @@ class WebClient;
 namespace csp::multiplayer
 {
 
-class EventBus;
+class NetworkEventBus;
 class EventDeserialiser;
 class MultiplayerConnection;
 
@@ -47,18 +47,18 @@ class value;
 
 namespace csp::systems
 {
-/// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or EventBus instance in the constructor of each
-/// System.
+/// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or NetworkEventBus instance in the constructor
+/// of each System.
 class CSP_API CSP_NO_DISPOSE SystemBase
 {
     friend class csp::multiplayer::MultiplayerConnection;
 
 protected:
-    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
-    CSP_NO_EXPORT SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
 
     csp::web::WebClient* WebClient;
-    csp::multiplayer::EventBus* EventBusPtr;
+    csp::multiplayer::NetworkEventBus* EventBusPtr;
 
 public:
     /// @brief Destructor of the SystemBase base class.
@@ -70,14 +70,6 @@ public:
     /// @brief Deregisters the system from listening for the default event.
     virtual void DeregisterSystemCallback();
 
-    /// @brief Deserialises the event values of the system.
-    /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT virtual void OnEvent(const std::vector<signalr::value>& EventValues);
-
-    /// @brief Sets a callback for a default event.
-    /// @param Callback csp::multiplayer::EventBus::ParameterisedCallbackHandler: Callback to receive data for the system that has been changed.
-    CSP_EVENT void SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback);
-
 protected:
     // EM, June2025: Having this on system base makes it quite simple to quit using the singleton macros in all the systems if we wanted to.
     // Should NOT be null. The only reason this is a pointer is because we can't get the wrapper gen work required to support reference injections
@@ -86,8 +78,6 @@ protected:
 
 private:
     SystemBase(); // This constructor is only provided to appease the wrapper generator and should not be used
-
-    csp::multiplayer::EventBus::ParameterisedCallbackHandler SystemCallback;
 };
 
 } // namespace csp::systems

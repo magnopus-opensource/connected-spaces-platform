@@ -28,7 +28,7 @@
 namespace csp::multiplayer
 {
 
-static const ReplicatedValue InvalidValue = ReplicatedValue();
+static const csp::common::ReplicatedValue InvalidValue = csp::common::ReplicatedValue();
 
 ComponentBase::ComponentBase()
     : Parent(nullptr)
@@ -62,9 +62,9 @@ uint16_t ComponentBase::GetId() { return Id; }
 
 ComponentType ComponentBase::GetComponentType() const { return Type; }
 
-const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
+const csp::common::Map<uint32_t, csp::common::ReplicatedValue>* ComponentBase::GetProperties() const { return &Properties; }
 
-const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
+const csp::common::ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 {
     if (Properties.HasKey(Key))
     {
@@ -83,14 +83,14 @@ bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
     {
         return RepVal.GetBool();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Boolean type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Boolean type");
     }
 
     return false;
@@ -100,14 +100,14 @@ int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
     {
         return RepVal.GetInt();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Integer type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Integer type");
     }
 
     return 0;
@@ -117,14 +117,14 @@ float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
     {
         return RepVal.GetFloat();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Float type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Float type");
     }
 
     return 0.0f;
@@ -134,88 +134,88 @@ const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
     {
         return RepVal.GetString();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid String type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String type");
     }
 
-    return ReplicatedValue::GetDefaultString();
+    return csp::common::ReplicatedValue::GetDefaultString();
 }
 
 const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
     {
         return RepVal.GetVector2();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector2 type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector2 type");
     }
 
-    return ReplicatedValue::GetDefaultVector2();
+    return csp::common::ReplicatedValue::GetDefaultVector2();
 }
 
 const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
     {
         return RepVal.GetVector3();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector3 type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector3 type");
     }
 
-    return ReplicatedValue::GetDefaultVector3();
+    return csp::common::ReplicatedValue::GetDefaultVector3();
 }
 
 const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
     {
         return RepVal.GetVector4();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid Vector4 type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid Vector4 type");
     }
 
-    return ReplicatedValue::GetDefaultVector4();
+    return csp::common::ReplicatedValue::GetDefaultVector4();
 }
 
-const csp::common::Map<csp::common::String, ReplicatedValue>& ComponentBase::GetStringMapProperty(uint32_t Key) const
+const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& ComponentBase::GetStringMapProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::StringMap)
+    if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
     {
         return RepVal.GetStringMap();
     }
 
     if (LogSystem != nullptr)
     {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying ReplicatedValue not a valid String Map type");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Underlying csp::common::ReplicatedValue not a valid String Map type");
     }
 
-    return ReplicatedValue::GetDefaultStringMap();
+    return csp::common::ReplicatedValue::GetDefaultStringMap();
 }
 
-void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
+void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value)
 {
     if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
     {
@@ -268,9 +268,9 @@ void ComponentBase::RemoveProperty(uint32_t Key)
     Parent->AddDirtyComponent(this);
 }
 
-void ComponentBase::SetProperties(const csp::common::Map<uint32_t, ReplicatedValue>& Value) { Properties = Value; }
+void ComponentBase::SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value) { Properties = Value; }
 
-void ComponentBase::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) { Properties[Key] = Value; }
+void ComponentBase::SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) { Properties[Key] = Value; }
 
 void ComponentBase::OnCreated() { }
 

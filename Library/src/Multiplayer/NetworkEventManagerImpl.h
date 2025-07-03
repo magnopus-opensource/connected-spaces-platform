@@ -22,11 +22,15 @@
 
 #include <functional>
 
+namespace csp::common
+{
+class ReplicatedValue;
+}
+
 namespace csp::multiplayer
 {
 
 class MultiplayerConnection;
-class ReplicatedValue;
 class ISignalRConnection;
 enum class ErrorCode;
 
@@ -39,7 +43,7 @@ public:
 
     void SetConnection(csp::multiplayer::ISignalRConnection* InConnection);
 
-    CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Arguments,
+    CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Arguments,
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
 private:

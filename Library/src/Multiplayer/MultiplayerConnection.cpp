@@ -17,16 +17,16 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
-#include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"
 #include "Events/EventSystem.h"
-#include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
@@ -164,7 +164,7 @@ MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     , Connected(false)
     , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
-    EventBusPtr = new EventBus(this, LogSystem);
+    EventBusPtr = new NetworkEventBus(this, LogSystem);
 }
 
 MultiplayerConnection::~MultiplayerConnection()

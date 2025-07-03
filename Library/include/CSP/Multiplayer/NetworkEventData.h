@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
@@ -43,8 +44,24 @@ enum class EPermissionChangeType
     Invalid,
 };
 
+/// @brief Data deserialized from a general purpose event. Serves as the base type for all custom deserialized events.
+class CSP_API NetworkEventData
+{
+public:
+    virtual ~NetworkEventData() { }
+
+    /// @brief The name of the event that sent this NetworkEventData
+    csp::common::String EventName;
+
+    /// @brief The ID of the client that sent this NetworkEventData
+    uint64_t SenderClientId;
+
+    /// @brief The collection of values sent with this Event. May be empty.
+    csp::common::Array<csp::common::ReplicatedValue> EventValues;
+};
+
 /// @brief Describes the changes an asset has undergone when the client application is connected to a space.
-class CSP_API AssetDetailBlobParams
+class CSP_API AssetDetailBlobChangedNetworkEventData : public NetworkEventData
 {
 public:
     /// @brief The type of change this asset has undergone.
@@ -64,7 +81,7 @@ public:
 };
 
 /// @brief Class used to provide details of a conversation message that has been received whilst the client application is connected to a space.
-class CSP_API ConversationEventParams
+class CSP_API ConversationNetworkEventData : public NetworkEventData
 {
 public:
     ConversationEventType MessageType;
@@ -72,7 +89,7 @@ public:
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.
-class CSP_API UserPermissionsParams
+class CSP_API AccessControlChangedNetworkEventData : public NetworkEventData
 {
 public:
     /// @brief The unique identifier of the space for which a user's permissions have changed.
@@ -97,24 +114,14 @@ enum class ESequenceUpdateType
     Invalid
 };
 
-class CSP_API SequenceChangedParams
+// Additional data needed for the case where the sequence event is a hotspot sequence event.
+// Not great, symptom of the fact that these should be seperate events, + the fact that we cant (or don't want to) use RTTI on WASM.
+// This is used only inside SequenceChangedNetworkEventData
+class CSP_API HotspotSequenceChangedNetworkEventData
 {
 public:
-    /// @brief The type of update to the sequence.
-    ESequenceUpdateType UpdateType;
-
-    /// @brief The key of the sequence which was updated.
-    csp::common::String Key;
-
-    /// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
-    csp::common::String NewKey;
-};
-
-class CSP_API SequenceHotspotChangedParams
-{
-public:
-    /// @brief The type of update to the sequence.
-    ESequenceUpdateType UpdateType;
+    HotspotSequenceChangedNetworkEventData() = default;
+    ~HotspotSequenceChangedNetworkEventData() = default;
 
     /// @brief The unique identifier of the space that this hotspot sequence belongs to.
     csp::common::String SpaceId;
@@ -126,6 +133,25 @@ public:
     csp::common::String NewName;
 };
 
+class CSP_API SequenceChangedNetworkEventData : public NetworkEventData
+{
+public:
+    /// @brief The type of update to the sequence.
+    ESequenceUpdateType UpdateType;
+
+    /// @brief The key of the sequence which was updated.
+    csp::common::String Key;
+
+    /// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
+    csp::common::String NewKey;
+
+    /// @brief Additional data if this sequence event is a hotspot sequence event. Will be non-empty in that case only.
+    csp::common::Optional<csp::multiplayer::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
+};
+
+// TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.
+// The annoyance is that ChangeType is defined for these EventDatas, gotta break that at some point.
+// I don't really know where this should go at the moment.
 class CSP_API MaterialChangedParams
 {
 public:

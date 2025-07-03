@@ -19,12 +19,12 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
-#include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/Convert.h"
 #include "Common/UUIDGenerator.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
@@ -90,7 +90,7 @@ UserSystem::UserSystem()
 {
 }
 
-UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
+UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)
     , RefreshTokenChangedCallback(nullptr)
 {
@@ -801,7 +801,7 @@ void UserSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register UserSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        CSP_LOG_ERROR_MSG("Error: Failed to register UserSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
@@ -810,27 +810,32 @@ void UserSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("AccessControlChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)),
+        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
 }
 
 void UserSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("AccessControlChanged");
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)));
     }
 }
 
-void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void UserSystem::OnAccessControlChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
 {
     if (!UserPermissionsChangedCallback)
     {
         return;
     }
 
-    csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-    UserPermissionsChangedCallback(Deserialiser.GetEventParams());
+    const csp::multiplayer::AccessControlChangedNetworkEventData& AccessControlChangedNetworkEventData
+        = static_cast<const csp::multiplayer::AccessControlChangedNetworkEventData&>(NetworkEventData);
+
+    UserPermissionsChangedCallback(AccessControlChangedNetworkEventData);
 }
 
 } // namespace csp::systems

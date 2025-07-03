@@ -23,7 +23,7 @@
 
 #include <functional>
 
-namespace csp::multiplayer
+namespace csp::common
 {
 
 /// @brief Enum representing the type of a replicated value.
