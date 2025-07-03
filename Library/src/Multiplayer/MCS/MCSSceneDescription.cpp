@@ -30,10 +30,10 @@ static constexpr const char* Int64Type = "Magnopus.Service.Multiplayer.Messages.
                                          "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
 static constexpr const char* UInt64Type = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, "
                                           "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* SingleType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single, "
-                                          "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* SingleArrayType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], "
-                                               "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
+static constexpr const char* SinglePrecisionType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single, "
+                                                   "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
+static constexpr const char* SinglePrecisionArrayType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], "
+                                                        "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
 static constexpr const char* DoubleType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Double, "
                                           "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
 static constexpr const char* StringType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, "
@@ -52,8 +52,8 @@ namespace
     std::string GetComponentString(bool) { return BooleanType; }
     std::string GetComponentString(int64_t) { return Int64Type; }
     std::string GetComponentString(uint64_t) { return UInt64Type; }
-    std::string GetComponentString(float) { return SingleType; }
-    std::string GetComponentString(const std::vector<float>&) { return SingleArrayType; }
+    std::string GetComponentString(float) { return SinglePrecisionType; }
+    std::string GetComponentString(const std::vector<float>&) { return SinglePrecisionArrayType; }
     std::string GetComponentString(double) { return DoubleType; }
     std::string GetComponentString(const std::string&) { return StringType; }
     std::string GetComponentString(const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>&) { return UInt16DictionaryType; }
@@ -123,11 +123,11 @@ namespace
         {
             DeserializeComponentDataFromTypeStringInternal<uint64_t>(Deserializer, OutVal);
         }
-        else if (Type == SingleType)
+        else if (Type == SinglePrecisionType)
         {
             DeserializeComponentDataFromTypeStringInternal<float>(Deserializer, OutVal);
         }
-        else if (Type == SingleArrayType)
+        else if (Type == SinglePrecisionArrayType)
         {
             DeserializeComponentDataFromTypeStringInternal<std::vector<float>>(Deserializer, OutVal);
         }
