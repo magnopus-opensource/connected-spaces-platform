@@ -130,6 +130,19 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringEmptyTest)
+{
+    const std::string TestValue = "";
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+
+    mcs::ItemComponentData DeserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorTest)
 {
     const std::vector<float> TestValue = { 1.1f, 2.2f, 3.3f };
