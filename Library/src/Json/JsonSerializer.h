@@ -256,13 +256,16 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
 
     for (rapidjson::SizeType i = 0; i < Size; ++i)
     {
+        // Get the json vale in the current array.
         auto JsonValue = &(*ValueStack.top())[i];
+        // Push this value to our stack, so subsequent calls affect read the inner object.
         ValueStack.push(JsonValue);
 
         T NewVal;
         DeserializeValue(NewVal);
         Values[i] = NewVal;
 
+        // Pop the element as we are finished reading.
         ValueStack.pop();
     }
 }
@@ -273,13 +276,16 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
 
     for (rapidjson::SizeType i = 0; i < Size; ++i)
     {
+        // Get the json vale in the current array.
         auto JsonValue = &(*ValueStack.top())[i];
+        // Push this value to our stack, so subsequent calls affect read the inner object.
         ValueStack.push(JsonValue);
 
         T NewVal;
         DeserializeValue(NewVal);
         Values.Append(NewVal);
 
+        // Pop the element as we are finished reading.
         ValueStack.pop();
     }
 }
@@ -291,13 +297,16 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(std::vector
 
     for (rapidjson::SizeType i = 0; i < Size; ++i)
     {
+        // Get the json vale in the current array.
         auto JsonValue = &(*ValueStack.top())[i];
+        // Push this value to our stack, so subsequent calls affect read the inner object.
         ValueStack.push(JsonValue);
 
         T NewVal;
         DeserializeValue(NewVal);
         Values[i] = NewVal;
 
+        // Pop the element as we are finished reading.
         ValueStack.pop();
     }
 }
