@@ -20,7 +20,7 @@
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 
 #include <signalrclient/signalr_value.h>
 #include <type_traits>
@@ -37,23 +37,25 @@ namespace csp::multiplayer
 csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
 // Deserialize the data general purpose event that requires no special custom deserialization.
-EventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when an asset referenced by the space changes.
-AssetDetailBlobChangedEventData DeserializeAssetDetailBlobChangedEvent(
+AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a conversation event happens.
-ConversationEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+ConversationNetworkEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a user in the space's access permissions change.
-AccessControlChangedEventData DeserializeAccessControlChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a sequence in the space changes.
-SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 // Specialized deserializataion for events triggered when a hotspot sequence in the space changes. Hacky because we cant use RTTI on WASM and the
 // Hotspot event uses the same event type as regular sequences
-SequenceChangedEventData DeserializeSequenceHotspotChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
 } // namespace csp::multiplayer

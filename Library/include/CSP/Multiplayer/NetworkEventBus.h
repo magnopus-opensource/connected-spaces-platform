@@ -60,8 +60,8 @@ class EventDeserialiser;
 enum class ErrorCode;
 
 // The callback used to register to listen to events.
-// EventData lifetime is tied to the callback, do not attempt to store it via reference.
-typedef std::function<void(const EventData& EventData)> NetworkEventCallback;
+// NetworkEventData lifetime is tied to the callback, do not attempt to store it via reference.
+typedef std::function<void(const NetworkEventData& NetworkEventData)> NetworkEventCallback;
 
 /*
  * @brief Details about a network event registrations to serve as a key in the event map.
@@ -126,7 +126,7 @@ namespace csp::multiplayer
 /// @brief Handles registration of interest, and dispatch of callbacks to interested parties, of events sent over the network to connected clients.
 /// This object may be used to send arbitrary messages between clients, broadcasting messages to either all clients, or particular clients specified
 /// by a clientID. Particular messages are generic and may be defined as any arbitrary string, and may carry payloads of csp::common::ReplicatedValue.
-class CSP_API EventBus
+class CSP_API NetworkEventBus
 {
 public:
     typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
@@ -150,7 +150,7 @@ public:
     CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
-    /// @brief Register interest in a network event, such that the EventBus will call the provided callback when it arrives
+    /// @brief Register interest in a network event, such that the NetworkEventBus will call the provided callback when it arrives
     /// @param Registration NetworkEventRegistration : Registration information, containing a ReceiverID and an EventName.
     /// @param Callback NetworkEventCallback : Callback to invoke when specified event is received.
     /// @return True if the registration was successful, false otherwise, such as in the case where Registration was not-unique, or the callback was
@@ -171,7 +171,7 @@ public:
     /// EventReceiverId.
     bool StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
 
-    /// @brief Get an array of all interests currently registered to the EventBus
+    /// @brief Get an array of all interests currently registered to the NetworkEventBus
     /// @return csp::common::Array<csp::multiplayer::NetworkEventRegistration> A container of all currently registered registrations.
     csp::common::Array<NetworkEventRegistration> AllRegistrations() const;
 
@@ -179,17 +179,17 @@ public:
     /// @return True is successfully started listening, false if the connection is unavailable for some reason.
     bool StartEventMessageListening();
 
-    /// @brief EventBus constructor
+    /// @brief NetworkEventBus constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the event bus with
-    CSP_NO_EXPORT EventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT NetworkEventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem);
 
-    /// @brief EventBus destructor
-    CSP_NO_EXPORT ~EventBus();
+    /// @brief NetworkEventBus destructor
+    CSP_NO_EXPORT ~NetworkEventBus();
 
     CSP_START_IGNORE
     /*
      * @brief Network events CSP sends over the network to facilitate its internal functionality.
-     * As the EventBus provides the ability to send any event, using a string as the identifier,
+     * As the NetworkEventBus provides the ability to send any event, using a string as the identifier,
      * these eventually get serialized/deserialized to go across the network
      * This is just a bit of type-safety really. In theory we could keep the strings this makes
      * manually in sync across all the systems, but this way mistakes are harder.
@@ -198,11 +198,13 @@ public:
      */
     enum class NetworkEvent
     {
-        AssetDetailBlobChanged, // Unpacks to AssetDetailBlobChangedEventData
-        Conversation, // Unpacks to ConversationEventData
-        SequenceChanged, // Unpacks to SequenceChangedEventData or SequenceHotspotChangedEventData (Better if there was a seperate event for each.)
-        AccessControlChanged, // Unpacks to AccessControlChangedEventData
-        GeneralPurposeEvent // Unpacks to EventData (Base type). An external event unknown to us that may have been registered with any string value.
+        AssetDetailBlobChanged, // Unpacks to AssetDetailBlobChangedNetworkEventData
+        Conversation, // Unpacks to ConversationNetworkEventData
+        SequenceChanged, // Unpacks to SequenceChangedNetworkEventData or SequenceHotspotChangedEventData (Better if there was a seperate event for
+                         // each.)
+        AccessControlChanged, // Unpacks to AccessControlChangedNetworkEventData
+        GeneralPurposeEvent // Unpacks to NetworkEventData (Base type). An external event unknown to us that may have been registered with any string
+                            // value.
     };
 
     static NetworkEvent NetworkEventFromString(const csp::common::String& EventString);
@@ -210,7 +212,7 @@ public:
     CSP_END_IGNORE
 
 private:
-    EventBus();
+    NetworkEventBus();
 
     class MultiplayerConnection* MultiplayerConnectionInst;
     csp::common::LogSystem& LogSystem;
@@ -230,7 +232,7 @@ private:
     CSP_END_IGNORE
 
     // Map internal event values to the deserializers needed to unpack them
-    std::unique_ptr<EventData> DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
+    std::unique_ptr<NetworkEventData> DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
 
     std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
 };

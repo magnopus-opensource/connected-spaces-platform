@@ -2000,17 +2000,17 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     csp::common::String CallbackAssetId;
 
     auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobChangedEventData& EventData)
+        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(EventData.ChangeType, EAssetChangeType::Created);
-        EXPECT_EQ(EventData.AssetType, csp::systems::EAssetType::MODEL);
+        EXPECT_EQ(NetworkEventData.ChangeType, EAssetChangeType::Created);
+        EXPECT_EQ(NetworkEventData.AssetType, csp::systems::EAssetType::MODEL);
 
-        CallbackAssetId = EventData.AssetId;
+        CallbackAssetId = NetworkEventData.AssetId;
         AssetDetailBlobChangedCallbackCalled = true;
     };
 
@@ -2057,7 +2057,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* EventBus = SystemsManager.GetEventBus();
+    auto* NetworkEventBus = SystemsManager.GetEventBus();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
@@ -2085,15 +2085,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
 
-    auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobChangedEventData& EventData)
+    auto AssetDetailBlobChangedCallback
+        = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(EventData.ChangeType, EAssetChangeType::Invalid);
-        EXPECT_EQ(EventData.AssetType, csp::systems::EAssetType::IMAGE);
+        EXPECT_EQ(NetworkEventData.ChangeType, EAssetChangeType::Invalid);
+        EXPECT_EQ(NetworkEventData.AssetType, csp::systems::EAssetType::IMAGE);
 
         AssetDetailBlobChangedCallbackCalled = true;
     };
@@ -2106,7 +2107,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     csp::common::ReplicatedValue Param4 = "";
     csp::common::ReplicatedValue Param5 = "";
 
-    EventBus->SendNetworkEventToClient(EventBus::StringFromNetworkEvent(EventBus::NetworkEvent::AssetDetailBlobChanged),
+    NetworkEventBus->SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged),
         { Param1, Param2, Param3, Param4, Param5 }, Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
 
     // Wait for message

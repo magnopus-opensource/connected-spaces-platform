@@ -21,7 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
 #include <unordered_map>

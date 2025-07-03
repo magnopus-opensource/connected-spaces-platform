@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "MCS/MCSTypes.h"
 
@@ -135,7 +135,7 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
 }
 
 // Parse the parts common to all events, extracting the event type (string) and the sender client id (uint)
-void PopulateCommonEventData(const std::vector<signalr::value>& EventValues, EventData& OutEventData, csp::common::LogSystem& LogSystem)
+void PopulateCommonEventData(const std::vector<signalr::value>& EventValues, NetworkEventData& OutEventData, csp::common::LogSystem& LogSystem)
 {
     /*
      * class EventMessage
@@ -199,17 +199,17 @@ csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, 
     return ParentIdString.c_str();
 }
 
-EventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    EventData ParsedEvent {};
+    NetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
     return ParsedEvent;
 }
 
-AssetDetailBlobChangedEventData DeserializeAssetDetailBlobChangedEvent(
+AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    AssetDetailBlobChangedEventData ParsedEvent {};
+    AssetDetailBlobChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     ParsedEvent.ChangeType = EAssetChangeType::Invalid;
@@ -231,9 +231,9 @@ AssetDetailBlobChangedEventData DeserializeAssetDetailBlobChangedEvent(
     return ParsedEvent;
 }
 
-ConversationEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+ConversationNetworkEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    ConversationEventData ParsedEvent {};
+    ConversationNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     ParsedEvent.MessageType = static_cast<ConversationEventType>(ParsedEvent.EventValues[0].GetInt());
@@ -247,9 +247,10 @@ ConversationEventData DeserializeConversationEvent(const std::vector<signalr::va
     return ParsedEvent;
 }
 
-AccessControlChangedEventData DeserializeAccessControlChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    AccessControlChangedEventData ParsedEvent {};
+    AccessControlChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     /*
@@ -357,9 +358,9 @@ AccessControlChangedEventData DeserializeAccessControlChangedEvent(const std::ve
     return ParsedEvent;
 }
 
-SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    SequenceChangedEventData ParsedEvent {};
+    SequenceChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     if (ParsedEvent.EventValues.Size() != 3)
@@ -386,11 +387,12 @@ SequenceChangedEventData DeserializeSequenceChangedEvent(const std::vector<signa
     return ParsedEvent;
 }
 
-SequenceChangedEventData DeserializeSequenceHotspotChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    SequenceChangedEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
+    SequenceChangedNetworkEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
 
-    ParsedEvent.HotspotData = csp::common::Optional(new HotspotEventData());
+    ParsedEvent.HotspotData = csp::common::Optional(new HotspotSequenceChangedNetworkEventData());
 
     ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
     ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);

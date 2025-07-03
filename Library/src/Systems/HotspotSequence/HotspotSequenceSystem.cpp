@@ -16,12 +16,12 @@
 
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Debug/Logging.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 
 #include <regex>
 #include <string>
@@ -88,8 +88,8 @@ namespace
 } // namespace
 
 HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
-    csp::multiplayer::EventBus* EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(EventBus, &LogSystem)
+    csp::multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(NetworkEventBus, &LogSystem)
 {
     this->SequenceSystem = SequenceSystem;
     this->SpaceSystem = SpaceSystem;
@@ -339,8 +339,8 @@ void HotspotSequenceSystem::RegisterSystemCallback()
 
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
-            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::multiplayer::EventData& EventData) { this->OnSequenceChangedEvent(EventData); });
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
+        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
 }
 
 void HotspotSequenceSystem::DeregisterSystemCallback()
@@ -348,15 +348,15 @@ void HotspotSequenceSystem::DeregisterSystemCallback()
     if (EventBusPtr)
     {
         EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
-            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)));
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)));
     }
 }
 
-void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData)
+void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
 {
-    // This may be either a SequenceChangedEventData or a SequenceHotspotChangedEventData... we're only interested in hotspot.
+    // This may be either a SequenceChangedNetworkEventData or a SequenceHotspotChangedEventData... we're only interested in hotspot.
     // This is hacky, see Eventbus deserialisation for more.
-    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData);
+    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData);
 
     const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
 

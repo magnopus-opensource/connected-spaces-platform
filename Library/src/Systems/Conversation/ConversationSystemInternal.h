@@ -19,7 +19,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/SystemBase.h"
 
 #include <unordered_set>
@@ -50,7 +50,7 @@ public:
     CSP_END_IGNORE
 
     ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
-        csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
 
     ~ConversationSystemInternal();
 
@@ -119,16 +119,16 @@ public:
     void FlushEvents();
 
 private:
-    bool TrySendEvent(const csp::multiplayer::ConversationEventData& Params);
+    bool TrySendEvent(const csp::multiplayer::ConversationNetworkEventData& Params);
 
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
     csp::systems::UserSystem* UserSystem;
 
-    csp::multiplayer::EventBus* EventBus;
+    csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
     std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
-    std::vector<std::unique_ptr<csp::multiplayer::ConversationEventData>> Events;
+    std::vector<std::unique_ptr<csp::multiplayer::ConversationNetworkEventData>> Events;
 };
 
 }
