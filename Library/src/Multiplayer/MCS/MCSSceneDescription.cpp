@@ -100,7 +100,7 @@ namespace
     }
 
     template <class T>
-    void DeserializeComponentDataStringInternal(
+    void DeserializeComponentDataFromTypeStringInternal(
         const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
     {
         T Val;
@@ -108,40 +108,40 @@ namespace
         OutVal = Val;
     }
 
-    void DeserializeComponentDataString(
+    void DeserializeComponentDataFromTypeString(
         const csp::json::JsonDeserializer& Deserializer, const std::string& Type, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
     {
         if (Type == BooleanType)
         {
-            DeserializeComponentDataStringInternal<bool>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<bool>(Deserializer, OutVal);
         }
         else if (Type == Int64Type)
         {
-            DeserializeComponentDataStringInternal<int64_t>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<int64_t>(Deserializer, OutVal);
         }
         else if (Type == UInt64Type)
         {
-            DeserializeComponentDataStringInternal<uint64_t>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<uint64_t>(Deserializer, OutVal);
         }
         else if (Type == SingleType)
         {
-            DeserializeComponentDataStringInternal<float>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<float>(Deserializer, OutVal);
         }
         else if (Type == SingleArrayType)
         {
-            DeserializeComponentDataStringInternal<std::vector<float>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::vector<float>>(Deserializer, OutVal);
         }
         else if (Type == DoubleType)
         {
-            DeserializeComponentDataStringInternal<double>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<double>(Deserializer, OutVal);
         }
         else if (Type == StringType)
         {
-            DeserializeComponentDataStringInternal<std::string>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::string>(Deserializer, OutVal);
         }
         else if (Type == UInt16DictionaryType)
         {
-            DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
 
             // We can only deserialize string maps, so we need to convert to int afterwards.
             const auto& StringMap = std::get<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(OutVal);
@@ -156,7 +156,7 @@ namespace
         }
         else if (Type == StringDictionaryType)
         {
-            DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+            DeserializeComponentDataFromTypeStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
         }
         else
         {
@@ -215,7 +215,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer:
     std::string TypeStdString = TypeString.c_str();
 
     csp::multiplayer::mcs::ItemComponentDataVariant Variant;
-    csp::multiplayer::mcs::DeserializeComponentDataString(Deserializer, TypeStdString, Variant);
+    csp::multiplayer::mcs::DeserializeComponentDataFromTypeString(Deserializer, TypeStdString, Variant);
     Obj.Value = Variant;
 }
 
