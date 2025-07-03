@@ -172,7 +172,13 @@ public:
 
     std::string GetMemberAsString(const char* Key) const;
 
+    /// @brief Starts the deserialization process of the member with the given key.
+    /// Subsequent calls with deserialize members within the given member.
+    /// @param Key const char* : The Key of the member to enter.
     void EnterMember(const char* Key) const;
+
+    /// @brief Stops deserialization of the current object and goes back to the parent object.
+    /// Subsequent calls with deserialize members within the parent object.
     void ExitMember() const;
 
 private:
