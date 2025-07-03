@@ -14,6 +14,46 @@
 
 using namespace std::chrono_literals;
 
+// TODO: Move this code somewhere it can be shared with CSPFoundation.cpp
+
+#if defined(DEBUG)
+#define LIB_NAME "ConnectedSpacesPlatform_D"
+#else
+#define LIB_NAME "ConnectedSpacesPlatform"
+#endif
+
+#if defined(CSP_WINDOWS)
+// For SHGetKnownFolderPath
+#include <Shlobj.h>
+// For std::codecvt_utf8_utf16
+#include <codecvt>
+// For GetModuleHandle and GetProcAddress
+#include <libloaderapi.h>
+
+#define LOAD_OWN_MODULE() (void*)GetModuleHandleA(LIB_NAME)
+#define GET_FUNCTION_ADDRESS(mod, name) (void*)GetProcAddress((HMODULE)(mod), name)
+#elif defined(CSP_ANDROID)
+// For dlopen and dlsym
+#include <dlfcn.h>
+// For fstat and mkdir
+#include <sys/stat.h>
+
+#define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
+#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
+#elif defined(CSP_MACOSX) || defined(CSP_IOS)
+// For dlopen and dlsym
+#include <dlfcn.h>
+// For stat and mkdir
+#include <sys/stat.h>
+// For PATH_MAX
+#include <sys/syslimits.h>
+
+#define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
+#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
+#elif defined(CSP_WASM)
+#include <emscripten.h>
+#endif
+
 
 namespace csp {
     // Helper function to free allocated memory from wrappers
@@ -28,7 +68,23 @@ namespace csp {
         return (std::fabs(A - B) <= Tolerance);
     }
 
+    void* ModuleHandle = nullptr;
 
+    void* GetFunctionAddress([[maybe_unused]] const csp::common::String& Name)
+    {
+    #if defined(CSP_WASM)
+        return nullptr;
+    #else
+        if (ModuleHandle == nullptr)
+        {
+            ModuleHandle = LOAD_OWN_MODULE();
+            assert(ModuleHandle != nullptr);
+        }
+
+        return GET_FUNCTION_ADDRESS(ModuleHandle, Name.c_str());
+    #endif
+    }
+    
     /********************************/
     /*       Global functions       */
     /********************************/
