@@ -403,13 +403,27 @@ void ComponentResult::OnResponse(const csp::services::ApiResponseBase* ApiRespon
     }
 }
 
-void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback)
+void ItemComponentData::GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback)
 {
     services::ResponseHandlerPtr ResponseHandler
         = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
             Callback, nullptr);
 
     static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
+}
+
+async::task<ComponentResult> ItemComponentData::GetComponentByIdTASK(const int32_t& ComponentId)
+{
+    async::event_task<ComponentResult> OnCompleteEvent;
+    async::task<ComponentResult> OnCompleteTask = OnCompleteEvent.get_task();
+
+    services::ResponseHandlerPtr ResponseHandler
+        = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
+            [](const ComponentResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+
+    static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
+
+    return OnCompleteTask;
 }
 
 }
