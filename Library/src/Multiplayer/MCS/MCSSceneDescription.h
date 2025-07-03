@@ -29,5 +29,4 @@ public:
 
 }
 
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::SceneDescription& Obj);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj);

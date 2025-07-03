@@ -185,8 +185,6 @@ void DeserializeComponents(const csp::json::JsonDeserializer& Deserializer, std:
 
 }
 
-void ToJson(csp::json::JsonSerializer& /* Deserializer*/, const csp::multiplayer::mcs::SceneDescription& /* Obj*/) { }
-
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj)
 {
     Deserializer.EnterMember("Data");
