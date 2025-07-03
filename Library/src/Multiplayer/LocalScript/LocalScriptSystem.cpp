@@ -23,8 +23,8 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "quickjs.h"
 #include "quickjspp.hpp"
-#include <async++.h>
 
 using namespace std;
 
@@ -76,7 +76,10 @@ void LocalScriptSystem::Initialize()
             Context = nullptr;
         }
         Context = new qjs::Context(*Runtime);
-        ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
+        if (ScriptBinding == nullptr)
+        {
+            ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
+        }
         // Set the custom module loader on the context
         Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
         {
@@ -123,16 +126,33 @@ void LocalScriptSystem::TickAnimationFrame(float timestamp)
     {
         return;
     }
-    // This is the javascript "Event Loop"
-    // needed to process promises and async/await operations
-    while (Runtime->isJobPending())
+    try {
+        // This is the javascript "Event Loop"
+        // needed to process promises and async/await operations
+        if (Runtime->isJobPending())
+        {
+            Runtime->executePendingJob();
+        }
+    }
+    catch (qjs::exception& e)
+    { // Catch by reference
+        CSP_LOG_ERROR_MSG("QuickJS exception during tick");
+        return;
+    }
+    catch (const std::exception& e)
     {
-        Runtime->executePendingJob();
+        CSP_LOG_ERROR_FORMAT("std::exception caught during tick: %s", e.what());
+        return;
+    }
+    catch (...)
+    {
+        CSP_LOG_ERROR_MSG("Unknown C++ exception caught during tick.");
+        return;
     }
 
     std::stringstream ss;
     ss << "typeof scriptRegistry !== 'undefined' && scriptRegistry.tick(" << timestamp << ");\n";
-    Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
+    evalScript(csp::common::String(ss.str().c_str()));
 }
 
 void LocalScriptSystem::LoadScriptModules()
@@ -221,7 +241,7 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
     }
     jsValue += "};\n";
     std::string out = jsValue + "scriptRegistry.addCodeComponent(parseInt(" + entityIdStr + ", 10), attributes);";
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Registering code component for entity %s w", out.c_str());
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Registering code component for entity %s", out.c_str());
     evalScript(csp::common::String(out.c_str()));
 }
 
@@ -308,10 +328,24 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
 
 void LocalScriptSystem::evalScript(const csp::common::String& script)
 {
-    JSValue v = Context->eval(script.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
-    if (JS_IsException(v))
+    try {
+        JSValue v = Context->eval(script.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
+        if (JS_IsException(v))
+        {
+            CSP_LOG_ERROR_FORMAT("QuickJS exception: %s", script.c_str());
+        }
+    }
+    catch (qjs::exception& e)
+    { 
+        CSP_LOG_ERROR_MSG("QuickJS exception");
+    }
+    catch (const std::exception& e)
     {
-        CSP_LOG_ERROR_FORMAT("QuickJS exception: %s", script.c_str());
+        CSP_LOG_ERROR_FORMAT("std::exception caught: %s", e.what());
+    }
+    catch (...)
+    {
+        CSP_LOG_ERROR_MSG("Unknown C++ exception caught.");
     }
 }
 

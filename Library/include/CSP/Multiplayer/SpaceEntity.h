@@ -356,6 +356,9 @@ public:
     /// @return True if the entity is Local, False if not.
     bool IsLocal() const;
 
+    /// @brief Marks the entity as owned by the local client, preventing to from being replicated to other clients.
+    void SetLocal(bool isLocal);
+
     /// @brief Locks the entity if it hasn't been locked already.
     /// @pre The entity must not already be locked.
     /// A CSP error will be sent to the LogSystem if this condition is not met.

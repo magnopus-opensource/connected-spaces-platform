@@ -415,22 +415,17 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
     // get LocalscriptSystem and call initialize to ensure that the space entity system is initialised
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     
-
-    // For WASM builds, handle script initialization differently
     try {
         csp::systems::LocalScriptSystem* LocalScriptSystem = SystemsManager.GetLocalScriptSystem();
         if (LocalScriptSystem)
         {   
             LocalScriptSystem->SetSpaceId(SpaceId);
-            // Try initialization but don't block if it fails
             try {
                 LocalScriptSystem->Initialize();
-                // Use the timeout version which is WASM safe
                 LocalScriptSystem->LoadScriptModules(); // Immediate return in WASM
             } 
             catch (const std::exception& e) {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Script initialization error: %s", e.what());
-                // Continue even if script initialization fails
             }
         }
     } 

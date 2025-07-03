@@ -435,6 +435,11 @@ bool SpaceEntity::IsLocal() const
     return IsOwnedByLocalClient;
 }
 
+void SpaceEntity::SetLocal(bool isLocal)
+{
+    IsOwnedByLocalClient = isLocal;
+}
+
 void SpaceEntity::MarkForUpdate()
 {
     if (EntitySystem)
