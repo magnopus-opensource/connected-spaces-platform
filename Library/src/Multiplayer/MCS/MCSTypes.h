@@ -41,6 +41,14 @@
     4. Add a new case in DeserializeComponentData so it can be deserialized from a signalr value.
 */
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::json
 {
 class JsonSerializer;
@@ -146,6 +154,9 @@ public:
 
     bool operator==(const ItemComponentData& Other) const;
     ItemComponentData& operator=(const ItemComponentData& Other);
+
+    CSP_ASYNC_RESULT void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
+    CSP_NO_EXPORT async::task<ComponentResult> GetComponentByIdTASK(const int32_t& ComponentId);
 
 private:
     ItemComponentDataVariant Value;
