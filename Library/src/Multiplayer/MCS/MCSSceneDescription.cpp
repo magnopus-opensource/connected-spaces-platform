@@ -47,117 +47,121 @@ static constexpr const char* StringDictionaryType
       "System.Private.CoreLib],[Magnopus.Service.Multiplayer.Messages.Components.IComponentData, Magnopus.Service.Multiplayer.Contracts]], "
       "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
 
-std::string GetComponentString(bool) { return BooleanType; }
-std::string GetComponentString(int64_t) { return Int64Type; }
-std::string GetComponentString(uint64_t) { return UInt64Type; }
-std::string GetComponentString(float) { return SingleType; }
-std::string GetComponentString(const std::vector<float>&) { return SingleArrayType; }
-std::string GetComponentString(double) { return DoubleType; }
-std::string GetComponentString(const std::string&) { return StringType; }
-std::string GetComponentString(const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>&) { return UInt16DictionaryType; }
-std::string GetComponentString(const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>&) { return StringDictionaryType; }
-
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, bool Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, int64_t Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, uint64_t Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, float Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::vector<float>& Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, double Value) { Serializer.SerializeMember("item", Value); }
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::string& Value)
+namespace
 {
-    Serializer.SerializeMember("item", csp::common::String { Value.c_str() });
-}
+    std::string GetComponentString(bool) { return BooleanType; }
+    std::string GetComponentString(int64_t) { return Int64Type; }
+    std::string GetComponentString(uint64_t) { return UInt64Type; }
+    std::string GetComponentString(float) { return SingleType; }
+    std::string GetComponentString(const std::vector<float>&) { return SingleArrayType; }
+    std::string GetComponentString(double) { return DoubleType; }
+    std::string GetComponentString(const std::string&) { return StringType; }
+    std::string GetComponentString(const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>&) { return UInt16DictionaryType; }
+    std::string GetComponentString(const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>&) { return StringDictionaryType; }
 
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
-{
-    std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
-
-    for (const auto& Pair : Value)
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, bool Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, int64_t Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, uint64_t Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, float Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::vector<float>& Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, double Value) { Serializer.SerializeMember("item", Value); }
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::string& Value)
     {
-        StringMap[std::to_string(Pair.first)] = Pair.second;
+        Serializer.SerializeMember("item", csp::common::String { Value.c_str() });
     }
 
-    Serializer.SerializeMember("item", StringMap);
-}
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
+    {
+        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
 
-void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>& Value)
-{
-    Serializer.SerializeMember("item", Value);
-}
-
-void SerializeComponents(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
-{
-    std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
-
-    for (const auto& Pair : Value)
-    {
-        StringMap[std::to_string(Pair.first)] = Pair.second;
-    }
-
-    Serializer.SerializeMember("components", StringMap);
-}
-
-template <class T>
-void DeserializeComponentDataStringInternal(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
-{
-    T Val;
-    Deserializer.SafeDeserializeMember("item", Val);
-    OutVal = Val;
-}
-
-void DeserializeComponentDataString(
-    const csp::json::JsonDeserializer& Deserializer, const std::string& Type, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
-{
-    if (Type == BooleanType)
-    {
-        DeserializeComponentDataStringInternal<bool>(Deserializer, OutVal);
-    }
-    else if (Type == Int64Type)
-    {
-        DeserializeComponentDataStringInternal<int64_t>(Deserializer, OutVal);
-    }
-    else if (Type == UInt64Type)
-    {
-        DeserializeComponentDataStringInternal<uint64_t>(Deserializer, OutVal);
-    }
-    else if (Type == SingleType)
-    {
-        DeserializeComponentDataStringInternal<float>(Deserializer, OutVal);
-    }
-    else if (Type == SingleArrayType)
-    {
-        DeserializeComponentDataStringInternal<std::vector<float>>(Deserializer, OutVal);
-    }
-    else if (Type == DoubleType)
-    {
-        DeserializeComponentDataStringInternal<double>(Deserializer, OutVal);
-    }
-    else if (Type == StringType)
-    {
-        DeserializeComponentDataStringInternal<std::string>(Deserializer, OutVal);
-    }
-    else if (Type == UInt16DictionaryType)
-    {
-        DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
-
-        // We can only deserialize string maps, so we need to convert to int afterwards.
-        const auto& StringMap = std::get<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(OutVal);
-        std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> UIntMap;
-
-        for (const auto& Val : StringMap)
+        for (const auto& Pair : Value)
         {
-            UIntMap[static_cast<uint16_t>(std::stoi(Val.first))] = Val.second;
+            StringMap[std::to_string(Pair.first)] = Pair.second;
         }
 
-        OutVal = UIntMap;
+        Serializer.SerializeMember("item", StringMap);
     }
-    else if (Type == StringDictionaryType)
+
+    void SerializeComponentData(csp::json::JsonSerializer& Serializer, const std::map<std::string, csp::multiplayer::mcs::ItemComponentData>& Value)
     {
-        DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+        Serializer.SerializeMember("item", Value);
     }
-    else
+
+    void SerializeComponents(csp::json::JsonSerializer& Serializer, const std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData>& Value)
     {
-        throw std::runtime_error("Invalid component type");
+        std::map<std::string, csp::multiplayer::mcs::ItemComponentData> StringMap;
+
+        for (const auto& Pair : Value)
+        {
+            StringMap[std::to_string(Pair.first)] = Pair.second;
+        }
+
+        Serializer.SerializeMember("components", StringMap);
+    }
+
+    template <class T>
+    void DeserializeComponentDataStringInternal(
+        const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
+    {
+        T Val;
+        Deserializer.SafeDeserializeMember("item", Val);
+        OutVal = Val;
+    }
+
+    void DeserializeComponentDataString(
+        const csp::json::JsonDeserializer& Deserializer, const std::string& Type, csp::multiplayer::mcs::ItemComponentDataVariant& OutVal)
+    {
+        if (Type == BooleanType)
+        {
+            DeserializeComponentDataStringInternal<bool>(Deserializer, OutVal);
+        }
+        else if (Type == Int64Type)
+        {
+            DeserializeComponentDataStringInternal<int64_t>(Deserializer, OutVal);
+        }
+        else if (Type == UInt64Type)
+        {
+            DeserializeComponentDataStringInternal<uint64_t>(Deserializer, OutVal);
+        }
+        else if (Type == SingleType)
+        {
+            DeserializeComponentDataStringInternal<float>(Deserializer, OutVal);
+        }
+        else if (Type == SingleArrayType)
+        {
+            DeserializeComponentDataStringInternal<std::vector<float>>(Deserializer, OutVal);
+        }
+        else if (Type == DoubleType)
+        {
+            DeserializeComponentDataStringInternal<double>(Deserializer, OutVal);
+        }
+        else if (Type == StringType)
+        {
+            DeserializeComponentDataStringInternal<std::string>(Deserializer, OutVal);
+        }
+        else if (Type == UInt16DictionaryType)
+        {
+            DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+
+            // We can only deserialize string maps, so we need to convert to int afterwards.
+            const auto& StringMap = std::get<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(OutVal);
+            std::map<uint16_t, csp::multiplayer::mcs::ItemComponentData> UIntMap;
+
+            for (const auto& Val : StringMap)
+            {
+                UIntMap[static_cast<uint16_t>(std::stoi(Val.first))] = Val.second;
+            }
+
+            OutVal = UIntMap;
+        }
+        else if (Type == StringDictionaryType)
+        {
+            DeserializeComponentDataStringInternal<std::map<std::string, csp::multiplayer::mcs::ItemComponentData>>(Deserializer, OutVal);
+        }
+        else
+        {
+            throw std::runtime_error("Invalid component type");
+        }
     }
 }
 
@@ -230,7 +234,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::
 
     if (Obj.Components)
     {
-        SerializeComponents(Serializer, *Obj.GetComponents());
+        csp::multiplayer::mcs::SerializeComponents(Serializer, *Obj.GetComponents());
     }
 }
 
