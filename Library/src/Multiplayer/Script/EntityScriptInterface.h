@@ -54,9 +54,14 @@ public:
     int32_t GetParentId();
     void SetParentId(int32_t ParentId);
 
+    bool IsLocal() const;
+    void SetLocal(bool bLocal);
+
     void RemoveParentEntity();
 
-    SpaceEntity* GetParentEntity() const;
+    std::vector<EntityScriptInterface*> GetChildEntities() const;
+
+    EntityScriptInterface* GetParentEntity() const;
 
     const std::string GetName() const;
     int32_t GetId() const;
@@ -80,7 +85,7 @@ private:
 template <typename ScriptInterface, ComponentType Type>
 ScriptInterface* EntityScriptInterface::CreateComponentOfType()
 {
-    if (Entity)
+    if (Entity && Entity->IsLocal())
     {
         ComponentBase* Component = Entity->AddComponent(Type);
         return (ScriptInterface*)Component->GetScriptInterface();

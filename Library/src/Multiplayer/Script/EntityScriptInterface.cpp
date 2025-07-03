@@ -148,14 +148,35 @@ void EntityScriptInterface::RemoveParentEntity()
     }
 }
 
-SpaceEntity* EntityScriptInterface::GetParentEntity() const
+EntityScriptInterface* EntityScriptInterface::GetParentEntity() const
 {
     if (Entity)
     {
-        return Entity->GetParentEntity();
+        SpaceEntity* Parent = Entity->GetParentEntity();
+        if (Parent)
+        {
+            return Parent->GetScriptInterface();
+        }
+    }
+    return nullptr;
+}
+
+std::vector<EntityScriptInterface*> EntityScriptInterface::GetChildEntities() const
+{
+    std::vector<EntityScriptInterface*> ResultEntities;
+
+    if (Entity)
+    {
+        const csp::common::List<SpaceEntity*>* ChildList = Entity->GetChildEntities();
+
+        for (size_t i = 0; i < ChildList->Size(); ++i)
+        {
+            SpaceEntity* Child = ChildList->operator[](i);
+            ResultEntities.push_back(Child->GetScriptInterface());
+        }
     }
 
-    return nullptr;
+    return ResultEntities;
 }
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetScale() const
@@ -205,6 +226,23 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalScale() const
 const std::string EntityScriptInterface::GetName() const { return Entity->GetName().c_str(); }
 
 int32_t EntityScriptInterface::GetId() const { return static_cast<int32_t>(Entity->GetId()); }
+
+bool EntityScriptInterface::IsLocal() const
+{
+    if (Entity)
+    {
+        return Entity->IsLocal();
+    }
+    return false;
+}
+
+void EntityScriptInterface::SetLocal(bool bLocal)
+{
+    if (Entity)
+    {
+        Entity->SetLocal(bLocal);
+    }
+}
 
 void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
 {
