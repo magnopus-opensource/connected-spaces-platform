@@ -111,6 +111,24 @@ struct TestContainerObject
     csp::common::List<float> FloatMembers;
 };
 
+struct TestStdContainerObject
+{
+    std::vector<float> Vector;
+    std::map<std::string, int> Map;
+};
+
+void ToJson(JsonSerializer& Serializer, const TestStdContainerObject& Obj)
+{
+    Serializer.SerializeMember("vectorMembers", Obj.Vector);
+    Serializer.SerializeMember("mapMembers", Obj.Map);
+}
+
+void FromJson(const JsonDeserializer& Deserializer, TestStdContainerObject& Obj)
+{
+    Deserializer.DeserializeMember("vectorMembers", Obj.Vector);
+    Deserializer.DeserializeMember("mapMembers", Obj.Map);
+}
+
 void ToJson(JsonSerializer& Serializer, const TestContainerObject& Obj)
 {
     Serializer.SerializeMember("intMembers", Obj.IntMembers);
@@ -221,15 +239,30 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonContainerObjectTest)
     TestContainerObject Obj2;
     JsonDeserializer::Deserialize(result, Obj2);
 
-    EXPECT_EQ(Obj.IntMembers.Size(), Obj.IntMembers.Size());
+    EXPECT_EQ(Obj.IntMembers.Size(), Obj2.IntMembers.Size());
     EXPECT_EQ(Obj.IntMembers[0], Obj2.IntMembers[0]);
     EXPECT_EQ(Obj.IntMembers[1], Obj2.IntMembers[1]);
     EXPECT_EQ(Obj.IntMembers[2], Obj2.IntMembers[2]);
 
-    EXPECT_EQ(Obj.FloatMembers.Size(), Obj.FloatMembers.Size());
+    EXPECT_EQ(Obj.FloatMembers.Size(), Obj2.FloatMembers.Size());
     EXPECT_EQ(Obj.FloatMembers[0], Obj2.FloatMembers[0]);
     EXPECT_EQ(Obj.FloatMembers[1], Obj2.FloatMembers[1]);
     EXPECT_EQ(Obj.FloatMembers[2], Obj2.FloatMembers[2]);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonEmptyContainerObjectTest)
+{
+    TestContainerObject Obj;
+
+    Obj.IntMembers = csp::common::Array<int>(0);
+
+    const csp::common::String result = JsonSerializer::Serialize(Obj);
+
+    TestContainerObject Obj2;
+    JsonDeserializer::Deserialize(result, Obj2);
+
+    EXPECT_EQ(Obj.IntMembers.Size(), Obj2.IntMembers.Size());
+    EXPECT_EQ(Obj.FloatMembers.Size(), Obj2.FloatMembers.Size());
 }
 
 CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonObjectContainerObjectTest)
@@ -282,4 +315,17 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonObjectContainerObjectTest)
         EXPECT_EQ(Obj.ListMember[i].Obj.StringMember, Obj.ListMember[i].Obj.StringMember);
         EXPECT_EQ(Obj.ListMember[i].FloatMember, Obj.ListMember[i].FloatMember);
     }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonEmptyStdContainerObjectTest)
+{
+    TestStdContainerObject Obj;
+
+    const csp::common::String result = JsonSerializer::Serialize(Obj);
+
+    TestStdContainerObject Obj2;
+    JsonDeserializer::Deserialize(result, Obj2);
+
+    EXPECT_EQ(Obj.Vector.size(), Obj2.Vector.size());
+    EXPECT_EQ(Obj.Map.size(), Obj2.Map.size());
 }
