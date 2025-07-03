@@ -7,7 +7,7 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
@@ -24,10 +24,10 @@ namespace csp::systems
 namespace
 {
     void SendConversationEvent(multiplayer::ConversationEventType EventType, const multiplayer::MessageInfo& EventInfo,
-        multiplayer::EventBus* EventBus, multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler Callback)
+        multiplayer::NetworkEventBus* NetworkEventBus, multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler Callback)
     {
         auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-        EventBus->SendNetworkEvent("Conversation", EventParams, Callback);
+        NetworkEventBus->SendNetworkEvent("Conversation", EventParams, Callback);
     }
 
     // Temp utility function until we adapt the new continuation pattern
@@ -237,26 +237,27 @@ namespace
         };
     }
 
-    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(
-        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::EventBus* EventBus)
+    std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationEvent(multiplayer::ConversationEventType EventType,
+        std::shared_ptr<AssetCollection> ConersationCollection, multiplayer::NetworkEventBus* NetworkEventBus)
     {
-        return [EventType, ConersationCollection, EventBus]()
+        return [EventType, ConersationCollection, NetworkEventBus]()
         {
             const multiplayer::MessageInfo& EventInfo
                 = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(*ConersationCollection);
             auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-            return EventBus->SendNetworkEvent("Conversation", EventParams);
+            return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
         };
     }
 
     std::function<async::task<std::optional<csp::multiplayer::ErrorCode>>()> SendConversationMessageEvent(
-        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection, multiplayer::EventBus* EventBus)
+        multiplayer::ConversationEventType EventType, std::shared_ptr<AssetCollection> MessageCollection,
+        multiplayer::NetworkEventBus* NetworkEventBus)
     {
-        return [EventType, MessageCollection, EventBus]()
+        return [EventType, MessageCollection, NetworkEventBus]()
         {
             const multiplayer::MessageInfo& EventInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(*MessageCollection);
             auto EventParams = ConversationSystemHelpers::MessageInfoToReplicatedValueArray(EventType, EventInfo);
-            return EventBus->SendNetworkEvent("Conversation", EventParams);
+            return NetworkEventBus->SendNetworkEvent("Conversation", EventParams);
         };
     }
 
@@ -341,12 +342,12 @@ namespace
 }
 
 ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
-    systems::UserSystem* UserSystem, multiplayer::EventBus* EventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(EventBus, &LogSystem)
+    systems::UserSystem* UserSystem, multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(NetworkEventBus, &LogSystem)
     , AssetSystem { AssetSystem }
     , SpaceSystem { SpaceSystem }
     , UserSystem { UserSystem }
-    , EventBus { EventBus }
+    , NetworkEventBus { NetworkEventBus }
 {
     RegisterSystemCallback();
 }
@@ -389,7 +390,7 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
         multiplayer::MessageInfo MessageInfo
             = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(AddCommentContainerResult.GetAssetCollection());
 
-        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, EventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, NetworkEventBus, SignalRCallback);
     };
 
     const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
@@ -442,7 +443,7 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
 
         multiplayer::MessageInfo MessageInfo
             = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, NetworkEventBus, SignalRCallback);
     };
 
     AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
@@ -477,7 +478,7 @@ void ConversationSystemInternal::AddMessage(
         };
 
         const multiplayer::MessageInfo& MessageInfo = MessageResultCallbackResult.GetMessageInfo();
-        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, NetworkEventBus, SignalRCallback);
     };
 
     multiplayer::MessageInfo MessageInfo(ConversationId, false, Message);
@@ -536,7 +537,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, NetworkEventBus, SignalRCallback);
     };
 
     AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
@@ -638,7 +639,7 @@ void ConversationSystemInternal::UpdateConversation(
             auto UpdatedInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
                 GetUpdatedConversationResult.GetAssetCollection());
 
-            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBus, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, NetworkEventBus, SignalRCallback);
         };
 
         multiplayer::MessageInfo NewConversationData
@@ -720,7 +721,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
                 INVOKE_IF_NOT_NULL(Callback, Result);
             };
 
-            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBus, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), NetworkEventBus, SignalRCallback);
         };
 
         multiplayer::MessageInfo NewMessageData
@@ -881,7 +882,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBus))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, NetworkEventBus))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
             MakeInvalid<multiplayer::AnnotationResult>(), *LogSystem))
@@ -907,7 +908,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBus))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, NetworkEventBus))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
         // 4. Delete annoation asset
@@ -1028,7 +1029,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBus))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, NetworkEventBus))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
             *LogSystem))
@@ -1056,7 +1057,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBus))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, NetworkEventBus))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
         // 4. Delete annoation asset
@@ -1117,21 +1118,23 @@ void ConversationSystemInternal::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register ConversationSystemInternal. EventBus must be instantiated in the MultiplayerConnection first.");
+        CSP_LOG_ERROR_MSG(
+            "Error: Failed to register ConversationSystemInternal. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
-                                        csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::Conversation)),
-        [this](const csp::multiplayer::EventData& EventData)
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)),
+        [this](const csp::multiplayer::NetworkEventData& NetworkEventData)
         {
-            const csp::multiplayer::ConversationEventData& ConversationEventData
-                = static_cast<const csp::multiplayer::ConversationEventData&>(EventData);
-            if (TrySendEvent(ConversationEventData) == false)
+            const csp::multiplayer::ConversationNetworkEventData& ConversationNetworkEventData
+                = static_cast<const csp::multiplayer::ConversationNetworkEventData&>(NetworkEventData);
+            if (TrySendEvent(ConversationNetworkEventData) == false)
             {
                 // If component doesn't exist, add it to the queue for processing later
-                std::unique_ptr<csp::multiplayer::ConversationEventData> EventDataCopy
-                    = std::make_unique<csp::multiplayer::ConversationEventData>(ConversationEventData);
+                std::unique_ptr<csp::multiplayer::ConversationNetworkEventData> EventDataCopy
+                    = std::make_unique<csp::multiplayer::ConversationNetworkEventData>(ConversationNetworkEventData);
                 Events.push_back(std::move(EventDataCopy));
             }
         });
@@ -1142,7 +1145,7 @@ void ConversationSystemInternal::DeregisterSystemCallback()
     if (EventBusPtr)
     {
         EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
-            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::Conversation)));
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)));
     }
 }
 
@@ -1162,7 +1165,7 @@ void ConversationSystemInternal::FlushEvents()
     }
 }
 
-bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationEventData& Params)
+bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationNetworkEventData& Params)
 {
     for (const auto& Component : Components)
     {

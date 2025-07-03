@@ -20,8 +20,8 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/CancellationToken.h"
 #include "CSP/Common/Optional.h"
-#include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -55,7 +55,7 @@ class RemoteFileManager;
 namespace csp::multiplayer
 {
 
-class EventBus;
+class NetworkEventBus;
 
 } // namespace csp::multiplayer
 
@@ -328,7 +328,7 @@ public:
         const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback);
 
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
-    typedef std::function<void(const csp::multiplayer::AssetDetailBlobChangedEventData&)> AssetDetailBlobChangedCallbackHandler;
+    typedef std::function<void(const csp::multiplayer::AssetDetailBlobChangedNetworkEventData&)> AssetDetailBlobChangedCallbackHandler;
 
     // Callback to receive material changes, contains a MaterialChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
@@ -347,11 +347,11 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::multiplayer::EventData& EventData);
+    CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData);
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, common::LogSystem& LogSystem);
     ~AssetSystem();
 
     CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);

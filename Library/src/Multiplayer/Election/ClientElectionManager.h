@@ -55,9 +55,9 @@ public:
     void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
     void OnDisconnect();
 
-    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, EventBus& EventBus);
+    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
 
-    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, EventBus& EventBus);
+    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
     void OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
     void OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
     void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
@@ -77,11 +77,11 @@ private:
     void OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
     void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
 
-    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar, EventBus& EventBus);
+    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar, NetworkEventBus& NetworkEventBus);
     void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);
     ClientProxy* FindClientUsingAvatar(const SpaceEntity* ClientAvatar);
 
-    ClientProxy* AddClientUsingId(int64_t ClientId, EventBus& EventBus);
+    ClientProxy* AddClientUsingId(int64_t ClientId, NetworkEventBus& NetworkEventBus);
     void RemoveClientUsingId(int64_t ClientId);
     ClientProxy* FindClientUsingId(int64_t ClientId);
 

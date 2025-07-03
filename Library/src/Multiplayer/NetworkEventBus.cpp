@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemBase.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 
@@ -34,15 +34,15 @@ namespace csp::multiplayer
 
 constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
-EventBus::~EventBus() { }
+NetworkEventBus::~NetworkEventBus() { }
 
-EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
+NetworkEventBus::NetworkEventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
     : LogSystem(LogSystem)
 {
     MultiplayerConnectionInst = InMultiplayerConnection;
 }
 
-bool EventBus::ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback)
+bool NetworkEventBus::ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback)
 {
     if (!Callback)
     {
@@ -66,7 +66,7 @@ bool EventBus::ListenNetworkEvent(NetworkEventRegistration Registration, Network
     return true;
 }
 
-bool EventBus::StopListenNetworkEvent(NetworkEventRegistration Registration)
+bool NetworkEventBus::StopListenNetworkEvent(NetworkEventRegistration Registration)
 {
     if (RegisteredEvents.find(Registration) == RegisteredEvents.end())
     {
@@ -81,7 +81,7 @@ bool EventBus::StopListenNetworkEvent(NetworkEventRegistration Registration)
     return true;
 }
 
-bool EventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiverId)
+bool NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiverId)
 {
     std::vector<NetworkEventRegistration> RegistrationsToRemove {};
 
@@ -110,7 +110,7 @@ bool EventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiv
     return true;
 }
 
-csp::common::Array<NetworkEventRegistration> EventBus::AllRegistrations() const
+csp::common::Array<NetworkEventRegistration> NetworkEventBus::AllRegistrations() const
 {
     csp::common::Array<NetworkEventRegistration> Registrations(RegisteredEvents.size());
     std::transform(RegisteredEvents.cbegin(), RegisteredEvents.cend(), Registrations.begin(),
@@ -118,11 +118,12 @@ csp::common::Array<NetworkEventRegistration> EventBus::AllRegistrations() const
     return Registrations;
 }
 
-bool EventBus::StartEventMessageListening()
+bool NetworkEventBus::StartEventMessageListening()
 {
     if (MultiplayerConnectionInst == nullptr || MultiplayerConnectionInst->GetSignalRConnection() == nullptr)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error : Multiplayer connection is unavailable, EventBus cannot start listening to events.");
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Error, "Error : Multiplayer connection is unavailable, NetworkEventBus cannot start listening to events.");
         return false;
     }
 
@@ -130,7 +131,7 @@ bool EventBus::StartEventMessageListening()
     {
         if (Result.is_null())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Log, "EventBus unexpectedly received event with null data, returning.");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus unexpectedly received event with null data, returning.");
             return;
         }
 
@@ -158,14 +159,14 @@ bool EventBus::StartEventMessageListening()
         // Deserialize the signalR packets using the appropriate deserialiser.
         // This only does anything for internal events, external events will always use the base EventDeserializer.
         // After this, we'll have ReplicatedValues, which serves as our common exchange type.
-        std::unique_ptr<EventData> DeserialisedEventData = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
+        std::unique_ptr<NetworkEventData> DeserialisedEventData = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
 
         // Dispatch the events
         for (const NetworkEventRegistration& Registration : MatchingRegistrations)
         {
-            // Pass EventData object to user ownership
+            // Pass NetworkEventData object to user ownership
             // This may be a subtype, the registrar will know what type they are expecting. External users should
-            // only ever register general purpose events, and thus should only ever get an EventData, so no need to cast.
+            // only ever register general purpose events, and thus should only ever get an NetworkEventData, so no need to cast.
             // The user shouldn't expect the scope of this variable to live beyond the callback
             RegisteredEvents[Registration](*DeserialisedEventData);
         }
@@ -175,13 +176,13 @@ bool EventBus::StartEventMessageListening()
     return true;
 }
 
-void EventBus::SendNetworkEvent(
+void NetworkEventBus::SendNetworkEvent(
     const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback)
 {
     SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID, Callback);
 }
 
-async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEvent(
+async::task<std::optional<csp::multiplayer::ErrorCode>> NetworkEventBus::SendNetworkEvent(
     const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
@@ -203,13 +204,13 @@ async::task<std::optional<csp::multiplayer::ErrorCode>> EventBus::SendNetworkEve
     return OnCompleteTask;
 }
 
-void EventBus::SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
+void NetworkEventBus::SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Args,
     uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
     MultiplayerConnectionInst->GetNetworkEventManager()->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
 }
 
-csp::common::String EventBus::StringFromNetworkEvent(NetworkEvent Event)
+csp::common::String NetworkEventBus::StringFromNetworkEvent(NetworkEvent Event)
 {
     auto it = CustomDeserializationEventMap.find(Event);
     if (it != CustomDeserializationEventMap.end())
@@ -218,7 +219,7 @@ csp::common::String EventBus::StringFromNetworkEvent(NetworkEvent Event)
         fmt::format("StringFromInternalNetworkEvent: unknown enum value {}", static_cast<std::underlying_type_t<NetworkEvent>>(Event)));
 }
 
-EventBus::NetworkEvent EventBus::NetworkEventFromString(const csp::common::String& EventString)
+NetworkEventBus::NetworkEvent NetworkEventBus::NetworkEventFromString(const csp::common::String& EventString)
 {
     for (const auto& [Key, Val] : CustomDeserializationEventMap)
     {
@@ -230,34 +231,36 @@ EventBus::NetworkEvent EventBus::NetworkEventFromString(const csp::common::Strin
     return NetworkEvent::GeneralPurposeEvent;
 }
 
-std::unique_ptr<EventData> EventBus::DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues)
+std::unique_ptr<NetworkEventData> NetworkEventBus::DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues)
 {
     switch (EventType)
     {
     case NetworkEvent::AssetDetailBlobChanged:
-        return std::make_unique<AssetDetailBlobChangedEventData>(csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(EventValues, LogSystem));
+        return std::make_unique<AssetDetailBlobChangedNetworkEventData>(
+            csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(EventValues, LogSystem));
     case NetworkEvent::Conversation:
-        return std::make_unique<ConversationEventData>(csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem));
+        return std::make_unique<ConversationNetworkEventData>(csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem));
     case NetworkEvent::SequenceChanged:
     {
         // This is a massive hack, why is it like this? We shouldn't have a SequenceSystem and a HotspotSequenceSystem if they're so similar that they
         // share event types. That or they're dissimilar enough to justify seperate events.
-        std::unique_ptr<SequenceChangedEventData> SequenceEventData
-            = std::make_unique<SequenceChangedEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
+        std::unique_ptr<SequenceChangedNetworkEventData> SequenceEventData
+            = std::make_unique<SequenceChangedNetworkEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
         const csp::common::String Key = SequenceEventData->Key;
         const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
         if (SequenceType == "Hotspots")
         {
             // If we're a hotspot sequence, send that deserialization packet along.
-            return std::make_unique<SequenceChangedEventData>(csp::multiplayer::DeserializeSequenceHotspotChangedEvent(EventValues, LogSystem));
+            return std::make_unique<SequenceChangedNetworkEventData>(
+                csp::multiplayer::DeserializeSequenceHotspotChangedEvent(EventValues, LogSystem));
         }
         // Otherwise, behave normaly
         return SequenceEventData;
     }
     case NetworkEvent::AccessControlChanged:
-        return std::make_unique<AccessControlChangedEventData>(csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem));
+        return std::make_unique<AccessControlChangedNetworkEventData>(csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem));
     case NetworkEvent::GeneralPurposeEvent:
-        return std::make_unique<EventData>(csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem));
+        return std::make_unique<NetworkEventData>(csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem));
     default:
         throw std::invalid_argument(
             fmt::format("DeserialiseForEventType: unknown enum value {}", static_cast<std::underlying_type_t<NetworkEvent>>(EventType)));

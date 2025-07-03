@@ -16,11 +16,11 @@
 
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
-#include "CSP/Multiplayer/EventData.h"
+#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
@@ -288,7 +288,7 @@ SequenceSystem::SequenceSystem()
 {
 }
 
-SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem)
+SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)
 {
     SequenceAPI = new chs::SequenceApi(InWebClient);
@@ -313,7 +313,7 @@ void SequenceSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
@@ -324,8 +324,8 @@ void SequenceSystem::RegisterSystemCallback()
 
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
-            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::multiplayer::EventData& EventData) { this->OnSequenceChangedEvent(EventData); });
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
+        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
 }
 
 void SequenceSystem::DeregisterSystemCallback()
@@ -333,23 +333,23 @@ void SequenceSystem::DeregisterSystemCallback()
     if (EventBusPtr)
     {
         EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
-            csp::multiplayer::EventBus::StringFromNetworkEvent(csp::multiplayer::EventBus::NetworkEvent::SequenceChanged)));
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)));
     }
 }
 
-void SequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::EventData& EventData)
+void SequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
 {
-    // This may be either a SequenceChangedEventData or a SequenceHotspotChangedEventData... we're only interested in non-hotspot.
+    // This may be either a SequenceChangedNetworkEventData or a SequenceHotspotChangedEventData... we're only interested in non-hotspot.
     // This is hacky, see Eventbus deserialisation for more.
 
-    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData);
+    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData);
 
     const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
 
     if (!IsHotspotEvent && SequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
-        SequenceChangedCallback(static_cast<const csp::multiplayer::SequenceChangedEventData&>(EventData));
+        SequenceChangedCallback(static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData));
     }
 }
 

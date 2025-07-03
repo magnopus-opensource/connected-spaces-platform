@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 
 namespace csp::common
 {
@@ -32,7 +32,7 @@ class WebClient;
 namespace csp::multiplayer
 {
 
-class EventBus;
+class NetworkEventBus;
 class EventDeserialiser;
 class MultiplayerConnection;
 
@@ -47,18 +47,18 @@ class value;
 
 namespace csp::systems
 {
-/// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or EventBus instance in the constructor of each
-/// System.
+/// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or NetworkEventBus instance in the constructor
+/// of each System.
 class CSP_API CSP_NO_DISPOSE SystemBase
 {
     friend class csp::multiplayer::MultiplayerConnection;
 
 protected:
-    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
-    CSP_NO_EXPORT SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
 
     csp::web::WebClient* WebClient;
-    csp::multiplayer::EventBus* EventBusPtr;
+    csp::multiplayer::NetworkEventBus* EventBusPtr;
 
 public:
     /// @brief Destructor of the SystemBase base class.

@@ -29,10 +29,10 @@ void RunTest()
 {
     // Listen for an event, then ping it back to the client that sent it.
     csp::systems::SystemsManager::Get().GetEventBus()->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("Receiver", "EventPingRequest"),
-        [](const csp::multiplayer::EventData& EventData)
+        [](const csp::multiplayer::NetworkEventData& NetworkEventData)
         {
             csp::systems::SystemsManager::Get().GetEventBus()->SendNetworkEventToClient(
-                "EventPingResponse", {}, EventData.SenderClientId, [](csp::multiplayer::ErrorCode) {});
+                "EventPingResponse", {}, NetworkEventData.SenderClientId, [](csp::multiplayer::ErrorCode) {});
         });
 }
 } // namespace CreateAvatar

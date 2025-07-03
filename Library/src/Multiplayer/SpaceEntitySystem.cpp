@@ -197,12 +197,12 @@ SpaceEntitySystem::SpaceEntitySystem()
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
     , ScriptRunner(nullptr)
-    , EventBus(nullptr)
+    , NetworkEventBus(nullptr)
 {
 }
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-    csp::multiplayer::EventBus& EventBus, csp::common::IJSScriptRunner& ScriptRunner)
+    csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
@@ -218,7 +218,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , LastTickTime(std::chrono::system_clock::now())
     , EntityPatchRate(90)
     , ScriptRunner(&ScriptRunner)
-    , EventBus(&EventBus)
+    , NetworkEventBus(&NetworkEventBus)
 {
     Initialise();
 }
@@ -378,7 +378,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
 
         if (ElectionManager != nullptr)
         {
-            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->EventBus);
+            ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->NetworkEventBus);
         }
         Callback(ReleasedAvatar);
     };
@@ -1481,7 +1481,7 @@ void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntity
     {
         // Note we are assuming Avatar==Client,
         // which is true now but may not be in the future
-        ElectionManager->OnClientAdd(Avatar, AddedAvatars, *this->EventBus);
+        ElectionManager->OnClientAdd(Avatar, AddedAvatars, *this->NetworkEventBus);
     }
 }
 
