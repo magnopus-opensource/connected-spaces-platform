@@ -203,7 +203,7 @@ typedef enum JSErrorEnum {
 } JSErrorEnum;
 
 #define JS_MAX_LOCAL_VARS 65536
-#define JS_STACK_SIZE_MAX 65534
+#define JS_STACK_SIZE_MAX 262136
 #define JS_STRING_LEN_MAX ((1 << 30) - 1)
 
 #define __exception __attribute__((warn_unused_result))

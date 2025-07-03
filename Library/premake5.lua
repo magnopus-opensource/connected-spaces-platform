@@ -264,7 +264,7 @@ if not Project then
             linkoptions { 
                 "-pthread",                                                     -- enable threading
                 "-fwasm-exceptions",                                            -- enable native wasm exceptions
-                "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
+               
                 "-sEXPORTED_FUNCTIONS=['_malloc','_free']",                     -- force export _malloc and _free function
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
@@ -272,6 +272,7 @@ if not Project then
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
+                "-sSTACK_SIZE=10MB",
                 "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
                 "-sEXPORTED_RUNTIME_METHODS=[" ..
                     "'ccall'," ..
@@ -306,11 +307,13 @@ if not Project then
 
         filter { "platforms:wasm", "configurations:*Debug*" }
             buildoptions {
+                "-O2",
                 "-gdwarf-5",
                 "-gseparate-dwarf"  -- preserve debug information (DWARF)
             }
 
             linkoptions {
+                "-O2",
                 "-gdwarf-5",
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
                 "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
@@ -318,12 +321,12 @@ if not Project then
         filter { "platforms:wasm", "configurations:*Release*" }
             -- We want to reduce the size of Release builds as much as possible
             buildoptions {
-                "-Os",
+                "-O3",
                 "-flto"
             }
 
             linkoptions {
-                "-Os",
+                "-O3",
                 "-flto"
             }
         filter {}
