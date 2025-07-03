@@ -27,40 +27,34 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value)
 {
-    std::visit(
-        [&Value](const auto& ValueType)
-        {
-            using Type = std::decay_t<decltype(ValueType)>;
-
-            if constexpr (std::is_same_v<Type, uint64_t>)
-            {
-                Value = static_cast<Type>(ValueType);
-            }
-            else if constexpr (std::is_same_v<Type, int64_t>)
-            {
-                Value = static_cast<Type>(ValueType);
-            }
-        },
-        ComponentData.GetValue());
+    if (std::holds_alternative<uint64_t>(ComponentData.GetValue()))
+    {
+        Value = std::get<uint64_t>(ComponentData.GetValue());
+    }
+    else if (std::holds_alternative<int64_t>(ComponentData.GetValue()))
+    {
+        Value = static_cast<uint64_t>(std::get<int64_t>(ComponentData.GetValue()));
+    }
+    else
+    {
+        throw std::runtime_error("Invalid Integer Type");
+    }
 }
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value)
 {
-    std::visit(
-        [&Value](const auto& ValueType)
-        {
-            using Type = std::decay_t<decltype(ValueType)>;
-
-            if constexpr (std::is_same_v<Type, uint64_t>)
-            {
-                Value = static_cast<Type>(ValueType);
-            }
-            else if constexpr (std::is_same_v<Type, int64_t>)
-            {
-                Value = static_cast<Type>(ValueType);
-            }
-        },
-        ComponentData.GetValue());
+    if (std::holds_alternative<int64_t>(ComponentData.GetValue()))
+    {
+        Value = std::get<int64_t>(ComponentData.GetValue());
+    }
+    else if (std::holds_alternative<uint64_t>(ComponentData.GetValue()))
+    {
+        Value = static_cast<int64_t>(std::get<uint64_t>(ComponentData.GetValue()));
+    }
+    else
+    {
+        throw std::runtime_error("Invalid Integer Type");
+    }
 }
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value)
