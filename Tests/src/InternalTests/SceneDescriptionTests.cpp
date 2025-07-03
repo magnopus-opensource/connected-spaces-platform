@@ -143,6 +143,19 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFl
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorEmptyTest)
+{
+    const std::vector<float> TestValue = {};
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+
+    mcs::ItemComponentData DeserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapTest)
 {
     const std::map<std::string, mcs::ItemComponentData> TestValue
@@ -157,10 +170,36 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapEmptyTest)
+{
+    const std::map<std::string, mcs::ItemComponentData> TestValue = {};
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+
+    mcs::ItemComponentData DeserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapTest)
 {
     const std::map<uint16_t, mcs::ItemComponentData> TestValue
         = { { 0, mcs::ItemComponentData { 1.1f } }, { 1, mcs::ItemComponentData { std::string { "Test" } } } };
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
+
+    mcs::ItemComponentData DeserializedValue {};
+    csp::json::JsonDeserializer::Deserialize(SerializedValue, DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapEmptyTest)
+{
+    const std::map<uint16_t, mcs::ItemComponentData> TestValue = {};
     mcs::ItemComponentData ComponentValue { TestValue };
 
     csp::common::String SerializedValue = csp::json::JsonSerializer::Serialize(ComponentValue);
