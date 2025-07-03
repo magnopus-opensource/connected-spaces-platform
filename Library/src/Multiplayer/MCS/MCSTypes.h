@@ -41,6 +41,14 @@
     4. Add a new case in DeserializeComponentData so it can be deserialized from a signalr value.
 */
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::multiplayer::mcs
 {
 /// @brief All supported MCS types
@@ -111,8 +119,6 @@ class ComponentResult;
 static csp::services::ApiBase* ComponentObjectMessageApi;
 typedef std::function<void(const ComponentResult& Result)> ComponentResultCallback;
 
-void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
-
 /// @brief Variant that holds all currently implemented MCS types by CSP.
 /// @details This should be updated if we need to support more of the above types in the future.
 /// All of our variant types must match the supported signalr serializer values, or we will get a compile error.
@@ -140,6 +146,9 @@ public:
 
     bool operator==(const ItemComponentData& Other) const;
     ItemComponentData& operator=(const ItemComponentData& Other);
+
+    CSP_ASYNC_RESULT void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
+    CSP_NO_EXPORT async::task<ComponentResult> GetComponentByIdTASK(const int32_t& ComponentId);
 
 private:
     ItemComponentDataVariant Value;
