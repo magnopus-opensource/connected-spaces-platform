@@ -27,6 +27,12 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value)
 {
+    /*
+        These checks are used to internally convert between integer types,
+        as the type we want to read into may not be the exact integer type that exists in the variant, which will cause a crash.
+        This is largly due to a quirk with the way MCS deserializes signed integer types, as they sometimes come back as unsigned.
+        It also enforces backwards compatibility if we ever change integer types.
+    */
     if (std::holds_alternative<uint64_t>(ComponentData.GetValue()))
     {
         Value = std::get<uint64_t>(ComponentData.GetValue());
@@ -43,6 +49,12 @@ void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData
 
 void MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value)
 {
+    /*
+        These checks are used to internally convert between integer types,
+        as the type we want to read into may not be the exact integer type that exists in the variant, which will cause a crash.
+        This is largly due to a quirk with the way MCS deserializes signed integer types, as they sometimes come back as unsigned.
+        It also enforces backwards compatibility if we ever change integer types.
+    */
     if (std::holds_alternative<int64_t>(ComponentData.GetValue()))
     {
         Value = std::get<int64_t>(ComponentData.GetValue());
