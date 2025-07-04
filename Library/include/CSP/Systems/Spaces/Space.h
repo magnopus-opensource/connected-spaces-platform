@@ -31,6 +31,11 @@ namespace csp::multiplayer
 class MultiplayerConnection;
 }
 
+namespace csp::services::generated::userservice
+{
+class GroupDto;
+}
+
 namespace csp::services
 {
 
@@ -44,6 +49,7 @@ namespace csp::systems
 {
 
 class AssetCollection;
+class Space;
 
 enum class CSP_FLAGS SpaceAttributes : uint8_t
 {
@@ -85,6 +91,8 @@ inline constexpr SpaceAttributes operator&(SpaceAttributes lhs, SpaceAttributes 
 }
 
 template <typename T> inline constexpr bool HasFlag(T value, T flag) { return (value & flag) == flag; }
+
+void GroupDtoToSpace(const csp::services::generated::userservice::GroupDto& Dto, csp::systems::Space& Space);
 
 CSP_END_IGNORE
 

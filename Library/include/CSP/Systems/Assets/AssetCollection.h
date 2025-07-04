@@ -34,8 +34,17 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::services::generated::prototypeservice
+{
+class PrototypeDto;
+}
+
 namespace csp::systems
 {
+class AssetCollection;
+
+void PrototypeDtoToAssetCollection(
+    const csp::services::generated::prototypeservice::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection);
 
 enum class EAssetCollectionType
 {

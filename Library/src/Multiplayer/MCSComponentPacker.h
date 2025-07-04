@@ -81,8 +81,6 @@ public:
 private:
     template <typename T> void ReadValue(uint16_t Key, T& Value) const;
 
-    // We currently only store int64 values, so if we are using uint64, we need to convert.
-    // We should update this in the future to store the correct integer type.
     static void ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value);
@@ -91,7 +89,6 @@ private:
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::String& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, ReplicatedValue& Value);
 
-    // Case for enums
     template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const;
 
     std::map<uint16_t, mcs::ItemComponentData> Components;

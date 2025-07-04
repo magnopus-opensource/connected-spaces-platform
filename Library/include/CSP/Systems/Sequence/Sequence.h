@@ -17,8 +17,17 @@
 
 #include "CSP/Systems/SystemsResult.h"
 
+namespace csp::services::generated::aggregationservice
+{
+class SequenceDto;
+}
+
 namespace csp::systems
 {
+class Sequence;
+
+void SequenceDtoToSequence(const csp::services::generated::aggregationservice::SequenceDto& Dto, Sequence& Sequence);
+
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
 class CSP_API Sequence

@@ -268,3 +268,22 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeStringMapTest)
 
     EXPECT_EQ(DeserializedValue, ComponentValue);
 }
+
+CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeUIntMapTest)
+{
+    const std::map<uint16_t, mcs::ItemComponentData> TestValue
+        = { { 0, mcs::ItemComponentData { 1.1f } }, { 1, mcs::ItemComponentData { std::string { "Test" } } } };
+    mcs::ItemComponentData ComponentValue { TestValue };
+
+    SignalRSerializer Serializer;
+    Serializer.WriteValue(ComponentValue);
+
+    signalr::value SerializedValue = Serializer.Get();
+
+    SignalRDeserializer Deserializer { SerializedValue };
+
+    mcs::ItemComponentData DeserializedValue {};
+    Deserializer.ReadValue(DeserializedValue);
+
+    EXPECT_EQ(DeserializedValue, ComponentValue);
+}
