@@ -370,6 +370,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", MakeInvalid<NullResult>(),
                 *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
+        .then(async::inline_scheduler(), []() { csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise(); })
         .then(async::inline_scheduler(),
             csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace](const std::exception& /*Except*/)
                 { CurrentSpace = {}; },
