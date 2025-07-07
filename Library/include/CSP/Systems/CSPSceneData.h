@@ -26,7 +26,7 @@ namespace csp::systems
 /// @details This data structure is created through the deserialization of a CSPSceneDescription Json which is retrieved externally.
 /// The json file used to create this structure is also used to create a systems::CSPSceneData object.
 /// The reason these are seperated is to break dependencies between our multiplayer and corer modules.
-class CSPSceneData
+class CSP_API CSPSceneData
 {
 public:
     /// @brief Constructor for CSPSceneData by deserializing a SceneDescription json file.
