@@ -17,6 +17,9 @@
 
 #include "Debug/Logging.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
+
 #include <Poco/File.h>
 #include <Poco/MD5Engine.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
@@ -54,8 +57,8 @@ const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
 EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
-    : WebClient(InPort, Tp, AutoRefresh)
+POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 
@@ -141,6 +144,9 @@ void POCOWebClient::Get(HttpRequest& Request)
     {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
+
+    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
 }
 
 void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
@@ -224,6 +230,9 @@ void POCOWebClient::Post(HttpRequest& Request)
 
         Payload.AddHeader(Key.c_str(), Val.c_str());
     }
+
+    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
 }
 
 void POCOWebClient::Put(HttpRequest& Request)
@@ -268,6 +277,9 @@ void POCOWebClient::Put(HttpRequest& Request)
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
+
+    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PUT", Request, PocoResponse);
 }
 
 void POCOWebClient::Delete(HttpRequest& Request)
@@ -306,6 +318,9 @@ void POCOWebClient::Delete(HttpRequest& Request)
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
+
+    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "DELETE", Request, PocoResponse);
 }
 
 void POCOWebClient::Head(HttpRequest& Request)
@@ -340,6 +355,9 @@ void POCOWebClient::Head(HttpRequest& Request)
     {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
+
+    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(
@@ -535,6 +553,20 @@ void POCOWebClient::SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSo
 
     Payload->SetContent(strm.str().c_str(), strm.str().size());
     Payload->SetBoundary(CSP_TEXT(Form.boundary().c_str()));
+}
+
+void POCOWebClient::LogHttpResponseIfLoglevelVeryVerbose(
+    csp::common::LogSystem* LogSystem, const char* Verb, const HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
+{
+    // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
+    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    {
+        csp::common::String Status = std::to_string(static_cast<int>(PocoResponse.getStatus())).c_str();
+        csp::common::String StatusReason = PocoResponse.getReason().c_str();
+
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), Status, StatusReason).c_str());
+    }
 }
 
 } // namespace csp::web

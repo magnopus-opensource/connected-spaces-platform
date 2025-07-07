@@ -32,8 +32,11 @@
 
 namespace csp::common
 {
+
+class LogSystem;
 class LoginState;
-}
+
+} // namespace csp::common
 
 namespace csp::systems
 {
@@ -80,7 +83,7 @@ class WebClient
     friend class csp::systems::SystemsManager;
 
 public:
-    WebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh = true);
+    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
     virtual ~WebClient();
 
     /// @brief Main method for sending a Http Request
@@ -116,10 +119,16 @@ protected:
 
     const Port RootPort;
 
+    // The RealtimeEngine SignalR connection uses the same POCO/Emscripten web client as our MCS RESTApi.
+    // For the SignalR connection null be will passed to the ctor for the LogSystem to avoid logging high frequency multiplayer API exchange.
+    csp::common::LogSystem* LogSystem = nullptr;
+
 private:
     void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));
     void RefreshIfExpired();
     void PrintClientErrorResponseMessages(const HttpResponse& Response);
+    // If the LogSystem LogLevel has been set to VeryVerbose details of Http requests will be logged
+    void LogHttpRequest(const HttpRequest* Request);
     csp::systems::UserSystem* UserSystem;
     const csp::common::LoginState* LoginState;
     std::atomic_bool RefreshNeeded, RefreshStarted;

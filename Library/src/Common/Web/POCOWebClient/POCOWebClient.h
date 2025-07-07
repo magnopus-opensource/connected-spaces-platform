@@ -22,6 +22,13 @@
 #include <Poco/Net/PartSource.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 
+namespace csp::common
+{
+
+class LogSystem;
+
+}
+
 namespace csp::systems
 {
 
@@ -68,7 +75,7 @@ public:
 
 protected:
     // Instances of POCOWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    POCOWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh = true);
+    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
     void SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version);
 
@@ -90,6 +97,10 @@ protected:
 
     std::vector<Poco::Net::HTTPCookie>* Cookies;
     std::mutex CookiesMutex;
+
+private:
+    static void LogHttpResponseIfLoglevelVeryVerbose(
+        csp::common::LogSystem* LogSystem, const char* Verb, const HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse);
 };
 
 } // namespace csp::web

@@ -15,6 +15,8 @@
  */
 #include "WebClient.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Json.h"
@@ -28,8 +30,9 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, bool AutoRefresh)
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : RootPort(InPort)
+    , LogSystem(LogSystem)
     , UserSystem(nullptr)
     , LoginState(nullptr)
     , RefreshNeeded(false)
@@ -164,6 +167,11 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
     csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
 {
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+
+    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    {
+        LogHttpRequest(Request);
+    }
 
 #ifdef CSP_WASM
     RefreshIfExpired();
@@ -464,4 +472,70 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
         }
     }
 }
+
+void WebClient::LogHttpRequest(const HttpRequest* Request)
+{
+    csp::common::String Verb = "";
+    switch (Request->GetVerb())
+    {
+    case ERequestVerb::Get:
+        Verb = "GET";
+        break;
+    case ERequestVerb::Post:
+        Verb = "POST";
+        break;
+    case ERequestVerb::Put:
+        Verb = "PUT";
+        break;
+    case ERequestVerb::Delete:
+        Verb = "DELETE";
+        break;
+    case ERequestVerb::Head:
+        Verb = "HEAD";
+        break;
+    default:
+        Verb = "UNKNOWN";
+        break;
+    }
+
+    csp::common::String Url = Request->GetUri().GetAsString();
+
+    const auto& RequestHeaders = Request->GetPayload().GetHeaders();
+    csp::common::String Headers;
+
+    for (const auto& Header : RequestHeaders)
+    {
+        Headers.Append(fmt::format("\t{}: {}\n", Header.first, Header.second).c_str());
+    }
+
+    const csp::common::String& RequestPayload = Request->GetPayload().ToJson();
+
+    csp::common::String RequestBody;
+
+    if (!RequestPayload.IsEmpty())
+    {
+        rapidjson::Document RequestJson;
+        RequestJson.Parse(RequestPayload);
+
+        if (RequestJson.IsObject())
+        {
+            for (rapidjson::Value::ConstMemberIterator itr = RequestJson.MemberBegin(); itr != RequestJson.MemberEnd(); ++itr)
+            {
+                // Obfuscate the users password when logging the Http request body
+                if (std::strcmp(itr->name.GetString(), "password") == 0)
+                {
+                    RequestBody.Append(fmt::format("\t{}: ******\n", JsonObjectToString(itr->name)).c_str());
+                }
+                else
+                {
+                    RequestBody.Append(fmt::format("\t{}: {}\n", JsonObjectToString(itr->name), JsonObjectToString(itr->value)).c_str());
+                }
+            }
+        }
+    }
+
+    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("HTTP Request\n{0} {1}\nRequest Headers\n{2}Request Body\n{3}", Verb, Url, Headers, RequestBody).c_str());
+}
+
 } // namespace csp::web

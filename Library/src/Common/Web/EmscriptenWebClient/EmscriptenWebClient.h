@@ -17,6 +17,13 @@
 
 #include "Common/Web/WebClient.h"
 
+namespace csp::common
+{
+
+class LogSystem;
+
+}
+
 namespace csp::systems
 {
 
@@ -51,7 +58,7 @@ public:
 
 protected:
     // Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh = true);
+    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
 private:
     void Send(HttpRequest& Request) override;

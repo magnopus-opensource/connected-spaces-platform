@@ -28,7 +28,7 @@ class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient
 {
 public:
     UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::EmscriptenWebClient(InPort, Tp)
+        : csp::web::EmscriptenWebClient(InPort, Tp, nullptr)
     {
     }
 };
@@ -37,7 +37,7 @@ class UAPOCOWebClient : public csp::web::POCOWebClient
 {
 public:
     UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::POCOWebClient(InPort, Tp)
+        : csp::web::POCOWebClient(InPort, Tp, nullptr)
     {
     }
 };

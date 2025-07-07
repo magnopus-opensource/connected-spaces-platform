@@ -21,6 +21,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
@@ -47,8 +48,8 @@ typedef std::function<void(const NullResult& Result)> NullResultCallback;
 class TestWebClient : public csp::web::EmscriptenWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : EmscriptenWebClient(InPort, Tp, false)
+    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+        : EmscriptenWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
@@ -58,8 +59,8 @@ public:
 class TestWebClient : public csp::web::POCOWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : POCOWebClient(InPort, Tp, false)
+    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+        : POCOWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
@@ -120,10 +121,12 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, NullResultTest)
 // BaseResult
 CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 {
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
     const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
     const csp::common::String MyTestPayload = "1234";
 
-    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP);
+    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, LogSystem);
     EXPECT_TRUE(WebClient != nullptr);
 
     ResponseReceiver Receiver;
