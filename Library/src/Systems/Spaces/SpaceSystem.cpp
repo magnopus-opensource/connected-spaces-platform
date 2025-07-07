@@ -363,6 +363,13 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
             systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                 "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        .then(async::inline_scheduler(),
+            [](const SpaceResult& SpaceResult)
+            {
+                // Initialize (or ensure initialization) prior to use (In RefreshMultiplayerScopes)
+                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise();
+                return SpaceResult;
+            })
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
         .then(async::inline_scheduler(), RefreshMultiplayerScopes())
         .then(async::inline_scheduler(),
@@ -370,7 +377,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
                 "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", MakeInvalid<NullResult>(),
                 *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
-        .then(async::inline_scheduler(), []() { csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise(); })
         .then(async::inline_scheduler(),
             csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace](const std::exception& /*Except*/)
                 { CurrentSpace = {}; },
