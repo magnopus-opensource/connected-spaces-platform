@@ -24,7 +24,8 @@ namespace csp::systems
 {
 /// @brief CSPSceneData which represents all data that exists for a space.
 /// @details This data structure is created through the deserialization of a CSPSceneDescription Json which is retrieved externally.
-/// To retrieve the scene descriptions containing entities, a CSPSceneDescription should be created using the same json file.
+/// The json file used to create this structure is also used to create a systems::CSPSceneData object.
+/// The reason these are seperated is to break dependencies between our multiplayer and corer modules.
 class CSPSceneData
 {
 public:

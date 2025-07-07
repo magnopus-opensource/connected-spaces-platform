@@ -20,7 +20,8 @@
 namespace csp::multiplayer::mcs
 {
 /// @brief Internal mcs data structure which represents objects in a scene.
-/// This is created through the deserialization of a csp scene json file.
+/// @details The json file used to create this structure is also used to create a systems::mcs::SceneData object.
+/// The reason these are seperated is to break dependencies between our multiplayer and corer modules.
 class SceneDescription
 {
 public:
