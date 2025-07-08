@@ -38,22 +38,11 @@
     4. Add a new case in DeserializeComponentData so it can be deserialized from a signalr value.
 */
 
-namespace csp::multiplayer::mcs
-{
-class ItemComponentData;
-class ObjectMessage;
-}
-
 namespace csp::json
 {
 class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
-
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
-void ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);
 
 namespace csp::multiplayer::mcs
 {
@@ -145,9 +134,6 @@ public:
     bool operator==(const ItemComponentData& Other) const;
 
 private:
-    friend void ::ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
-
     ItemComponentDataVariant Value;
 };
 
@@ -160,7 +146,7 @@ class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 public:
     ObjectMessage() = default;
     ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-        const std::map<PropertyKeyType, ItemComponentData>& Components);
+        const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -176,9 +162,6 @@ public:
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
 private:
-    friend void ::ToJson(csp::json::JsonSerializer& Deserializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
-    friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);
-
     uint64_t Id = 0;
     uint64_t Type = 0;
     bool IsTransferable = false;
@@ -219,3 +202,8 @@ private:
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 }
+
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);

@@ -218,7 +218,7 @@ const ItemComponentDataVariant& ItemComponentData::GetValue() const { return Val
 bool ItemComponentData::operator==(const ItemComponentData& Other) const { return Value == Other.Value; }
 
 ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-    const std::map<PropertyKeyType, ItemComponentData>& Components)
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components)
     : Id { Id }
     , Type { Type }
     , IsTransferable { IsTransferable }

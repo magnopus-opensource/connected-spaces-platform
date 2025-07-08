@@ -214,7 +214,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer:
 
     csp::multiplayer::mcs::ItemComponentDataVariant Variant;
     csp::multiplayer::mcs::DeserializeComponentDataFromTypeString(Deserializer, TypeStdString, Variant);
-    Obj.Value = Variant;
+    Obj = csp::multiplayer::mcs::ItemComponentData { Variant };
 }
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ObjectMessage& Obj)
@@ -230,7 +230,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::
         Serializer.SerializeMember("parentId", *Obj.GetParentId());
     }
 
-    if (Obj.Components)
+    if (Obj.GetComponents())
     {
         csp::multiplayer::mcs::SerializeComponents(Serializer, *Obj.GetComponents());
     }
@@ -238,19 +238,29 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj)
 {
-    Deserializer.SafeDeserializeMember("id", Obj.Id);
-    Deserializer.SafeDeserializeMember("prefabId", Obj.Type);
-    Deserializer.SafeDeserializeMember("isTransferable", Obj.IsTransferable);
-    Deserializer.SafeDeserializeMember("isPersistent", Obj.IsPersistent);
+    uint64_t Id = 0;
+    uint64_t Type = 0;
+    bool IsTransferable = false;
+    bool IsPersistent = false;
+    uint64_t OwnerId = 0;
+    std::optional<uint64_t> ParentId;
+    std::optional<std::map<csp::multiplayer::mcs::PropertyKeyType, csp::multiplayer::mcs::ItemComponentData>> Components;
+
+    Deserializer.SafeDeserializeMember("id", Id);
+    Deserializer.SafeDeserializeMember("prefabId", Type);
+    Deserializer.SafeDeserializeMember("isTransferable", IsTransferable);
+    Deserializer.SafeDeserializeMember("isPersistent", IsPersistent);
     // Deserializer.SafeDeserializeMember("ownerUserId", Obj.OwnerId);
 
-    uint64_t ParentId = 0;
-    Deserializer.SafeDeserializeMember("parentId", ParentId);
+    uint64_t DeserializedParentId = 0;
+    Deserializer.SafeDeserializeMember("parentId", DeserializedParentId);
 
-    if (ParentId != 0)
+    if (DeserializedParentId != 0)
     {
-        Obj.ParentId = ParentId;
+        ParentId = DeserializedParentId;
     }
 
-    csp::multiplayer::mcs::DeserializeComponents(Deserializer, Obj.Components);
+    csp::multiplayer::mcs::DeserializeComponents(Deserializer, Components);
+
+    Obj = csp::multiplayer::mcs::ObjectMessage { Id, Type, IsTransferable, IsPersistent, OwnerId, ParentId, Components };
 }
