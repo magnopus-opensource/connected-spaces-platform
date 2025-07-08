@@ -163,7 +163,3 @@ protected:
     IJSScriptRunner() = default;
 };
 }
-
-CSP_START_IGNORE
-#pragma warning(pop)
-CSP_END_IGNORE
