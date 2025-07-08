@@ -363,6 +363,13 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
             systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                 "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        .then(async::inline_scheduler(),
+            [](const SpaceResult& SpaceResult)
+            {
+                // Initialize (or ensure initialization) prior to use (In RefreshMultiplayerScopes)
+                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise();
+                return SpaceResult;
+            })
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
         .then(async::inline_scheduler(), RefreshMultiplayerScopes())
         .then(async::inline_scheduler(),
