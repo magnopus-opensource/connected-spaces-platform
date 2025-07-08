@@ -1181,7 +1181,8 @@ mcs::ObjectPatch SpaceEntity::CreateObjectPatch()
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {
         UpdatedComponents[TransientDeletionComponentIds[i]]
-            = static_cast<mcs::ItemComponentData>(static_cast<uint64_t>(mcs::ItemComponentDataType::DELETE_COMPONENT));
+            // we replace the contents of the component with the *value* of the mcs::ItemComponentDataType::DELETE_COMPONENT type
+            = mcs::ItemComponentData(static_cast<uint64_t>(mcs::ItemComponentDataType::DELETE_COMPONENT));
     }
 
     // 4. Create the object patch using the required properties and our created components.

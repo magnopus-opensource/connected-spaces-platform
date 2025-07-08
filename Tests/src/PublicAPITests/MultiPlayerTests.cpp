@@ -1248,20 +1248,6 @@ void GetComponentById(mcs::ItemComponentData* ComponentValue, const uint32_t Id,
 {
     auto [Result] = Awaitable(&mcs::ItemComponentData::GetComponentById, ComponentValue, Id).Await(RequestPredicate);
 
-    //  auto [Result] = AWAIT_PRE(
-    // ComponentValue, GetComponentByIdTASK, RequestPredicate, id);
-    // ComponentValue, csp::multiplayer::mcs::ItemComponentData::GetComponentByIdTASK, RequestPredicate, id);
-    // ComponentValue, ItemComponentData::GetComponentByIdTASK, RequestPredicate, id);
-    // auto [Result] = Awaitable(&csp::multiplayer::mcs::ItemComponentData::GetComponentByIdTASK, ComponentValue, id)
-    // auto [Result] = Awaitable(&mcs::ItemComponentData::GetComponentByIdTASK, ComponentValue, id).Await(RequestPredicate);
-
-    // auto [Result2]
-    //= AWAIT_PRE(ComponentValue, GetComponentById, RequestPredicate, id);
-    //= AWAIT_PRE(ComponentValue, csp::multiplayer::mcs::ItemComponentData::GetComponentById, RequestPredicate, id);
-    //   = AWAIT_PRE(ComponentValue, ItemComponentData::GetComponentById, RequestPredicate, id);
-    // auto [Result2] = Awaitable(&csp::multiplayer::mcs::ItemComponentData::GetComponentById, ComponentValue, id)
-    // auto [Result2] = Awaitable(&mcs::ItemComponentData::GetComponentById, ComponentValue, id).Await(RequestPredicate);
-
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     OutComponentData = Result.GetComponent();
