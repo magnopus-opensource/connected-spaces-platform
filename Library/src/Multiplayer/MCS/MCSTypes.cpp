@@ -18,7 +18,11 @@
 
 #include "CSP/Systems/SystemsResult.h"
 #include "Services/MultiplayerService/Api.h"
-
+#ifdef CSP_WASM
+#include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#else
+#include "Common/Web/POCOWebClient/POCOWebClient.h"
+#endif
 namespace chs_multiplayer = csp::services::generated::multiplayerservice;
 
 namespace csp::multiplayer::mcs
@@ -168,17 +172,21 @@ namespace
 
 ItemComponentData::ItemComponentData()
     : Value(nullptr)
+    , ComponentObjectMessageApi(nullptr)
+
 {
 }
 
 ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
     : Value { Value }
 {
+    ComponentObjectMessageApi = new chs_multiplayer::ObjectMessageApi(csp::systems::SystemsManager::Get().GetWebClient());
 }
 
 ItemComponentData::ItemComponentData(ItemComponentDataVariant&& Value)
     : Value { Value }
 {
+    ComponentObjectMessageApi = new chs_multiplayer::ObjectMessageApi(csp::systems::SystemsManager::Get().GetWebClient());
 }
 
 void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
@@ -237,6 +245,7 @@ bool ItemComponentData::operator==(const ItemComponentData& Other) const { retur
 ItemComponentData& ItemComponentData::operator=(const ItemComponentData& Other)
 {
     Value = Other.Value;
+    ComponentObjectMessageApi = Other.ComponentObjectMessageApi;
 
     return *this;
 }

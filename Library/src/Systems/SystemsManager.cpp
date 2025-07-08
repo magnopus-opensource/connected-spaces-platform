@@ -55,6 +55,8 @@ SystemsManager& SystemsManager::Get()
     return *SystemsManager::Instance;
 }
 
+csp::web::WebClient* SystemsManager::GetWebClient() { return WebClient; }
+
 UserSystem* SystemsManager::GetUserSystem() { return UserSystem; }
 
 SpaceSystem* SystemsManager::GetSpaceSystem() { return SpaceSystem; }

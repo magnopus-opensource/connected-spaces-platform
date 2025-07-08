@@ -49,6 +49,14 @@ template <typename T> class task;
 CSP_END_IGNORE
 }
 
+namespace csp::web
+{
+
+class WebClient;
+class POCOWebClient;
+
+} // namespace csp::web
+
 namespace csp::json
 {
 class JsonSerializer;
@@ -122,7 +130,6 @@ enum class ItemComponentDataType : uint64_t
 class ItemComponentData;
 class ComponentResult;
 
-static csp::services::ApiBase* ComponentObjectMessageApi;
 typedef std::function<void(const ComponentResult& Result)> ComponentResultCallback;
 
 void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
@@ -160,6 +167,7 @@ public:
 
 private:
     ItemComponentDataVariant Value;
+    csp::services::ApiBase* ComponentObjectMessageApi;
 };
 
 /// @brief Represents an MCS object message.

@@ -41,6 +41,8 @@ using namespace csp::multiplayer;
 // Test constructor values of ObjectMessage are correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageConstructorTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestId = 1;
     const uint64_t TestType = 2;
     const bool TestIsTransferable = false;
@@ -64,6 +66,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageConstructorTest)
 // Test constructor values of ObjectPatch are correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectPatchConstructorTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestId = 1;
     const uint64_t TestOwnerId = 2;
     const bool TestDestroy = false;
@@ -85,6 +89,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectPatchConstructorTest)
 // Test serialization of ObjectMessage is correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageSerializeTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestId = 1;
     const uint64_t TestType = 2;
     const bool TestIsTransferable = true;
@@ -112,6 +118,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectMessageSerializeTest)
 // Test serialization of ObjectPatch is correct.
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ObjectPatchSerializeTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestId = 1;
     const uint64_t TestOwnerId = 2;
     const bool TestDestroy = false;
@@ -143,6 +151,8 @@ This SHOULD be kept up-to-date if new types are added in the future!
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeBoolTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const bool TestValue = true;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -161,6 +171,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeBoolTest)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeInt64Test)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const int64_t TestValue = 10;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -179,6 +191,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeInt64Test)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeUint64Test)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestValue = 10;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -197,6 +211,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeUint64Test)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeDoubleTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const double TestValue = 10.1;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -215,6 +231,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeDoubleTest)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeFloatTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const float TestValue = 10.1f;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -233,6 +251,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeFloatTest)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeStringTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::string TestValue = "Test";
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -251,6 +271,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeStringTest)
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeFloatVectorTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::vector<float> TestValue = { 1.1f, 2.2f, 3.3f };
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -269,6 +291,8 @@ CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeFloatVectorTest
 
 CSP_INTERNAL_TEST(CSPEngine, MCSTests, ItemComponentDataSerializeStringMapTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::map<std::string, mcs::ItemComponentData> TestValue
         = { { "Key1", mcs::ItemComponentData { 1.1f } }, { "Key2", mcs::ItemComponentData { std::string { "Test" } } } };
     mcs::ItemComponentData ComponentValue { TestValue };

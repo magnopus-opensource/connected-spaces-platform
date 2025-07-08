@@ -83,6 +83,10 @@ class CSP_API SystemsManager
 public:
     static SystemsManager& Get();
 
+    /// @brief Retrieves web client.
+    /// @return WebClient : pointer to the web client class
+    CSP_NO_EXPORT csp::web::WebClient* GetWebClient();
+
     /// @brief Retrieves user system.
     /// @return SpaceSystem : pointer to the user system class
     UserSystem* GetUserSystem();
