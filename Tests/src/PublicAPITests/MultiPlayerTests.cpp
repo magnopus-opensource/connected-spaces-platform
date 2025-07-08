@@ -30,6 +30,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
@@ -1323,13 +1324,18 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_TRUE(Components.HasKey(KeepKey));
     EXPECT_TRUE(Components.HasKey(DeleteKey));
     const bool TestValue = true;
-    mcs::ItemComponentData ComponentValue { TestValue };
+    mcs::ItemComponentData ComponentValue;
     mcs::ItemComponentData OutComponentData;
+    MCSComponentPacker ComponentPacker;
 
     auto ComponentKeys = Components.Keys();
     for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         uint32_t id = ComponentKeys->operator[](i);
+        ComponentPacker.WriteValue(id, Components[i]);
+        auto UpdatedComponents = ComponentPacker.GetComponents();
+
+        ComponentValue = UpdatedComponents[0];
         GetComponentById(&ComponentValue, id, OutComponentData);
     }
 
@@ -1354,6 +1360,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         uint32_t id = ComponentKeys->operator[](i);
+        ComponentPacker.WriteValue(id, Components[i]);
+        auto UpdatedComponents = ComponentPacker.GetComponents();
+
+        ComponentValue = UpdatedComponents[0];
         GetComponentById(&ComponentValue, id, OutComponentData);
     }
 
@@ -1394,6 +1404,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     for (size_t i = 0; i < ComponentKeys->Size(); ++i)
     {
         uint32_t id = ComponentKeys->operator[](i);
+        ComponentPacker.WriteValue(id, Components[i]);
+        auto UpdatedComponents = ComponentPacker.GetComponents();
+
+        ComponentValue = UpdatedComponents[0];
         GetComponentById(&ComponentValue, id, OutComponentData);
     }
     delete (ComponentKeys);
