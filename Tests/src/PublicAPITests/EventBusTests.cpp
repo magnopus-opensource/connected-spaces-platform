@@ -75,7 +75,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregister)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 1);
@@ -104,17 +104,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName3 }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName2 }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId2, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName3 }, [](const csp::common::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { ReceiverId2, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 6);
@@ -196,13 +196,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
 
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
     EXPECT_FALSE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
@@ -413,7 +413,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
     auto TestRunnerUser1 = CreateTestUser();
     auto TestRunnerUser2 = CreateTestUser();
 
-    csp::systems::Space TestSpace = CreateTestSpaceAndEnterScope(SystemsManager.GetSpaceSystem(), Connection);
+    csp::systems::Space TestSpace = CreateTestSpaceAndEnterScope(SpaceSystem, Connection);
 
     MultiplayerTestRunnerProcess EventBusPingRunner1
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::EVENT_BUS_PING)
@@ -450,7 +450,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
     const char* PintRequestEventName = "EventPingRequest";
     const char* PingResponseEventName = "EventPingResponse";
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiver", PingResponseEventName),
+    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, PingResponseEventName),
         [&ReceivedPings, &TwoPingsResponsePromise](const csp::common::NetworkEventData& NetworkEventData)
         {
             std::cout << "Received Event Bus Ping." << std::endl;
