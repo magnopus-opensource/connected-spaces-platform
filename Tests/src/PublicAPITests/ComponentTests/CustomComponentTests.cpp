@@ -65,10 +65,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    const char* TestSpaceName2 = "OLY-UNITTEST-SPACE-REWIND-2";
+    const char* TestSpaceName2 = "CSP-UNITTEST-SPACE-MAG-2";
 
     const csp::common::String ObjectName = "Object 1";
     const csp::common::String ApplicationOrigin = "Application Origin 1";
