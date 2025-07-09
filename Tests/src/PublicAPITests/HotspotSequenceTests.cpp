@@ -191,9 +191,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
     // Validate sequence creation events.
     bool CallbackCalled = false;
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+        [&CallbackCalled, &Space, &TestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
-            EXPECT_EQ(NetworkEventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
+            EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Create);
             EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
             EXPECT_EQ(NetworkEventData.HotspotData->Name, TestGroupName);
             CallbackCalled = true;
@@ -207,9 +207,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
     // Validate sequence deletion events.
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+        [&CallbackCalled, &Space, &TestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
-            EXPECT_EQ(NetworkEventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
+            EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Delete);
             EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
             EXPECT_EQ(NetworkEventData.HotspotData->Name, TestGroupName);
             CallbackCalled = true;
@@ -370,11 +370,11 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
     HotspotSystem->SetHotspotSequenceChangedCallback(
         [&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
-            const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+            const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
             // When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
             // The second is an update, as CSP will also update the group's metadata to reflect the new name.
-            if (NetworkEventData.UpdateType == csp::multiplayer::ESequenceUpdateType::Rename)
+            if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Rename)
             {
                 // With rename events, we expect to be able to receive both the old and new names.
                 EXPECT_EQ(NetworkEventData.HotspotData->Name, OldTestGroupName);
@@ -382,7 +382,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
                 ReceivedRenameCallback = true;
             }
-            else if (NetworkEventData.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+            else if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
             {
                 EXPECT_EQ(NetworkEventData.HotspotData->Name, NewTestGroupName);
                 ReceivedUpdateCallback = true; // Both the rename and update callbacks have now fired. That's all the expected events.
@@ -732,15 +732,14 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         bool SequencesUpdated = false;
 
         auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
-                      const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+                      const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
-            if (NetworkEventData.HotspotData->Name == TestGroupName1 && NetworkEventData.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
+            if (NetworkEventData.HotspotData->Name == TestGroupName1 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Delete)
             {
                 // Ensure we delete the group which only has one item
                 SequenceDeleted = true;
             }
-            else if (NetworkEventData.HotspotData->Name == TestGroupName2
-                && NetworkEventData.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+            else if (NetworkEventData.HotspotData->Name == TestGroupName2 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
             {
                 // Ensure we update the sequence that has multiple items
                 SequenceUpdate = true;

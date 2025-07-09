@@ -1772,7 +1772,7 @@ void AssetSystem::RegisterSystemCallback()
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
-        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
 }
 
 void AssetSystem::DeregisterSystemCallback()
@@ -1785,15 +1785,15 @@ void AssetSystem::DeregisterSystemCallback()
     }
 }
 
-void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
+void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
     if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
     {
         return;
     }
 
-    const csp::multiplayer::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedNetworkEventData
-        = static_cast<const csp::multiplayer::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
+    const csp::common::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedNetworkEventData
+        = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
 
     if (AssetDetailBlobChangedCallback)
     {
@@ -1802,7 +1802,7 @@ void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::multiplayer::NetworkE
 
     if (AssetDetailBlobChangedNetworkEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
     {
-        csp::multiplayer::MaterialChangedParams MaterialParams;
+        csp::common::MaterialChangedParams MaterialParams;
         MaterialParams.ChangeType = AssetDetailBlobChangedNetworkEventData.ChangeType;
         MaterialParams.MaterialCollectionId = AssetDetailBlobChangedNetworkEventData.AssetCollectionId;
         MaterialParams.MaterialId = AssetDetailBlobChangedNetworkEventData.AssetId;

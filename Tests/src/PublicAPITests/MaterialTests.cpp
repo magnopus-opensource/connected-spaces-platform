@@ -730,12 +730,12 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         csp::common::String MaterialCollectionId;
         csp::common::String MaterialId;
 
-        auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::multiplayer::MaterialChangedParams& Params)
+        auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::common::MaterialChangedParams& Params)
         {
             MaterialCollectionId = Params.MaterialCollectionId;
             MaterialId = Params.MaterialId;
 
-            EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
+            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Created);
             CallbackCalled = true;
         };
 
@@ -758,12 +758,12 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     {
         bool CallbackCalled2 = false;
 
-        auto CB = [&CallbackCalled2, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+        auto CB = [&CallbackCalled2, &CreatedGLTFMaterial](const csp::common::MaterialChangedParams& Params)
         {
             EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
             EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
 
-            EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Updated);
+            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Updated);
 
             CallbackCalled2 = true;
         };
@@ -781,12 +781,12 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     {
         bool CallbackCalled3 = false;
 
-        auto CB = [&CallbackCalled3, &CreatedGLTFMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+        auto CB = [&CallbackCalled3, &CreatedGLTFMaterial](const csp::common::MaterialChangedParams& Params)
         {
             EXPECT_EQ(Params.MaterialCollectionId, CreatedGLTFMaterial->GetMaterialCollectionId());
             EXPECT_EQ(Params.MaterialId, CreatedGLTFMaterial->GetMaterialId());
 
-            EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Deleted);
+            EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Deleted);
 
             CallbackCalled3 = true;
         };
@@ -842,12 +842,12 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     csp::common::String MaterialCollectionId;
     csp::common::String MaterialId;
 
-    auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::multiplayer::MaterialChangedParams& Params)
+    auto CB = [&CallbackCalled, &MaterialCollectionId, &MaterialId](const csp::common::MaterialChangedParams& Params)
     {
         MaterialCollectionId = Params.MaterialCollectionId;
         MaterialId = Params.MaterialId;
 
-        EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
+        EXPECT_EQ(Params.ChangeType, csp::common::EAssetChangeType::Created);
         CallbackCalled = true;
     };
 

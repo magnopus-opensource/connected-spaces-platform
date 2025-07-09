@@ -2000,14 +2000,14 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     csp::common::String CallbackAssetId;
 
     auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
+        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(NetworkEventData.ChangeType, EAssetChangeType::Created);
+        EXPECT_EQ(NetworkEventData.ChangeType, csp::common::EAssetChangeType::Created);
         EXPECT_EQ(NetworkEventData.AssetType, csp::systems::EAssetType::MODEL);
 
         CallbackAssetId = NetworkEventData.AssetId;
@@ -2086,14 +2086,14 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     bool AssetDetailBlobChangedCallbackCalled = false;
 
     auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
+        = [&AssetDetailBlobChangedCallbackCalled](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
     {
         if (AssetDetailBlobChangedCallbackCalled)
         {
             return;
         }
 
-        EXPECT_EQ(NetworkEventData.ChangeType, EAssetChangeType::Invalid);
+        EXPECT_EQ(NetworkEventData.ChangeType, csp::common::EAssetChangeType::Invalid);
         EXPECT_EQ(NetworkEventData.AssetType, csp::systems::EAssetType::IMAGE);
 
         AssetDetailBlobChangedCallbackCalled = true;
@@ -2101,7 +2101,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
-    csp::common::ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
+    csp::common::ReplicatedValue Param1 = static_cast<int64_t>(csp::common::EAssetChangeType::Invalid);
     csp::common::ReplicatedValue Param2 = "";
     csp::common::ReplicatedValue Param3 = "";
     csp::common::ReplicatedValue Param4 = "";

@@ -494,10 +494,10 @@ void ClientElectionManager::BindNetworkEvents()
     NetworkEventBus* NetworkEventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
-        [this](const NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
-        [this](const NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()

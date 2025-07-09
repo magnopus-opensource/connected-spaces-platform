@@ -71,7 +71,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregister)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 1);
@@ -92,17 +92,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName1" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId", "TestEventName1" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName2" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId", "TestEventName2" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId1", "TestEventName1" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId1", "TestEventName1" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId1", "TestEventName2" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {});
+        NetworkEventRegistration { "TestReceiverId1", "TestEventName2" }, [](const csp::common::NetworkEventData& NetworkEventData) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 6);
@@ -173,13 +173,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
 
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { "TestReceiverId", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
     EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId", "TestEventName1" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { "TestReceiverId", "TestEventName1" }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
     EXPECT_FALSE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::multiplayer::NetworkEventData& NetworkEventData) {}));
+        NetworkEventRegistration { "TestReceiverId1", "TestEventName" }, [](const csp::common::NetworkEventData& NetworkEventData) {}));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
@@ -226,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
         = { csp::common::ReplicatedValue { "TestVal" }, csp::common::ReplicatedValue { 1.0f } };
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiverId", "TestEvent"),
-        [&NetworkEventPromise](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
 
     NetworkEventBus->SendNetworkEventToClient("TestEvent", ValsToSend, Connection->GetClientId(), ErrorCallback);
@@ -263,14 +263,14 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiReciever)
         = { csp::common::ReplicatedValue { "TestVal" }, csp::common::ReplicatedValue { 1.0f } };
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiverId", "TestEvent"),
-        [&NetworkEventPromise](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
 
     std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise1;
     std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture1 = NetworkEventPromise1.get_future();
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiverId1", "TestEvent"),
-        [&NetworkEventPromise1](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&NetworkEventPromise1](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
 
     NetworkEventBus->SendNetworkEventToClient("TestEvent", ValsToSend, Connection->GetClientId(), ErrorCallback);
@@ -312,10 +312,10 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
         = { csp::common::ReplicatedValue { "TestVal" }, csp::common::ReplicatedValue { 1.0f } };
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiverId", "TestEvent"),
-        [&NetworkEventPromise](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiverId", "TestEvent1"),
-        [&NetworkEventPromise1](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&NetworkEventPromise1](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
 
     NetworkEventBus->SendNetworkEventToClient("TestEvent", ValsToSend, Connection->GetClientId(), ErrorCallback);
@@ -401,7 +401,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
     std::atomic<int> ReceivedPings = 0;
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("TestReceiver", "EventPingResponse"),
-        [&ReceivedPings, &TwoPingsResponsePromise](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [&ReceivedPings, &TwoPingsResponsePromise](const csp::common::NetworkEventData& NetworkEventData)
         {
             std::cout << "Received Event Bus Ping." << std::endl;
             // fetch_add returns the old value for thready reasons. (std::latch would be better here given c++20)

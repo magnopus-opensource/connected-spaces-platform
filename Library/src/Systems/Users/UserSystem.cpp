@@ -17,9 +17,9 @@
 #include "CSP/Systems/Users/UserSystem.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/Convert.h"
@@ -813,7 +813,7 @@ void UserSystem::RegisterSystemCallback()
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)),
-        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
 }
 
 void UserSystem::DeregisterSystemCallback()
@@ -825,15 +825,15 @@ void UserSystem::DeregisterSystemCallback()
     }
 }
 
-void UserSystem::OnAccessControlChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
+void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
     if (!UserPermissionsChangedCallback)
     {
         return;
     }
 
-    const csp::multiplayer::AccessControlChangedNetworkEventData& AccessControlChangedNetworkEventData
-        = static_cast<const csp::multiplayer::AccessControlChangedNetworkEventData&>(NetworkEventData);
+    const csp::common::AccessControlChangedNetworkEventData& AccessControlChangedNetworkEventData
+        = static_cast<const csp::common::AccessControlChangedNetworkEventData&>(NetworkEventData);
 
     UserPermissionsChangedCallback(AccessControlChangedNetworkEventData);
 }

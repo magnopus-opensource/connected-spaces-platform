@@ -1126,15 +1126,15 @@ void ConversationSystemInternal::RegisterSystemCallback()
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)),
-        [this](const csp::multiplayer::NetworkEventData& NetworkEventData)
+        [this](const csp::common::NetworkEventData& NetworkEventData)
         {
-            const csp::multiplayer::ConversationNetworkEventData& ConversationNetworkEventData
-                = static_cast<const csp::multiplayer::ConversationNetworkEventData&>(NetworkEventData);
+            const csp::common::ConversationNetworkEventData& ConversationNetworkEventData
+                = static_cast<const csp::common::ConversationNetworkEventData&>(NetworkEventData);
             if (TrySendEvent(ConversationNetworkEventData) == false)
             {
                 // If component doesn't exist, add it to the queue for processing later
-                std::unique_ptr<csp::multiplayer::ConversationNetworkEventData> EventDataCopy
-                    = std::make_unique<csp::multiplayer::ConversationNetworkEventData>(ConversationNetworkEventData);
+                std::unique_ptr<csp::common::ConversationNetworkEventData> EventDataCopy
+                    = std::make_unique<csp::common::ConversationNetworkEventData>(ConversationNetworkEventData);
                 Events.push_back(std::move(EventDataCopy));
             }
         });
@@ -1165,7 +1165,7 @@ void ConversationSystemInternal::FlushEvents()
     }
 }
 
-bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationNetworkEventData& Params)
+bool ConversationSystemInternal::TrySendEvent(const csp::common::ConversationNetworkEventData& Params)
 {
     for (const auto& Component : Components)
     {

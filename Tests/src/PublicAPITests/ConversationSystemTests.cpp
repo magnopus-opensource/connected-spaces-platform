@@ -104,13 +104,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled1 = true; };
-        auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled2 = true; };
+        auto Callback1 = [&CallbackCalled1](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled1 = true; };
+        auto Callback2 = [&CallbackCalled2](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        csp::multiplayer::ConversationNetworkEventData Params;
+        csp::common::ConversationNetworkEventData Params;
         Params.MessageType = csp::multiplayer::ConversationEventType::NewConversation;
         Params.MessageInfo.ConversationId = ConversationComponent1->GetConversationId();
 
@@ -139,13 +139,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
         bool CallbackCalled1 = false;
         bool CallbackCalled2 = false;
 
-        const auto Callback1 = [&CallbackCalled1](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled1 = true; };
-        const auto Callback2 = [&CallbackCalled2](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled2 = true; };
+        const auto Callback1 = [&CallbackCalled1](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled1 = true; };
+        const auto Callback2 = [&CallbackCalled2](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled2 = true; };
 
         ConversationComponent1->SetConversationUpdateCallback(Callback1);
         ConversationComponent2->SetConversationUpdateCallback(Callback2);
 
-        csp::multiplayer::ConversationNetworkEventData Params;
+        csp::common::ConversationNetworkEventData Params;
         Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
         Params.MessageInfo.ConversationId = ConversationComponent2->GetConversationId();
 
@@ -200,7 +200,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     static constexpr const char* TestConversationId = "New Test Message";
 
     // Send an event to a yet to exist conversation component
-    csp::multiplayer::ConversationNetworkEventData Params;
+    csp::common::ConversationNetworkEventData Params;
     Params.MessageType = csp::multiplayer::ConversationEventType::NewMessage;
     Params.MessageInfo.ConversationId = TestConversationId;
 
@@ -229,7 +229,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
@@ -241,7 +241,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 

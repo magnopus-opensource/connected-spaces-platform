@@ -17,9 +17,9 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/SystemBase.h"
 
 #include <unordered_set>
@@ -119,7 +119,7 @@ public:
     void FlushEvents();
 
 private:
-    bool TrySendEvent(const csp::multiplayer::ConversationNetworkEventData& Params);
+    bool TrySendEvent(const csp::common::ConversationNetworkEventData& Params);
 
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
@@ -128,7 +128,7 @@ private:
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
     std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
-    std::vector<std::unique_ptr<csp::multiplayer::ConversationNetworkEventData>> Events;
+    std::vector<std::unique_ptr<csp::common::ConversationNetworkEventData>> Events;
 };
 
 }

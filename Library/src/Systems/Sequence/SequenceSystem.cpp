@@ -16,7 +16,7 @@
 
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
-#include "CSP/Multiplayer/NetworkEventData.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
@@ -325,7 +325,7 @@ void SequenceSystem::RegisterSystemCallback()
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
 }
 
 void SequenceSystem::DeregisterSystemCallback()
@@ -337,19 +337,20 @@ void SequenceSystem::DeregisterSystemCallback()
     }
 }
 
-void SequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
+void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
-    // This may be either a SequenceChangedNetworkEventData or a SequenceHotspotChangedEventData... we're only interested in non-hotspot.
+    // This may be either a hotspot sequence event or a regular sequence event.. we're only interested in non-hotspot.
+    // The event will have a a populated "HotspotData" member if it is a hotspot sequence event..
     // This is hacky, see Eventbus deserialisation for more.
 
-    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData);
+    const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
 
     const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
 
     if (!IsHotspotEvent && SequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
-        SequenceChangedCallback(static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData));
+        SequenceChangedCallback(SequenceEvent);
     }
 }
 

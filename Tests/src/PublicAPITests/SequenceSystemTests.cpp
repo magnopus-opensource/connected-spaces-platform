@@ -925,10 +925,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueSequenceName[256];
     SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
-    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
         EXPECT_EQ(NetworkEventData.Key, UniqueSequenceName);
-        EXPECT_EQ(NetworkEventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
+        EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Create);
 
         CallbackCalled = true;
     };
@@ -947,9 +947,9 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
     auto UpdateCallback
-        = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+        = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
-        EXPECT_EQ(NetworkEventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+        EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
         EXPECT_EQ(NetworkEventData.Key, std::string(UniqueUpdatedSequenceName).c_str());
 
         CallbackCalled = true;
@@ -965,10 +965,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     EXPECT_TRUE(CallbackCalled);
 
     // Delete sequence
-    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedNetworkEventData& NetworkEventData)
+    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
         EXPECT_EQ(NetworkEventData.Key, UniqueUpdatedSequenceName);
-        EXPECT_EQ(NetworkEventData.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
+        EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Delete);
 
         CallbackCalled = true;
     };

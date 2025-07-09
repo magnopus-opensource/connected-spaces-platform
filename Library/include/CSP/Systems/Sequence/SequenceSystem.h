@@ -16,8 +16,8 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/Sequence/Sequence.h"
 #include "CSP/Systems/SystemBase.h"
 
@@ -111,7 +111,7 @@ public:
 
     // Callback to receive sequence changes, contains a SequenceChangedParams with the details.
     // SequenceChangeEventData will have a null HotspotData member.
-    typedef std::function<void(const csp::multiplayer::SequenceChangedNetworkEventData&)> SequenceChangedCallbackHandler;
+    typedef std::function<void(const csp::common::SequenceChangedNetworkEventData&)> SequenceChangedCallbackHandler;
 
     /// @brief Sets a callback for a sequence changed event.
     /// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence that has been changed.
@@ -123,7 +123,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

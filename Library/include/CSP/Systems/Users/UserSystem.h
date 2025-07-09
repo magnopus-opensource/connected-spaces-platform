@@ -19,9 +19,9 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/LoginState.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
@@ -227,7 +227,7 @@ public:
     CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback);
 
     // Callback to receive access permission changes Data when a message is sent.
-    typedef std::function<void(const csp::multiplayer::AccessControlChangedNetworkEventData&)> UserPermissionsChangedCallbackHandler;
+    typedef std::function<void(const csp::common::AccessControlChangedNetworkEventData&)> UserPermissionsChangedCallbackHandler;
 
     /// @brief Sets a callback for an access control changed event.
     ///
@@ -243,7 +243,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

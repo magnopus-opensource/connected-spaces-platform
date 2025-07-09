@@ -24,7 +24,7 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 
-namespace csp::multiplayer
+namespace csp::common
 {
 
 /// @brief Enum specifying the type of change that occured to an asset.
@@ -87,8 +87,8 @@ public:
 class CSP_API ConversationNetworkEventData : public NetworkEventData
 {
 public:
-    ConversationEventType MessageType;
-    MessageInfo MessageInfo;
+    csp::multiplayer::ConversationEventType MessageType;
+    csp::multiplayer::MessageInfo MessageInfo;
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.
@@ -149,7 +149,7 @@ public:
     csp::common::String NewKey;
 
     /// @brief Additional data if this sequence event is a hotspot sequence event. Will be non-empty in that case only.
-    csp::common::Optional<csp::multiplayer::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
+    csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
 };
 
 // TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.

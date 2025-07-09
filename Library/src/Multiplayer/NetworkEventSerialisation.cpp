@@ -28,8 +28,9 @@ namespace
 {
 using namespace csp::multiplayer;
 
-ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::common::LogSystem& LogSystem)
+csp::common::ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::common::LogSystem& LogSystem)
 {
+    using namespace csp::common;
     ESequenceUpdateType SequenceUpdateType = ESequenceUpdateType::Invalid;
 
     switch (UpdateType)
@@ -135,7 +136,8 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
 }
 
 // Parse the parts common to all events, extracting the event type (string) and the sender client id (uint)
-void PopulateCommonEventData(const std::vector<signalr::value>& EventValues, NetworkEventData& OutEventData, csp::common::LogSystem& LogSystem)
+void PopulateCommonEventData(
+    const std::vector<signalr::value>& EventValues, csp::common::NetworkEventData& OutEventData, csp::common::LogSystem& LogSystem)
 {
     /*
      * class EventMessage
@@ -199,24 +201,24 @@ csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, 
     return ParentIdString.c_str();
 }
 
-NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    NetworkEventData ParsedEvent {};
+    csp::common::NetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
     return ParsedEvent;
 }
 
-AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
+csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    AssetDetailBlobChangedNetworkEventData ParsedEvent {};
+    csp::common::AssetDetailBlobChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
-    ParsedEvent.ChangeType = EAssetChangeType::Invalid;
+    ParsedEvent.ChangeType = csp::common::EAssetChangeType::Invalid;
 
-    if (ParsedEvent.EventValues[0].GetInt() < static_cast<int64_t>(EAssetChangeType::Num))
+    if (ParsedEvent.EventValues[0].GetInt() < static_cast<int64_t>(csp::common::EAssetChangeType::Num))
     {
-        ParsedEvent.ChangeType = static_cast<EAssetChangeType>(ParsedEvent.EventValues[0].GetInt());
+        ParsedEvent.ChangeType = static_cast<csp::common::EAssetChangeType>(ParsedEvent.EventValues[0].GetInt());
     }
     else
     {
@@ -231,9 +233,10 @@ AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
     return ParsedEvent;
 }
 
-ConversationNetworkEventData DeserializeConversationEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::ConversationNetworkEventData DeserializeConversationEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    ConversationNetworkEventData ParsedEvent {};
+    csp::common::ConversationNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     ParsedEvent.MessageType = static_cast<ConversationEventType>(ParsedEvent.EventValues[0].GetInt());
@@ -247,10 +250,10 @@ ConversationNetworkEventData DeserializeConversationEvent(const std::vector<sign
     return ParsedEvent;
 }
 
-AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
+csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    AccessControlChangedNetworkEventData ParsedEvent {};
+    csp::common::AccessControlChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     /*
@@ -324,19 +327,19 @@ AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
             const csp::common::String ChangeTypeString(
                 ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0], LogSystem).GetString());
 
-            ParsedEvent.ChangeType = EPermissionChangeType::Invalid;
+            ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Invalid;
 
             if (ChangeTypeString == "Created")
             {
-                ParsedEvent.ChangeType = EPermissionChangeType::Created;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Created;
             }
             else if (ChangeTypeString == "Updated")
             {
-                ParsedEvent.ChangeType = EPermissionChangeType::Updated;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Updated;
             }
             else if (ChangeTypeString == "Removed")
             {
-                ParsedEvent.ChangeType = EPermissionChangeType::Removed;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Removed;
             }
             else
             {
@@ -358,9 +361,10 @@ AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
     return ParsedEvent;
 }
 
-SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    SequenceChangedNetworkEventData ParsedEvent {};
+    csp::common::SequenceChangedNetworkEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     if (ParsedEvent.EventValues.Size() != 3)
@@ -387,17 +391,17 @@ SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(const std::vecto
     return ParsedEvent;
 }
 
-SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    SequenceChangedNetworkEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
+    csp::common::SequenceChangedNetworkEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
 
-    ParsedEvent.HotspotData = csp::common::Optional(new HotspotSequenceChangedNetworkEventData());
+    ParsedEvent.HotspotData = csp::common::Optional(new csp::common::HotspotSequenceChangedNetworkEventData());
 
     ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
     ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);
 
-    if (ParsedEvent.UpdateType == ESequenceUpdateType::Rename)
+    if (ParsedEvent.UpdateType == csp::common::ESequenceUpdateType::Rename)
     {
         // When a key is changed (renamed) then we get an additional parameter describing the new key.
         // The usual event data describing the name in this instance will describe the _old_ key.

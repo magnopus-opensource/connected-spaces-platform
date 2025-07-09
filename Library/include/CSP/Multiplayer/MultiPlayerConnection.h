@@ -18,10 +18,10 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/MultiplayerHubMethods.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 
 #include <atomic>
 #include <functional>

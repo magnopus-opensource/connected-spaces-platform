@@ -19,10 +19,10 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 
 #include <chrono>
 #include <deque>

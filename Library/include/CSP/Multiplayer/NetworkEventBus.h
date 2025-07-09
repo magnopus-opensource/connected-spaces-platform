@@ -61,7 +61,7 @@ enum class ErrorCode;
 
 // The callback used to register to listen to events.
 // NetworkEventData lifetime is tied to the callback, do not attempt to store it via reference.
-typedef std::function<void(const NetworkEventData& NetworkEventData)> NetworkEventCallback;
+typedef std::function<void(const csp::common::NetworkEventData& NetworkEventData)> NetworkEventCallback;
 
 /*
  * @brief Details about a network event registrations to serve as a key in the event map.
@@ -232,7 +232,7 @@ private:
     CSP_END_IGNORE
 
     // Map internal event values to the deserializers needed to unpack them
-    std::unique_ptr<NetworkEventData> DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
+    std::unique_ptr<csp::common::NetworkEventData> DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
 
     std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
 };

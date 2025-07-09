@@ -17,8 +17,8 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/NetworkEventData.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
@@ -92,7 +92,7 @@ public:
 
     // Callback to receive hotspot sequence changes, contains a SequenceChangedNetworkEventData with the details.
     // The SequenceChangedNetworkEventData will have a populate HotspotData member for the additional information neccesary to hotspots
-    typedef std::function<void(const csp::multiplayer::SequenceChangedNetworkEventData&)> HotspotSequenceChangedCallbackHandler;
+    typedef std::function<void(const csp::common::SequenceChangedNetworkEventData&)> HotspotSequenceChangedCallbackHandler;
 
     /// @brief Sets a callback to be fired when a hotspot sequence is changed.
     /// @param Callback HotspotSequenceChangedCallbackHandler: Callback to receive data for the hotspot sequence that has been changed.
@@ -104,7 +104,7 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData);
+    CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     HotspotSequenceSystem(

@@ -161,7 +161,8 @@ bool NetworkEventBus::StartEventMessageListening()
         // After this, we'll have ReplicatedValues, which serves as our common exchange type.
         // NOTE: This is not ideal, we'd rather have systems interpret this data directly. However, that would mean breaking the signalr dependency
         // in the deserialisation, which is very possible, just a bit time consuming, so we'll do it later.
-        std::unique_ptr<NetworkEventData> DeserialisedEventData = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
+        std::unique_ptr<csp::common::NetworkEventData> DeserialisedEventData
+            = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
 
         // Dispatch the events
         for (const NetworkEventRegistration& Registration : MatchingRegistrations)
@@ -233,8 +234,11 @@ NetworkEventBus::NetworkEvent NetworkEventBus::NetworkEventFromString(const csp:
     return NetworkEvent::GeneralPurposeEvent;
 }
 
-std::unique_ptr<NetworkEventData> NetworkEventBus::DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues)
+std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEventType(
+    NetworkEvent EventType, const std::vector<signalr::value>& EventValues)
 {
+    using namespace csp::common;
+
     switch (EventType)
     {
     case NetworkEvent::AssetDetailBlobChanged:

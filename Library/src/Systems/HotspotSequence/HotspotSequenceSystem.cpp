@@ -16,7 +16,7 @@
 
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
-#include "CSP/Multiplayer/NetworkEventData.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
@@ -340,7 +340,7 @@ void HotspotSequenceSystem::RegisterSystemCallback()
     EventBusPtr->ListenNetworkEvent(
         csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
-        [this](const csp::multiplayer::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
 }
 
 void HotspotSequenceSystem::DeregisterSystemCallback()
@@ -352,11 +352,12 @@ void HotspotSequenceSystem::DeregisterSystemCallback()
     }
 }
 
-void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::multiplayer::NetworkEventData& NetworkEventData)
+void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
-    // This may be either a SequenceChangedNetworkEventData or a SequenceHotspotChangedEventData... we're only interested in hotspot.
+    // This may be either a hotspot sequence event or a regular sequence event.. we're only interested in hotspot.
+    // The event will have a a populated "HotspotData" member if it is a hotspot sequence event.
     // This is hacky, see Eventbus deserialisation for more.
-    const auto& SequenceEvent = static_cast<const csp::multiplayer::SequenceChangedNetworkEventData&>(NetworkEventData);
+    const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
 
     const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
 

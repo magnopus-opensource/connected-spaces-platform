@@ -240,7 +240,7 @@ public:
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     CSP_ASYNC_RESULT void GetAnnotationThumbnailsForConversation(AnnotationThumbnailCollectionResultCallback Callback);
 
-    typedef std::function<void(const ConversationNetworkEventData&)> ConversationUpdateCallbackHandler;
+    typedef std::function<void(const csp::common::ConversationNetworkEventData&)> ConversationUpdateCallbackHandler;
 
     /// @brief Sets a callback for when the conversation is updated by another client.
     /// @param Callback ConversationUpdateCallbackHandler: Callback to receive data for the conversation that has been changed.
