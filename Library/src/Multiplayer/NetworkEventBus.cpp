@@ -159,6 +159,8 @@ bool NetworkEventBus::StartEventMessageListening()
         // Deserialize the signalR packets using the appropriate deserialiser.
         // This only does anything for internal events, external events will always use the base EventDeserializer.
         // After this, we'll have ReplicatedValues, which serves as our common exchange type.
+        // NOTE: This is not ideal, we'd rather have systems interpret this data directly. However, that would mean breaking the signalr dependency
+        // in the deserialisation, which is very possible, just a bit time consuming, so we'll do it later.
         std::unique_ptr<NetworkEventData> DeserialisedEventData = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
 
         // Dispatch the events

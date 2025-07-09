@@ -17,6 +17,9 @@
 #pragma once
 
 #include "CSP/Common/ReplicatedValue.h"
+
+// These will be broken in OF-1704, and the need for them (the inherited types) will dissapear, as that deserialisation logic will be done in the
+// individual systems. Can't be done until the actual deserialisation functions don't take signalr values as inputs.
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
