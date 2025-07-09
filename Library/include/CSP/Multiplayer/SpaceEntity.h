@@ -34,6 +34,8 @@
 CSP_START_IGNORE
 #ifdef CSP_TESTS
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+class CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
+class CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -123,6 +125,8 @@ class CSP_API SpaceEntity
 
 #ifdef CSP_TESTS
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+    friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
+    friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -447,6 +451,14 @@ public:
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
 
+    /// @brief Creates this entity from an ObjectMessage.
+    /// @param Message ObjectMessage : The object message to build the entity from.
+    CSP_NO_EXPORT void FromObjectMessage(const csp::multiplayer::mcs::ObjectMessage& Message);
+
+    /// @brief Updates this entity from an ObjectPatch.
+    /// @param Patch ObjectPatch : The object patch to update the entity from.
+    CSP_NO_EXPORT void FromObjectPatch(const csp::multiplayer::mcs::ObjectPatch& Patch);
+
 private:
     class DirtyComponent
     {
@@ -482,8 +494,6 @@ private:
     csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
     csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
 
-    void FromObjectMessage(const csp::multiplayer::mcs::ObjectMessage& Message);
-    void FromObjectPatch(const csp::multiplayer::mcs::ObjectPatch& Patch);
     // Called when we're parsing a component from an mcs::ObjectMessage
     void ComponentFromItemComponentData(uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
     // Called when we're parsing a component from an mcs::ObjectPatch

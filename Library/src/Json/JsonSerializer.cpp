@@ -33,9 +33,31 @@ void JsonSerializer::SerializeValue(float Value) { Writer.Double(Value); }
 
 void JsonSerializer::SerializeValue(double Value) { Writer.Double(Value); }
 
+void JsonSerializer::SerializeValue(const char* Value) { Writer.String(Value); }
+
 void JsonSerializer::SerializeValue(const csp::common::String& Value) { Writer.String(Value); }
 
 void JsonSerializer::SerializeValue(std::nullptr_t /*Value*/) { Writer.Null(); }
+
+void JsonSerializer::SerializeValue(const std::string& Value) { Writer.String(Value.c_str()); }
+
+std::string JsonDeserializer::GetMemberAsString(const char* Key) const
+{
+    auto JsonValue = &(*ValueStack.top())[Key];
+
+    rapidjson::StringBuffer Buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+    JsonValue->Accept(Writer);
+    return Buffer.GetString();
+}
+
+void JsonDeserializer::EnterMember(const char* Key) const
+{
+    auto JsonValue = &(*ValueStack.top())[Key];
+    ValueStack.push(JsonValue);
+}
+
+void JsonDeserializer::ExitMember() const { ValueStack.pop(); }
 
 void JsonDeserializer::DeserializeValue(int32_t& Value) const { Value = ValueStack.top()->GetInt(); }
 
@@ -52,4 +74,5 @@ void JsonDeserializer::DeserializeValue(float& Value) const { Value = static_cas
 void JsonDeserializer::DeserializeValue(double& Value) const { Value = ValueStack.top()->GetDouble(); }
 
 void JsonDeserializer::DeserializeValue(csp::common::String& Value) const { Value = ValueStack.top()->GetString(); }
+void JsonDeserializer::DeserializeValue(std::string& Value) const { Value = ValueStack.top()->GetString(); }
 } // namespace csp::json
