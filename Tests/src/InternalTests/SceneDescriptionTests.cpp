@@ -225,17 +225,17 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
 
 class MockScriptRunner : public csp::common::IJSScriptRunner
 {
-    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText) override { return false; }
-    void RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override { }
-    void UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) override { }
+    bool RunScript(int64_t ContextId, const csp::common::String&) override { return false; }
+    void RegisterScriptBinding(csp::common::IScriptBinding*) override { }
+    void UnregisterScriptBinding(csp::common::IScriptBinding*) override { }
     bool BindContext(int64_t ContextId) override { return false; }
     bool ResetContext(int64_t ContextId) override { return false; }
     void* GetContext(int64_t ContextId) override { return nullptr; }
-    void* GetModule(int64_t ContextId, const csp::common::String& ModuleName) override { return nullptr; }
+    void* GetModule(int64_t ContextId, const csp::common::String&) override { return nullptr; }
     bool CreateContext(int64_t ContextId) override { return false; }
     bool DestroyContext(int64_t ContextId) override { return false; }
-    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source) override { }
-    void ClearModuleSource(csp::common::String ModuleUrl) override { }
+    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String) override { }
+    void ClearModuleSource(csp::common::String) override { }
 };
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeEmptyTest)
