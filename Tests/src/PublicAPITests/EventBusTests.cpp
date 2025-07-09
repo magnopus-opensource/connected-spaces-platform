@@ -47,8 +47,8 @@ namespace
 csp::systems::Space CreateTestSpaceAndEnterScope(csp::systems::SpaceSystem* SpaceSystem, csp::multiplayer::MultiplayerConnection* Connection)
 {
     // Create space
-    const char* TestSpaceName = "CSP_UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "CSP_UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP_UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP_UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
