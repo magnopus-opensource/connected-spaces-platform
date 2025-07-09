@@ -451,7 +451,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
     const char* PingResponseEventName = "EventPingResponse";
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, PingResponseEventName),
-        [&ReceivedPings, &TwoPingsResponsePromise](const csp::common::NetworkEventData& NetworkEventData)
+        [&ReceivedPings, &TwoPingsResponsePromise](const csp::common::NetworkEventData& /*NetworkEventData*/)
         {
             std::cout << "Received Event Bus Ping." << std::endl;
             // fetch_add returns the old value for thready reasons. (std::latch would be better here given c++20)
