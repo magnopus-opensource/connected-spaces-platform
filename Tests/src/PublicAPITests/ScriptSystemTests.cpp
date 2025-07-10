@@ -26,6 +26,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
 
@@ -43,19 +44,6 @@ void OnUserCreated(SpaceEntity* InUser);
 
 namespace
 {
-
-/* We need to unset the mock logger before CSP shuts down,
- * because you get interdependent memory errors in the "Foundation shutdown"
- * log if you don't. (Another reason we don't want to be starting/stopping
- * ALL of CSP in these tests really.)
- */
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
-};
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
@@ -1080,8 +1068,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     // Create audio component
     auto* CustomComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
 
-    CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(0)));
-    CustomComponent->SetCustomProperty("NumberChanged", ReplicatedValue(false));
+    CustomComponent->SetCustomProperty("Number", csp::common::ReplicatedValue(int64_t(0)));
+    CustomComponent->SetCustomProperty("NumberChanged", csp::common::ReplicatedValue(false));
 
     CreatedObject->QueueUpdate();
     EntitySystem->ProcessPendingEntityOperations();
@@ -1117,7 +1105,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 0);
     EXPECT_FALSE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
 
-    CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(100)));
+    CustomComponent->SetCustomProperty("Number", csp::common::ReplicatedValue(int64_t(100)));
 
     EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 100);
     EXPECT_TRUE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());

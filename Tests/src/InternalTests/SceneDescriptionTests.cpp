@@ -259,8 +259,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
-    csp::multiplayer::EventBus EventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, EventBus, ScriptRunner);
+    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -292,8 +292,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
-    csp::multiplayer::EventBus EventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, EventBus, ScriptRunner);
+    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -397,8 +397,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
-    csp::multiplayer::EventBus EventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, EventBus, ScriptRunner);
+    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
+    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };

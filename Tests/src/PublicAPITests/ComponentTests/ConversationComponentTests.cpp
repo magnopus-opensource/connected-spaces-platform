@@ -935,10 +935,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
         bool CallbackCalled = false;
 
         AssetSystem->SetAssetDetailBlobChangedCallback(
-            [ConversationId, &CallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
+            [ConversationId, &CallbackCalled](const csp::common::AssetDetailBlobChangedNetworkEventData& NetworkEventData)
             {
-                EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Deleted);
-                EXPECT_EQ(Params.AssetCollectionId, ConversationId);
+                EXPECT_EQ(NetworkEventData.ChangeType, csp::common::EAssetChangeType::Deleted);
+                EXPECT_EQ(NetworkEventData.AssetCollectionId, ConversationId);
                 CallbackCalled = true;
             });
 
@@ -997,10 +997,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure conversation created event is fired when calling ConversationComponent::CreateConversation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1034,10 +1034,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure message created event is fired when calling ConversationComponent::AddMessage
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1065,10 +1065,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure conversation information event is fired when calling ConversationComponent::UpdateConversation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1097,10 +1097,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure message information event is fired when calling ConversationComponent::UpdateMessage
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1127,10 +1127,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure message deletion event is fired when calling ConversationComponent::DeleteMessage
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1156,10 +1156,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
 
     // Ensure conversation deletion event is fired when calling ConversationComponent::DeleteConversation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1296,11 +1296,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
 
     // Ensure conversation created callback is called
     {
-        csp::multiplayer::ConversationEventParams ReceivedParams;
+        csp::common::ConversationNetworkEventData ReceivedParams;
         bool CallbackCalled = false;
 
         ConversationComponent->SetConversationUpdateCallback(
-            [&CallbackCalled, &ReceivedParams, &ReceivedInfo](const csp::multiplayer::ConversationEventParams& Params)
+            [&CallbackCalled, &ReceivedParams, &ReceivedInfo](const csp::common::ConversationNetworkEventData& Params)
             {
                 ReceivedParams = Params;
                 ReceivedInfo = Params.MessageInfo;
@@ -1872,7 +1872,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
         // However, we still need this callback to flush the original creation event
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
         const auto [Result] = AWAIT(ConversationComponent, CreateConversation, ConversationMessage);
@@ -1885,10 +1885,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
     // Ensure conversation annotation set event is fired when calling ConversationComponent::SetConversationAnnotation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1933,10 +1933,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
     // Ensure annotation delete event is fired when calling ConversationComponent::DeleteConversationAnnotation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -1965,7 +1965,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
     {
         bool CallbackCalled = false;
 
-        const auto Callback = [&CallbackCalled](const csp::multiplayer::ConversationEventParams& /*Params*/) { CallbackCalled = true; };
+        const auto Callback = [&CallbackCalled](const csp::common::ConversationNetworkEventData& /*Params*/) { CallbackCalled = true; };
 
         ConversationComponent->SetConversationUpdateCallback(Callback);
 
@@ -1978,10 +1978,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
     // Ensure annotation set event is fired when calling ConversationComponent::SetAnnotation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;
@@ -2026,10 +2026,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationEve
 
     // Ensure anntation delete event is fired when calling ConversationComponent::DeleteAnnotation
     {
-        csp::multiplayer::ConversationEventParams RetrievedParams;
+        csp::common::ConversationNetworkEventData RetrievedParams;
         bool CallbackCalled = false;
 
-        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::common::ConversationNetworkEventData& Params)
         {
             RetrievedParams = Params;
             CallbackCalled = true;

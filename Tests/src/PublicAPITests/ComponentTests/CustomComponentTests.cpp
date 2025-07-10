@@ -49,7 +49,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");
-    ReplicatedValue TestStringValue(MyString);
+    csp::common::ReplicatedValue TestStringValue(MyString);
 
     MyCustomComponent.SetCustomProperty(PropertyKey, TestStringValue);
 
@@ -115,39 +115,39 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
         // Vector Check
         {
-            CustomComponent->SetCustomProperty("Vector3", ReplicatedValue({ 10, 10, 10 }));
+            CustomComponent->SetCustomProperty("Vector3", csp::common::ReplicatedValue({ 10, 10, 10 }));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({ 10, 10, 10 }));
 
-            CustomComponent->SetCustomProperty("Vector4", ReplicatedValue({ 10, 10, 10, 10 }));
+            CustomComponent->SetCustomProperty("Vector4", csp::common::ReplicatedValue({ 10, 10, 10, 10 }));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({ 10, 10, 10, 10 }));
         }
 
         // String Check
         {
-            CustomComponent->SetCustomProperty("String", ReplicatedValue("OKO"));
+            CustomComponent->SetCustomProperty("String", csp::common::ReplicatedValue("OKO"));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
         }
 
         // Boolean Check
         {
-            CustomComponent->SetCustomProperty("Boolean", ReplicatedValue(true));
+            CustomComponent->SetCustomProperty("Boolean", csp::common::ReplicatedValue(true));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("Boolean").GetBool(), true);
         }
 
         // Integer Check
         {
-            CustomComponent->SetCustomProperty("Integer", ReplicatedValue(int64_t(1)));
+            CustomComponent->SetCustomProperty("Integer", csp::common::ReplicatedValue(int64_t(1)));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
         }
 
         // Float Check
         {
-            CustomComponent->SetCustomProperty("Float", ReplicatedValue(1.00f));
+            CustomComponent->SetCustomProperty("Float", csp::common::ReplicatedValue(1.00f));
 
             EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
         }

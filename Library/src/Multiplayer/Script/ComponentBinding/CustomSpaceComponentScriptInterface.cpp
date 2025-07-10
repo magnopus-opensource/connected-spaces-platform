@@ -59,25 +59,25 @@ void CustomSpaceComponentScriptInterface::RemoveCustomProperty(const std::string
 const std::variant<bool, int64_t, float, std::string, std::vector<float>> CustomSpaceComponentScriptInterface::GetCustomProperty(
     const std::string& Key)
 {
-    ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
+    csp::common::ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
 
     switch (ReturnValue.GetReplicatedValueType())
     {
-    case ReplicatedValueType::Boolean:
+    case csp::common::ReplicatedValueType::Boolean:
         return ReturnValue.GetBool();
-    case ReplicatedValueType::Integer:
+    case csp::common::ReplicatedValueType::Integer:
         return ReturnValue.GetInt();
-    case ReplicatedValueType::Float:
+    case csp::common::ReplicatedValueType::Float:
         return ReturnValue.GetFloat();
-    case ReplicatedValueType::String:
+    case csp::common::ReplicatedValueType::String:
         return ReturnValue.GetString().c_str();
-    case ReplicatedValueType::Vector3:
+    case csp::common::ReplicatedValueType::Vector3:
     {
         std::vector<float> ReturnVector;
         ReturnVector = { ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z };
         return ReturnVector;
     }
-    case ReplicatedValueType::Vector4:
+    case csp::common::ReplicatedValueType::Vector4:
     {
         std::vector<float> ReturnVector;
         ReturnVector = { ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z };
@@ -104,7 +104,7 @@ std::vector<std::string> CustomSpaceComponentScriptInterface::GetCustomPropertyK
 void CustomSpaceComponentScriptInterface::SetCustomProperty(
     const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value)
 {
-    ReplicatedValue SetValue;
+    csp::common::ReplicatedValue SetValue;
 
     switch (Value.index())
     {

@@ -20,7 +20,7 @@
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/PrototypeService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/RemoteFileManager.h"
@@ -357,7 +357,7 @@ AssetSystem::AssetSystem()
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus, common::LogSystem& LogSystem)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)
 {
     PrototypeAPI = new chs::PrototypeApi(InWebClient);
@@ -1758,7 +1758,7 @@ void AssetSystem::RegisterSystemCallback()
 {
     if (!EventBusPtr)
     {
-        CSP_LOG_ERROR_MSG("Error: Failed to register AssetSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        CSP_LOG_ERROR_MSG("Error: Failed to register AssetSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
         return;
     }
 
@@ -1769,40 +1769,43 @@ void AssetSystem::RegisterSystemCallback()
         return;
     }
 
-    EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
 }
 
 void AssetSystem::DeregisterSystemCallback()
 {
     if (EventBusPtr)
     {
-        EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
+
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)));
     }
 }
 
-void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
     if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
     {
         return;
     }
 
-    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-
-    const csp::multiplayer::AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();
+    const csp::common::AssetDetailBlobChangedNetworkEventData& AssetDetailBlobChangedNetworkEventData
+        = static_cast<const csp::common::AssetDetailBlobChangedNetworkEventData&>(NetworkEventData);
 
     if (AssetDetailBlobChangedCallback)
     {
-        AssetDetailBlobChangedCallback(AssetParams);
+        AssetDetailBlobChangedCallback(AssetDetailBlobChangedNetworkEventData);
     }
 
-    if (AssetParams.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+    if (AssetDetailBlobChangedNetworkEventData.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
     {
-        csp::multiplayer::MaterialChangedParams MaterialParams;
-        MaterialParams.ChangeType = AssetParams.ChangeType;
-        MaterialParams.MaterialCollectionId = AssetParams.AssetCollectionId;
-        MaterialParams.MaterialId = AssetParams.AssetId;
+        csp::common::MaterialChangedParams MaterialParams;
+        MaterialParams.ChangeType = AssetDetailBlobChangedNetworkEventData.ChangeType;
+        MaterialParams.MaterialCollectionId = AssetDetailBlobChangedNetworkEventData.AssetCollectionId;
+        MaterialParams.MaterialId = AssetDetailBlobChangedNetworkEventData.AssetId;
 
         MaterialChangedCallback(MaterialParams);
     }

@@ -29,7 +29,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides)]
-        = csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue>();
+        = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
@@ -142,7 +142,7 @@ void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceComponent::GetMaterialOverrides() const
 {
     // Convert replicated values map to string values
-    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+    common::Map<common::String, common::ReplicatedValue> ReplicatedOverrides
         = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
 
     csp::common::Map<common::String, common::String> Overrides;

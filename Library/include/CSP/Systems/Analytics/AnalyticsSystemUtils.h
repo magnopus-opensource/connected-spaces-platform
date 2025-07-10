@@ -17,12 +17,12 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 
 namespace csp::systems
 {
-using MetricValue = csp::multiplayer::ReplicatedValue;
+using MetricValue = csp::common::ReplicatedValue;
 
 class CSP_API AnalyticsEvent
 {

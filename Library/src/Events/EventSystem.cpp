@@ -25,6 +25,7 @@ namespace std
 
 template <> struct hash<csp::events::EventId>
 {
+    // This is taken from boost hash_combine, I doubt the author understood the magic number. I don't either.
     void HashCombine(std::size_t& InHash, std::size_t Other) const { InHash ^= Other + 0x9e3779b9 + (InHash << 6) + (InHash >> 2); }
 
     std::size_t operator()(const csp::events::EventId& Id) const

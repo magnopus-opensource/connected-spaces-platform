@@ -401,8 +401,8 @@ public:
     CSP_NO_EXPORT void SetEntityPatchSentCallbackParams(const bool Boolean);
 
     /// @brief Getter for the dirty properties
-    /// @return csp::common::Map<uint16_t, ReplicatedValue>
-    CSP_NO_EXPORT csp::common::Map<uint16_t, ReplicatedValue> GetDirtyProperties();
+    /// @return csp::common::Map<uint16_t, csp::common::ReplicatedValue>
+    CSP_NO_EXPORT csp::common::Map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties();
 
     /// @brief Getter for the transient deletion component IDs
     /// @return csp::common::List<uint16_t>
@@ -525,7 +525,7 @@ private:
     CallbackHandler EntityPatchSentCallback;
 
     csp::common::Map<uint16_t, ComponentBase*> Components;
-    csp::common::Map<uint16_t, ReplicatedValue> DirtyProperties;
+    csp::common::Map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
     csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
     uint16_t NextComponentId;
 

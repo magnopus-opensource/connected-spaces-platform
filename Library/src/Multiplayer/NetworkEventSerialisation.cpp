@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "MCS/MCSTypes.h"
 
@@ -24,12 +24,13 @@
 #include <fmt/format.h>
 #include <regex>
 
-using namespace csp::multiplayer;
-
 namespace
 {
-ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::common::LogSystem& LogSystem)
+using namespace csp::multiplayer;
+
+csp::common::ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::common::LogSystem& LogSystem)
 {
+    using namespace csp::common;
     ESequenceUpdateType SequenceUpdateType = ESequenceUpdateType::Invalid;
 
     switch (UpdateType)
@@ -64,88 +65,15 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType, csp::com
     return SequenceUpdateType;
 }
 
-csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
+csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
     return csp::common::Decode::URI(RawValue.GetString());
 }
 
-} // namespace
-
-csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index)
+csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component, csp::common::LogSystem& LogSystem)
 {
-    const std::string SequenceKeyString(SequenceKey.c_str());
-    // Match item after second ':' to get our parent Id.
-    // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
-    const std::regex Expression(R"(^(?:[^:]*\:){)" + std::to_string(Index) + R"(}([^:]*))");
-    std::smatch Match;
-    const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
-
-    if (Found == false)
-    {
-        return "";
-    }
-
-    std::string ParentIdString = Match[1];
-
-    if (ParentIdString.empty())
-    {
-        return "";
-    }
-
-    return ParentIdString.c_str();
-}
-
-EventDeserialiser::EventDeserialiser(csp::common::LogSystem& LogSystem)
-    : SenderClientId(0)
-    , LogSystem(LogSystem)
-{
-}
-
-void EventDeserialiser::ParseCommon(const std::vector<signalr::value>& EventValues)
-{
-    /*
-     * class EventMessage
-     * [0] string EventType
-     * [1] uint SenderClientId
-     * [2] uint? RecipientClientId
-     *
-     * RecipientClientId can be processed if needed, but currently not required, though note it is a nullable uint,
-       null for an all-client broadcast, and a uint for the intended receiving client's Id : RecipientClientId = EventValues[2];
-    */
-
-    EventType = (csp::common::String)EventValues[0].as_string().c_str();
-    SenderClientId = EventValues[1].as_uinteger();
-}
-
-void EventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
-{
-    ParseCommon(EventValues);
-
-    /*
-     * [3] map<uint, vec> Components
-     */
-
-    if (!EventValues[3].is_null())
-    {
-        const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
-
-        EventData = csp::common::Array<csp::multiplayer::ReplicatedValue>(Components.size());
-        int i = 0;
-
-        for (auto& Component : Components)
-        {
-            // Component is in form [TypeId, [Field0, Field1, ...]]
-            auto Type = Component.second.as_array()[0].as_uinteger();
-            auto& Value = Component.second.as_array()[1].as_array()[0]; // ItemComponentData<T> only has a single field
-            EventData[i++] = ParseSignalRComponent(Type, Value);
-        }
-    }
-}
-
-csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const
-{
-    csp::multiplayer::ReplicatedValue ReplicatedValue;
+    csp::common::ReplicatedValue ReplicatedValue;
 
     // Prevents serialization crashes for optional values where the actual value is null.
     if (Component.type() == signalr::value_type::null)
@@ -207,58 +135,126 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
     return ReplicatedValue;
 }
 
-AssetChangedEventDeserialiser::AssetChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
-    : EventDeserialiser(LogSystem)
+// Parse the parts common to all events, extracting the event type (string) and the sender client id (uint)
+void PopulateCommonEventData(
+    const std::vector<signalr::value>& EventValues, csp::common::NetworkEventData& OutEventData, csp::common::LogSystem& LogSystem)
 {
+    /*
+     * class EventMessage
+     * [0] string EventType
+     * [1] uint SenderClientId
+     * [2] uint? RecipientClientId
+     *
+     * RecipientClientId can be processed if needed, but currently not required, though note it is a nullable uint,
+       null for an all-client broadcast, and a uint for the intended receiving client's Id : RecipientClientId = EventValues[2];
+    */
+
+    OutEventData.EventName = EventValues[0].as_string().c_str();
+    OutEventData.SenderClientId = EventValues[1].as_uinteger();
+
+    /*
+     * [3] map<uint, vec> Components
+     */
+
+    if (!EventValues[3].is_null())
+    {
+        const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
+
+        OutEventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(Components.size());
+        int i = 0;
+
+        for (auto& Component : Components)
+        {
+            // Component is in form [TypeId, [Field0, Field1, ...]]
+            auto Type = Component.second.as_array()[0].as_uinteger();
+            auto& Value = Component.second.as_array()[1].as_array()[0]; // ItemComponentData<T> only has a single field
+            OutEventData.EventValues[i++] = ParseSignalRComponent(Type, Value, LogSystem);
+        }
+    }
 }
 
-void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+} // namespace
+
+namespace csp::multiplayer
 {
-    EventDeserialiser::Parse(EventValues);
+csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index)
+{
+    const std::string SequenceKeyString(SequenceKey.c_str());
+    // Match item after second ':' to get our parent Id.
+    // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
+    const std::regex Expression(R"(^(?:[^:]*\:){)" + std::to_string(Index) + R"(}([^:]*))");
+    std::smatch Match;
+    const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 
-    EventParams.ChangeType = EAssetChangeType::Invalid;
-
-    if (EventData[0].GetInt() < static_cast<int64_t>(EAssetChangeType::Num))
+    if (Found == false)
     {
-        EventParams.ChangeType = static_cast<EAssetChangeType>(EventData[0].GetInt());
+        return "";
+    }
+
+    std::string ParentIdString = Match[1];
+
+    if (ParentIdString.empty())
+    {
+        return "";
+    }
+
+    return ParentIdString.c_str();
+}
+
+csp::common::NetworkEventData DeserializeGeneralPurposeEvent(const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+{
+    csp::common::NetworkEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
+    return ParsedEvent;
+}
+
+csp::common::AssetDetailBlobChangedNetworkEventData DeserializeAssetDetailBlobChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+{
+    csp::common::AssetDetailBlobChangedNetworkEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
+
+    ParsedEvent.ChangeType = csp::common::EAssetChangeType::Invalid;
+
+    if (ParsedEvent.EventValues[0].GetInt() < static_cast<int64_t>(csp::common::EAssetChangeType::Num))
+    {
+        ParsedEvent.ChangeType = static_cast<csp::common::EAssetChangeType>(ParsedEvent.EventValues[0].GetInt());
     }
     else
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
     }
 
-    EventParams.AssetId = EventData[1].GetString();
-    EventParams.Version = EventData[2].GetString();
-    EventParams.AssetType = csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString());
-    EventParams.AssetCollectionId = EventData[4].GetString();
+    ParsedEvent.AssetId = ParsedEvent.EventValues[1].GetString();
+    ParsedEvent.Version = ParsedEvent.EventValues[2].GetString();
+    ParsedEvent.AssetType = csp::systems::ConvertDTOAssetDetailType(ParsedEvent.EventValues[3].GetString());
+    ParsedEvent.AssetCollectionId = ParsedEvent.EventValues[4].GetString();
+
+    return ParsedEvent;
 }
 
-ConversationEventDeserialiser::ConversationEventDeserialiser(csp::common::LogSystem& LogSystem)
-    : EventDeserialiser(LogSystem)
+csp::common::ConversationNetworkEventData DeserializeConversationEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
+    csp::common::ConversationNetworkEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
+
+    ParsedEvent.MessageType = static_cast<ConversationEventType>(ParsedEvent.EventValues[0].GetInt());
+    ParsedEvent.MessageInfo.ConversationId = ParsedEvent.EventValues[1].GetString();
+    ParsedEvent.MessageInfo.CreatedTimestamp = ParsedEvent.EventValues[2].GetString();
+    ParsedEvent.MessageInfo.EditedTimestamp = ParsedEvent.EventValues[3].GetString();
+    ParsedEvent.MessageInfo.UserId = ParsedEvent.EventValues[4].GetString();
+    ParsedEvent.MessageInfo.Message = ParsedEvent.EventValues[5].GetString();
+    ParsedEvent.MessageInfo.MessageId = ParsedEvent.EventValues[6].GetString();
+
+    return ParsedEvent;
 }
 
-void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-    EventDeserialiser::Parse(EventValues);
-
-    EventParams.MessageType = static_cast<ConversationEventType>(EventData[0].GetInt());
-    EventParams.MessageInfo.ConversationId = EventData[1].GetString();
-    EventParams.MessageInfo.CreatedTimestamp = EventData[2].GetString();
-    EventParams.MessageInfo.EditedTimestamp = EventData[3].GetString();
-    EventParams.MessageInfo.UserId = EventData[4].GetString();
-    EventParams.MessageInfo.Message = EventData[5].GetString();
-    EventParams.MessageInfo.MessageId = EventData[6].GetString();
-}
-
-UserPermissionsChangedEventDeserialiser::UserPermissionsChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
-    : EventDeserialiser(LogSystem)
-{
-}
-
-void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
-{
-    ParseCommon(EventValues);
+    csp::common::AccessControlChangedNetworkEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
     /*
      * [3] map<uint, vec> Components, where Components is structured as follows:
@@ -281,7 +277,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 
         {
             const std::vector<signalr::value>& SpaceIdComponent(Components.at(SPACE_ID).as_array());
-            EventParams.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0]).GetString();
+            ParsedEvent.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0], LogSystem).GetString();
         }
 
         {
@@ -292,7 +288,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
                 const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
 
                 int i = 0;
-                EventParams.UserRoles = csp::common::Array<csp::systems::SpaceUserRole>(RolesArrayComponent.size());
+                ParsedEvent.UserRoles = csp::common::Array<csp::systems::SpaceUserRole>(RolesArrayComponent.size());
                 for (auto& RoleValue : RolesArrayComponent)
                 {
                     csp::systems::SpaceUserRole NewRole = csp::systems::SpaceUserRole::Invalid;
@@ -316,7 +312,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
                             "UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
                     }
 
-                    EventParams.UserRoles[i++] = NewRole;
+                    ParsedEvent.UserRoles[i++] = NewRole;
                 }
             }
             else
@@ -329,21 +325,21 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
         {
             const std::vector<signalr::value>& ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
             const csp::common::String ChangeTypeString(
-                ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0]).GetString());
+                ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0], LogSystem).GetString());
 
-            EventParams.ChangeType = EPermissionChangeType::Invalid;
+            ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Invalid;
 
             if (ChangeTypeString == "Created")
             {
-                EventParams.ChangeType = EPermissionChangeType::Created;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Created;
             }
             else if (ChangeTypeString == "Updated")
             {
-                EventParams.ChangeType = EPermissionChangeType::Updated;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Updated;
             }
             else if (ChangeTypeString == "Removed")
             {
-                EventParams.ChangeType = EPermissionChangeType::Removed;
+                ParsedEvent.ChangeType = csp::common::EPermissionChangeType::Removed;
             }
             else
             {
@@ -354,71 +350,64 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 
         {
             const std::vector<signalr::value>& UserIdComponent(Components.at(USER_ID).as_array());
-            EventParams.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
+            ParsedEvent.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0], LogSystem).GetString();
         }
     }
-}
-
-SequenceChangedEventDeserialiser::SequenceChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
-    : EventDeserialiser(LogSystem)
-{
-}
-
-void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
-{
-    EventDeserialiser::Parse(EventValues);
-
-    if (EventData.Size() != 3)
+    else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "SequenceChangedEvent - Invalid arguments.");
-        return;
+        throw std::invalid_argument("Unexpected null eventvalues in DeserializeAccessControlChangedEvent");
     }
 
-    int64_t UpdateType = EventData[0].GetInt();
-
-    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
-
-    EventParams.Key = DecodeSequenceKey(EventData[1]);
-
-    // Optional parameter for when a key is changed
-    if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
-    {
-        // Sequence keys are URI encoded to support reserved characters.
-        EventParams.NewKey = csp::common::Decode::URI(EventData[2].GetString());
-    }
+    return ParsedEvent;
 }
 
-SequenceHotspotChangedEventDeserialiser::SequenceHotspotChangedEventDeserialiser(csp::common::LogSystem& LogSystem)
-    : EventDeserialiser(LogSystem)
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {
-}
+    csp::common::SequenceChangedNetworkEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
-void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
-{
-    EventDeserialiser::Parse(EventValues);
-
-    if (EventData.Size() != 3)
+    if (ParsedEvent.EventValues.Size() != 3)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", EventData.Size()).c_str());
-        return;
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
+        throw std::invalid_argument(
+            fmt::format("SequenceChangedEvent - Invalid arguments. Expected 3 arguments but got {}.", ParsedEvent.EventValues.Size()).c_str());
     }
 
-    int64_t UpdateType = EventData[0].GetInt();
-    EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
+    int64_t UpdateType = ParsedEvent.EventValues[0].GetInt();
 
-    const csp::common::String Key = DecodeSequenceKey(EventData[1]);
-    EventParams.SpaceId = GetSequenceKeyIndex(Key, 1);
-    EventParams.Name = GetSequenceKeyIndex(Key, 2);
+    ParsedEvent.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType, LogSystem);
 
-    if (EventParams.UpdateType == ESequenceUpdateType::Rename)
+    ParsedEvent.Key = DecodeSequenceKey(ParsedEvent.EventValues[1]);
+
+    // Optional parameter for when a key is changed
+    if (ParsedEvent.EventValues[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
+    {
+        // Sequence keys are URI encoded to support reserved characters.
+        ParsedEvent.NewKey = csp::common::Decode::URI(ParsedEvent.EventValues[2].GetString());
+    }
+
+    return ParsedEvent;
+}
+
+csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+{
+    csp::common::SequenceChangedNetworkEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
+
+    ParsedEvent.HotspotData = csp::common::Optional(new csp::common::HotspotSequenceChangedNetworkEventData());
+
+    ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
+    ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);
+
+    if (ParsedEvent.UpdateType == csp::common::ESequenceUpdateType::Rename)
     {
         // When a key is changed (renamed) then we get an additional parameter describing the new key.
         // The usual event data describing the name in this instance will describe the _old_ key.
-        if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
+        if (ParsedEvent.EventValues[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
         {
-            const csp::common::String NewKey = DecodeSequenceKey(EventData[2]);
-            EventParams.NewName = GetSequenceKeyIndex(NewKey, 2);
+            ParsedEvent.HotspotData->NewName = GetSequenceKeyIndex(ParsedEvent.NewKey, 2);
         }
         else
         {
@@ -426,4 +415,7 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
                 "SequenceHotspotChangedEvent - The expected new name of the hotspot sequence was not found in the event payload.");
         }
     }
+
+    return ParsedEvent;
+}
 }
