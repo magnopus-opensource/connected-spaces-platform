@@ -1,0 +1,59 @@
+# Name of the workflow as it appears in the GitHub Actions tab
+name: Add PR Review Guidance Comment
+
+# Trigger the workflow when a pull request is opened / reopened
+on:
+  pull_request:
+    types: [opened, reopened]
+
+# Grant write access to pull requests (this is necessary to add comments)
+permissions:
+  pull-requests: write
+
+# Define a single job named 'add-guidance-comment'
+jobs:
+  add-guidance-comment:
+    # Specify the runner environment for this job
+    runs-on: ubuntu-latest
+
+    # Define the step: Add a comment to the Pull Request with review guidance
+    steps:
+      - name: Add PR Review Guidance Comment
+        # Use the 'peter-evans/create-or-update-comment' action to manage PR comments
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          # Specify the ID of the pull request to comment on
+          issue-number: ${{ github.event.pull_request.number }}
+          # Define the content of the comment.
+          body: |
+            # 🚀 Pull Request Review Guidelines
+
+            Thank you for taking the time to review this Pull Request. The following is a summary of our Pull Request guidelines. The full guidelines can be found [here](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/PR_GUIDELINES.md).
+
+            ## 💬 How to Provide Feedback
+            We use a **comment ladder** when leaving review comments to avoid any ambiguity.
+
+            | Tag | Is response required? | Is a change required? | May the PR author resolve? |
+            |:----|:---------------------:|:---------------------:|:--------------------------:|
+            | [Fix] | ✔️ | ✔️ | ❌ |
+            | [Consider] | ✔️ | ❌ | ✔️ |
+            | [Question] | ✔️ | ❌ | ❌ |
+            | [Nit] | ❌ | ❌ | ✔️ |
+            | [Comment] | ❌ | ❌ | ✔️ |
+
+            All comments should be prefixed with one of the above tags, for example:
+            `[fix] Your editor is still set to use tabs instead of spaces, or this file is old and needs to be reformatted.`
+
+            ⚠️ Reviewers should be sure to resolve conversations if they feel their feedback has been addressed sufficiently.
+
+            ## 🎯 PR Author Focus Areas
+            * **Link Commits to Conversations** After making a change in response to a reviewer's comment, link the specific commit in the comment thread. This will allow the reviewer to view the change without having to hunt the codebase for it.
+            * **Breaking Changes** Any breaking changes made to the public interface must be specifically called out in the PR. The preferred format is a bullet list enumerating the specific nature of the change/s, as well as the types and method signatures that are affected. If necessary, migration guidance should also be provided here.
+
+
+            Thanks again for taking the time to review this Pull Request.
+          # An optional string to identify the comment. If a comment with this ID already exists,
+          # it will be updated instead of a new one being created.
+          # This prevents multiple guidance comments on the same PR.
+          edit-mode: replace
+          comment-id: pr-review-guidance-comment-id
