@@ -1245,13 +1245,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     LogOut(UserSystem);
 }
 
-void GetObjectById(mcs::ItemComponentData* ComponentValue, const uint32_t Id, mcs::ItemComponentData& OutComponentData)
+void GetComponentById(mcs::ItemComponentData* ComponentValue, const uint32_t Id, mcs::ItemComponentData& OutComponentData)
 {
-    auto [Result] = Awaitable(&mcs::ItemComponentData::GetObjectById, ComponentValue, Id).Await(RequestPredicate);
+    auto [Result] = Awaitable(&mcs::ItemComponentData::GetComponentById, ComponentValue, Id).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    OutComponentData = Result.GetObject();
+    OutComponentData = Result.GetComponent();
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpace)
@@ -1324,7 +1324,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
         auto UpdatedComponents = ComponentPacker.GetComponents();
 
         ComponentValue = UpdatedComponents[0];
-        GetObjectById(&ComponentValue, id, OutComponentData);
+        GetComponentById(&ComponentValue, id, OutComponentData);
     }
 
     // Delete component
@@ -1353,7 +1353,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
         auto UpdatedComponents = ComponentPacker.GetComponents();
 
         ComponentValue = UpdatedComponents[0];
-        GetObjectById(&ComponentValue, id, OutComponentData);
+        GetComponentById(&ComponentValue, id, OutComponentData);
     }
 
     // Exit space and enter again, making sure the entities have been created
@@ -1399,7 +1399,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
         auto UpdatedComponents = ComponentPacker.GetComponents();
 
         ComponentValue = UpdatedComponents[0];
-        GetObjectById(&ComponentValue, id, OutComponentData);
+        GetComponentById(&ComponentValue, id, OutComponentData);
     }
     delete (ComponentKeys);
 
