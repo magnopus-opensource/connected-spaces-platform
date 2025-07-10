@@ -20,6 +20,11 @@
 
 #include <string>
 
+namespace csp::systems
+{
+class StatusInfo;
+} // namespace csp::systems
+
 namespace csp
 {
 
@@ -166,6 +171,11 @@ public:
     /// @brief Gets the tenant that foundation is currently using, based on what was provided during initialisation.
     /// @return csp::common::String&
     static const csp::common::String& GetTenant();
+
+    /// @brief Resolves Service Definition aginst the provided StatusInfo
+    /// Will log information about the state of each of the services, such as depreciation, and newer versions
+    /// @return bool : true if all services are available, false otherwise
+    CSP_NO_EXPORT static bool ResolveServiceDefinition(const ServiceDefinition& ServiceDefinition, const csp::systems::StatusInfo& StatusInfo);
 
 private:
     static bool IsInitialised;
