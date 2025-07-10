@@ -42,12 +42,11 @@ def upload_test_report(args):
         print(f"Test results uploaded successfully!")
 
     else:
-        print(f"Failed to import results: {response.status_code}")
-
-    log_path = os.path.dirname(os.path.abspath(args.junit_file)) + "TestReportUploader.log"
-    with open(log_path, "w") as file:
-        file.write(response.text)
-        print(f"Log written to {log_path}")
+        log_path = os.path.dirname(os.path.abspath(args.junit_file)) + "TestReportUploader.log"
+        with open(log_path, "w") as file:
+            file.write(response.text)
+            print(f"Log written to {log_path}")
+        raise Exception(f"Failed to import results: {response.status_code}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("TestReportUploader")
