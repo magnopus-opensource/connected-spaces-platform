@@ -1209,8 +1209,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
 
     // Create space
     csp::systems::Space Space;
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-MAG";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());

@@ -69,7 +69,7 @@ So when one entity posts a `HeyThere` message...
 ```js
 PostAMessage()
 {
-    var spaceEntity = TheEntitySystem.getEntityByName("OLY-SPACEENTITY-2115");
+    var spaceEntity = TheEntitySystem.getEntityByName("CSP-SPACEENTITY-2115");
     spaceEntity.postMessage("HeyThere", "MyParameters");
 }
 

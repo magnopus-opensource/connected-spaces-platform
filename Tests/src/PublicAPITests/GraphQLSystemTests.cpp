@@ -42,8 +42,8 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
     csp::common::String UserId;
     csp::systems::Space Space;
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-MAGNOPUS";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-MAGNOPUS";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAGNOPUS";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAGNOPUS";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
