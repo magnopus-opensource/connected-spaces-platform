@@ -111,7 +111,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
 
   // Step 5: Copy binary files
   const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
-  const binaryDestPath = join("..", "oko-web", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized);
+  const binaryDestPath = join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized);
   
   console.log(`\n[${step}/${totalSteps}] Copying binary files from ${binarySourcePath} to ${binaryDestPath}...`);
   if (!await copyDirectory(binarySourcePath, binaryDestPath)) {
@@ -121,7 +121,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
 
   // Step 6: Copy TypeScript files
   const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
-  const tsDestPath = join("..", "oko-web", "node_modules", "connected-spaces-platform.web");
+  const tsDestPath = join("..", "codecomponent", "node_modules", "connected-spaces-platform.web");
   
   console.log(`\n[${step}/${totalSteps}] Copying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
   if (!await copyDirectory(tsSourcePath, tsDestPath)) {
@@ -129,6 +129,40 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
   }
 
   console.log("\nBuild process completed successfully! 🎉");
+}
+
+async function copyFilesOnly(buildType: string) {
+  const buildTypeCapitalized = buildType.charAt(0).toUpperCase() + buildType.slice(1);
+  
+  console.log(`\nPerforming copy operations for ${buildType} build...`);
+  
+  // Step 1: Copy binary files
+  const binarySourcePath = join(".", "Library", "Binaries", "wasm", buildTypeCapitalized);
+  const binaryDestPath = join("..", "codecomponent", "node_modules", "connected-spaces-platform.web", buildTypeCapitalized);
+  
+  console.log(`\n[1/2] Copying binary files from ${binarySourcePath} to ${binaryDestPath}...`);
+  if (!await exists(binarySourcePath)) {
+    throw new Error(`Binary source path ${binarySourcePath} does not exist. Build may be required first.`);
+  }
+  
+  if (!await copyDirectory(binarySourcePath, binaryDestPath)) {
+    throw new Error("Failed to copy binary files");
+  }
+
+  // Step 2: Copy TypeScript files
+  const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
+  const tsDestPath = join("..", "codecomponent", "node_modules", "connected-spaces-platform.web");
+
+  console.log(`\n[2/2] Copying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
+  if (!await exists(tsSourcePath)) {
+    throw new Error(`TypeScript source path ${tsSourcePath} does not exist. Wrapper generator may need to be run first.`);
+  }
+  
+  if (!await copyDirectory(tsSourcePath, tsDestPath)) {
+    throw new Error("Failed to copy TypeScript files");
+  }
+
+  console.log("\nCopy operations completed successfully! 🎉");
 }
 
 const buildTypeOption = {
@@ -169,6 +203,20 @@ await new Command()
         skipGenerate: true, 
         noConfigure: true 
       });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("\n❌ Error:", error.message);
+      } else {
+        console.error("\n❌ Error:", String(error));
+      }
+      Deno.exit(1);
+    }
+  })
+  .command("copy", "Only copy the binary and TypeScript files without building")
+  .option("-t, --type <type>", "Build Type (affects which files are copied)", buildTypeOption)
+  .action(async ({ type }) => {
+    try {
+      await copyFilesOnly(type);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("\n❌ Error:", error.message);

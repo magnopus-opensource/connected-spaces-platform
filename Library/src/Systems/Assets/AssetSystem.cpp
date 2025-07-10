@@ -1748,13 +1748,37 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterial(const csp::common::String& AssetC
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
+// Helper function to strip the random part after three underscores from script paths
+csp::common::String StripRandomPartFromScriptPath(const csp::common::String& scriptPath)
+{
+    // Find the position of three consecutive underscores
+    const char* pathStr = scriptPath.c_str();
+    const char* underscorePos = strstr(pathStr, "___");
+    
+    if (underscorePos != nullptr)
+    {
+        // Create a new string with only the part before the three underscores
+        size_t prefixLength = underscorePos - pathStr;
+        return csp::common::String(pathStr, prefixLength);
+    }
+    
+    // If no three consecutive underscores found, return the original path
+    return scriptPath;
+}
+
 
 csp::common::String AssetSystem::GetAssetPath(
     const Asset& Asset, 
     const csp::common::Map<csp::common::String, csp::systems::AssetCollection>& AssetCollectionMap)
 {
-    // Start with the asset name
-    csp::common::String Path = Asset.Name;
+    // Start with the asset name - strip any random part after three underscores
+    csp::common::String CleanName = StripRandomPartFromScriptPath(Asset.Name);
+    csp::common::String Path = CleanName;
+    
+    if (CleanName != Asset.Name)
+    {
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Normalized asset name from: %s to: %s", Asset.Name.c_str(), CleanName.c_str());
+    }
     
     // Get the asset collection for this asset
     csp::common::String CurrentCollectionId = Asset.AssetCollectionId;
@@ -1772,8 +1796,11 @@ csp::common::String AssetSystem::GetAssetPath(
         
         const AssetCollection& CurrentCollection = AssetCollectionMap[CurrentCollectionId];
         
+        // Process the collection name to remove random part after three underscores
+        csp::common::String CleanCollectionName = StripRandomPartFromScriptPath(CurrentCollection.Name);
+        
         // Add this collection's name to the path
-        Path = CurrentCollection.Name + "/" + Path;
+        Path = CleanCollectionName + "/" + Path;
         
         // Move up to the parent
         CurrentCollectionId = CurrentCollection.ParentId;
@@ -1782,6 +1809,7 @@ csp::common::String AssetSystem::GetAssetPath(
     // Add leading slash
     Path = "/" + Path;
     
+    CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Generated path: %s", Path.c_str());
     return Path;
 }
 
