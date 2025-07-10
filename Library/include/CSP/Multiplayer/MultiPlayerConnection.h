@@ -193,6 +193,10 @@ public:
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
+    /// @brief Resolves Multiplayer Hub Methods aginst the provided array of available methods
+    /// @return bool : true if all available methods match, false otherwise
+    CSP_NO_EXPORT static bool ResolveMultiplayerHubMethods(const csp::common::Array<csp::common::String>& Methods);
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
