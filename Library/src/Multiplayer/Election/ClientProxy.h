@@ -15,7 +15,8 @@
  */
 #pragma once
 
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
+#include "CSP/Common/ReplicatedValue.h"
 
 #include <atomic>
 #include <chrono>
@@ -34,7 +35,7 @@ namespace csp::multiplayer
 {
 
 class ClientElectionManager;
-
+class NetworkEventBus;
 class SpaceEntity;
 
 enum class ClientElectionState
@@ -76,7 +77,8 @@ using ClientMap = std::map<ClientId, class ClientProxy*>;
 class ClientProxy
 {
 public:
-    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem);
+    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager, csp::common::LogSystem& LogSystem,
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner);
 
     void UpdateState();
 
@@ -121,6 +123,8 @@ private:
     std::chrono::system_clock::time_point ElectionStartTime;
 
     csp::common::LogSystem& LogSystem;
+    csp::common::IJSScriptRunner& ScriptRunner;
+    csp::multiplayer::NetworkEventBus& NetworkEventBus;
 };
 
 } // namespace csp::multiplayer

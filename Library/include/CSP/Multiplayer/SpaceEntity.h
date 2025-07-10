@@ -18,11 +18,11 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/ThirdPartyPlatforms.h"
 #include "SpaceEntitySystem.h"
 
 #include <atomic>
@@ -34,6 +34,8 @@
 CSP_START_IGNORE
 #ifdef CSP_TESTS
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+class CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
+class CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -123,6 +125,8 @@ class CSP_API SpaceEntity
 
 #ifdef CSP_TESTS
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
+    friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
+    friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -144,12 +148,13 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem);
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
-        const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+        SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
+        bool IsPersistent);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -396,8 +401,8 @@ public:
     CSP_NO_EXPORT void SetEntityPatchSentCallbackParams(const bool Boolean);
 
     /// @brief Getter for the dirty properties
-    /// @return csp::common::Map<uint16_t, ReplicatedValue>
-    CSP_NO_EXPORT csp::common::Map<uint16_t, ReplicatedValue> GetDirtyProperties();
+    /// @return csp::common::Map<uint16_t, csp::common::ReplicatedValue>
+    CSP_NO_EXPORT csp::common::Map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties();
 
     /// @brief Getter for the transient deletion component IDs
     /// @return csp::common::List<uint16_t>
@@ -439,10 +444,20 @@ public:
 
     /// @brief Apply a local patch
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the SpaceEntitySystem state. Don't set this
+    /// unless you know what you are doing. (default: false)
+    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
+
+    /// @brief Creates this entity from an ObjectMessage.
+    /// @param Message ObjectMessage : The object message to build the entity from.
+    CSP_NO_EXPORT void FromObjectMessage(const csp::multiplayer::mcs::ObjectMessage& Message);
+
+    /// @brief Updates this entity from an ObjectPatch.
+    /// @param Patch ObjectPatch : The object patch to update the entity from.
+    CSP_NO_EXPORT void FromObjectPatch(const csp::multiplayer::mcs::ObjectPatch& Patch);
 
 private:
     class DirtyComponent
@@ -479,8 +494,6 @@ private:
     csp::multiplayer::mcs::ObjectMessage CreateObjectMessage();
     csp::multiplayer::mcs::ObjectPatch CreateObjectPatch();
 
-    void FromObjectMessage(const csp::multiplayer::mcs::ObjectMessage& Message);
-    void FromObjectPatch(const csp::multiplayer::mcs::ObjectPatch& Patch);
     // Called when we're parsing a component from an mcs::ObjectMessage
     void ComponentFromItemComponentData(uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
     // Called when we're parsing a component from an mcs::ObjectPatch
@@ -512,7 +525,7 @@ private:
     CallbackHandler EntityPatchSentCallback;
 
     csp::common::Map<uint16_t, ComponentBase*> Components;
-    csp::common::Map<uint16_t, ReplicatedValue> DirtyProperties;
+    csp::common::Map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
     csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
     uint16_t NextComponentId;
 

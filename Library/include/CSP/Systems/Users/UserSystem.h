@@ -18,9 +18,10 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/LoginState.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
@@ -55,7 +56,7 @@ public:
 
     /// @brief Get the current login state.
     /// @return LoginState : Current login state
-    const LoginState& GetLoginState() const;
+    const csp::common::LoginState& GetLoginState() const;
 
     /// @brief Sets a callback that will get fired when the login token has changed as a result of logging in with credentials or with a token or
     /// after the Connected Spaces Platform internal system has refreshed the session.
@@ -226,7 +227,7 @@ public:
     CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback);
 
     // Callback to receive access permission changes Data when a message is sent.
-    typedef std::function<void(const csp::multiplayer::UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
+    typedef std::function<void(const csp::common::AccessControlChangedNetworkEventData&)> UserPermissionsChangedCallbackHandler;
 
     /// @brief Sets a callback for an access control changed event.
     ///
@@ -242,11 +243,11 @@ public:
     void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
-    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+    CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
+    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
@@ -262,7 +263,7 @@ private:
     csp::services::ApiBase* ExternalServiceProxyApi;
     csp::services::ApiBase* StripeAPI;
 
-    LoginState CurrentLoginState;
+    csp::common::LoginState CurrentLoginState;
 
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 

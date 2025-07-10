@@ -18,9 +18,9 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Multiplayer/MultiplayerHubMethods.h"
 
 #include <atomic>
@@ -42,28 +42,18 @@ CSP_END_IGNORE
 namespace csp::common
 {
 class LogSystem;
+class ReplicatedValue;
 }
-
-namespace csp::systems
-{
-
-class SpaceSystem;
-class SystemsManager;
-class UserSystem;
-
-} // namespace csp::systems
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
-
-class ReplicatedValue;
 class SpaceEntitySystem;
 class ClientElectionManager;
 class ISignalRConnection;
 class NetworkEventManagerImpl;
 class IWebSocketClient;
-class EventBus;
+class NetworkEventBus;
 
 /// @brief Enum used to specify the current state of the multiplayer connection.
 enum class ConnectionState
@@ -146,8 +136,10 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
     /// ownership of this pointer.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
-        const csp::common::String& DeviceId);
+    /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
+    /// flow, prior to entity fetches.
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -161,9 +153,9 @@ public:
     /// @return NetworkEventManagerImpl* : pointer to the NetworkEventManager
     CSP_NO_EXPORT csp::multiplayer::NetworkEventManagerImpl* GetNetworkEventManager() { return NetworkEventManager; }
 
-    /// @brief Getter for the EventBus
-    /// @return EventBus* : pointer to the EventBus
-    CSP_NO_EXPORT EventBus* GetEventBusPtr() { return EventBusPtr; }
+    /// @brief Getter for the NetworkEventBus
+    /// @return NetworkEventBus* : pointer to the NetworkEventBus
+    CSP_NO_EXPORT NetworkEventBus* GetEventBusPtr() { return EventBusPtr; }
 
     /// @brief Disconnect the multiplayer and provide a reason
     /// @param Reason csp::common::String& : the reason to disconnect
@@ -223,7 +215,7 @@ private:
     class csp::multiplayer::ISignalRConnection* Connection;
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
-    class EventBus* EventBusPtr;
+    class NetworkEventBus* EventBusPtr;
 
     csp::common::LogSystem& LogSystem;
 

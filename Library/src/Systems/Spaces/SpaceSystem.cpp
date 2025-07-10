@@ -19,8 +19,8 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
-#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -363,6 +363,13 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
             systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                 "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        .then(async::inline_scheduler(),
+            [](const SpaceResult& SpaceResult)
+            {
+                // Initialize (or ensure initialization) prior to use (In RefreshMultiplayerScopes)
+                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise();
+                return SpaceResult;
+            })
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
         .then(async::inline_scheduler(), RefreshMultiplayerScopes())
         .then(async::inline_scheduler(),

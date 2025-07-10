@@ -17,9 +17,9 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
-#include "CSP/ThirdPartyPlatforms.h"
 
 #include <functional>
 
@@ -43,8 +43,14 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::services::generated::prototypeservice
+{
+class AssetDetailDto;
+}
+
 namespace csp::systems
 {
+class Asset;
 
 /// @brief Asset type enum, defines the allowed and implemented types of assets.
 enum class EAssetType
@@ -79,6 +85,8 @@ EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
 
 /// @brief Converts the EAssetPlatform enum into a string value.
 csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
+
+void AssetDetailDtoToAsset(const csp::services::generated::prototypeservice::AssetDetailDto& Dto, csp::systems::Asset& Asset);
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset which maps to a PrototypeService::AssetDetail.

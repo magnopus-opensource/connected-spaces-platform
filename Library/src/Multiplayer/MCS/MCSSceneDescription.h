@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,19 @@
  */
 #pragma once
 
-namespace csp::systems
-{
+#include "MCSTypes.h"
 
-/// @brief Enum for setting csp::systems::Asset third party platform type.
-/// NONE indicates that the asset will work on any platform.
-/// Any other value indicates it will only work with this platform.
-enum class EThirdPartyPlatform
+namespace csp::multiplayer::mcs
 {
-    NONE,
-    UNREAL,
-    UNITY
+/// @brief Internal mcs data structure which represents objects in a scene.
+/// @details The json file used to create this structure is also used to create a systems::mcs::SceneData object.
+/// The reason these are seperated is to break dependencies between our multiplayer and corer modules.
+class SceneDescription
+{
+public:
+    std::vector<ObjectMessage> Objects;
 };
-} // namespace csp::systems
+
+}
+
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj);

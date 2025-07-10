@@ -17,23 +17,20 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
-#include "CSP/Multiplayer/EventBus.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CallHelpers.h"
 #include "Events/EventSystem.h"
-#include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 #include <Multiplayer/SignalR/ISignalRConnection.h>
-
-// Needs broken
-#include "CSP/Systems/SystemsManager.h"
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -167,7 +164,7 @@ MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
     , Connected(false)
     , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
-    EventBusPtr = new EventBus(this, LogSystem);
+    EventBusPtr = new NetworkEventBus(this, LogSystem);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -353,8 +350,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection, const csp::common::String& AccessToken,
-    const csp::common::String& DeviceId)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
+    csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -377,7 +374,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
 
     Connection = SignalRConnection;
     NetworkEventManager->SetConnection(Connection);
-    csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
+    SpaceEntitySystem.SetConnection(Connection);
 
     EventBusPtr->StartEventMessageListening();
 

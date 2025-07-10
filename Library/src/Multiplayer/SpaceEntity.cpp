@@ -57,9 +57,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <thread>
 
-// Ach, not quite broken yet
-#include "CSP/Systems/SystemsManager.h"
-
 using namespace std::chrono;
 
 // Queue pending script property updates
@@ -105,14 +102,14 @@ SpaceEntity::SpaceEntity()
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, nullptr, nullptr)
+    , Script(this, nullptr, nullptr, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(nullptr)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem* LogSystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
@@ -128,16 +125,17 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::LogSyst
     , Parent(nullptr)
     , EntityLock(LockType::None)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
-    , Script(this, InEntitySystem, LogSystem)
+    , Script(this, InEntitySystem, &ScriptRunner, LogSystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(LogSystem)
     , TimeOfLastPatch(0)
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id,
-    const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent)
-    : SpaceEntity(EntitySystem, LogSystem)
+SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+    SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
+    bool IsTransferable, bool IsPersistent)
+    : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
 {
     this->Id = Id;
     this->Type = Type;
@@ -372,7 +370,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
 
     if (ThirdPartyPlatform != InThirdPartyPlatformType)
     {
-        DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = ReplicatedValue(static_cast<int64_t>(InThirdPartyPlatformType));
+        DirtyProperties[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = csp::common::ReplicatedValue(static_cast<int64_t>(InThirdPartyPlatformType));
     }
 }
 
@@ -551,10 +549,10 @@ void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
 
 void SpaceEntity::RemoveParentId() { ParentId = nullptr; }
 
-void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
+void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessaging)
 {
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-    if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
+    if (!AllowSelfMessaging)
     {
         std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
         std::scoped_lock ComponentsLocker(ComponentsLock);
@@ -595,8 +593,9 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
                     // TODO: For the moment, we update all properties on a dirty component, in future we need to change this to per property
                     // replication. Components[DirtyComponents[i].Component->GetId()]->Properties = DirtyComponents[i].Component->DirtyProperties;
 
-                    /*const csp::common::Map<uint32_t, ReplicatedValue> DirtyComponentProperties = DirtyComponents[i].Component->DirtyProperties;
-                    const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys			  = DirtyComponentProperties.Keys();
+                    /*const csp::common::Map<uint32_t, csp::common::ReplicatedValue> DirtyComponentProperties =
+                    DirtyComponents[i].Component->DirtyProperties; const csp::common::Array<uint32_t>* DirtyComponentPropertyKeys
+                    = DirtyComponentProperties.Keys();
 
                     for (size_t j = 0; j < DirtyComponentPropertyKeys->Size(); j++)
                     {
@@ -726,7 +725,7 @@ void SpaceEntity::SetEntityPatchSentCallbackParams(bool Boolean) { EntityPatchSe
 
 csp::common::Map<uint16_t, SpaceEntity::DirtyComponent> SpaceEntity::GetDirtyComponents() { return DirtyComponents; }
 
-csp::common::Map<uint16_t, csp::multiplayer::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
+csp::common::Map<uint16_t, csp::common::ReplicatedValue> SpaceEntity::GetDirtyProperties() { return DirtyProperties; }
 
 csp::common::List<uint16_t> SpaceEntity::GetTransientDeletionComponentIds() { return TransientDeletionComponentIds; }
 
@@ -883,7 +882,10 @@ bool SpaceEntity::Deselect()
 
 bool SpaceEntity::IsModifiable() const
 {
-    if (EntitySystem == nullptr || csp::systems::SystemsManager::Get().GetMultiplayerConnection() == nullptr)
+
+    // I do not know if we actually need to check multiplayer for nullness, this check was here when breaking dependencies ... one would hope it would
+    // be an invariant on EntitySystem.
+    if ((EntitySystem == nullptr) || (EntitySystem->GetMultiplayerConnectionInstance() == nullptr))
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
@@ -899,7 +901,7 @@ bool SpaceEntity::IsModifiable() const
         return false;
     }
 
-    return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
+    return (OwnerId == EntitySystem->GetMultiplayerConnectionInstance()->GetClientId() || IsTransferable);
 }
 
 void SpaceEntity::Lock()
@@ -929,7 +931,7 @@ void SpaceEntity::Lock()
     std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
-    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
 }
 
 void SpaceEntity::Unlock()
@@ -946,7 +948,7 @@ void SpaceEntity::Unlock()
     std::scoped_lock<std::mutex> PropertiesLocker(PropertiesLock);
 
     DirtyProperties.Remove(COMPONENT_KEY_VIEW_LOCKTYPE);
-    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = ReplicatedValue(static_cast<int64_t>(LockType::None));
+    DirtyProperties[COMPONENT_KEY_VIEW_LOCKTYPE] = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
 }
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
@@ -1330,7 +1332,7 @@ void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs
                     continue;
                 }
 
-                ReplicatedValue Property;
+                csp::common::ReplicatedValue Property;
                 MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->Properties[PatchComponentPair.first] = Property;
@@ -1374,7 +1376,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
                 continue;
             }
 
-            ReplicatedValue Property;
+            csp::common::ReplicatedValue Property;
             MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
             Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
@@ -1396,7 +1398,7 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
                     continue;
                 }
 
-                ReplicatedValue Property;
+                csp::common::ReplicatedValue Property;
                 MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
 
                 Component->SetPropertyFromPatch(PatchComponentPair.first, Property);

@@ -24,6 +24,21 @@
 #include <cstdint>
 #include <string>
 
+namespace csp::common
+{
+/// @brief Enum which represents possible login states of a CSP client.
+enum class ELoginState : uint8_t
+{
+    LoginThirdPartyProviderDetailsRequested,
+    LoginRequested,
+    LoggedIn,
+    LogoutRequested,
+    LoggedOut,
+    Error,
+};
+
+}
+
 namespace csp::web
 {
 
@@ -153,6 +168,15 @@ inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
 
 namespace csp::systems
 {
+
+/// @brief Indicates special handling for any thirdparty platform
+/// @note We may remove this soon, as it's deceptive implying these are the only platforms we support.
+enum class EThirdPartyPlatform
+{
+    NONE,
+    UNREAL,
+    UNITY
+};
 
 /// @brief Code to indicate the result of a request.
 /// Request results should be checked for a success by clients before using any other accessors.

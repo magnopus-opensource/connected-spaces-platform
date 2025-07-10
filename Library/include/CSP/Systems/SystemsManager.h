@@ -155,7 +155,7 @@ public:
 
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
-    csp::multiplayer::EventBus* GetEventBus();
+    csp::multiplayer::NetworkEventBus* GetEventBus();
 
 private:
     SystemsManager();
@@ -174,7 +174,7 @@ private:
     csp::web::WebClient* WebClient;
 
     csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
-    csp::multiplayer::EventBus* EventBus;
+    csp::multiplayer::NetworkEventBus* NetworkEventBus;
     csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;

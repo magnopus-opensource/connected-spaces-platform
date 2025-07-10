@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
@@ -48,15 +49,15 @@ class ClientElectionManager
     /** @endcond */
 
 public:
-    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem);
+    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
     ~ClientElectionManager();
 
     void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
     void OnDisconnect();
 
-    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
+    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
 
-    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
+    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
     void OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
     void OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
     void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
@@ -73,14 +74,14 @@ private:
     void BindNetworkEvents();
     void UnBindNetworkEvents();
 
-    void OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data);
-    void OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data);
+    void OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
+    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
 
-    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar);
+    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar, NetworkEventBus& NetworkEventBus);
     void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);
     ClientProxy* FindClientUsingAvatar(const SpaceEntity* ClientAvatar);
 
-    ClientProxy* AddClientUsingId(int64_t ClientId);
+    ClientProxy* AddClientUsingId(int64_t ClientId, NetworkEventBus& NetworkEventBus);
     void RemoveClientUsingId(int64_t ClientId);
     ClientProxy* FindClientUsingId(int64_t ClientId);
 
@@ -122,6 +123,7 @@ private:
     ClientProxy* Leader;
 
     csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
+    csp::common::IJSScriptRunner& RemoteScriptRunner;
 };
 
 } // namespace csp::multiplayer

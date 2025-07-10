@@ -17,11 +17,11 @@
 #pragma once
 
 #include "CSP/Common/Map.h"
+#include "CSP/Common/NetworkEventData.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
 #include <unordered_map>
@@ -59,7 +59,8 @@ namespace ConversationSystemHelpers
     CSP_NO_EXPORT std::unordered_map<std::string, std::string> GetAnnotationThumbnailAssetIdsFromCollectionResult(
         const AssetCollectionsResult& Result);
 
-    csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params);
+    csp::common::Array<common::ReplicatedValue> MessageInfoToReplicatedValueArray(
+        csp::multiplayer::ConversationEventType MessageName, const multiplayer::MessageInfo& MessageInfo);
 }
 
 } // namespace csp::multiplayer
