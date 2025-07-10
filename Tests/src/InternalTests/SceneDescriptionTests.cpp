@@ -33,6 +33,8 @@ using namespace csp::systems;
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ObjectMessageSerializeTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestId = 1;
     const uint64_t TestType = 2;
     const bool TestIsTransferable = true;
@@ -54,6 +56,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ObjectMessageSerializeTest)
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeBoolTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const bool TestValue = true;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -67,6 +71,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeBo
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeInt64Test)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const int64_t TestValue = -10;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -80,6 +86,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeIn
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUInt64Test)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const uint64_t TestValue = 10;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -93,6 +101,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeDoubleTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const double TestValue = 10.1;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -106,6 +116,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeDo
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const float TestValue = 10.1f;
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -119,6 +131,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFl
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::string TestValue = "Test";
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -132,6 +146,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringEmptyTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::string TestValue = "";
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -145,6 +161,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::vector<float> TestValue = { 1.1f, 2.2f, 3.3f };
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -158,6 +176,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFl
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFloatVectorEmptyTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::vector<float> TestValue = {};
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -171,6 +191,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeFl
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::map<std::string, mcs::ItemComponentData> TestValue
         = { { "Key1", mcs::ItemComponentData { 1.1f } }, { "Key2", mcs::ItemComponentData { std::string { "Test" } } } };
     mcs::ItemComponentData ComponentValue { TestValue };
@@ -185,6 +207,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeStringMapEmptyTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::map<std::string, mcs::ItemComponentData> TestValue = {};
     mcs::ItemComponentData ComponentValue { TestValue };
 
@@ -198,6 +222,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeSt
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::map<uint16_t, mcs::ItemComponentData> TestValue
         = { { 0, mcs::ItemComponentData { 1.1f } }, { 1, mcs::ItemComponentData { std::string { "Test" } } } };
     mcs::ItemComponentData ComponentValue { TestValue };
@@ -212,6 +238,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUI
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, ItemComponentDataSerializeUIntMapEmptyTest)
 {
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
     const std::map<uint16_t, mcs::ItemComponentData> TestValue = {};
     mcs::ItemComponentData ComponentValue { TestValue };
 
