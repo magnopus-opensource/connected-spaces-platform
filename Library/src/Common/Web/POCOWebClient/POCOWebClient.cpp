@@ -17,6 +17,9 @@
 
 #include "Debug/Logging.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
+
 #include <Poco/File.h>
 #include <Poco/MD5Engine.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
@@ -44,6 +47,19 @@ namespace
 
 template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N - 1; }
 
+void LogHttpResponseIfLoglevelVeryVerbose(
+    csp::common::LogSystem* LogSystem, const char* Verb, const csp::web::HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
+{
+    // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
+    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), static_cast<int>(PocoResponse.getStatus()),
+                PocoResponse.getReason())
+                .c_str());
+    }
+}
+
 } // namespace
 
 namespace csp::web
@@ -54,8 +70,8 @@ const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
 EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
-    : WebClient(InPort, Tp, AutoRefresh)
+POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 
@@ -141,6 +157,8 @@ void POCOWebClient::Get(HttpRequest& Request)
     {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
 }
 
 void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
@@ -224,6 +242,8 @@ void POCOWebClient::Post(HttpRequest& Request)
 
         Payload.AddHeader(Key.c_str(), Val.c_str());
     }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
 }
 
 void POCOWebClient::Put(HttpRequest& Request)
@@ -268,6 +288,8 @@ void POCOWebClient::Put(HttpRequest& Request)
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PUT", Request, PocoResponse);
 }
 
 void POCOWebClient::Delete(HttpRequest& Request)
@@ -306,6 +328,8 @@ void POCOWebClient::Delete(HttpRequest& Request)
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "DELETE", Request, PocoResponse);
 }
 
 void POCOWebClient::Head(HttpRequest& Request)
@@ -340,6 +364,8 @@ void POCOWebClient::Head(HttpRequest& Request)
     {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(

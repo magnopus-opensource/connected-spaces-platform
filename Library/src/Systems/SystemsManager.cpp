@@ -130,9 +130,9 @@ void SystemsManager::CreateSystems()
     LogSystem = new csp::common::LogSystem();
 
 #ifdef CSP_WASM
-    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #else
-    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
     ScriptSystem = new csp::systems::ScriptSystem();
 

@@ -15,7 +15,10 @@
  */
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "Debug/Logging.h"
 #include "PlatformTestUtils.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 
 #ifdef CSP_WASM
@@ -27,6 +30,7 @@
 #include "gtest/gtest.h"
 #include <atomic>
 #include <chrono>
+#include <gmock/gmock.h>
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
 #include <thread>
@@ -74,8 +78,8 @@ private:
 class TestWebClient : public EmscriptenWebClient
 {
 public:
-    TestWebClient(const Port InPort, const ETransferProtocol Tp)
-        : EmscriptenWebClient(InPort, Tp, false)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+        : EmscriptenWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
@@ -85,8 +89,8 @@ public:
 class TestWebClient : public POCOWebClient
 {
 public:
-    TestWebClient(const Port InPort, const ETransferProtocol Tp)
-        : POCOWebClient(InPort, Tp, false)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+        : POCOWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
@@ -110,7 +114,9 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
 {
     TReceiver Receiver;
 
-    TestWebClient WebClient(Port, ETransferProtocol::HTTP);
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    TestWebClient WebClient(Port, ETransferProtocol::HTTP, LogSystem);
 
     WebClientSendRequest(&WebClient, Url, Verb, Payload, &Receiver);
 
@@ -184,6 +190,138 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
     Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
     RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
+
+    csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVeryVerboseLogging)
+{
+    InitialiseFoundation();
+
+    {
+        // We must set the log level to VeryVerbose to receive logs for the HTTP Requests and Responses
+        csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+        LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+
+        RAIIMockLogger MockLogger {};
+
+        // Request/Response logs we expect to receive for our HTTP calls.
+        // We are only checking against a substring of the request/response logs.
+        // Get logs
+        csp::common::String CSPLogMsgGetRequestSubstring = "HTTP Request\nGET https://reqres.in/api/users/2";
+        csp::common::String CSPLogMsgGetResponseSubstring = "HTTP Response\nGET https://reqres.in/api/users/2";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
+        // Put logs
+        csp::common::String CSPLogMsgPutRequestSubstring = "HTTP Request\nPUT https://reqres.in/api/users/2";
+        csp::common::String CSPLogMsgPutResponseSubstring = "HTTP Response\nPUT https://reqres.in/api/users/2";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
+        // Post logs
+        csp::common::String CSPLogMsgPostRequestSubstring = "HTTP Request\nPOST https://reqres.in/api/login";
+        csp::common::String CSPLogMsgPostResponseSubstring = "HTTP Response\nPOST https://reqres.in/api/login";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
+        // Delete logs
+        csp::common::String CSPLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://reqres.in/api/users/1";
+        csp::common::String CSPLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://reqres.in/api/users/1";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
+
+        // GET request
+        HttpPayload PayloadGet;
+
+        PayloadGet.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, PayloadGet, EResponseCodes::ResponseOK);
+
+        // PUT request
+        HttpPayload PayloadPut;
+
+        rapidjson::Document JsonDocPut(rapidjson::kObjectType);
+        JsonDocPut.AddMember("name", "bob", JsonDocPut.GetAllocator());
+        JsonDocPut.AddMember("job", "builder", JsonDocPut.GetAllocator());
+
+        PayloadPut.SetContent(JsonDocPut);
+        PayloadPut.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, PayloadPut, EResponseCodes::ResponseOK);
+
+        // POST request
+        HttpPayload PayloadPost;
+
+        rapidjson::Document JsonDocPost(rapidjson::kObjectType);
+        JsonDocPost.AddMember("email", "eve.holt@reqres.in", JsonDocPost.GetAllocator());
+        JsonDocPost.AddMember("password", "secret", JsonDocPost.GetAllocator());
+
+        PayloadPost.SetContent(JsonDocPost);
+
+        PayloadPost.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+        PayloadPost.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, PayloadPost, EResponseCodes::ResponseOK);
+
+        // Delete request
+        HttpPayload PayloadDelete;
+        PayloadDelete.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>(
+            "https://reqres.in/api/users/1", ERequestVerb::Delete, 80, PayloadDelete, EResponseCodes::ResponseNoContent);
+    }
+
+    csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseNoLogging)
+{
+    InitialiseFoundation();
+
+    {
+        RAIIMockLogger MockLogger {};
+
+        // With the log level NOT set to VeryVerbose we expect to receive no logs for the HTTP Requests and Responses
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(0);
+
+        // GET request
+        HttpPayload PayloadGet;
+
+        PayloadGet.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, PayloadGet, EResponseCodes::ResponseOK);
+
+        // PUT request
+        HttpPayload PayloadPut;
+
+        rapidjson::Document JsonDocPut(rapidjson::kObjectType);
+        JsonDocPut.AddMember("name", "bob", JsonDocPut.GetAllocator());
+        JsonDocPut.AddMember("job", "builder", JsonDocPut.GetAllocator());
+
+        PayloadPut.SetContent(JsonDocPut);
+        PayloadPut.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, PayloadPut, EResponseCodes::ResponseOK);
+
+        // POST request
+        HttpPayload PayloadPost;
+
+        rapidjson::Document JsonDocPost(rapidjson::kObjectType);
+        JsonDocPost.AddMember("email", "eve.holt@reqres.in", JsonDocPost.GetAllocator());
+        JsonDocPost.AddMember("password", "secret", JsonDocPost.GetAllocator());
+
+        PayloadPost.SetContent(JsonDocPost);
+
+        PayloadPost.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+        PayloadPost.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, PayloadPost, EResponseCodes::ResponseOK);
+
+        // Delete request
+        HttpPayload PayloadDelete;
+        PayloadDelete.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
+
+        RunWebClientTest<ResponseReceiver>(
+            "https://reqres.in/api/users/1", ERequestVerb::Delete, 80, PayloadDelete, EResponseCodes::ResponseNoContent);
+    }
 
     csp::CSPFoundation::Shutdown();
 }
@@ -264,12 +402,13 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
     PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
     {
+        csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
         WebClient* Client;
 #ifdef CSP_WASM
-        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #else
-        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
+        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
         EXPECT_TRUE(Client != nullptr);
 
@@ -413,7 +552,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     HttpPayload Payload;
     ResponseReceiver Receiver;
 
-    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP);
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP, LogSystem);
     EXPECT_TRUE(WebClient != nullptr);
 
     WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
