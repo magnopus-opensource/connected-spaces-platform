@@ -32,18 +32,14 @@
 
 namespace csp::common
 {
-
 class LogSystem;
 class LoginState;
-
 } // namespace csp::common
 
 namespace csp::systems
 {
-
 class SystemsManager;
 class UserSystem;
-
 } // namespace csp::systems
 
 namespace csp::web

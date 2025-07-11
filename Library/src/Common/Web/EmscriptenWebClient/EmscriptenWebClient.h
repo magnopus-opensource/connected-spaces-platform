@@ -19,23 +19,17 @@
 
 namespace csp::common
 {
-
 class LogSystem;
-
 }
 
 namespace csp::systems
 {
-
 class SystemsManager;
-
 }
 
 namespace csp::multiplayer
 {
-
 class CSPHttpClient;
-
 }
 
 namespace csp::web
