@@ -20,6 +20,8 @@ enum class CodePropertyType
     COLOR3,
     BOOLEAN,
     SLIDER,
+    ASSET,
+    ENTITY,
     NUM
 };
 
@@ -49,7 +51,15 @@ public:
     // Getter and Setter methods for StringValue
     const csp::common::String& GetStringValue() const;
     void SetStringValue(const csp::common::String& stringValue);
+
+    // Getter and Setter methods for AssetCollectionValue
+    const csp::common::String& GetAssetCollectionValue() const;
+    void SetAssetCollectionValue(const csp::common::String& assetCollectionValue);
     
+    // Getter and Setter methods for AssetValue
+    const csp::common::String& GetAssetValue() const;
+    void SetAssetValue(const csp::common::String& assetValue);
+
     // Getter and Setter methods for FloatValue
     float GetFloatValue() const;
     void SetFloatValue(float floatValue);
@@ -88,6 +98,8 @@ private:
     float FloatValue;
     uint32_t IntValue;
     bool BoolValue;
+    csp::common::String AssetCollectionValue;
+    csp::common::String AssetValue;
     Vector2 Vector2Value;
     Vector3 Vector3Value;
     Vector4 Vector4Value;

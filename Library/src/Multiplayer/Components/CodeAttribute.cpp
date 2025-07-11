@@ -27,6 +27,7 @@ csp::common::String CodeAttribute::Serialize() const
     switch(Type)
     {
         case CodePropertyType::STRING:
+        case CodePropertyType::ENTITY:
             result += StringValue;
             break;
         case CodePropertyType::NUMBER:
@@ -35,6 +36,10 @@ csp::common::String CodeAttribute::Serialize() const
             break;
         case CodePropertyType::BOOLEAN:
             result += BoolValue ? "true" : "false";
+            break;
+        case CodePropertyType::ASSET:
+            result += AssetCollectionValue + "," +
+                      AssetValue;
             break;
         case CodePropertyType::VECTOR2:
             result += csp::common::String(std::to_string(Vector2Value.X).c_str()) + "," +
@@ -81,6 +86,7 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
         switch(attribute.Type)
         {
             case CodePropertyType::STRING:
+            case CodePropertyType::ENTITY:
                 attribute.StringValue = parts[1];
                 break;
             case CodePropertyType::NUMBER:
@@ -89,6 +95,14 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
                 break;
             case CodePropertyType::BOOLEAN:
                 attribute.BoolValue = (parts[1] == "true");
+                break;
+            case CodePropertyType::ASSET:
+                if (parts.Size() == 3) // Ensure we have enough parts
+                {
+                    attribute.AssetCollectionValue = parts[1];
+                    attribute.AssetValue = parts[2];
+                    return attribute;
+                }
                 break;
             case CodePropertyType::VECTOR2:
                 if (parts.Size() >= 5) // Ensure we have enough parts
@@ -166,6 +180,12 @@ void CodeAttribute::SetType(CodePropertyType type) { Type = type; }
 
 const csp::common::String& CodeAttribute::GetStringValue() const { return StringValue; }
 void CodeAttribute::SetStringValue(const csp::common::String& stringValue) { StringValue = stringValue; }
+
+const csp::common::String& CodeAttribute::GetAssetCollectionValue() const { return AssetCollectionValue; }
+void CodeAttribute::SetAssetCollectionValue(const csp::common::String& assetCollectionValue) { AssetCollectionValue = assetCollectionValue; }
+
+const csp::common::String& CodeAttribute::GetAssetValue() const { return AssetValue; }
+void CodeAttribute::SetAssetValue(const csp::common::String& assetValue) { AssetValue = assetValue; }
 
 float CodeAttribute::GetFloatValue() const { return FloatValue; }
 void CodeAttribute::SetFloatValue(float floatValue) { FloatValue = floatValue; }

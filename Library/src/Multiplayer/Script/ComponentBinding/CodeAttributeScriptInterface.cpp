@@ -47,6 +47,8 @@ int32_t CodeAttributeScriptInterface::GetType() const
 
 // Use macros for other properties
 DEFINE_ATTRIBUTE_PROPERTY_STRING(CodeAttribute, StringValue);
+DEFINE_ATTRIBUTE_PROPERTY_STRING(CodeAttribute, AssetCollectionValue);
+DEFINE_ATTRIBUTE_PROPERTY_STRING(CodeAttribute, AssetValue);
 DEFINE_ATTRIBUTE_PROPERTY_TYPE(CodeAttribute, float, float, FloatValue);
 DEFINE_ATTRIBUTE_PROPERTY_TYPE(CodeAttribute, int32_t, int32_t, IntValue);
 DEFINE_ATTRIBUTE_PROPERTY_TYPE(CodeAttribute, bool, bool, BoolValue);

@@ -209,6 +209,7 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
             switch (attribute->GetType())
             {   
                 case csp::multiplayer::CodePropertyType::STRING:
+                case csp::multiplayer::CodePropertyType::ENTITY:
                     jsValue += "'" + std::string(attribute->GetStringValue().c_str()) + "'";
                     break;
                 case csp::multiplayer::CodePropertyType::NUMBER:
@@ -218,6 +219,9 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
                 case csp::multiplayer::CodePropertyType::BOOLEAN:
 
                     jsValue += attribute->GetBoolValue() ? "true" : "false";
+                    break;
+                case csp::multiplayer::CodePropertyType::ASSET:
+                    jsValue += "[" + std::string(attribute->GetAssetCollectionValue().c_str()) + ", " + std::string(attribute->GetAssetValue().c_str()) + "]";
                     break;
                 case csp::multiplayer::CodePropertyType::VECTOR2:
                     jsValue += "[" + std::to_string(attribute->GetVector2Value().X) + ", " + std::to_string(attribute->GetVector2Value().Y) + "]";
@@ -359,6 +363,7 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
     switch (Attribute.GetType())
     {
     case csp::multiplayer::CodePropertyType::STRING:
+    case csp::multiplayer::CodePropertyType::ENTITY:
         jsValue = "'" + std::string(Attribute.GetStringValue().c_str()) + "'";
         break;
     case csp::multiplayer::CodePropertyType::BOOLEAN:
@@ -367,6 +372,10 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
     case csp::multiplayer::CodePropertyType::NUMBER:
     case csp::multiplayer::CodePropertyType::SLIDER:
         jsValue = std::to_string(Attribute.GetFloatValue());
+        break;
+    case csp::multiplayer::CodePropertyType::ASSET:
+        // Asset as a JavaScript object
+        jsValue = "{ assetCollectionId: '" + std::string(Attribute.GetAssetCollectionValue().c_str()) + "', assetId: '" + std::string(Attribute.GetAssetValue().c_str()) + "' }";
         break;
     case csp::multiplayer::CodePropertyType::VECTOR2:
         // Vector2 as a JavaScript array

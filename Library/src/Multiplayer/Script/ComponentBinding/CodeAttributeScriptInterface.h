@@ -34,6 +34,8 @@ public:
     // Update property declarations to use std vector types
     DECLARE_SCRIPT_PROPERTY(int32_t, Type);
     DECLARE_SCRIPT_PROPERTY(std::string, StringValue);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionValue);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetValue);
     DECLARE_SCRIPT_PROPERTY(float, FloatValue);
     DECLARE_SCRIPT_PROPERTY(int32_t, IntValue);
     DECLARE_SCRIPT_PROPERTY(bool, BoolValue);
