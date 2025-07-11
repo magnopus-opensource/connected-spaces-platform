@@ -145,7 +145,6 @@ void POCOWebClient::Get(HttpRequest& Request)
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 
-    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "GET", Request, PocoResponse);
 }
 
@@ -231,7 +230,6 @@ void POCOWebClient::Post(HttpRequest& Request)
         Payload.AddHeader(Key.c_str(), Val.c_str());
     }
 
-    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "POST", Request, PocoResponse);
 }
 
@@ -278,7 +276,6 @@ void POCOWebClient::Put(HttpRequest& Request)
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
 
-    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PUT", Request, PocoResponse);
 }
 
@@ -319,7 +316,6 @@ void POCOWebClient::Delete(HttpRequest& Request)
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
     }
 
-    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "DELETE", Request, PocoResponse);
 }
 
@@ -356,7 +352,6 @@ void POCOWebClient::Head(HttpRequest& Request)
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 
-    // Call will log the response if the LogSystem LogLevel has been set to VeryVerbose.
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
 }
 
