@@ -47,6 +47,20 @@ namespace
 
 template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N - 1; }
 
+void LogHttpResponseIfLoglevelVeryVerbose(
+    csp::common::LogSystem* LogSystem, const char* Verb, const csp::web::HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
+{
+    // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
+    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    {
+        csp::common::String Status = std::to_string(static_cast<int>(PocoResponse.getStatus())).c_str();
+        csp::common::String StatusReason = PocoResponse.getReason().c_str();
+
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), Status, StatusReason).c_str());
+    }
+}
+
 } // namespace
 
 namespace csp::web
@@ -548,20 +562,6 @@ void POCOWebClient::SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSo
 
     Payload->SetContent(strm.str().c_str(), strm.str().size());
     Payload->SetBoundary(CSP_TEXT(Form.boundary().c_str()));
-}
-
-void POCOWebClient::LogHttpResponseIfLoglevelVeryVerbose(
-    csp::common::LogSystem* LogSystem, const char* Verb, const HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse)
-{
-    // If the LogSystem LogLevel has been set to VeryVerbose, log the response.
-    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
-    {
-        csp::common::String Status = std::to_string(static_cast<int>(PocoResponse.getStatus())).c_str();
-        csp::common::String StatusReason = PocoResponse.getReason().c_str();
-
-        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), Status, StatusReason).c_str());
-    }
 }
 
 } // namespace csp::web

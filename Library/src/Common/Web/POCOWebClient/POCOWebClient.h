@@ -91,10 +91,6 @@ protected:
 
     std::vector<Poco::Net::HTTPCookie>* Cookies;
     std::mutex CookiesMutex;
-
-private:
-    static void LogHttpResponseIfLoglevelVeryVerbose(
-        csp::common::LogSystem* LogSystem, const char* Verb, const HttpRequest& Request, const Poco::Net::HTTPResponse& PocoResponse);
 };
 
 } // namespace csp::web
