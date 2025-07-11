@@ -123,8 +123,6 @@ private:
     void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));
     void RefreshIfExpired();
     void PrintClientErrorResponseMessages(const HttpResponse& Response);
-    // If the LogSystem LogLevel has been set to VeryVerbose details of Http requests will be logged
-    void LogHttpRequest(const HttpRequest* Request);
     csp::systems::UserSystem* UserSystem;
     const csp::common::LoginState* LoginState;
     std::atomic_bool RefreshNeeded, RefreshStarted;
