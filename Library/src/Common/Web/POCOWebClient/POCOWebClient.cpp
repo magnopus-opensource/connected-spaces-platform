@@ -54,10 +54,9 @@ void LogHttpResponseIfLoglevelVeryVerbose(
     if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
     {
         csp::common::String Status = std::to_string(static_cast<int>(PocoResponse.getStatus())).c_str();
-        csp::common::String StatusReason = PocoResponse.getReason().c_str();
 
         LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
-            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), Status, StatusReason).c_str());
+            fmt::format("HTTP Response\n{0} {1}\nStatus: {2} - {3}", Verb, Request.GetUri().GetAsString(), Status, PocoResponse.getReason()).c_str());
     }
 }
 
