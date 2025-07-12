@@ -15,7 +15,13 @@
  */
 #pragma once
 
+#include "CSP/CSPCommon.h"
+#include "Debug/Logging.h"
+#include "quickjspp.hpp"
+#include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+
+#include <map>
 #include <string>
 #include <vector>
 
@@ -32,6 +38,8 @@ class EntityScriptInterface
 {
 public:
     EntityScriptInterface(SpaceEntity* InEntity = nullptr);
+
+    void SetContext(qjs::Context* InContext);
 
     using Vector3 = std::vector<float>;
     using Vector4 = std::vector<float>;
@@ -71,7 +79,9 @@ public:
     void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
     void PostMessageToScript(std::string Message, std::string MessageParamsJson);
 
-
+    void On(const std::string& EventName, qjs::Value Callback);
+    void Off(const std::string& EventName, qjs::Value Callback);
+    void Fire(const std::string& EventName, qjs::Value& EventData);
 
     std::vector<ComponentScriptInterface*> GetComponents();
 
@@ -80,6 +90,8 @@ public:
 
 private:
     SpaceEntity* Entity;
+    qjs::Context* Context = nullptr;
+    std::map<std::string, std::vector<qjs::Value>> EventListeners;
 };
 
 template <typename ScriptInterface, ComponentType Type>

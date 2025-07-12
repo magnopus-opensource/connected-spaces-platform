@@ -680,6 +680,14 @@ public:
         codeComponent->ClearAttributes();
     }
 
+    void FireEvent(uint64_t id, const std::string& eventName, qjs::Value& eventArgs)
+    {
+        auto* entity = EntitySystem->FindSpaceEntityById(id);
+        if (entity)
+        {
+            entity->GetScriptInterface()->Fire(eventName, eventArgs);
+        }
+    }
     //
 
     /**
@@ -1098,7 +1106,9 @@ void BindInternal(qjs::Context::Module* Module)
         .property<&EntityScriptInterface::GetId>("id")
         .property<&EntityScriptInterface::GetName>("name")
         .property<&EntityScriptInterface::IsLocal, &EntityScriptInterface::SetLocal>("isLocal")
-        .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
+        .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId")
+        .fun<&EntityScriptInterface::On>("on")
+        .fun<&EntityScriptInterface::Off>("off");
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()
@@ -1134,6 +1144,8 @@ void BindInternal(qjs::Context::Module* Module)
         .constructor<>()
         .PROPERTY_GET(CodeAttribute, Type, "type")
         .PROPERTY_GET(CodeAttribute, StringValue, "stringValue")
+        .PROPERTY_GET(CodeAttribute, AssetCollectionValue, "assetCollectionValue")
+        .PROPERTY_GET(CodeAttribute, AssetValue, "assetValue")
         .PROPERTY_GET(CodeAttribute, FloatValue, "floatValue")
         .PROPERTY_GET(CodeAttribute, IntValue, "intValue")
         .PROPERTY_GET(CodeAttribute, BoolValue, "boolValue")

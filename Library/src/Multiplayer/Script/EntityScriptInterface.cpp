@@ -29,6 +29,11 @@ EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity)
 {
 }
 
+void EntityScriptInterface::SetContext(qjs::Context* InContext)
+{
+    Context = InContext;
+}
+
 EntityScriptInterface::Vector3 EntityScriptInterface::GetPosition() const
 {
     EntityScriptInterface::Vector3 Pos = { 0, 0, 0 };
@@ -259,7 +264,57 @@ void EntityScriptInterface::PostMessageToScript(std::string Message, std::string
     Entity->GetScript().PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
 }
 
+void EntityScriptInterface::On(const std::string& EventName, qjs::Value Cb)
+{
+    if (!JS_IsFunction(Context->ctx, Cb.v))
+    {
+        return;
+    }
 
+    EventListeners[EventName].push_back(std::move(Cb));
+}
+
+void EntityScriptInterface::Off(const std::string& EventName, qjs::Value Cb)
+{
+    if (!JS_IsFunction(Context->ctx, Cb.v))
+    {
+        return;
+    }
+
+    auto it = EventListeners.find(EventName);
+    if (it != EventListeners.end())
+    {
+        auto& listeners = it->second;
+        listeners.erase(std::remove_if(listeners.begin(),
+                                       listeners.end(),
+                                       [&](const qjs::Value& storedCb)
+                                       {
+                                           return JS_VALUE_GET_PTR(storedCb.v) == JS_VALUE_GET_PTR(Cb.v);
+                                       }),
+                        listeners.end());
+    }
+}
+
+void EntityScriptInterface::Fire(const std::string& EventName, qjs::Value& EventArgs)
+{
+    auto it = EventListeners.find(EventName);
+    if (it != EventListeners.end())
+    {
+        for (auto& listener : it->second)
+        {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Firing event '%s' with args: %s", EventName.c_str(), EventArgs.toJSON().c_str());
+            JSValueConst args[] = { EventArgs.v };
+            JSValue result = JS_Call(Context->ctx, listener.v, JS_UNDEFINED, 1, args);
+
+            if (JS_IsException(result))
+            {
+                Context->getException(); // This will log the exception through the context's handler
+            }
+
+            JS_FreeValue(Context->ctx, result);
+        }
+    }
+}
 
 
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()

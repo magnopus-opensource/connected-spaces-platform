@@ -87,8 +87,14 @@ public:
     /// @param AssetParams The asset parameters containing information about the updated script
     void UpdateScriptModule(const csp::multiplayer::AssetDetailBlobParams& AssetParams);
     CSP_NO_EXPORT void UpdateAttributeForEntity(uint64_t EntityId, const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Attribute);
-
-
+    void fireEvent(const csp::common::String& eventName,
+                   uint64_t entityId,
+                   uint16_t componentId,
+                   int button,
+                   float clientX,
+                   float clientY,
+                   float screenX,
+                   float screenY);
 
 private:
     /// @brief The QuickJS context for script execution

@@ -23,6 +23,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "Multiplayer/Script/EntityScriptInterface.h"
 #include "quickjs.h"
 #include "quickjspp.hpp"
 
@@ -221,7 +222,7 @@ void LocalScriptSystem::RegisterCodeComponentInRegistry(uint64_t EntityId)
                     jsValue += attribute->GetBoolValue() ? "true" : "false";
                     break;
                 case csp::multiplayer::CodePropertyType::ASSET:
-                    jsValue += "[" + std::string(attribute->GetAssetCollectionValue().c_str()) + ", " + std::string(attribute->GetAssetValue().c_str()) + "]";
+                    jsValue += "['" + std::string(attribute->GetAssetCollectionValue().c_str()) + "', '" + std::string(attribute->GetAssetValue().c_str()) + "']";
                     break;
                 case csp::multiplayer::CodePropertyType::VECTOR2:
                     jsValue += "[" + std::to_string(attribute->GetVector2Value().X) + ", " + std::to_string(attribute->GetVector2Value().Y) + "]";
@@ -285,9 +286,13 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         'color3': 5,    // COLOR3 = 5
                         'boolean': 6,   // BOOLEAN = 6
                         'slider': 7,    // SLIDER = 7
+                        'asset': 8,     // ASSET = 8
+                        'entity': 9,    // ENTITY = 9
                     };
                     const normalTypes = {
                         'string': 'setAttributeString',
+                        'asset': 'setAttributeString',
+                        'entity': 'setAttributeString',
                         'boolean': 'setAttributeBoolean',
                         'vector2': 'setAttributeVector2',
                         'vector3': 'setAttributeVector3',
@@ -375,7 +380,7 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
         break;
     case csp::multiplayer::CodePropertyType::ASSET:
         // Asset as a JavaScript object
-        jsValue = "{ assetCollectionId: '" + std::string(Attribute.GetAssetCollectionValue().c_str()) + "', assetId: '" + std::string(Attribute.GetAssetValue().c_str()) + "' }";
+        jsValue = "[ '" + std::string(Attribute.GetAssetCollectionValue().c_str()) + "',  '" + std::string(Attribute.GetAssetValue().c_str()) + "']";
         break;
     case csp::multiplayer::CodePropertyType::VECTOR2:
         // Vector2 as a JavaScript array
@@ -402,6 +407,40 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
         entityIdStr.c_str(), Key.c_str(), jsValue.c_str());
 
     evalScript(out);
+}
+
+void LocalScriptSystem::fireEvent(const csp::common::String& eventName,
+                                  uint64_t entityId,
+                                  uint16_t componentId,
+                                  int button,
+                                  float clientX,
+                                  float clientY,
+                                  float screenX,
+                                  float screenY)
+{
+    if (Context == nullptr)
+    {
+        return;
+    }
+
+    qjs::Value eventArgs = Context->newObject();
+    eventArgs["entityId"] = Context->newValue(static_cast<double>(entityId));
+    eventArgs["componentId"] = Context->newValue(static_cast<double>(componentId));
+    
+    qjs::Value pointerEvent = Context->newObject();
+    pointerEvent["button"] = Context->newValue(button);
+    pointerEvent["clientX"] = Context->newValue(clientX);
+    pointerEvent["clientY"] = Context->newValue(clientY);
+    pointerEvent["screenX"] = Context->newValue(screenX);
+    pointerEvent["screenY"] = Context->newValue(screenY);
+
+    eventArgs["pointerEvent"] = pointerEvent;
+
+    csp::multiplayer::SpaceEntity* entity = EntitySystem->FindSpaceEntityById(entityId);
+    if (entity)
+    {
+        entity->GetScriptInterface()->Fire(eventName.c_str(), eventArgs);
+    }
 }
 
 csp::multiplayer::CodeSpaceComponent* LocalScriptSystem::getCodeComponentForEntity(uint64_t EntityId)

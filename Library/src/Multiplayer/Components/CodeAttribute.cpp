@@ -97,15 +97,15 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
                 attribute.BoolValue = (parts[1] == "true");
                 break;
             case CodePropertyType::ASSET:
-                if (parts.Size() == 3) // Ensure we have enough parts
-                {
+                if (parts.Size() >= 3)
+                {   
                     attribute.AssetCollectionValue = parts[1];
                     attribute.AssetValue = parts[2];
                     return attribute;
                 }
                 break;
             case CodePropertyType::VECTOR2:
-                if (parts.Size() >= 5) // Ensure we have enough parts
+                if (parts.Size() >= 5)
                 {
                     attribute.Vector2Value = csp::common::Vector2(
                         std::stof(parts[1].c_str()), 
@@ -153,7 +153,7 @@ CodeAttribute CodeAttribute::Deserialize(const csp::common::String& serialized)
         }
         
         // For scalar types (number, string, boolean), Min and Max are at standard positions
-        if (parts.Size() >= 4)
+        if (parts.Size() >= 4 && (attribute.Type == CodePropertyType::SLIDER || attribute.Type == CodePropertyType::NUMBER))
         {
             attribute.Min = std::stof(parts[2].c_str());
             attribute.Max = std::stof(parts[3].c_str());
