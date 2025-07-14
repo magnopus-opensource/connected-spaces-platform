@@ -17,6 +17,7 @@
 
 #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/Status/Status.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/version.h"
@@ -417,7 +418,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
 
     if (!ServiceInfo)
     {
-        const auto Message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy.c_str());
+        const auto Message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy);
 
         CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
         return false;
@@ -435,7 +436,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && ServiceVersionInfo == ServiceInfo->ApiVersions.end()) // The current version in use has been retired.
     {
         const auto Message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion.c_str(), Documentation);
+            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
         return false;
@@ -446,8 +447,8 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && !ServiceVersionInfo->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
     {
         const auto Message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
-            ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceVersionInfo->DeprecationDatetime.c_str(),
-            ServiceInfo->CurrentApiVersion.c_str(), Documentation);
+            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceVersionInfo->DeprecationDatetime, ServiceInfo->CurrentApiVersion,
+            Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
         return true;
@@ -458,7 +459,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && ServiceVersionInfo->Version != ServiceInfo->CurrentApiVersion) // The current version in use is not the latest available.
     {
         const auto Message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion.c_str(), Documentation);
+            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
         return true;
