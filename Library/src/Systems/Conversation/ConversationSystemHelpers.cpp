@@ -268,4 +268,15 @@ multiplayer::MessageInfo GetConversationInfoFromConversationAssetCollection(cons
     return Info;
 }
 
+void AppendMetadata(csp::common::Map<csp::common::String, csp::common::String>& MetadataToUpdate,
+    const csp::common::Map<csp::common::String, csp::common::String>& NewMetadataValues)
+{
+    std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(NewMetadataValues.Keys()));
+
+    for (const auto& Key : *Keys)
+    {
+        MetadataToUpdate[Key] = NewMetadataValues[Key];
+    }
+}
+
 } // namespace csp::multiplayer

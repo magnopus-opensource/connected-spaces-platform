@@ -60,6 +60,9 @@ namespace ConversationSystemHelpers
         const AssetCollectionsResult& Result);
 
     csp::common::Array<multiplayer::ReplicatedValue> MessageInfoToReplicatedValueArray(const multiplayer::ConversationEventParams& Params);
+
+    void AppendMetadata(csp::common::Map<csp::common::String, csp::common::String>& MetadataToUpdate,
+        const csp::common::Map<csp::common::String, csp::common::String>& NewMetadataValues);
 }
 
 } // namespace csp::multiplayer
