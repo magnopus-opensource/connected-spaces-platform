@@ -42,7 +42,7 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem, const csp::common::S
     const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
     char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueString().c_str());
+    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
 
     auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
     auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -71,7 +71,7 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem, const csp::co
     const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
     char UniqueThirdPartyAnchorId[256];
-    SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueString().c_str());
+    SPRINTF(UniqueThirdPartyAnchorId, "CSP-UNITTEST-ID-%s", GetUniqueString().c_str());
 
     auto AnchorPosition = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
     auto AnchorRotation = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -149,7 +149,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
     auto* AnchorSystem = SystemsManager.GetAnchorSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -186,9 +186,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -246,9 +246,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -324,9 +324,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -452,9 +452,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -536,9 +536,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", "OLY-UNITTEST-SPACE-REWIND", GetUniqueString().c_str());
+    SPRINTF(UniqueSpaceName, "%s-%s", "CSP-UNITTEST-SPACE-MAG", GetUniqueString().c_str());
     char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", "OLY-UNITTEST-ASSET-COLLECTION-REWIND", GetUniqueString().c_str());
+    SPRINTF(UniqueAssetCollectionName, "%s-%s", "CSP-UNITTEST-ASSET-COLLECTION-MAG", GetUniqueString().c_str());
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -596,9 +596,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSET-COLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());

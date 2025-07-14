@@ -38,6 +38,12 @@
     4. Add a new case in DeserializeComponentData so it can be deserialized from a signalr value.
 */
 
+namespace csp::json
+{
+class JsonSerializer;
+class JsonDeserializer;
+} // namespace csp::json
+
 namespace csp::multiplayer::mcs
 {
 /// @brief All supported MCS types
@@ -140,7 +146,7 @@ class ObjectMessage : public ISignalRSerializable, public ISignalRDeserializable
 public:
     ObjectMessage() = default;
     ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bool IsPersistent, uint64_t OwnerId, std::optional<uint64_t> ParentId,
-        const std::map<PropertyKeyType, ItemComponentData>& Components);
+        const std::optional<std::map<PropertyKeyType, ItemComponentData>>& Components);
 
     void Serialize(SignalRSerializer& Serializer) const override;
     void Deserialize(SignalRDeserializer& Deserializer) override;
@@ -196,3 +202,8 @@ private:
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 }
+
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ObjectMessage& Obj);
+void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ObjectMessage& Obj);

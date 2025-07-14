@@ -57,3 +57,6 @@ If, as a pull-request author, you are aware of a particular reviewer who really 
 
 ### Review Timeframe
 Maintainers should attempt to look at any PR assigned to them within a 24 hour working period. If they are unable to do so, they should contact the PR author informing them that they will not be able to provide a review in a timely manner.
+
+### Breaking Changes
+If making changes that break the public interface, (i.e. could cause an integrating client to need to change their code) these changes must be listed clearly in the PR description. The preferred format is a bullet list enumerating the specific nature of the changes, as well as the types/method signatures that are affected. If necessary, migration guidance should also be provided here, if moving code from the old pattern to the new is non-obvious.

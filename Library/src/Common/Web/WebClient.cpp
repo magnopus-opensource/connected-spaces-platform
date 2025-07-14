@@ -15,6 +15,8 @@
  */
 #include "WebClient.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Json.h"
@@ -28,8 +30,9 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, bool AutoRefresh)
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : RootPort(InPort)
+    , LogSystem(LogSystem)
     , UserSystem(nullptr)
     , LoginState(nullptr)
     , RefreshNeeded(false)
@@ -164,6 +167,11 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
     csp::common::CancellationToken& CancellationToken, bool AsyncResponse)
 {
     auto* Request = new csp::web::HttpRequest(this, Verb, InUri, Payload, ResponseCallback, CancellationToken, AsyncResponse);
+
+    if (LogSystem != nullptr && LogSystem->GetSystemLevel() == csp::common::LogLevel::VeryVerbose)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("{}", *Request).c_str());
+    }
 
 #ifdef CSP_WASM
     RefreshIfExpired();
@@ -464,4 +472,5 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
         }
     }
 }
+
 } // namespace csp::web

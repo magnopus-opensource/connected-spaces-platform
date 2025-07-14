@@ -93,12 +93,12 @@ csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem() { re
 
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
-csp::multiplayer::EventBus* SystemsManager::GetEventBus() { return EventBus; }
+csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
 
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
     , MultiplayerConnection(nullptr)
-    , EventBus(nullptr)
+    , NetworkEventBus(nullptr)
     , SpaceEntitySystem(nullptr)
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
@@ -130,23 +130,23 @@ void SystemsManager::CreateSystems()
     LogSystem = new csp::common::LogSystem();
 
 #ifdef CSP_WASM
-    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #else
-    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
     ScriptSystem = new csp::systems::ScriptSystem();
 
     ScriptSystem->Initialise();
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem);
-    EventBus = MultiplayerConnection->GetEventBusPtr();
+    NetworkEventBus = MultiplayerConnection->GetEventBusPtr();
     AnalyticsSystem = new csp::systems::AnalyticsSystem();
     VoipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors
-    UserSystem = new csp::systems::UserSystem(WebClient, EventBus, *LogSystem);
+    UserSystem = new csp::systems::UserSystem(WebClient, NetworkEventBus, *LogSystem);
     SpaceSystem = new csp::systems::SpaceSystem(WebClient, *LogSystem);
-    AssetSystem = new csp::systems::AssetSystem(WebClient, EventBus, *LogSystem);
+    AssetSystem = new csp::systems::AssetSystem(WebClient, NetworkEventBus, *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
     SettingsSystem = new csp::systems::SettingsSystem(WebClient, *LogSystem);
@@ -155,12 +155,12 @@ void SystemsManager::CreateSystems()
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, *LogSystem);
     ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, *LogSystem);
     QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem);
-    SequenceSystem = new csp::systems::SequenceSystem(WebClient, EventBus, *LogSystem);
-    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus, *LogSystem);
-    ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, EventBus, *LogSystem);
+    SequenceSystem = new csp::systems::SequenceSystem(WebClient, NetworkEventBus, *LogSystem);
+    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, NetworkEventBus, *LogSystem);
+    ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
 
     // Not a SystemBase inheritor (to become IRealtimeEngine anyway)
-    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, *LogSystem, *EventBus, *ScriptSystem);
+    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, *LogSystem, *NetworkEventBus, *ScriptSystem);
 }
 
 void SystemsManager::DestroySystems()
@@ -184,7 +184,7 @@ void SystemsManager::DestroySystems()
     delete UserSystem;
     delete VoipSystem;
     delete AnalyticsSystem;
-    delete MultiplayerConnection; // Also deletes EventBus
+    delete MultiplayerConnection; // Also deletes NetworkEventBus
     delete ScriptSystem;
 
     delete WebClient;

@@ -145,8 +145,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
     csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
         TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -248,8 +248,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
         TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -301,10 +301,10 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
     auto SpaceSystem = SystemsManager.GetSpaceSystem();
     auto AssetSystem = SystemsManager.GetAssetSystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-CSP";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-CSP";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-CSP";
-    const char* TestAssetName = "OLY-UNITTEST-ASSET-CSP";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-CSP";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-CSP";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-CSP";
+    const char* TestAssetName = "CSP-UNITTEST-ASSET-CSP";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());

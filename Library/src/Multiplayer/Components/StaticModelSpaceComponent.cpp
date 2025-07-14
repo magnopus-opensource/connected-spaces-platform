@@ -28,7 +28,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides)]
-        = csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue>();
+        = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)] = csp::common::Vector3::One();
@@ -65,7 +65,7 @@ void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::
 csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceComponent::GetMaterialOverrides() const
 {
     // Convert replicated values map to string values
-    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+    common::Map<common::String, common::ReplicatedValue> ReplicatedOverrides
         = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
     csp::common::Map<csp::common::String, csp::common::String> Overrides;
@@ -83,7 +83,7 @@ csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceCompo
 
 void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
 {
-    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+    common::Map<common::String, common::ReplicatedValue> ReplicatedOverrides
         = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
     ReplicatedOverrides[ModelPath] = MaterialId;

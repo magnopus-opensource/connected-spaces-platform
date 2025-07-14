@@ -16,7 +16,7 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#include "Multiplayer/EventSerialisation.h"
+#include "Multiplayer/NetworkEventSerialisation.h"
 
 namespace csp::systems
 {
@@ -28,7 +28,7 @@ SystemBase::SystemBase()
 {
 }
 
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem)
+SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem)
     : WebClient(InWebClient)
     , EventBusPtr(InEventBus)
     , LogSystem(LogSystem)
@@ -36,7 +36,7 @@ SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::Event
     RegisterSystemCallback();
 }
 
-SystemBase::SystemBase(csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem* LogSystem)
+SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem)
     : WebClient(nullptr)
     , EventBusPtr(InEventBus)
     , LogSystem(LogSystem)
@@ -58,25 +58,6 @@ void SystemBase::RegisterSystemCallback()
 void SystemBase::DeregisterSystemCallback()
 {
     // Do nothing.
-}
-
-void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
-{
-    if (!SystemCallback)
-    {
-        return;
-    }
-
-    csp::multiplayer::EventDeserialiser Deserialiser { *LogSystem };
-    Deserialiser.Parse(EventValues);
-
-    SystemCallback(true, Deserialiser.GetEventData());
-}
-
-void SystemBase::SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
-{
-    SystemCallback = Callback;
-    RegisterSystemCallback();
 }
 
 } // namespace csp::systems

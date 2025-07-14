@@ -136,10 +136,11 @@ private:
 
 CSPHttpClient::CSPHttpClient()
 {
+// Passing null for the LogSystem to the POCO/Emscripten web client ctor to avoid logging high frequency multiplayer API exchange.
 #ifdef CSP_WASM
-    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS, nullptr);
 #else
-    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS);
+    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS, nullptr);
 #endif
 }
 

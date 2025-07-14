@@ -43,9 +43,9 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
     const csp::common::Optional<csp::systems::GeoLocation>& Location, const csp::common::Optional<csp::systems::AssetCollection>& AssetCollection,
     csp::systems::PointOfInterest& OutPOI)
 {
-    const char* POITitle = "OLY-UNITTEST-POI-TITLE";
-    const char* POIDescription = "OLY-UNITTEST-POI-DESC-REWIND";
-    const char* POIOwner = "OLY-UNITTEST-OWNER";
+    const char* POITitle = "CSP-UNITTEST-POI-TITLE";
+    const char* POIDescription = "CSP-UNITTEST-POI-DESC-MAG";
+    const char* POIOwner = "CSP-UNITTEST-OWNER";
     const auto POIType = csp::systems::EPointOfInterestType::DEFAULT;
 
     csp::systems::GeoLocation POILocation;
@@ -69,7 +69,7 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
     else
     {
         // for the POI creation only the ID is relevant
-        POIAssetCollection.Id = "OLY-UNITTEST-ASSET-COLLECTION-ID";
+        POIAssetCollection.Id = "CSP-UNITTEST-ASSET-COLLECTION-ID";
     }
 
     char UniquePOIName[256];
@@ -268,9 +268,9 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 
     LogInAsNewTestUser(UserSystem, UserId);
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());

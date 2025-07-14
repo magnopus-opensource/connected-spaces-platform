@@ -47,6 +47,10 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
         return csp::systems::EAssetCollectionType::DEFAULT;
     }
 }
+} // namespace
+
+namespace csp::systems
+{
 
 void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
 {
@@ -110,11 +114,6 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
         AssetCollection.IsUnique = Dto.GetHighlander();
     }
 }
-
-} // namespace
-
-namespace csp::systems
-{
 
 AssetCollection::AssetCollection()
     : Type(EAssetCollectionType::DEFAULT)

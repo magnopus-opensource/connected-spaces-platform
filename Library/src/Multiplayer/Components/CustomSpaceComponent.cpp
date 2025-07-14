@@ -56,16 +56,16 @@ bool CustomSpaceComponent::HasCustomProperty(const csp::common::String& Key) con
     return Properties.HasKey(PropertyKey);
 }
 
-const ReplicatedValue& CustomSpaceComponent::GetCustomProperty(const csp::common::String& Key) const
+const csp::common::ReplicatedValue& CustomSpaceComponent::GetCustomProperty(const csp::common::String& Key) const
 {
     const uint32_t PropertyKey = GetCustomPropertySubscriptionKey(Key);
 
     return GetProperty(PropertyKey);
 }
 
-void CustomSpaceComponent::SetCustomProperty(const csp::common::String& Key, const ReplicatedValue& Value)
+void CustomSpaceComponent::SetCustomProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value)
 {
-    if (Value.GetReplicatedValueType() != ReplicatedValueType::InvalidType)
+    if (Value.GetReplicatedValueType() != csp::common::ReplicatedValueType::InvalidType)
     {
         const uint32_t PropertyKey = GetCustomPropertySubscriptionKey(Key);
         if (!Properties.HasKey(PropertyKey))
@@ -93,7 +93,7 @@ csp::common::List<csp::common::String> CustomSpaceComponent::GetCustomPropertyKe
     {
         const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
-        if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String && !RepVal.GetString().IsEmpty())
+        if (RepVal.GetReplicatedValueType() == csp::common::ReplicatedValueType::String && !RepVal.GetString().IsEmpty())
         {
             return GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)).GetString().Split(',');
         }
@@ -120,7 +120,7 @@ void CustomSpaceComponent::AddKey(const csp::common::String& Value)
     {
         const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
-        if (RepVal.GetReplicatedValueType() != ReplicatedValueType::String)
+        if (RepVal.GetReplicatedValueType() != csp::common::ReplicatedValueType::String)
         {
             return;
         }

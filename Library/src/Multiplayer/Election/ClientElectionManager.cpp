@@ -16,8 +16,8 @@
 #include "ClientElectionManager.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Events/Event.h"
@@ -120,7 +120,8 @@ void ClientElectionManager::OnDisconnect()
     UnBindNetworkEvents();
 }
 
-void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, EventBus& EventBus)
+void ClientElectionManager::OnLocalClientAdd(
+    const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
@@ -141,7 +142,7 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
         LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("IsFirstClient=false : Num Avatars {}", Avatars.Size()).c_str());
     }
 
-    ClientProxy* Client = AddClientUsingAvatar(ClientAvatar, EventBus);
+    ClientProxy* Client = AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
     LocalClient = Client;
 
     if (IsFirstClient)
@@ -151,11 +152,12 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
     }
 }
 
-void ClientElectionManager::OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/, EventBus& EventBus)
+void ClientElectionManager::OnClientAdd(
+    const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
-    AddClientUsingAvatar(ClientAvatar, EventBus);
+    AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
 }
 
 void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
@@ -177,7 +179,7 @@ void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const 
     // @Todo - This event allows us to track individual object ownership
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar, EventBus& EventBus)
+ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar, NetworkEventBus& NetworkEventBus)
 {
     if (ClientAvatar == nullptr)
     {
@@ -186,7 +188,7 @@ ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* Clie
     }
 
     const int64_t ClientId = static_cast<int64_t>(ClientAvatar->GetOwnerId());
-    return AddClientUsingId(ClientId, EventBus);
+    return AddClientUsingId(ClientId, NetworkEventBus);
 }
 
 void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar)
@@ -214,7 +216,7 @@ ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* Cli
     return FindClientUsingId(ClientId);
 }
 
-ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId, EventBus& EventBus)
+ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(
         csp::common::LogLevel::VeryVerbose, fmt::format("ClientElectionManager::AddClientUsingAvatar called : ClientId={}", ClientId).c_str());
@@ -223,7 +225,7 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId, EventBus&
 
     if (Clients.find(ClientId) == Clients.end())
     {
-        Client = new ClientProxy(ClientId, this, LogSystem, EventBus, RemoteScriptRunner);
+        Client = new ClientProxy(ClientId, this, LogSystem, NetworkEventBus, RemoteScriptRunner);
         Clients.insert(ClientMap::value_type(ClientId, Client));
 
         if ((LocalClient != nullptr) && (Leader != nullptr))
@@ -489,24 +491,24 @@ bool ClientElectionManager::IsConnected() const
 
 void ClientElectionManager::BindNetworkEvents()
 {
-    EventBus* EventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus* NetworkEventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
-    EventBus->ListenNetworkEvent(
-        ClientElectionMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnClientElectionEvent(Data); });
+    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
 
-    EventBus->ListenNetworkEvent(
-        RemoteRunScriptMessage, [this](bool /*ok*/, const csp::common::Array<ReplicatedValue>& Data) { this->OnRemoteRunScriptEvent(Data); });
+    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-    EventBus* EventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus* NetworkEventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
-    EventBus->StopListenNetworkEvent(ClientElectionMessage);
-    EventBus->StopListenNetworkEvent(RemoteRunScriptMessage);
+    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
+    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 }
 
-void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data)
+void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
 {
     // @Note This needs to be kept in sync with any changes to message format
     const int64_t EventType = static_cast<int64_t>(Data[0].GetInt());
@@ -521,7 +523,7 @@ void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<Repli
     }
 }
 
-void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data)
+void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
 {
     // @Note This needs to be kept in sync with any changes to message format
     const int64_t ContextId = static_cast<int64_t>(Data[0].GetInt());

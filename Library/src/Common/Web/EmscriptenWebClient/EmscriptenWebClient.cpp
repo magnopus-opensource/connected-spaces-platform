@@ -18,6 +18,7 @@
 
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Debug/Logging.h"
 
 #include <assert.h>
@@ -114,8 +115,8 @@ template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N
 namespace csp::web
 {
 
-EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
-    : WebClient(InPort, Tp, AutoRefresh)
+EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     std::srand(std::time(nullptr));
 }

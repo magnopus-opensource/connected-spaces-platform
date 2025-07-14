@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValue.h"
 
-namespace csp::multiplayer
+namespace csp::common
 {
 static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
 static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();

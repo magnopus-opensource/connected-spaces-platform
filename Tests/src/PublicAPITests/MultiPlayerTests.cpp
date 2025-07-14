@@ -18,9 +18,9 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -32,6 +32,7 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
+#include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -72,10 +73,10 @@ int ReceivedEntityUpdatesCount;
 bool EventSent = false;
 bool EventReceived = false;
 
-ReplicatedValue ObjectFloatProperty;
-ReplicatedValue ObjectBoolProperty;
-ReplicatedValue ObjectIntProperty;
-ReplicatedValue ObjectStringProperty;
+csp::common::ReplicatedValue ObjectFloatProperty;
+csp::common::ReplicatedValue ObjectBoolProperty;
+csp::common::ReplicatedValue ObjectIntProperty;
+csp::common::ReplicatedValue ObjectStringProperty;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -92,9 +93,9 @@ void InitialiseTestingConnection()
     EventSent = false;
     EventReceived = false;
 
-    ObjectFloatProperty = ReplicatedValue(2.3f);
-    ObjectBoolProperty = ReplicatedValue(true);
-    ObjectIntProperty = ReplicatedValue(static_cast<int64_t>(42));
+    ObjectFloatProperty = csp::common::ReplicatedValue(2.3f);
+    ObjectBoolProperty = csp::common::ReplicatedValue(true);
+    ObjectIntProperty = csp::common::ReplicatedValue(static_cast<int64_t>(42));
     ObjectStringProperty = "My replicated string";
 }
 
@@ -201,7 +202,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                     {
                         std::cerr << "Component Updated: ID: " << ComponentID << std::endl;
 
-                        const csp::common::Map<uint32_t, ReplicatedValue>& Properties = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
+                        const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Properties
+                            = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
                         const csp::common::Array<uint32_t>* PropertyKeys = Properties.Keys();
 
                         for (size_t j = 0; j < PropertyKeys->Size(); ++j)
@@ -214,27 +216,27 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                             uint32_t PropertyID = PropertyKeys->operator[](j);
                             std::cerr << "\tProperty ID: " << PropertyID;
 
-                            const ReplicatedValue& Property = Properties[PropertyID];
+                            const csp::common::ReplicatedValue& Property = Properties[PropertyID];
 
                             switch (Property.GetReplicatedValueType())
                             {
-                            case ReplicatedValueType::Integer:
+                            case csp::common::ReplicatedValueType::Integer:
                                 std::cerr << "\tValue: " << Property.GetInt() << std::endl;
                                 break;
-                            case ReplicatedValueType::String:
+                            case csp::common::ReplicatedValueType::String:
                                 std::cerr << "\tValue: " << Property.GetString() << std::endl;
                                 break;
-                            case ReplicatedValueType::Float:
+                            case csp::common::ReplicatedValueType::Float:
                                 std::cerr << "\tValue: " << Property.GetFloat() << std::endl;
                                 break;
-                            case ReplicatedValueType::Boolean:
+                            case csp::common::ReplicatedValueType::Boolean:
                                 std::cerr << "\tValue: " << Property.GetBool() << std::endl;
                                 break;
-                            case ReplicatedValueType::Vector3:
+                            case csp::common::ReplicatedValueType::Vector3:
                                 std::cerr << "\tValue: {" << Property.GetVector3().X << ", " << Property.GetVector3().Y << ", "
                                           << Property.GetVector3().Z << "}" << std::endl;
                                 break;
-                            case ReplicatedValueType::Vector4:
+                            case csp::common::ReplicatedValueType::Vector4:
                                 std::cerr << "\tValue: {" << Property.GetVector4().X << ", " << Property.GetVector4().Y << ", "
                                           << Property.GetVector4().Z << ", " << Property.GetVector4().W << "}" << std::endl;
                                 break;
@@ -269,12 +271,6 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
     SetRandomProperties(InUser, EntitySystem);
 }
 
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
-};
 } // namespace
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
@@ -287,7 +283,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -342,7 +338,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -386,7 +382,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -434,7 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -507,7 +503,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -747,8 +743,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -898,7 +894,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -1256,7 +1252,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());

@@ -19,10 +19,10 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
-#include "CSP/Multiplayer/EventParameters.h"
 
 #include <chrono>
 #include <deque>
@@ -66,7 +66,7 @@ namespace csp::multiplayer
 class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
-class EventBus;
+class NetworkEventBus;
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -352,7 +352,7 @@ public:
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
     CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
-        csp::multiplayer::EventBus& EventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
+        csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
     CSP_NO_EXPORT ~SpaceEntitySystem();
@@ -458,7 +458,7 @@ private:
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
     // May not be null
-    csp::multiplayer::EventBus* EventBus;
+    csp::multiplayer::NetworkEventBus* NetworkEventBus;
 };
 
 } // namespace csp::multiplayer

@@ -28,7 +28,7 @@ class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient
 {
 public:
     UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::EmscriptenWebClient(InPort, Tp)
+        : csp::web::EmscriptenWebClient(InPort, Tp, nullptr)
     {
     }
 };
@@ -37,7 +37,7 @@ class UAPOCOWebClient : public csp::web::POCOWebClient
 {
 public:
     UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::POCOWebClient(InPort, Tp)
+        : csp::web::POCOWebClient(InPort, Tp, nullptr)
     {
     }
 };
@@ -82,7 +82,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
 
     for (size_t i = 0; i < Values->Size(); ++i)
     {
-        if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
+        if (Values->operator[](i).GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
         {
             if (HasIntegerParam)
             {
@@ -93,7 +93,7 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
             EventString += ValueTag;
             EventString += std::to_string(Values->operator[](i).GetInt()).c_str();
         }
-        else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String)
+        else if (Values->operator[](i).GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
         {
             if (HasStringParam)
             {

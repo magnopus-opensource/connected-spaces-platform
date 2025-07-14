@@ -41,7 +41,7 @@ namespace MultiplayerTestRunner::TestIdentifiers
  * The test runner works by passing a specific test identifier in an a command line arg.
  * These things have to be strings, so this file serves to encode which tests are available,
  * and to give a nice way to get at the correct strings.
- * Absolutey drives me mad that there's no good compile time solution for these conversion implementations.
+ * Absolutely drives me mad that there's no good compile time solution for these conversion implementations.
  */
 
 /*
@@ -51,11 +51,12 @@ namespace MultiplayerTestRunner::TestIdentifiers
 enum class TestIdentifier
 {
     CREATE_AVATAR, //"CreateAvatar"
-    CREATE_CONVERSATION //"CreateConversation"
+    CREATE_CONVERSATION, //"CreateConversation"
+    EVENT_BUS_PING //"EventBusPing"
 };
 
 inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap { { TestIdentifier::CREATE_AVATAR, "CreateAvatar" },
-    { TestIdentifier::CREATE_CONVERSATION, "CreateConversation" } };
+    { TestIdentifier::CREATE_CONVERSATION, "CreateConversation" }, { TestIdentifier::EVENT_BUS_PING, "EventBusPing" } };
 
 /*
  * Use `TestIdentifierStringMap` to convert a string to a test identifier, if valid.

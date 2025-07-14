@@ -62,7 +62,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");
-    ReplicatedValue TestStringValue(MyString);
+    csp::common::ReplicatedValue TestStringValue(MyString);
 
     MyCustomComponent.SetCustomProperty(PropertyKey, TestStringValue);
     MyCustomComponent.RemoveCustomProperty(PropertyKey);
@@ -77,10 +77,10 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ReplacePropertyWithNewTypeTest)
 
     const csp::common::String PropertyKey("MyPropertyKey");
     const csp::common::String MyString("MyTestString");
-    ReplicatedValue TestStringValue(MyString);
+    csp::common::ReplicatedValue TestStringValue(MyString);
 
     const int64_t MyInt = 42;
-    ReplicatedValue TestIntValue(MyInt);
+    csp::common::ReplicatedValue TestIntValue(MyInt);
 
     MyCustomComponent.SetCustomProperty(PropertyKey, TestStringValue);
     MyCustomComponent.RemoveCustomProperty(PropertyKey);
@@ -100,8 +100,8 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
     const csp::common::String MyString1("MyTestString1");
     const csp::common::String PropertyKey2("MyPropertyKey2");
     const csp::common::String MyString2("MyTestString2");
-    ReplicatedValue TestStringValue1(MyString1);
-    ReplicatedValue TestStringValue2(MyString2);
+    csp::common::ReplicatedValue TestStringValue1(MyString1);
+    csp::common::ReplicatedValue TestStringValue2(MyString2);
 
     MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
 
@@ -214,8 +214,8 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
