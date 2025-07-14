@@ -172,8 +172,12 @@ public:
     /// @return csp::common::String&
     static const csp::common::String& GetTenant();
 
-    /// @brief Resolves Service Definition aginst the provided StatusInfo
-    /// Will log information about the state of each of the services, such as depreciation, and newer versions
+    /// @brief Compares the given service definition against status information to evaluate state differences.
+    /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
+    /// `StatusInfo` to determine the differences between the two. The comparison is performed with
+    /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
+    /// @param ServiceDefinition The service definition to be evaluated.
+    /// @param StatusInfo The current status information against which the service definition is compared.
     /// @return bool : true if all services are available, false otherwise
     CSP_NO_EXPORT static bool ResolveServiceDefinition(const ServiceDefinition& ServiceDefinition, const csp::systems::StatusInfo& StatusInfo);
 
