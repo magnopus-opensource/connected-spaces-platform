@@ -34,33 +34,51 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
-/// @brief Stores the version and deprecation information for a services
+/// @ingroup Status System
+/// @brief Stores the version and deprecation information for a service
 class CSP_API ServiceVersionInfo
 {
 public:
+    /// @brief The version identifier of the service's API (e.g., "v1").
     csp::common::String Version;
+
+    /// @brief The date and time at which the API version is considered deprecated, in ISO 8601 format.
+    /// If empty, the version is currently active or the deprecation date is unknown.
     csp::common::String DeprecationDatetime;
 };
 
-/// @brief Stores information about a service include available versions
+/// @ingroup Status System
+/// @brief Stores information about a service including available versions
 class CSP_API ServiceInfo
 {
 public:
+    /// @brief The reverse proxy endpoint or base URL through which the service is accessed.
     csp::common::String ReverseProxy;
+
+    /// @brief The name identifier of the service (e.g., "User Service").
     csp::common::String Name;
+
+    /// @brief A list of all available API versions for the service, along with their metadata.
     csp::common::Array<ServiceVersionInfo> ApiVersions;
+
+    /// @brief The currently active API version, this version is guaranteed to be stable and supported.
     csp::common::String CurrentApiVersion;
 };
 
+/// @ingroup Status System
 /// @brief Store information about the current service deployment
 class CSP_API StatusInfo
 {
 public:
+    /// @brief The version identifier of the service container or deployment package.
+    /// Typically reflects the software release version (e.g., "{Major}.{Minor}.{Patch}[-{Prerelease Tag}][+{Build Number}]").
     csp::common::String ContainerVersion;
+
+    /// @brief A list of services available in the current deployment, with their metadata and API versions.
     csp::common::Array<ServiceInfo> Services;
 };
 
-/// @ingroup CSPFoundation
+/// @ingroup Status System
 /// @brief Data class used to contain information when a Response is received from Status Server
 class CSP_API StatusInfoResult : public csp::systems::ResultBase
 {
@@ -73,7 +91,7 @@ class CSP_API StatusInfoResult : public csp::systems::ResultBase
 
 public:
     /// @brief Will return info for the latest available status information from the server
-    /// @return StatusInfo : the closest maintenance window information
+    /// @return StatusInfo : The latest status information
     [[nodiscard]] const StatusInfo& GetLatestStatusInfo() const;
 
 private:
@@ -84,6 +102,8 @@ private:
     StatusInfo StatusInfoResponse;
 };
 
+/// @brief Callback containing an StatusInfo result used when creating or retrieving an StatusInfo.
+/// @param Result StatusInfoResult : Data class containing information on task result/progress
 typedef std::function<void(const StatusInfoResult& Result)> StatusInfoCallback;
 
 } // namespace csp::systems

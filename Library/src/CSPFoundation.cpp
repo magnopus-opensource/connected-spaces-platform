@@ -403,13 +403,15 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
     // Extract the reverse proxy from the URI to be used as key in StatusInfo
     const auto ReverseProxy = [](const csp::common::String URI) -> csp::common::String
     {
+        // Extracts and returns the last segment of a URI path by splitting it on '/'.
+        // e.g. 'https://www.magnopus.com/connected-spaces-platform' -> 'connected-spaces-platform'
         if (auto const Split = URI.Split('/'); Split.Size() != 0)
             return Split[Split.Size() - 1];
 
         return "";
     }(ServiceDefinition.GetURI());
 
-    // Find the ServiceInfo that correlate with the reverse proxy
+    // Find the ServiceInfo that correlates with the reverse proxy
     const auto ServiceInfo = std::find_if(StatusInfo.Services.begin(), StatusInfo.Services.end(),
         [ReverseProxy](csp::systems::ServiceInfo ServiceInfo) { return ServiceInfo.ReverseProxy == ReverseProxy; });
 
@@ -421,14 +423,14 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         return false;
     }
 
-    // Find the ServiceVersionInfothat correlate with the expected version of the service
+    // Find the ServiceVersionInfo that correlate with the expected version of the service
     const auto ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
         [ServiceDefinition](csp::systems::ServiceVersionInfo ServiceVersionInfo)
         { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", ServiceDefinition.GetVersion()); });
 
     static constexpr auto Documentation = "https://connected-spaces-platform.net/index.html";
 
-    // Validate that the current service has being retired by the live services, and promote information to the user
+    // Validate that the current service exists in the array; if not, the service has been retired by the live services.
     if (ServiceInfo != StatusInfo.Services.end()
         && ServiceVersionInfo == ServiceInfo->ApiVersions.end()) // The current version in use has been retired.
     {
@@ -439,7 +441,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         return false;
     }
 
-    // Validate that the current service has being deprecated by the live services, and promote information to the user
+    // Validate that the current service has deprecation information; if so, the service has been deprecated by the live services.
     if (ServiceInfo != StatusInfo.Services.end()
         && !ServiceVersionInfo->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
     {
@@ -451,7 +453,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         return true;
     }
 
-    // Validate that the current service has a newer version available on the live services, and promote information to the user
+    // Validate that the current service version matches the current; if not, the service has a newer version available on the live services.
     if (ServiceInfo != StatusInfo.Services.end()
         && ServiceVersionInfo->Version != ServiceInfo->CurrentApiVersion) // The current version in use is not the latest available.
     {

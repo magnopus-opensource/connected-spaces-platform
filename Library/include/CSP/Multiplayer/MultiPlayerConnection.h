@@ -193,8 +193,11 @@ public:
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
-    /// @brief Resolves Multiplayer Hub Methods aginst the provided array of available methods
-    /// @return bool : true if all available methods match, false otherwise
+    /// @brief Validates that all required multiplayer hub methods are available.
+    /// This function compares the provided array of method names (`Methods`) against a set of available multiplayer hub methods.
+    /// It ensures that every method in the input array exists in the available set.
+    /// @param Methods An array of method names that are expected to be present.
+    /// @return bool : true if all available in use multiplayer hub methods match, false otherwise.
     CSP_NO_EXPORT static bool ResolveMultiplayerHubMethods(const csp::common::Array<csp::common::String>& Methods);
 
 private:
