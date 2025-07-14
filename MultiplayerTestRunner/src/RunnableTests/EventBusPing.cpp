@@ -31,6 +31,7 @@ void RunTest()
     csp::systems::SystemsManager::Get().GetEventBus()->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("Receiver", "EventPingRequest"),
         [](const csp::common::NetworkEventData& NetworkEventData)
         {
+            std::cout << "TestRunner: Received ping request. Sending Response." << std::endl;
             csp::systems::SystemsManager::Get().GetEventBus()->SendNetworkEventToClient(
                 "EventPingResponse", {}, NetworkEventData.SenderClientId, [](csp::multiplayer::ErrorCode) {});
         });
