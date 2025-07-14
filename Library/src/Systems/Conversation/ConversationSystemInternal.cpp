@@ -641,13 +641,20 @@ void ConversationSystemInternal::UpdateConversation(
             SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBus, SignalRCallback);
         };
 
-        multiplayer::MessageInfo NewConversationData
-            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(GetConversationResult.GetAssetCollection());
+        const AssetCollection& ConversationAssetCollection = GetConversationResult.GetAssetCollection();
+        common::Map<common::String, common::String> ConversationAssetCollectionMetadata = ConversationAssetCollection.GetMetadataImmutable();
 
+        multiplayer::MessageInfo NewConversationData
+            = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
         NewConversationData.Message = NewData.NewMessage;
 
-        this->AssetSystem->UpdateAssetCollectionMetadata(GetConversationResult.GetAssetCollection(),
-            ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData), nullptr, GetUpdatedConversationCallback);
+        common::Map<common::String, common::String> NewConversationMessageMetadata
+            = ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData);
+
+        ConversationSystemHelpers::AppendMetadata(ConversationAssetCollectionMetadata, NewConversationMessageMetadata);
+
+        this->AssetSystem->UpdateAssetCollectionMetadata(
+            ConversationAssetCollection, ConversationAssetCollectionMetadata, nullptr, GetUpdatedConversationCallback);
     };
 
     AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
@@ -723,13 +730,18 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
             SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBus, SignalRCallback);
         };
 
-        multiplayer::MessageInfo NewMessageData
-            = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection());
+        const AssetCollection& MessageAssetCollection = GetMessageResult.GetAssetCollection();
+        common::Map<common::String, common::String> MessageAssetCollectionMetadata = MessageAssetCollection.GetMetadataImmutable();
 
+        multiplayer::MessageInfo NewMessageData = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
         NewMessageData.Message = NewData.NewMessage;
 
-        this->AssetSystem->UpdateAssetCollectionMetadata(GetMessageResult.GetAssetCollection(),
-            ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData), nullptr, GetUpdatedMessageCallback);
+        common::Map<common::String, common::String> NewMessageMetadata
+            = ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData);
+
+        ConversationSystemHelpers::AppendMetadata(MessageAssetCollectionMetadata, NewMessageMetadata);
+
+        this->AssetSystem->UpdateAssetCollectionMetadata(MessageAssetCollection, MessageAssetCollectionMetadata, nullptr, GetUpdatedMessageCallback);
     };
 
     AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
