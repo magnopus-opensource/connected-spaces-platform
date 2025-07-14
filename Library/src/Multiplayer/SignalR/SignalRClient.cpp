@@ -17,6 +17,7 @@
 #include "SignalRClient.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/String.h"
 #include "Multiplayer/WebSocketClient.h"
 
@@ -134,13 +135,13 @@ private:
     std::thread::id ThreadId;
 };
 
-CSPHttpClient::CSPHttpClient()
+CSPHttpClient::CSPHttpClient(csp::common::IAuthContext& AuthContext)
 {
 // Passing null for the LogSystem to the POCO/Emscripten web client ctor to avoid logging high frequency multiplayer API exchange.
 #ifdef CSP_WASM
-    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS, nullptr);
+    WebClientHttps = new csp::web::EmscriptenWebClient(443, csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
 #else
-    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS, nullptr);
+    WebClientHttps = new csp::web::POCOWebClient(443, csp::web::ETransferProtocol::HTTPS, AuthContext, nullptr);
 #endif
 }
 
