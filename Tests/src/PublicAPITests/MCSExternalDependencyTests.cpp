@@ -19,6 +19,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Status/Status.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -29,17 +30,6 @@ using namespace csp::common;
 
 namespace
 {
-/* We need to unset the mock logger before CSP shuts down,
- * because you get interdependent memory errors in the "Foundation shutdown"
- * log if you don't. (Another reason we don't want to be starting/stopping
- * ALL of CSP in these tests really.)
- */
-struct RAIIMockLogger
-{
-    RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
-    ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const String&)> MockLogCallback;
-};
 
 csp::systems::ServiceVersionInfo CreateServiceVersionInfoFromParams(const String& Version, const String& DeprecationDatetime)
 {
