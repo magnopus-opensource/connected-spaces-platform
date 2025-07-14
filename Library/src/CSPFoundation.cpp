@@ -401,7 +401,7 @@ const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDefinition, const csp::systems::StatusInfo& StatusInfo)
 {
     // Extract the reverse proxy from the URI to be used as key in StatusInfo
-    auto const ReverseProxy = [](const csp::common::String URI) -> csp::common::String
+    const auto ReverseProxy = [](const csp::common::String URI) -> csp::common::String
     {
         if (auto const Split = URI.Split('/'); Split.Size() != 0)
             return Split[Split.Size() - 1];
@@ -410,32 +410,32 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
     }(ServiceDefinition.GetURI());
 
     // Find the ServiceInfo that correlate with the reverse proxy
-    auto const ServiceInfo = std::find_if(StatusInfo.Services.begin(), StatusInfo.Services.end(),
+    const auto ServiceInfo = std::find_if(StatusInfo.Services.begin(), StatusInfo.Services.end(),
         [ReverseProxy](csp::systems::ServiceInfo ServiceInfo) { return ServiceInfo.ReverseProxy == ReverseProxy; });
 
     if (!ServiceInfo)
     {
-        auto const message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy.c_str());
+        const auto Message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy.c_str());
 
-        CSP_LOG_MSG(csp::common::LogLevel::Error, message.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
         return false;
     }
 
     // Find the ServiceVersionInfothat correlate with the expected version of the service
-    auto const ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
+    const auto ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
         [ServiceDefinition](csp::systems::ServiceVersionInfo ServiceVersionInfo)
         { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", ServiceDefinition.GetVersion()); });
 
-    auto const Documentation = "https://connected-spaces-platform.net/index.html";
+    static constexpr auto Documentation = "https://connected-spaces-platform.net/index.html";
 
     // Validate that the current service has being retired by the live services, and promote information to the user
     if (ServiceInfo != StatusInfo.Services.end()
         && ServiceVersionInfo == ServiceInfo->ApiVersions.end()) // The current version in use has been retired.
     {
-        auto const message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
+        const auto Message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
             ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion.c_str(), Documentation);
 
-        CSP_LOG_MSG(csp::common::LogLevel::Fatal, message.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
         return false;
     }
 
@@ -443,11 +443,11 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
     if (ServiceInfo != StatusInfo.Services.end()
         && !ServiceVersionInfo->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
     {
-        auto const message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
+        const auto Message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
             ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceVersionInfo->DeprecationDatetime.c_str(),
             ServiceInfo->CurrentApiVersion.c_str(), Documentation);
 
-        CSP_LOG_MSG(csp::common::LogLevel::Warning, message.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
         return true;
     }
 
@@ -455,10 +455,10 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
     if (ServiceInfo != StatusInfo.Services.end()
         && ServiceVersionInfo->Version != ServiceInfo->CurrentApiVersion) // The current version in use is not the latest available.
     {
-        auto const message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
+        const auto Message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
             ServiceInfo->Name.c_str(), ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion.c_str(), Documentation);
 
-        CSP_LOG_MSG(csp::common::LogLevel::Log, message.c_str());
+        CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
         return true;
     }
 
