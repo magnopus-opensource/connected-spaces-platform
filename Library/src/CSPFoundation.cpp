@@ -399,7 +399,7 @@ const csp::common::String& CSPFoundation::GetClientUserAgentString() { return *C
 
 const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
-bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDefinition, const csp::systems::StatusInfo& StatusInfo)
+bool ServiceDefinition::CheckPrerequisites(const csp::systems::StatusInfo& StatusInfo) const
 {
     // Extract the reverse proxy from the URI to be used as key in StatusInfo
     const auto ReverseProxy = [](const csp::common::String URI) -> csp::common::String
@@ -410,7 +410,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
             return Split[Split.Size() - 1];
 
         return "";
-    }(ServiceDefinition.GetURI());
+    }(this->GetURI());
 
     // Find the ServiceInfo that correlates with the reverse proxy
     const auto ServiceInfo = std::find_if(StatusInfo.Services.begin(), StatusInfo.Services.end(),
@@ -426,8 +426,8 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
 
     // Find the ServiceVersionInfo that correlate with the expected version of the service
     const auto ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
-        [ServiceDefinition](csp::systems::ServiceVersionInfo ServiceVersionInfo)
-        { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", ServiceDefinition.GetVersion()); });
+        [this](csp::systems::ServiceVersionInfo ServiceVersionInfo)
+        { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", this->GetVersion()); });
 
     static constexpr auto Documentation = "https://connected-spaces-platform.net/index.html";
 
@@ -436,7 +436,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && ServiceVersionInfo == ServiceInfo->ApiVersions.end()) // The current version in use has been retired.
     {
         const auto Message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
+            ServiceInfo->Name, this->GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
         return false;
@@ -447,8 +447,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && !ServiceVersionInfo->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
     {
         const auto Message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
-            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceVersionInfo->DeprecationDatetime, ServiceInfo->CurrentApiVersion,
-            Documentation);
+            ServiceInfo->Name, this->GetVersion(), ServiceVersionInfo->DeprecationDatetime, ServiceInfo->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
         return true;
@@ -459,7 +458,7 @@ bool CSPFoundation::ResolveServiceDefinition(const ServiceDefinition& ServiceDef
         && ServiceVersionInfo->Version != ServiceInfo->CurrentApiVersion) // The current version in use is not the latest available.
     {
         const auto Message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name, ServiceDefinition.GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
+            ServiceInfo->Name, this->GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
         return true;

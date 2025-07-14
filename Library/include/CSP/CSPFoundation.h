@@ -58,6 +58,14 @@ public:
     /// @param InVersion uint32_t : Version for service endpoint.
     CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
 
+    /// @brief Compares the service definition against status information to evaluate state differences.
+    /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
+    /// `StatusInfo` to determine the differences between the two. The comparison is performed with
+    /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
+    /// @param StatusInfo The current status information against which the service definition is compared.
+    /// @return bool : true if all services are available, false otherwise
+    CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::StatusInfo& StatusInfo) const;
+
 private:
     csp::common::String URI;
     uint32_t Version;
@@ -171,15 +179,6 @@ public:
     /// @brief Gets the tenant that foundation is currently using, based on what was provided during initialisation.
     /// @return csp::common::String&
     static const csp::common::String& GetTenant();
-
-    /// @brief Compares the given service definition against status information to evaluate state differences.
-    /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
-    /// `StatusInfo` to determine the differences between the two. The comparison is performed with
-    /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
-    /// @param ServiceDefinition The service definition to be evaluated.
-    /// @param StatusInfo The current status information against which the service definition is compared.
-    /// @return bool : true if all services are available, false otherwise
-    CSP_NO_EXPORT static bool ResolveServiceDefinition(const ServiceDefinition& ServiceDefinition, const csp::systems::StatusInfo& StatusInfo);
 
 private:
     static bool IsInitialised;

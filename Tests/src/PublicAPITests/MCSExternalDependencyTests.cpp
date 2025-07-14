@@ -75,7 +75,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
         = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
     auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
 
-    auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
     EXPECT_TRUE(result);
 }
 
@@ -93,7 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     // Create a dummy response for StatusInfo containing the invalid information
     auto StatusInfo = CreateStatusInfo("", {});
 
-    auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
     EXPECT_FALSE(result);
 }
 
@@ -114,7 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
     EXPECT_FALSE(result);
 }
 
@@ -136,7 +136,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "please visit: https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
     EXPECT_TRUE(result);
 }
 
@@ -157,7 +157,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
     EXPECT_TRUE(result);
 }
 
