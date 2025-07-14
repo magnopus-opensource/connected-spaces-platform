@@ -31,7 +31,7 @@ using namespace csp::common;
 namespace
 {
 
-csp::systems::ServiceVersionInfo CreateServiceVersionInfoFromParams(const String& Version, const String& DeprecationDatetime)
+csp::systems::ServiceVersionInfo CreateServiceVersionInfo(const String& Version, const String& DeprecationDatetime)
 {
     auto ServiceVersionInfo = csp::systems::ServiceVersionInfo();
 
@@ -41,7 +41,7 @@ csp::systems::ServiceVersionInfo CreateServiceVersionInfoFromParams(const String
     return ServiceVersionInfo;
 }
 
-csp::systems::ServiceInfo CreateServiceInfoFromParams(
+csp::systems::ServiceInfo CreateServiceInfo(
     const String& ReverseProxy, const String& Name, const Array<csp::systems::ServiceVersionInfo> ApiVersions, const String& CurrentApiVersion)
 {
     auto ServiceInfo = csp::systems::ServiceInfo();
@@ -54,7 +54,7 @@ csp::systems::ServiceInfo CreateServiceInfoFromParams(
     return ServiceInfo;
 }
 
-csp::systems::StatusInfo CreateStatusInfoFromParams(const String& ContainerVersion, const Array<csp::systems::ServiceInfo> Services)
+csp::systems::StatusInfo CreateStatusInfo(const String& ContainerVersion, const Array<csp::systems::ServiceInfo> Services)
 {
     auto StatusInfo = csp::systems::StatusInfo();
 
@@ -70,10 +70,10 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
     // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfoFromParams(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
-    auto UserServiceServiceInfo = CreateServiceInfoFromParams(
-        "mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
-    auto StatusInfo = CreateStatusInfoFromParams("2.0.1-{GUID}", { UserServiceServiceInfo });
+    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
+    auto UserServiceServiceInfo
+        = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
+    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
 
     auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
     EXPECT_TRUE(result);
@@ -91,7 +91,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
     // Create a dummy response for StatusInfo containing the invalid information
-    auto StatusInfo = CreateStatusInfoFromParams("", {});
+    auto StatusInfo = CreateStatusInfo("", {});
 
     auto const result = csp::CSPFoundation::ResolveServiceDefinition(Endpoints.UserService, StatusInfo);
     EXPECT_FALSE(result);
@@ -105,9 +105,9 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
     // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfoFromParams("v2", "");
-    auto UserServiceServiceInfo = CreateServiceInfoFromParams("mag-user", "User Service", { ServiceVersionInfo }, "v2");
-    auto StatusInfo = CreateStatusInfoFromParams("2.0.1-{GUID}", { UserServiceServiceInfo });
+    auto ServiceVersionInfo = CreateServiceVersionInfo("v2", "");
+    auto UserServiceServiceInfo = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, "v2");
+    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
 
     // Validate that the retired code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 has been retired, the latest version is v2. For more information please visit: "
@@ -126,11 +126,10 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
     // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo
-        = CreateServiceVersionInfoFromParams(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "YYYY-MM-DDThh:mm:ss.sTZD");
-    auto UserServiceServiceInfo = CreateServiceInfoFromParams(
-        "mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
-    auto StatusInfo = CreateStatusInfoFromParams("2.0.1-{GUID}", { UserServiceServiceInfo });
+    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "YYYY-MM-DDThh:mm:ss.sTZD");
+    auto UserServiceServiceInfo
+        = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
+    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
 
     // Validate that the deprecated code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 will be deprecated as of YYYY-MM-DDThh:mm:ss.sTZD, the latest version is v1. For more information "
@@ -149,9 +148,9 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
     // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfoFromParams(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
-    auto UserServiceServiceInfo = CreateServiceInfoFromParams("mag-user", "User Service", { ServiceVersionInfo }, "v{Infinity}");
-    auto StatusInfo = CreateStatusInfoFromParams("2.0.1-{GUID}", { UserServiceServiceInfo });
+    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
+    auto UserServiceServiceInfo = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, "v{Infinity}");
+    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
 
     // Validate that the latest available version code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 is not the latest available, the latest version is v{Infinity}. For more information please visit: "
