@@ -461,6 +461,10 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
             }
         });
 
+    std::cout << "Sleeping for seven seconds before sending event" << std::endl;
+    SystemsManager.GetLogSystem()->LogMsg(csp::common::LogLevel::Log, "Sleeping for seven seconds before sending event");
+    std::this_thread::sleep_for(7s);
+
     // Send the ping event to all clients
     NetworkEventBus->SendNetworkEvent(PintRequestEventName, {}, [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
 
