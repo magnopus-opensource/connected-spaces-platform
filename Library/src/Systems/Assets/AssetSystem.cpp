@@ -1808,8 +1808,6 @@ csp::common::String AssetSystem::GetAssetPath(
     
     // Add leading slash
     Path = "/" + Path;
-    
-    CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Generated path: %s", Path.c_str());
     return Path;
 }
 

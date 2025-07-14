@@ -26,6 +26,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "quickjs.h"
 #include "quickjspp.hpp"
+#include "Multiplayer/Script/SpaceScriptInterface.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ LocalScriptSystem::LocalScriptSystem(csp::multiplayer::SpaceEntitySystem* InEnti
     Runtime = new qjs::Runtime();
     Context = nullptr;
     ScriptBinding = nullptr;
+    SpaceInterface = nullptr;
     csp::systems::AssetSystem* assetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
     if (assetSystem)
     {
@@ -57,6 +59,7 @@ LocalScriptSystem::~LocalScriptSystem()
     delete Context;
     delete Runtime;
     delete ScriptBinding;
+    delete SpaceInterface;
 }
 
 void LocalScriptSystem::Initialize()
@@ -77,9 +80,23 @@ void LocalScriptSystem::Initialize()
             Context = nullptr;
         }
         Context = new qjs::Context(*Runtime);
+        
+        // Create SpaceInterface for global event handling
+        if (SpaceInterface != nullptr)
+        {
+            delete SpaceInterface;
+        }
+        SpaceInterface = new csp::multiplayer::SpaceScriptInterface(Context);
+        
         if (ScriptBinding == nullptr)
         {
-            ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem);
+            // Pass SpaceInterface to EntityScriptBinding
+            ScriptBinding = new csp::multiplayer::EntityScriptBinding(EntitySystem, SpaceInterface);
+        }
+        else
+        {
+            // Update existing EntityScriptBinding with the new SpaceInterface
+            ScriptBinding->SetSpaceScriptInterface(SpaceInterface);
         }
         // Set the custom module loader on the context
         Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
@@ -105,7 +122,7 @@ void LocalScriptSystem::Initialize()
         Context->eval(csp::systems::SignalsScriptCode.c_str(), "@preact/signals-core", JS_EVAL_TYPE_MODULE);
 
         // Bind the existing script functions to the context
-        ScriptBinding->BindLocalScriptRoot(Context, &CSP_Module);
+        ScriptBinding->BindLocalScriptRoot(Context, &CSP_Module, SpaceInterface);
     }
     catch (qjs::exception& e)
     { // Catch by reference
@@ -130,10 +147,13 @@ void LocalScriptSystem::TickAnimationFrame(float timestamp)
     try {
         // This is the javascript "Event Loop"
         // needed to process promises and async/await operations
-        if (Runtime->isJobPending())
+        while (Runtime->isJobPending())
         {
             Runtime->executePendingJob();
         }
+        std::stringstream ss;
+        ss << "typeof scriptRegistry !== 'undefined' && scriptRegistry.tick(" << timestamp << ");\n";
+        evalScript(csp::common::String(ss.str().c_str()));
     }
     catch (qjs::exception& e)
     { // Catch by reference
@@ -150,10 +170,6 @@ void LocalScriptSystem::TickAnimationFrame(float timestamp)
         CSP_LOG_ERROR_MSG("Unknown C++ exception caught during tick.");
         return;
     }
-
-    std::stringstream ss;
-    ss << "typeof scriptRegistry !== 'undefined' && scriptRegistry.tick(" << timestamp << ");\n";
-    evalScript(csp::common::String(ss.str().c_str()));
 }
 
 void LocalScriptSystem::LoadScriptModules()
@@ -284,6 +300,7 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         'vector3': 3,   // VECTOR3 = 3
                         'vector4': 4,   // VECTOR4 = 4
                         'color3': 5,    // COLOR3 = 5
+                        'color': 5,    // COLOR = 5
                         'boolean': 6,   // BOOLEAN = 6
                         'slider': 7,    // SLIDER = 7
                         'asset': 8,     // ASSET = 8
@@ -298,6 +315,20 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         'vector3': 'setAttributeVector3',
                         'vector4': 'setAttributeVector4',
                         'color3': 'setAttributeVector3',
+                        'color': 'setAttributeVector3',
+                    };
+                    const emptyValues = {
+                        'string': '',
+                        'asset': ['', ''],
+                        'entity': '',
+                        'boolean': false,
+                        'vector2': [0, 0],
+                        'vector3': [0, 0, 0],
+                        'vector4': [0, 0, 0, 0],
+                        'color3': [0, 0, 0],
+                        'color': [0, 0, 0],
+                        'number': 0.0,
+                        'slider': 0.0,
                     };
                     const numbericTypes = {
                         'number': 'setAttributeFloat',
@@ -314,13 +345,13 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
                         const typeNum = typesToNumber[value.type];
 
                         if (fn) {
-                            TheEntitySystem[fn](entityIdNum, key, typeNum, value.defaultValue);
+                            TheEntitySystem[fn](entityIdNum, key, typeNum, value.value ?? emptyValues[value.type]);
                         } else {
                             fn = numbericTypes[value.type];
                             if (fn) {
                                 const min = value.min !== undefined ? value.min : 0;
                                 const max = value.max !== undefined ? value.max : 0;
-                                TheEntitySystem[fn](entityIdNum, key, typeNum, min, max, value.defaultValue);
+                                TheEntitySystem[fn](entityIdNum, key, typeNum, min, max, value.value ?? emptyValues[value.type]);
                             } else {
                                 console.warn(`No handler found for attribute type: ${value.type}`);
                             }
@@ -338,11 +369,8 @@ void LocalScriptSystem::ParseAttributesForEntity(uint64_t EntityId)
 void LocalScriptSystem::evalScript(const csp::common::String& script)
 {
     try {
-        JSValue v = Context->eval(script.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
-        if (JS_IsException(v))
-        {
-            CSP_LOG_ERROR_FORMAT("QuickJS exception: %s", script.c_str());
-        }
+       Context->eval(script.c_str(), "<import>", JS_EVAL_TYPE_MODULE);
+   
     }
     catch (qjs::exception& e)
     { 
@@ -409,14 +437,14 @@ void LocalScriptSystem::UpdateAttributeForEntity(uint64_t EntityId, const csp::c
     evalScript(out);
 }
 
-void LocalScriptSystem::fireEvent(const csp::common::String& eventName,
-                                  uint64_t entityId,
-                                  uint16_t componentId,
-                                  int button,
-                                  float clientX,
-                                  float clientY,
-                                  float screenX,
-                                  float screenY)
+void LocalScriptSystem::firePointerEvent(const csp::common::String& eventName,
+                                         uint64_t entityId,
+                                         uint16_t componentId,
+                                         int button,
+                                         float clientX,
+                                         float clientY,
+                                         float screenX,
+                                         float screenY)
 {
     if (Context == nullptr)
     {
@@ -441,6 +469,25 @@ void LocalScriptSystem::fireEvent(const csp::common::String& eventName,
     {
         entity->GetScriptInterface()->Fire(eventName.c_str(), eventArgs);
     }
+}
+
+void LocalScriptSystem::fireKeyboardEvent(const csp::common::String& key, bool isKeyDown)
+{
+    if (Context == nullptr || SpaceInterface == nullptr)
+    {
+        return;
+    }
+
+    // Create event object
+    qjs::Value eventObj = Context->newObject();
+    eventObj["key"] = Context->newValue(key.c_str());
+    eventObj["isKeyDown"] = Context->newValue(isKeyDown);
+    
+    // Get the event name based on key state
+    std::string eventName = isKeyDown ? "keydown" : "keyup";
+    
+    // Call the Fire method directly on our C++ SpaceInterface instance
+    SpaceInterface->Fire(eventName, eventObj);
 }
 
 csp::multiplayer::CodeSpaceComponent* LocalScriptSystem::getCodeComponentForEntity(uint64_t EntityId)

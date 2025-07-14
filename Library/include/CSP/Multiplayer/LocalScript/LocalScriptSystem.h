@@ -36,12 +36,11 @@ class LocalScriptSystem;
 class LocalScriptResult;
 }
 
-// namespace qjs
-// {
-// class Runtime;
-// class Context;
-// using Context::Module = qjs::Context::Module;
-// }
+namespace csp::multiplayer
+{
+class SpaceScriptInterface;
+class EntityScriptBinding;
+}
 
 namespace csp::services
 {
@@ -87,22 +86,32 @@ public:
     /// @param AssetParams The asset parameters containing information about the updated script
     void UpdateScriptModule(const csp::multiplayer::AssetDetailBlobParams& AssetParams);
     CSP_NO_EXPORT void UpdateAttributeForEntity(uint64_t EntityId, const csp::common::String& Key, const csp::multiplayer::CodeAttribute& Attribute);
-    void fireEvent(const csp::common::String& eventName,
-                   uint64_t entityId,
-                   uint16_t componentId,
-                   int button,
-                   float clientX,
-                   float clientY,
-                   float screenX,
-                   float screenY);
+    void firePointerEvent(const csp::common::String& eventName,
+                          uint64_t entityId,
+                          uint16_t componentId,
+                          int button,
+                          float clientX,
+                          float clientY,
+                          float screenX,
+                          float screenY);
+    void fireKeyboardEvent(const csp::common::String& key, bool isKeyDown);
+    
 
 private:
+    /// @brief Get the Space interface for global event handling
+    /// @return Pointer to the SpaceScriptInterface
+    csp::multiplayer::SpaceScriptInterface* GetSpaceInterface() { return SpaceInterface; }
+
     /// @brief The QuickJS context for script execution
     qjs::Context* Context; 
     qjs::Runtime* Runtime;
     csp::multiplayer::EntityScriptBinding* ScriptBinding;
     multiplayer::SpaceEntitySystem* EntitySystem;
     csp::common::String SpaceId;
+    
+    /// @brief The Space interface for global event handling
+    csp::multiplayer::SpaceScriptInterface* SpaceInterface;
+    
     //qjs::Context::Module* CSP_Module;
     // Store loaded scripts to ensure they remain in memory
     csp::common::Map<csp::common::String, csp::common::String> LoadedScripts;

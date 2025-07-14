@@ -91,6 +91,73 @@ private:
     }
 };
 
+// Space interface for global events like keyboard inputs
+class SpaceScriptInterface
+{
+public:
+    SpaceScriptInterface(qjs::Context* inContext) : Context(inContext) {}
+
+    void On(const std::string& eventName, qjs::Value callback)
+    {
+        if (!JS_IsFunction(Context->ctx, callback.v))
+        {
+            CSP_LOG_ERROR_MSG("Callback supplied to on() is not a function.");
+            return;
+        }
+
+        EventListeners[eventName].push_back(callback);
+    }
+
+    void Off(const std::string& eventName, qjs::Value callback)
+    {
+        auto it = EventListeners.find(eventName);
+        if (it != EventListeners.end())
+        {
+            auto& listeners = it->second;
+            for (auto i = listeners.begin(); i != listeners.end();)
+            {
+                if (JS_VALUE_GET_PTR(i->v) == JS_VALUE_GET_PTR(callback.v))
+                {
+                    i = listeners.erase(i);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+        }
+    }
+
+    void Fire(const std::string& eventName, const qjs::Value& eventArgs)
+    {
+        auto it = EventListeners.find(eventName);
+        if (it != EventListeners.end())
+        {
+            auto& listeners = it->second;
+            for (auto& listener : listeners)
+            {
+                JSValueConst args[] = {eventArgs.v};
+                JSValue result = JS_Call(Context->ctx, listener.v, JS_UNDEFINED, 1, args);
+
+                if (JS_IsException(result))
+                {
+                    JS_FreeValue(Context->ctx, result);
+                
+                    CSP_LOG_ERROR_MSG("Exception thrown in event handler");
+                }
+                else
+                {
+                    JS_FreeValue(Context->ctx, result);
+                }
+            }
+        }
+    }
+
+private:
+    qjs::Context* Context;
+    std::map<std::string, std::vector<qjs::Value>> EventListeners;
+};
+
 using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
 class EntitySystemScriptInterface
@@ -756,7 +823,12 @@ void EntityScriptLog(qjs::rest<std::string> Args)
 }
 
 EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem)
-    : EntitySystem(InEntitySystem)
+    : EntitySystem(InEntitySystem), Context(nullptr), SpaceInterface(nullptr)
+{
+}
+
+EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem, SpaceScriptInterface* InSpaceInterface)
+    : EntitySystem(InEntitySystem), Context(nullptr), SpaceInterface(InSpaceInterface)
 {
 }
 
@@ -1063,6 +1135,13 @@ void BindInternal(qjs::Context::Module* Module)
             "createStaticModelComponent")
         .fun<&EntityScriptInterface::CreateComponentOfType<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>>(
             "createAnimatedModelComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<ImageSpaceComponentScriptInterface, ComponentType::Image>>(
+            "createImageComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("createTextComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("createButtonComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>>("createVideoPlayerComponent")
+        .fun<&EntityScriptInterface::CreateComponentOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
+            "createGaussianSplatComponent")
         .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<CodeSpaceComponentScriptInterface, ComponentType::Code>>("getCodeComponents")
@@ -1139,7 +1218,7 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
-
+    
     Module->class_<CodeAttributeScriptInterface>("CodeAttribute")
         .constructor<>()
         .PROPERTY_GET(CodeAttribute, Type, "type")
@@ -1160,6 +1239,10 @@ void BindInternal(qjs::Context::Module* Module)
         .fun<&ConsoleInterface::Log>("log")
         .fun<&ConsoleInterface::Warn>("warn")
         .fun<&ConsoleInterface::Error>("error");
+        
+       Module->class_<SpaceScriptInterface>("Space")
+        .fun<&SpaceScriptInterface::On>("on")
+        .fun<&SpaceScriptInterface::Off>("off");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -1172,10 +1255,12 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
     qjs::Context* Context = (qjs::Context*)ScriptSystem->GetContext(ContextId);
     qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(ContextId, csp::systems::SCRIPT_NAMESPACE);
 
+    this->Context = Context;
     BindInternal(Module);
 
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem, Context);
     Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+
 
     // Always import OKO module into scripts
     std::stringstream ss;
@@ -1189,12 +1274,18 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
     Context->eval(ss.str(), "<import>", JS_EVAL_TYPE_MODULE);
 }
 
-void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module)
+void EntityScriptBinding::SetSpaceScriptInterface(SpaceScriptInterface* InSpaceInterface)
+{
+    SpaceInterface = InSpaceInterface;
+}
+
+void EntityScriptBinding::BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, SpaceScriptInterface* SpaceInterface)
 {
     BindInternal(Module);
     // This is temporary
     Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem, Context);
     Context->global()["console"] = new ConsoleInterface(); // Add console here as well
+    Context->global()["space"] = SpaceInterface; // Use the provided SpaceInterface instance
 }
 
 } // namespace csp::multiplayer

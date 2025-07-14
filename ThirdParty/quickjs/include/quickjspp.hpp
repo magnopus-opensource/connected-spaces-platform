@@ -2,6 +2,7 @@
 #pragma warning(disable : 4702)
 
 #include "quickjs.h"
+#include "Debug/Logging.h" // Add this to get CSP_LOG macros
 
 #include <algorithm>
 #include <cassert>

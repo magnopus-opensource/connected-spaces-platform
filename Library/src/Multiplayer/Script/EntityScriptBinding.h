@@ -29,12 +29,17 @@ namespace csp::multiplayer
 
 class SpaceEntitySystem;
 
+class SpaceScriptInterface;
+
 class EntityScriptBinding : public csp::systems::IScriptBinding
 {
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
-    void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module);
+    EntityScriptBinding(SpaceEntitySystem* InEntitySystem, SpaceScriptInterface* InSpaceInterface);
+    void SetSpaceScriptInterface(SpaceScriptInterface* InSpaceInterface);
+    void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, SpaceScriptInterface* SpaceInterface = nullptr);
     virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
+    void BindWithSpaceInterface(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem, SpaceScriptInterface* SpaceInterface);
     
 
     static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
@@ -43,6 +48,7 @@ public:
 private:
     SpaceEntitySystem* EntitySystem;
     qjs::Context* Context;
+    SpaceScriptInterface* SpaceInterface;
 };
 
 } // namespace csp::multiplayer
