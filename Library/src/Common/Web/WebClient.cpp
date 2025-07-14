@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 #include "WebClient.h"
-
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "CSP/Systems/Users/UserSystem.h"
-#include "Debug/Logging.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "Json.h"
 #include "Services/ApiBase/ApiBase.h"
 
@@ -30,11 +28,24 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
+WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : RootPort(InPort)
+    , AuthContext { &AuthContext }
+    , LogSystem(LogSystem)
+    , RefreshNeeded(false)
+    , RefreshStarted(false)
+    , AutoRefreshEnabled(AutoRefresh)
+#ifndef CSP_WASM
+    , RequestCount(0)
+    , ThreadPool(CSP_MAX_CONCURRENT_REQUESTS)
+#endif
+{
+}
+
 WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : RootPort(InPort)
+    , AuthContext(nullptr)
     , LogSystem(LogSystem)
-    , UserSystem(nullptr)
-    , LoginState(nullptr)
     , RefreshNeeded(false)
     , RefreshStarted(false)
     , AutoRefreshEnabled(AutoRefresh)
@@ -113,13 +124,7 @@ void WebClient::RefreshIfExpired()
         return;
     }
 
-    if (LoginState == nullptr)
-    {
-        UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-        LoginState = &UserSystem->GetLoginState();
-    }
-
-    if (LoginState->RefreshNeeded())
+    if (AuthContext->GetLoginState().RefreshNeeded())
     {
 #ifdef CSP_WASM
         WasmRequestsMutex.lock();
@@ -131,35 +136,34 @@ void WebClient::RefreshIfExpired()
         RefreshNeeded = true;
 #endif
 
-        csp::systems::NullResultCallback NullResCallback = [this](const csp::systems::NullResult& NullRes)
-        {
-            if (NullRes.GetResultCode() == csp::systems::EResultCode::Success)
+        AuthContext->RefreshToken(
+            [this](bool Success)
             {
-#ifdef CSP_WASM
-                WasmRequestsMutex.lock();
+                if (Success)
                 {
-                    while (!WasmRequests.IsEmpty())
+#ifdef CSP_WASM
+                    WasmRequestsMutex.lock();
                     {
-                        auto WasmRequest = WasmRequests.Dequeue().value();
-                        WasmRequest->RefreshAccessToken();
-                        Send(*WasmRequest);
+                        while (!WasmRequests.IsEmpty())
+                        {
+                            auto WasmRequest = WasmRequests.Dequeue().value();
+                            WasmRequest->RefreshAccessToken();
+                            Send(*WasmRequest);
+                        }
+
+                        RefreshNeeded = false;
                     }
-
-                    RefreshNeeded = false;
-                }
-                WasmRequestsMutex.unlock();
+                    WasmRequestsMutex.unlock();
 #else
-                RefreshNeeded = false;
+                    RefreshNeeded = false;
 #endif
-                RefreshStarted = false;
-            }
-            else if (NullRes.GetResultCode() == csp::systems::EResultCode::Failed)
-            {
-                assert(false && "User authentication token refresh failed!");
-            }
-        };
-
-        UserSystem->RefreshSession(UserSystem->GetLoginState().UserId, csp::web::HttpAuth::GetRefreshToken(), NullResCallback);
+                    RefreshStarted = false;
+                }
+                else
+                {
+                    assert(false && "User authentication token refresh failed!");
+                }
+            });
     }
 }
 
@@ -193,6 +197,8 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
     AddRequest(Request);
 #endif
 }
+
+void WebClient::SetAuthContext(csp::common::IAuthContext& InAuthContext) { AuthContext = &InAuthContext; }
 
 void WebClient::AddRequest(HttpRequest* Request, [[maybe_unused]] std::chrono::milliseconds SendDelay)
 {

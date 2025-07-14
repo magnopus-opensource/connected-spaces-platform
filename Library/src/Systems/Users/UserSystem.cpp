@@ -86,7 +86,7 @@ AuthContext::AuthContext(csp::systems::UserSystem& UserSystem)
 {
 }
 
-const csp::common::LoginState& AuthContext::GetLoginState() const { UserSystem.GetLoginState(); }
+const csp::common::LoginState& AuthContext::GetLoginState() const { return UserSystem.GetLoginState(); }
 
 void AuthContext::RefreshToken(std::function<void(bool)> Callback)
 {
@@ -200,7 +200,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(*this),
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
                     *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -261,7 +261,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(*this),
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
                     *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else
@@ -350,7 +350,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(*this),
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
                     *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else
@@ -476,7 +476,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
             };
 
             auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(*this),
+            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
                 *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
         }
         else

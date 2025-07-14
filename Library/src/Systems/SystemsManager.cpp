@@ -134,8 +134,11 @@ void SystemsManager::CreateSystems()
 #else
     WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
-    ScriptSystem = new csp::systems::ScriptSystem();
 
+    UserSystem = new csp::systems::UserSystem(WebClient, NetworkEventBus, *LogSystem);
+    WebClient->SetAuthContext(UserSystem->GetAuthContext());
+
+    ScriptSystem = new csp::systems::ScriptSystem();
     ScriptSystem->Initialise();
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem);
@@ -144,7 +147,7 @@ void SystemsManager::CreateSystems()
     VoipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors
-    UserSystem = new csp::systems::UserSystem(WebClient, NetworkEventBus, *LogSystem);
+
     SpaceSystem = new csp::systems::SpaceSystem(WebClient, *LogSystem);
     AssetSystem = new csp::systems::AssetSystem(WebClient, NetworkEventBus, *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);

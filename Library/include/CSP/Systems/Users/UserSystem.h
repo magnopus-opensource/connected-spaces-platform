@@ -54,7 +54,7 @@ public:
 
     /// @brief Refreshes the sessions RefreshToken.
     /// This is currently used internally by the web client.
-    virtual void RefreshToken(std::function<void(bool)> Callback) override;
+    void RefreshToken(std::function<void(bool)> Callback) override;
 
 private:
     UserSystem& UserSystem;

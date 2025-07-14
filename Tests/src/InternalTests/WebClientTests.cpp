@@ -17,6 +17,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "PlatformTestUtils.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
@@ -78,8 +79,8 @@ private:
 class TestWebClient : public EmscriptenWebClient
 {
 public:
-    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
-        : EmscriptenWebClient(InPort, Tp, LogSystem, false)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : EmscriptenWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
 };
@@ -89,8 +90,8 @@ public:
 class TestWebClient : public POCOWebClient
 {
 public:
-    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
-        : POCOWebClient(InPort, Tp, LogSystem, false)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : POCOWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
 };
@@ -113,10 +114,10 @@ template <typename TReceiver>
 void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPayload& Payload, EResponseCodes ExpectedResponse)
 {
     TReceiver Receiver;
-
+    auto& UserSystem = *csp::systems::SystemsManager::Get().GetUserSystem();
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-    TestWebClient WebClient(Port, ETransferProtocol::HTTP, LogSystem);
+    TestWebClient WebClient(Port, ETransferProtocol::HTTP, UserSystem.GetAuthContext(), LogSystem);
 
     WebClientSendRequest(&WebClient, Url, Verb, Payload, &Receiver);
 
@@ -402,13 +403,13 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
     PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
     {
+        auto& UserSystem = *csp::systems::SystemsManager::Get().GetUserSystem();
         csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-
         WebClient* Client;
 #ifdef CSP_WASM
-        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        Client = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, UserSystem, LogSystem);
 #else
-        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        Client = new TestWebClient(80, csp::web::ETransferProtocol::HTTPS, UserSystem.GetAuthContext(), LogSystem);
 #endif
         EXPECT_TRUE(Client != nullptr);
 
@@ -552,9 +553,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     HttpPayload Payload;
     ResponseReceiver Receiver;
 
+    auto& UserSystem = *csp::systems::SystemsManager::Get().GetUserSystem();
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-
-    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP, LogSystem);
+    auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP, UserSystem.GetAuthContext(), LogSystem);
     EXPECT_TRUE(WebClient != nullptr);
 
     WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);

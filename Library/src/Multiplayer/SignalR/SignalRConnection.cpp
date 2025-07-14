@@ -16,6 +16,7 @@
 #include "SignalRConnection.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "SignalRClient.h"
 #include <memory>
 
@@ -57,9 +58,10 @@ public:
 };
 #endif
 
-SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient)
+SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient,
+    csp::common::IAuthContext& AuthContext)
     : Connection(hub_connection_builder::create(BaseUri)
-                     .with_http_client_factory([](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(); })
+                     .with_http_client_factory([&AuthContext](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(AuthContext); })
                      .with_websocket_factory([WebsocketClient](const signalr_client_config&) { return WebsocketClient; })
                      .skip_negotiation(true)
                      .with_messagepack_hub_protocol()

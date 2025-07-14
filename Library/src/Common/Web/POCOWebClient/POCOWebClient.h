@@ -26,17 +26,6 @@ namespace csp::common
 {
 class LogSystem;
 }
-
-namespace csp::systems
-{
-class SystemsManager;
-}
-
-namespace csp::multiplayer
-{
-class CSPHttpClient;
-}
-
 namespace csp::web
 {
 
@@ -53,11 +42,10 @@ public:
 
 class POCOWebClient : public WebClient
 {
-    friend class csp::systems::SystemsManager;
-    friend class csp::multiplayer::CSPHttpClient;
-
 public:
     virtual ~POCOWebClient();
+
+    using WebClient::WebClient;
 
     std::string MD5Hash(const void* Data, const size_t Size) override;
 
@@ -67,10 +55,11 @@ public:
     void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
         const char* Version, const csp::common::String& MediaType) override;
 
-protected:
     // Instances of POCOWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
     POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
+protected:
     void SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSource* Source, const char* Version);
 
     void Send(HttpRequest& Request) override;

@@ -33,14 +33,9 @@
 namespace csp::common
 {
 class LogSystem;
+class IAuthContext;
 class LoginState;
 } // namespace csp::common
-
-namespace csp::systems
-{
-class SystemsManager;
-class UserSystem;
-} // namespace csp::systems
 
 namespace csp::web
 {
@@ -76,10 +71,11 @@ enum class ETransferProtocol : uint8_t
 class WebClient
 {
     friend class HttpRequest;
-    friend class csp::systems::SystemsManager;
 
 public:
     WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
+    WebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem,
+        bool AutoRefresh = true);
     virtual ~WebClient();
 
     /// @brief Main method for sending a Http Request
@@ -107,6 +103,8 @@ public:
         const char* Version, const csp::common::String& MediaType)
         = 0;
 
+    void SetAuthContext(csp::common::IAuthContext& AuthContext);
+
 protected:
     /// @brief Send a http request
     /// @param Request Details of the web request headers and payload
@@ -115,16 +113,17 @@ protected:
 
     const Port RootPort;
 
-    // The RealtimeEngine SignalR connection uses the same POCO/Emscripten web client as our MCS RESTApi.
-    // For the SignalR connection null be will passed to the ctor for the LogSystem to avoid logging high frequency multiplayer API exchange.
-    csp::common::LogSystem* LogSystem = nullptr;
-
 private:
     void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));
     void RefreshIfExpired();
     void PrintClientErrorResponseMessages(const HttpResponse& Response);
-    csp::systems::UserSystem* UserSystem;
-    const csp::common::LoginState* LoginState;
+    csp::common::IAuthContext* AuthContext;
+    // The RealtimeEngine SignalR connection uses the same POCO/Emscripten web client as our MCS RESTApi.
+    // For the SignalR connection null be will passed to the ctor for the LogSystem to avoid logging high frequency multiplayer API exchange.
+protected:
+    csp::common::LogSystem* LogSystem = nullptr;
+
+private:
     std::atomic_bool RefreshNeeded, RefreshStarted;
     bool AutoRefreshEnabled;
 

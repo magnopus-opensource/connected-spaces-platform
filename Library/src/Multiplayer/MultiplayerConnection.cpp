@@ -17,6 +17,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
@@ -149,10 +150,10 @@ namespace
     };
 }
 
-ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
+ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(csp::common::IAuthContext& AuthContext)
 {
     return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
-        std::make_shared<csp::multiplayer::CSPWebsocketClient>());
+        std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext);
 }
 
 MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
