@@ -20,6 +20,11 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"
 
-const csp::systems::StatusInfo& csp::systems::StatusInfoResult::GetLatestStatusInfo() const { return StatusInfoResponse; }
+namespace csp::systems
+{
 
-void csp::systems::StatusInfoResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
+const StatusInfo& StatusInfoResult::GetLatestStatusInfo() const { return StatusInfoResponse; }
+
+void StatusInfoResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
+
+} // namespace csp::systems
