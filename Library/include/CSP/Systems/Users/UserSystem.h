@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Optional.h"
@@ -41,7 +42,7 @@ namespace csp::systems
 /// @ingroup User System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' user service.
 /// Offers methods for creating accounts, authenticating, and retrieving user profiles.
-class CSP_API UserSystem : public SystemBase
+class CSP_API UserSystem : public SystemBase, public csp::common::IAuthContext
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
@@ -53,11 +54,21 @@ class CSP_API UserSystem : public SystemBase
 
 public:
     // Authentication
+    // AuthContext Interface **********
 
     /// @brief Get the current login state.
+    /// Note: This function should be marked as override. However, due to wrapper generator limitations,
+    /// we had to make IAuthContext unexported, which prevents the wrapper generator from finding the interface.
+    /// So, removing override here stops the wrapper gen looking for the non-exported interface.
     /// @return LoginState : Current login state
-    const csp::common::LoginState& GetLoginState() const;
+    virtual const csp::common::LoginState& GetLoginState() const;
 
+private:
+    /// @brief Refreshes the sessions RefreshToken.
+    /// This is currently used internally by the web client.
+    CSP_NO_EXPORT virtual void RefreshToken(std::function<void(bool)> Callback) override;
+    // ***********************************
+public:
     /// @brief Sets a callback that will get fired when the login token has changed as a result of logging in with credentials or with a token or
     /// after the Connected Spaces Platform internal system has refreshed the session.
     /// In the callback result the token and it's expiration time will be provided.
