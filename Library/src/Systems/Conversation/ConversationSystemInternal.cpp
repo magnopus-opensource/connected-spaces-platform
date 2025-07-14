@@ -180,12 +180,7 @@ namespace
         {
             auto NewMetadata = MessageCollection->GetMetadataImmutable();
 
-            std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(Metadata.Keys()));
-
-            for (const auto& Key : *Keys)
-            {
-                NewMetadata[Key] = Metadata[Key];
-            }
+            ConversationSystemHelpers::AppendMetadata(NewMetadata, Metadata);
 
             return AssetSystem->UpdateAssetCollectionMetadata(*MessageCollection, NewMetadata, nullptr);
         };
