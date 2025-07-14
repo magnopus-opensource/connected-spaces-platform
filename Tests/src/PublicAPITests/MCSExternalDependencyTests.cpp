@@ -170,7 +170,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     for (auto const Method : MultiplayerHubMethodMap)
         Methods[static_cast<int>(Method.first)] = String(Method.second.c_str());
 
-    auto const result = csp::multiplayer::MultiplayerConnection::ResolveMultiplayerHubMethods(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
     EXPECT_TRUE(result);
 }
 
@@ -183,8 +183,9 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: DeleteObjects";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
+    auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> {};
-    auto const result = csp::multiplayer::MultiplayerConnection::ResolveMultiplayerHubMethods(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
     EXPECT_FALSE(result);
 }
 
@@ -197,7 +198,8 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: GenerateObjectIds";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
+    auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> { "DeleteObjects", "SendEventMessage", "StopListening" };
-    auto const result = csp::multiplayer::MultiplayerConnection::ResolveMultiplayerHubMethods(Methods);
+    auto const result = MultiplayerHubMethodMap.CheckPrerequisites(Methods);
     EXPECT_FALSE(result);
 }

@@ -189,23 +189,6 @@ MultiplayerConnection::~MultiplayerConnection()
     }
 }
 
-bool MultiplayerConnection::ResolveMultiplayerHubMethods(const csp::common::Array<csp::common::String>& MethodNames)
-{
-    for (const auto& Method : MultiplayerHubMethodMap())
-    {
-        // Validate that the current methods is in the available methods array
-        if (const auto itt = std::find(MethodNames.begin(), MethodNames.end(), Method.second.c_str()); itt == MethodNames.end())
-        {
-            auto const message = fmt::format("Failed to resolve the Multiplayer Hub Method: {0}", Method.second.c_str());
-
-            CSP_LOG_MSG(csp::common::LogLevel::Fatal, message.c_str());
-            return false;
-        }
-    }
-
-    return true;
-}
-
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
     : LogSystem(InBoundConnection.LogSystem)
 {
