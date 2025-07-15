@@ -41,13 +41,13 @@
     4. Add a new case in DeserializeComponentData so it can be deserialized from a signalr value.
 */
 
-namespace async
-{
-CSP_START_IGNORE
-template <typename T> class event_task;
-template <typename T> class task;
-CSP_END_IGNORE
-}
+// namespace async
+//{
+// CSP_START_IGNORE
+// template <typename T> class event_task;
+// template <typename T> class task;
+// CSP_END_IGNORE
+// }
 
 namespace csp::web
 {
@@ -128,11 +128,9 @@ enum class ItemComponentDataType : uint64_t
 };
 
 class ItemComponentData;
-class ComponentResult;
+class ObjectResult;
 
-typedef std::function<void(const ComponentResult& Result)> ComponentResultCallback;
-
-void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
+typedef std::function<void(const ObjectResult& Result)> ObjectResultCallback;
 
 /// @brief Variant that holds all currently implemented MCS types by CSP.
 /// @details This should be updated if we need to support more of the above types in the future.
@@ -162,12 +160,8 @@ public:
     bool operator==(const ItemComponentData& Other) const;
     ItemComponentData& operator=(const ItemComponentData& Other);
 
-    CSP_ASYNC_RESULT void GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback);
-    CSP_NO_EXPORT async::task<ComponentResult> GetComponentByIdTASK(const int32_t& ComponentId);
-
 private:
     ItemComponentDataVariant Value;
-    csp::services::ApiBase* ComponentObjectMessageApi;
 };
 
 /// @brief Represents an MCS object message.
@@ -194,6 +188,9 @@ public:
     std::optional<uint64_t> GetParentId() const;
     const std::optional<std::map<PropertyKeyType, ItemComponentData>>& GetComponents() const;
 
+    CSP_ASYNC_RESULT void GetObjectById(const int32_t& ObjectId, ObjectResultCallback Callback);
+    // CSP_NO_EXPORT async::task<ComponentResult> GetComponentByIdTASK(const int32_t& ComponentId);//todo check if the async block breaks everything
+
 private:
     uint64_t Id = 0;
     uint64_t Type = 0;
@@ -202,6 +199,8 @@ private:
     uint64_t OwnerId = 0;
     std::optional<uint64_t> ParentId;
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
+
+    csp::services::ApiBase* ComponentObjectMessageApi;
 };
 
 /// @brief Represents an MCS object patch.
@@ -235,26 +234,26 @@ private:
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
 
-class CSP_API ComponentResult : public csp::systems::ResultBase
+class CSP_API ObjectResult : public csp::systems::ResultBase
 {
 public:
-    ItemComponentData& GetComponent();
+    ObjectMessage& GetObjectMessage();
 
-    const ItemComponentData& GetComponent() const;
+    const ObjectMessage& GetObjectMessage() const;
 
-    CSP_NO_EXPORT void SetComponent(const ItemComponentData& Component);
+    CSP_NO_EXPORT void SetObjectMessage(const ObjectMessage& Component);
 
-    CSP_NO_EXPORT ComponentResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    CSP_NO_EXPORT ObjectResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-    ComponentResult() = default;
+    ObjectResult() = default;
 
-    ComponentResult(void*) {};
+    ObjectResult(void*) {};
 
 private:
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    ItemComponentData ComponentData;
+    ObjectMessage ObjectMessageData;
 };
 
 }

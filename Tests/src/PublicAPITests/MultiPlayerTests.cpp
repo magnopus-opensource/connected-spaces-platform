@@ -1245,13 +1245,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     LogOut(UserSystem);
 }
 
-void GetComponentById(mcs::ItemComponentData* ComponentValue, const uint32_t Id, mcs::ItemComponentData& OutComponentData)
+void GetSpaceEntityById(csp::multiplayer::mcs::ObjectMessage* Object, const uint64_t Id, csp::multiplayer::SpaceEntity& OutSpaceEntity)
 {
-    auto [Result] = Awaitable(&mcs::ItemComponentData::GetComponentById, ComponentValue, Id).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::multiplayer::mcs::ObjectMessage::GetObjectById, Object, static_cast<uint32_t>(Id)).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    OutComponentData = Result.GetComponent();
+    OutSpaceEntity.FromObjectMessage(Result.GetObjectMessage());
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpace)
@@ -1310,22 +1310,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_EQ(Components.Size(), 2);
     EXPECT_TRUE(Components.HasKey(KeepKey));
     EXPECT_TRUE(Components.HasKey(DeleteKey));
-    mcs::ItemComponentData ComponentValue;
-    mcs::ItemComponentData OutComponentData;
-    MCSComponentPacker ComponentPacker;
 
-    auto ComponentKeys = Components.Keys();
-    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
-    {
-        ComponentBase* Component = Components[ComponentKeys->operator[](i)];
-        uint16_t id = Component->GetId();
+    mcs::ObjectMessage* Message = nullptr;
 
-        ComponentPacker.WriteValue(id, Component);
-        auto UpdatedComponents = ComponentPacker.GetComponents();
+    // Test that the components have been created on the object
+    SpaceEntity RetrievedObject;
+    GetSpaceEntityById(Message, Object->GetId(), RetrievedObject);
+    auto& RetrievedComponents = *RetrievedObject.GetComponents();
 
-        ComponentValue = UpdatedComponents[0];
-        GetComponentById(&ComponentValue, id, OutComponentData);
-    }
+    EXPECT_EQ(RetrievedComponents.Size(), 2);
+    EXPECT_TRUE(RetrievedComponents.HasKey(KeepKey));
+    EXPECT_TRUE(RetrievedComponents.HasKey(DeleteKey));
 
     // Delete component
     Object->RemoveComponent(ComponentToDelete->GetId());
@@ -1344,17 +1339,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_TRUE(RealComponents.HasKey(KeepKey));
     EXPECT_FALSE(RealComponents.HasKey(DeleteKey));
 
-    ComponentKeys = RealComponents.Keys();
-    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
-    {
-        ComponentBase* Component = Components[ComponentKeys->operator[](i)];
-        uint16_t id = Component->GetId();
-        ComponentPacker.WriteValue(id, Component);
-        auto UpdatedComponents = ComponentPacker.GetComponents();
+    // Test that the component has been deleted on the object
+    SpaceEntity RetrievedObjectAfterDeletion;
+    GetSpaceEntityById(Message, Object->GetId(), RetrievedObjectAfterDeletion);
+    auto& RetrievedComponentsAfterDeletion = *RetrievedObjectAfterDeletion.GetComponents();
 
-        ComponentValue = UpdatedComponents[0];
-        GetComponentById(&ComponentValue, id, OutComponentData);
-    }
+    EXPECT_EQ(RetrievedComponentsAfterDeletion.Size(), 1);
+    EXPECT_TRUE(RetrievedComponentsAfterDeletion.HasKey(KeepKey));
+    EXPECT_FALSE(RetrievedComponentsAfterDeletion.HasKey(DeleteKey));
 
     // Exit space and enter again, making sure the entities have been created
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -1390,18 +1382,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_FALSE(FoundComponents.HasKey(DeleteKey));
     EXPECT_EQ(FoundEntity->GetComponent(0)->GetComponentName(), "ComponentNameKeep");
 
-    ComponentKeys = FoundComponents.Keys();
-    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
-    {
-        ComponentBase* Component = Components[ComponentKeys->operator[](i)];
-        uint16_t id = Component->GetId();
-        ComponentPacker.WriteValue(id, Component);
-        auto UpdatedComponents = ComponentPacker.GetComponents();
+    // Test that the component has been deleted on the object after re-entry
+    SpaceEntity RetrievedObjectAfterReentry;
+    GetSpaceEntityById(Message, Object->GetId(), RetrievedObjectAfterReentry);
+    auto& RetrievedComponentsAfterReentry = *RetrievedObjectAfterReentry.GetComponents();
 
-        ComponentValue = UpdatedComponents[0];
-        GetComponentById(&ComponentValue, id, OutComponentData);
-    }
-    delete (ComponentKeys);
+    EXPECT_EQ(RetrievedComponentsAfterReentry.Size(), 1);
+    EXPECT_TRUE(RetrievedComponentsAfterReentry.HasKey(KeepKey));
+    EXPECT_FALSE(RetrievedComponentsAfterReentry.HasKey(DeleteKey));
 
     // Exit space
     auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

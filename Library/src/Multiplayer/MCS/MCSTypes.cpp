@@ -23,6 +23,7 @@
 #else
 #include "Common/Web/POCOWebClient/POCOWebClient.h"
 #endif
+
 namespace chs_multiplayer = csp::services::generated::multiplayerservice;
 
 namespace csp::multiplayer::mcs
@@ -172,7 +173,6 @@ namespace
 
 ItemComponentData::ItemComponentData()
     : Value(nullptr)
-    , ComponentObjectMessageApi(nullptr)
 
 {
 }
@@ -180,13 +180,11 @@ ItemComponentData::ItemComponentData()
 ItemComponentData::ItemComponentData(const ItemComponentDataVariant& Value)
     : Value { Value }
 {
-    ComponentObjectMessageApi = new chs_multiplayer::ObjectMessageApi(csp::systems::SystemsManager::Get().GetWebClient());
 }
 
 ItemComponentData::ItemComponentData(ItemComponentDataVariant&& Value)
     : Value { Value }
 {
-    ComponentObjectMessageApi = new chs_multiplayer::ObjectMessageApi(csp::systems::SystemsManager::Get().GetWebClient());
 }
 
 void ItemComponentData::Serialize(SignalRSerializer& Serializer) const
@@ -245,7 +243,6 @@ bool ItemComponentData::operator==(const ItemComponentData& Other) const { retur
 ItemComponentData& ItemComponentData::operator=(const ItemComponentData& Other)
 {
     Value = Other.Value;
-    ComponentObjectMessageApi = Other.ComponentObjectMessageApi;
 
     return *this;
 }
@@ -259,7 +256,9 @@ ObjectMessage::ObjectMessage(uint64_t Id, uint64_t Type, bool IsTransferable, bo
     , OwnerId { OwnerId }
     , ParentId { ParentId }
     , Components { Components }
+
 {
+    this->ComponentObjectMessageApi = new chs_multiplayer::ObjectMessageApi(csp::systems::SystemsManager::Get().GetWebClient()); // TODO
 }
 
 void ObjectMessage::Serialize(SignalRSerializer& Serializer) const
@@ -390,13 +389,13 @@ std::optional<uint64_t> ObjectPatch::GetParentId() const { return ParentId; }
 const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ObjectPatch::GetComponents() const { return Components; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ItemComponentData& ComponentResult::GetComponent() { return ComponentData; }
+ObjectMessage& ObjectResult::GetObjectMessage() { return ObjectMessageData; }
 
-const ItemComponentData& ComponentResult::GetComponent() const { return ComponentData; }
+const ObjectMessage& ObjectResult::GetObjectMessage() const { return ObjectMessageData; }
 
-void ComponentResult::SetComponent(const ItemComponentData& Component) { ComponentData = Component; }
+void ObjectResult::SetObjectMessage(const ObjectMessage& Message) { ObjectMessageData = Message; }
 
-void ComponentResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ObjectResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
 
@@ -412,27 +411,27 @@ void ComponentResult::OnResponse(const csp::services::ApiResponseBase* ApiRespon
     }
 }
 
-void ItemComponentData::GetComponentById(const int32_t& ComponentId, ComponentResultCallback Callback)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void ObjectMessage::GetObjectById(const int32_t& ObjectId, ObjectResultCallback Callback)
 {
     services::ResponseHandlerPtr ResponseHandler
-        = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
-            Callback, nullptr);
+        = ComponentObjectMessageApi->CreateHandler<ObjectResultCallback, ObjectResult, void, chs_multiplayer::ObjectMessageDto>(Callback, nullptr);
 
-    static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
+    static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ObjectId, ResponseHandler);
 }
 
-async::task<ComponentResult> ItemComponentData::GetComponentByIdTASK(const int32_t& ComponentId)
-{
-    async::event_task<ComponentResult> OnCompleteEvent;
-    async::task<ComponentResult> OnCompleteTask = OnCompleteEvent.get_task();
-
-    services::ResponseHandlerPtr ResponseHandler
-        = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
-            [](const ComponentResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
-
-    static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
-
-    return OnCompleteTask;
-}
+// async::task<ComponentResult> ItemComponentData::GetComponentByIdTASK(const int32_t& ComponentId)
+//{
+//     async::event_task<ComponentResult> OnCompleteEvent;
+//     async::task<ComponentResult> OnCompleteTask = OnCompleteEvent.get_task();
+//
+//     services::ResponseHandlerPtr ResponseHandler
+//         = ComponentObjectMessageApi->CreateHandler<ComponentResultCallback, ComponentResult, void, chs_multiplayer::ObjectMessageDto>(
+//             [](const ComponentResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+//
+//     static_cast<chs_multiplayer::ObjectMessageApi*>(ComponentObjectMessageApi)->objectsIdGet(ComponentId, ResponseHandler);
+//
+//     return OnCompleteTask;
+// }
 
 }

@@ -44,12 +44,14 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/SystemsResult.h"
 #include "Common/Convert.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
+#include "Services/MultiplayerService/Api.h"
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
@@ -58,6 +60,7 @@
 #include <thread>
 
 using namespace std::chrono;
+namespace chs_multiplayer = csp::services::generated::multiplayerservice;
 
 // Queue pending script property updates
 // #define CSP_ENTITY_SCRIPT_UPDATE_DEFERRED
@@ -106,6 +109,7 @@ SpaceEntity::SpaceEntity()
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(nullptr)
     , TimeOfLastPatch(0)
+
 {
 }
 
