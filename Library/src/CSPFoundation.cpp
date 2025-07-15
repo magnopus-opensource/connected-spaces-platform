@@ -424,7 +424,7 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::StatusInfo& Statu
         return false;
     }
 
-    // Find the ServiceVersionInfo that correlate with the expected version of the service
+    // Find the ServiceVersionInfo that correlates with the expected version of the service
     const auto ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
         [this](csp::systems::ServiceVersionInfo ServiceVersionInfo)
         { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", this->GetVersion()); });

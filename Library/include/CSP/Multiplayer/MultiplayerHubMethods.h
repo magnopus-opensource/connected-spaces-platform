@@ -79,7 +79,7 @@ struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod,
     /// This function compares the provided array of method names (`MethodNames`) against a set of available multiplayer hub methods.
     /// It ensures that every method in the input array exists in the available set.
     /// @param MethodNames An array of method names that are expected to be present.
-    /// @return bool : true if all available in use multiplayer hub methods match, false otherwise.
+    /// @return bool : true if all available in-use multiplayer hub methods match, false otherwise.
     bool CheckPrerequisites(const csp::common::Array<csp::common::String>& MethodNames) const;
 };
 
