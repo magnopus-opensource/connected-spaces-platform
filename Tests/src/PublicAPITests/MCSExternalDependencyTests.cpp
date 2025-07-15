@@ -179,7 +179,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     RAIIMockLogger MockLogger {};
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Fatal);
 
-    // Validate that the failure to find multiplayer hub methods  code path has been triggered and populated through the log system
+    // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: DeleteObjects";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
@@ -194,7 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     RAIIMockLogger MockLogger {};
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Fatal);
 
-    // Validate that the failure to find multiplayer hub methods  code path has been triggered and populated through the log system
+    // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: GenerateObjectIds";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 

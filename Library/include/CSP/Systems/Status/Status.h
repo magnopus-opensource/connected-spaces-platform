@@ -43,12 +43,12 @@ public:
     csp::common::String Version;
 
     /// @brief The date and time at which the API version is considered deprecated, in ISO 8601 format.
-    /// If empty, the version is currently active or the deprecation date is unknown.
+    /// If empty, the version is currently active, or the deprecation date is unknown.
     csp::common::String DeprecationDatetime;
 };
 
 /// @ingroup Status System
-/// @brief Stores information about a service including available versions
+/// @brief Stores information about a service, including available versions
 class CSP_API ServiceInfo
 {
 public:
@@ -61,7 +61,7 @@ public:
     /// @brief A list of all available API versions for the service, along with their metadata.
     csp::common::Array<ServiceVersionInfo> ApiVersions;
 
-    /// @brief The currently active API version, this version is guaranteed to be stable and supported.
+    /// @brief The currently active API version; this version is guaranteed to be stable and supported.
     csp::common::String CurrentApiVersion;
 };
 
@@ -79,7 +79,7 @@ public:
 };
 
 /// @ingroup Status System
-/// @brief Data class used to contain information when a Response is received from Status Server
+/// @brief Data class used to contain information when a Response is received from the Status Server
 class CSP_API StatusInfoResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
@@ -102,7 +102,7 @@ private:
     StatusInfo StatusInfoResponse;
 };
 
-/// @brief Callback containing an StatusInfo result used when creating or retrieving an StatusInfo.
+/// @brief Callback containing a StatusInfo result used when creating or retrieving a StatusInfo.
 /// @param Result StatusInfoResult : Data class containing information on task result/progress
 typedef std::function<void(const StatusInfoResult& Result)> StatusInfoCallback;
 

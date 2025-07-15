@@ -28,7 +28,7 @@ bool MultiplayerHubMethodMap::CheckPrerequisites(const csp::common::Array<csp::c
 {
     for (const auto& Method : *this)
     {
-        // Validate that the current methods is in the available method names array
+        // Validate that the current method is in the available method names array
         if (const auto itt = std::find(MethodNames.begin(), MethodNames.end(), Method.second.c_str()); itt == MethodNames.end())
         {
             const auto Message = fmt::format("Failed to resolve the Multiplayer Hub Method: {0}", Method.second);
