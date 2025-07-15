@@ -255,6 +255,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 		cinematicCamera.aperture = 10;
 		cinematicCamera.focalLength = 2;
 		cinematicCamera.isViewerCamera = true;
+		cinematicCamera.isEnabled = false;
 	)xx";
 
     CreatedObject->GetScript().SetScriptSource(CinematicCameraScriptText.c_str());
@@ -273,6 +274,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
     EXPECT_FLOAT_EQ(CinematicCamera->GetAperture(), 10.0f);
     EXPECT_FLOAT_EQ(CinematicCamera->GetFocalLength(), 2.0f);
     EXPECT_TRUE(CinematicCamera->GetIsViewerCamera());
+    EXPECT_FALSE(CinematicCamera->GetIsEnabled());
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
