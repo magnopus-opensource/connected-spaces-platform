@@ -54,7 +54,7 @@ public:
     /// @param Context csp::common::String : The specific context whose settings should be retrieved.
     /// @param Keys csp::common::Optional<csp::common::String> : List of setting keys to retrieve. If not provided, all settings for the context are
     /// returned.
-    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes
+    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys, ApplicationSettingsResultCallback Callback);
 
@@ -64,7 +64,7 @@ public:
     /// @param Context csp::common::String : The specific context whose settings should be retrieved.
     /// @param Keys csp::common::Optional<csp::common::String> : List of setting keys to retrieve. If not provided, all settings for the context are
     /// returned.
-    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes
+    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetSettingsByContextAnonymous(const csp::common::String& Tenant, const csp::common::String& ApplicationName,
         const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys,
         ApplicationSettingsResultCallback Callback);
