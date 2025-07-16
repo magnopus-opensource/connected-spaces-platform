@@ -22,6 +22,8 @@
 #include "Services/UserService/Dto.h"
 #include "Systems/ResultHelpers.h"
 
+#include "CSP/Systems/ContinuationUtils.h"
+
 using namespace csp::common;
 
 namespace chs = csp::services::generated::userservice;
@@ -42,5 +44,34 @@ ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* InWebC
 }
 
 ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (ApplicationSettingsAPI); }
+
+void ApplicationSettingsSystem::GetSettingsByContext(
+    const String& ApplicationName, const String& Context, const Optional<Array<String>>& Keys, ApplicationSettingsResultCallback Callback)
+{
+    GetSettingsByContext(ApplicationName, Context, Keys)
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+            "ApplicationSettingsSystem::GetApplicationSettingsFromContext successfully retrieved application settings",
+            "Failed to get application settings", {}, {}, {}))
+        .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
+}
+
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContext(const csp::common::String& ApplicationName,
+    const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    services::ResponseHandlerPtr SettingsResponseHandler
+        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+    // TODO: [OF-1710] include use of 'const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys'
+    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
+        ->applicationsApplicationNameSettingsContextGet(ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
+
+    return OnCompleteTask;
+}
 
 } // namespace csp::systems
