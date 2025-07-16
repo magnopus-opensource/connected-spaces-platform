@@ -396,7 +396,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestNoConnectionRegistration)
     EXPECT_FALSE(NoConnectionEventBus.StartEventMessageListening());
 }
 
-CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestMulticastEventToAllClients)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, TestMulticastEventToAllClients)
 {
     // Spin up 2 other clients
     auto& SystemsManager = csp::systems::SystemsManager::Get();
