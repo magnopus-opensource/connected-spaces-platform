@@ -50,8 +50,8 @@ void ApplicationSettingsSystem::GetSettingsByContext(
 {
     GetSettingsByContext(ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
-            "ApplicationSettingsSystem::GetApplicationSettingsFromContext successfully retrieved application settings",
-            "Failed to get application settings", {}, {}, {}))
+            "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
+            {}, {}))
         .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
@@ -63,7 +63,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
 {
     GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
-            "ApplicationSettingsSystem::GetApplicationSettingsFromContext successfully retrieved application settings",
+            "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
         .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
         .then(common::continuations::InvokeIfExceptionInChain(
