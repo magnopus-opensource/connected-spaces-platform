@@ -73,7 +73,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
 void ApplicationSettingsSystem::GetContexts(const csp::common::String& ApplicationName, ApplicationSettingsContextsResultCallback Callback)
 {
     GetContexts(ApplicationName)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsContextsResult>(Callback,
             "ApplicationSettingsSystem::GetContexts successfully retrieved application settings contexts",
             "Failed to get application settings contexts", {}, {}, {}))
         .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings contexts."))
