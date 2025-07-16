@@ -49,10 +49,23 @@ class CSP_API ApplicationSettingsSystem : public SystemBase
     CSP_END_IGNORE
 
 public:
+    /// @brief Asynchronously retrieves application settings for a specific context.
+    /// @param ApplicationName csp::common::String : The name of the application for which settings are requested.
+    /// @param Context csp::common::String : The specific context whose settings should be retrieved.
+    /// @param Keys csp::common::Optional<csp::common::String> : List of setting keys to retrieve. If not provided, all settings for the context are
+    /// returned.
+    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys, ApplicationSettingsResultCallback Callback);
+
 private:
     ApplicationSettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     CSP_NO_EXPORT ApplicationSettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~ApplicationSettingsSystem();
+
+    // Application Settings Continuations
+    async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
+        const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
 
     csp::services::ApiBase* ApplicationSettingsAPI;
 };
