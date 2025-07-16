@@ -1311,7 +1311,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_TRUE(Components.HasKey(KeepKey));
     EXPECT_TRUE(Components.HasKey(DeleteKey));
 
-    mcs::ObjectMessage* Message = nullptr;
+    // uint64_t zero = 0;
+    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ItemComponentDataComponents = {};
+    mcs::ObjectMessage* Message
+        = new mcs::ObjectMessage(Object->GetId(), 43, false, true, 44, 45, ItemComponentDataComponents); // todo: this param is pointless
 
     // Test that the components have been created on the object
     SpaceEntity RetrievedObject;
