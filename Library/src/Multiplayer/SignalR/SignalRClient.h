@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 #pragma once
-#include "Web/WebClient.h"
+#include "Common/Web/WebClient.h"
 
 #include <atomic>
 #include <signalrclient/http_client.h>
 #include <signalrclient/signalr_client_config.h>
 #include <signalrclient/websocket_client.h>
-
-namespace csp::systems
-{
-
-class LoginState;
-class UserSystem;
-
-}
 
 namespace csp::multiplayer
 {
@@ -43,8 +35,6 @@ public:
     void receive(std::function<void(const std::string&, std::exception_ptr)> callback) override;
 
 private:
-    csp::systems::UserSystem* UserSystem;
-    const csp::systems::LoginState* LoginState;
     std::atomic_bool RefreshInitialised;
 };
 

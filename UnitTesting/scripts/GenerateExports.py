@@ -21,7 +21,7 @@ def main():
     os.mkdir("include")
 
     # Initialise Jinja environment
-    env = Environment(loader=FileSystemLoader("templates/exports"), extensions=["jinja2_workarounds.MultiLineInclude"])
+    env = Environment(loader=FileSystemLoader("templates/exports"))
 
     # Render exports
     header_template = env.get_template("exports.h.jinja2")

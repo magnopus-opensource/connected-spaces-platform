@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/LoginState.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/EventParameters.h"
@@ -55,7 +56,7 @@ public:
 
     /// @brief Get the current login state.
     /// @return LoginState : Current login state
-    const LoginState& GetLoginState() const;
+    const csp::common::LoginState& GetLoginState() const;
 
     /// @brief Sets a callback that will get fired when the login token has changed as a result of logging in with credentials or with a token or
     /// after the Connected Spaces Platform internal system has refreshed the session.
@@ -246,7 +247,7 @@ public:
 
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
+    UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
@@ -262,7 +263,7 @@ private:
     csp::services::ApiBase* ExternalServiceProxyApi;
     csp::services::ApiBase* StripeAPI;
 
-    LoginState CurrentLoginState;
+    csp::common::LoginState CurrentLoginState;
 
     LoginTokenInfoResultCallback RefreshTokenChangedCallback;
 

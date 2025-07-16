@@ -144,15 +144,15 @@ bool ScriptRuntime::ExistsInContext(int64_t ContextId, const csp::common::String
     return false;
 }
 
-void ScriptRuntime::RegisterScriptBinding(IScriptBinding* ScriptBinding) { Bindings.push_back(ScriptBinding); }
+void ScriptRuntime::RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.push_back(ScriptBinding); }
 
-void ScriptRuntime::UnregisterScriptBinding(IScriptBinding* ScriptBinding) { Bindings.remove(ScriptBinding); }
+void ScriptRuntime::UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding) { Bindings.remove(ScriptBinding); }
 
 void ScriptRuntime::BindContext(ScriptContext* Context)
 {
     for (auto Binding : Bindings)
     {
-        Binding->Bind(Context->GetId(), TheScriptSystem);
+        Binding->Bind(Context->GetId(), *TheScriptSystem);
     }
 }
 
@@ -160,13 +160,13 @@ void ScriptRuntime::ResetContext(ScriptContext* Context) { Context->Reset(); }
 
 void ScriptRuntime::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
     Modules[ModuleUrl.c_str()] = Source.c_str();
 }
 
 void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModuleUrlAlias: %s-%s\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
 
     UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
 

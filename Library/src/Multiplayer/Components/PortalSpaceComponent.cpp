@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
-
-#include "CSP/Systems/Spaces/SpaceSystem.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
-csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Portal, Parent)
+csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Portal, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(PortalPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(PortalPropertyKeys::IsActive)] = true;
@@ -42,13 +38,6 @@ const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() 
 void csp::multiplayer::PortalSpaceComponent::SetSpaceId(const csp::common::String& Value)
 {
     SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value);
-}
-
-void csp::multiplayer::PortalSpaceComponent::GetSpaceThumbnail(csp::systems::UriResultCallback Callback) const
-{
-    csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
-
-    SpaceSystem->GetSpaceThumbnail(GetSpaceId(), Callback);
 }
 
 /* IPositionComponent */

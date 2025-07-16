@@ -18,11 +18,11 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/ThirdPartyPlatforms.h"
 #include "SpaceEntitySystem.h"
 
 #include <atomic>
@@ -36,6 +36,11 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 #endif
 CSP_END_IGNORE
+
+namespace csp::common
+{
+class LogSystem;
+}
 
 namespace csp::multiplayer
 {
@@ -139,15 +144,16 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem);
+    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// @brief Creates a SpaceEntity giving the option to make it local only.
     SpaceEntity(SpaceEntitySystem* InEntitySystem, bool IsOwnedByLocalClient);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name,
-        const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable, bool IsPersistent, bool IsLocal);
+    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+        SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
+        bool IsPersistent, bool IsLocal);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -448,7 +454,9 @@ public:
 
     /// @brief Apply a local patch
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true);
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the SpaceEntitySystem state. Don't set this
+    /// unless you know what you are doing. (default: false)
+    CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
@@ -534,6 +542,9 @@ private:
 
     EntityScript Script;
     std::unique_ptr<EntityScriptInterface> ScriptInterface;
+
+    // May be null
+    csp::common::LogSystem* LogSystem = nullptr;
 
     CSP_START_IGNORE
     mutable std::mutex EntityMutexLock;

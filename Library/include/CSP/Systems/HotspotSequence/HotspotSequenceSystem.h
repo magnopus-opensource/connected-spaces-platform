@@ -45,8 +45,8 @@ public:
     /** @endcond */
     CSP_END_IGNORE
 
-    HotspotSequenceSystem(
-        csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem, csp::multiplayer::EventBus* InEventBus);
+    HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
+        csp::multiplayer::EventBus* InEventBus, csp::common::LogSystem& LogSystem);
     /// @brief Create a Hotspot group
     /// @param GroupName csp::common::String : The unique grouping name
     /// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
@@ -85,9 +85,10 @@ public:
 
     /// @brief This will delete any groups which only contain this item
     /// For any groups which contanin the given item and additional items, it will just update the group by removing the given item.
-    /// @param ItemName csp::common::String : An item to update all sequences containing.
+    /// @param ItemID csp::common::String : An item to update all sequences containing. Can be retrieved from a HotspotSpaceComponent via
+    /// HotspotSpaceComponent::GetUniqueComponentId
     /// @param Callback NullResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback);
+    CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback Callback);
 
     // Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedParams&)> HotspotSequenceChangedCallbackHandler;
@@ -105,7 +106,8 @@ public:
     CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
 private:
-    HotspotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    HotspotSequenceSystem(
+        csp::common::LogSystem& LogSystem); // This constructor is only provided to appease the wrapper generator and should not be used
     csp::systems::SequenceSystem* SequenceSystem;
     csp::systems::SpaceSystem* SpaceSystem;
 

@@ -44,13 +44,13 @@ namespace csp::systems
 {
 
 SettingsSystem::SettingsSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , SettingsAPI(nullptr)
 {
 }
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient)
-    : SystemBase(InWebClient, nullptr)
+SettingsSystem::SettingsSystem(web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, nullptr, &LogSystem)
 {
     SettingsAPI = new chs::SettingsApi(InWebClient);
 }
@@ -85,7 +85,7 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->apiV1UsersUserIdSettingsContextPut(UserId, InContext, InSettings, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextPut(UserId, InContext, InSettings, SettingsResponseHandler);
 }
 
 void SettingsSystem::GetSettingValue(const String& InContext, const String& InKey, StringResultCallback Callback) const
@@ -133,7 +133,7 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->apiV1UsersUserIdSettingsContextGet(UserId, InContext, MyKey, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextGet(UserId, InContext, MyKey, SettingsResponseHandler);
 }
 
 void SettingsSystem::SetNDAStatus(bool InValue, NullResultCallback Callback)
@@ -385,7 +385,7 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     static_cast<int>(UploadResult.GetResultCode()), UploadResult.GetHttpResultCode());
                             }
 
@@ -505,7 +505,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
                         {
                             if (UploadResult.GetResultCode() == EResultCode::Failed)
                             {
-                                CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+                                CSP_LOG_FORMAT(csp::common::LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                             }
 

@@ -40,7 +40,7 @@ class CSP_API SplineSpaceComponent : public ComponentBase
 public:
     /// @brief Constructs the spline space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    SplineSpaceComponent(SpaceEntity* Parent);
+    SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Generate a vector3 at a chosen position along the spline
     /// Note: Generates a cubic spline position from current Waypoints

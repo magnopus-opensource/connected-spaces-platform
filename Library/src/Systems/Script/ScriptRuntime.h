@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Common/Interfaces/IScriptBinding.h"
 #include "CSP/Common/String.h"
 
 #include <list>
@@ -31,13 +32,12 @@ namespace csp::systems
 
 class ScriptSystem;
 class ScriptContext;
-class IScriptBinding;
 
 class ScriptRuntime
 {
 public:
     using ContextMap = std::map<int64_t, ScriptContext*>;
-    using BindingList = std::list<IScriptBinding*>;
+    using BindingList = std::list<csp::common::IScriptBinding*>;
     using ModuleSourceMap = std::map<std::string, std::string>;
     using UrlAliasMap = std::map<std::string, std::string>;
 
@@ -53,8 +53,8 @@ public:
 
     bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
 
-    void RegisterScriptBinding(IScriptBinding* ScriptBinding);
-    void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
+    void RegisterScriptBinding(csp::common::IScriptBinding* ScriptBinding);
+    void UnregisterScriptBinding(csp::common::IScriptBinding* ScriptBinding);
 
     void BindContext(ScriptContext* Context);
     void ResetContext(ScriptContext* Context);

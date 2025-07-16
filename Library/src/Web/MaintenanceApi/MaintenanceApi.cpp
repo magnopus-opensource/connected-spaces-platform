@@ -17,13 +17,13 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
-#include "Web/HttpPayload.h"
-#include "Web/WebClient.h"
+#include "Common/Web/HttpPayload.h"
+#include "Common/Web/WebClient.h"
 
 namespace csp::systems::maintenanceservice
 {
 MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient)
-    : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)
+    : ApiBase(InWebClient, csp::CSPFoundation::GetEndpoints().AggregationService)
 {
 }
 

@@ -16,16 +16,13 @@
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Hotspot, Parent)
+HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Hotspot, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
@@ -98,14 +95,5 @@ void HotspotSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<u
 bool HotspotSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)); }
 
 void HotspotSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value); }
-
-void HotspotSpaceComponent::OnLocalDelete()
-{
-    auto CB = [](const csp::systems::NullResult& /*Result*/) {
-
-    };
-
-    systems::SystemsManager::Get().GetHotspotSequenceSystem()->RemoveItemFromGroups(GetUniqueComponentId(), CB);
-}
 
 } // namespace csp::multiplayer

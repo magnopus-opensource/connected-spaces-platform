@@ -17,6 +17,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Multiplayer/LocalScript/LocalScriptResult.h"
 
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
@@ -30,8 +31,6 @@
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
-
-#include <async++.h>
 
 using namespace csp;
 using namespace csp::common;
@@ -353,15 +352,15 @@ std::optional<EShaderType> GetShaderTypeFromMaterialCollectionArray(
 }
 
 AssetSystem::AssetSystem()
-    : SystemBase(nullptr, nullptr)
+    : SystemBase(nullptr, nullptr, nullptr)
     , PrototypeAPI(nullptr)
     , AssetDetailAPI(nullptr)
     , FileManager(nullptr)
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus)
-    : SystemBase(InWebClient, InEventBus)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus, common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, InEventBus, &LogSystem)
 {
     PrototypeAPI = new chs::PrototypeApi(InWebClient);
     AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
@@ -397,7 +396,7 @@ void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetColl
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
         Callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete(PrototypeId, ResponseHandler);
 }
 
 void AssetSystem::DeleteAssetById(const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback)
@@ -406,7 +405,7 @@ void AssetSystem::DeleteAssetById(const csp::common::String& AsseCollectiontId, 
         Callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdDelete(AsseCollectiontId, AssetId, ResponseHandler);
+        ->prototypesPrototypeIdAssetDetailsAssetDetailIdDelete(AsseCollectiontId, AssetId, ResponseHandler);
 }
 
 void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId, const Optional<String>& ParentAssetCollectionId,
@@ -426,7 +425,7 @@ void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId, const
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
             Callback, nullptr, web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesPost(PrototypeInfo, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesPost(PrototypeInfo, ResponseHandler);
 }
 
 async::task<AssetCollectionResult> AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common::String>& InSpaceId,
@@ -450,7 +449,7 @@ async::task<AssetCollectionResult> AssetSystem::CreateAssetCollection(const csp:
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
             [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesPost(PrototypeInfo, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesPost(PrototypeInfo, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -471,7 +470,7 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
         Callback, nullptr, web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete(PrototypeId, ResponseHandler);
 }
 
 async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection)
@@ -492,7 +491,7 @@ async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection
     services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
         [](const NullResult& /*s*/) {}, nullptr, web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdDelete(PrototypeId, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -525,8 +524,7 @@ void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollect
     csp::services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->apiV1PrototypesDelete(AssetCollectionIds, ResponseHandler, csp::common::CancellationToken::Dummy());
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesDelete(AssetCollectionIds, ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
 void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections, const csp::common::String& DestSpaceId,
@@ -576,7 +574,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 
     // Use `GET /api/v1/prototypes` and only pass asset collection IDs
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(std::nullopt, // Tags
+        ->prototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(std::nullopt, // Tags
             std::nullopt, // ExcludedTags
             std::nullopt, // TagsAll
             AssetCollectionIds, // const std::optional<std::vector<utility::string_t>>& Ids
@@ -609,7 +607,7 @@ void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetC
     services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdGet(AssetCollectionId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdGet(AssetCollectionId, ResponseHandler);
 }
 
 async::task<AssetCollectionResult> AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollectionId)
@@ -621,7 +619,7 @@ async::task<AssetCollectionResult> AssetSystem::GetAssetCollectionById(const csp
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
             [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdGet(AssetCollectionId, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdGet(AssetCollectionId, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -631,7 +629,7 @@ void AssetSystem::GetAssetCollectionByName(const String& AssetCollectionName, As
     services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesNameNameGet(AssetCollectionName, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesNameNameGet(AssetCollectionName, ResponseHandler);
 }
 
 void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const Optional<String>& ParentId, const Optional<Array<String>>& Names,
@@ -669,7 +667,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
             Callback, nullptr);
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->apiV1PrototypesGet(PrototypeTags, // Tags
+        ->prototypesGet(PrototypeTags, // Tags
             std::nullopt, // ExcludedTags
             std::nullopt, // TagsAll
             PrototypeIds, // Ids
@@ -735,7 +733,7 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
             [](const AssetCollectionsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->apiV1PrototypesGet(PrototypeTags, // Tags
+        ->prototypesGet(PrototypeTags, // Tags
             std::nullopt, // ExcludedTags
             std::nullopt, // TagsAll
             PrototypeIds, // Ids
@@ -771,7 +769,7 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
     services::ResponseHandlerPtr ResponseHandler
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
 }
 
 async::task<AssetCollectionResult> AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
@@ -788,7 +786,7 @@ async::task<AssetCollectionResult> AssetSystem::UpdateAssetCollectionMetadata(co
         = PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
             [](const AssetCollectionResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
-    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->prototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -823,7 +821,7 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
         csp::systems::AssetCollectionCountResult, void, services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
 
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->apiV1PrototypesCountGet(PrototypeTags, // Tags
+        ->prototypesCountGet(PrototypeTags, // Tags
             std::nullopt, // ExcludedTags
             std::nullopt, // TagsAll
             PrototypeIds, // Ids
@@ -887,7 +885,7 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const Stri
     services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
         Callback, nullptr, web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->apiV1PrototypesPrototypeIdAssetDetailsPost(AssetCollection.Id, AssetInfo, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->prototypesPrototypeIdAssetDetailsPost(AssetCollection.Id, AssetInfo, ResponseHandler);
 }
 
 async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const csp::common::String& Name,
@@ -937,7 +935,7 @@ async::task<AssetResult> AssetSystem::CreateAsset(const AssetCollection& AssetCo
     services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
         [](const AssetResult&) {}, nullptr, web::EResponseCodes::ResponseCreated, std::move(OnCompleteEvent));
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->apiV1PrototypesPrototypeIdAssetDetailsPost(AssetCollection.Id, AssetInfo, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->prototypesPrototypeIdAssetDetailsPost(AssetCollection.Id, AssetInfo, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -968,7 +966,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
     services::ResponseHandlerPtr ResponseHandler = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(
         Callback, nullptr, web::EResponseCodes::ResponseCreated);
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdPut(Asset.AssetCollectionId, Asset.Id, AssetInfo, ResponseHandler);
+        ->prototypesPrototypeIdAssetDetailsAssetDetailIdPut(Asset.AssetCollectionId, Asset.Id, AssetInfo, ResponseHandler);
 }
 
 void AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset, NullResultCallback Callback)
@@ -1001,7 +999,7 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
         = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesAssetDetailsGet(std::nullopt, // Ids
+        ->prototypesAssetDetailsGet(std::nullopt, // Ids
             std::nullopt, // SupportedPlatforms
             std::nullopt, // AssetTypes
             std::nullopt, // Styles
@@ -1021,8 +1019,7 @@ void AssetSystem::GetAssetById(const String& AssetCollectionId, const String& As
     services::ResponseHandlerPtr ResponseHandler
         = AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(Callback, nullptr);
 
-    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdGet(AssetCollectionId, AssetId, ResponseHandler);
+    static_cast<chs::AssetDetailApi*>(AssetDetailAPI)->prototypesPrototypeIdAssetDetailsAssetDetailIdGet(AssetCollectionId, AssetId, ResponseHandler);
 }
 
 void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, const Optional<Array<String>>& AssetIds,
@@ -1088,7 +1085,7 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, c
         = AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesAssetDetailsGet(AssetDetailIds, // Ids
+        ->prototypesAssetDetailsGet(AssetDetailIds, // Ids
             std::nullopt, // SupportedPlatforms
             AssetDetailTypes, // AssetTypes
             std::nullopt, // Styles
@@ -1171,7 +1168,7 @@ async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Ar
             [](const AssetsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesAssetDetailsGet(AssetDetailIds, // Ids
+        ->prototypesAssetDetailsGet(AssetDetailIds, // Ids
             std::nullopt, // SupportedPlatforms
             AssetDetailTypes, // AssetTypes
             std::nullopt, // Styles
@@ -1211,7 +1208,7 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
     // Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesAssetDetailsGet(std::nullopt, // Ids
+        ->prototypesAssetDetailsGet(std::nullopt, // Ids
             std::nullopt, // SupportedPlatforms
             std::nullopt, // AssetTypes
             std::nullopt, // Styles
@@ -1259,7 +1256,7 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, cons
         InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(
+        ->prototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(
             AssetCollection.Id, Asset.Id, std::nullopt, FormFile, ResponseHandler, CancellationToken);
 }
 
@@ -1284,7 +1281,7 @@ async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& Ass
         [](const UriResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-        ->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(
+        ->prototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(
             AssetCollection.Id, Asset.Id, std::nullopt, FormFile, ResponseHandler, CancellationToken);
 
     return OnCompleteTask;
@@ -2089,7 +2086,7 @@ void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
         return;
     }
 
-    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
+    csp::multiplayer::AssetChangedEventDeserialiser Deserialiser { *LogSystem };
     Deserialiser.Parse(EventValues);
 
     const csp::multiplayer::AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();

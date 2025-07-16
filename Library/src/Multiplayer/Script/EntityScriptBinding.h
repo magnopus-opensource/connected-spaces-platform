@@ -15,13 +15,14 @@
  */
 #pragma once
 
-#include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Common/Interfaces/IScriptBinding.h"
 #include "Debug/Logging.h"
 #include "quickjspp.hpp"
 
-namespace csp::systems
+namespace csp::common
 {
-class ScriptSystem;
+class LogSystem;
+class IJSScriptRunner;
 }
 
 namespace csp::multiplayer
@@ -31,24 +32,26 @@ class SpaceEntitySystem;
 
 class SpaceScriptInterface;
 
-class EntityScriptBinding : public csp::systems::IScriptBinding
+class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
-    EntityScriptBinding(SpaceEntitySystem* InEntitySystem, SpaceScriptInterface* InSpaceInterface);
+    EntityScriptBinding(SpaceEntitySystem* InEntitySystem, SpaceScriptInterface* InSpaceInterface, csp::common::LogSystem& LogSystem);
     void SetSpaceScriptInterface(SpaceScriptInterface* InSpaceInterface);
+    void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
     void BindLocalScriptRoot(qjs::Context* Context, qjs::Context::Module* Module, SpaceScriptInterface* SpaceInterface = nullptr);
-    virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
-    void BindWithSpaceInterface(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem, SpaceScriptInterface* SpaceInterface);
-    
+    void BindWithSpaceInterface(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner, SpaceScriptInterface* SpaceInterface);
 
-    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
-    static void RemoveBinding(EntityScriptBinding* InEntityBinding);
+
+    static EntityScriptBinding* BindEntitySystem(
+        SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+    static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
     SpaceEntitySystem* EntitySystem;
     qjs::Context* Context;
     SpaceScriptInterface* SpaceInterface;
+    csp::common::LogSystem& LogSystem;
 };
 
 } // namespace csp::multiplayer

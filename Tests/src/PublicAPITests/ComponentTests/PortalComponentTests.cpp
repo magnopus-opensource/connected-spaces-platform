@@ -51,35 +51,23 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    const char* TestSpaceName2 = "OLY-UNITTEST-SPACE-REWIND-2";
-    const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueSpaceName2[256];
-    SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
-
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
+    // Create space 2
     csp::systems::Space Space2;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName2, TestSpaceDescription2, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space2);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     csp::common::String PortalSpaceID;
 
     const csp::common::String UserName = "Player 1";
     const SpaceTransform UserTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    const bool IsVisible = true;
     const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String UserAvatarId = "MyCoolAvatar";
     const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
@@ -91,7 +79,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        const auto LoginState = UserSystem->GetLoginState();
+
+        auto [Avatar]
+            = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
         // Create object to represent the portal
         csp::common::String ObjectName = "Object 1";
@@ -118,7 +109,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-        auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        const auto LoginState = UserSystem->GetLoginState();
+
+        auto [Avatar]
+            = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -186,20 +180,11 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     };
 
     PortalComponent->SetSpaceId(Space.Id);
-    PortalComponent->GetSpaceThumbnail(Callback);
 
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    int64_t TestTime = 0;
+    // Get thumbnail using the space id.
+    SpaceSystem->GetSpaceThumbnail(PortalComponent->GetSpaceId(), Callback);
 
-    while (!HasThumbailResult && TestTime < 20)
-    {
-        std::this_thread::sleep_for(50ms);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-    }
-
+    WaitForCallback(HasThumbailResult);
     EXPECT_TRUE(HasThumbailResult);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -220,20 +205,13 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 

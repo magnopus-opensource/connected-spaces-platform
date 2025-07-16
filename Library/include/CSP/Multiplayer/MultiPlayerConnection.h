@@ -21,7 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Systems/Assets/Asset.h"
+#include "CSP/Multiplayer/MultiplayerHubMethods.h"
 
 #include <atomic>
 #include <functional>
@@ -39,14 +39,10 @@ template <typename T> class task;
 CSP_END_IGNORE
 }
 
-namespace csp::systems
+namespace csp::common
 {
-
-class SpaceSystem;
-class SystemsManager;
-class UserSystem;
-
-} // namespace csp::systems
+class LogSystem;
+}
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -67,16 +63,6 @@ enum class ConnectionState
     Connected,
     Disconnecting,
     Disconnected
-};
-
-/// @brief Enum used to indicate the failure state of a multiplayer request.
-enum class ErrorCode
-{
-    None,
-    Unknown,
-    NotConnected,
-    AlreadyConnected,
-    SpaceUserLimitExceeded
 };
 
 /// @ingroup Multiplayer
@@ -151,7 +137,10 @@ public:
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
     /// ownership of this pointer.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection);
+    /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
+    /// flow, prior to entity fetches.
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -192,7 +181,7 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection();
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -200,6 +189,10 @@ public:
     /// @brief End the multiplayer connection.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
     CSP_NO_EXPORT void Disconnect(ErrorCodeCallbackHandler Callback);
+
+    /// @brief Getter for the MultiplayerHubMethodMap
+    /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
+    CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -225,6 +218,8 @@ private:
     class NetworkEventManagerImpl* NetworkEventManager;
     class EventBus* EventBusPtr;
 
+    csp::common::LogSystem& LogSystem;
+
     uint64_t ClientId;
 
     DisconnectionCallbackHandler DisconnectionCallback;
@@ -235,6 +230,8 @@ private:
     uint32_t KeepAliveSeconds = 120;
 
     bool AllowSelfMessaging = false;
+
+    MultiplayerHubMethodMap MultiplayerHubMethods;
 };
 
 } // namespace csp::multiplayer

@@ -16,11 +16,11 @@
 
 #include "Awaitable.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "CSP/Web/HTTPResponseCodes.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -3128,6 +3128,57 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
     // Log out and log in as default user to clean up original space
     LogOut(UserSystem);
     LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ReEnterSpaceTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-TEST-SPACE";
+    const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Create default and alt users
+    csp::systems::Profile DefaultUser = CreateTestUser();
+    csp::systems::Profile AlternativeUser = CreateTestUser();
+
+    // Log in
+    LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // This is a regression test against the space entity system non initialising on re-entering a space
+    // Using Leader election enabled as a proxy as behind the scenes that just checks if the election manager is null, something that is set/unset
+    // during init/shutdown. This should hopefully be redundant soon as SpaceEntitySystem will be initialized by definition.
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_TRUE(SystemsManager.GetSpaceEntitySystem()->IsLeaderElectionEnabled());
+
+    // Leave the space
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_FALSE(SystemsManager.GetSpaceEntitySystem()->IsLeaderElectionEnabled());
+
+    // Re-enter the space
+    auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    ASSERT_EQ(ReEnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    ASSERT_TRUE(SystemsManager.GetSpaceEntitySystem()->IsLeaderElectionEnabled());
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);

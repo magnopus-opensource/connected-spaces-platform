@@ -22,6 +22,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 namespace csp::multiplayer
 {
@@ -79,17 +80,19 @@ enum class AvatarComponentPropertyKeys
     AvatarPlayMode,
     MovementDirection,
     LocomotionModel,
+    IsVisible,
+    IsARVisible,
     Num
 };
 
 // @ingroup AvatarSpaceComponent
 /// @brief Data representation of an AvatarSpaceComponent.
-class CSP_API AvatarSpaceComponent : public ComponentBase
+class CSP_API AvatarSpaceComponent : public ComponentBase, public IVisibleComponent
 {
 public:
     /// @brief Constructs the avatar space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    AvatarSpaceComponent(SpaceEntity* Parent);
+    AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the ID for the avatar of this avatar component.
     /// @note Used for selecting a specific avatar depending on the user's preferences.
@@ -268,6 +271,18 @@ public:
     /// @brief Sets which locomotion model this avatar component is using.
     /// @param Value The locomotion model used by this avatar component.
     void SetLocomotionModel(LocomotionModel Value);
+
+    /// \addtogroup IVisibleComponent
+    /// @{
+    /// @copydoc IVisibleComponent::GetIsVisible()
+    bool GetIsVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVisible()
+    void SetIsVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsARVisible()
+    bool GetIsARVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsARVisible()
+    void SetIsARVisible(bool InValue) override;
+    /// @}
 };
 
 } // namespace csp::multiplayer

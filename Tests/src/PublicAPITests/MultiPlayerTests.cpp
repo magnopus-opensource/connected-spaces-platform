@@ -16,12 +16,14 @@
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/CSPAsyncScheduler.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -43,8 +45,6 @@
 #include <chrono>
 #include <filesystem>
 #include <thread>
-
-#include <async++.h>
 
 #include "Mocks/SignalRConnectionMock.h"
 
@@ -129,12 +129,15 @@ void OnConnect(SpaceEntitySystem* EntitySystem)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     csp::common::String UserAvatarId = "MyCoolAvatar";
 
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem->CreateAvatar(UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode,
+    const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
+
+    EntitySystem->CreateAvatar(UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
         [EntitySystem](SpaceEntity* NewAvatar)
         {
             EXPECT_NE(NewAvatar, nullptr);
@@ -284,12 +287,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -308,8 +306,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -345,12 +342,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -362,8 +354,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     InitialiseTestingConnection();
 
@@ -395,12 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -412,8 +398,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     InitialiseTestingConnection();
 
@@ -449,12 +434,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -466,8 +446,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     InitialiseTestingConnection();
 
@@ -528,12 +507,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -545,8 +519,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -625,12 +598,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -638,8 +605,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -651,12 +617,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -679,6 +649,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
     EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
     EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
+    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -698,12 +669,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -711,8 +676,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -724,12 +688,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     const csp::common::String& UserName = "Creator 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolCreatorAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
     LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -752,6 +720,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
     EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
     EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
+    EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -865,12 +834,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -878,8 +841,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -891,11 +853,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     auto& Components = *Avatar->GetComponents();
@@ -932,12 +898,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -949,8 +910,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     InitialiseTestingConnection();
 
@@ -992,12 +952,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1005,8 +959,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1092,12 +1045,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1105,8 +1052,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1189,12 +1135,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1202,8 +1142,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1317,12 +1256,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -1334,8 +1268,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     bool Interrupted = false;
     bool Disconnected = false;
@@ -1347,15 +1280,18 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
-    auto [Avatar]
-        = Awaitable(&SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode)
-              .Await();
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = Awaitable(&SpaceEntitySystem::CreateAvatar, EntitySystem, UserName, LoginState, UserTransform, IsVisible, UserAvatarState,
+        UserAvatarId, UserAvatarPlayMode)
+                        .Await();
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
@@ -1397,20 +1333,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1464,12 +1393,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1477,8 +1400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1490,11 +1412,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar]
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     csp::common::String ObjectName = "Object 1";
@@ -1546,12 +1472,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1559,8 +1479,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1638,12 +1557,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
-    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::common::String UserId;
 
     // Log in
@@ -1651,8 +1564,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1700,15 +1612,8 @@ void RunParentEntityReplicationTest(bool Local)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1929,15 +1834,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2022,15 +1920,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2115,15 +2006,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2211,15 +2095,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2301,15 +2178,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ParentEntityEnterSpaceRepl
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2427,15 +2297,8 @@ void RunParentChildDeletionTest(bool Local)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2603,15 +2466,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2659,15 +2515,8 @@ void RunParentDeletionTest(bool Local)
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
     // Create space
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2911,6 +2760,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2927,13 +2777,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
     EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::Start, Error when starting SignalR connection.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2963,13 +2815,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
         Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -2979,17 +2833,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
 
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
-            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+            [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == "DeleteObjects")
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "GetClientId")
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
                 {
                     // Fail getting client Id
                     auto Value = signalr::value("Irrelevant value from GetClientId");
@@ -3012,13 +2866,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
         MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -3028,23 +2884,23 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
 
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
-            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+            [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == "DeleteObjects")
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "GetClientId")
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
                     return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), std::exception_ptr(nullptr)));
                 }
-                else if (HubMethodName == "StartListening")
+                else if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::START_LISTENING))
                 {
                     // Fail to start listening
                     auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
@@ -3065,13 +2921,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
     EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
 
@@ -3081,17 +2939,18 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
 
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
-            [](const std::string& HubMethodName, const signalr::value& /*Message*/,
+            [Connection](const std::string& HubMethodName, const signalr::value& /*Message*/,
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
-                if (HubMethodName == "DeleteObjects")
+                if (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::DELETE_OBJECTS))
                 {
                     // Succeed deleting objects
                     auto Value = signalr::value("Irrelevant value from DeleteObjects");
                     Callback(Value, nullptr);
                     return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
                 }
-                else if ((HubMethodName == "GetClientId") || (HubMethodName == "StartListening"))
+                else if ((HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GET_CLIENT_ID))
+                    || (HubMethodName == Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::START_LISTENING)))
                 {
                     // Succeed getting client Id
                     Callback(signalr::value(std::uint64_t(0)), nullptr);
@@ -3115,7 +2974,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
     EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
 
     Connection->SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
-    Connection->Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock);
+    Connection->Connect(
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
@@ -3137,7 +2997,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr };
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
 
     // Ensure the lock error message is called when we try and lock an entity that is already locked
     const csp::common::String LockErrorMsg = "Entity is already locked.";
@@ -3152,7 +3015,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockPrerequisitesTest)
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockPrerequisitesTest)
 {
     RAIIMockLogger MockLogger {};
-    SpaceEntity Entity { nullptr };
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
 
     // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
     const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";

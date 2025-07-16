@@ -15,12 +15,13 @@
  */
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
-
-#include "CallHelpers.h"
-#include "Debug/Logging.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/ResultHelpers.h"
+
+// Needs broken
+#include "CSP/Systems/SystemsManager.h"
 
 using namespace csp::systems;
 
@@ -29,13 +30,16 @@ namespace csp::multiplayer
 
 namespace
 {
-    bool EnsureValidConversationId(const csp::common::String& ConversationId)
+    bool EnsureValidConversationId(const csp::common::String& ConversationId, csp::common::LogSystem* LogSystem)
     {
         if (ConversationId.IsEmpty())
         {
-            CSP_LOG_MSG(LogLevel::Log,
-                "This component does not have an associated conversation. "
-                "Call CreateConversation to create a new conversation for this component");
+            if (LogSystem != nullptr)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Log,
+                    "This component does not have an associated conversation. "
+                    "Call CreateConversation to create a new conversation for this component");
+            }
             return false;
         }
 
@@ -43,8 +47,8 @@ namespace
     }
 }
 
-csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Conversation, Parent)
+csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Conversation, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)] = "";
     Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)] = true;
@@ -65,9 +69,16 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
     if (!ConversationId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("This component does not have an associated conversation. "
-                          "Call CreateConversation to create a new conversation for this component");
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "This component already has an associated conversation.");
+        }
+
+        if (Callback)
+        {
+            Callback(MakeInvalid<StringResult>());
+        }
+
         return;
     }
 
@@ -75,7 +86,10 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
     {
         // Set this components conversation id from the result.
         SetConversationId(Result.GetValue());
-        INVOKE_IF_NOT_NULL(Callback, Result);
+        if (Callback)
+        {
+            Callback(Result);
+        }
     };
 
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
@@ -86,9 +100,12 @@ void ConversationSpaceComponent::DeleteConversation(systems::NullResultCallback 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<NullResult>());
+        }
         return;
     }
 
@@ -100,9 +117,12 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<MessageResult>());
+        }
         return;
     }
 
@@ -114,9 +134,12 @@ void ConversationSpaceComponent::DeleteMessage(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<MessageResult>());
+        }
         return;
     }
 
@@ -129,9 +152,12 @@ void ConversationSpaceComponent::GetMessagesFromConversation(
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageCollectionResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<MessageCollectionResult>());
+        }
         return;
     }
 
@@ -143,9 +169,12 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<ConversationResult>());
+        }
         return;
     }
 
@@ -157,9 +186,12 @@ void ConversationSpaceComponent::UpdateConversation(const MessageUpdateParams& N
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<ConversationResult>());
+        }
         return;
     }
 
@@ -171,9 +203,12 @@ void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& Messa
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<MessageResult>());
+        }
         return;
     }
 
@@ -186,9 +221,12 @@ void ConversationSpaceComponent::UpdateMessage(
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<MessageResult>());
+        }
         return;
     }
 
@@ -200,9 +238,12 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NumberOfRepliesResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<NumberOfRepliesResult>());
+        }
         return;
     }
 
@@ -214,9 +255,12 @@ void ConversationSpaceComponent::GetConversationAnnotation(multiplayer::Annotati
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationResult>());
+        }
         return;
     }
 
@@ -230,9 +274,12 @@ void ConversationSpaceComponent::SetConversationAnnotation(const multiplayer::An
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<multiplayer::AnnotationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationResult>());
+        }
         return;
     }
 
@@ -244,9 +291,12 @@ void ConversationSpaceComponent::DeleteConversationAnnotation(systems::NullResul
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<NullResult>());
+        }
         return;
     }
 
@@ -258,9 +308,12 @@ void ConversationSpaceComponent::GetAnnotation(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationResult>());
+        }
         return;
     }
 
@@ -274,9 +327,12 @@ void ConversationSpaceComponent::SetAnnotation(const csp::common::String& Messag
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationResult>());
+        }
         return;
     }
 
@@ -288,9 +344,12 @@ void ConversationSpaceComponent::DeleteAnnotation(const csp::common::String& Mes
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationResult>());
+        }
         return;
     }
 
@@ -302,9 +361,12 @@ void ConversationSpaceComponent::GetAnnotationThumbnailsForConversation(multipla
 {
     const common::String& ConversationId = GetConversationId();
 
-    if (EnsureValidConversationId(ConversationId) == false)
+    if (EnsureValidConversationId(ConversationId, LogSystem) == false)
     {
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AnnotationThumbnailCollectionResult>());
+        if (Callback)
+        {
+            Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>());
+        }
         return;
     }
 

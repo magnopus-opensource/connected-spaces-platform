@@ -17,8 +17,8 @@
 
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spatial/PointOfInterestSystem.h"
+#include "Common/Web/WebClient.h"
 #include "Debug/Logging.h"
-#include "Web/WebClient.h"
 
 namespace csp::systems
 {
@@ -26,8 +26,8 @@ namespace csp::systems
 class PointOfInterestInternalSystem : public PointOfInterestSystem
 {
 public:
-    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient)
-        : PointOfInterestSystem(InWebClient) {};
+    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+        : PointOfInterestSystem(InWebClient, LogSystem) {};
 
     void CreateSite(const Site& Site, SiteResultCallback Callback) { PointOfInterestSystem::CreateSite(Site, Callback); };
 

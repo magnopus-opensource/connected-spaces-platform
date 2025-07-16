@@ -58,7 +58,7 @@ void ScriptContext::Initialise()
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, std::nullopt };
         }
 
-        CSP_LOG_FORMAT(LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
+        CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
 
         return qjs::Context::ModuleData { Url.c_str(), Source.c_str(), std::nullopt };
     };
@@ -92,7 +92,7 @@ ScriptModule* ScriptContext::GetModule(const csp::common::String& ModuleName)
 
 void ScriptContext::AddModule(const csp::common::String& ModuleName)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
 
     ModuleMap::iterator It = Modules.find(ModuleName.c_str());
 

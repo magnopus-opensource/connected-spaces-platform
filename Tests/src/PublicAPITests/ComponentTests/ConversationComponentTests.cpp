@@ -20,10 +20,10 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
@@ -578,8 +578,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr);
     }
 
-    static const csp::common::String AlreadyHasConversationErrorLog = "This component does not have an associated conversation. "
-                                                                      "Call CreateConversation to create a new conversation for this component";
+    static const csp::common::String AlreadyHasConversationErrorLog = "This component already has an associated conversation.";
 
     // Ensure CreateConversation errors and logs appropriately when a conversation has already been created
     {
@@ -1188,21 +1187,21 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     LogOut(UserSystem);
 }
 
-// This test is to be fixed as part of OF-1645.
 /*
 Tests that the CreateConversaiton event is correctly received and processed by other clients.
 Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
 correctly when receiving the component property from a patch, which has been created by the ConversationSpaceComponent::CreateConversation call.
 */
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    // Create user
+    // Create users
     auto TestUser = CreateTestUser();
+    auto TestUser2 = CreateTestUser();
 
     // Log in
     csp::common::String UserId;
@@ -1210,10 +1209,24 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
 
     // Create space
     csp::systems::Space Space;
-    CreateDefaultTestSpace(SpaceSystem, Space);
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::systems::InviteUserRoleInfo InviteUser;
+    InviteUser.UserEmail = TestUser2.Email;
+    InviteUser.UserRole = csp::systems::SpaceUserRole::Moderator;
+    csp::systems::InviteUserRoleInfoCollection InviteUsers;
+    InviteUsers.InviteUserRoleInfos = { InviteUser };
+
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, InviteUsers, nullptr, nullptr, Space);
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Get conversation component created by other client
     SpaceEntity* Entity = nullptr;
@@ -1223,7 +1236,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
     MultiplayerTestRunnerProcess CreateConversationRunner
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_CONVERSATION)
               .SetSpaceId(Space.Id.c_str())
-              .SetLoginEmail(TestUser.Email.c_str())
+              .SetLoginEmail(TestUser2.Email.c_str())
               .SetPassword(GeneratedTestAccountPassword)
               .SetEndpoint(EndpointBaseURI())
               .SetTimeoutInSeconds(60);
@@ -1237,8 +1250,11 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
         EntitySystem->SetEntityCreatedCallback(
             [EntitySystem, &CallbackCalled, &Entity](csp::multiplayer::SpaceEntity* NewEntity)
             {
-                Entity = NewEntity;
-                CallbackCalled = true;
+                if (NewEntity->GetName() == "TestObject")
+                {
+                    Entity = NewEntity;
+                    CallbackCalled = true;
+                }
             });
 
         // Start other client
@@ -1256,12 +1272,15 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
             [&ComponentCreated, &ConversationComponent](
                 SpaceEntity* Entity, SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>& Components)
             {
-                for (size_t i = 0; i < Components.Size(); ++i)
+                if (Entity->GetName() == "TestObject")
                 {
-                    if (Components[i].UpdateType == ComponentUpdateType::Add)
+                    for (size_t i = 0; i < Components.Size(); ++i)
                     {
-                        ConversationComponent = static_cast<ConversationSpaceComponent*>(Entity->GetComponent(0));
-                        ComponentCreated = true;
+                        if (Components[i].UpdateType == ComponentUpdateType::Add)
+                        {
+                            ConversationComponent = static_cast<ConversationSpaceComponent*>(Entity->GetComponent(0));
+                            ComponentCreated = true;
+                        }
                     }
                 }
             });
@@ -1335,12 +1354,11 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentSeco
     LogOut(UserSystem);
 }
 
-// This test is to be fixed as part of OF-1645.
 /*
 Tests that other clients can't Delete other clients messages, or edit other clients conversations or messages.
 Other clients can still delete other conversations, as components/entities dont have any restrictions.
 */
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -1373,6 +1391,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPerm
     {
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Ensure patch rate limiting is off, as we're sending patches in quick succession.
+        EntitySystem->SetEntityPatchRateLimitEnabled(false);
 
         // Create object to represent the conversation
         csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
@@ -1414,9 +1435,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPerm
         csp::common::String SecondTestUserId;
         LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
-
         EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         bool EntitiesRetrieved = false;
@@ -1429,6 +1447,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ConversationTests, ConversationComponentPerm
                     EntitiesRetrieved = true;
                 }
             });
+
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
         WaitForCallbackWithUpdate(EntitiesRetrieved, EntitySystem);
 

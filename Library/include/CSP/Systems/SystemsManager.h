@@ -22,6 +22,11 @@
 #include <chrono>
 #include <functional>
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::systems
 {
 
@@ -35,7 +40,6 @@ class LocalScriptSystem;
 class PointOfInterestSystem;
 class PointOfInterestInternalSystem;
 class AnchorSystem;
-class LogSystem;
 class SettingsSystem;
 class GraphQLSystem;
 class AnalyticsSystem;
@@ -114,7 +118,7 @@ public:
 
     /// @brief Retrieves the Log system.
     /// @return LogSystem : pointer to the Log system class
-    LogSystem* GetLogSystem();
+    csp::common::LogSystem* GetLogSystem();
 
     /// @brief Retrieves the Settings system.
     /// @return SettingsSystem : pointer to the Settings system class
@@ -185,7 +189,7 @@ private:
     VoipSystem* VoipSystem;
     PointOfInterestInternalSystem* PointOfInterestSystem;
     AnchorSystem* AnchorSystem;
-    LogSystem* LogSystem;
+    csp::common::LogSystem* LogSystem;
     SettingsSystem* SettingsSystem;
     GraphQLSystem* GraphQLSystem;
     AnalyticsSystem* AnalyticsSystem;

@@ -50,7 +50,7 @@ class CSP_API HotspotSpaceComponent : public ComponentBase, public IPositionComp
 public:
     /// @brief Constructs the Hotspot space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
-    HotspotSpaceComponent(SpaceEntity* Parent);
+    HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the Name of the Hotspot.
     /// @return The Name of the Hotspot.
@@ -106,9 +106,6 @@ public:
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
     /// @}
-
-private:
-    void OnLocalDelete() override;
 };
 
 } // namespace csp::multiplayer

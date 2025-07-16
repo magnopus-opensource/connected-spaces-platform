@@ -16,7 +16,6 @@
 
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 
-#include "Debug/Logging.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
 namespace
@@ -31,8 +30,8 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 namespace csp::multiplayer
 {
 
-CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Collision, Parent)
+CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Collision, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };

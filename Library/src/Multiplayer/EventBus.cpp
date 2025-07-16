@@ -15,14 +15,15 @@
  */
 #include "CSP/Multiplayer/EventBus.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemBase.h"
-#include "CallHelpers.h"
-#include "Debug/Logging.h"
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 
-#include <async++.h>
+#include "CSP/Common/CSPAsyncScheduler.h"
+#include <fmt/format.h>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -34,7 +35,8 @@ constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 EventBus::~EventBus() { }
 
-EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection)
+EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
+    : LogSystem(LogSystem)
 {
     MultiplayerConnectionInst = InMultiplayerConnection;
     SystemsNetworkEventMap = {};
@@ -45,8 +47,7 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
 {
     if (!System)
     {
-        std::string ErrorMessage = "Error: Expected non-null system.";
-        CSP_LOG_ERROR_FORMAT("%s", ErrorMessage.c_str());
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Expected non-null system.");
         return;
     }
 
@@ -54,7 +55,7 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
     {
         if (CallbacksNetworkEventMap[EventName])
         {
-            CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.", EventName.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Error, fmt::format("Error: there is already a callback registered for {}.", EventName).c_str());
             return;
         }
     }
@@ -64,11 +65,12 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
     {
         if (SystemsNetworkEventMap[EventName] != System)
         {
-            CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s. Deregister it first.", EventName.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Error: there is already a system registered for {}. Deregister it first.", EventName).c_str());
         }
         else
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "This system is already registered for %s.", EventName.c_str());
+            LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("This system is already registered for {}.", EventName).c_str());
         }
         return;
     }
@@ -80,16 +82,16 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, Paramete
 {
     if (!Callback)
     {
-        std::string ErrorMessage = "Error: Expected non-null callback.";
-        CSP_LOG_ERROR_FORMAT("%s", ErrorMessage.c_str());
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Expected non-null callback.");
         return;
     }
 
     if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()
         && SystemsNetworkEventMap[EventName])
     {
-        CSP_LOG_ERROR_FORMAT(
-            "Error: there is already a system registered for %s. Deregister the system before registering a callback.", EventName.c_str());
+        LogSystem.LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Error: there is already a system registered for {}. Deregister the system before registering a callback.", EventName)
+                .c_str());
         return;
     }
 
@@ -98,7 +100,8 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, Paramete
         if (CallbacksNetworkEventMap[EventName])
         {
             // We cannot compare callbacks, so we can't know whether it is the same callback that is already set. Therefore, we always update it
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "The callback set for %s was overwritten with a new callback.", EventName.c_str());
+            LogSystem.LogMsg(
+                csp::common::LogLevel::VeryVerbose, fmt::format("The callback set for {} was overwritten with a new callback.", EventName).c_str());
         }
     }
 
@@ -123,7 +126,7 @@ void EventBus::StartEventMessageListening()
 {
     if (MultiplayerConnectionInst->GetSignalRConnection() == nullptr)
     {
-        CSP_LOG_ERROR_MSG("Error : Multiplayer connection is unavailable, EventBus cannot start listening to events.");
+        LogSystem.LogMsg(csp::common::LogLevel::Error, "Error : Multiplayer connection is unavailable, EventBus cannot start listening to events.");
         return;
     }
 
@@ -131,13 +134,13 @@ void EventBus::StartEventMessageListening()
     {
         if (Result.is_null())
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "Event values were empty.");
+            LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "Event values were empty.");
             return;
         }
 
         if (CallbacksNetworkEventMap.empty() && SystemsNetworkEventMap.empty())
         {
-            CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "Event map was empty.");
+            LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "Event map was empty.");
             return;
         }
 
@@ -147,7 +150,8 @@ void EventBus::StartEventMessageListening()
         if (CallbacksNetworkEventMap.find(EventType) == CallbacksNetworkEventMap.end()
             && SystemsNetworkEventMap.find(EventType) == SystemsNetworkEventMap.end())
         {
-            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Event %s is no longer registered to, discarding...", EventType.c_str());
+            LogSystem.LogMsg(
+                csp::common::LogLevel::VeryVerbose, fmt::format("Event {} is no longer registered to, discarding...", EventType).c_str());
             return;
         }
 
@@ -158,7 +162,7 @@ void EventBus::StartEventMessageListening()
         else if (CallbacksNetworkEventMap.find(EventType) != CallbacksNetworkEventMap.end())
         {
             // For everything else, use the generic deserialiser
-            EventDeserialiser Deserialiser;
+            EventDeserialiser Deserialiser { LogSystem };
             Deserialiser.Parse(EventValues);
 
             CallbacksNetworkEventMap[EventType](true, Deserialiser.GetEventData());

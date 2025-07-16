@@ -31,6 +31,11 @@ class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_T
 #endif
 CSP_END_IGNORE
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 
@@ -152,7 +157,9 @@ public:
 
 protected:
     ComponentBase();
-    ComponentBase(ComponentType Type, SpaceEntity* Parent);
+
+    // The LogSystem input may be null, components do not _have_ to log.
+    ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     const ReplicatedValue& GetProperty(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;
@@ -195,6 +202,9 @@ protected:
     csp::common::Map<uint32_t, ReplicatedValue> DirtyProperties;
 
     ComponentScriptInterface* ScriptInterface;
+
+    // May be null, should check before use.
+    csp::common::LogSystem* LogSystem = nullptr;
 
     csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
 

@@ -15,10 +15,11 @@
  */
 
 #include "../PublicAPITests/UserSystemTestHelpers.h"
+#include "Common/Web/WebClient.h"
 #include "Multiplayer/WebSocketClient.h"
-#include "Web/WebClient.h"
 
-csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri);
+csp::multiplayer::IWebSocketClient* WebSocketStart(
+    const csp::common::String& Uri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
 void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient);
 void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const csp::common::String& Data);
