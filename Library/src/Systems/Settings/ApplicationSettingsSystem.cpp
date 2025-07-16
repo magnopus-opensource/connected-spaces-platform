@@ -57,6 +57,19 @@ void ApplicationSettingsSystem::GetSettingsByContext(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
 
+void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& Tenant, const csp::common::String& ApplicationName,
+    const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys,
+    ApplicationSettingsResultCallback Callback)
+{
+    GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+            "ApplicationSettingsSystem::GetApplicationSettingsFromContext successfully retrieved application settings",
+            "Failed to get application settings", {}, {}, {}))
+        .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
+}
+
 async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContext(const csp::common::String& ApplicationName,
     const csp::common::String& Context, const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys)
 {
@@ -70,6 +83,24 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
     // TODO: [OF-1710] include use of 'const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys'
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->applicationsApplicationNameSettingsContextGet(ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
+
+    return OnCompleteTask;
+}
+
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common::String& Tenant,
+    const csp::common::String& ApplicationName, const csp::common::String& Context,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    services::ResponseHandlerPtr SettingsResponseHandler
+        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+    // TODO: [OF-1710] include use of 'const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys'
+    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
+        ->tenantsTenantApplicationsApplicationNameSettingsContextGet(Tenant, ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
 
     return OnCompleteTask;
 }
