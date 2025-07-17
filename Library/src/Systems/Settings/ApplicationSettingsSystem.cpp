@@ -45,6 +45,17 @@ ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* InWebC
 
 ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (ApplicationSettingsAPI); }
 
+void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback)
+{
+    CreateSettingsByContext(ApplicationSettings)
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+            "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
+            {}, {}, {}))
+        .then(systems::continuations::ReportSuccess(Callback, "Successfully created application settings."))
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
+}
+
 void ApplicationSettingsSystem::GetSettingsByContext(
     const String& ApplicationName, const String& Context, const Optional<Array<String>>& Keys, ApplicationSettingsResultCallback Callback)
 {
@@ -52,7 +63,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
             {}, {}))
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings."))
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
@@ -65,7 +76,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings."))
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
@@ -76,9 +87,29 @@ void ApplicationSettingsSystem::GetContexts(const csp::common::String& Applicati
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsContextsResult>(Callback,
             "ApplicationSettingsSystem::GetContexts successfully retrieved application settings contexts",
             "Failed to get application settings contexts", {}, {}, {}))
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully retrieved application settings contexts."))
+        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings contexts."))
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsContextsResult>()); }, *LogSystem));
+}
+
+async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
+    async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    services::ResponseHandlerPtr SettingsResponseHandler
+        = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+
+    auto Request = std::make_shared<chs::ApplicationSettingsDto>();
+    Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
+    Request->SetSettings(Convert(ApplicationSettings.Settings));
+
+    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
+        ->applicationsApplicationNameSettingsContextPut(
+            ApplicationSettings.ApplicationName, ApplicationSettings.Context, Request, SettingsResponseHandler);
+
+    return OnCompleteTask;
 }
 
 async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByContext(const csp::common::String& ApplicationName,
