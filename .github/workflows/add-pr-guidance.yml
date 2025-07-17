@@ -1,14 +1,16 @@
 # Name of the workflow as it appears in the GitHub Actions tab
 name: Add PR Review Guidance Comment
 
-# Trigger the workflow when a pull request is opened / reopened
+# Trigger the workflow when a pull request is opened / reopened - this will run in the context of the base repository
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
 
 # Grant write access to pull requests (this is necessary to add comments)
 permissions:
   pull-requests: write
+  # Comments are considered issues in GitHub
+  issues: write
 
 # Define a single job named 'add-guidance-comment'
 jobs:
