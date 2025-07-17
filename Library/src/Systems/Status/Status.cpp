@@ -23,8 +23,8 @@
 namespace csp::systems
 {
 
-const StatusInfo& StatusInfoResult::GetLatestStatusInfo() const { return StatusInfoResponse; }
+const ServicesDeploymentStatus& ServicesDeploymentStatusResult::GetLatestServicesDeploymentStatus() const { return ServicesDeploymentStatusResponse; }
 
-void StatusInfoResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
+void ServicesDeploymentStatusResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }
 
 } // namespace csp::systems

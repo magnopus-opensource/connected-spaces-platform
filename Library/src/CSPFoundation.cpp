@@ -399,9 +399,9 @@ const csp::common::String& CSPFoundation::GetClientUserAgentString() { return *C
 
 const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
-bool ServiceDefinition::CheckPrerequisites(const csp::systems::StatusInfo& StatusInfo) const
+bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
 {
-    // Extract the reverse proxy from the URI to be used as key in StatusInfo
+    // Extract the reverse proxy from the URI to be used as key in ServicesDeploymentStatus
     const auto ReverseProxy = [](const csp::common::String URI) -> csp::common::String
     {
         // Extracts and returns the last segment of a URI path by splitting it on '/'.
@@ -412,11 +412,11 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::StatusInfo& Statu
         return "";
     }(this->GetURI());
 
-    // Find the ServiceInfo that correlates with the reverse proxy
-    const auto ServiceInfo = std::find_if(StatusInfo.Services.begin(), StatusInfo.Services.end(),
-        [ReverseProxy](csp::systems::ServiceInfo ServiceInfo) { return ServiceInfo.ReverseProxy == ReverseProxy; });
+    // Find the ServiceStatus that correlates with the reverse proxy
+    const auto ServiceStatus = std::find_if(ServicesDeploymentStatus.Services.begin(), ServicesDeploymentStatus.Services.end(),
+        [ReverseProxy](csp::systems::ServiceStatus ServiceStatus) { return ServiceStatus.ReverseProxy == ReverseProxy; });
 
-    if (!ServiceInfo)
+    if (!ServiceStatus)
     {
         const auto Message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy);
 
@@ -424,41 +424,40 @@ bool ServiceDefinition::CheckPrerequisites(const csp::systems::StatusInfo& Statu
         return false;
     }
 
-    // Find the ServiceVersionInfo that correlates with the expected version of the service
-    const auto ServiceVersionInfo = std::find_if(ServiceInfo->ApiVersions.begin(), ServiceInfo->ApiVersions.end(),
-        [this](csp::systems::ServiceVersionInfo ServiceVersionInfo)
-        { return ServiceVersionInfo.Version.c_str() == fmt::format("v{0}", this->GetVersion()); });
+    // Find the VersionMetadata that correlates with the expected version of the service
+    const auto VersionMetadata = std::find_if(ServiceStatus->ApiVersions.begin(), ServiceStatus->ApiVersions.end(),
+        [this](csp::systems::VersionMetadata VersionMetadata) { return VersionMetadata.Version.c_str() == fmt::format("v{0}", this->GetVersion()); });
 
     static constexpr auto Documentation = "https://connected-spaces-platform.net/index.html";
 
     // Validate that the current service exists in the array; if not, the service has been retired by the live services.
-    if (ServiceInfo != StatusInfo.Services.end()
-        && ServiceVersionInfo == ServiceInfo->ApiVersions.end()) // The current version in use has been retired.
+    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
+        && VersionMetadata == ServiceStatus->ApiVersions.end()) // The current version in use has been retired.
     {
         const auto Message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name, this->GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
+            ServiceStatus->Name, this->GetVersion(), ServiceStatus->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
         return false;
     }
 
     // Validate that the current service has deprecation information; if so, the service has been deprecated by the live services.
-    if (ServiceInfo != StatusInfo.Services.end()
-        && !ServiceVersionInfo->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
+    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
+        && !VersionMetadata->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
     {
         const auto Message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
-            ServiceInfo->Name, this->GetVersion(), ServiceVersionInfo->DeprecationDatetime, ServiceInfo->CurrentApiVersion, Documentation);
+            ServiceStatus->Name, this->GetVersion(), VersionMetadata->DeprecationDatetime, ServiceStatus->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
         return true;
     }
 
     // Validate that the current service version matches the current; if not, the service has a newer version available on the live services.
-    if (ServiceInfo != StatusInfo.Services.end()
-        && ServiceVersionInfo->Version != ServiceInfo->CurrentApiVersion) // The current version in use is not the latest available.
+    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
+        && VersionMetadata->Version != ServiceStatus->CurrentApiVersion) // The current version in use is not the latest available.
     {
         const auto Message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
-            ServiceInfo->Name, this->GetVersion(), ServiceInfo->CurrentApiVersion, Documentation);
+            ServiceStatus->Name, this->GetVersion(), ServiceStatus->CurrentApiVersion, Documentation);
 
         CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
         return true;
