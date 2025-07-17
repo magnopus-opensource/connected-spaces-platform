@@ -166,16 +166,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
     // Setup script to set new properties
     std::string ConversationScriptText = R"xx(
-			var conversation = ThisEntity.getConversationComponents()[0];
-			conversation.isVisible = false;
-			conversation.isActive = false;
-			conversation.position = [1,2,3];
-			conversation.rotation = [4,5,6,7];
+            var conversation = ThisEntity.getConversationComponents()[0];
+            conversation.isVisible = false;
+            conversation.isActive = false;
+            conversation.position = [1,2,3];
+            conversation.rotation = [4,5,6,7];
             conversation.title = "TestTitle";
             conversation.resolved = true;
             conversation.conversationCameraPosition = [8, 9, 10];
             conversation.conversationCameraRotation = [11, 12, 13, 14];
-		)xx";
+        )xx";
 
     Object->GetScript().SetScriptSource(ConversationScriptText.c_str());
     Object->GetScript().Invoke();
@@ -2818,6 +2818,380 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationThu
         const char* Data2 = static_cast<const char*>(DownloadAnnotationResult2.GetData());
         std::vector<char> DataV2(Data2, Data2 + strlen(Data2));
         EXPECT_EQ(TestThumbnailData2V, DataV2);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+/*
+ * Tests that the annotation for a conversation can be retrieved after updating the conversation.
+ */
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateConversationGetAnnotationTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    csp::common::String ConversationId;
+    csp::common::String MessageId;
+
+    // Ensure callback values are correct when calling ConversationComponent::CreateConversation
+    {
+        static constexpr const char* TestMessage = "TestConversation";
+        auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestMessage);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(Result.GetValue() != "");
+
+        ConversationId = Result.GetValue();
+    }
+
+    static const csp::common::Vector3 TestConversationAuthorCameraPosition { 1.f, 2.f, 3.f };
+    static const csp::common::Vector4 TestConversationAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
+    static constexpr const float TestConversationFov = 90.f;
+
+    std::vector<char> TestAnnotationDataV = PngHeader;
+    TestAnnotationDataV.push_back('1');
+    std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+    TestAnnotationDataV.push_back('2');
+
+    // Create annotation attached to conversation
+    {
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = TestConversationAuthorCameraPosition;
+        Data.AuthorCameraRotation = TestConversationAuthorCameraRotation;
+        Data.VerticalFov = TestConversationFov;
+
+        csp::systems::BufferAssetDataSource AnnotationBufferData;
+        AnnotationBufferData.Buffer = TestAnnotationDataV.data();
+        AnnotationBufferData.BufferLength = TestAnnotationDataV.size();
+        AnnotationBufferData.SetMimeType("image/png");
+
+        csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailDataV.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailDataV.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
+
+        auto [Result] = AWAIT_PRE(
+            ConversationComponent, SetConversationAnnotation, RequestPredicate, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestConversationAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestConversationAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestConversationFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
+    }
+
+    // Get conversation annotation and ensure data still matches
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationAnnotation, RequestPredicate);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestConversationAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestConversationAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestConversationFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
+    }
+
+    // Update the conversation
+    {
+        static constexpr const char* TestMessage = "TestConversation2";
+
+        MessageUpdateParams NewData;
+        NewData.NewMessage = TestMessage;
+
+        auto [Result] = AWAIT(ConversationComponent, UpdateConversation, NewData);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetConversationInfo();
+
+        EXPECT_EQ(Info.ConversationId, ConversationId);
+        EXPECT_TRUE(Info.CreatedTimestamp != "");
+
+        // Value should now be edited
+        EXPECT_TRUE(Info.EditedTimestamp != "");
+        EXPECT_EQ(Info.UserId, UserId);
+
+        // Message should be updated with the new value
+        EXPECT_EQ(Info.Message, TestMessage);
+        EXPECT_EQ(Info.MessageId, "");
+    }
+
+    // Get conversation annotation again and ensure data still matches
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetConversationAnnotation, RequestPredicate);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestConversationAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestConversationAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestConversationFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationDataV, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailDataV, ThumbnailDataV);
+    }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+/*
+ * Tests that the annotation for a message can be retrieved after updating the message.
+ */
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateMessageGetAnnotationTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    // Login
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    csp::common::String ConversationId;
+    csp::common::String MessageId;
+
+    // Ensure callback values are correct when calling ConversationComponent::CreateConversation
+    {
+        static constexpr const char* TestMessage = "TestConversation";
+        auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestMessage);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_TRUE(Result.GetValue() != "");
+
+        ConversationId = Result.GetValue();
+    }
+
+    static const csp::common::Vector3 TestConversationAuthorCameraPosition { 1.f, 2.f, 3.f };
+    static const csp::common::Vector4 TestConversationAuthorCameraRotation { 4.f, 5.f, 6.f, 7.f };
+    static constexpr const float TestConversationFov = 90.f;
+
+    std::vector<char> TestAnnotationDataV = PngHeader;
+    TestAnnotationDataV.push_back('1');
+    std::vector<char> TestAnnotationThumbnailDataV = PngHeader;
+    TestAnnotationDataV.push_back('2');
+
+    // Ensure callback values are correct when calling ConversationComponent::CreateMessage
+    {
+        static constexpr const char* TestMessage = "TestMessage";
+
+        auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessageInfo();
+        MessageId = Info.MessageId;
+    }
+
+    static const csp::common::Vector3 TestAuthorCameraPosition { 8.f, 9.f, 10.f };
+    static const csp::common::Vector4 TestAuthorCameraRotation { 11.f, 12.f, 13.f, 14.f };
+    static constexpr const float TestFov = 100.f;
+
+    std::vector<char> TestAnnotationData2V = PngHeader;
+    TestAnnotationData2V.push_back('3');
+    std::vector<char> TestAnnotationThumbnailData2V = PngHeader;
+    TestAnnotationData2V.push_back('4');
+
+    // Create annotation attached to message
+    {
+        AnnotationUpdateParams Data;
+        Data.AuthorCameraPosition = TestAuthorCameraPosition;
+        Data.AuthorCameraRotation = TestAuthorCameraRotation;
+        Data.VerticalFov = TestFov;
+
+        csp::systems::BufferAssetDataSource AnnotationBufferData;
+        AnnotationBufferData.Buffer = TestAnnotationData2V.data();
+        AnnotationBufferData.BufferLength = TestAnnotationData2V.size();
+        AnnotationBufferData.SetMimeType("image/png");
+
+        csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
+        AnnotationThumbnailBufferData.Buffer = TestAnnotationThumbnailData2V.data();
+        AnnotationThumbnailBufferData.BufferLength = TestAnnotationThumbnailData2V.size();
+        AnnotationThumbnailBufferData.SetMimeType("image/png");
+
+        auto [Result]
+            = AWAIT_PRE(ConversationComponent, SetAnnotation, RequestPredicate, MessageId, Data, AnnotationBufferData, AnnotationThumbnailBufferData);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationData2V, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailDataV(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailData2V, ThumbnailDataV);
+    }
+
+    // Get annotation and ensure data still matches
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotation, RequestPredicate, MessageId);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationData2V, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailData2V(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailData2V, ThumbnailData2V);
+    }
+
+    // Ensure callback values are correct when calling ConversationComponent::UpdateMessage
+    {
+        static constexpr const char* TestMessage = "TestMessage2";
+
+        MessageUpdateParams NewData;
+        NewData.NewMessage = TestMessage;
+
+        auto [Result] = AWAIT(ConversationComponent, UpdateMessage, MessageId, NewData);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::MessageInfo& Info = Result.GetMessageInfo();
+
+        EXPECT_EQ(Info.ConversationId, ConversationId);
+        EXPECT_TRUE(Info.CreatedTimestamp != "");
+        // Value should now be edited
+        EXPECT_TRUE(Info.EditedTimestamp != "");
+        EXPECT_EQ(Info.UserId, UserId);
+        // Message should be updated with the new value
+        EXPECT_EQ(Info.Message, TestMessage);
+        EXPECT_EQ(Info.MessageId, MessageId);
+    }
+
+    // Get annotation again and ensure data still matches
+    {
+        auto [Result] = AWAIT_PRE(ConversationComponent, GetAnnotation, RequestPredicate, MessageId);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const csp::multiplayer::AnnotationData& RetrievedData = Result.GetAnnotationData();
+
+        EXPECT_TRUE((RetrievedData.AuthorCameraPosition == TestAuthorCameraPosition));
+        EXPECT_TRUE((RetrievedData.AuthorCameraRotation == TestAuthorCameraRotation));
+        EXPECT_EQ(RetrievedData.VerticalFov, TestFov);
+
+        auto [DownloadAnnotationResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationAsset());
+        EXPECT_EQ(DownloadAnnotationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultData = static_cast<const char*>(DownloadAnnotationResult.GetData());
+        std::vector<char> DataV(ResultData, ResultData + strlen(ResultData));
+        EXPECT_EQ(TestAnnotationData2V, DataV);
+
+        auto [DownloadAnnotationThumbnailResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Result.GetAnnotationThumbnailAsset());
+        EXPECT_EQ(DownloadAnnotationThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        const char* ResultAnnotationData = static_cast<const char*>(DownloadAnnotationThumbnailResult.GetData());
+        std::vector<char> ThumbnailData2V(ResultAnnotationData, ResultAnnotationData + strlen(ResultAnnotationData));
+        EXPECT_EQ(TestAnnotationThumbnailData2V, ThumbnailData2V);
     }
 
     // Delete space
