@@ -265,6 +265,102 @@ namespace
 
         return MultiplayerServiceURI;
     }
+
+    /// @brief Extracts and returns the last segment of a URI path by splitting it on '/'.
+    /// e.g. 'https://www.magnopus.com/connected-spaces-platform' -> 'connected-spaces-platform'
+    /// @return csp::common::String : empty string if not successful, otherwise the remaining stting.
+    csp::common::String ExtractReverseProxyFromUri(const csp::common::String& URI)
+    {
+        if (auto const Split = URI.Split('/'); Split.Size() != 0)
+            return Split[Split.Size() - 1];
+
+        return "";
+    }
+
+    static constexpr auto DocumentationUri = "https://connected-spaces-platform.net/index.html";
+
+    /// @brief Tries to find the ServiceStatus for a given reverse proxy.
+    /// @return csp::systems::ServiceStatus* : nullptr if not found, otherwise a pointer to the ServiceStatus.
+    const csp::systems::ServiceStatus* FindServiceStatus(
+        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& ReverseProxy)
+    {
+        const auto ServiceStatusIt = std::find_if(ServicesDeploymentStatus.Services.begin(), ServicesDeploymentStatus.Services.end(),
+            [&ReverseProxy](const csp::systems::ServiceStatus& status) { return status.ReverseProxy == ReverseProxy; });
+
+        if (ServiceStatusIt == ServicesDeploymentStatus.Services.end())
+        {
+            const auto message = fmt::format("Unable to resolve {} Reverse Proxy in Status Info", ReverseProxy);
+            CSP_LOG_MSG(csp::common::LogLevel::Error, message.c_str());
+            return nullptr;
+        }
+        return &(*ServiceStatusIt);
+    }
+
+    /// @brief Tries to find the VersionMetadata for an expected API version within a ServiceStatus.
+    /// @return csp::systems::VersionMetadata* : nullptr if not found, otherwise a pointer to the VersionMetadata.
+    const csp::systems::VersionMetadata* FindVersionMetadata(const csp::systems::ServiceStatus& ServiceStatus, uint32_t ExpectedVersion)
+    {
+        const auto versionMetadataIt = std::find_if(ServiceStatus.ApiVersions.begin(), ServiceStatus.ApiVersions.end(),
+            [ExpectedVersion](const csp::systems::VersionMetadata& metadata)
+            { return metadata.Version.c_str() == fmt::format("v{}", ExpectedVersion); });
+
+        if (versionMetadataIt == ServiceStatus.ApiVersions.end())
+        {
+            return nullptr;
+        }
+        return &(*versionMetadataIt);
+    }
+
+    /// @brief Handles validation for the "retired" state of a service.
+    /// @return bool : true if the service is retired (and logs fatal), false otherwise.
+    bool HandleRetiredState(const csp::systems::ServiceStatus& ServiceStatus, uint32_t CurrentVersion)
+    {
+        const auto Message = fmt::format("{} v{} has been retired, the latest version is {}. For more information please visit: {}",
+            ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
+        CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+        return true;
+    }
+
+    /// @brief Handles validation for the "deprecated" state of a service.
+    /// @return bool : true if the service is deprecated (and logs warning), false otherwise.
+    bool HandleDeprecatedState(
+        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& versionMetadata, uint32_t CurrentVersion)
+    {
+        if (!versionMetadata.DeprecationDatetime.IsEmpty())
+        {
+            const auto Message = fmt::format("{} v{} will be deprecated as of {}, the latest version is {}. For more information please visit: {}",
+                ServiceStatus.Name, CurrentVersion, versionMetadata.DeprecationDatetime, ServiceStatus.CurrentApiVersion, DocumentationUri);
+            CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Handles validation for the "available (older version)" state of a service.
+    /// @return bool : true if a newer version is available (and logs info), false otherwise.
+    bool HandleOlderVersionAvailableState(
+        const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata, uint32_t CurrentVersion)
+    {
+        if (VersionMetadata.Version != ServiceStatus.CurrentApiVersion)
+        {
+            const auto Message = fmt::format("{} v{} is not the latest available, the latest version is {}. For more information please visit: {}",
+                ServiceStatus.Name, CurrentVersion, ServiceStatus.CurrentApiVersion, DocumentationUri);
+            CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Handles validation for the "latest (older version)" state of a service.
+    /// @return bool : true if the latest version, false otherwise.
+    bool HandleLatestVersionState(const csp::systems::ServiceStatus& ServiceStatus, const csp::systems::VersionMetadata& VersionMetadata)
+    {
+        if (VersionMetadata.Version == ServiceStatus.CurrentApiVersion)
+        {
+            return true;
+        }
+        return false;
+    }
 }
 
 EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI)
@@ -401,69 +497,70 @@ const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
 bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
 {
-    // Extract the reverse proxy from the URI to be used as key in ServicesDeploymentStatus
-    const auto ReverseProxy = [](const csp::common::String URI) -> csp::common::String
-    {
-        // Extracts and returns the last segment of a URI path by splitting it on '/'.
-        // e.g. 'https://www.magnopus.com/connected-spaces-platform' -> 'connected-spaces-platform'
-        if (auto const Split = URI.Split('/'); Split.Size() != 0)
-            return Split[Split.Size() - 1];
+    // Extract the reverse proxy from the service's URI.
+    // The reverse proxy is a unique identifier used to locate the service's deployment status.
+    const auto ReverseProxy = ExtractReverseProxyFromUri(this->GetURI());
 
-        return "";
-    }(this->GetURI());
-
-    // Find the ServiceStatus that correlates with the reverse proxy
-    const auto ServiceStatus = std::find_if(ServicesDeploymentStatus.Services.begin(), ServicesDeploymentStatus.Services.end(),
-        [ReverseProxy](csp::systems::ServiceStatus ServiceStatus) { return ServiceStatus.ReverseProxy == ReverseProxy; });
-
+    // Evaluate State: Service Not Found (Highest Priority)
+    // Attempt to find the overall status of the service within the provided deployment status.
+    // If the service's reverse proxy is not found in the deployment status,
+    // it implies the service is not deployed or recognized by the system.
+    // This is a critical failure, and the prerequisite check immediately returns false.
+    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, ReverseProxy);
     if (!ServiceStatus)
     {
-        const auto Message = fmt::format("Unable to resolve {0} Reverse Proxy in Status Info", ReverseProxy);
-
-        CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
         return false;
     }
 
-    // Find the VersionMetadata that correlates with the expected version of the service
-    const auto VersionMetadata = std::find_if(ServiceStatus->ApiVersions.begin(), ServiceStatus->ApiVersions.end(),
-        [this](csp::systems::VersionMetadata VersionMetadata) { return VersionMetadata.Version.c_str() == fmt::format("v{0}", this->GetVersion()); });
+    // Retrieve the specific version metadata for this service definition's version.
+    const auto VersionMetadata = FindVersionMetadata(*ServiceStatus, this->GetVersion());
 
-    static constexpr auto Documentation = "https://connected-spaces-platform.net/index.html";
-
-    // Validate that the current service exists in the array; if not, the service has been retired by the live services.
-    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
-        && VersionMetadata == ServiceStatus->ApiVersions.end()) // The current version in use has been retired.
+    // Evaluate State: Retired (Second Highest Priority)
+    // A service version is considered 'retired' if the currently expected version
+    // (from this ServiceDefinition's configuration) is no longer listed or supported
+    // in the live service's API versions. This often means the version has been
+    // completely removed from the live environment and is no longer operational.
+    // This is a fatal condition, and the prerequisite check immediately returns false.
+    if (!VersionMetadata)
     {
-        const auto Message = fmt::format("{0} v{1} has been retired, the latest version is {2}. For more information please visit: {3}",
-            ServiceStatus->Name, this->GetVersion(), ServiceStatus->CurrentApiVersion, Documentation);
-
-        CSP_LOG_MSG(csp::common::LogLevel::Fatal, Message.c_str());
+        HandleRetiredState(*ServiceStatus, this->GetVersion());
         return false;
     }
 
-    // Validate that the current service has deprecation information; if so, the service has been deprecated by the live services.
-    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
-        && !VersionMetadata->DeprecationDatetime.IsEmpty()) // The current version in use has been marked as deprecated.
+    // Evaluate State: Deprecated (Third Highest Priority)
+    // A service version is 'deprecated' if it is still active and functional,
+    // but its continued use is discouraged. It typically means the service
+    // will be retired at a future date (indicated by DeprecationDatetime)
+    // and clients should migrate to a newer version.
+    // For prerequisite checks, a deprecated service is generally still considered
+    // 'valid enough to run', but a warning is logged to inform the user.
+    if (HandleDeprecatedState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
     {
-        const auto Message = fmt::format("{0} v{1} will be deprecated as of {2}, the latest version is {3}. For more information please visit: {4}",
-            ServiceStatus->Name, this->GetVersion(), VersionMetadata->DeprecationDatetime, ServiceStatus->CurrentApiVersion, Documentation);
-
-        CSP_LOG_MSG(csp::common::LogLevel::Warning, Message.c_str());
         return true;
     }
 
-    // Validate that the current service version matches the current; if not, the service has a newer version available on the live services.
-    if (ServiceStatus != ServicesDeploymentStatus.Services.end()
-        && VersionMetadata->Version != ServiceStatus->CurrentApiVersion) // The current version in use is not the latest available.
+    // Evaluate State: Older Version Available (Fourth Highest Priority)
+    // This state indicates that the service version being used is functional
+    // but is not the absolute latest version available on the live system.
+    // It implies there's a newer, fully supported version that clients could upgrade to.
+    // This is typically an informational message, not a blocking error for prerequisites.
+    if (HandleOlderVersionAvailableState(*ServiceStatus, *VersionMetadata, this->GetVersion()))
     {
-        const auto Message = fmt::format("{0} v{1} is not the latest available, the latest version is {2}. For more information please visit: {3}",
-            ServiceStatus->Name, this->GetVersion(), ServiceStatus->CurrentApiVersion, Documentation);
-
-        CSP_LOG_MSG(csp::common::LogLevel::Log, Message.c_str());
         return true;
     }
 
-    return true;
+    // Evaluate State: Latest Version (Lowest Priority)
+    // If none of the above conditions (service not found, retired, deprecated, or older version)
+    // are met, then the service's current version is the latest and fully supported version
+    // available on the live system. This is the ideal and expected state.
+    if (HandleLatestVersionState(*ServiceStatus, *VersionMetadata))
+    {
+        return true;
+    }
+
+    // Fallback in the event that the service's state could not be definitively validated.
+    CSP_LOG_MSG(csp::common::LogLevel::Error, "ServiceDefinition::CheckPrerequisites: Unable to validate service state.");
+    return false;
 }
 
 void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
