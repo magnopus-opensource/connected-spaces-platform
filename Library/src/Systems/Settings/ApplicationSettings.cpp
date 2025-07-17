@@ -28,7 +28,7 @@ namespace
 
 void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& Dto, csp::systems::ApplicationSettings& ApplicationSettings)
 {
-    if (Dto.GetApplicationName())
+    if (Dto.HasApplicationName())
         ApplicationSettings.ApplicationName = Dto.GetApplicationName();
 
     if (Dto.HasContext())
