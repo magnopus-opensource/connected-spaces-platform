@@ -50,7 +50,7 @@ public:
     csp::common::String Context;
 
     /// @brief Flag indicating whether anonymous access is allowed.
-    /// If true, the application can operate without user authentication.
+    /// If true, an anonymous user can access these settings.
     bool AllowAnonymous;
 
     /// @brief A key-value store of arbitrary application settings.
