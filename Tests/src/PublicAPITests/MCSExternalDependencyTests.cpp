@@ -31,37 +31,38 @@ using namespace csp::common;
 namespace
 {
 
-csp::systems::ServiceVersionInfo CreateServiceVersionInfo(const String& Version, const String& DeprecationDatetime)
+csp::systems::VersionMetadata CreateVersionMetadata(const String& Version, const String& DeprecationDatetime)
 {
-    auto ServiceVersionInfo = csp::systems::ServiceVersionInfo();
+    auto VersionMetadata = csp::systems::VersionMetadata();
 
-    ServiceVersionInfo.Version = Version;
-    ServiceVersionInfo.DeprecationDatetime = DeprecationDatetime;
+    VersionMetadata.Version = Version;
+    VersionMetadata.DeprecationDatetime = DeprecationDatetime;
 
-    return ServiceVersionInfo;
+    return VersionMetadata;
 }
 
-csp::systems::ServiceInfo CreateServiceInfo(
-    const String& ReverseProxy, const String& Name, const Array<csp::systems::ServiceVersionInfo> ApiVersions, const String& CurrentApiVersion)
+csp::systems::ServiceStatus CreateServiceStatus(
+    const String& ReverseProxy, const String& Name, const Array<csp::systems::VersionMetadata> ApiVersions, const String& CurrentApiVersion)
 {
-    auto ServiceInfo = csp::systems::ServiceInfo();
+    auto ServiceStatus = csp::systems::ServiceStatus();
 
-    ServiceInfo.ReverseProxy = ReverseProxy;
-    ServiceInfo.Name = Name;
-    ServiceInfo.ApiVersions = ApiVersions;
-    ServiceInfo.CurrentApiVersion = CurrentApiVersion;
+    ServiceStatus.ReverseProxy = ReverseProxy;
+    ServiceStatus.Name = Name;
+    ServiceStatus.ApiVersions = ApiVersions;
+    ServiceStatus.CurrentApiVersion = CurrentApiVersion;
 
-    return ServiceInfo;
+    return ServiceStatus;
 }
 
-csp::systems::StatusInfo CreateStatusInfo(const String& ContainerVersion, const Array<csp::systems::ServiceInfo> Services)
+csp::systems::ServicesDeploymentStatus CreateServicesDeploymentStatus(
+    const String& ContainerVersion, const Array<csp::systems::ServiceStatus> Services)
 {
-    auto StatusInfo = csp::systems::StatusInfo();
+    auto ServicesDeploymentStatus = csp::systems::ServicesDeploymentStatus();
 
-    StatusInfo.ContainerVersion = ContainerVersion;
-    StatusInfo.Services = Services;
+    ServicesDeploymentStatus.ContainerVersion = ContainerVersion;
+    ServicesDeploymentStatus.Services = Services;
 
-    return StatusInfo;
+    return ServicesDeploymentStatus;
 }
 }
 
@@ -69,13 +70,13 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
 {
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
-    // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
-    auto UserServiceServiceInfo
-        = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
-    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
+    // Create a dummy response for ServicesDeploymentStatus containing the user service
+    auto VersionMetadata = CreateVersionMetadata(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
+    auto UserServiceServiceStatus
+        = CreateServiceStatus("mag-user", "User Service", { VersionMetadata }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
+    auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("2.0.1-{GUID}", { UserServiceServiceStatus });
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_TRUE(result);
 }
 
@@ -90,10 +91,10 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     const String ErrorMsg = "Unable to resolve mag-user Reverse Proxy in Status Info";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    // Create a dummy response for StatusInfo containing the invalid information
-    auto StatusInfo = CreateStatusInfo("", {});
+    // Create a dummy response for ServicesDeploymentStatus containing the invalid information
+    auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("", {});
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_FALSE(result);
 }
 
@@ -104,17 +105,17 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
 
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
-    // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfo("v2", "");
-    auto UserServiceServiceInfo = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, "v2");
-    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
+    // Create a dummy response for ServicesDeploymentStatus containing the user service
+    auto VersionMetadata = CreateVersionMetadata("v2", "");
+    auto UserServiceServiceStatus = CreateServiceStatus("mag-user", "User Service", { VersionMetadata }, "v2");
+    auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("2.0.1-{GUID}", { UserServiceServiceStatus });
 
     // Validate that the retired code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 has been retired, the latest version is v2. For more information please visit: "
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_FALSE(result);
 }
 
@@ -125,18 +126,18 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
 
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
-    // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "YYYY-MM-DDThh:mm:ss.sTZD");
-    auto UserServiceServiceInfo
-        = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
-    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
+    // Create a dummy response for ServicesDeploymentStatus containing the user service
+    auto VersionMetadata = CreateVersionMetadata(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "YYYY-MM-DDThh:mm:ss.sTZD");
+    auto UserServiceServiceStatus
+        = CreateServiceStatus("mag-user", "User Service", { VersionMetadata }, fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str());
+    auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("2.0.1-{GUID}", { UserServiceServiceStatus });
 
     // Validate that the deprecated code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 will be deprecated as of YYYY-MM-DDThh:mm:ss.sTZD, the latest version is v1. For more information "
                             "please visit: https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_TRUE(result);
 }
 
@@ -147,17 +148,17 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
 
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
-    // Create a dummy response for StatusInfo containing the user service
-    auto ServiceVersionInfo = CreateServiceVersionInfo(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
-    auto UserServiceServiceInfo = CreateServiceInfo("mag-user", "User Service", { ServiceVersionInfo }, "v{Infinity}");
-    auto StatusInfo = CreateStatusInfo("2.0.1-{GUID}", { UserServiceServiceInfo });
+    // Create a dummy response for ServicesDeploymentStatus containing the user service
+    auto VersionMetadata = CreateVersionMetadata(fmt::format("v{0}", Endpoints.UserService.GetVersion()).c_str(), "");
+    auto UserServiceServiceStatus = CreateServiceStatus("mag-user", "User Service", { VersionMetadata }, "v{Infinity}");
+    auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("2.0.1-{GUID}", { UserServiceServiceStatus });
 
     // Validate that the latest available version code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 is not the latest available, the latest version is v{Infinity}. For more information please visit: "
                             "https://connected-spaces-platform.net/index.html";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
-    auto const result = Endpoints.UserService.CheckPrerequisites(StatusInfo);
+    auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_TRUE(result);
 }
 

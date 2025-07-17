@@ -36,7 +36,7 @@ namespace csp::systems
 
 /// @ingroup Status System
 /// @brief Stores the version and deprecation information for a service
-class CSP_API ServiceVersionInfo
+class CSP_API VersionMetadata
 {
 public:
     /// @brief The version identifier of the service's API (e.g., "v1").
@@ -49,7 +49,7 @@ public:
 
 /// @ingroup Status System
 /// @brief Stores information about a service, including available versions
-class CSP_API ServiceInfo
+class CSP_API ServiceStatus
 {
 public:
     /// @brief The reverse proxy endpoint or base URL through which the service is accessed.
@@ -59,7 +59,7 @@ public:
     csp::common::String Name;
 
     /// @brief A list of all available API versions for the service, along with their metadata.
-    csp::common::Array<ServiceVersionInfo> ApiVersions;
+    csp::common::Array<VersionMetadata> ApiVersions;
 
     /// @brief The currently active API version; this version is guaranteed to be stable and supported.
     csp::common::String CurrentApiVersion;
@@ -67,7 +67,7 @@ public:
 
 /// @ingroup Status System
 /// @brief Store information about the current service deployment
-class CSP_API StatusInfo
+class CSP_API ServicesDeploymentStatus
 {
 public:
     /// @brief The version identifier of the service container or deployment package.
@@ -75,12 +75,12 @@ public:
     csp::common::String ContainerVersion;
 
     /// @brief A list of services available in the current deployment, with their metadata and API versions.
-    csp::common::Array<ServiceInfo> Services;
+    csp::common::Array<ServiceStatus> Services;
 };
 
 /// @ingroup Status System
 /// @brief Data class used to contain information when a Response is received from the Status Server
-class CSP_API StatusInfoResult : public csp::systems::ResultBase
+class CSP_API ServicesDeploymentStatusResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
@@ -90,20 +90,20 @@ class CSP_API StatusInfoResult : public csp::systems::ResultBase
     /** @endcond */
 
 public:
-    /// @brief Will return info for the latest available status information from the server
-    /// @return StatusInfo : The latest status information
-    [[nodiscard]] const StatusInfo& GetLatestStatusInfo() const;
+    /// @brief Will return services deployment status for the latest available deployment from the server
+    /// @return ServicesDeploymentStatus : The latest services deployment status
+    [[nodiscard]] const ServicesDeploymentStatus& GetLatestServicesDeploymentStatus() const;
 
 private:
-    StatusInfoResult() {};
-    StatusInfoResult(void*) {};
+    ServicesDeploymentStatusResult() {};
+    ServicesDeploymentStatusResult(void*) {};
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-    StatusInfo StatusInfoResponse;
+    ServicesDeploymentStatus ServicesDeploymentStatusResponse;
 };
 
-/// @brief Callback containing a StatusInfo result used when creating or retrieving a StatusInfo.
-/// @param Result StatusInfoResult : Data class containing information on task result/progress
-typedef std::function<void(const StatusInfoResult& Result)> StatusInfoCallback;
+/// @brief Callback containing a ServicesDeploymentStatus result used when creating or retrieving a ServicesDeploymentStatus.
+/// @param Result ServicesDeploymentStatusResult : Data class containing information on task result/progress
+typedef std::function<void(const ServicesDeploymentStatusResult& Result)> ServicesDeploymentStatusCallback;
 
 } // namespace csp::systems
