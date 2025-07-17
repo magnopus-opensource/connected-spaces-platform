@@ -72,7 +72,7 @@ class CSP_API ServicesDeploymentStatus
 public:
     /// @brief The version identifier of the service container or deployment package.
     /// Typically reflects the software release version (e.g., "{Major}.{Minor}.{Patch}[-{Prerelease Tag}][+{Build Number}]").
-    csp::common::String ContainerVersion;
+    csp::common::String Version;
 
     /// @brief A list of services available in the current deployment, with their metadata and API versions.
     csp::common::Array<ServiceStatus> Services;
