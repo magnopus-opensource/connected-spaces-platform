@@ -139,7 +139,6 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
             [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
-    // TODO: [OF-1710] include use of 'const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys'
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->tenantsTenantApplicationsApplicationNameSettingsContextGet(Tenant, ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
 
