@@ -49,6 +49,12 @@ class CSP_API ApplicationSettingsSystem : public SystemBase
     CSP_END_IGNORE
 
 public:
+    /// @brief Asynchronously creates or updates application settings for a specific context.
+    /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
+    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
+    CSP_NO_EXPORT CSP_ASYNC_RESULT void CreateSettingsByContext(
+        const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
+
     /// @brief Asynchronously retrieves application settings for a specific context.
     /// @param ApplicationName csp::common::String : The name of the application for which settings are requested.
     /// @param Context csp::common::String : The specific context whose settings should be retrieved.
@@ -80,6 +86,7 @@ private:
     ~ApplicationSettingsSystem();
 
     // Application Settings Continuations
+    async::task<ApplicationSettingsResult> CreateSettingsByContext(const ApplicationSettings& ApplicationSettings);
     async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
     async::task<ApplicationSettingsResult> GetSettingsByContextAnonymous(const csp::common::String& Tenant,
