@@ -54,12 +54,11 @@ csp::systems::ServiceStatus CreateServiceStatus(
     return ServiceStatus;
 }
 
-csp::systems::ServicesDeploymentStatus CreateServicesDeploymentStatus(
-    const String& ContainerVersion, const Array<csp::systems::ServiceStatus> Services)
+csp::systems::ServicesDeploymentStatus CreateServicesDeploymentStatus(const String& Version, const Array<csp::systems::ServiceStatus> Services)
 {
     auto ServicesDeploymentStatus = csp::systems::ServicesDeploymentStatus();
 
-    ServicesDeploymentStatus.ContainerVersion = ContainerVersion;
+    ServicesDeploymentStatus.Version = Version;
     ServicesDeploymentStatus.Services = Services;
 
     return ServicesDeploymentStatus;
