@@ -390,6 +390,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Iso, "iso")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, ShutterSpeed, "shutterSpeed")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, Aperture, "aperture")
+        .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsEnabled, "isEnabled")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
 
     Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
