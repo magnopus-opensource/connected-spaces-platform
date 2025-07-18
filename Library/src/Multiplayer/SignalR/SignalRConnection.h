@@ -25,6 +25,11 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
 CSP_END_IGNORE
 
+namespace csp::common
+{
+class IAuthContext;
+}
+
 namespace csp::multiplayer
 {
 
@@ -37,7 +42,8 @@ public:
 
     typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
 
-    SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient);
+    SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient,
+        csp::common::IAuthContext& AuthContext);
     virtual ~SignalRConnection();
 
     void Start(std::function<void(std::exception_ptr)> Callback) override;

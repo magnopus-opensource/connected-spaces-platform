@@ -70,8 +70,8 @@ const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
 EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : WebClient(InPort, Tp, AuthContext, LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 

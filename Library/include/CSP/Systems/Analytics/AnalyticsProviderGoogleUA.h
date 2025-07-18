@@ -19,6 +19,11 @@
 
 #include <chrono>
 
+namespace csp::common
+{
+class IAuthContext;
+}
+
 namespace csp::web
 {
 class WebClient;
@@ -32,7 +37,7 @@ namespace csp::systems
 class AnalyticsProviderGoogleUA : public IAnalyticsProvider
 {
 public:
-    AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag);
+    AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag, csp::common::IAuthContext& AuthContext);
 
     CSP_START_IGNORE
     void Log(AnalyticsEvent* Event) override;
