@@ -81,10 +81,11 @@ public:
     static void CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, csp::common::ReplicatedValue& Value);
     static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value);
 
+        static void ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value); // OR HACK - TEMPORARY
+
 private:
     template <typename T> void ReadValue(uint16_t Key, T& Value) const;
 
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value);
     static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector3& Value);

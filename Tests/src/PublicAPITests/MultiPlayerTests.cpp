@@ -1248,11 +1248,18 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
 
 void GetSpaceEntityById(csp::multiplayer::mcs::ObjectMessage* Object, const uint64_t Id, csp::multiplayer::SpaceEntity& OutSpaceEntity)
 {
-    auto [Result] = Awaitable(&csp::multiplayer::mcs::ObjectMessage::GetObjectById, Object, static_cast<uint32_t>(Id)).Await(RequestPredicate);
+    // The first parameter (Object) exists solely for the purpose of Awaitable/AWAIT_PRE. They require the object GetObjectById is called on.
+    // I think the reason why the endpoint cannot find the objects is down to this parameter being unneeded or wrong. I have tried with an empty
+    // ObjectMessage first, then dummy values, then I have tried to fill it with the actual data from the SpaceEntity and Components, but
+    // Result.GetObjectMessage() always seems to be an empty object
 
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    // auto [Result] = Awaitable(&csp::multiplayer::mcs::ObjectMessage::GetObjectById, Object, static_cast<uint32_t>(Id)).Await(RequestPredicate); //
+    // both this and next line are equivalent.
+    auto [Result] = AWAIT_PRE(Object, GetObjectById, RequestPredicate, static_cast<uint32_t>(Id));
 
-    OutSpaceEntity.FromObjectMessage(Result.GetObjectMessage());
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success); // always failed
+
+    OutSpaceEntity.FromObjectMessage(Result.GetObjectMessage()); // always empty
 }
 
 // new test. not working yet:the CHS endpoint returns a 404, object not found, error
@@ -1313,14 +1320,32 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpa
     EXPECT_TRUE(Components.HasKey(KeepKey));
     EXPECT_TRUE(Components.HasKey(DeleteKey));
 
-    // uint64_t zero = 0;
-    const std::optional<std::map<PropertyKeyType, ItemComponentData>>& ItemComponentDataComponents = {};
-    mcs::ObjectMessage* Message
-        = new mcs::ObjectMessage(Object->GetId(), 43, false, true, 44, 45, ItemComponentDataComponents); // todo: this param is pointless
+    /// the sole purpose of this is to try to assign the same values as the real component to the bogus/dummy ObjectMessage parameter
+    std::map<PropertyKeyType, ItemComponentData> ItemComponentDataComponents;
+    mcs::ItemComponentData ComponentValue;
+    mcs::ItemComponentData OutComponentData;
+    MCSComponentPacker ComponentPacker;
+
+    auto ComponentKeys = Components.Keys();
+    for (size_t i = 0; i < ComponentKeys->Size(); ++i)
+    {
+        ComponentBase* Component = Components[ComponentKeys->operator[](i)];
+        uint16_t id = Component->GetId();
+
+        ComponentPacker.WriteValue(id, Component);
+        auto UpdatedComponents = ComponentPacker.GetComponents();
+
+        ComponentValue = UpdatedComponents[0];
+        ItemComponentDataComponents[static_cast<unsigned short>(i)] = ComponentValue;
+    }
+    delete (ComponentKeys);
+
+    mcs::ObjectMessage* Message = new mcs::ObjectMessage(Object->GetId(), 43, false, true, 44, 45, ItemComponentDataComponents); // todo: fix this
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Test that the components have been created on the object
     SpaceEntity RetrievedObject;
-    GetSpaceEntityById(Message, Object->GetId(), RetrievedObject);
+    GetSpaceEntityById(Message, Object->GetId(), RetrievedObject); // 404 error, objects not found
     auto& RetrievedComponents = *RetrievedObject.GetComponents();
 
     EXPECT_EQ(RetrievedComponents.Size(), 2);
