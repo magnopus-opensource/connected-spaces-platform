@@ -1226,6 +1226,22 @@ void SpaceEntity::FromObjectMessage(const mcs::ObjectMessage& Message)
                 break;
             }
 
+            // completely untested. the idea is to avoid calling ComponentFromItemComponentData when the component's contents have been set to
+            // ItemComponentDataType::DELETE_COMPONENT this is to avoid the error in ComponentFromItemComponentData when this is the case
+            int ErrorCounter = 0;
+            try
+            {
+                uint64_t Value;
+                MCSComponentUnpacker::ReadValue(ComponentDataPair.second, Value); // hack: made ReadValue public to try this
+                if (Value == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::DELETE_COMPONENT))
+                {
+                    break;
+                }
+            }
+            catch (...)
+            {
+                ErrorCounter++;
+            }
             ComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
         }
     }
@@ -1318,7 +1334,9 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
 
 void SpaceEntity::ComponentFromItemComponentData(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
-    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
+    auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(
+        ComponentData.GetValue()); // memory problem here when ComponentData is set to 56. appears as a crash when debugging but doesn't halt tests
+                                   // when running.
     ComponentType MessageComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
 
     if (MessageComponentType != ComponentType::Invalid)
