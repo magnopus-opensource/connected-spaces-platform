@@ -2,7 +2,7 @@
 
 This directory contains a set of unit tests that exercise the Wrapper Generator and test its output.
 
-These test have been written for a Windows test environment and test two outputs:
+These tests have been written for a Windows test environment and test two outputs:
 
 * C# tests, running in [Unity] as [Play Mode tests](https://docs.unity3d.com/Packages/com.unity.test-framework@2.0/manual/edit-mode-vs-play-mode-tests.html#play-mode-tests) using the Unity Test Framework
 * Typescript tests, running in [node.js]
@@ -45,7 +45,7 @@ Alternatively, open the Unity project in [tests/csharp](tests/csharp/) and run t
 
 ### Javascript/WASM
 
-Rerequisites:
+Prerequisites:
 
 * Build environment configured for CSP
 * Python configured with [requirements.txt](../teamcity/requirements.txt)
