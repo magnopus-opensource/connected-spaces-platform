@@ -81,17 +81,6 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
 
-void ApplicationSettingsSystem::GetContexts(const csp::common::String& ApplicationName, ApplicationSettingsContextsResultCallback Callback)
-{
-    GetContexts(ApplicationName)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsContextsResult>(Callback,
-            "ApplicationSettingsSystem::GetContexts successfully retrieved application settings contexts",
-            "Failed to get application settings contexts", {}, {}, {}))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings contexts."))
-        .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsContextsResult>()); }, *LogSystem));
-}
-
 async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings)
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
@@ -141,22 +130,6 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->tenantsTenantApplicationsApplicationNameSettingsContextGet(Tenant, ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
-
-    return OnCompleteTask;
-}
-
-async::task<ApplicationSettingsContextsResult> ApplicationSettingsSystem::GetContexts(const csp::common::String& ApplicationName)
-{
-    auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsContextsResult>>();
-    async::task<ApplicationSettingsContextsResult> OnCompleteTask = OnCompleteEvent->get_task();
-
-    services::ResponseHandlerPtr SettingsResponseHandler
-        = ApplicationSettingsAPI
-              ->CreateHandler<ApplicationSettingsContextsResultCallback, ApplicationSettingsContextsResult, void, chs::ApplicationSettingsDto>(
-                  [](const ApplicationSettingsContextsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
-
-    static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
-        ->applicationsApplicationNameSettingsGet(ApplicationName, SettingsResponseHandler);
 
     return OnCompleteTask;
 }
