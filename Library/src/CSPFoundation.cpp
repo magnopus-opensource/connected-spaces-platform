@@ -266,13 +266,16 @@ namespace
         return MultiplayerServiceURI;
     }
 
-    /// @brief Extracts and returns the last segment of a URI path by splitting it on '/'.
-    /// e.g. 'https://www.magnopus.com/connected-spaces-platform' -> 'connected-spaces-platform'
+    /// @brief Find the Reverse Proxy in service URI from Services Deployment Status.
+    /// e.g. 'http://localhost:8081/mag-multiplayer/hubs/v1/multiplayer' -> 'mag-multiplayer'
     /// @return csp::common::String : empty string if not successful, otherwise the remaining stting.
-    csp::common::String ExtractReverseProxyFromUri(const csp::common::String& URI)
+    csp::common::String FindReverseProxy(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI)
     {
-        if (auto const Split = URI.Split('/'); Split.Size() != 0)
-            return Split[Split.Size() - 1];
+        for (auto const& Service : ServicesDeploymentStatus.Services)
+        {
+            if (URI.Contains(Service.ReverseProxy))
+                return Service.ReverseProxy;
+        }
 
         return "";
     }
@@ -282,15 +285,19 @@ namespace
     /// @brief Tries to find the ServiceStatus for a given reverse proxy.
     /// @return csp::systems::ServiceStatus* : nullptr if not found, otherwise a pointer to the ServiceStatus.
     const csp::systems::ServiceStatus* FindServiceStatus(
-        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& ReverseProxy)
+        const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus, const csp::common::String& URI)
     {
+        // Finds the reverse proxy in the service's URI.
+        // The reverse proxy is a unique identifier used to locate the service's deployment status.
+        const auto ReverseProxy = FindReverseProxy(ServicesDeploymentStatus, URI);
+
         const auto ServiceStatusIt = std::find_if(ServicesDeploymentStatus.Services.begin(), ServicesDeploymentStatus.Services.end(),
             [&ReverseProxy](const csp::systems::ServiceStatus& status) { return status.ReverseProxy == ReverseProxy; });
 
         if (ServiceStatusIt == ServicesDeploymentStatus.Services.end())
         {
-            const auto message = fmt::format("Unable to resolve {} Reverse Proxy in Status Info", ReverseProxy);
-            CSP_LOG_MSG(csp::common::LogLevel::Error, message.c_str());
+            const auto Message = fmt::format("Unable to resolve {} in Status Info", URI);
+            CSP_LOG_MSG(csp::common::LogLevel::Error, Message.c_str());
             return nullptr;
         }
         return &(*ServiceStatusIt);
@@ -300,15 +307,15 @@ namespace
     /// @return csp::systems::VersionMetadata* : nullptr if not found, otherwise a pointer to the VersionMetadata.
     const csp::systems::VersionMetadata* FindVersionMetadata(const csp::systems::ServiceStatus& ServiceStatus, uint32_t ExpectedVersion)
     {
-        const auto versionMetadataIt = std::find_if(ServiceStatus.ApiVersions.begin(), ServiceStatus.ApiVersions.end(),
+        const auto VersionMetadataIt = std::find_if(ServiceStatus.ApiVersions.begin(), ServiceStatus.ApiVersions.end(),
             [ExpectedVersion](const csp::systems::VersionMetadata& metadata)
             { return metadata.Version.c_str() == fmt::format("v{}", ExpectedVersion); });
 
-        if (versionMetadataIt == ServiceStatus.ApiVersions.end())
+        if (VersionMetadataIt == ServiceStatus.ApiVersions.end())
         {
             return nullptr;
         }
-        return &(*versionMetadataIt);
+        return &(*VersionMetadataIt);
     }
 
     /// @brief Handles validation for the "retired" state of a service.
@@ -497,16 +504,12 @@ const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
 bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
 {
-    // Extract the reverse proxy from the service's URI.
-    // The reverse proxy is a unique identifier used to locate the service's deployment status.
-    const auto ReverseProxy = ExtractReverseProxyFromUri(this->GetURI());
-
     // Evaluate State: Service Not Found (Highest Priority)
     // Attempt to find the overall status of the service within the provided deployment status.
     // If the service's reverse proxy is not found in the deployment status,
     // it implies the service is not deployed or recognized by the system.
     // This is a critical failure, and the prerequisite check immediately returns false.
-    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, ReverseProxy);
+    const auto ServiceStatus = FindServiceStatus(ServicesDeploymentStatus, this->GetURI());
     if (!ServiceStatus)
     {
         return false;

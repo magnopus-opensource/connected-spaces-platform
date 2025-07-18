@@ -17,6 +17,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/Status/Status.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "RAIIMockLogger.h"
@@ -87,7 +88,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     auto const Endpoints = csp::CSPFoundation::GetEndpoints();
 
     // Validate that the retired code path has been triggered and populated through the log system
-    const String ErrorMsg = "Unable to resolve mag-user Reverse Proxy in Status Info";
+    const String ErrorMsg = fmt::format("Unable to resolve {} in Status Info", Endpoints.UserService.GetURI()).c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
 
     // Create a dummy response for ServicesDeploymentStatus containing the invalid information
