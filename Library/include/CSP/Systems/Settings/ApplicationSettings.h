@@ -97,40 +97,8 @@ private:
     ApplicationSettings ApplicationSettings;
 };
 
-/// @ingroup Application Settings System
-/// @brief Represents the result of a request to retrieve available application settings contexts.
-class CSP_API ApplicationSettingsContextsResult : public csp::systems::ResultBase
-{
-    /** @cond DO_NOT_DOCUMENT */
-    CSP_START_IGNORE
-    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-    CSP_END_IGNORE
-    /** @endcond */
-
-public:
-    const ApplicationSettingsContexts& GetApplicationSettingsContexts() const;
-
-    CSP_NO_EXPORT ApplicationSettingsContextsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-
-    CSP_NO_EXPORT ApplicationSettingsContextsResult(
-        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
-
-private:
-    ApplicationSettingsContextsResult(void*) {};
-
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-    ApplicationSettingsContexts ApplicationSettingsContexts;
-};
-
 /// @brief Callback containing Application Settings.
 /// @param Result ApplicationSettingsResult : result class
 typedef std::function<void(const ApplicationSettingsResult& Result)> ApplicationSettingsResultCallback;
-
-/// @brief Callback containing Application Settings Contexts.
-/// @param Result ApplicationSettingsContextsResult : result class
-typedef std::function<void(const ApplicationSettingsContextsResult& Result)> ApplicationSettingsContextsResultCallback;
 
 } // namespace csp::systems

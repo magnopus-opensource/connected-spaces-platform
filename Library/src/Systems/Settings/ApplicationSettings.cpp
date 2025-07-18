@@ -72,23 +72,4 @@ void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase*
     }
 }
 
-const ApplicationSettingsContexts& ApplicationSettingsContextsResult::GetApplicationSettingsContexts() const { return ApplicationSettingsContexts; }
-
-void ApplicationSettingsContextsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
-{
-    ResultBase::OnResponse(ApiResponse);
-
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-    {
-        rapidjson::Document JsonDoc;
-        JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
-        assert(JsonDoc.IsArray());
-
-        for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
-        {
-            ApplicationSettingsContexts.Contexts[i] = JsonDoc[i].GetString();
-        }
-    }
-}
-
 } // namespace csp::systems
