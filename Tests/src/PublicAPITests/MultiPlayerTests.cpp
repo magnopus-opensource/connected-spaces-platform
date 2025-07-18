@@ -1127,6 +1127,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     LogOut(UserSystem);
 }
 
+// old test, unchanged.
+//  eventually this test should probably disappear in favour of the new one
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpace)
 {
     SetRandSeed();
@@ -1227,7 +1229,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
     EXPECT_TRUE(FoundEntity != nullptr);
     auto& FoundComponents = *FoundEntity->GetComponents();
-    assert(FoundEntity);
 
     // Check the right component has been deleted
     EXPECT_EQ(FoundComponents.Size(), 1);
@@ -1254,6 +1255,7 @@ void GetSpaceEntityById(csp::multiplayer::mcs::ObjectMessage* Object, const uint
     OutSpaceEntity.FromObjectMessage(Result.GetObjectMessage());
 }
 
+// new test. not working yet:the CHS endpoint returns a 404, object not found, error
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectDeleteComponentTestReenterSpace)
 {
     SetRandSeed();

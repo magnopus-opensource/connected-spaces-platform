@@ -75,8 +75,6 @@ enum class ComponentType
     Text = 25,
     Hotspot = 26,
     CinematicCamera = 27,
-    // spare values
-    Delete = 56
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
