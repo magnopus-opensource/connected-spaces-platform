@@ -246,10 +246,6 @@ public:
     /// @return The SpaceEntityType enum value.
     SpaceEntityType GetEntityType() const;
 
-    /// @brief Get SpaceEntitySystem Object
-    /// @return SpaceEntitySystem
-    SpaceEntitySystem* GetSpaceEntitySystem();
-
     /// @brief Sets the parent for this entity
     /// QueueUpdate() should be called afterwards to enable changes to the parent.
     /// @param ParentId uint64_t The new parent id of this entity.
@@ -349,6 +345,9 @@ public:
     ///
     /// @return True if deselection occurred. False if not.
     bool Deselect();
+
+    // ClientID is the clientID that comes from the multiplayer connection, ie the clientID of the client that is executing the code at the time.
+    bool SetSelectionState(bool SelectionState, uint64_t ClientId);
 
     /// @brief Checks if the entity can be modified.
     /// Specifically whether the local client already owns the entity or can take ownership of the entity.
