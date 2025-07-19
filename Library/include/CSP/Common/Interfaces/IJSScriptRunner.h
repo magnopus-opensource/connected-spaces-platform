@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/InvalidInterfaceUserError.h"
 #include "CSP/Common/String.h"
 
 namespace csp::common
@@ -40,17 +41,6 @@ class IScriptBinding;
  * @important This type is not a true interface, instead having throwing default
  * implementations. This is due to wrapper generator constraints, hopefully temporary ones.
  */
-
-// We do not want a dependency on the STL just to do this generator-hack-workaround. Use a custom type.
-class CSP_API InvalidInterfaceUseError
-{
-public:
-    csp::common::String msg;
-    InvalidInterfaceUseError(const csp::common::String& msg)
-        : msg(msg)
-    {
-    }
-};
 
 class CSP_API IJSScriptRunner
 {
