@@ -253,6 +253,8 @@ SpaceEntitySystem::SpaceEntityQueue* SpaceEntitySystem::GetPendingAdds() { retur
 
 MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
 
+csp::common::RealtimeEngineType SpaceEntitySystem::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::OnlineMultiUser; }
+
 namespace
 {
     std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::LoginState& LoginState,
@@ -396,7 +398,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& Name, const csp:
 }
 
 void SpaceEntitySystem::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-    csp::common::Optional<uint64_t> ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
     const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentID, Callback, &LogSystem = this->LogSystem](
                                               const signalr::value& Result, const std::exception_ptr& Except)
@@ -628,19 +630,6 @@ SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InNam
     return nullptr;
 }
 
-void SpaceEntitySystem::RegisterEntityScriptAsModule(SpaceEntity* NewEntity)
-{
-    EntityScript& Script = NewEntity->GetScript();
-    Script.RegisterSourceAsModule();
-}
-
-void SpaceEntitySystem::BindNewEntityToScript(SpaceEntity* NewEntity)
-{
-    EntityScript& Script = NewEntity->GetScript();
-    Script.Bind();
-    Script.Invoke();
-}
-
 void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
     if (SpaceEntityCreatedCallback)
@@ -651,17 +640,27 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
     SpaceEntityCreatedCallback = std::move(Callback);
 }
 
-void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Callback)
+bool SpaceEntitySystem::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
 {
-    if (InitialEntitiesRetrievedCallback)
+    if (!SelectedEntities.Contains(Entity))
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
+        SelectedEntities.Append(Entity);
+        return true;
     }
-
-    InitialEntitiesRetrievedCallback = std::move(Callback);
+    return false;
 }
 
-void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
+bool SpaceEntitySystem::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+{
+    if (SelectedEntities.Contains(Entity))
+    {
+        SelectedEntities.RemoveItem(Entity);
+        return true;
+    }
+    return false;
+}
+
+void SpaceEntitySystem::SetScriptLeaderReadyCallback(CallbackHandler Callback)
 {
     if (ScriptSystemReadyCallback)
     {
@@ -672,7 +671,7 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 
     if (ElectionManager)
     {
-        ElectionManager->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
+        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
     }
 }
 
@@ -1106,36 +1105,6 @@ void SpaceEntitySystem::TickEntityScripts()
             }
         }
     }
-}
-
-bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity)
-{
-    if (SelectedState && !Entity->IsSelected())
-    {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId()))
-        {
-            if (!SelectedEntities.Contains(Entity))
-            {
-                SelectedEntities.Append(Entity);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    if (!SelectedState && Entity->GetSelectingClientID() == MultiplayerConnectionInst->GetClientId())
-    {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, 0))
-        {
-            SelectedEntities.RemoveItem(Entity);
-            return true;
-        }
-
-        return false;
-    }
-
-    return false;
 }
 
 void SpaceEntitySystem::EnableLeaderElection()
