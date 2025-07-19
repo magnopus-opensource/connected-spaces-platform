@@ -404,7 +404,6 @@ private:
     SpaceEntitySystem(); // needed for the wrapper generator
 
     MultiplayerConnection* MultiplayerConnectionInst;
-    csp::multiplayer::ISignalRConnection* Connection;
 
     // Should not be null
     csp::common::LogSystem* LogSystem;
@@ -471,8 +470,6 @@ private:
     std::chrono::milliseconds EntityPatchRate;
 
     bool EntityPatchRateLimitEnabled = true;
-
-    bool IsInitialised = false;
 
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
