@@ -184,8 +184,8 @@ using namespace std::chrono;
 SpaceEntitySystem::SpaceEntitySystem()
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(nullptr)
-    , Connection(nullptr)
     , LogSystem(nullptr)
+    , ScriptBinding(nullptr)
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::mutex)
@@ -205,7 +205,6 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(InMultiplayerConnection)
-    , Connection(nullptr)
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
@@ -220,12 +219,24 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
 {
-    Initialise();
+    EnableLeaderElection();
+
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 }
 
 SpaceEntitySystem::~SpaceEntitySystem()
 {
-    Shutdown();
+
+    DisableLeaderElection();
+    LocalDestroyAllEntities();
+
+    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
     delete (EventHandler);
 
@@ -236,41 +247,6 @@ SpaceEntitySystem::~SpaceEntitySystem()
     delete (PendingRemoves);
     delete (PendingOutgoingUpdateUniqueSet);
     delete (PendingIncomingUpdates);
-}
-
-void SpaceEntitySystem::Initialise()
-{
-    if (IsInitialised)
-    {
-        return;
-    }
-
-    EnableLeaderElection();
-
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *LogSystem, *ScriptRunner);
-
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-
-    IsInitialised = true;
-}
-
-void SpaceEntitySystem::Shutdown()
-{
-    if (!IsInitialised)
-    {
-        return;
-    }
-
-    DisableLeaderElection();
-    LocalDestroyAllEntities();
-
-    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
-
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-
-    IsInitialised = false;
 }
 
 SpaceEntitySystem::SpaceEntityQueue* SpaceEntitySystem::GetPendingAdds() { return PendingAdds; }
@@ -308,7 +284,8 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
     const std::vector Arr { Param1 };
     const signalr::value Params(Arr);
 
-    return Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
+    return MultiplayerConnectionInst->GetSignalRConnection()
+        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
@@ -334,7 +311,7 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return Connection->Invoke(
+        return MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
             MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get());
     };
 }
@@ -574,7 +551,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     LocalDestroyEntity(Entity);
 
     const std::vector InvokeArguments = { signalr::value(ObjectPatches) };
-    Connection->Invoke(
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), InvokeArguments, LocalCallback);
 }
 
@@ -901,7 +878,7 @@ void SpaceEntitySystem::FetchAllEntitiesAndPopulateBuffers(const csp::common::St
 
 void SpaceEntitySystem::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    if (Connection == nullptr)
+    if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))
     {
         return;
     }
@@ -1367,7 +1344,7 @@ void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> Pendin
     }
     Serializer.EndWriteArray();
 
-    Connection->Invoke(
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), Serializer.Get(), LocalCallback);
 }
 
