@@ -328,8 +328,6 @@ void ClientElectionManager::Update()
     }
 }
 
-SpaceEntitySystem* ClientElectionManager::GetSpaceEntitySystem() { return SpaceEntitySystemPtr; }
-
 bool ClientElectionManager::IsLocalClientLeader() const { return (LocalClient && (LocalClient == Leader)); }
 
 ClientProxy* ClientElectionManager::GetLeader() const { return Leader; }
@@ -348,9 +346,9 @@ void ClientElectionManager::SetLeader(ClientProxy* Client)
     Leader = Client;
 
     // Notify Scripts ready callback now we have a valid leader
-    if (ScriptSystemReadyCallback)
+    if (LeaderReadyCallback)
     {
-        ScriptSystemReadyCallback(true);
+        LeaderReadyCallback(true);
     }
 }
 
@@ -402,9 +400,9 @@ void ClientElectionManager::SetElectionState(ElectionState NewState)
     TheElectionState = NewState;
 }
 
-void ClientElectionManager::SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback)
+void ClientElectionManager::SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback)
 {
-    ScriptSystemReadyCallback = InScriptSystemReadyCallback;
+    LeaderReadyCallback = ScriptLeaderReadyCallback;
 }
 
 void ClientElectionManager::HandleElectionStateIdle()
