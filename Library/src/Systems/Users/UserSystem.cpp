@@ -43,6 +43,28 @@ inline const char* BoolToApiString(bool Val) { return Val ? "true" : "false"; }
 
 } // namespace
 
+namespace
+{
+
+/* Connect our main network connection, serving both out-of-space messaging, as well as in space messages, via SignalR method
+ * bindings. All methods are (or at least should be) bound here, including the NetworkEventBus. It may surprise you that the methods are
+ * never unbound until logout, when the MultiplayerConnection is destroyed. We may bind the methods for in-space networking,
+ * but we only do anything with the data we receive if an IRealtimeEngine is set, which is set/unset on space entry.
+ *
+ * This does a fair amount more than binding and starting the connection, which it perhaps shouldn't.
+ * Does a lot of state management resetting entities and such, as well as registering callbacks.
+ *
+ * This dependency needs to be broken prior to formal modularization, I suspect by injecting the MultiplayerConnection much like we inject
+ * the RealtimeEngine. */
+void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& MultiplayerConnection,
+    csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback, const csp::systems::LoginStateResult& LoginStateRes)
+{
+    MultiplayerConnection.Connect(ErrorCallback, LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId,
+        csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
+}
+
+}
+
 namespace csp::systems
 {
 
@@ -212,10 +234,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                     Callback(LoginStateRes);
                 };
 
-                auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -274,10 +293,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                     Callback(LoginStateRes);
                 };
 
-                auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
             }
             else
             {
@@ -333,10 +349,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                     Callback(LoginStateRes);
                 };
 
-                auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
             }
             else
             {
@@ -460,10 +473,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
-            auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
-                *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
+            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
         }
         else
         {

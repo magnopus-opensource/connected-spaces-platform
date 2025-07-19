@@ -45,6 +45,16 @@ typedef std::function<void(csp::multiplayer::SpaceEntity*)> EntityCreatedCallbac
 namespace csp::common
 {
 
+// This callback should be fired during IRealtimeEngine::FetchAllEntitiesAndPopulateBuffers when the system is ready for
+// csp::systems::SpaceSystem::EnterSpace to yield control back to calling clients. This may be done prior to actually completing fetching all
+// entities, as that could be a long operation and the specific RealtimeEngine implementation may not wish to block clients entering a space.
+typedef std::function<void()> EntityFetchStartedCallback;
+// This callback should be fired once all the entities have been fetched upon initial space setup, invoked via
+// IRealtimeEngine::FetchAllEntitiesAndPopulateBuffers. This serves as a public notification to clients that the RealtimeEngine is in a valid state
+// and entity inspection and mutation may begin.
+// Provides the number of entities fetched as an argument
+typedef std::function<void(std::uint32_t)> EntityFetchCompleteCallback;
+
 // This, frustratingly, cannot be an in-class type due to the code generator.
 /// @brief Enum of concrete types of RealtimeEngines.
 enum class RealtimeEngineType : int
@@ -118,6 +128,24 @@ public:
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
     CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) = 0;
+    /**
+     * @brief Fetch space entities from the RealtimeEngine data source and perform initial setup to populate internal buffers
+     *
+     * This method is called during csp::systems::SpaceSystem::Enterspace.
+     *
+     * @param SpaceId const csp::common::String& : The identifier of the space to fetch entities from. Format depends on how your specific backend
+     * store indexes spaces.
+     * @param FetchStartedCallback EntityFetchStartedCallback : Callback notifying for when csp::systems::SpaceSystem::EnterSpace can yield control
+     * back to clients
+     * @params FetchCompleteCallback EntityFetchCompleteCallback : Callback notifying when all entities are fetched and stored appropriately, and
+     * clients may start entity mutation.
+     *
+     * @post @param FetchStartedCallback will have been called, and @param FetchCompleteCallback will either have been called, or an async job started
+     * with an intent to call it once fetch is complete.
+     */
+    CSP_NO_EXPORT virtual void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId, EntityFetchStartedCallback FetchStartedCallback,
+        csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+        = 0;
 
     /***** ENTITY ACCESS *****************************************************/
 

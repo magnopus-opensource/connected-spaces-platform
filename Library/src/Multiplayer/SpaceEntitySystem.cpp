@@ -625,112 +625,115 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
     }
 }
 
-SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem)
+namespace
 {
-    // Create object message from signalr value
+    // You should lock the entities mutex before calling this, and probably have processed entity operations
+    void InitialiseEntityScripts(csp::multiplayer::SpaceEntitySystem::SpaceEntityList& Entities)
+    {
+        // Register all scripts for import
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            EntityScript& Script = Entities[i]->GetScript();
+            Script.RegisterSourceAsModule();
+        }
+
+        // Bind and invoke all scripts
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
+            {
+                Script.Bind();
+                Script.Invoke();
+            }
+        }
+
+        // Tell all scripts that all entities are now loaded
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            EntityScript& Script = Entities[i]->GetScript();
+            Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+        }
+    }
+
+    void FireSpaceEntityCreatedCallback(
+        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
+    {
+        if (SpaceEntityCreatedCallback)
+        {
+            SpaceEntityCreatedCallback(SpaceEntity);
+        }
+        else
+        {
+            LogSystem.LogMsg(
+                common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+        }
+    }
+}
+
+SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage)
+{
+    //  Create object message from signalr value
     mcs::ObjectMessage Message;
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(EntitySystem, *ScriptRunner, LogSystem);
+    const auto NewEntity = new SpaceEntity(this, *ScriptRunner, LogSystem);
     NewEntity->FromObjectMessage(Message);
 
-    EntitySystem->AddEntity(NewEntity);
+    AddEntity(NewEntity);
 
     return NewEntity;
 }
 
-void SpaceEntitySystem::BindOnObjectMessage()
+void SpaceEntitySystem::OnObjectMessage(const signalr::value& Params)
 {
-    Connection->On("OnObjectMessage",
-        [this](const signalr::value& Params)
-        {
-            // Params is an array of all params sent, so grab the first
-            auto& EntityMessage = Params.as_array()[0];
+    // Params is an array of all params sent, so grab the first
+    auto& EntityMessage = Params.as_array()[0];
 
-            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
+    SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
 
-            if (SpaceEntityCreatedCallback)
-            {
-                SpaceEntityCreatedCallback(NewEntity);
-            }
-            else
-            {
-                LogSystem->LogMsg(
-                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
-            }
-        });
+    if (NewEntity)
+    {
+        FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+    }
 }
 
-void SpaceEntitySystem::BindOnObjectPatch()
+void SpaceEntitySystem::OnObjectPatch(const signalr::value& Params)
 {
-    Connection->On("OnObjectPatch",
-        [this](const signalr::value& Params)
-        {
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-            // Params is an array of all params sent, so grab the first
-            auto& EntityMessage = Params.as_array()[0];
+    // Params is an array of all params sent, so grab the first
+    auto& EntityMessage = Params.as_array()[0];
 
-            PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
-        });
+    PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
 }
 
-void SpaceEntitySystem::BindOnRequestToSendObject()
+void SpaceEntitySystem::OnRequestToSendObject(const signalr::value& Params)
 {
-    Connection->On("OnRequestToSendObject",
-        [this](const signalr::value& Params)
-        {
-            const uint64_t EntityID = Params.as_array()[0].as_uinteger();
+    const uint64_t EntityID = Params.as_array()[0].as_uinteger();
 
-            // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
-            if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
-            {
-                mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
+    // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
+    if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
+    {
+        mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
 
-                SignalRSerializer Serializer;
-                Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
-                const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except)
-                { HandleException(Except, "Failed to send server requested object."); };
+        const std::function LocalSendCallback
+            = [this](const signalr::value&, const std::exception_ptr& Except) { HandleException(Except, "Failed to send server requested object."); };
 
-                Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE),
-                    Serializer.Get(), LocalSendCallback);
-            }
-            else
-            {
-                std::vector<signalr::value> const InvokeArguments = { EntityID };
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+            LocalSendCallback);
+    }
+    else
+    {
+        std::vector<signalr::value> const InvokeArguments = { EntityID };
 
-                Connection->Invoke(
-                    MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
-            }
-        });
-}
-
-void SpaceEntitySystem::BindOnRequestToDisconnect() const
-{
-    Connection->On("OnRequestToDisconnect",
-        [](const signalr::value& Params)
-        {
-            const std::string Reason = Params.as_array()[0].as_string();
-
-            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
-            DisconnectEvent->AddString("Reason", Reason.c_str());
-            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
-        });
-}
-
-void SpaceEntitySystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection)
-{
-    Connection = InConnection;
-
-    BindOnObjectMessage();
-
-    BindOnObjectPatch();
-
-    BindOnRequestToSendObject();
-
-    BindOnRequestToDisconnect();
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
+    }
 }
 
 void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
@@ -742,12 +745,14 @@ void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::functio
     ParamsVec.push_back(signalr::value((uint64_t)Limit)); // limit
     const auto Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
 }
 
-std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem::CreateRetrieveAllEntitiesCallback(int Skip)
+std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem::CreateRetrieveAllEntitiesCallback(
+    int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
     {
         HandleException(Except, "Failed to retrieve paged entities.");
 
@@ -757,42 +762,78 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 
         for (const auto& EntityMessage : Items)
         {
-            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
-
-            if (SpaceEntityCreatedCallback)
-            {
-                SpaceEntityCreatedCallback(NewEntity);
-            }
-            else
-            {
-                LogSystem->LogMsg(
-                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
-            }
+            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
+            FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
         }
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
 
         if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
         {
-            GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount));
+            GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount, FetchCompleteCallback));
         }
         else
         {
-            OnAllEntitiesCreated();
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
+            // Ensure entity list is up to date
+            ProcessPendingEntityOperations();
+
+            InitialiseEntityScripts(Entities);
+            EnableEntityTick = true;
+
+            // Start leader election
+            if (IsLeaderElectionEnabled())
+            {
+                // Start listening for election events
+                //
+                // If we are the first client to connect then this
+                // will also set this client as the leader
+                ElectionManager->OnConnect(Avatars, Objects);
+            }
+            else
+            {
+                DetermineScriptOwners();
+            }
+
+            if (FetchCompleteCallback)
+            {
+                FetchCompleteCallback(CurrentEntityCount);
+            }
         }
     };
 
     return Callback;
 };
 
-void SpaceEntitySystem::RetrieveAllEntities()
+void SpaceEntitySystem::FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId,
+    csp::common::EntityFetchStartedCallback FetchStartedCallback, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+{
+    /* Refresh the multiplayer connection to force the scopes to change
+     * This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
+    auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
+    auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
+
+    /* Investigate whether this needs to happen at all, it 's overwhelmingly complex... If you' re doing anything AOI,
+     * this probably wants rewritten or removed along with your work. */
+    RefreshMultiplayerConnectionToEnactScopeChange(SpaceId, RefreshMultiplayerConnectionEvent);
+
+    RefreshMultiplayerConnectionContinuation.then(async::inline_scheduler(),
+        [this, FetchStartedCallback, FetchCompleteCallback]()
+        {
+            this->RetrieveAllEntities(FetchCompleteCallback);
+            FetchStartedCallback();
+        });
+}
+
+void SpaceEntitySystem::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
     if (Connection == nullptr)
     {
         return;
     }
 
-    GetEntitiesPaged(0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0)); // Get at most ENTITY_PAGE_LIMIT entities at a time
+    GetEntitiesPaged(
+        0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0, FetchCompleteCallback)); // Get at most ENTITY_PAGE_LIMIT entities at a time
 }
 
 void SpaceEntitySystem::LocalDestroyAllEntities()
@@ -900,59 +941,6 @@ void SpaceEntitySystem::MarkEntityForUpdate(SpaceEntity* Entity)
 
     // Duplicates can be added here and will be ignored when sending updates
     TickUpdateEntities.push_back(Entity);
-}
-
-void SpaceEntitySystem::OnAllEntitiesCreated()
-{
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    // Ensure entity list is up to date
-    ProcessPendingEntityOperations();
-
-    // Register all scripts for import
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.RegisterSourceAsModule();
-    }
-
-    // Bind and invoke all scripts
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
-        {
-            Script.Bind();
-            Script.Invoke();
-        }
-    }
-
-    // Tell all scripts that all entities are now loaded
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
-    }
-
-    if (IsLeaderElectionEnabled())
-    {
-        // Start listening for election events
-        //
-        // If we are the first client to connect then this
-        // will also set this client as the leader
-        ElectionManager->OnConnect(Avatars, Objects);
-    }
-    else
-    {
-        DetermineScriptOwners();
-    }
-
-    // Enable entity tick events
-    EnableEntityTick = true;
-
-    if (InitialEntitiesRetrievedCallback)
-    {
-        InitialEntitiesRetrievedCallback(true);
-    }
 }
 
 // @brief Simple script ownership
@@ -1173,9 +1161,6 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                             [RefreshMultiplayerContinuationEvent, &LogSystem, this]()
                             {
                                 LogSystem->LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                // TODO: Support getting errors from RetrieveAllEntities
-                                this->RetrieveAllEntities();
 
                                 // Success!
                                 RefreshMultiplayerContinuationEvent->set({});

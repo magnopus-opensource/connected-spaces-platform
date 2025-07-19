@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/Asset.h"
@@ -77,7 +78,19 @@ public:
     /// ERequestFailureReason::UserSpaceAccessDenied
     /// @param Space Space : space to enter into
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, SpaceResultCallback Callback);
+
+    // TEMPORARY hack as I am doing a staged refactor. This is in fact, a hack of a hack.
+    // 1. I will eventually be passing IRealtimeEngine to EnterSpace, so this callback wants to be set on that object, however, I want to ensure
+    //    the interface changes are working first by getting green tests.
+    // 2. The natural way to do _that_ is to pass this callback to EnterSpace temporarily, but I cant even do that because both the wrapper gen
+    //    and our tests assume only one callback on an async function ... (to my mind, this condemns the AWAIT_PRE macros forever, unacceptable
+    //    burden to refactoring, even once the wrapper gen is gone.)
+    // This will not exist in subsequent commits, if this is here during PR, look me in the eyes and call me a fool.
+    CSP_NO_EXPORT csp::common::EntityFetchCompleteCallback EntityFetchComplete = nullptr;
+
+    // In the same vein, TEMPORARY hack.
+    CSP_NO_EXPORT csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback = nullptr;
 
     /// @brief Exits the space and deregisters from the space scope.
     CSP_ASYNC_RESULT void ExitSpace(NullResultCallback Callback);
@@ -385,10 +398,8 @@ private:
         SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
 
     // EnterSpace Continuations
-    auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
+    auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
-    // Wraps SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
-    auto RefreshMultiplayerScopes();
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

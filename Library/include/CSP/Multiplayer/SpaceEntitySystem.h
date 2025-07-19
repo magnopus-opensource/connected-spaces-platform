@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/List.h"
@@ -365,6 +367,30 @@ public:
     /// @return: MultiplayerConnection*
     CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
 
+    /**
+     * @brief Fetch all entities in the space from MCS
+     *
+     * Uses SignalR to fetch all the entities from MCS and populate the entities buffer.
+     * Also refreshes the scopes in the space, (a potentially redundant action that we are trying to remove),
+     * this coincidentally restarts the multiplayer connection, although this should be a purely internal implementation detail.
+     *
+     * @param SpaceId const csp::common::String& : MCS formatted SpaceId
+     * @param FetchStartedCallback EntityFetchStartedCallback Callback called once scopes are reset and entity fetch has begun.
+     * @param FetchCompleteCallback EntityFetchCompleteCallback Callback called async once all entities are fetched and stored.
+     *
+     * @pre @param Space represented by SpaceId must exist on the configured server endpoint. See csp::systems::SpaceSystem::CreateSpace
+     * @post @param FetchStartedCallback will be called. @param FetchCompleteCallback will be called async once all the entities are fetched.
+     */
+    CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId,
+        csp::common::EntityFetchStartedCallback FetchStartedCallback, csp::common::EntityFetchCompleteCallback FetchCompleteCallback) override;
+
+    /*
+     * Called when MultiplayerConnection recieved signalR events.
+     */
+    CSP_NO_EXPORT void OnObjectMessage(const signalr::value& Params);
+    CSP_NO_EXPORT void OnObjectPatch(const signalr::value& Params);
+    CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
+
 protected:
     SpaceEntityList Entities;
     SpaceEntityList Avatars;
@@ -389,12 +415,6 @@ private:
     EntityCreatedCallback SpaceEntityCreatedCallback;
     CallbackHandler InitialEntitiesRetrievedCallback;
     CallbackHandler ScriptSystemReadyCallback;
-
-    void BindOnObjectMessage();
-    void BindOnObjectPatch();
-    void BindOnRequestToSendObject();
-    void BindOnRequestToDisconnect() const;
-
     SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem);
 
     void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
@@ -407,7 +427,6 @@ private:
     void ApplyIncomingPatch(const signalr::value*);
     void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-    void OnAllEntitiesCreated();
     void DetermineScriptOwners();
 
     void ResolveParentChildForDeletion(SpaceEntity* Deletion);

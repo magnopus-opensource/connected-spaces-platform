@@ -26,6 +26,7 @@
 #include <atomic>
 #include <functional>
 #include <map>
+#include <memory>
 #include <vector>
 
 CSP_START_IGNORE
@@ -43,7 +44,9 @@ namespace csp::common
 {
 class LogSystem;
 class ReplicatedValue;
+class IRealtimeEngine;
 class IAuthContext;
+class IRealtimeEngine;
 }
 
 /// @brief Namespace that encompasses everything in the multiplayer system
@@ -135,13 +138,10 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
+    /// @param SignalRConnection ISignalRConnection* : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
     /// ownership of this pointer.
-    /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
-    /// flow, prior to entity fetches.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, [[maybe_unused]] const csp::common::String& MultiplayerUri,
-        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId,
+        ISignalRConnection* SignalRConnection);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -195,6 +195,9 @@ public:
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
+    /// @brief Sets the internal reference to the SpaceEntitySystem. Should be called when entering a space.
+    CSP_NO_EXPORT void SetSpaceEntitySystem(std::shared_ptr<SpaceEntitySystem>& SpaceEntitySystem);
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
@@ -213,6 +216,19 @@ private:
     CSP_END_IGNORE
 
     void Stop(ExceptionCallbackHandler Callback) const;
+
+    /*
+     * Bind the SignalR messages that are recieved from MCS to facilitate realtime communication.
+     * These are bound for the entire lifetime of the MultiplayerConnection (conceptually Login/Logout scoped).
+     * These messages are dispatched to the SpaceEntitySystem if it exists.
+     * For the future, consider how pleasant it might be if we bound everything all at once here, and had a single
+     * container of observers to recieve the bindings. That would make registering/deregistering AND lifetime the
+     * same concept, and we'd have a single pipe of realtime events that were obvious to trace.
+     */
+    void BindOnObjectMessage();
+    void BindOnObjectPatch();
+    void BindOnRequestToSendObject();
+    void BindOnRequestToDisconnect();
 
     class csp::multiplayer::ISignalRConnection* Connection;
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
@@ -233,6 +249,14 @@ private:
     bool AllowSelfMessaging = false;
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
+
+    // Space Entity System is created and destroyed on space entry/de-entry
+    // HOWEVER, for better or worse, bindings are only made once, on login. (They have to be, cant reregister signalR bindings, and we want
+    // out-of-space messaging) Therefore, this SpaceEntitySystem needs to be set each time we enter a space. The weak pointer nature means that we can
+    // discard messages that come to us when not in a space (which WILL happen during exiting a space due to network async).
+    // This used to be done by recycling the same SpaceEntitySystem, but we can't (and don't want to!) do that anymore.
+    // Review note: This may vanish depending on what decisions are made regarding ownership of the IRealtimeEngine.
+    std::weak_ptr<SpaceEntitySystem> SpaceEntitySystemWeak;
 };
 
 } // namespace csp::multiplayer

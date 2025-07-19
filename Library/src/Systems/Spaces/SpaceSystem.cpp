@@ -252,7 +252,7 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
 }
 
 /* EnterSpace Continuations */
-auto SpaceSystem::AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem)
+auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem)
 {
     return [Callback, &SpaceSystem](const SpaceResult& GetSpaceResult)
     {
@@ -319,24 +319,6 @@ auto SpaceSystem::FireEnterSpaceEvent(Space& OutCurrentSpace)
     };
 }
 
-auto SpaceSystem::RefreshMultiplayerScopes()
-{
-    return [](const SpaceResult& SpaceResult)
-    {
-        CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::RefreshMultiplayerScopes");
-
-        /* Refresh the multiplayer connection to force the scopes to change */
-        /* This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
-        auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
-        auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
-
-        csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RefreshMultiplayerConnectionToEnactScopeChange(
-            SpaceResult.GetSpace().Id, RefreshMultiplayerConnectionEvent);
-
-        return RefreshMultiplayerConnectionContinuation;
-    };
-}
-
 /*
  * ** EnterSpace Flow **
  * GetSpace
@@ -349,9 +331,12 @@ auto SpaceSystem::RefreshMultiplayerScopes()
  * ReportSuccess
  * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, resets state)
  */
-void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
+void SpaceSystem::EnterSpace(const String& SpaceId, SpaceResultCallback Callback)
 {
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
+
+    // To be replaced by passing in the system, we need to deal with MultiplayerConnection::connect.
+    std::weak_ptr<csp::common::IRealtimeEngine> RealtimeEngineWeak = csp::systems::SystemsManager::Get().InstantiateMultiplayerRealtimeEngine();
 
     GetSpace(SpaceId)
         .then(async::inline_scheduler(),
@@ -363,22 +348,46 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
             systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
                 "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                 "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
         .then(async::inline_scheduler(),
-            [](const SpaceResult& SpaceResult)
+            // Temporarily use the member callbacks, this will just be on the realtime engine in later commits and thus simpler.
+            [RealtimeEngineWeak, EntityFetchCompleteCallback = this->EntityFetchComplete,
+                SpaceEntityCreatedCallback = this->SpaceEntityCreatedCallback](const SpaceResult& SpaceResult)
             {
-                // Initialize (or ensure initialization) prior to use (In RefreshMultiplayerScopes)
-                csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Initialise();
-                return SpaceResult;
+                std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine = RealtimeEngineWeak.lock();
+
+                // TEMPORARILY set the member callback. This shouldn't break anything but space-rejoin tests, as this callback tends
+                // to be set after a space join to query object messages (though I do wonder how many of those are technically races...)
+                RealtimeEngine->SetEntityCreatedCallback(SpaceEntityCreatedCallback);
+
+                /* Because this is external api (RealtimeEngine) we use the callback for chaining, rather than a nicer interface.
+                 * Need to make sure we've finished fetching all the entities before we move on
+                 *
+                 * The way this works is, in SpaceEntitySystem we do a bunch of nested callbacks to refresh scopes,
+                 * they can't be synchronous because we need to wait until one callback finishes until we can call the next one.
+                 * Once that's done, we're free to request entities from the backend. It is at this point, once we have fired the
+                 * entity request, that the login is free to continue.
+                 * That means there are two callback points, when we've made the request, AND, when the request is finished and
+                 * all the entities are fetched. We internally care about the first in order to progress the EnterSpace flow, as you
+                 * can enter a space before all the entities are fetched. Clients need to know about the latter however.
+                 *
+                 * If we can get rid of this refreshScopes behaviour, this all gets extremely simpler.
+                 */
+                auto FinishedFetchEntitySetupEvent = std::make_shared<async::event_task<csp::systems::SpaceResult>>();
+                auto FinishedFetchEntitySetupContinuation = FinishedFetchEntitySetupEvent->get_task();
+
+                // This is what fetches the data for the space, all the assets and whatnot. Creates the space entities in the realtime engine.
+                RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(
+                    SpaceResult.GetSpace().Id,
+                    [FinishedFetchEntitySetupEvent, ResultCopy = SpaceResult]()
+                    { FinishedFetchEntitySetupEvent->set(ResultCopy); }, // Forward through the SpaceResult
+                    EntityFetchCompleteCallback);
+
+                return FinishedFetchEntitySetupContinuation;
             })
-        .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace))
-        .then(async::inline_scheduler(), RefreshMultiplayerScopes())
-        .then(async::inline_scheduler(),
-            common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(Callback,
-                "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", MakeInvalid<NullResult>(),
-                *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Error))
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
         .then(async::inline_scheduler(),
-            csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace](const std::exception& /*Except*/)
+            csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace]([[maybe_unused]] const std::exception& Except)
                 { CurrentSpace = {}; },
                 *csp::systems::SystemsManager::Get().GetLogSystem()));
 }
@@ -393,7 +402,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 
     if (MultiplayerConnection != nullptr)
     {
-        csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Shutdown();
+        csp::systems::SystemsManager::Get().DestroyRealtimeEngine();
 
         MultiplayerConnection->StopListening(
             [MultiplayerConnection, Callback](multiplayer::ErrorCode Error)
