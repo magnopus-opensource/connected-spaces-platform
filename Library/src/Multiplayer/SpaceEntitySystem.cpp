@@ -664,7 +664,7 @@ void SpaceEntitySystem::SetScriptLeaderReadyCallback(CallbackHandler Callback)
 {
     if (ScriptSystemReadyCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptLeaderReadyCallback has already been set. Previous callback overwritten.");
     }
 
     ScriptSystemReadyCallback = std::move(Callback);

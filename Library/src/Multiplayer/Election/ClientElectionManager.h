@@ -42,6 +42,8 @@ enum class ElectionState
 
 class ClientElectionManager
 {
+    typedef std::function<void(bool)> ScriptLeaderReadyCallback;
+
     /** @cond DO_NOT_DOCUMENT */
     friend class ClientProxy;
     friend class SpaceEntitySystem;
@@ -63,8 +65,6 @@ public:
     void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
 
     void Update();
-
-    SpaceEntitySystem* GetSpaceEntitySystem();
 
     bool IsLocalClientLeader() const;
 
@@ -106,7 +106,7 @@ private:
 
     void SetElectionState(ElectionState NewState);
 
-    void SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback);
+    void SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback);
 
 private:
     SpaceEntitySystem* SpaceEntitySystemPtr;
@@ -122,7 +122,7 @@ private:
 
     ClientProxy* Leader;
 
-    csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
+    ScriptLeaderReadyCallback LeaderReadyCallback;
     csp::common::IJSScriptRunner& RemoteScriptRunner;
 };
 
