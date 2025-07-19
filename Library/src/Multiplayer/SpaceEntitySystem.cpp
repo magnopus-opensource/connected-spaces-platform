@@ -384,10 +384,17 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
     };
 }
 
-void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const csp::common::LoginState& LoginState,
-    const SpaceTransform& InSpaceTransform, bool IsVisible, AvatarState InState, const csp::common::String& InAvatarId,
-    AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback)
+void SpaceEntitySystem::CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState> LoginState,
+    const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
+    const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
+
+    if (!LoginState.HasValue())
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "CreateAvatar requires a non-empty LoginState.");
+        Callback(nullptr);
+        return;
+    }
 
     // Ask the server for an avatar Id via "GenerateObjectIds"
     async::shared_task<uint64_t> GetAvatarNetworkIdChain = RemoteGenerateNewAvatarId();
@@ -395,13 +402,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const cs
     // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
     async::task<void> SerializeAndSendChain
         = GetAvatarNetworkIdChain
-              .then(SendNewAvatarObjectMessage(InName, LoginState, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode))
+              .then(SendNewAvatarObjectMessage(Name, *LoginState, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
               .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 
     // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
-        .then(CreateNewLocalAvatar(InName, LoginState, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode, Callback))
+        .then(CreateNewLocalAvatar(Name, *LoginState, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [Callback, LogSystem = this->LogSystem](const std::exception& Except)
             {
@@ -411,9 +418,76 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const cs
             *LogSystem));
 }
 
-void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void SpaceEntitySystem::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+    csp::common::Optional<uint64_t> ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
-    CreateObjectInternal(InName, nullptr, InSpaceTransform, Callback);
+    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentID, Callback, &LogSystem = this->LogSystem](
+                                              const signalr::value& Result, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
+                std::rethrow_exception(Except);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
+            Callback(nullptr);
+        }
+
+        auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
+        auto* NewObject = new SpaceEntity(
+            this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+
+        if (ParentID.HasValue())
+        {
+            NewObject->SetParentId(static_cast<uint64_t>(*ParentID));
+        }
+
+        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
+
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+
+        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
+            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        {
+            try
+            {
+                if (Except)
+                {
+                    std::rethrow_exception(Except);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
+                Callback(nullptr);
+            }
+
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+            ResolveEntityHierarchy(NewObject);
+
+            Entities.Append(NewObject);
+            Objects.Append(NewObject);
+            Callback(NewObject);
+        };
+
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+            LocalSendCallback);
+    };
+
+    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
+    const signalr::value Param1((uint64_t)1ULL);
+    const std::vector Arr { Param1 };
+
+    const signalr::value Params(Arr);
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
 }
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
@@ -1492,76 +1566,6 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
     {
         ElectionManager->OnObjectRemove(Object, RemovedObjects);
     }
-}
-
-void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
-    const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
-{
-    const std::function LocalIDCallback = [this, InName, InParent, InSpaceTransform, Callback, &LogSystem = this->LogSystem](
-                                              const signalr::value& Result, const std::exception_ptr& Except)
-    {
-        try
-        {
-            if (Except)
-            {
-                std::rethrow_exception(Except);
-            }
-        }
-        catch (const std::exception& e)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
-            Callback(nullptr);
-        }
-
-        auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, InName, InSpaceTransform,
-            MultiplayerConnectionInst->GetClientId(), true, true);
-
-        if (InParent.HasValue())
-        {
-            NewObject->SetParentId(*InParent);
-        }
-
-        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
-
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
-
-        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-        {
-            try
-            {
-                if (Except)
-                {
-                    std::rethrow_exception(Except);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
-                Callback(nullptr);
-            }
-
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-            ResolveEntityHierarchy(NewObject);
-
-            Entities.Append(NewObject);
-            Objects.Append(NewObject);
-            Callback(NewObject);
-        };
-
-        Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-            LocalSendCallback);
-    };
-
-    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
-
-    const signalr::value Params(Arr);
-    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
 }
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)

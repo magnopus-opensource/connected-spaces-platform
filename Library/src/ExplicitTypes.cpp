@@ -15,6 +15,7 @@
  */
 #include "CSP/Common/Array.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/LoginState.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
@@ -86,3 +87,4 @@ template class CSP_API csp::common::Optional<csp::systems::EAssetCollectionType>
 template class CSP_API csp::common::Optional<csp::systems::FileAssetDataSource>;
 template class CSP_API csp::common::Optional<csp::systems::Space>;
 template class CSP_API csp::common::Optional<csp::systems::SpaceAttributes>;
+template class CSP_API csp::common::Optional<csp::common::LoginState>;
