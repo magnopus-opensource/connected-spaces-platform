@@ -25,6 +25,7 @@
 namespace csp::common
 {
 class LogSystem;
+class IRealtimeEngine;
 }
 
 namespace csp::systems
@@ -156,7 +157,9 @@ public:
     /// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
     HotspotSequenceSystem* GetHotspotSequenceSystem();
 
-    csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
+    CSP_NO_EXPORT std::weak_ptr<csp::common::IRealtimeEngine> GetRealtimeEngine();
+    CSP_NO_EXPORT std::weak_ptr<csp::common::IRealtimeEngine> InstantiateMultiplayerRealtimeEngine();
+    CSP_NO_EXPORT void DestroyRealtimeEngine();
 
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
@@ -180,7 +183,7 @@ private:
 
     csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
-    csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
+    std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine;
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;
