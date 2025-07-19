@@ -378,8 +378,6 @@ csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
-SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem() { return EntitySystem; }
-
 void SpaceEntity::SetParentId(uint64_t InParentId)
 {
     // If the current parentid differs from the input
@@ -405,7 +403,7 @@ SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
 
 void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-    EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
+    EntitySystem->CreateEntity(InName, InSpaceTransform, GetId(), Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
@@ -871,13 +869,13 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 bool SpaceEntity::Select()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return EntitySystem->SetSelectionStateOfEntity(true, this);
+    return SetSelectionState(true, EntitySystem->GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 bool SpaceEntity::Deselect()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return EntitySystem->SetSelectionStateOfEntity(false, this);
+    return SetSelectionState(false, EntitySystem->GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 bool SpaceEntity::IsModifiable() const
@@ -952,6 +950,31 @@ void SpaceEntity::Unlock()
 }
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
+
+bool SpaceEntity::SetSelectionState(bool SelectionState, uint64_t ClientId)
+{
+    if (SelectionState && !IsSelected())
+    {
+        if (InternalSetSelectionStateOfEntity(SelectionState, ClientId))
+        {
+            return EntitySystem->AddEntityToSelectedEntities(this);
+        }
+
+        return false;
+    }
+
+    if (!SelectionState && GetSelectingClientID() == ClientId)
+    {
+        if (InternalSetSelectionStateOfEntity(SelectionState, 0))
+        {
+            return EntitySystem->RemoveEntityFromSelectedEntities(this);
+        }
+
+        return false;
+    }
+
+    return false;
+}
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
 {
@@ -1064,7 +1087,7 @@ void SpaceEntity::ResolveParentChildRelationship()
         }
 
         // Set our new parent
-        Parent = GetSpaceEntitySystem()->FindSpaceEntityById(*ParentId);
+        Parent = EntitySystem->FindSpaceEntityById(*ParentId);
 
         if (Parent == nullptr)
         {
