@@ -189,6 +189,12 @@ MultiplayerConnection::~MultiplayerConnection()
     }
 }
 
+void MultiplayerConnection::SetSpaceEntitySystem(std::shared_ptr<csp::multiplayer::SpaceEntitySystem>& SpaceEntitySystem)
+{
+    // Take a weak ptr
+    this->SpaceEntitySystemWeak = SpaceEntitySystem;
+}
+
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
     : LogSystem(InBoundConnection.LogSystem)
 {
@@ -350,8 +356,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
-    csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, const csp::common::String& AccessToken, const csp::common::String& DeviceId,
+    ISignalRConnection* SignalRConnection)
 {
     if (Connection != nullptr)
     {
@@ -362,6 +368,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
             return;
         }
 
+        // What even is this state? Non-null connection, but non-connected?
         delete Connection;
     }
 
@@ -373,8 +380,12 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
     Connection = SignalRConnection;
-    NetworkEventManager->SetConnection(Connection);
-    SpaceEntitySystem.SetConnection(Connection);
+    NetworkEventManager->SetConnection(*SignalRConnection);
+
+    BindOnObjectMessage();
+    BindOnObjectPatch();
+    BindOnRequestToSendObject();
+    BindOnRequestToDisconnect();
 
     EventBusPtr->StartEventMessageListening();
 
@@ -641,5 +652,68 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 }
 
 bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelfMessaging; }
+
+void MultiplayerConnection::BindOnObjectMessage()
+{
+    GetSignalRConnection()->On("OnObjectMessage",
+        [this](const signalr::value& Params)
+        {
+            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            {
+                EntitySystem->OnObjectMessage(Params);
+            }
+            else
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Log, "Recieved OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
+            }
+        });
+}
+
+void MultiplayerConnection::BindOnObjectPatch()
+{
+    GetSignalRConnection()->On("OnObjectPatch",
+        [this](const signalr::value& Params)
+        {
+            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            {
+                EntitySystem->OnObjectPatch(Params);
+            }
+            else
+            {
+                LogSystem.LogMsg(common::LogLevel::Log, "Recieved OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
+            }
+        });
+}
+
+void MultiplayerConnection::BindOnRequestToSendObject()
+{
+    GetSignalRConnection()->On("OnRequestToSendObject",
+        [this](const signalr::value& Params)
+        {
+            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            {
+                EntitySystem->OnRequestToSendObject(Params);
+            }
+            else
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Log, "Recieved OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
+            }
+        });
+}
+
+void MultiplayerConnection::BindOnRequestToDisconnect()
+{
+    GetSignalRConnection()->On("OnRequestToDisconnect",
+        [](const signalr::value& Params)
+        {
+            const std::string Reason = Params.as_array()[0].as_string();
+
+            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
+            DisconnectEvent->AddString("Reason", Reason.c_str());
+            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
+        });
+}
 
 } // namespace csp::multiplayer
