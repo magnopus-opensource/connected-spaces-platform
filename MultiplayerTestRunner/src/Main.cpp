@@ -54,16 +54,16 @@
  * By this point, the client should be logged in and inside a space, hence tests need not concern themselves with space creation and cleanup.
  * This function blocks until the timeout has elapsed.
  */
-void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_point ProgramStartTime)
+void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_point ProgramStartTime, SpaceRAII& SpaceRAII)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
     switch (Settings.TestIdentifier)
     {
     case TestIdentifier::CREATE_AVATAR:
-        CreateAvatar::RunTest();
+        CreateAvatar::RunTest(SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::CREATE_CONVERSATION:
-        CreateConversation::RunTest();
+        CreateConversation::RunTest(SpaceRAII.GetRealtimeEngine());
         break;
     case TestIdentifier::EVENT_BUS_PING:
         EventBusPing::RunTest();
@@ -111,14 +111,14 @@ int main(int argc, char* argv[])
         Utils::InitialiseCSPWithUserAgentInfo(Settings.Endpoint.c_str());
 
         // Log in
-        LoginRAII loggedIn { Settings.LoginEmailAndPassword.first, Settings.LoginEmailAndPassword.second };
+        LoginRAII LoggedIn { Settings.LoginEmailAndPassword.first, Settings.LoginEmailAndPassword.second };
 
         // Enter space (creating one if it dosen't exist)
-        SpaceRAII space { Settings.SpaceId };
-        Settings.SpaceId = space.GetSpaceId(); // We need to update the settings as a new space may have been created
+        SpaceRAII Space { Settings.SpaceId };
+        Settings.SpaceId = Space.GetSpaceId(); // We need to update the settings as a new space may have been created
 
         // Run the specified test according to the TestIdentifier. Wont return earlier than timeout.
-        RunTest(Settings, ProgramStartTime);
+        RunTest(Settings, ProgramStartTime, Space);
 
         return 0;
     }

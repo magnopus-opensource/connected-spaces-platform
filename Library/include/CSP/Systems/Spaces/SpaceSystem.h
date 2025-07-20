@@ -72,13 +72,17 @@ public:
      *   @{ */
 
     /// @brief Enter a space if you have permission to, based on the Space settings.
-    /// This includes setting scopes (and toggling event listening in order to set the scope).
-    /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
+    /// Registers the user as in the space on the backend service, and calls csp::common::IRealtimeEngine::FetchAllEntitiesAndPopulateBuffers.
+    /// The initial load behaviour will differ based on the concrete IRealtimeEngine passed to this function.
     /// If user does not have permission to discover or enter the space, callback will be called with EResultCode::Failed and
     /// ERequestFailureReason::UserSpaceAccessDenied
     /// @param Space Space : space to enter into
+    /// @param RealtimeEngine IRealtimeEngine* : RealtimeEngine to load the space with. This object belongs to the caller, and does not
+    /// transfer ownership. Once the space is loaded, the caller should be sure to maintain the lifetime of the RealtimeEngine so long
+    /// as the space is active. Once the caller has called csp::systems::SpaceSystem::ExitSpace and received the callback, then they are
+    /// free to release the memory.
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, SpaceResultCallback Callback);
+    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, csp::common::IRealtimeEngine* RealtimeEngine, SpaceResultCallback Callback);
 
     // TEMPORARY hack as I am doing a staged refactor. This is in fact, a hack of a hack.
     // 1. I will eventually be passing IRealtimeEngine to EnterSpace, so this callback wants to be set on that object, however, I want to ensure

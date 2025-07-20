@@ -161,7 +161,7 @@ public:
     /// @param NetworkEventBus csp::multiplayer::NetworkEventbus& : Reference the the network event bus, used for leadership election messaging.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
-    CSP_NO_EXPORT SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    SpaceEntitySystem(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief SpaceEntitySystem destructor
@@ -349,6 +349,7 @@ protected:
 private:
     SpaceEntitySystem(); // needed for the wrapper generator
 
+    // Should not be null
     MultiplayerConnection* MultiplayerConnectionInst;
 
     // Should not be null

@@ -331,12 +331,24 @@ auto SpaceSystem::FireEnterSpaceEvent(Space& OutCurrentSpace)
  * ReportSuccess
  * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, resets state)
  */
-void SpaceSystem::EnterSpace(const String& SpaceId, SpaceResultCallback Callback)
+void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine* RealtimeEngine, SpaceResultCallback Callback)
 {
-    CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
+    if (RealtimeEngine == nullptr)
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Fatal, "RealtimeEngine pointer passed to EnterSpace cannot be null");
+        Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
+    }
 
-    // To be replaced by passing in the system, we need to deal with MultiplayerConnection::connect.
-    std::weak_ptr<csp::common::IRealtimeEngine> RealtimeEngineWeak = csp::systems::SystemsManager::Get().InstantiateMultiplayerRealtimeEngine();
+    // Hack alert. Not the best place to be doing this, but don't want to force the client to do this right this second, the api isn't strong enough
+    // and it'll be too easy to get wrong. Will need to break this dependency. We do the opposite in ExitSpace because we need to null the pointer,
+    // shared_ptrs and weak_ptrs would solve this entirely if they could be passed across the interface.
+    if (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::OnlineMultiUser)
+    {
+        csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetSpaceEntitySystem(
+            static_cast<csp::multiplayer::SpaceEntitySystem*>(RealtimeEngine));
+    }
+
+    CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
 
     GetSpace(SpaceId)
         .then(async::inline_scheduler(),
@@ -351,11 +363,9 @@ void SpaceSystem::EnterSpace(const String& SpaceId, SpaceResultCallback Callback
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
         .then(async::inline_scheduler(),
             // Temporarily use the member callbacks, this will just be on the realtime engine in later commits and thus simpler.
-            [RealtimeEngineWeak, EntityFetchCompleteCallback = this->EntityFetchComplete,
-                SpaceEntityCreatedCallback = this->SpaceEntityCreatedCallback](const SpaceResult& SpaceResult)
+            [RealtimeEngine, EntityFetchCompleteCallback = this->EntityFetchComplete, SpaceEntityCreatedCallback = this->SpaceEntityCreatedCallback](
+                const SpaceResult& SpaceResult)
             {
-                std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine = RealtimeEngineWeak.lock();
-
                 // TEMPORARILY set the member callback. This shouldn't break anything but space-rejoin tests, as this callback tends
                 // to be set after a space join to query object messages (though I do wonder how many of those are technically races...)
                 RealtimeEngine->SetEntityCreatedCallback(SpaceEntityCreatedCallback);
@@ -402,8 +412,6 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 
     if (MultiplayerConnection != nullptr)
     {
-        csp::systems::SystemsManager::Get().DestroyRealtimeEngine();
-
         MultiplayerConnection->StopListening(
             [MultiplayerConnection, Callback](multiplayer::ErrorCode Error)
             {
@@ -417,7 +425,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                 }
 
                 MultiplayerConnection->ResetScopes(
-                    [Callback](multiplayer::ErrorCode Error)
+                    [MultiplayerConnection, Callback](multiplayer::ErrorCode Error)
                     {
                         if (Error != multiplayer::ErrorCode::None)
                         {
@@ -428,6 +436,12 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                             return;
                         }
 
+                        // Null the realtime engine pointer in the multiplayer connection such that it stops dispatching signalR updates.
+                        // (Error paths are messy, what does failing to leave a space mean memory wise? This is why owned types with RAII work so much
+                        // better).
+                        MultiplayerConnection->SetSpaceEntitySystem(nullptr);
+
+                        // Inform the user we've exited a space
                         const NullResult Result(EResultCode::Success, 200);
                         INVOKE_IF_NOT_NULL(Callback, Result);
                     });

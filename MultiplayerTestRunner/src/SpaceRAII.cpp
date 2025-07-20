@@ -18,6 +18,7 @@
 
 #include "../include/ErrorCodes.h"
 #include "../include/ProcessDescriptors.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Utils.h"
 #include "uuid_v4.h"
@@ -30,6 +31,7 @@ namespace
 } // namespace
 
 SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
+    : RealtimeEngine(csp::systems::SystemsManager::Get().MakeOnlineRealtimeEngine())
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
@@ -50,7 +52,7 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
     std::promise<csp::systems::NullResult> ResultPromise;
     std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
 
-    SpaceSystem.EnterSpace(SpaceId.c_str(),
+    SpaceSystem.EnterSpace(SpaceId.c_str(), RealtimeEngine.get(),
         [&ResultPromise](csp::systems::NullResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets
@@ -160,3 +162,5 @@ csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem&
 
     return Result.GetSpace();
 }
+
+csp::multiplayer::SpaceEntitySystem& SpaceRAII::GetRealtimeEngine() const { return *RealtimeEngine; }

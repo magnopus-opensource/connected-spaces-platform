@@ -157,13 +157,14 @@ public:
     /// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
     HotspotSequenceSystem* GetHotspotSequenceSystem();
 
-    CSP_NO_EXPORT std::weak_ptr<csp::common::IRealtimeEngine> GetRealtimeEngine();
-    CSP_NO_EXPORT std::weak_ptr<csp::common::IRealtimeEngine> InstantiateMultiplayerRealtimeEngine();
-    CSP_NO_EXPORT void DestroyRealtimeEngine();
-
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
+
+    // Convenience method for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
+    // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
+    // @deprecated This method is a transitional method, and should not be expected to exist in the long term.
+    csp::multiplayer::SpaceEntitySystem* MakeOnlineRealtimeEngine();
 
 private:
     SystemsManager();

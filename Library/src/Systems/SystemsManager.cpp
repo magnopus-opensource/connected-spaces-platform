@@ -93,40 +93,14 @@ SequenceSystem* SystemsManager::GetSequenceSystem() { return SequenceSystem; }
 
 HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem() { return HotspotSequenceSystem; }
 
-std::weak_ptr<csp::common::IRealtimeEngine> SystemsManager::GetRealtimeEngine() { return RealtimeEngine; }
-
-std::weak_ptr<csp::common::IRealtimeEngine> SystemsManager::InstantiateMultiplayerRealtimeEngine()
-{
-    // The reason we do this is because if the tests, most tests get the pointer to the space entity system right at the beginning.
-    // However, in the new world it wont exist until clients provide it in enterspace, so the pointer they get will be invalid.
-    // This whole method will dissapear when that happens.
-    // This way, the tests will still work as EnterSpace wont _actually_ set a new RealtimeEngine.
-    if (RealtimeEngine != nullptr)
-    {
-        return RealtimeEngine; // Not real logic, remove after integration
-    }
-
-    // This will change once api is given to clients to init a realtime engine of their choosing.
-    RealtimeEngine = std::make_shared<csp::multiplayer::SpaceEntitySystem>(MultiplayerConnection, *LogSystem, *NetworkEventBus, *ScriptSystem);
-    std::shared_ptr<csp::multiplayer::SpaceEntitySystem> SpaceEntitySystemPtr
-        = std::static_pointer_cast<csp::multiplayer::SpaceEntitySystem>(RealtimeEngine);
-    MultiplayerConnection->SetSpaceEntitySystem(SpaceEntitySystemPtr);
-
-    return RealtimeEngine;
-}
-
-void SystemsManager::DestroyRealtimeEngine()
-{
-    // We shut down realtime engine  when leaving a space, hence why this is different to the rest of the systems here.
-    if (RealtimeEngine != nullptr)
-    {
-        RealtimeEngine.reset();
-    }
-}
-
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
+
+csp::multiplayer::SpaceEntitySystem* SystemsManager::MakeOnlineRealtimeEngine()
+{
+    return new csp::multiplayer::SpaceEntitySystem { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
+}
 
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
@@ -197,17 +171,12 @@ void SystemsManager::CreateSystems()
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, NetworkEventBus, *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, NetworkEventBus, *LogSystem);
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
-
-    // Just for integration, this shouldn't actually be done here, as we want clients to create this
-    // See InstantiateMultiplayerRealtimeEngine for explanation, it's just for tests, and temporary.
-    InstantiateMultiplayerRealtimeEngine();
 }
 
 void SystemsManager::DestroySystems()
 {
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
-    DestroyRealtimeEngine();
     delete ConversationSystem;
     delete HotspotSequenceSystem;
     delete SequenceSystem;
