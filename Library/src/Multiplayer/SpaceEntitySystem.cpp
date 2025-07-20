@@ -201,10 +201,10 @@ SpaceEntitySystem::SpaceEntitySystem()
 {
 }
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
-    , MultiplayerConnectionInst(InMultiplayerConnection)
+    , MultiplayerConnectionInst(&InMultiplayerConnection)
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)

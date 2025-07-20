@@ -45,5 +45,5 @@ TEST_F(RunnableTests, CreateAvatar)
     // Make a throwaway space
     SpaceRAII Space({});
 
-    CreateAvatar::RunTest();
+    CreateAvatar::RunTest(Space.GetRealtimeEngine());
 }

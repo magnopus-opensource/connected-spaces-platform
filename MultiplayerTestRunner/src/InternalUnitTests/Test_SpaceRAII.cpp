@@ -121,7 +121,7 @@ TEST_F(SpaceRAIITest, TestUseInvalidExistingSpace)
     try
     {
         ::testing::internal::CaptureStdout();
-        SpaceRAII Space({ Invalid_SpaceID });
+        SpaceRAII Space(std::make_optional(Invalid_SpaceID));
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {

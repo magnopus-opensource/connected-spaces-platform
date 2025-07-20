@@ -18,10 +18,15 @@
 
 #include "../CLIArgs.h"
 
+namespace csp::multiplayer
+{
+class SpaceEntitySystem;
+}
+
 namespace CreateConversation
 {
 /*
  * Example test that creates a conversation component with a conversation message
  */
-void RunTest();
+void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine);
 } // namespace CreateConversation

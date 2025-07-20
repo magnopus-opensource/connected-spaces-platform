@@ -189,10 +189,9 @@ MultiplayerConnection::~MultiplayerConnection()
     }
 }
 
-void MultiplayerConnection::SetSpaceEntitySystem(std::shared_ptr<csp::multiplayer::SpaceEntitySystem>& SpaceEntitySystem)
+void MultiplayerConnection::SetSpaceEntitySystem(csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem)
 {
-    // Take a weak ptr
-    this->SpaceEntitySystemWeak = SpaceEntitySystem;
+    MultiplayerRealtimeEngine = SpaceEntitySystem;
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
@@ -658,14 +657,14 @@ void MultiplayerConnection::BindOnObjectMessage()
     GetSignalRConnection()->On("OnObjectMessage",
         [this](const signalr::value& Params)
         {
-            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            if (MultiplayerRealtimeEngine != nullptr)
             {
-                EntitySystem->OnObjectMessage(Params);
+                MultiplayerRealtimeEngine->OnObjectMessage(Params);
             }
             else
             {
                 LogSystem.LogMsg(
-                    common::LogLevel::Log, "Recieved OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
+                    common::LogLevel::Log, "Received OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
             }
         });
 }
@@ -675,13 +674,13 @@ void MultiplayerConnection::BindOnObjectPatch()
     GetSignalRConnection()->On("OnObjectPatch",
         [this](const signalr::value& Params)
         {
-            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            if (MultiplayerRealtimeEngine != nullptr)
             {
-                EntitySystem->OnObjectPatch(Params);
+                MultiplayerRealtimeEngine->OnObjectPatch(Params);
             }
             else
             {
-                LogSystem.LogMsg(common::LogLevel::Log, "Recieved OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
+                LogSystem.LogMsg(common::LogLevel::Log, "Received OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
             }
         });
 }
@@ -691,14 +690,14 @@ void MultiplayerConnection::BindOnRequestToSendObject()
     GetSignalRConnection()->On("OnRequestToSendObject",
         [this](const signalr::value& Params)
         {
-            if (auto EntitySystem = SpaceEntitySystemWeak.lock())
+            if (MultiplayerRealtimeEngine != nullptr)
             {
-                EntitySystem->OnRequestToSendObject(Params);
+                MultiplayerRealtimeEngine->OnRequestToSendObject(Params);
             }
             else
             {
                 LogSystem.LogMsg(
-                    common::LogLevel::Log, "Recieved OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
+                    common::LogLevel::Log, "Received OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
             }
         });
 }
