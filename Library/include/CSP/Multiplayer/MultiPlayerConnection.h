@@ -196,7 +196,10 @@ public:
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
     /// @brief Sets the internal reference to the SpaceEntitySystem. Should be called when entering a space.
-    CSP_NO_EXPORT void SetSpaceEntitySystem(std::shared_ptr<SpaceEntitySystem>& SpaceEntitySystem);
+    /// @param SpaceEntitySystem SpaceEntitySystem* : Non-owning pointer. Ideally this would be an owned structure, but we can't due to the wrapper
+    /// generator. Remember to null this when exiting a space as object dispatch depends on that, until clients are capable of managing this
+    /// themselves. Unfortunate manual state management.
+    CSP_NO_EXPORT void SetSpaceEntitySystem(csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem);
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -250,13 +253,7 @@ private:
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
 
-    // Space Entity System is created and destroyed on space entry/de-entry
-    // HOWEVER, for better or worse, bindings are only made once, on login. (They have to be, cant reregister signalR bindings, and we want
-    // out-of-space messaging) Therefore, this SpaceEntitySystem needs to be set each time we enter a space. The weak pointer nature means that we can
-    // discard messages that come to us when not in a space (which WILL happen during exiting a space due to network async).
-    // This used to be done by recycling the same SpaceEntitySystem, but we can't (and don't want to!) do that anymore.
-    // Review note: This may vanish depending on what decisions are made regarding ownership of the IRealtimeEngine.
-    std::weak_ptr<SpaceEntitySystem> SpaceEntitySystemWeak;
+    SpaceEntitySystem* MultiplayerRealtimeEngine = nullptr;
 };
 
 } // namespace csp::multiplayer

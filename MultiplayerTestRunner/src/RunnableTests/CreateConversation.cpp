@@ -36,23 +36,25 @@ when receiving 2 patches, the first being the initial component creation, and th
 the ConversationId property update.
 This scenario would fail if events arent correctly stored, and then flushed when receiving the conversation id
 */
-void RunTest()
+void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine)
 {
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
-
     // Ensure patch rate limiting is off, as we're sending patches in quick succession.
-    EntitySystem.SetEntityPatchRateLimitEnabled(false);
+    RealtimeEngine.SetEntityPatchRateLimitEnabled(false);
 
     csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
     std::promise<csp::multiplayer::SpaceEntity*> CreateObjectResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> CreateObjectResultFuture = CreateObjectResultPromise.get_future();
 
-    EntitySystem.CreateObject("TestObject", ObjectTransform,
+    RealtimeEngine.CreateEntity("TestObject", ObjectTransform, csp::common::Optional<uint64_t> {},
         [&CreateObjectResultPromise](csp::multiplayer::SpaceEntity* Result) { CreateObjectResultPromise.set_value(Result); });
 
     csp::multiplayer::SpaceEntity* Object = CreateObjectResultFuture.get();
+
+    if (Object == nullptr)
+    {
+        throw std::runtime_error("Failed to create TestObject");
+    }
 
     // Create the conversation component
     auto* ConversationComponent = (csp::multiplayer::ConversationSpaceComponent*)Object->AddComponent(csp::multiplayer::ComponentType::Conversation);
@@ -60,7 +62,7 @@ void RunTest()
     // Send patch before CreateConversation is called,
     // so clients get a patch which contains the conversation component with an invalid id
     Object->QueueUpdate();
-    EntitySystem.ProcessPendingEntityOperations();
+    RealtimeEngine.ProcessPendingEntityOperations();
 
     // Create the conversation using the component
     std::promise<csp::common::String> CreateConversationResultPromise;
@@ -79,7 +81,8 @@ void RunTest()
     // Send patch at the end so clients get a patch which contains the conversation component
     // with a valid conversation id
     Object->QueueUpdate();
-    EntitySystem.ProcessPendingEntityOperations();
+
+    RealtimeEngine.ProcessPendingEntityOperations();
 }
 
 } // namespace CreateConversation
