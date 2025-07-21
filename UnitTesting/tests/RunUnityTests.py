@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-UNITY_VERSION = "2022.2.16"
+UNITY_VERSION = "6000.0.53f1"
 
 def get_editor_path_cachefile_path():
     filename = "editor_filepath.cfg"
