@@ -235,7 +235,7 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
 {
     return [SpaceSystem, Space, InviteUsers]() -> async::task<NullResult>
     {
-        if (!InviteUsers.HasValue())
+        if (!InviteUsers.HasValue() || InviteUsers->InviteUserRoleInfos.IsEmpty())
         {
             // In the event the optional is null we still want to return success to continue the chain.
             return async::make_task(NullResult(EResultCode::Success, 200));
