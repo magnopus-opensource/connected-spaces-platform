@@ -18,7 +18,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "CSP/Systems/Status/Status.h"
+#include "CSP/Systems/ServiceStatus.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"

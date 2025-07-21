@@ -18,7 +18,7 @@
 #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "CSP/Systems/Status/Status.h"
+#include "CSP/Systems/ServiceStatus.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/version.h"
 #include "Common/UUIDGenerator.h"

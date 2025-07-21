@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "CSP/Systems/Status/Status.h"
+#include "CSP/Systems/ServiceStatus.h"
 
 #include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
