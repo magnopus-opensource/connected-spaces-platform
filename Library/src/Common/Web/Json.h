@@ -191,7 +191,7 @@ template <typename U, typename V> inline rapidjson::Value TypeToJsonValue(const 
 
 // Full template specialisations for TypeToJsonValue
 
-template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& Allocator)
+template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& /*Allocator*/)
 {
     rapidjson::Value JsonValue;
     JsonValue.SetBool(Value);
@@ -199,17 +199,17 @@ template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJson
     return JsonValue;
 }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
 template <> inline rapidjson::Value TypeToJsonValue(const csp::common::String& Value, RapidJsonAlloc& Allocator)
 {
