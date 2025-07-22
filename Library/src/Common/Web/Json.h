@@ -45,7 +45,7 @@ template <class T> inline csp::common::String TypeToJsonString(const std::shared
 
 template <class T>
 [[deprecated("Unsupported type for JSON (string) serialisation! You should probably add support for it :)")]] inline csp::common::String
-TypeToJsonString(const T& Value)
+TypeToJsonString(const T& /*Value*/)
 {
     return csp::common::String("");
 }
