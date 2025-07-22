@@ -67,7 +67,7 @@ def get_unity_installation():
     file.close()
 
     if not os.path.exists(editor_path):
-        print("Unable to locate previously detected Unity installtion!")
+        print("Unable to locate previously detected Unity installation!")
         find_unity_installation()
 
     file = open(cachefile_path, "r")
