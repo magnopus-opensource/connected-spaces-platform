@@ -20,10 +20,15 @@
 
 #include <string>
 
+namespace csp::systems
+{
+class ServicesDeploymentStatus;
+} // namespace csp::systems
+
 namespace csp
 {
 
-/// @brief Represents definition for identifying and versioning an external service endpoint..
+/// @brief Represents definition for identifying and versioning an external service endpoint.
 class CSP_API ServiceDefinition
 {
 public:
@@ -52,6 +57,14 @@ public:
     /// @brief Sets the current Version for the service endpoint.
     /// @param InVersion uint32_t : Version for service endpoint.
     CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
+
+    /// @brief Compares the service definition against services deployment status to evaluate state differences.
+    /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
+    /// `ServicesDeploymentStatus` to determine the differences between the two. The comparison is performed with
+    /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
+    /// @param ServicesDeploymentStatus The current status information against which the service definition is compared.
+    /// @return bool : true if all services are available, false otherwise
+    CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const;
 
 private:
     csp::common::String URI;
