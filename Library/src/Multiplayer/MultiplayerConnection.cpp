@@ -352,7 +352,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
 }
 
 void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
-    csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
+    csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+    const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
     if (Connection != nullptr)
     {
@@ -366,10 +367,13 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
         delete Connection;
     }
 
+// You will notice that the Emscripten webclient doesn't take the Uri into its constructor.
+// This is because it uses the url passed into its Start function, which gets modified by SignalR.
+// This modified version isn't compatible with our POCO implementation, so we need to directly use the MultiplayerUri.
 #ifdef CSP_WASM
     WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(AccessToken.c_str(), DeviceId.c_str());
 #else
-    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), LogSystem);
+    WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(MultiplayerUri.c_str(), AccessToken.c_str(), DeviceId.c_str(), LogSystem);
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
