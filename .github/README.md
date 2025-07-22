@@ -1,7 +1,7 @@
 # Connected Spaces Platform
 
 <p align="center">
-    <img src="https://github.com/user-attachments/assets/b40be23d-4d07-42bd-b3cb-652f261cf20b">
+    <img src="https://github.com/user-attachments/assets/b40be23d-4d07-42bd-b3cb-652f261cf20b"> 
 </p>
 
 ## An interoperable communication library for the spatial internet
