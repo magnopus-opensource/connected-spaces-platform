@@ -85,6 +85,9 @@ public:
         OutFileStream.open(LogFilePath, std::ios_base::app);
         OutFileStream << "[" + CurrentTime + ":" + std::to_string(ChronoMilliseconds) + "] " + LogMessage;
         OutFileStream.close();
+#else
+        // Suppress the unused parameter warning
+        (void)LogMessage;
 #endif
     }
 

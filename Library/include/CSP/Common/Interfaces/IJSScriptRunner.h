@@ -65,13 +65,23 @@ public:
      * @param ScriptText String& : The text of the script to be executed by the javascript engine.
      * @return Whether the script was successfully run.
      */
-    virtual bool RunScript(int64_t ContextId, const String& ScriptText) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    virtual bool RunScript(int64_t ContextId, const String& ScriptText)
+    {
+        // Marking parameters as unused by casting them to void to suppress warnings.
+        // All other methods are marked as CSP_NO_EXPORT which means that parameter names can be commented out to suppress warnings,
+        // however this method is exported and the wrapper generator does not support that approach.
+        // C++ 17 adds support for the [[maybe_unused]] attribute, but again the wrapper generator does not support it.
+        (void)ContextId;
+        (void)ScriptText;
+
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+    }
 
     /**
      * @brief Register a binding object with the script runner. The script runner should store this for use.
      * @param ScriptBinding IScriptBinding* : Object capable of binding a script. The binding is eventually used to call back into IJSScriptRunner.
      */
-    CSP_NO_EXPORT virtual void RegisterScriptBinding(IScriptBinding* ScriptBinding)
+    CSP_NO_EXPORT virtual void RegisterScriptBinding(IScriptBinding* /*ScriptBinding*/)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
@@ -81,7 +91,7 @@ public:
      * @param ScriptBinding IScriptBinding : Object capable of binding a script.
      * @pre ScriptBinding has been registered via RegisterScriptBinding
      */
-    CSP_NO_EXPORT virtual void UnregisterScriptBinding(IScriptBinding* ScriptBinding)
+    CSP_NO_EXPORT virtual void UnregisterScriptBinding(IScriptBinding* /*ScriptBinding*/)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
@@ -92,7 +102,7 @@ public:
      *                  If the provided context does not exist, the script bind will fail.
      * @return Whether the context was successfully bound.
      */
-    CSP_NO_EXPORT virtual bool BindContext(int64_t ContextId) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool BindContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /**
      * @brief Reset the script context. This will likely shutdown and re-initialize any modules in the context.
@@ -100,7 +110,7 @@ public:
      *                  If the provided context does not exist, the script reset will fail.
      * @return Whether the context was successfully reset.
      */
-    CSP_NO_EXPORT virtual bool ResetContext(int64_t ContextId) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool ResetContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /**
      * @brief Get the script context object.
@@ -108,7 +118,7 @@ public:
      * @return The script context object. This specific type of this is implementation defined. However, if using CSP's ScriptSystem at time of
      * writing, it will be a csp::systems::ScriptContext*, which you should cast to. Returns nullptr if the provided context does not exist.
      */
-    CSP_NO_EXPORT virtual void* GetContext(int64_t ContextId) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual void* GetContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /**
      * @brief Get a script module object within a context.
@@ -118,7 +128,7 @@ public:
      * writing, it will be a csp::systems::ScriptModule*, which you should cast to. Returns nullptr if the specified module does not exist in the
      * context.
      */
-    CSP_NO_EXPORT virtual void* GetModule(int64_t ContextId, const String& ModuleName)
+    CSP_NO_EXPORT virtual void* GetModule(int64_t /*ContextId*/, const String& /*ModuleName*/)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
@@ -128,14 +138,14 @@ public:
      * @param ContextId int64_t : The Id of the context to create, must be unique to other contexts.
      * @return Whether the context was created successfully.
      */
-    CSP_NO_EXPORT virtual bool CreateContext(int64_t ContextId) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool CreateContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /**
      * @brief Destroy a pre-existing context with specified ID.
      * @param ContextId int64_t : The Id of the context to destroy.
      * @return Whether the context was destroyed successfully.
      */
-    CSP_NO_EXPORT virtual bool DestroyContext(int64_t ContextId) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    CSP_NO_EXPORT virtual bool DestroyContext(int64_t /*ContextId*/) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /**
      * @brief Set the javascript source code of a particular module
@@ -144,7 +154,7 @@ public:
      * @param Source String: The javascript source code to set.
      * @pre ModuleURL must be unique.
      */
-    CSP_NO_EXPORT virtual void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
+    CSP_NO_EXPORT virtual void SetModuleSource(csp::common::String /*ModuleUrl*/, csp::common::String /*Source*/)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
@@ -154,7 +164,7 @@ public:
      * @param ModuleUrl String : The URL of the module to clear.
      * @pre ModuleURL must already exist via setting it with SetModuleSource.
      */
-    CSP_NO_EXPORT virtual void ClearModuleSource(csp::common::String ModuleUrl)
+    CSP_NO_EXPORT virtual void ClearModuleSource(csp::common::String /*ModuleUrl*/)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }

@@ -60,7 +60,7 @@ public:
 
     /// @brief Constructs an optional with a null value.
     /// @param InValue std::nullptr_t : nullptr value
-    Optional(std::nullptr_t InValue)
+    Optional(std::nullptr_t /*InValue*/)
     {
         Value = nullptr;
         ValueDestructor = DefaultDestructor<T>;
