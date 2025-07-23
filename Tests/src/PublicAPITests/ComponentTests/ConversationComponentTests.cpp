@@ -2855,7 +2855,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateConvers
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     // Login
@@ -2866,11 +2865,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateConvers
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create object to hold component
-    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
 
     // Create conversation component
     auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
@@ -3033,7 +3035,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateMessage
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
     // Login
@@ -3044,11 +3045,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateMessage
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create object to hold component
-    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
 
     // Create conversation component
     auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
