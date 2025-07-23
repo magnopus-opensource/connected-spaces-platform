@@ -322,13 +322,13 @@ public:
      *
      * @param SpaceId const csp::common::String& : MCS formatted SpaceId
      * @param FetchStartedCallback EntityFetchStartedCallback Callback called once scopes are reset and entity fetch has begun.
-     * @param FetchCompleteCallback EntityFetchCompleteCallback Callback called async once all entities are fetched and stored.
      *
      * @pre @param Space represented by SpaceId must exist on the configured server endpoint. See csp::systems::SpaceSystem::CreateSpace
-     * @post @param FetchStartedCallback will be called. @param FetchCompleteCallback will be called async once all the entities are fetched.
+     * @post @param FetchStartedCallback will be called. The csp::common::EntityFetchCompleteCallback passed in the constructor will be called async
+     * once all the entities are fetched.
      */
-    CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId,
-        csp::common::EntityFetchStartedCallback FetchStartedCallback, csp::common::EntityFetchCompleteCallback FetchCompleteCallback) override;
+    CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
+        const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
