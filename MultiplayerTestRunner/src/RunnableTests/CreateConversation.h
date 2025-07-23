@@ -20,7 +20,7 @@
 
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 }
 
 namespace CreateConversation
@@ -28,5 +28,5 @@ namespace CreateConversation
 /*
  * Example test that creates a conversation component with a conversation message
  */
-void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine);
+void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
 } // namespace CreateConversation

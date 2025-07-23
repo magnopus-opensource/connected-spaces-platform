@@ -19,7 +19,7 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/CSPSceneData.h"
 #include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
@@ -260,7 +260,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -295,7 +295,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -402,7 +402,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };

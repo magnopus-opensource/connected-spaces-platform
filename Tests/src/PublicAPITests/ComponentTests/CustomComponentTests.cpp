@@ -92,7 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     {
-        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -201,7 +201,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         SpaceEntity* LoadedObject;
 
         // Reload the space and verify the contents match
-        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         RealtimeEngine->SetEntityCreatedCallback(

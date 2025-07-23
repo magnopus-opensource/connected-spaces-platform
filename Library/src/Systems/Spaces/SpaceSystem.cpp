@@ -21,7 +21,7 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -354,10 +354,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     // Hack alert. Not the best place to be doing this, but don't want to force the client to do this right this second, the api isn't strong enough
     // and it'll be too easy to get wrong. Will need to break this dependency. We do the opposite in ExitSpace because we need to null the pointer,
     // shared_ptrs and weak_ptrs would solve this entirely if they could be passed across the interface.
-    if (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::OnlineMultiUser)
+    if (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
     {
-        csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetSpaceEntitySystem(
-            static_cast<csp::multiplayer::SpaceEntitySystem*>(RealtimeEngine));
+        csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetOnlineRealtimeEngine(
+            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine));
     }
 
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
@@ -380,7 +380,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                 /* Because this is external api (RealtimeEngine) we use the callback for chaining, rather than a nicer interface.
                  * Need to make sure we've finished fetching all the entities before we move on
                  *
-                 * The way this works is, in SpaceEntitySystem we do a bunch of nested callbacks to refresh scopes,
+                 * The way this works is, in OnlineRealtimeEngine we do a bunch of nested callbacks to refresh scopes,
                  * they can't be synchronous because we need to wait until one callback finishes until we can call the next one.
                  * Once that's done, we're free to request entities from the backend. It is at this point, once we have fired the
                  * entity request, that the login is free to continue.
@@ -444,7 +444,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                         // Null the realtime engine pointer in the multiplayer connection such that it stops dispatching signalR updates.
                         // (Error paths are messy, what does failing to leave a space mean memory wise? This is why owned types with RAII work so much
                         // better).
-                        MultiplayerConnection->SetSpaceEntitySystem(nullptr);
+                        MultiplayerConnection->SetOnlineRealtimeEngine(nullptr);
 
                         // Inform the user we've exited a space
                         const NullResult Result(EResultCode::Success, 200);

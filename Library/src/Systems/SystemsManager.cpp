@@ -99,9 +99,9 @@ csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnectio
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
 
-csp::multiplayer::SpaceEntitySystem* SystemsManager::MakeOnlineRealtimeEngine()
+csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
-    return new csp::multiplayer::SpaceEntitySystem { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
+    return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
 }
 
 SystemsManager::SystemsManager()

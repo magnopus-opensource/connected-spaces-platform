@@ -164,7 +164,7 @@ public:
     // Convenience method for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
     // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
     // @deprecated This method is a transitional method, and should not be expected to exist in the long term.
-    csp::multiplayer::SpaceEntitySystem* MakeOnlineRealtimeEngine();
+    csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
 
 private:
     SystemsManager();

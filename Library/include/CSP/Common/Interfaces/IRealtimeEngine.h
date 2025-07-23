@@ -70,10 +70,10 @@ class LoginState;
 
 // This, frustratingly, cannot be an in-class type due to the code generator.
 /// @brief Enum of concrete types of RealtimeEngines.
-enum class RealtimeEngineType : int
+enum class RealtimeEngineType
 {
-    OnlineMultiUser = 0,
-    OnlineSingleUser
+    Online = 0,
+    Offline
 };
 
 /**
@@ -270,7 +270,7 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
-    /// @brief Set Callback that notifies when the SpaceEntitySystem is in a valid state
+    /// @brief Set Callback that notifies when the OnlineRealtimeEngine is in a valid state
     /// after entering a space, and entity mutation can begin. Users should not mutate entities before receiving this callback.
     /// This callback should be emitted in response to FetchAllEntitiesAndPopulateBuffers completing, either syncronously or asyncronously.
     /// This callback must be set prior to entering a space.
@@ -306,44 +306,44 @@ protected:
 
 // The following doc is temporary for reference during the module migration effort.
 
-/* As this interface is more or less a conversion from `SpaceEntitySystem`, what follows are
+/* As this interface is more or less a conversion from `OnlineRealtimeEngine`, what follows are
  * the methods that were public, but are no longer going to be public as far as the interface
  * is concerned. I've checked via searching the Magnopus org for uses of these, and initial findings
  * show these can be hidden, although some client validation wouldn't go amiss.
- * In reality, SpaceEntitySystem isn't going anywhere and will continue to exists behind the interface, so these
+ * In reality, OnlineRealtimeEngine isn't going anywhere and will continue to exists behind the interface, so these
  * methods are not being deleted, they're just not being exposed to clients or CSP-core.
  * They'll still be called by methods internal to the module.
  *
  *
- * SpaceEntitySystem::AddEntity (We think only Ichabod uses this, we think incorrectly. _Definitely_ need to check this one. Potential full deletion
+ * OnlineRealtimeEngine::AddEntity (We think only Ichabod uses this, we think incorrectly. _Definitely_ need to check this one. Potential full deletion
  * candidate)
- * SpaceEntitySystem::LocalDestroyEntity SpaceEntitySystem::LockEntityUpdate SpaceEntitySystem::UnlockEntityUpdate
- * SpaceEntitySystem::SetConnection
- * SpaceEntitySystem::RegisterEntityScriptAsModule (Potential full deletion candidate)
- * SpaceEntitySystem::BindNewEntityToScript (Potential full deletion candidate)
- * SpaceEntitySystem::RetrieveAllEntities
- * SpaceEntitySystem::LocalDestroyAllEntities
- * SpaceEntitySystem::SetSelectionStateOfEntity (Covered by SpaceEntity Select/Deselect)
- * SpaceEntitySystem::CreateObjectInternal
- * SpaceEntitySystem::ResolveEntityHierarchy
- * SpaceEntitySystem::Initialise
- * SpaceEntitySystem::Shutdown
- * SpaceEntitySystem::GetPendingAdds
- * SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally
- * SpaceEntitySystem::RunScriptRemotely (Public interface to this is EntityScript::RunScript)
+ * OnlineRealtimeEngine::LocalDestroyEntity OnlineRealtimeEngine::LockEntityUpdate OnlineRealtimeEngine::UnlockEntityUpdate
+ * OnlineRealtimeEngine::SetConnection
+ * OnlineRealtimeEngine::RegisterEntityScriptAsModule (Potential full deletion candidate)
+ * OnlineRealtimeEngine::BindNewEntityToScript (Potential full deletion candidate)
+ * OnlineRealtimeEngine::RetrieveAllEntities
+ * OnlineRealtimeEngine::LocalDestroyAllEntities
+ * OnlineRealtimeEngine::SetSelectionStateOfEntity (Covered by SpaceEntity Select/Deselect)
+ * OnlineRealtimeEngine::CreateObjectInternal
+ * OnlineRealtimeEngine::ResolveEntityHierarchy
+ * OnlineRealtimeEngine::Initialise
+ * OnlineRealtimeEngine::Shutdown
+ * OnlineRealtimeEngine::GetPendingAdds
+ * OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally
+ * OnlineRealtimeEngine::RunScriptRemotely (Public interface to this is EntityScript::RunScript)
  */
 
 /* These are the methods that have been removed from the base interface, but will exist publicly on the Multi User concretion.
  *
- * SpaceEntitySystem::GetEntityPatchRateLimitEnabled
- * SpaceEntitySystem::SetEntityPatchRateLimitEnabled
- * SpaceEntitySystem::EnableLeaderElection
- * SpaceEntitySystem::DisableLeaderElection
- * SpaceEntitySystem::IsLeaderElectionEnabled
- * SpaceEntitySystem::GetLeaderId
- * SpaceEntitySystem::ClaimScriptOwnership
- * SpaceEntitySystem::SetScriptSystemReadyCallback (Should rename to SetScriptLeaderReadyCallback)
- * SpaceEntitySystem::GetMultiplayerConnectionInstance
+ * OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled
+ * OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled
+ * OnlineRealtimeEngine::EnableLeaderElection
+ * OnlineRealtimeEngine::DisableLeaderElection
+ * OnlineRealtimeEngine::IsLeaderElectionEnabled
+ * OnlineRealtimeEngine::GetLeaderId
+ * OnlineRealtimeEngine::ClaimScriptOwnership
+ * OnlineRealtimeEngine::SetScriptSystemReadyCallback (Should rename to SetScriptLeaderReadyCallback)
+ * OnlineRealtimeEngine::GetMultiplayerConnectionInstance
  * SystemsManager::GetEventBus (Rename EventBus -> NetworkEventBus)
- * SpaceEntitySystem::RefreshMultiplayerConnection
+ * OnlineRealtimeEngine::RefreshMultiplayerConnection
  */

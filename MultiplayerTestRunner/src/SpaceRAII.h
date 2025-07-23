@@ -54,10 +54,10 @@ public:
     /*
      * Get the RealtimeEngine that is instantiated for the lifetime that we are in the space for.
      */
-    csp::multiplayer::SpaceEntitySystem& GetRealtimeEngine() const;
+    csp::multiplayer::OnlineRealtimeEngine& GetRealtimeEngine() const;
 
 private:
     bool CreatedThisSpace = false; // If we created this space, we should destroy it when done.
     std::string SpaceId;
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine;
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine;
 };

@@ -17,7 +17,7 @@
 
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 #include "uuid_v4.h"
@@ -225,7 +225,7 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
     }
 }
 
-inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::SpaceEntitySystem* EntitySystem, int MaxTextTimeSeconds = 20)
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::OnlineRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
 {
     // Wait for message
     auto Start = std::chrono::steady_clock::now();
@@ -251,7 +251,7 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
     }
 }
 
-inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::SpaceEntitySystem* EntitySystem, csp::common::String Name = "Object")
+inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::OnlineRealtimeEngine* EntitySystem, csp::common::String Name = "Object")
 {
     csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
     auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});

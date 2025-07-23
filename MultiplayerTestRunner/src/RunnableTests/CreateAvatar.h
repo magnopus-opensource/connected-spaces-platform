@@ -20,7 +20,7 @@
 
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 }
 
 namespace CreateAvatar
@@ -28,5 +28,5 @@ namespace CreateAvatar
 /*
  * Example test that simply creates an avatar in a room.
  */
-void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine);
+void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
 } // namespace CreateAvatar

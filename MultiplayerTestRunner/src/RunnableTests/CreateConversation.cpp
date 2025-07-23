@@ -19,11 +19,11 @@
 #include "CreateConversation.h"
 #include "../CLIArgs.h"
 
-#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/Systems/SystemsManager.h"
+#include <CSP/Multiplayer/Components/ConversationSpaceComponent.h>
+#include <CSP/Multiplayer/SpaceEntity.h>
+#include <CSP/Multiplayer/OnlineRealtimeEngine.h>
+#include <CSP/Multiplayer/SpaceTransform.h>
+#include <CSP/Systems/SystemsManager.h>
 
 #include <future>
 #include <iostream>
@@ -36,7 +36,7 @@ when receiving 2 patches, the first being the initial component creation, and th
 the ConversationId property update.
 This scenario would fail if events arent correctly stored, and then flushed when receiving the conversation id
 */
-void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine)
+void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
     // Ensure patch rate limiting is off, as we're sending patches in quick succession.
     RealtimeEngine.SetEntityPatchRateLimitEnabled(false);

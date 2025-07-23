@@ -47,7 +47,7 @@ Once Login is complete, the client application should consider starting to call 
 
 ## 3. Set the EntityCreated Callback
 ```c++
-void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 ```
 
 This callback will be triggered any time the client receives a message from a space the user is subscribed to, stating that an Entity has been created. It is advised to call this just prior to entering a space, as once subscribed to a space, this callback will be triggered for each Entity currently in the space. The Client should use the data passed here to initialize any local representation of the entities in their application.
