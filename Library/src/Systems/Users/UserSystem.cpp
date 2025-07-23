@@ -59,8 +59,7 @@ namespace
 void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& MultiplayerConnection,
     csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback, const csp::systems::LoginStateResult& LoginStateRes)
 {
-    MultiplayerConnection.Connect(ErrorCallback, LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId,
-        csp::multiplayer::MultiplayerConnection::MakeSignalRConnection());
+    MultiplayerConnection.Connect(ErrorCallback, LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
 }
 
 }

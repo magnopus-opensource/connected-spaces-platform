@@ -22,7 +22,7 @@
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CallHelpers.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/MultiplayerConstants.h"
@@ -155,8 +155,8 @@ ISignalRConnection* MultiplayerConnection::MakeSignalRConnection()
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 }
 
-MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem)
-    : Connection(nullptr)
+MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection)
+    : Connection(&Connection)
     , WebSocketClient(nullptr)
     , NetworkEventManager(new NetworkEventManagerImpl(this))
     , LogSystem(LogSystem)
@@ -240,7 +240,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
         // Shared pointer to keep alive in local callback
         auto EntitiesDeletedEvent = std::make_shared<async::event_task<void>>();
         auto EntitiesDeletedContinuation = EntitiesDeletedEvent->get_task();
-        if (Connection == nullptr || !Connected)
+        if (!Connected)
         {
             throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::DeleteEntities, Error not connected.");
         }
@@ -292,7 +292,7 @@ auto MultiplayerConnection::RequestClientId()
         auto ClientIdRequestedEvent = std::make_shared<async::event_task<uint64_t>>();
         auto ClientIdRequestedContinuation = ClientIdRequestedEvent->get_task();
 
-        if (Connection == nullptr || !Connected)
+        if (!Connected)
         {
             throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::RequestClientId, Error not connected.");
         }
@@ -328,7 +328,7 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
         auto StartListeningEvent = std::make_shared<async::event_task<void>>();
         auto StartListeningContinuation = StartListeningEvent->get_task();
 
-        if (Connection == nullptr || !Connected)
+        if (!Connected)
         {
             throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::StartListening, Error not connected.");
         }
@@ -355,20 +355,14 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, const csp::common::String& AccessToken, const csp::common::String& DeviceId,
-    ISignalRConnection* SignalRConnection)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
-    if (Connection != nullptr)
+
+    if (Connected)
     {
-        if (Connected)
-        {
-            INVOKE_IF_NOT_NULL(Callback, ErrorCode::AlreadyConnected);
+        INVOKE_IF_NOT_NULL(Callback, ErrorCode::AlreadyConnected);
 
-            return;
-        }
-
-        // What even is this state? Non-null connection, but non-connected?
-        delete Connection;
+        return;
     }
 
 #ifdef CSP_WASM
@@ -378,8 +372,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, const csp
 #endif
     csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
-    Connection = SignalRConnection;
-    NetworkEventManager->SetConnection(*SignalRConnection);
+    NetworkEventManager->SetConnection(*Connection);
 
     BindOnObjectMessage();
     BindOnObjectPatch();
@@ -427,7 +420,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, const csp
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
@@ -456,25 +449,10 @@ void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reas
     Stop(StopHandler);
 }
 
-void MultiplayerConnection::Start(const ExceptionCallbackHandler Callback) const
-{
-    if (Connection == nullptr)
-    {
-        INVOKE_IF_NOT_NULL(Callback, std::make_exception_ptr(std::runtime_error("No Connection!")));
-
-        return;
-    }
-
-    Connection->Start(Callback);
-}
+void MultiplayerConnection::Start(const ExceptionCallbackHandler Callback) const { Connection->Start(Callback); }
 
 async::task<void> MultiplayerConnection::Start() const
 {
-    if (Connection == nullptr)
-    {
-        csp::common::continuations::LogErrorAndCancelContinuation("MultiplayerConnection::Start, SignalR connection pointer is null.", LogSystem);
-    }
-
     // Shared pointer to keep alive in local callback
     auto OnCompleteEvent = std::make_shared<async::event_task<void>>();
     async::task<void> OnCompleteTask = OnCompleteEvent->get_task();
@@ -498,10 +476,9 @@ async::task<void> MultiplayerConnection::Start() const
 
 void MultiplayerConnection::Stop(const ExceptionCallbackHandler Callback) const
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, std::make_exception_ptr(std::runtime_error("No Connection!")));
-
         return;
     }
 
@@ -519,7 +496,7 @@ CSP_EVENT void MultiplayerConnection::SetNetworkInterruptionCallback(NetworkInte
 
 void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
@@ -553,7 +530,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
 
 void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
@@ -580,7 +557,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 
 void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
@@ -607,21 +584,11 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
 
-ConnectionState MultiplayerConnection::GetConnectionState() const
-{
-    if (Connection != nullptr)
-    {
-        return static_cast<ConnectionState>(Connection->GetConnectionState());
-    }
-    else
-    {
-        return ConnectionState::Disconnected;
-    }
-}
+ConnectionState MultiplayerConnection::GetConnectionState() const { return static_cast<ConnectionState>(Connection->GetConnectionState()); }
 
 CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const bool InAllowSelfMessaging, ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr || !Connected)
+    if (!Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
@@ -654,7 +621,9 @@ bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelf
 
 void MultiplayerConnection::BindOnObjectMessage()
 {
-    GetSignalRConnection()->On("OnObjectMessage",
+
+    GetSignalRConnection()->On(
+        "OnObjectMessage",
         [this](const signalr::value& Params)
         {
             if (MultiplayerRealtimeEngine != nullptr)
@@ -666,12 +635,14 @@ void MultiplayerConnection::BindOnObjectMessage()
                 LogSystem.LogMsg(
                     common::LogLevel::Log, "Received OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
             }
-        });
+        },
+        LogSystem);
 }
 
 void MultiplayerConnection::BindOnObjectPatch()
 {
-    GetSignalRConnection()->On("OnObjectPatch",
+    GetSignalRConnection()->On(
+        "OnObjectPatch",
         [this](const signalr::value& Params)
         {
             if (MultiplayerRealtimeEngine != nullptr)
@@ -682,12 +653,14 @@ void MultiplayerConnection::BindOnObjectPatch()
             {
                 LogSystem.LogMsg(common::LogLevel::Log, "Received OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
             }
-        });
+        },
+        LogSystem);
 }
 
 void MultiplayerConnection::BindOnRequestToSendObject()
 {
-    GetSignalRConnection()->On("OnRequestToSendObject",
+    GetSignalRConnection()->On(
+        "OnRequestToSendObject",
         [this](const signalr::value& Params)
         {
             if (MultiplayerRealtimeEngine != nullptr)
@@ -699,12 +672,14 @@ void MultiplayerConnection::BindOnRequestToSendObject()
                 LogSystem.LogMsg(
                     common::LogLevel::Log, "Received OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
             }
-        });
+        },
+        LogSystem);
 }
 
 void MultiplayerConnection::BindOnRequestToDisconnect()
 {
-    GetSignalRConnection()->On("OnRequestToDisconnect",
+    GetSignalRConnection()->On(
+        "OnRequestToDisconnect",
         [](const signalr::value& Params)
         {
             const std::string Reason = Params.as_array()[0].as_string();
@@ -712,7 +687,8 @@ void MultiplayerConnection::BindOnRequestToDisconnect()
             csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
             DisconnectEvent->AddString("Reason", Reason.c_str());
             csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
-        });
+        },
+        LogSystem);
 }
 
 } // namespace csp::multiplayer
