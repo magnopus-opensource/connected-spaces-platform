@@ -1271,8 +1271,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
 // This test currently requires manual steps and will be reviewed as part of OF-1535.
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
-
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -1349,8 +1347,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {
     // Test for OB-1046
     // If the rate limiter hasn't processed all PendingOutgoingUpdates after SpaceEntity deletion it will crash when trying to process them
-
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     SetRandSeed();
 
@@ -2814,7 +2810,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
 {
     csp::common::LogSystem LogSystem;
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
 
     // The start function will throw internally
@@ -2831,14 +2827,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
 
     Connection->SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
     Connection->Connect(
-        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "", "", SignalRMock);
+        std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), SignalRMock, *SpaceEntitySystem, "", "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsErrorsThenDisconnectionFunctionsCalled)
 {
     csp::common::LogSystem LogSystem;
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
 
     // Start and stop will call their callbacks
@@ -2867,14 +2863,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
         Call(csp::common::String("MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "", SignalRMock);
+    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsThenDisconnectionFunctionsCalled)
 {
     csp::common::LogSystem LogSystem;
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
 
     // Start and stop will call their callbacks
@@ -2916,14 +2912,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
         MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "", SignalRMock);
+    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErrorsThenDisconnectionFunctionsCalled)
 {
     csp::common::LogSystem LogSystem;
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
 
     // Start and stop will call their callbacks
@@ -2969,14 +2965,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
     EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
-    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "", SignalRMock);
+    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCallbacksCalled)
 {
     csp::common::LogSystem LogSystem;
     SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
 
     // Start and stop will call their callbacks
@@ -3020,7 +3016,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenAllSignalRSucceedsThenSuccessCa
     EXPECT_CALL(MockDisconnectionCallback, Call(::testing::_)).Times(0);
 
     Connection.SetConnectionCallback(std::bind(&MockConnectionCallback::Call, &MockSuccessConnectionCallback, std::placeholders::_1));
-    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "", SignalRMock);
+    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestParseMultiplayerError)

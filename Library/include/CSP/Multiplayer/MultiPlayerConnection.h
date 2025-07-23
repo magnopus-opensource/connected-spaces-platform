@@ -138,10 +138,7 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    /// @param SignalRConnection ISignalRConnection* : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
-    /// ownership of this pointer.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId,
-        ISignalRConnection* SignalRConnection);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -182,7 +179,10 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem);
+    /// @param LogSystem csp::common::LogSystem& LogSystem injection.
+    /// @param Connection csp::multiplayer::ISignalRConnection& Connection injection. Multiplayer connection allows connection/disconnection, and
+    /// tracks that with a boolean flag, but the connection object itself is invariant, always set.
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -233,7 +233,9 @@ private:
     void BindOnRequestToSendObject();
     void BindOnRequestToDisconnect();
 
+    // May not be null
     class csp::multiplayer::ISignalRConnection* Connection;
+
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class NetworkEventBus* EventBusPtr;

@@ -19,6 +19,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "Mocks/SignalRConnectionMock.h"
 #include "TestHelpers.h"
 
 void PublicTestBase::SetUp()
@@ -39,6 +40,42 @@ void PublicTestBase::SetUp()
 }
 
 void PublicTestBase::TearDown()
+{
+    ::testing::Test::TearDown();
+
+    if (!csp::CSPFoundation::GetIsInitialised())
+    {
+        fprintf(stderr, "%s\n",
+            "csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
+
+        return;
+    }
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation shutdown!");
+    csp::CSPFoundation::Shutdown();
+}
+
+void PublicTestBaseWithMocks::SetUp()
+{
+    SignalRMock = new SignalRConnectionMock();
+
+    ::testing::Test::SetUp();
+
+    // Yield SignalRMock ownership
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), SignalRMock);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+
+    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+}
+
+void PublicTestBaseWithMocks::TearDown()
 {
     ::testing::Test::TearDown();
 
