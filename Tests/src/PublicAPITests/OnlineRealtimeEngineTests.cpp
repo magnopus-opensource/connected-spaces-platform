@@ -39,12 +39,12 @@ public:
 
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNewAvatarId)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInRemoteGenerateNewAvatarId)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates a result and not an exception
     EXPECT_CALL(
@@ -75,12 +75,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemot
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewAvatarId)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemoteGenerateNewAvatarId)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -111,12 +111,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteG
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObjectMessage)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSendNewAvatarObjectMessage)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates a result and not an exception
     EXPECT_CALL(
@@ -149,12 +149,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendN
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjectMessage)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSendNewAvatarObjectMessage)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -196,11 +196,11 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNew
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAvatar)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCreateNewLocalAvatar)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     using MockEntityCreatedCallback = testing::MockFunction<void(SpaceEntity*)>;
     MockEntityCreatedCallback MockCallback;
@@ -247,14 +247,14 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreat
                 Username, LoginState, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
 }
 
-CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreateAvatarChain)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLoggedFromWholeCreateAvatarChain)
 {
     RAIIMockLogger MockLogger {};
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Log);
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)

@@ -23,7 +23,7 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
-#include "SpaceEntitySystem.h"
+#include "OnlineRealtimeEngine.h"
 
 #include <atomic>
 #include <chrono>
@@ -121,7 +121,7 @@ class CSP_API SpaceEntity
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class SpaceEntitySystem;
+    friend class OnlineRealtimeEngine;
 
 #ifdef CSP_TESTS
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
@@ -148,11 +148,11 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
+    SpaceEntity(OnlineRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
-    /// Initially implemented for use in SpaceEntitySystem::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+    /// Initially implemented for use in OnlineRealtimeEngine::CreateAvatar
+    CSP_NO_EXPORT SpaceEntity(OnlineRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
         SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
         bool IsPersistent);
 
@@ -443,7 +443,7 @@ public:
 
     /// @brief Apply a local patch
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the SpaceEntitySystem state. Don't set this
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the OnlineRealtimeEngine state. Don't set this
     /// unless you know what you are doing. (default: false)
     CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
@@ -498,7 +498,7 @@ private:
     // Called when we're parsing a component from an mcs::ObjectPatch
     ComponentUpdateInfo ComponentFromItemComponentDataPatch(uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
 
-    SpaceEntitySystem* EntitySystem;
+    OnlineRealtimeEngine* EntitySystem;
 
     SpaceEntityType Type;
     uint64_t Id;
@@ -562,7 +562,7 @@ private:
     /// @brief Set ParentId to nullptr
     void RemoveParentId();
 
-    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
+    // Do NOT call directly, always call either Select() Deselect() or OnlineRealtimeEngine::InternalSetSelectionStateOfEntity()
     /// @brief Internal version of the selected state of the entity setter
     /// @param SelectedState bool : the selected state to set
     /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state

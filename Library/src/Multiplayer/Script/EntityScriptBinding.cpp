@@ -20,7 +20,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -54,7 +54,7 @@ using SpaceEntityList = csp::common::List<SpaceEntity*>;
 class EntitySystemScriptInterface
 {
 public:
-    EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr)
+    EntitySystemScriptInterface(OnlineRealtimeEngine* InEntitySystem = nullptr)
         : EntitySystem(InEntitySystem)
     {
     }
@@ -225,7 +225,7 @@ public:
     std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
 
 private:
-    SpaceEntitySystem* EntitySystem;
+    OnlineRealtimeEngine* EntitySystem;
 };
 
 void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSystem)
@@ -240,14 +240,14 @@ void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSys
     LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
-EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding::EntityScriptBinding(OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
     : EntitySystem(InEntitySystem)
     , LogSystem(LogSystem)
 {
 }
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+    OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
     EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);

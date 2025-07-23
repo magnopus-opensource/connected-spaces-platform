@@ -18,7 +18,7 @@
 
 #include "../include/ErrorCodes.h"
 #include "../include/ProcessDescriptors.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Utils.h"
 #include "uuid_v4.h"
@@ -171,4 +171,4 @@ csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem&
     return Result.GetSpace();
 }
 
-csp::multiplayer::SpaceEntitySystem& SpaceRAII::GetRealtimeEngine() const { return *RealtimeEngine; }
+csp::multiplayer::OnlineRealtimeEngine& SpaceRAII::GetRealtimeEngine() const { return *RealtimeEngine; }

@@ -151,7 +151,7 @@ SpaceTransform MarkerEntityTransform =
     csp::common::Vector3::One()
 };
 
-csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback = [](csp::multiplayer::SpaceEntity* CreatedSpaceEntity)
+csp::multiplayer::OnlineRealtimeEngine::EntityCreatedCallback Callback = [](csp::multiplayer::SpaceEntity* CreatedSpaceEntity)
 {
     if (CreatedSpaceEntity)
     {

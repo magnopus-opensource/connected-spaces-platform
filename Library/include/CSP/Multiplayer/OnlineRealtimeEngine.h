@@ -49,11 +49,11 @@ namespace signalr
 class value;
 } // namespace signalr
 
-class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
-class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
-class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
-class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
-class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+class CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+class CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
+class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
 class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
 
 namespace csp::common
@@ -82,15 +82,15 @@ class NetworkEventBus;
 /// It manages things like queueing updated entities and triggering tick events. Callbacks
 /// can be registered for certain events that occur within the entity system so clients can
 /// react appropriately.
-class CSP_API SpaceEntitySystem : public csp::common::IRealtimeEngine
+class CSP_API OnlineRealtimeEngine : public csp::common::IRealtimeEngine
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
     friend class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
     /** @endcond */
     CSP_END_IGNORE
@@ -157,17 +157,17 @@ public:
     /// @param ScriptText csp::common::String& : the text of the script to run
     CSP_NO_EXPORT void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
 
-    /// @brief SpaceEntitySystem constructor
-    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the SpaceEntitySystem with
+    /// @brief OnlineRealtimeEngine constructor
+    /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the OnlineRealtimeEngine with
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param NetworkEventBus csp::multiplayer::NetworkEventbus& : Reference the the network event bus, used for leadership election messaging.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
-    SpaceEntitySystem(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+    OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
         csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
-    /// @brief SpaceEntitySystem destructor
-    CSP_NO_EXPORT ~SpaceEntitySystem();
+    /// @brief OnlineRealtimeEngine destructor
+    CSP_NO_EXPORT ~OnlineRealtimeEngine();
 
     /// @brief Getter for the pending adds
     /// @return: SpaceEntityQueue*
@@ -349,7 +349,7 @@ protected:
     std::recursive_mutex* EntitiesLock;
 
 private:
-    SpaceEntitySystem(); // needed for the wrapper generator
+    OnlineRealtimeEngine(); // needed for the wrapper generator
 
     // Should not be null
     MultiplayerConnection* MultiplayerConnectionInst;

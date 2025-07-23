@@ -43,7 +43,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySystem)
+void CreateAvatarForLeaderElection(csp::multiplayer::OnlineRealtimeEngine* EntitySystem)
 {
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -103,7 +103,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
@@ -236,7 +236,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
@@ -368,7 +368,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
@@ -500,7 +500,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
@@ -631,7 +631,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
@@ -760,7 +760,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
     RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);

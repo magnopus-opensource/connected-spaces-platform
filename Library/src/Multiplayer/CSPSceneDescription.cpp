@@ -21,7 +21,7 @@
 
 namespace csp::multiplayer
 {
-CSPSceneDescription::CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::SpaceEntitySystem& EntitySystem,
+CSPSceneDescription::CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::OnlineRealtimeEngine& EntitySystem,
     csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
 {
     mcs::SceneDescription SceneDescription;

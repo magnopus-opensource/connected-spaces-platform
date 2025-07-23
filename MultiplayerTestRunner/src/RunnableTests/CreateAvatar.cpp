@@ -18,7 +18,7 @@
 
 #include "uuid_v4.h"
 #include <CSP/Common/Optional.h>
-#include <CSP/Multiplayer/SpaceEntitySystem.h>
+#include <CSP/Multiplayer/OnlineRealtimeEngine.h>
 #include <CSP/Multiplayer/SpaceTransform.h>
 #include <CSP/Systems/Spaces/SpaceSystem.h>
 #include <CSP/Systems/SystemsManager.h>
@@ -28,7 +28,7 @@
 namespace CreateAvatar
 {
 
-void RunTest(csp::multiplayer::SpaceEntitySystem& RealtimeEngine)
+void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
     using namespace csp::multiplayer;
 
