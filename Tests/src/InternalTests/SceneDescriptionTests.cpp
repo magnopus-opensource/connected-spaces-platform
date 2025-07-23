@@ -260,7 +260,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -293,7 +293,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -398,7 +398,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     csp::common::LogSystem LogSystem;
     csp::multiplayer::MultiplayerConnection Connection { LogSystem };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::SpaceEntitySystem EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };

@@ -271,8 +271,11 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 50);
 
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 

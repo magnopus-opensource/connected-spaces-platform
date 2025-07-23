@@ -48,7 +48,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -65,16 +64,19 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the ECommerce
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create ECommerce component
     auto* ECommerceComponent = static_cast<ECommerceSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ECommerce));
@@ -109,7 +111,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -126,22 +127,25 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the ECommerce
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create ECommerce component
     auto* ECommerceComponent = (ECommerceSpaceComponent*)CreatedObject->AddComponent(ComponentType::ECommerce);
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
     std::string ECommerceScriptText = R"xx(
@@ -156,7 +160,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
     CreatedObject->GetScript().SetScriptSource(ECommerceScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure values are set correctly
     csp::common::String ProductId = "TEST_PRODUCT_ID";

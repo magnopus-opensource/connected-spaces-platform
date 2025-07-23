@@ -49,20 +49,25 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
     }
 
     // Enter space
-    std::promise<csp::systems::SpaceResult> ResultPromise;
-    std::future<csp::systems::SpaceResult> ResultFuture = ResultPromise.get_future();
+    std::promise<csp::systems::SpaceResult> EnterSpacePromise;
+    std::future<csp::systems::SpaceResult> EnterSpaceFuture = EnterSpacePromise.get_future();
+
+    std::promise<uint32_t> InitialEntityFetchPromise;
+    std::future<uint32_t> InitialEntityFetchFuture = InitialEntityFetchPromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback(
+        [&InitialEntityFetchPromise](uint32_t EntitiesFetched) { InitialEntityFetchPromise.set_value(EntitiesFetched); });
 
     SpaceSystem.EnterSpace(SpaceId.c_str(), RealtimeEngine.get(),
-        [&ResultPromise](csp::systems::SpaceResult Result)
+        [&EnterSpacePromise](csp::systems::SpaceResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets
             if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
             {
-                ResultPromise.set_value(Result);
+                EnterSpacePromise.set_value(Result);
             }
         });
 
-    csp::systems::SpaceResult EnterSpaceResult = ResultFuture.get();
+    csp::systems::SpaceResult EnterSpaceResult = EnterSpaceFuture.get();
 
     if (EnterSpaceResult.GetResultCode() != csp::systems::EResultCode::Success)
     {
@@ -70,6 +75,9 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
             = "HTTP Code: " + std::to_string(EnterSpaceResult.GetHttpResultCode()) + " Body: " + EnterSpaceResult.GetResponseBody().c_str();
         throw Utils::ExceptionWithCode { MultiplayerTestRunner::ErrorCodes::FAILED_TO_ENTER_SPACE, FailureReason };
     }
+
+    InitialEntityFetchFuture.get(); // Fully enter the space before yielding to the test code
+
     MultiplayerTestRunner::ProcessDescriptors::PrintProcessDescriptor(MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR);
 }
 

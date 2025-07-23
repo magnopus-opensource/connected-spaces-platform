@@ -48,7 +48,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -70,11 +69,14 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
     const csp::common::String UserAvatarId = "MyCoolAvatar";
 
     {
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Ensure we're in the first space
         EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
@@ -82,7 +84,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
         // Create object to represent the spline
         csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         // Create spline component
         auto* SplineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
@@ -139,7 +141,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -156,16 +157,19 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the spline
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create spline component
     auto* SplineComponent = (SplineSpaceComponent*)CreatedObject->AddComponent(ComponentType::Spline);
@@ -173,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
         = { { 0, 0, 0 }, { 0, 1000, 0 }, { 0, 2000, 0 }, { 0, 3000, 0 }, { 0, 4000, 0 }, { 0, 5000, 0 } };
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
     const std::string SplineScriptText = R"xx(
@@ -189,7 +193,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     CreatedObject->GetScript().SetScriptSource(SplineScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     EXPECT_EQ(SplineComponent->GetWaypoints().Size(), WayPoints.Size());
 

@@ -115,7 +115,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -133,11 +132,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // we'll be using this in a few places below as part of the test, so we declare it upfront
     const std::string ScriptText = R"xx(
@@ -165,7 +167,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     {
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
@@ -176,7 +178,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
         Object->QueueUpdate();
 
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
     }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -195,7 +197,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -217,28 +218,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok)
-    {
-        EXPECT_EQ(Ok, true);
-        std::cerr << "EntitiesReadyCallback called" << std::endl;
-    };
+    auto EntitiesReadyCallback = [](int /*NumEntitiesFetched*/) { std::cerr << "EntitiesReadyCallback called" << std::endl; };
 
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
-
-    EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
-    EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-    EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
+    RealtimeEngine->SetEntityCreatedCallback(EntityCreatedCallback);
+    RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -251,7 +249,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -289,18 +288,18 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     // Create an AnimatedModelComponent and have the script update it's position
     {
-        EntitySystem->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         AnimatedModelSpaceComponent* AnimatedModelComponent
             = static_cast<AnimatedModelSpaceComponent*>(Object->AddComponent(ComponentType::AnimatedModel));
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         Object->GetScript().Invoke();
@@ -331,7 +330,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -349,11 +347,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -365,8 +366,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -399,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     Avatar->GetScript().SetScriptSource(AvatarScriptText.c_str());
     Avatar->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     auto& Components = *Avatar->GetComponents();
 
@@ -429,7 +430,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -447,11 +447,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -463,8 +466,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -516,7 +519,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -533,11 +535,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -550,7 +555,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -580,7 +586,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create script
     auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
@@ -588,7 +594,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure position is set to 0
     EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
@@ -597,13 +603,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     CreatedObject->RemoveComponent(ScriptComponent->GetId());
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Tick to attempt to call scripts tick event
     csp::CSPFoundation::Tick();
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure position is still set to 0
     EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
@@ -626,7 +632,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -643,11 +648,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -660,7 +668,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -690,7 +699,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create animated model component
     auto* AnimatedComponent = static_cast<AnimatedModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
@@ -701,7 +710,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     CreatedObject->GetScript().Invoke();
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Make a component update
     AnimatedComponent->SetPosition(csp::common::Vector3::One());
@@ -710,13 +719,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     CreatedObject->RemoveComponent(ScriptComponent->GetId());
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure entity update doesn't crash
     csp::CSPFoundation::Tick();
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -735,7 +744,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -756,28 +764,27 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok)
-    {
-        EXPECT_EQ(Ok, true);
-        std::cerr << "EntitiesReadyCallback called" << std::endl;
-    };
+    auto EntitiesReadyCallback = [](int /*NumEntitiesFetched*/) { std::cerr << "EntitiesReadyCallback called" << std::endl; };
 
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
-    EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-    EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
+    RealtimeEngine->SetEntityCreatedCallback(EntityCreatedCallback);
+    RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -790,7 +797,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -828,7 +836,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     bool PatchPending = true;
     CreatedObject->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
@@ -842,7 +850,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     while (PatchPending)
     {
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
 
@@ -855,7 +863,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     while (PatchPending)
     {
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
 
@@ -873,7 +881,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     while (PatchPending)
     {
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
         csp::CSPFoundation::Tick();
         std::this_thread::sleep_for(10ms);
     }
@@ -896,7 +904,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -914,11 +921,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -931,7 +941,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -961,12 +972,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     {
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         Object->QueueUpdate();
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         Object->GetScript().Invoke();
@@ -993,7 +1004,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -1014,28 +1024,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     auto EntityCreatedCallback = [](SpaceEntity* /*Entity*/) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok)
-    {
-        EXPECT_EQ(Ok, true);
-        std::cerr << "EntitiesReadyCallback called" << std::endl;
-    };
+    auto EntitiesReadyCallback = [](int /*NumEntitiesFetched*/) { std::cerr << "EntitiesReadyCallback called" << std::endl; };
 
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
-
-    EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
-    EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-    EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
+    RealtimeEngine->SetEntityCreatedCallback(EntityCreatedCallback);
+    RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -1048,7 +1055,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1063,7 +1071,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     // Create object to represent the audio
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create audio component
     auto* CustomComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
@@ -1072,7 +1080,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     CustomComponent->SetCustomProperty("NumberChanged", csp::common::ReplicatedValue(false));
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
     std::string ScriptText = R"xx(
@@ -1098,7 +1106,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
     CreatedObject->GetScript().SetScriptSource(ScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     EXPECT_EQ(CustomComponent->GetCustomProperty("testFloat").GetFloat(), 1.234f);
     EXPECT_EQ(CustomComponent->GetCustomProperty("testInt").GetInt(), 1234);
@@ -1126,7 +1134,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -1144,12 +1151,15 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
@@ -1162,7 +1172,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar]
+        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1177,14 +1188,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     // Create space object
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [SpaceEntity] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [SpaceEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Attempt to add 2 script components
     SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
     SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
 
     SpaceEntity->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Only 1 script component should be on the object
     EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
@@ -1205,7 +1216,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -1222,6 +1232,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // we'll be using this in a few places below as part of the test, so we declare it upfront
     const std::string ScriptText = R"xx(
@@ -1250,13 +1262,15 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     {
         const csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [Object] = Awaitable(&SpaceEntitySystem::CreateObject, EntitySystem, ObjectName, ObjectTransform).Await();
+        auto [Object] = Awaitable(&csp::common::IRealtimeEngine::CreateEntity, static_cast<csp::common::IRealtimeEngine*>(RealtimeEngine.get()),
+            ObjectName, ObjectTransform, csp::common::Optional<uint64_t>())
+                            .Await();
         ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         Object->QueueUpdate();
 
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
     }
 
     //------------------------------------------------------------
@@ -1265,7 +1279,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
     bool EntityHasBeenRecreated = false;
     // we're gonna wanna wait till the entity is created before we can do our test
-    EntitySystem->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* /*Object*/) { EntityHasBeenRecreated = true; });
+    RealtimeEngine->SetEntityCreatedCallback([&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* /*Object*/) { EntityHasBeenRecreated = true; });
 
     // spin till we recreate the entity from phase 1 locally, having received it back from CHS
     while (EntityHasBeenRecreated == false)
@@ -1274,7 +1288,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
     // interesting part of phase 2 begins!
     {
-        csp::multiplayer::SpaceEntity* Object = EntitySystem->GetEntityByIndex(0);
+        csp::multiplayer::SpaceEntity* Object = RealtimeEngine->GetEntityByIndex(0);
         // grab the script component we created in phase 1 (we should make this kind of thing easier)
         const csp::common::Array<ComponentBase*>& Components = *Object->GetComponents()->Values();
         ScriptSpaceComponent* ScriptComponent = nullptr;
