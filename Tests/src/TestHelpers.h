@@ -66,6 +66,10 @@ inline const char* TESTS_CLIENT_SKU = "CPPTest";
 #define CSP_PUBLIC_TEST(namespace_name, test_case_name, test_name)                                                                                   \
     NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, ::PublicTestBase, ::testing::internal::GetTypeId<::PublicTestBase>())
 
+#define CSP_PUBLIC_TEST_WITH_MOCKS(namespace_name, test_case_name, test_name)                                                                        \
+    NAMESPACE_GTEST_TEST_(                                                                                                                           \
+        namespace_name, test_case_name, test_name, ::PublicTestBaseWithMocks, ::testing::internal::GetTypeId<::PublicTestBaseWithMocks>())
+
 #define CSP_INTERNAL_TEST(namespace_name, test_case_name, test_name)                                                                                 \
     NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, ::testing::Test, ::testing::internal::GetTestTypeId())
 
@@ -185,9 +189,9 @@ inline void LogFatal(std::string Message)
     exit(1);
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI)
+inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
 {
-    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS");
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", SignalRMock);
 
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();

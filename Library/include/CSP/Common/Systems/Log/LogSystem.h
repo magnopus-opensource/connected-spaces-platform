@@ -41,12 +41,6 @@ enum class LogLevel
 /// Contains a callback system that allows clients to react to specific logs or events.
 class CSP_API LogSystem
 {
-    CSP_START_IGNORE
-    /** @cond DO_NOT_DOCUMENT */
-    friend class SystemsManager;
-    /** @endcond */
-    CSP_END_IGNORE
-
 public:
     LogSystem();
     ~LogSystem();

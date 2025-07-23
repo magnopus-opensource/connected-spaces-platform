@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 #include "SignalRConnection.h"
+
+#include "CSP/CSPFoundation.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "SignalRClient.h"
+#include <fmt/format.h>
 #include <memory>
+#include <signalrclient/signalr_exception.h>
 
 // Needs broken ... it's just for profiling we could probably just remove
 #include "Debug/Logging.h"
@@ -103,11 +108,27 @@ void SignalRConnection::SetDisconnected(const std::function<void(std::exception_
     Connection.set_disconnected(DisconnectedCallback);
 }
 
-void SignalRConnection::On(const std::string& EventName, const SignalRConnection::MethodInvokedHandler& Handler)
+bool SignalRConnection::On(const std::string& EventName, const SignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem)
 {
     CSP_PROFILE_SCOPED();
 
-    Connection.on(EventName, Handler);
+    // A bit of a hack, the signalr lib can neither unbind events, nor handle duplicate events being bound
+    // This checks if an event has been bound, and dosen't attempt to bind if it has.
+    // By doing this, we can move some of the api to be instantiable and not on SystemsManager without having to move the connection with it, (as
+    // connection rebinds every time we login as though it's a fresh object ... which it should be!) Non-ideal, but okay.
+    try
+    {
+        Connection.on(EventName, Handler);
+        return true;
+    }
+    catch (const signalr::signalr_exception& exception)
+    {
+        // If you register an event twice, you'll throw. Very hard to debug if this happens off thread, which it does with re-logging in.
+        // Not really an error though, expected behaviour for our flow, just log to help in debugability
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            fmt::format("Caught SignalR error, ignoring 'On' registration for {}. : {}", EventName, exception.what()).c_str());
+        return false;
+    }
 }
 
 async::task<std::tuple<signalr::value, std::exception_ptr>> SignalRConnection::Invoke(

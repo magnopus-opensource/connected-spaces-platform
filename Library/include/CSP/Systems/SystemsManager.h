@@ -172,12 +172,14 @@ private:
 
     ConversationSystemInternal* GetConversationSystem();
 
-    static void Instantiate();
+    // Optional SignalR inject, null means the systemsmanager will make one of its own
+    static void Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject = nullptr);
     static void Destroy();
 
     static SystemsManager* Instance;
 
-    void CreateSystems();
+    // Optional SignalR inject, null means the systemsmanager will make one of its own
+    void CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject);
     void DestroySystems();
 
     csp::web::WebClient* WebClient;

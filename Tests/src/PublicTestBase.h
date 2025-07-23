@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/Systems/Spaces/Space.h"
+#include "Mocks/SignalRConnectionMock.h"
 #include <gtest/gtest.h>
 
 namespace
@@ -43,6 +44,18 @@ class PublicTestBase : public ::testing::Test
 protected:
     void SetUp() override;
     void TearDown() override;
+};
+
+class PublicTestBaseWithMocks : public ::testing::Test
+{
+protected:
+    void SetUp() override;
+    void TearDown() override;
+
+    // We don't have to/can't clean this up here, we inject it and CSP takes ownership.
+    // Confusing from an external user perspective I know, and somewhat fragile because we're relying on SystemsManager::destroy to trigger the RAII
+    // behaviour, may change with a new initialisation api.
+    SignalRConnectionMock* SignalRMock;
 };
 
 // For parameterized (data driven) tests

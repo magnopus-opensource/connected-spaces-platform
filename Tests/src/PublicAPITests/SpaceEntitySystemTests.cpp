@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
@@ -38,14 +39,12 @@ public:
 
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNewAvatarId)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNewAvatarId)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates a result and not an exception
     EXPECT_CALL(
@@ -63,7 +62,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
                 return async::make_task(std::make_tuple(Value, std::exception_ptr(nullptr)));
             });
 
-    SpaceEntitySystem->RemoteGenerateNewAvatarId()
+    RealtimeEngine->RemoteGenerateNewAvatarId()
         .then(async::inline_scheduler(),
             [](async::shared_task<uint64_t> Result)
             {
@@ -74,21 +73,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
             [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewAvatarId)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewAvatarId)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -99,7 +91,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
                     std::make_tuple(signalr::value("Irrelevant value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
 
-    SpaceEntitySystem->RemoteGenerateNewAvatarId()
+    RealtimeEngine->RemoteGenerateNewAvatarId()
         .then(
             [](async::shared_task<uint64_t> Result)
             {
@@ -117,21 +109,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
             [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObjectMessage)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObjectMessage)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates a result and not an exception
     EXPECT_CALL(
@@ -149,7 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage(
+            RealtimeEngine->SendNewAvatarObjectMessage(
                 "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
@@ -162,21 +147,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
             [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjectMessage)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjectMessage)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -196,7 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage(
+            RealtimeEngine->SendNewAvatarObjectMessage(
                 "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
@@ -216,20 +194,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
             [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAvatar)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAvatar)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     using MockEntityCreatedCallback = testing::MockFunction<void(SpaceEntity*)>;
     MockEntityCreatedCallback MockCallback;
@@ -272,25 +243,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
             return std::make_tuple(async::make_task(uint64_t { 55 }).share(), async::make_task());
         }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
-            SpaceEntitySystem->CreateNewLocalAvatar(
+            RealtimeEngine->CreateNewLocalAvatar(
                 Username, LoginState, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreateAvatarChain)
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreateAvatarChain)
 {
     RAIIMockLogger MockLogger {};
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Log);
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* SpaceEntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    auto SignalRMock = std::unique_ptr<SignalRConnectionMock>(new SignalRConnectionMock());
-    SpaceEntitySystem->SetConnection(SignalRMock.get());
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
@@ -316,11 +280,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorLoggedFromWholeCreat
 
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    SpaceEntitySystem->CreateAvatar(
+    RealtimeEngine->CreateAvatar(
         "Username", LoginState, UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
-
-    // During destruction (test cleanup) CSP can access the connection.
-    // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.
-    SignalRConnectionMock* ThrowawaySignalRMock = new SignalRConnectionMock();
-    SpaceEntitySystem->SetConnection(ThrowawaySignalRMock);
 }
