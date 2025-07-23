@@ -855,8 +855,8 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
     return Callback;
 };
 
-void SpaceEntitySystem::FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId,
-    csp::common::EntityFetchStartedCallback FetchStartedCallback, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+void SpaceEntitySystem::FetchAllEntitiesAndPopulateBuffers(
+    const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback)
 {
     /* Refresh the multiplayer connection to force the scopes to change
      * This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
@@ -868,9 +868,9 @@ void SpaceEntitySystem::FetchAllEntitiesAndPopulateBuffers(const csp::common::St
     RefreshMultiplayerConnectionToEnactScopeChange(SpaceId, RefreshMultiplayerConnectionEvent);
 
     RefreshMultiplayerConnectionContinuation.then(async::inline_scheduler(),
-        [this, FetchStartedCallback, FetchCompleteCallback]()
+        [this, FetchStartedCallback]()
         {
-            this->RetrieveAllEntities(FetchCompleteCallback);
+            this->RetrieveAllEntities(EntityFetchCompleteCallback);
             FetchStartedCallback();
         });
 }
@@ -1152,7 +1152,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnectionInst->StopListening(
-        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent, this](
+        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent](
             csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
@@ -1163,7 +1163,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
             LogSystem->LogMsg(csp::common::LogLevel::Log, "MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem, this](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem](csp::multiplayer::ErrorCode Error)
                 {
                     LogSystem->LogMsg(csp::common::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
@@ -1178,7 +1178,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
                     MultiplayerConnection->StartListening()()
                         .then(async::inline_scheduler(),
-                            [RefreshMultiplayerContinuationEvent, &LogSystem, this]()
+                            [RefreshMultiplayerContinuationEvent, &LogSystem]()
                             {
                                 LogSystem->LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
