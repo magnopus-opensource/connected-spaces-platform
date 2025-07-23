@@ -503,6 +503,43 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithEmptyBulkInviteTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    ::Space Space;
+    InviteUserRoleInfoCollection InviteUsers;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, nullptr, Space);
+
+    auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
+    EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
 {
     SetRandSeed();
@@ -735,6 +772,59 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
     {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithEmptyBulkInviteTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
+    FILE* UploadFile = nullptr;
+    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
+
+    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
+    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
+    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
+    fclose(UploadFile);
+
+    BufferAssetDataSource BufferSource;
+    BufferSource.Buffer = UploadFileData.get();
+    BufferSource.BufferLength = UploadFileSize;
+
+    BufferSource.SetMimeType("image/png");
+
+    // Create space
+    ::Space Space;
+    InviteUserRoleInfoCollection InviteUsers;
+    CreateSpaceWithBuffer(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, BufferSource, nullptr, Space);
+
+    auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
+    EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
