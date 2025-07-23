@@ -49,11 +49,11 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
     }
 
     // Enter space
-    std::promise<csp::systems::NullResult> ResultPromise;
-    std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
+    std::promise<csp::systems::SpaceResult> ResultPromise;
+    std::future<csp::systems::SpaceResult> ResultFuture = ResultPromise.get_future();
 
     SpaceSystem.EnterSpace(SpaceId.c_str(), RealtimeEngine.get(),
-        [&ResultPromise](csp::systems::NullResult Result)
+        [&ResultPromise](csp::systems::SpaceResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets
             if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -62,7 +62,7 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
             }
         });
 
-    csp::systems::NullResult EnterSpaceResult = ResultFuture.get();
+    csp::systems::SpaceResult EnterSpaceResult = ResultFuture.get();
 
     if (EnterSpaceResult.GetResultCode() != csp::systems::EResultCode::Success)
     {
