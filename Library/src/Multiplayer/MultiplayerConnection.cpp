@@ -190,9 +190,9 @@ MultiplayerConnection::~MultiplayerConnection()
     }
 }
 
-void MultiplayerConnection::SetSpaceEntitySystem(csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem)
+void MultiplayerConnection::SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine)
 {
-    MultiplayerRealtimeEngine = SpaceEntitySystem;
+    MultiplayerRealtimeEngine = OnlineRealtimeEngine;
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)

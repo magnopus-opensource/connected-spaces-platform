@@ -132,7 +132,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -227,7 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -347,7 +347,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -447,7 +447,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -535,7 +535,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -648,7 +648,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -773,7 +773,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -921,7 +921,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1033,7 +1033,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
         ScriptSystemReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1151,7 +1151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
@@ -1233,7 +1233,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     // we'll be using this in a few places below as part of the test, so we declare it upfront
     const std::string ScriptText = R"xx(

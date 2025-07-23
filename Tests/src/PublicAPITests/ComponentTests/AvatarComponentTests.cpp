@@ -61,7 +61,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
@@ -198,7 +198,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space

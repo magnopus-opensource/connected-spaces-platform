@@ -52,7 +52,7 @@ class IRealtimeEngine;
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 class ClientElectionManager;
 class ISignalRConnection;
 class NetworkEventManagerImpl;
@@ -195,11 +195,11 @@ public:
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
 
-    /// @brief Sets the internal reference to the SpaceEntitySystem. Should be called when entering a space.
-    /// @param SpaceEntitySystem SpaceEntitySystem* : Non-owning pointer. Ideally this would be an owned structure, but we can't due to the wrapper
-    /// generator. Remember to null this when exiting a space as object dispatch depends on that, until clients are capable of managing this
+    /// @brief Sets the internal reference to the OnlineRealtimeEngine. Should be called when entering a space.
+    /// @param OnlineRealtimeEngine OnlineRealtimeEngine* : Non-owning pointer. Ideally this would be an owned structure, but we can't due to the
+    /// wrapper generator. Remember to null this when exiting a space as object dispatch depends on that, until clients are capable of managing this
     /// themselves. Unfortunate manual state management.
-    CSP_NO_EXPORT void SetSpaceEntitySystem(csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem);
+    CSP_NO_EXPORT void SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine);
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -223,7 +223,7 @@ private:
     /*
      * Bind the SignalR messages that are recieved from MCS to facilitate realtime communication.
      * These are bound for the entire lifetime of the MultiplayerConnection (conceptually Login/Logout scoped).
-     * These messages are dispatched to the SpaceEntitySystem if it exists.
+     * These messages are dispatched to the OnlineRealtimeEngine if it exists.
      * For the future, consider how pleasant it might be if we bound everything all at once here, and had a single
      * container of observers to recieve the bindings. That would make registering/deregistering AND lifetime the
      * same concept, and we'd have a single pipe of realtime events that were obvious to trace.
@@ -255,7 +255,7 @@ private:
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
 
-    SpaceEntitySystem* MultiplayerRealtimeEngine = nullptr;
+    OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
 };
 
 } // namespace csp::multiplayer
