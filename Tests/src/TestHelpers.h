@@ -250,7 +250,7 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
 inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::SpaceEntitySystem* EntitySystem, csp::common::String Name = "Object")
 {
     csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, Name, ObjectTransform);
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
 }

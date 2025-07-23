@@ -48,7 +48,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -66,15 +65,18 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     {
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         // Create custom component
         auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
@@ -172,7 +174,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -189,22 +190,25 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the fog
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Create fog component
     auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
 
     CreatedObject->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script
     const std::string AnimatedModelScriptText = R"xx(
@@ -223,7 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     CreatedObject->GetScript().SetScriptSource(AnimatedModelScriptText.c_str());
     CreatedObject->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Test new values
     EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
@@ -252,7 +256,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -272,21 +275,24 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
     csp::common::String ObjectName = "Object 1";
 
     {
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         // Create animated model component
         auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
         AnimatedModelComponent->AddMaterialOverride("TestKey", "TestValue");
 
         CreatedObject->QueueUpdate();
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -297,25 +303,23 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
         // Re-enter space
         bool EntitiesCreated = false;
 
-        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
-        {
-            EntitiesCreated = true;
-            EXPECT_TRUE(Success);
-        };
+        auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
 
-        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
-        EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
+        ASSERT_TRUE(EntitiesCreated);
 
-        SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
-        EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* FoundEntity = RealtimeEngine->FindSpaceObject(ObjectName);
+        ASSERT_TRUE(FoundEntity != nullptr);
 
         auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)FoundEntity->GetComponent(0);
-        EXPECT_TRUE(AnimatedModelComponent != nullptr);
+        ASSERT_TRUE(AnimatedModelComponent != nullptr);
 
         EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 1);
         EXPECT_TRUE(AnimatedModelComponent->GetMaterialOverrides().HasKey("TestKey"));
@@ -325,7 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
         AnimatedModelComponent->RemoveMaterialOverride("TestKey");
 
         FoundEntity->QueueUpdate();
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -338,25 +342,22 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
         // Re-enter space
         bool EntitiesCreated = false;
 
-        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
-        {
-            EntitiesCreated = true;
-            EXPECT_TRUE(Success);
-        };
+        auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
 
-        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
 
-        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
         EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
-        EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(EntitiesCreated, RealtimeEngine.get());
+        ASSERT_TRUE(EntitiesCreated);
 
-        SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
-        EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* FoundEntity = RealtimeEngine->FindSpaceObject(ObjectName);
+        ASSERT_TRUE(FoundEntity != nullptr);
 
         auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)FoundEntity->GetComponent(0);
-        EXPECT_TRUE(AnimatedModelComponent != nullptr);
+        ASSERT_TRUE(AnimatedModelComponent != nullptr);
 
         EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
 

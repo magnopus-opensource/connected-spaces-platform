@@ -54,6 +54,7 @@ class CSPEngine_SpaceEntitySystemTests_TestSuccessInRemoteGenerateNewAvatarId_Te
 class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
 class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
 class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
 
 namespace csp::common
 {
@@ -90,6 +91,7 @@ class CSP_API SpaceEntitySystem : public csp::common::IRealtimeEngine
     friend class CSPEngine_SpaceEntitySystemTests_TestErrorInSendNewAvatarObjectMessage_Test;
     friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInSendNewAvatarObjectMessage_Test;
     friend class CSPEngine_SpaceEntitySystemTests_TestSuccessInCreateNewLocalAvatar_Test;
+    friend class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
     /** @endcond */
     CSP_END_IGNORE
 
