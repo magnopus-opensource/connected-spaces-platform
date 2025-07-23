@@ -335,8 +335,20 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 {
     if (RealtimeEngine == nullptr)
     {
-        CSP_LOG_MSG(csp::common::LogLevel::Fatal, "RealtimeEngine pointer passed to EnterSpace cannot be null");
+        CSP_LOG_MSG(csp::common::LogLevel::Error, "RealtimeEngine pointer passed to EnterSpace cannot be null");
         Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
+        return;
+    }
+
+    if (!RealtimeEngine->GetEntityFetchCompleteCallback())
+    {
+        // Would be better if this were a type-invariant on RealtimeEngine, rather than a function precondition, but wrapper gen dosen't let us pass
+        // callbacks in constructors.
+        CSP_LOG_MSG(csp::common::LogLevel::Error,
+            "Provided RealtimeEngine has a null EntityFetchCompleteCallback. Set one prior to calling EnterSpace by calling "
+            "`SetSetEntityFetchCompleteCallback`");
+        Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
+        return;
     }
 
     // Hack alert. Not the best place to be doing this, but don't want to force the client to do this right this second, the api isn't strong enough
@@ -363,13 +375,8 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
         .then(async::inline_scheduler(),
             // Temporarily use the member callbacks, this will just be on the realtime engine in later commits and thus simpler.
-            [RealtimeEngine, EntityFetchCompleteCallback = this->EntityFetchComplete, SpaceEntityCreatedCallback = this->SpaceEntityCreatedCallback](
-                const SpaceResult& SpaceResult)
+            [RealtimeEngine](const SpaceResult& SpaceResult)
             {
-                // TEMPORARILY set the member callback. This shouldn't break anything but space-rejoin tests, as this callback tends
-                // to be set after a space join to query object messages (though I do wonder how many of those are technically races...)
-                RealtimeEngine->SetEntityCreatedCallback(SpaceEntityCreatedCallback);
-
                 /* Because this is external api (RealtimeEngine) we use the callback for chaining, rather than a nicer interface.
                  * Need to make sure we've finished fetching all the entities before we move on
                  *
@@ -387,11 +394,9 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                 auto FinishedFetchEntitySetupContinuation = FinishedFetchEntitySetupEvent->get_task();
 
                 // This is what fetches the data for the space, all the assets and whatnot. Creates the space entities in the realtime engine.
-                RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(
-                    SpaceResult.GetSpace().Id,
+                RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(SpaceResult.GetSpace().Id,
                     [FinishedFetchEntitySetupEvent, ResultCopy = SpaceResult]()
-                    { FinishedFetchEntitySetupEvent->set(ResultCopy); }, // Forward through the SpaceResult
-                    EntityFetchCompleteCallback);
+                    { FinishedFetchEntitySetupEvent->set(ResultCopy); }); // Forward through the SpaceResult
 
                 return FinishedFetchEntitySetupContinuation;
             })
