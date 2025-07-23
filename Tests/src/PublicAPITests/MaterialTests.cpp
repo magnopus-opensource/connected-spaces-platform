@@ -717,8 +717,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
     ::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space so we can get the material events
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial* CreatedGLTFMaterial = nullptr;
@@ -830,8 +833,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     ::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space so we can get the material and asset events
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial* CreatedGLTFMaterial = nullptr;

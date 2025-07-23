@@ -63,7 +63,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -93,15 +92,18 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     {
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Create object to represent the Custom fields
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
         // Create custom component
         auto* CustomComponent = (CustomSpaceComponent*)CreatedObject->AddComponent(ComponentType::Custom);
@@ -180,8 +182,8 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         }
 
         // Queue update process before exiting space
-        EntitySystem->QueueEntityUpdate(CreatedObject);
-        EntitySystem->ProcessPendingEntityOperations();
+        RealtimeEngine->QueueEntityUpdate(CreatedObject);
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -198,7 +200,11 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         auto GotAllEntities = false;
         SpaceEntity* LoadedObject;
 
-        EntitySystem->SetEntityCreatedCallback(
+        // Reload the space and verify the contents match
+        std::unique_ptr<csp::multiplayer::SpaceEntitySystem> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        RealtimeEngine->SetEntityCreatedCallback(
             [&](SpaceEntity* Entity)
             {
                 if (Entity->GetName() == ObjectName)
@@ -208,8 +214,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
                 }
             });
 
-        // Reload the space and verify the contents match
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
         // Wait until loaded
