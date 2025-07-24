@@ -38,7 +38,8 @@ static void {{ delegate.name }}Function(
 static readonly {{ delegate.name }} {{ name }}DelegateInstance = {{ delegate.name }}Function;
 
 {{> DocComments }}
-public Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}> {{ name }}({{# parameters }}{{# type }}{{> Type }}{{# is_optional }}?{{/ is_optional }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
+public {{# is_virtual }}{{^ is_override }}virtual{{/ is_override }}{{/ is_virtual }}
+       {{# is_override }}override{{/ is_override }} Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}> {{ name }}({{# parameters }}{{# type }}{{> Type }}{{# is_optional }}?{{/ is_optional }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
 {
     var tcs = new TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>(this);
     var handle = GCHandle.Alloc(tcs);

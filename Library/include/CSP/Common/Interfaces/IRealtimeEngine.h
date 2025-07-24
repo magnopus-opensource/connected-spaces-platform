@@ -122,7 +122,7 @@ public:
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState> LoginState,
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState>& LoginState,
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
         const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
     {
@@ -276,7 +276,7 @@ public:
     /// This callback must be set prior to entering a space.
     /// @param FetchCompleteCallback csp::common::EntityFetchCompleteCallback : Callback that notifies when the RealtimeEngine has completed initial
     /// entity fetch
-    void SetEntityFetchCompleteCallback(EntityFetchCompleteCallback Callback) { EntityFetchCompleteCallback = Callback; }
+    CSP_EVENT void SetEntityFetchCompleteCallback(EntityFetchCompleteCallback Callback) { EntityFetchCompleteCallback = Callback; }
 
     // Wrapper generator limitation, would rather expose this as it'd be handy to know :(
     CSP_NO_EXPORT EntityFetchCompleteCallback GetEntityFetchCompleteCallback() const { return EntityFetchCompleteCallback; }
@@ -315,9 +315,8 @@ protected:
  * They'll still be called by methods internal to the module.
  *
  *
- * OnlineRealtimeEngine::AddEntity (We think only Ichabod uses this, we think incorrectly. _Definitely_ need to check this one. Potential full deletion
- * candidate)
- * OnlineRealtimeEngine::LocalDestroyEntity OnlineRealtimeEngine::LockEntityUpdate OnlineRealtimeEngine::UnlockEntityUpdate
+ * OnlineRealtimeEngine::AddEntity (We think only Ichabod uses this, we think incorrectly. _Definitely_ need to check this one. Potential full
+ * deletion candidate) OnlineRealtimeEngine::LocalDestroyEntity OnlineRealtimeEngine::LockEntityUpdate OnlineRealtimeEngine::UnlockEntityUpdate
  * OnlineRealtimeEngine::SetConnection
  * OnlineRealtimeEngine::RegisterEntityScriptAsModule (Potential full deletion candidate)
  * OnlineRealtimeEngine::BindNewEntityToScript (Potential full deletion candidate)

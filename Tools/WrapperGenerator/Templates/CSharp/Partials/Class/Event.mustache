@@ -54,7 +54,8 @@ event EventHandler<
 {{# has_multiple_parameters }}
     ){{/ has_multiple_parameters }}
 >? Real{{ name }};
-public event EventHandler<
+public {{# is_virtual }}{{^ is_override }}virtual{{/ is_override }}{{/ is_virtual }}
+       {{# is_override }}override{{/ is_override }} event EventHandler<
 {{# has_multiple_parameters }}
     (
 {{/ has_multiple_parameters }}

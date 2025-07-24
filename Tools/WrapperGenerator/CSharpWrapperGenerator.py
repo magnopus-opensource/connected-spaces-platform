@@ -596,6 +596,8 @@ class CSharpWrapperGenerator:
                 and len(param.type.function_signature.parameters) > 1
             ),
             "delegate": delegate,
+            "is_virtual" : method.is_virtual,
+            "is_override" : method.is_override
         }
 
         events.append(event)
