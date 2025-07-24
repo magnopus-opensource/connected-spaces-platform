@@ -68,4 +68,4 @@ To maintain an active and healthy open-source project, the maintainers reserve t
 - Unresolved merge conflicts that haven't been addressed in a timely manner.
 - A lack of response to requested changes or re-review requests.
 
-Before a stale PR is closed, the maintainers will make a reasonable effort to notify the author, providing an opportunity to re-engage or provide an update. If no action is taken, or if the maintainers determine that the PR is no longer being actively maintained, it may be closed to keep the project moving forward.
+Before a stale PR is closed, the maintainers will make a reasonable effort to notify the author, providing an opportunity to re-engage or provide an update. If no action is taken, or if the maintainers determine that the PR is no longer being actively maintained, it will be closed to keep the project moving forward.
