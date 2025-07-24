@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 
 namespace csp::multiplayer
 {
@@ -29,10 +29,10 @@ class CSP_API CSPSceneDescription
 public:
     /// @brief Constructor for CSPSceneDescription by deserializing a SceneDescription json file.
     /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
-    /// @param EntitySystem csp::multiplayer::SpaceEntitySystem& : The SpaceEntitySystem for this session.
-    /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
+    /// @param EntitySystem csp::multiplayer::OnlineRealtimeEngine& : The OnlineRealtimeEngine for this session.
+    /// @param LogSystem csp::common::LogSystem& : The OnlineRealtimeEngine for this session.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
-    CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::SpaceEntitySystem& EntitySystem,
+    CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::OnlineRealtimeEngine& EntitySystem,
         csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
     /// @brief The Entities that exist for this scene.

@@ -24,11 +24,11 @@ Once the client has made their changes to the component properties they need to 
 void SpaceEntity::SendUpdate(CallbackHandler Callback);
 ```
 
-This calls into the `SpaceEntitySystem` (which manages all entities and is responsible for multiplayer service communication) and the entity will be enqueued for patch message transmission.
+This calls into the `OnlineRealtimeEngine` (which manages all entities and is responsible for multiplayer service communication) and the entity will be enqueued for patch message transmission.
 
 ## Patch Message Serialization
 
-When the entity update is dequeued by the `SpaceEntitySystem` and prepared for transmission, it is first serialised into the expected data format for SignalR and MsgPack, as the payload of `SendObjectPatch`.
+When the entity update is dequeued by the `OnlineRealtimeEngine` and prepared for transmission, it is first serialised into the expected data format for SignalR and MsgPack, as the payload of `SendObjectPatch`.
 
 ```c++
 SignalRMsgPackEntitySerialiser Serialiser;
@@ -122,7 +122,7 @@ Using these callbacks, a client application can update their client-level repres
 
 ## Receiving a Patch Message
 
-When the `SpaceEntitySystem` sets the SignalR connection (`SpaceEntitySystem::SetConnection`), we set the callback for the `OnObjectPatch` multiplayer service invocation.
+When the `OnlineRealtimeEngine` sets the SignalR connection (`OnlineRealtimeEngine::SetConnection`), we set the callback for the `OnObjectPatch` multiplayer service invocation.
 
 This callback then fires when we receive a patch message from another client.
 

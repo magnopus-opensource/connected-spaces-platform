@@ -21,6 +21,7 @@ CSP_START_IGNORE
 #include <optional>
 
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/Interfaces/InvalidInterfaceUserError.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
 namespace csp::common::continuations
@@ -59,6 +60,12 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
             LogSystem.LogMsg(
                 csp::common::LogLevel::Verbose, "Caught exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
             InvokeIfExceptionCallable(exception);
+        }
+        catch (const csp::common::InvalidInterfaceUseError& exception)
+        {
+            LogSystem.LogMsg(
+                csp::common::LogLevel::Verbose, "Error, CSP expects derived IRealtimeEngine type, but has received a base instantiation. ");
+            InvokeIfExceptionCallable(std::runtime_error(exception.msg));
         }
     };
 }

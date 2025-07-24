@@ -26,20 +26,20 @@ class IJSScriptRunner;
 namespace csp::multiplayer
 {
 
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 
 class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
-    EntityScriptBinding(SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem);
+    EntityScriptBinding(OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem);
     void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
 
     static EntityScriptBinding* BindEntitySystem(
-        SpaceEntitySystem* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+        OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
     static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
-    SpaceEntitySystem* EntitySystem;
+    OnlineRealtimeEngine* EntitySystem;
     csp::common::LogSystem& LogSystem;
 };
 

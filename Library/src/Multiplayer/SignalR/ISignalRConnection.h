@@ -25,6 +25,11 @@ namespace signalr
 class value;
 }
 
+namespace csp::common
+{
+class LogSystem;
+}
+
 namespace csp::multiplayer
 {
 // This interface written initially to allow Mocks to be created in tests for the SignalRConnection
@@ -48,7 +53,7 @@ public:
     virtual ISignalRConnection::ConnectionState GetConnectionState() const = 0;
     virtual std::string GetConnectionId() const = 0;
     virtual void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback) = 0;
-    virtual void On(const std::string& EventName, const MethodInvokedHandler& Handler) = 0;
+    virtual bool On(const std::string& EventName, const MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem) = 0;
     virtual async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
         const std::string& MethodName, const signalr::value& Arguments,
         std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {})

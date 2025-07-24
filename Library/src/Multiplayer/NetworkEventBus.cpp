@@ -175,7 +175,7 @@ bool NetworkEventBus::StartEventMessageListening()
         }
     };
 
-    MultiplayerConnectionInst->GetSignalRConnection()->On("OnEventMessage", EventDispatchCallback);
+    MultiplayerConnectionInst->GetSignalRConnection()->On("OnEventMessage", EventDispatchCallback, LogSystem);
     return true;
 }
 

@@ -85,7 +85,7 @@ class CSP_API ComponentBase
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;
-    friend class SpaceEntitySystem;
+    friend class OnlineRealtimeEngine;
     friend class EntityScriptInterface;
 #ifdef CSP_TESTS
     friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;

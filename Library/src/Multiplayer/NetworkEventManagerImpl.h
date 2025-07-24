@@ -41,7 +41,7 @@ public:
 
     typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
 
-    void SetConnection(csp::multiplayer::ISignalRConnection* InConnection);
+    void SetConnection(csp::multiplayer::ISignalRConnection& InConnection);
 
     CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<csp::common::ReplicatedValue>& Arguments,
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
