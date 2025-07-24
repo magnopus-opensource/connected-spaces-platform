@@ -5,7 +5,6 @@ When making, or engaging with, a new pull request against main, please attempt t
 > [!NOTE]
 > All of these policies are general guidelines, and we acknowledge that exceptions to every rule exist. Use your best judgement, always.
 
-
 ### Comment Ladder
 When leaving review comments, mark your comment with a tag demonstrating what the expected reaction to your comment is, in order to avoid text-comms based ambiguity.
 
@@ -60,3 +59,13 @@ Maintainers should attempt to look at any PR assigned to them within a 24 hour w
 
 ### Breaking Changes
 If making changes that break the public interface, (i.e. could cause an integrating client to need to change their code) these changes must be listed clearly in the PR description. The preferred format is a bullet list enumerating the specific nature of the changes, as well as the types/method signatures that are affected. If necessary, migration guidance should also be provided here, if moving code from the old pattern to the new is non-obvious.
+
+### Closure Policy
+
+To maintain an active and healthy open-source project, the maintainers reserve the right to close pull requests (PRs) that become stale. A PR may be considered stale if there has been:
+
+- Prolonged inactivity from the author or reviewers.
+- Unresolved merge conflicts that haven't been addressed in a timely manner.
+- A lack of response to requested changes or re-review requests.
+
+Before a stale PR is closed, the maintainers will make a reasonable effort to notify the author, providing an opportunity to re-engage or provide an update. If no action is taken, or if the maintainers determine that the PR is no longer being actively maintained, it will be closed to keep the project moving forward.
