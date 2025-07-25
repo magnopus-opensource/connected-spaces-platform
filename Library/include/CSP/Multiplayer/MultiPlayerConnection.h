@@ -140,7 +140,8 @@ public:
     /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
     /// flow, prior to entity fetches.
     CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise

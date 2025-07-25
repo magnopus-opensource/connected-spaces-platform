@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #include "SignalRConnection.h"
-
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "SignalRClient.h"
 #include <memory>
