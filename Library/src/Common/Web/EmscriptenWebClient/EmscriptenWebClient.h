@@ -21,25 +21,11 @@ namespace csp::common
 {
 class LogSystem;
 }
-
-namespace csp::systems
-{
-class SystemsManager;
-}
-
-namespace csp::multiplayer
-{
-class CSPHttpClient;
-}
-
 namespace csp::web
 {
 
 class EmscriptenWebClient : public WebClient
 {
-    friend class csp::systems::SystemsManager;
-    friend class csp::multiplayer::CSPHttpClient;
-
 public:
     virtual ~EmscriptenWebClient() {};
 
@@ -50,8 +36,8 @@ public:
     void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
         const char* Version, const csp::common::String& MediaType) override;
 
-protected:
     // Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
+    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
     EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh = true);
 
 private:

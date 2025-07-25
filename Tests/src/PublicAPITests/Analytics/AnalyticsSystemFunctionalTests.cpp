@@ -15,11 +15,13 @@
  */
 
 #include "AnalyticsSystemTestHelpers.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Systems/Analytics/Analytics.h"
 #include "TestHelpers.h"
 
@@ -63,8 +65,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     csp::systems::AnalyticsSystem* System = SystemsManager.GetAnalyticsSystem();
+    csp::systems::UserSystem* UserSystem = SystemsManager.GetUserSystem();
 
-    csp::systems::AnalyticsProviderGoogleUA Provider("11111", "22222");
+    csp::systems::AnalyticsProviderGoogleUA Provider("11111", "22222", UserSystem->GetAuthContext());
 
     System->RegisterProvider(&Provider);
 
