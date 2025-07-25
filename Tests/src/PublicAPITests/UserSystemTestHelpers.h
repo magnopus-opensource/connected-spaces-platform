@@ -32,6 +32,8 @@ void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::Strin
     csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
+void LogInAsLocalAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified = true);
+
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);
 
 csp::systems::Profile CreateTestUser();
