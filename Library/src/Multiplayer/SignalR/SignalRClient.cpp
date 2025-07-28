@@ -16,7 +16,6 @@
 
 #include "SignalRClient.h"
 
-#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/String.h"
 #include "Multiplayer/WebSocketClient.h"

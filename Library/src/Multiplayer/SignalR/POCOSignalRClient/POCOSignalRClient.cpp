@@ -37,9 +37,10 @@ namespace csp::multiplayer
 {
 
 CSPWebSocketClientPOCO::CSPWebSocketClientPOCO(
-    const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept
+    const std::string& MultiplayerUri, const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept
     : PocoWebSocket(nullptr)
     , StopFlag(false)
+    , MultiplayerUri { MultiplayerUri }
     , AccessToken { AccessToken }
     , DeviceId { DeviceId }
     , LogSystem(LogSystem)
@@ -78,8 +79,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& /*Url*/, CallbackHandler C
 
     try
     {
-        CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint
-            = ParseMultiplayerServiceUriEndPoint(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str());
+        CSPWebSocketClientPOCO::ParsedURIInfo ParsedEndpoint = ParseMultiplayerServiceUriEndPoint(MultiplayerUri);
 
         auto domain = ParsedEndpoint.Domain;
         auto protocol = ParsedEndpoint.Protocol;
