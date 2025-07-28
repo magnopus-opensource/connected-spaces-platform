@@ -637,7 +637,7 @@ void MultiplayerConnection::BindOnObjectMessage()
             else
             {
                 LogSystem.LogMsg(
-                    common::LogLevel::Log, "Received OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
+                    common::LogLevel::Verbose, "Received OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
             }
         },
         LogSystem);
@@ -656,7 +656,8 @@ void MultiplayerConnection::BindOnObjectPatch()
             }
             else
             {
-                LogSystem.LogMsg(common::LogLevel::Log, "Received OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
+                LogSystem.LogMsg(
+                    common::LogLevel::Verbose, "Received OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
             }
         },
         LogSystem);
@@ -676,7 +677,7 @@ void MultiplayerConnection::BindOnRequestToSendObject()
             else
             {
                 LogSystem.LogMsg(
-                    common::LogLevel::Log, "Received OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
+                    common::LogLevel::Verbose, "Received OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
             }
         },
         LogSystem);
