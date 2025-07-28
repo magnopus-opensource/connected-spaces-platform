@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/LoginState.h"
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Optional.h"
@@ -37,6 +38,29 @@ class WebClient;
 
 namespace csp::systems
 {
+class UserSystem;
+
+// This class exists purely to appease the wrapper generator.
+// IAuthContext was previously implemented by the UserSystem.
+// However, due to limitations with function pointers as parameters, we needed to hide the interface implementation.
+// Now, AuthContext, uses the functionality from the UserSystem to act as the AuthContext.
+CSP_START_IGNORE
+class AuthContext : public csp::common::IAuthContext
+{
+public:
+    AuthContext(csp::services::ApiBase* AuthenticationAPI, csp::common::LoginState& LoginState);
+
+    const csp::common::LoginState& GetLoginState() const override;
+
+    /// @brief Refreshes the sessions RefreshToken.
+    /// This is currently used internally by the web client.
+    void RefreshToken(std::function<void(bool)> Callback) override;
+
+private:
+    csp::services::ApiBase* AuthenticationAPI;
+    csp::common::LoginState* LoginState;
+};
+CSP_END_IGNORE
 
 /// @ingroup User System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' user service.
@@ -47,13 +71,11 @@ class CSP_API UserSystem : public SystemBase
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     friend class LoginStateResult;
-    friend class csp::web::WebClient;
     /** @endcond */
     CSP_END_IGNORE
 
 public:
     // Authentication
-
     /// @brief Get the current login state.
     /// @return LoginState : Current login state
     const csp::common::LoginState& GetLoginState() const;
@@ -245,6 +267,9 @@ public:
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
     CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
+    /// The IAuthContext object is owned by the UserSystem, and will be destroyed when the UserSystem is destroyed.
+    CSP_NO_EXPORT csp::common::IAuthContext& GetAuthContext();
+
 private:
     UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
@@ -254,8 +279,6 @@ private:
 
     void NotifyRefreshTokenHasChanged();
     void ResetAuthenticationState();
-
-    void RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback);
 
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;
@@ -272,6 +295,8 @@ private:
     EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
 
     UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
+
+    AuthContext Auth;
 };
 
 } // namespace csp::systems

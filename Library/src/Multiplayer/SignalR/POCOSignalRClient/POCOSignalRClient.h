@@ -35,7 +35,8 @@ namespace csp::multiplayer
 class CSPWebSocketClientPOCO : public IWebSocketClient
 {
 public:
-    CSPWebSocketClientPOCO(const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept;
+    CSPWebSocketClientPOCO(
+        const std::string& MultiplayerUri, const std::string& AccessToken, const std::string& DeviceId, csp::common::LogSystem& LogSystem) noexcept;
     ~CSPWebSocketClientPOCO();
 
     void Start(const std::string& Url, CallbackHandler Callback) override;
@@ -66,6 +67,7 @@ private:
     ReceiveHandler ReceiveCallback;
     std::atomic_bool StopFlag;
 
+    std::string MultiplayerUri;
     std::string AccessToken;
     std::string DeviceId;
     csp::common::LogSystem& LogSystem;

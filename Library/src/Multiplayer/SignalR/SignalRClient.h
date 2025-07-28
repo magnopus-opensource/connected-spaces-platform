@@ -21,6 +21,11 @@
 #include <signalrclient/signalr_client_config.h>
 #include <signalrclient/websocket_client.h>
 
+namespace csp::common
+{
+class IAuthContext;
+}
+
 namespace csp::multiplayer
 {
 
@@ -41,7 +46,7 @@ private:
 class CSPHttpClient : public signalr::http_client
 {
 public:
-    CSPHttpClient();
+    CSPHttpClient(csp::common::IAuthContext& AuthContext);
 
     void send(const std::string& url, const signalr::http_request& request,
         std::function<void(const signalr::http_response&, std::exception_ptr)> callback) override;

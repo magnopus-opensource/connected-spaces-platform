@@ -48,8 +48,8 @@ typedef std::function<void(const NullResult& Result)> NullResultCallback;
 class TestWebClient : public csp::web::EmscriptenWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
-        : EmscriptenWebClient(InPort, Tp, LogSystem, false)
+    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : EmscriptenWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
 };
@@ -59,13 +59,23 @@ public:
 class TestWebClient : public csp::web::POCOWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
-        : POCOWebClient(InPort, Tp, LogSystem, false)
+    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+        : POCOWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
 };
 
 #endif
+
+class TestAuthContext : public IAuthContext
+{
+public:
+    const csp::common::LoginState& GetLoginState() const override { return State; }
+    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+
+private:
+    csp::common::LoginState State;
+};
 
 class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
 {
@@ -125,8 +135,8 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 
     const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
     const csp::common::String MyTestPayload = "1234";
-
-    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, LogSystem);
+    TestAuthContext AuthContext;
+    auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP, AuthContext, LogSystem);
     EXPECT_TRUE(WebClient != nullptr);
 
     ResponseReceiver Receiver;
