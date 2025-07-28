@@ -42,8 +42,8 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "Common/Convert.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
@@ -869,13 +869,13 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 bool SpaceEntity::Select()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return SetSelectionState(true, EntitySystem->GetMultiplayerConnectionInstance()->GetClientId());
+    return InternalSetSelectionStateOfEntity(true);
 }
 
 bool SpaceEntity::Deselect()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return SetSelectionState(false, EntitySystem->GetMultiplayerConnectionInstance()->GetClientId());
+    return InternalSetSelectionStateOfEntity(false);
 }
 
 bool SpaceEntity::IsModifiable() const
@@ -951,62 +951,43 @@ void SpaceEntity::Unlock()
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
 
-bool SpaceEntity::SetSelectionState(bool SelectionState, uint64_t ClientId)
+bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 {
-    if (SelectionState && !IsSelected())
-    {
-        if (InternalSetSelectionStateOfEntity(SelectionState, ClientId))
-        {
-            return EntitySystem->AddEntityToSelectedEntities(this);
-        }
-
-        return false;
-    }
-
-    if (!SelectionState && GetSelectingClientID() == ClientId)
-    {
-        if (InternalSetSelectionStateOfEntity(SelectionState, 0))
-        {
-            return EntitySystem->RemoveEntityFromSelectedEntities(this);
-        }
-
-        return false;
-    }
-
-    return false;
-}
-
-bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
-{
+    uint64_t LocalClientId = EntitySystem->GetMultiplayerConnectionInstance()->GetClientId();
     if (SelectedState)
     {
         if (!IsSelected())
         {
             DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
 
-            if (SelectedId != ClientID)
+            if (SelectedId != LocalClientId)
             {
-                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(ClientID);
+                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(LocalClientId);
             }
 
-            SelectedId = ClientID;
+            SelectedId = LocalClientId;
 
-            return true;
+            return EntitySystem->AddEntityToSelectedEntities(this);
         }
         return false;
     }
 
-    if (IsSelected())
+    if (LocalClientId == GetSelectingClientID())
     {
-        DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
-
-        if (SelectedId != 0)
+        if (IsSelected())
         {
-            DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(0);
+            DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
+
+            if (SelectedId != 0)
+            {
+                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(0);
+            }
+
+            SelectedId = 0;
+            return EntitySystem->RemoveEntityFromSelectedEntities(this);
         }
 
-        SelectedId = 0;
-        return true;
+        return false;
     }
 
     return false;

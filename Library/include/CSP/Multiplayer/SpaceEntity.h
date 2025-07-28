@@ -346,9 +346,6 @@ public:
     /// @return True if deselection occurred. False if not.
     bool Deselect();
 
-    // ClientID is the clientID that comes from the multiplayer connection, ie the clientID of the client that is executing the code at the time.
-    bool SetSelectionState(bool SelectionState, uint64_t ClientId);
-
     /// @brief Checks if the entity can be modified.
     /// Specifically whether the local client already owns the entity or can take ownership of the entity.
     /// @return True if the entity can be modified, False if not.
@@ -567,7 +564,7 @@ private:
     /// @param SelectedState bool : the selected state to set
     /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
     /// @return bool : the selection state of the entity
-    bool InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID);
+    bool InternalSetSelectionStateOfEntity(const bool SelectedState);
 };
 
 } // namespace csp::multiplayer
