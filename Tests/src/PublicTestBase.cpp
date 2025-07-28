@@ -28,11 +28,10 @@ void PublicTestBase::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -64,11 +63,10 @@ void PublicTestBaseWithMocks::SetUp()
     // Yield SignalRMock ownership
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), SignalRMock);
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -97,11 +95,10 @@ template <typename T> void PublicTestBaseWithParam<T>::SetUp()
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
-
-    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
+    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
