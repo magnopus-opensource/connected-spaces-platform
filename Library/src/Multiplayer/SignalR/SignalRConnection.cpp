@@ -125,7 +125,7 @@ bool SignalRConnection::On(const std::string& EventName, const SignalRConnection
     {
         // If you register an event twice, you'll throw. Very hard to debug if this happens off thread, which it does with re-logging in.
         // Not really an error though, expected behaviour for our flow, just log to help in debugability
-        LogSystem.LogMsg(csp::common::LogLevel::Log,
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose,
             fmt::format("Caught SignalR error, ignoring 'On' registration for {}. : {}", EventName, exception.what()).c_str());
         return false;
     }
