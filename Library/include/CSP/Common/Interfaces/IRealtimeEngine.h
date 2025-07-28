@@ -164,10 +164,19 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    /// @brief Adds an entity to the set of selected entities
+    /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
+    /// @return True if the entity was succesfully added, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
+    /// cases.
     virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
+
+    /// @brief Removes an entity to the set of selected entities
+    /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
+    /// @return True if the entity was succesfully removed, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
+    /// cases.
     virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
