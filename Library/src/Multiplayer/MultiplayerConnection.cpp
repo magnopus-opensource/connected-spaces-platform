@@ -195,6 +195,8 @@ void MultiplayerConnection::SetOnlineRealtimeEngine(csp::multiplayer::OnlineReal
     MultiplayerRealtimeEngine = OnlineRealtimeEngine;
 }
 
+csp::multiplayer::OnlineRealtimeEngine* MultiplayerConnection::GetOnlineRealtimeEngine() const { return MultiplayerRealtimeEngine; }
+
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
     : LogSystem(InBoundConnection.LogSystem)
 {

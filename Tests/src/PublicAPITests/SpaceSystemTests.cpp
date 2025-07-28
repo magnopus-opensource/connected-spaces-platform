@@ -18,6 +18,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/MultiplayerHubMethods.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -3244,6 +3245,50 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
     DeleteSpace(SpaceSystem, Space.Id);
 
     // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+    csp::systems::Profile User = CreateTestUser();
+    LogIn(UserSystem, UserId, User.Email, GeneratedTestAccountPassword);
+
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    ASSERT_FALSE(SpaceSystem->IsInSpace());
+    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
+
+    ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    ASSERT_TRUE(SpaceSystem->IsInSpace());
+    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    ASSERT_FALSE(SpaceSystem->IsInSpace());
+    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+
+    DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
 

@@ -201,6 +201,11 @@ public:
     /// themselves. Unfortunate manual state management.
     CSP_NO_EXPORT void SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine);
 
+    /// @brief Get the currently set realtime engine.
+    /// @return Non-owning pointer to currently set realtime engine. This should be non-null when in a space, and null before entering, or after
+    /// exiting a space.
+    csp::multiplayer::OnlineRealtimeEngine* GetOnlineRealtimeEngine() const;
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 

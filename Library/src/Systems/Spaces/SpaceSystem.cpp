@@ -38,6 +38,7 @@
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 
 #include <exception>
+#include <fmt/format.h>
 #include <memory>
 #include <optional>
 #include <rapidjson/rapidjson.h>
@@ -422,8 +423,10 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
-                    CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s",
-                        multiplayer::ErrorCodeToString(Error).c_str());
+                    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Fatal,
+                        fmt::format("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: {}",
+                            multiplayer::ErrorCodeToString(Error))
+                            .c_str());
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
                     return;
@@ -434,9 +437,14 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                     {
                         if (Error != multiplayer::ErrorCode::None)
                         {
-                            CSP_LOG_ERROR_FORMAT(
-                                "Error on exiting spaces whilst clearing scopes, ErrorCode: %s", multiplayer::ErrorCodeToString(Error).c_str());
+                            csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::common::LogLevel::Fatal,
+                                fmt::format("Error on exiting spaces whilst clearing scopes, ErrorCode: {}", multiplayer::ErrorCodeToString(Error))
+                                    .c_str());
                             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+                            // This is a fatal error path, we'll null the realtime engine. You still leave the space, despite the services not
+                            // agreeing.
+                            MultiplayerConnection->SetOnlineRealtimeEngine(nullptr);
 
                             return;
                         }
