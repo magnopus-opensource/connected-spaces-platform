@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 
-UNITY_VERSION = "2022.2.16"
+UNITY_VERSION = "6000.0.53f1"
 
 def get_editor_path_cachefile_path():
     filename = "editor_filepath.cfg"
@@ -67,7 +67,7 @@ def get_unity_installation():
     file.close()
 
     if not os.path.exists(editor_path):
-        print("Unable to locate previously detected Unity installtion!")
+        print("Unable to locate previously detected Unity installation!")
         find_unity_installation()
 
     file = open(cachefile_path, "r")
