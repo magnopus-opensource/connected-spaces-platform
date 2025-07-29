@@ -130,10 +130,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
 
-        // Set an expectation that the mock logger will receive message for a successful creation
-        const String SendResultMsg = "Successfully created application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
-
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -177,10 +173,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
         // Set an expectation that the mock logger will receive message for a successful creation of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
-
-        // Set an expectation that the mock logger will receive message for a successful creation
-        const String SendResultMsg = "Successfully created application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
 
@@ -264,10 +256,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
 
-        // Set an expectation that the mock logger will receive message for a successful result retrieval
-        const String SendResultMsg = "Successfully retrieved application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
-
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, ApplicationSettingsTestData.ApplicationName,
             ApplicationSettingsTestData.Context, nullptr);
 
@@ -310,10 +298,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextW
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
-
-        // Set an expectation that the mock logger will receive message for a successful result retrieval
-        const String SendResultMsg = "Successfully retrieved application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
 
         auto Keys = csp::common::Array<csp::common::String>(1);
         Keys[0] = "TestSettings_3";
@@ -390,10 +374,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
 
-        // Set an expectation that the mock logger will receive message for a successful result retrieval
-        const String SendResultMsg = "Successfully retrieved application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
-
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
             ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);
 
@@ -428,10 +408,6 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
         EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
-
-        // Set an expectation that the mock logger will receive message for a successful result retrieval
-        const String SendResultMsg = "Successfully retrieved application settings.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(SendResultMsg)).Times(1);
 
         auto Keys = csp::common::Array<csp::common::String>(1);
         Keys[0] = "TestSettings_3";
