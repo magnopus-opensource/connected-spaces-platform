@@ -65,8 +65,15 @@ public:
      * @param ScriptText String& : The text of the script to be executed by the javascript engine.
      * @return Whether the script was successfully run.
      */
-    virtual bool RunScript(int64_t /*ContextId*/, const String& /*ScriptText*/)
+    virtual bool RunScript(int64_t ContextId, const String& ScriptText)
     {
+        // Marking parameters as unused by casting them to void to suppress warnings.
+        // All other methods are marked as CSP_NO_EXPORT which means that parameter names can be commented out to suppress warnings,
+        // however this method is exported and the wrapper generator does not support that approach.
+        // C++ 17 adds support for the [[maybe_unused]] attribute, but again the wrapper generator does not support it.
+        (void)ContextId;
+        (void)ScriptText;
+
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 

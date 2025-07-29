@@ -95,6 +95,7 @@ class CSP_API Asset
 public:
     Asset();
     Asset(const Asset& Other) = default;
+    Asset& operator=(const Asset& other) = default;
     csp::common::String AssetCollectionId;
     csp::common::String Id;
     csp::common::String FileName;
