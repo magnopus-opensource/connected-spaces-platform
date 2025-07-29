@@ -38,12 +38,7 @@ void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsD
         ApplicationSettings.AllowAnonymous = Dto.GetAllowAnonymous();
 
     if (Dto.HasSettings())
-    {
-        for (const auto& Pair : Dto.GetSettings())
-        {
-            ApplicationSettings.Settings[Pair.first] = Pair.second;
-        }
-    }
+        ApplicationSettings.Settings = Convert(Dto.GetSettings());
 }
 
 } // namespace
