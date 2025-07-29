@@ -476,3 +476,31 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     }
 }
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSettingsByContextAnonymousTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+
+    auto ApplicationSettingsTestData = GetApplicationSettingsAnonymousTestData();
+
+    // Get Application Settings
+    {
+        RAIIMockLogger MockLogger {};
+        csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
+
+        // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
+        const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+
+        const String ErrorMsg = "Failed to get application settings";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
+
+        auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, "", ApplicationSettingsTestData.ApplicationName,
+            ApplicationSettingsTestData.Context, nullptr);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    }
+}
