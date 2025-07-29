@@ -52,8 +52,7 @@ public:
     /// @brief Asynchronously creates or updates application settings for a specific context.
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_NO_EXPORT CSP_ASYNC_RESULT void CreateSettingsByContext(
-        const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
+    CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
 
     /// @brief Asynchronously retrieves application settings for a specific context.
     /// @param ApplicationName csp::common::String : The name of the application for which settings are requested.
