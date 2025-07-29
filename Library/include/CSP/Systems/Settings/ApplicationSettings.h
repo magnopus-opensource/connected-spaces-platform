@@ -58,17 +58,6 @@ public:
     csp::common::Map<csp::common::String, csp::common::String> Settings;
 };
 
-/// @brief Holds a list of application settings contexts.
-/// This class is used to manage and represent multiple configuration contexts
-/// that can be associated with an application.
-class CSP_API ApplicationSettingsContexts
-{
-public:
-    /// @brief A list of context identifiers.
-    /// Each context in the array represents a unique configuration scope,
-    csp::common::Array<csp::common::String> Contexts;
-};
-
 /// @ingroup Application Settings System
 /// @brief Represents the result of a request for application settings.
 class CSP_API ApplicationSettingsResult : public csp::systems::ResultBase
