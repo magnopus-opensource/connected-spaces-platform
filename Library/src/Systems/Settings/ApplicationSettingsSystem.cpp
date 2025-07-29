@@ -51,7 +51,7 @@ void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSetting
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
             {}, {}, {}))
-        .then(systems::continuations::ReportSuccess(Callback, "Successfully created application settings."))
+        .then(systems::continuations::SendResult(Callback, "Successfully created application settings."))
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
