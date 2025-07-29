@@ -293,7 +293,7 @@ Users can personalize their appearance across CSP-enabled applications by settin
 
 **Steps to Set Avatar Information:**
 
-To set or update a user's avatar, use the `SetAvatarInfo` function. Provide the type of avatar (`Predefined`, `ReadyPlayerMe`, or `Custom`) and the corresponding identifier (such as a URL or an ID) to specify the avatar.
+To set or update a user's avatar, use the `SetAvatarInfo` function. Provide the type of avatar (`Predefined`, `ReadyPlayerMe`, `Custom`, or `Hidden`) and the corresponding identifier (such as a URL or an ID) to specify the avatar.
 
 **Example Code to Set Avatar Information:**
 
