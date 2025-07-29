@@ -82,6 +82,7 @@ enum class AvatarType
     Premade,
     ReadyPlayerMe,
     Custom,
+    Hidden,
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
