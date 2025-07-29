@@ -18,6 +18,11 @@
 namespace csp::web
 {
 
-// Todo :- More complex types will be handled here with template specialisations
+template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
+[[deprecated("Unsupported type for JSON serialisation! You should probably add support for it :)")]] rapidjson::Value TypeToJsonValue(
+    const T& Value, RapidJsonAlloc& Allocator)
+{
+    assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
+}
 
 } // namespace csp::web
