@@ -21,6 +21,18 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
+CSP_START_IGNORE
+#ifdef CSP_TESTS
+class CSPEngine_ApplicationSettingsSystemTests_CreateSettingsByContextTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_CreateAnonymousSettingsByContextTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_CreateInvalidSettingsByContextTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextWithKeysTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextAnonymousTest_Test;
+class CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextAnonymousWithKeysTest_Test;
+#endif
+CSP_END_IGNORE
+
 namespace csp::services
 {
 
@@ -45,17 +57,19 @@ class CSP_API ApplicationSettingsSystem : public SystemBase
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
+#ifdef CSP_TESTS
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_CreateSettingsByContextTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_CreateAnonymousSettingsByContextTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_CreateInvalidSettingsByContextTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextWithKeysTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextAnonymousTest_Test;
+    friend class ::CSPEngine_ApplicationSettingsSystemTests_GetSettingsByContextAnonymousWithKeysTest_Test;
+#endif
     /** @endcond */
     CSP_END_IGNORE
 
 public:
-    /// @brief Asynchronously creates or updates application settings for a specific context.
-    /// Elevated Permissions Required: This function requires elevated permissions to execute successfully. If the user does not possess any of the
-    /// necessary roles, the operation will failwith a 403 Forbidden error.
-    /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
-    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
-
     /// @brief Asynchronously retrieves application settings for a specific context.
     /// @param ApplicationName csp::common::String : The name of the application for which settings are requested.
     /// @param Context csp::common::String : The specific context whose settings should be retrieved.
@@ -80,6 +94,13 @@ private:
     ApplicationSettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     CSP_NO_EXPORT ApplicationSettingsSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem);
     ~ApplicationSettingsSystem();
+
+    /// @brief Asynchronously creates or updates application settings for a specific context.
+    /// Elevated Permissions Required: This function requires elevated permissions to execute successfully. If the user does not possess any of the
+    /// necessary roles, the operation will failwith a 403 Forbidden error.
+    /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
+    /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
+    CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
 
     // Application Settings Continuations
     async::task<ApplicationSettingsResult> CreateSettingsByContext(const ApplicationSettings& ApplicationSettings);

@@ -49,35 +49,6 @@ ApplicationSettings GetApplicationSettingsTestData(const csp::common::String& Co
     return ApplicationSettings;
 }
 
-void SeedApplicationSettings()
-{
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
-
-    csp::common::String UserId;
-    LogInAsAdminUser(UserSystem, UserId);
-
-    // Seed application settings test data
-    {
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Seed anonymous application settings test data
-    {
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
-        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
-
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    }
-
-    // Log out
-    LogOut(UserSystem);
-}
-
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByContextTest)
@@ -196,11 +167,24 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateInvalidSettings
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextTest)
 {
     SetRandSeed();
-    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+
+    // Seed application settings test data
+    {
+        csp::common::String UserId;
+        LogInAsAdminUser(UserSystem, UserId);
+
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Log out
+        LogOut(UserSystem);
+    }
 
     // Login
     csp::common::String UserId;
@@ -237,11 +221,24 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextWithKeysTest)
 {
     SetRandSeed();
-    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+
+    // Seed application settings test data
+    {
+        csp::common::String UserId;
+        LogInAsAdminUser(UserSystem, UserId);
+
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
+        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Log out
+        LogOut(UserSystem);
+    }
 
     // Login
     csp::common::String UserId;
@@ -315,10 +312,24 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousTest)
 {
     SetRandSeed();
-    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+
+    // Seed application settings test data
+    {
+        csp::common::String UserId;
+        LogInAsAdminUser(UserSystem, UserId);
+
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Log out
+        LogOut(UserSystem);
+    }
 
     auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
 
@@ -348,10 +359,24 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousWithKeysTest)
 {
     SetRandSeed();
-    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
+
+    // Seed application settings test data
+    {
+        csp::common::String UserId;
+        LogInAsAdminUser(UserSystem, UserId);
+
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+        auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        // Log out
+        LogOut(UserSystem);
+    }
 
     auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
 
