@@ -45,17 +45,6 @@ ApplicationSettingsSystem::ApplicationSettingsSystem(csp::web::WebClient* InWebC
 
 ApplicationSettingsSystem::~ApplicationSettingsSystem() { delete (ApplicationSettingsAPI); }
 
-void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback)
-{
-    CreateSettingsByContext(ApplicationSettings)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
-            "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
-            {}, {}, {}))
-        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
-        .then(common::continuations::InvokeIfExceptionInChain(
-            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
-}
-
 void ApplicationSettingsSystem::GetSettingsByContext(
     const String& ApplicationName, const String& Context, const Optional<Array<String>>& Keys, ApplicationSettingsResultCallback Callback)
 {
@@ -76,6 +65,17 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
+        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
+        .then(common::continuations::InvokeIfExceptionInChain(
+            [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
+}
+
+void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback)
+{
+    CreateSettingsByContext(ApplicationSettings)
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+            "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
+            {}, {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
