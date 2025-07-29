@@ -21,6 +21,8 @@
 namespace
 {
 constexpr char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
+constexpr char* AdminAccountEmailName = "MAGNOPUS_SERVICES_ADMIN_EMAIL";
+constexpr char* AdminAccountPasswordName = "MAGNOPUS_SERVICES_ADMIN_PASSWORD";
 
 // If you're trying to run with localMCS, set `MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081` after having launched the maglocal docker instance.
 const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
@@ -31,6 +33,10 @@ const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const ch
 } // namespace
 
 inline const char* EndpointBaseURI() { return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud"); }
+
+inline const char* AdminAccountEmail() { return GetEnvironmentVariableOrDefault(AdminAccountEmailName, ""); }
+
+inline const char* AdminAccountPassword() { return GetEnvironmentVariableOrDefault(AdminAccountPasswordName, ""); }
 
 class PublicTestBase : public ::testing::Test
 {

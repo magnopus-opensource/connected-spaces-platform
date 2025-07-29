@@ -105,16 +105,11 @@ void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::Strin
     LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
 }
 
-void LogInAsLocalAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified)
+void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified,
+    csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
-    // Attempt to log in with an account with elevated permissions.
-    // It is expected that the login attempt will fail for any deployment that is not the local magnopus services.
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "admin@magnopus.com", "admin", AgeVerified).Await(RequestPredicate);
-
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
-    {
-        OutUserId = Result.GetLoginState().UserId;
-    }
+    // Attempt to log in with an admin account with elevated permissions.
+    LogIn(UserSystem, OutUserId, AdminAccountEmail(), AdminAccountPassword(), AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
 }
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode)

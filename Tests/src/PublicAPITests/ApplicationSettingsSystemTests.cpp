@@ -49,19 +49,14 @@ ApplicationSettings GetApplicationSettingsTestData(const csp::common::String& Co
     return ApplicationSettings;
 }
 
-void AttemptToSeedLocalCHSApplicationSettings()
+void SeedApplicationSettings()
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
 
     csp::common::String UserId;
-    LogInAsLocalAdminUser(UserSystem, UserId);
-
-    // In the event that login fails, we do not want to attempt to seed the service with application settings.
-    // It is expected that the login attempt will fail for any deployment that is not the local magnopus services.
-    if (UserId.IsEmpty())
-        return;
+    LogInAsAdminUser(UserSystem, UserId);
 
     // Seed application settings test data
     {
@@ -95,12 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
 
     // Login
     csp::common::String UserId;
-    LogInAsLocalAdminUser(UserSystem, UserId);
-
-    // In the event that login fails, we do not want to attempt to create the application settings.
-    // It is expected that the login attempt will fail for any deployment that is not the local magnopus services.
-    if (UserId.IsEmpty())
-        return;
+    LogInAsAdminUser(UserSystem, UserId);
 
     auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_CONTEXT_TESTS", false);
 
@@ -129,7 +119,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByContextAnonymousTest)
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettingsByContextTest)
 {
     SetRandSeed();
 
@@ -139,12 +129,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
 
     // Login
     csp::common::String UserId;
-    LogInAsLocalAdminUser(UserSystem, UserId);
-
-    // In the event that login fails, we do not want to attempt to create the application settings.
-    // It is expected that the login attempt will fail for any deployment that is not the local magnopus services.
-    if (UserId.IsEmpty())
-        return;
+    LogInAsAdminUser(UserSystem, UserId);
 
     auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
 
@@ -183,12 +168,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateInvalidSettings
 
     // Login
     csp::common::String UserId;
-    LogInAsLocalAdminUser(UserSystem, UserId);
-
-    // In the event that login fails, we do not want to attempt to create the application settings.
-    // It is expected that the login attempt will fail for any deployment that is not the local magnopus services.
-    if (UserId.IsEmpty())
-        return;
+    LogInAsAdminUser(UserSystem, UserId);
 
     auto ApplicationSettingsTestData = ::ApplicationSettings();
 
@@ -216,9 +196,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateInvalidSettings
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextTest)
 {
     SetRandSeed();
-
-    // Create Application Settings
-    AttemptToSeedLocalCHSApplicationSettings();
+    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -259,9 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextWithKeysTest)
 {
     SetRandSeed();
-
-    // Create Application Settings
-    AttemptToSeedLocalCHSApplicationSettings();
+    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -339,9 +315,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousTest)
 {
     SetRandSeed();
-
-    // Create Application Settings
-    AttemptToSeedLocalCHSApplicationSettings();
+    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
@@ -374,9 +348,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousWithKeysTest)
 {
     SetRandSeed();
-
-    // Create Application Settings
-    AttemptToSeedLocalCHSApplicationSettings();
+    SeedApplicationSettings();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
