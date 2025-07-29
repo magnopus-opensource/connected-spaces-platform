@@ -126,7 +126,7 @@ template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson
 // Catch-all template for notifying the user if no specialisation exists for serialising the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON serialisation! You should probably add support for it :)")]] inline rapidjson::Value TypeToJsonValue(
-    const T& Value, RapidJsonAlloc& Allocator)
+    const T& /*Value*/, RapidJsonAlloc& /*Allocator*/)
 {
     assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
 }
@@ -260,7 +260,7 @@ inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
 // Catch-all template for notifying the user if no specialisation exists for deserialising to the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON deserialisation! You should probably add support for it :)")]] inline void JsonValueToType(
-    const rapidjson::Value& Value, T& Type)
+    const rapidjson::Value& /*Value*/, T& /*Type*/)
 {
     assert(false && "Unsupported type for JSON deserialisation! You should probably add support for it :)");
 }
