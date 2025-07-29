@@ -51,7 +51,7 @@ void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSetting
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
             {}, {}, {}))
-        .then(systems::continuations::SendResult(Callback, "Successfully created application settings."))
+        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
@@ -63,7 +63,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
             {}, {}))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings."))
+        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
@@ -76,7 +76,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
-        .then(systems::continuations::SendResult(Callback, "Successfully retrieved application settings."))
+        .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
         .then(common::continuations::InvokeIfExceptionInChain(
             [Callback](const std::exception& /*exception*/) { Callback(MakeInvalid<ApplicationSettingsResult>()); }, *LogSystem));
 }
