@@ -81,24 +81,66 @@ csp::common::String FormatScopesForURL(csp::common::Array<csp::common::String> S
     return FormattedScopes;
 }
 
+AuthContext::AuthContext(csp::services::ApiBase* AuthenticationAPI, csp::common::LoginState& LoginState)
+    : AuthenticationAPI { AuthenticationAPI }
+    , LoginState { &LoginState }
+{
+}
+
+const csp::common::LoginState& AuthContext::GetLoginState() const { return *LoginState; }
+
+void AuthContext::RefreshToken(std::function<void(bool)> Callback)
+{
+    if (LoginState->State == csp::common::ELoginState::LoggedIn)
+    {
+        auto Request = std::make_shared<chs_user::RefreshRequest>();
+        Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+        Request->SetUserId(LoginState->UserId);
+        Request->SetRefreshToken(LoginState->RefreshToken);
+
+        LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
+        {
+            if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                const NullResult Result(csp::systems::EResultCode::Success, 200);
+                INVOKE_IF_NOT_NULL(Callback, true);
+            }
+            else
+            {
+                const NullResult Result(LoginStateRes.GetResultCode(), LoginStateRes.GetHttpResultCode());
+                INVOKE_IF_NOT_NULL(Callback, false);
+            }
+        };
+
+        csp::services::ResponseHandlerPtr ResponseHandler
+            = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
+                LoginStateResCallback, LoginState);
+
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost(Request, ResponseHandler);
+    }
+}
+
 UserSystem::UserSystem()
     : SystemBase(nullptr, nullptr, nullptr)
     , AuthenticationAPI(nullptr)
     , ProfileAPI(nullptr)
     , PingAPI(nullptr)
     , ExternalServiceProxyApi(nullptr)
+    , StripeAPI { nullptr }
+    , Auth { AuthenticationAPI, CurrentLoginState }
 {
 }
 
 UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, InEventBus, &LogSystem)
+    , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient) }
+    , ProfileAPI { new chs_user::ProfileApi(InWebClient) }
+    , PingAPI { new chs_user::PingApi(InWebClient) }
+    , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient) }
+    , StripeAPI { new chs_user::StripeApi(InWebClient) }
     , RefreshTokenChangedCallback(nullptr)
+    , Auth { AuthenticationAPI, CurrentLoginState }
 {
-    AuthenticationAPI = new chs_user::AuthenticationApi(InWebClient);
-    ProfileAPI = new chs_user::ProfileApi(InWebClient);
-    PingAPI = new chs_user::PingApi(InWebClient);
-    ExternalServiceProxyApi = new chs_aggregation::ExternalServiceProxyApi(InWebClient);
-    StripeAPI = new chs_user::StripeApi(InWebClient);
 
     RegisterSystemCallback();
 }
@@ -171,9 +213,9 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), LoginStateRes.GetLoginState().AccessToken,
-                    LoginStateRes.GetLoginState().DeviceId);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
+                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
+                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -233,9 +275,9 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), LoginStateRes.GetLoginState().AccessToken,
-                    LoginStateRes.GetLoginState().DeviceId);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
+                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
+                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else
             {
@@ -255,37 +297,6 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
         BadResult.ResponseBody = "Already logged in!";
         Callback(BadResult);
-    }
-}
-
-void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback)
-{
-    if (CurrentLoginState.State == csp::common::ELoginState::LoggedIn)
-    {
-        auto Request = std::make_shared<chs_user::RefreshRequest>();
-        Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-        Request->SetUserId(UserId);
-        Request->SetRefreshToken(RefreshToken);
-
-        LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
-        {
-            if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
-            {
-                const NullResult Result(csp::systems::EResultCode::Success, 200);
-                INVOKE_IF_NOT_NULL(Callback, Result);
-            }
-            else
-            {
-                const NullResult Result(LoginStateRes.GetResultCode(), LoginStateRes.GetHttpResultCode());
-                INVOKE_IF_NOT_NULL(Callback, Result);
-            }
-        };
-
-        csp::services::ResponseHandlerPtr ResponseHandler
-            = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
-                LoginStateResCallback, &CurrentLoginState);
-
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost(Request, ResponseHandler);
     }
 }
 
@@ -323,9 +334,9 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                 };
 
                 auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
-                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), LoginStateRes.GetLoginState().AccessToken,
-                    LoginStateRes.GetLoginState().DeviceId);
+                MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
+                    *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
+                    CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
             }
             else
             {
@@ -450,9 +461,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
             };
 
             auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(),
-                *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), LoginStateRes.GetLoginState().AccessToken,
-                LoginStateRes.GetLoginState().DeviceId);
+            MultiplayerConnection->Connect(ErrorCallback, csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(GetAuthContext()),
+                *csp::systems::SystemsManager::Get().GetSpaceEntitySystem(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
+                CurrentLoginState.AccessToken, CurrentLoginState.DeviceId);
         }
         else
         {
@@ -838,4 +849,6 @@ void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData
     UserPermissionsChangedCallback(AccessControlChangedNetworkEventData);
 }
 
+csp::common::IAuthContext& UserSystem::GetAuthContext()
+{ return Auth; }
 } // namespace csp::systems

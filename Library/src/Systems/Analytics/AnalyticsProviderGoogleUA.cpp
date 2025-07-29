@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 
 #ifdef CSP_WASM
 #include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
@@ -27,8 +28,8 @@ namespace
 class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient
 {
 public:
-    UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::EmscriptenWebClient(InPort, Tp, nullptr)
+    UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext)
+        : csp::web::EmscriptenWebClient(InPort, Tp, AuthContext, nullptr)
     {
     }
 };
@@ -36,8 +37,8 @@ public:
 class UAPOCOWebClient : public csp::web::POCOWebClient
 {
 public:
-    UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
-        : csp::web::POCOWebClient(InPort, Tp, nullptr)
+    UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext)
+        : csp::web::POCOWebClient(InPort, Tp, AuthContext, nullptr)
     {
     }
 };
@@ -112,15 +113,16 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
     return EventString;
 }
 
-AnalyticsProviderGoogleUA::AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag)
+AnalyticsProviderGoogleUA::AnalyticsProviderGoogleUA(
+    const csp::common::String& ClientId, const csp::common::String& PropertyTag, csp::common::IAuthContext& AuthContext)
     : ClientId { ClientId }
     , PropertyTag { PropertyTag }
     , Start { std::chrono::steady_clock::now() }
 {
 #ifdef CSP_WASM
-    WebClient = new UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, AuthContext);
 #else
-    WebClient = new UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = new UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS, AuthContext);
 #endif
 }
 

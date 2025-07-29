@@ -62,12 +62,13 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(
     };
 
 #ifdef CSP_WASM
-    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
+    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten(
+        Uri.c_str(), AccessToken.c_str(), DeviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
 
     std::thread TestThread([&]() { WebSocketClient->Start(Uri.c_str(), Fn); });
 #else
-    auto* WebSocketClient
-        = new csp::multiplayer::CSPWebSocketClientPOCO(AccessToken.c_str(), DeviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
+    auto* WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO(
+        Uri.c_str(), AccessToken.c_str(), DeviceId.c_str(), *csp::systems::SystemsManager::Get().GetLogSystem());
     WebSocketClient->Start(Uri.c_str(), Fn);
 #endif
 

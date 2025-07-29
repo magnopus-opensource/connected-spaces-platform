@@ -70,8 +70,8 @@ const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
 
 EResponseCodes GetOlyResponseCode(Poco::Net::HTTPResponse::HTTPStatus PocoResponseCode) { return (EResponseCodes)PocoResponseCode; }
 
-POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh)
-    : WebClient(InPort, Tp, LogSystem, AutoRefresh)
+POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem, bool AutoRefresh) 
+: WebClient(InPort, Tp, LogSystem, AutoRefresh)
 {
     Poco::Net::initializeSSL();
 
@@ -88,6 +88,13 @@ POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, csp:
     Poco::Net::SSLManager::instance().initializeClient(PrivateKeyHandler, CertHandler, PocoContext);
 
     Cookies = new std::remove_pointer_t<decltype(Cookies)>();
+}
+
+POCOWebClient::POCOWebClient(
+    const Port InPort, const ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+    : POCOWebClient(InPort, Tp, LogSystem, AutoRefresh)
+{
+    SetAuthContext(AuthContext);
 }
 
 POCOWebClient::~POCOWebClient() { delete Cookies; }
