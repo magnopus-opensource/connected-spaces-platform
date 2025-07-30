@@ -99,68 +99,10 @@ public:
     // Callback that will provide a pointer to a SpaceEntity object.
     typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
-    /// @brief Sets a callback to be executed when the script system is ready to run scripts.
-    /// @param Callback CallbackHandler : the callback to execute.
-    CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler Callback);
-
-    /// @brief Sets the script owner for the given entity to the current client
-    /// @param Entity SpaceEntity : A pointer to the entity
-    void ClaimScriptOwnership(SpaceEntity* Entity) const;
-
-    /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
-
-    /// @brief Disable Leader Election feature.
-    void DisableLeaderElection();
-
-    /// @brief Check if the Leader Election feature is enabled.
-    /// @return true if enabled, false otherwise.
-    bool IsLeaderElectionEnabled() const;
-
-    /// @brief Debug helper to get the id of the currently elected script leader.
-    /// @return The id of the leader.
-    uint64_t GetLeaderId() const;
-
-    /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
-    /// @return True if enabled, false otherwise.
-    bool GetEntityPatchRateLimitEnabled() const;
-
-    /// @brief Set the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
-    ///
-    /// This feature is enabled by default and should only be disabled if you are encountering issues.
-    ///
-    /// @param Enabled : sets if the feature should be enabled or not.
-    /// \rst
-    ///.. note::
-    ///   If disabling this feature, more requests will be made to Magnopus Connected Services,
-    ///   and consequently more patch merges may occur on the server as a result.
-    /// \endrst
-    void SetEntityPatchRateLimitEnabled(bool Enabled);
-
-    /// @brief "Refreshes" (ie, turns on an off again), the multiplayer connection, in order to refresh scopes.
-    /// This shouldn't be neccesary, we should devote some effort to checking if it still is at some point
-    /// @param SpaceId csp::Common:String& : The Id of the space to refresh
-    /// @param RefreshMultiplayerContinuationEvent : std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> Continuation event
-    /// that populates an optional error code on failure. Error is empty on success.
-    CSP_NO_EXPORT void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
-        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
-
-    using SpaceEntityList = csp::common::List<SpaceEntity*>;
-    using SpaceEntityQueue = std::deque<SpaceEntity*>;
-
-    /// @brief Checks whether we should run scripts locally
-    /// @return bool
-    CSP_NO_EXPORT bool CheckIfWeShouldRunScriptsLocally() const;
-
-    /// @brief Runs the provided script remotely
-    /// @param ContextId int64_t : the ID of the context on which to run the script
-    /// @param ScriptText csp::common::String& : the text of the script to run
-    CSP_NO_EXPORT void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
-
     /// @brief OnlineRealtimeEngine constructor
     /// @param InMultiplayerConnection MultiplayerConnection* : the multiplayer connection to construct the OnlineRealtimeEngine with
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
-    /// @param NetworkEventBus csp::multiplayer::NetworkEventbus& : Reference the the network event bus, used for leadership election messaging.
+    /// @param NetworkEventBus csp::multiplayer::NetworkEventBus& : Reference the the network event bus, used for leadership election messaging.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script. Called to execute scripts when the leader
     /// election system
     OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
@@ -168,31 +110,6 @@ public:
 
     /// @brief OnlineRealtimeEngine destructor
     CSP_NO_EXPORT ~OnlineRealtimeEngine();
-
-    /// @brief Getter for the pending adds
-    /// @return: SpaceEntityQueue*
-    CSP_NO_EXPORT SpaceEntityQueue* GetPendingAdds();
-
-    /// @brief Getter for the multiplayer connection instance
-    /// @return: MultiplayerConnection*
-    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
-
-    // @brief Ticks all entities and scripts, processing any pending local and remote updates
-    // Will only tick scrips if EnableEntityTick is enabled, which it should be if entity fetch has completed.
-    CSP_NO_EXPORT void TickEntities();
-
-    /// @brief Locks the entity mutex.
-    void LockEntityUpdate() const;
-
-    /// @brief Unlocks the entity mutex.
-    void UnlockEntityUpdate() const;
-
-    /// @brief Queues a specific entity to update. Used in SpaceEntity to queue updates via passing the this pointer
-    void QueueEntityUpdate(SpaceEntity* EntityToUpdate);
-
-    /// @brief "Resolves" the entity heirarchy, such that the entity is parented appropriately, and internal buffers are populated appropriately.
-    /// (Vague, need more understanding about what this does)
-    void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /********************** REALTIME ENGINE INTERFACE ************************/
     /*************************************************************************/
@@ -339,6 +256,91 @@ public:
      */
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
         const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
+
+    /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
+
+    using SpaceEntityList = csp::common::List<SpaceEntity*>;
+    using SpaceEntityQueue = std::deque<SpaceEntity*>;
+
+    /// @brief Sets a callback to be executed when the script system is ready to run scripts.
+    /// @param Callback CallbackHandler : the callback to execute.
+    CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler Callback);
+
+    /// @brief Sets the script owner for the given entity to the current client
+    /// @param Entity SpaceEntity : A pointer to the entity
+    void ClaimScriptOwnership(SpaceEntity* Entity) const;
+
+    /// @brief Enable Leader Election feature.
+    void EnableLeaderElection();
+
+    /// @brief Disable Leader Election feature.
+    void DisableLeaderElection();
+
+    /// @brief Check if the Leader Election feature is enabled.
+    /// @return true if enabled, false otherwise.
+    bool IsLeaderElectionEnabled() const;
+
+    /// @brief Debug helper to get the id of the currently elected script leader.
+    /// @return The id of the leader.
+    uint64_t GetLeaderId() const;
+
+    /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
+    /// @return True if enabled, false otherwise.
+    bool GetEntityPatchRateLimitEnabled() const;
+
+    /// @brief Set the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
+    ///
+    /// This feature is enabled by default and should only be disabled if you are encountering issues.
+    ///
+    /// @param Enabled : sets if the feature should be enabled or not.
+    /// \rst
+    ///.. note::
+    ///   If disabling this feature, more requests will be made to Magnopus Connected Services,
+    ///   and consequently more patch merges may occur on the server as a result.
+    /// \endrst
+    void SetEntityPatchRateLimitEnabled(bool Enabled);
+
+    /// @brief "Refreshes" (ie, turns on an off again), the multiplayer connection, in order to refresh scopes.
+    /// This shouldn't be neccesary, we should devote some effort to checking if it still is at some point
+    /// @param SpaceId csp::Common:String& : The Id of the space to refresh
+    /// @param RefreshMultiplayerContinuationEvent : std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> Continuation event
+    /// that populates an optional error code on failure. Error is empty on success.
+    CSP_NO_EXPORT void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
+        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
+
+    /// @brief Checks whether we should run scripts locally
+    /// @return bool
+    CSP_NO_EXPORT bool CheckIfWeShouldRunScriptsLocally() const;
+
+    /// @brief Runs the provided script remotely
+    /// @param ContextId int64_t : the ID of the context on which to run the script
+    /// @param ScriptText csp::common::String& : the text of the script to run
+    CSP_NO_EXPORT void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
+
+    /// @brief Getter for the pending adds
+    /// @return: SpaceEntityQueue*
+    CSP_NO_EXPORT SpaceEntityQueue* GetPendingAdds();
+
+    /// @brief Getter for the multiplayer connection instance
+    /// @return: MultiplayerConnection*
+    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
+
+    // @brief Ticks all entities and scripts, processing any pending local and remote updates
+    // Will only tick scrips if EnableEntityTick is enabled, which it should be if entity fetch has completed.
+    CSP_NO_EXPORT void TickEntities();
+
+    /// @brief Locks the entity mutex.
+    void LockEntityUpdate() const;
+
+    /// @brief Unlocks the entity mutex.
+    void UnlockEntityUpdate() const;
+
+    /// @brief Queues a specific entity to update. Used in SpaceEntity to queue updates via passing the this pointer
+    void QueueEntityUpdate(SpaceEntity* EntityToUpdate);
+
+    /// @brief "Resolves" the entity heirarchy, such that the entity is parented appropriately, and internal buffers are populated appropriately.
+    /// (Vague, need more understanding about what this does)
+    void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
