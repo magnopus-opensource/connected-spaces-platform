@@ -83,8 +83,8 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         const auto LoginState = UserSystem->GetLoginState();
 
-        auto [Avatar] = AWAIT(
-            RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState,
+            UserAvatarId, UserAvatarPlayMode);
 
         // Create object to represent the portal
         csp::common::String ObjectName = "Object 1";
@@ -116,8 +116,8 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         const auto LoginState = UserSystem->GetLoginState();
 
-        auto [Avatar] = AWAIT(
-            RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState,
+            UserAvatarId, UserAvatarPlayMode);
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }

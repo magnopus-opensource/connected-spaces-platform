@@ -257,7 +257,7 @@ csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() co
 
 namespace
 {
-    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::LoginState& LoginState,
+    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId,
         csp::multiplayer::OnlineRealtimeEngine& OnlineRealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
         uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
         bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
@@ -270,7 +270,7 @@ namespace
         AvatarComponent->SetAvatarId(AvatarId);
         AvatarComponent->SetState(AvatarState);
         AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
-        AvatarComponent->SetUserId(LoginState.UserId);
+        AvatarComponent->SetUserId(UserId);
         AvatarComponent->SetIsVisible(IsVisible);
 
         return NewAvatar;
@@ -299,12 +299,12 @@ async::shared_task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
 }
 
 std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(
-    const csp::common::String& Name, const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible,
+    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
     const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode)
 {
-    return [Name, LoginState, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
+    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(LoginState, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
+        auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
@@ -319,10 +319,10 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
 }
 
 std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> OnlineRealtimeEngine::CreateNewLocalAvatar(
-    const csp::common::String& Name, const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible,
+    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
     const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback)
 {
-    return [Name, LoginState, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
+    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
                std::tuple<async::shared_task<uint64_t>, async::task<void>> NetworkIdFromChain)
     {
         uint64_t NetworkId = std::get<0>(NetworkIdFromChain).get();
@@ -345,7 +345,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(LoginState, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
+        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
             Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -363,31 +363,23 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
     };
 }
 
-void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState>& LoginState,
+void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
     const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
     const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
-
-    if (!LoginState.HasValue())
-    {
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "CreateAvatar requires a non-empty LoginState.");
-        Callback(nullptr);
-        return;
-    }
 
     // Ask the server for an avatar Id via "GenerateObjectIds"
     async::shared_task<uint64_t> GetAvatarNetworkIdChain = RemoteGenerateNewAvatarId();
 
     // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
     async::task<void> SerializeAndSendChain
-        = GetAvatarNetworkIdChain
-              .then(SendNewAvatarObjectMessage(Name, *LoginState, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
+        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
               .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 
     // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
-        .then(CreateNewLocalAvatar(Name, *LoginState, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
+        .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [Callback, LogSystem = this->LogSystem](const std::exception& Except)
             {

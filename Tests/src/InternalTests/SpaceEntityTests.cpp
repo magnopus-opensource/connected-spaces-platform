@@ -56,7 +56,7 @@ void CreateAvatarForLeaderElection(csp::multiplayer::OnlineRealtimeEngine* Entit
     const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
 
     auto [Avatar]
-        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cout << "CreateAvatar Local Callback" << std::endl;

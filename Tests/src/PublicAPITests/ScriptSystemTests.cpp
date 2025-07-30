@@ -249,8 +249,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -367,7 +367,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
     const auto LoginState = UserSystem->GetLoginState();
 
     auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -467,7 +467,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
     const auto LoginState = UserSystem->GetLoginState();
 
     auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
     EXPECT_EQ(Avatar->GetName(), UserName);
@@ -555,8 +555,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -668,8 +668,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -797,8 +797,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -941,8 +941,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1055,8 +1055,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
@@ -1172,8 +1172,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     std::cerr << "CreateAvatar Local Callback" << std::endl;
