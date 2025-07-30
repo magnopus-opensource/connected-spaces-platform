@@ -102,7 +102,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettin
     csp::common::String UserId;
     LogInAsAdminUser(UserSystem, UserId);
 
-    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Create Application Settings
     {
@@ -322,7 +322,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         csp::common::String UserId;
         LogInAsAdminUser(UserSystem, UserId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -331,7 +331,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         LogOut(UserSystem);
     }
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
@@ -369,7 +369,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         csp::common::String UserId;
         LogInAsAdminUser(UserSystem, UserId);
 
-        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+        auto ApplicationSettings = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettings);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -378,7 +378,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
         LogOut(UserSystem);
     }
 
-    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+    auto const ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
@@ -440,7 +440,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSett
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* ApplicationSettingsSystem = SystemsManager.GetApplicationSettingsSystem();
 
-    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONTMOUS_CONTEXT_TESTS", true);
+    auto ApplicationSettingsTestData = GetApplicationSettingsTestData("MAG_APPLICATION_SETTINGS_ANONYMOUS_CONTEXT_TESTS", true);
 
     // Get Application Settings
     {
