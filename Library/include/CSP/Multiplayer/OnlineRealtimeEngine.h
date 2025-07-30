@@ -250,8 +250,8 @@ public:
      * @param SpaceId const csp::common::String& : MCS formatted SpaceId
      * @param FetchStartedCallback EntityFetchStartedCallback Callback called once scopes are reset and entity fetch has begun.
      *
-     * @pre @param Space represented by SpaceId must exist on the configured server endpoint. See csp::systems::SpaceSystem::CreateSpace
-     * @post @param FetchStartedCallback will be called. The csp::common::EntityFetchCompleteCallback passed in the constructor will be called async
+     * @pre Space represented by SpaceId must exist on the configured server endpoint. See csp::systems::SpaceSystem::CreateSpace
+     * @post FetchStartedCallback will be called. The csp::common::EntityFetchCompleteCallback passed in the constructor will be called async
      * once all the entities are fetched.
      */
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
