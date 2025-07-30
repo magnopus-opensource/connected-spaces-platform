@@ -86,6 +86,21 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
     auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
     async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
 
+    if (ApplicationSettings.ApplicationName.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG(
+            "The creation of an application setting was issued without a application name. You have to provide an asset application name.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
+    if (ApplicationSettings.Context.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("The creation of an application setting was issued without a context. You have to provide an asset context.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
             [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
@@ -107,6 +122,21 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
     auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
     async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
 
+    if (ApplicationName.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG(
+            "The retrieval of an application setting was issued without a application name. You have to provide an asset application name.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
+    if (Context.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("The retrieval of an application setting was issued without a context. You have to provide an asset context.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
             [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
@@ -123,6 +153,21 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 {
     auto OnCompleteEvent = std::make_shared<async::event_task<ApplicationSettingsResult>>();
     async::task<ApplicationSettingsResult> OnCompleteTask = OnCompleteEvent->get_task();
+
+    if (ApplicationName.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG(
+            "The retrieval of an application setting was issued without a application name. You have to provide an asset application name.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
+
+    if (Context.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("The retrieval of an application setting was issued without a context. You have to provide an asset context.");
+        OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
+        return OnCompleteTask;
+    }
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
