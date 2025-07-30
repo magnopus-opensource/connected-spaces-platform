@@ -191,7 +191,7 @@ public:
      * store indexes spaces.
      * @param FetchStartedCallback EntityFetchStartedCallback : Callback notifying for when csp::systems::SpaceSystem::EnterSpace can yield control
      * back to clients
-     * @post @param FetchStartedCallback will have been called, and the EntityFetchCompleteCallback the engine was constructed with will either have
+     * @post FetchStartedCallback will have been called, and the EntityFetchCompleteCallback the engine was constructed with will either have
      * been called, or an async job started with an intent to call it once fetch is complete.
      */
     CSP_NO_EXPORT virtual void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId, EntityFetchStartedCallback FetchStartedCallback)
