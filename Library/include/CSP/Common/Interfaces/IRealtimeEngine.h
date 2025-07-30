@@ -113,8 +113,8 @@ public:
 
     /// @brief Create and add a SpaceEntity with type Avatar, and relevant components and default states as specified.
     /// @param Name csp::common::String : The entity name of the newly created avatar entity.
-    /// @param LoginState const csp::common::Optional<csp::common::LoginState>& : Login state tokens for authenticating on the remote server. Only
-    /// required if backend data store requires authentication.
+    /// @param UserId  csp::common::String : Id of the user creating this avatar. If your backend data store requires authentication, this will
+    /// probably be your username or some similar unique identifier.
     /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
     /// @param IsVisible bool : Whether the avatar defaults to being visible.
     /// @param AvatarState csp::multiplayer::AvatarState : The initial Avatar State to set.
@@ -122,7 +122,7 @@ public:
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState>& LoginState,
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
         const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
     {

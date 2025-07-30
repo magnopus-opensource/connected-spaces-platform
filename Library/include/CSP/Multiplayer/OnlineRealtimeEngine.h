@@ -204,13 +204,14 @@ public:
 
     /// @brief Create and add a SpaceEntity with type Avatar, and relevant components and default states as specified.
     /// @param Name csp::common::String : The entity name of the newly created avatar entity.
+    /// @param UserId csp::common::String : The Id of the user creating the avatar. This can be fetched from csp::systems::UserSystem::GetLoginState
     /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
     /// @param State csp::multiplayer::AvatarState : The initial Avatar State to set.
     /// @param AvatarId csp::common::String : The ID to be set on the AvatarSpaceComponent
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::Optional<csp::common::LoginState>& LoginState,
+    CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& State,
         const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode,
         csp::multiplayer::EntityCreatedCallback Callback) override;
@@ -232,7 +233,7 @@ public:
     /// is called from the main thread.
     ///
     /// @param EntityToAdd SpaceEntity : Pointer to the entity to be added.
-    void AddEntity(SpaceEntity* EntityToAdd) override; // NOTE: This needs to become an interface method, will likely hit this problem during rebase
+    void AddEntity(SpaceEntity* EntityToAdd) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
@@ -414,10 +415,10 @@ private:
     CSP_START_IGNORE
     async::shared_task<uint64_t> RemoteGenerateNewAvatarId();
     std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name,
-        const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
+        const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
         AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
     std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> CreateNewLocalAvatar(const csp::common::String& Name,
-        const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
+        const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
         AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
