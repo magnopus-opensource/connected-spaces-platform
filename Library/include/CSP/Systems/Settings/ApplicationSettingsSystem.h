@@ -97,7 +97,7 @@ private:
 
     /// @brief Asynchronously creates or updates application settings for a specific context.
     /// Elevated Permissions Required: This function requires elevated permissions to execute successfully. If the user does not possess any of the
-    /// necessary roles, the operation will failwith a 403 Forbidden error.
+    /// necessary roles, the operation will fail with a 403 Forbidden error.
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
     CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
