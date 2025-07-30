@@ -25,4 +25,11 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
     assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
 }
 
+template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
+[[deprecated("Unsupported type for JSON deserialisation! You should probably add support for it :)")]] inline void JsonValueToType(
+    const rapidjson::Value& Value, T& Type)
+{
+    assert(false && "Unsupported type for JSON deserialisation! You should probably add support for it :)");
+}
+
 } // namespace csp::web
