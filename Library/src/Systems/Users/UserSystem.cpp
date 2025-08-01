@@ -56,10 +56,10 @@ namespace
  *
  * This dependency needs to be broken prior to formal modularization, I suspect by injecting the MultiplayerConnection much like we inject
  * the RealtimeEngine. */
-void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& MultiplayerConnection,
+void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& MultiplayerConnection, const csp::common::String& MultiplayerURI,
     csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback, const csp::systems::LoginStateResult& LoginStateRes)
 {
-    MultiplayerConnection.Connect(ErrorCallback, LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
+    MultiplayerConnection.Connect(ErrorCallback, MultiplayerURI, LoginStateRes.GetLoginState().AccessToken, LoginStateRes.GetLoginState().DeviceId);
 }
 
 }
@@ -233,7 +233,8 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                     Callback(LoginStateRes);
                 };
 
-                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ErrorCallback, LoginStateRes);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
             {
@@ -292,7 +293,8 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                     Callback(LoginStateRes);
                 };
 
-                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ErrorCallback, LoginStateRes);
             }
             else
             {
@@ -348,7 +350,8 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
                     Callback(LoginStateRes);
                 };
 
-                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ErrorCallback, LoginStateRes);
             }
             else
             {
@@ -472,7 +475,8 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
-            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), ErrorCallback, LoginStateRes, GetAuthContext());
+            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
+                ErrorCallback, LoginStateRes);
         }
         else
         {

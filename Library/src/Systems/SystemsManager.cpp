@@ -153,7 +153,8 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     ScriptSystem->Initialise();
 
     // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.
-    auto* SignalRConnection = (SignalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() : SignalRInject;
+    auto* SignalRConnection
+        = (SignalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(UserSystem->GetAuthContext()) : SignalRInject;
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 

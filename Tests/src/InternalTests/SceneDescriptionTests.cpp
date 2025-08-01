@@ -17,6 +17,7 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
@@ -238,6 +239,16 @@ class MockScriptRunner : public csp::common::IJSScriptRunner
     void ClearModuleSource(csp::common::String) override { }
 };
 
+class TestAuthContext : public csp::common::IAuthContext
+{
+public:
+    const csp::common::LoginState& GetLoginState() const override { return State; }
+    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+
+private:
+    csp::common::LoginState State;
+};
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeEmptyTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -258,7 +269,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
+    TestAuthContext AuthContext;
+
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
     csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
@@ -293,7 +306,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
+    TestAuthContext AuthContext;
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
     csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
@@ -400,7 +414,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection() };
+    TestAuthContext AuthContext;
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
     csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
