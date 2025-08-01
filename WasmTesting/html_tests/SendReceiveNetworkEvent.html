@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+    <meta charset="utf-8">
+    <title>CSP WASM Browser Test, SendReceiveNetworkEvent</title>
+    <script type="module">
+      import { ready, CSPFoundation, Systems, Multiplayer, Common } from './node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
+      import { initializeCSP } from './shared/csp-initializer.js';
+      (async () => {
+
+      // Get email, password and spaceID from query parameters
+        const params = new URLSearchParams(window.location.search);
+        const useDebugCSP = params.get('useDebugCsp');
+        const email = params.get('email');
+        const password = params.get('password');
+        const spaceId = params.get(`spaceId`)
+
+        console.log ('email: ', email)
+        console.log ('password: ', password)
+        console.log ('spaceId: ', spaceId)
+
+        await initializeCSP(useDebugCSP);
+
+        const userSystem = Systems.SystemsManager.get().getUserSystem();
+
+        //Login
+        const loginResult = await userSystem.login('', email, password);
+        if (loginResult.getResultCode() == Systems.EResultCode.Success){
+          console.log("Successfully logged in");
+        }
+        else {
+          console.error("Failed to log in");
+        }
+        loginResult.delete();
+
+        await Systems.SystemsManager.get().getMultiplayerConnection().setAllowSelfMessagingFlag(true);
+
+        //Enter the space
+        const spaceSystem = Systems.SystemsManager.get().getSpaceSystem();
+        const enterSpaceResult = await spaceSystem.enterSpace(spaceId);
+
+        if (enterSpaceResult.getResultCode() == Systems.EResultCode.Success){
+          console.log("Successfully entered space");
+        }
+        else {
+          console.error("Failed to enter space");
+        }
+        
+        enterSpaceResult.delete(); 
+
+        const eventBus = Systems.SystemsManager.get().getEventBus();
+                 
+        const receiverId = "Id";
+        const eventName = "EventName";
+        const networkEventRegistration = Multiplayer.NetworkEventRegistration.create_eventReceiverId_eventName(receiverId, eventName);
+
+        const replicatedValues = Common.Array.ofcsp_common_ReplicatedValue()
+ 
+        function sendAndWaitForEvent() {
+          return new Promise((resolve, reject) => {
+            // Register for "EventName" event
+            const success = eventBus.listenNetworkEvent(networkEventRegistration, (ab, networkEventData) => {
+                console.log("Received event:", eventName);
+                resolve(networkEventData);
+              }
+            );
+
+            // Send the event, promise won't resolve until it is received.
+            eventBus.sendNetworkEvent(eventName, replicatedValues);
+
+          });
+        }
+
+        //Just getting the promise is good enough for the test
+        await sendAndWaitForEvent();
+
+      })();
+    </script>
+  </head>
+  <body>
+    <h1>Running CSP WASM browser test…</h1>
+  </body>
+</html>
