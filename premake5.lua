@@ -62,7 +62,7 @@ solution( "ConnectedSpacesPlatform" )
         'set "INCS=$(AdditionalIncludeDirectories)"',
         'set "DEFS=!DEFS:;= -D!"',
         'set "INCS=!INCS:;= -I!"',
-        'cppcheck --enable=all --xml --xml-version=2 --output-file="$(SolutionDir)$(ProjectName)_$(Configuration)_$(Platform).xml" --std=c++17 -D"!DEFS!" -I"!INCS!" "$(ProjectDir)src"',
+        'cppcheck --enable=all --xml --xml-version=2 --output-file="$(SolutionDir)$(ProjectName)_$(Configuration)_$(Platform).xml" --suppressions-list=$(SolutionDir)cppcheck_suppressions.txt --std=c++17 -D"!DEFS!" -I"!INCS!" "$(ProjectDir)src"',
         'echo "Cppcheck analysis complete for $(ProjectName) - $(Configuration)."',
         'goto :eof',
 
