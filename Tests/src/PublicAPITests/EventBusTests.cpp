@@ -163,7 +163,10 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
 
-    EXPECT_FALSE(NetworkEventBus->ListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName }, nullptr));
+    NetworkEventBus->ListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName }, nullptr);
+    auto AllRegistrations = NetworkEventBus->AllRegistrations();
+    EXPECT_FALSE(std::any_of(AllRegistrations.begin(), AllRegistrations.end(),
+        [ReceiverId](const NetworkEventRegistration& Registration) { return Registration.EventReceiverId == ReceiverId; }));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
@@ -195,14 +198,22 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
               .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
 
-    EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
-    EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
-    EXPECT_TRUE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
-    EXPECT_FALSE(NetworkEventBus->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {}));
+    const auto StartSize = NetworkEventBus->AllRegistrations().Size();
+
+    NetworkEventBus->ListenNetworkEvent(
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
+    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 1);
+    NetworkEventBus->ListenNetworkEvent(
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
+    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 2);
+    NetworkEventBus->ListenNetworkEvent(
+        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
+    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 3);
+
+    // This one should be rejected
+    NetworkEventBus->ListenNetworkEvent(
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
+    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 3);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
@@ -225,8 +236,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
     EXPECT_CALL(MockLogger.MockLogCallback, Call(Error1)).Times(1);
 
-    EXPECT_FALSE(NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName }));
-    EXPECT_FALSE(NetworkEventBus->StopListenAllNetworkEvents(ReceiverId));
+    NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
+    NetworkEventBus->StopListenAllNetworkEvents(ReceiverId);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
