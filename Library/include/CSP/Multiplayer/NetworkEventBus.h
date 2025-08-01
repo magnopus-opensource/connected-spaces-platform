@@ -151,25 +151,21 @@ public:
         uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
     /// @brief Register interest in a network event, such that the NetworkEventBus will call the provided callback when it arrives
-    /// @param Registration NetworkEventRegistration : Registration information, containing a ReceiverID and an EventName.
-    /// @param Callback NetworkEventCallback : Callback to invoke when specified event is received.
-    /// @return True if the registration was successful, false otherwise, such as in the case where Registration was not-unique, or the callback was
-    /// null.
-    bool ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback);
+    /// @param Registration NetworkEventRegistration : Registration information, containing a ReceiverID and an EventName. Will fail to register if
+    /// identical callback registration already registered.
+    /// @param Callback NetworkEventCallback : Callback to invoke when specified event is received. Will fail to register if null.
+    void ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback);
 
     // Here is where a nice method overload would go that lets you pass 2 strings directly as a convenience, however it can't be done at the moment
     // due to the wrapper generator (JS), and having a distinct name seems more confusing than anything.
 
     /// @brief Deregister interest in a network event
     /// @param Registration NetworkEventRegistration : Registration information of already registered event, containing a ReceiverID and an EventName.
-    /// @return True if the deregistration was successful, false otherwise, such as in the case where Registration was not found
-    bool StopListenNetworkEvent(NetworkEventRegistration Registration);
+    void StopListenNetworkEvent(NetworkEventRegistration Registration);
 
     /// @brief Deregister interest in all network events registered to a particular EventReceiverId
     /// @param EventReceiverId const csp::common::String& : EventReceiverId to deregister.
-    /// @return True if the deregistration was successful, false otherwise, such as if no events were found to deregister under the provided
-    /// EventReceiverId.
-    bool StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
+    void StopListenAllNetworkEvents(const csp::common::String& EventReceiverId);
 
     /// @brief Get an array of all interests currently registered to the NetworkEventBus
     /// @return csp::common::Array<csp::multiplayer::NetworkEventRegistration> A container of all currently registered registrations.

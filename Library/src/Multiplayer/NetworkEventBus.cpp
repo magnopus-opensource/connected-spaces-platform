@@ -42,12 +42,12 @@ NetworkEventBus::NetworkEventBus(MultiplayerConnection* InMultiplayerConnection,
     MultiplayerConnectionInst = InMultiplayerConnection;
 }
 
-bool NetworkEventBus::ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback)
+void NetworkEventBus::ListenNetworkEvent(NetworkEventRegistration Registration, NetworkEventCallback Callback)
 {
     if (!Callback)
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "Error: Expected non-null callback.");
-        return false;
+        return;
     }
 
     if (RegisteredEvents.find(Registration) != RegisteredEvents.end())
@@ -57,16 +57,15 @@ bool NetworkEventBus::ListenNetworkEvent(NetworkEventRegistration Registration, 
             fmt::format("Attempting to register a duplicate network event receiver with EventReceiverId: {}, Event: {}. Registration denied.",
                 Registration.EventReceiverId, Registration.EventName)
                 .c_str());
-        return false;
+        return;
     }
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose,
         fmt::format("Registering network event. EventReceiverId: {}, Event: {}.", Registration.EventReceiverId, Registration.EventName).c_str());
     RegisteredEvents[Registration] = Callback;
-    return true;
 }
 
-bool NetworkEventBus::StopListenNetworkEvent(NetworkEventRegistration Registration)
+void NetworkEventBus::StopListenNetworkEvent(NetworkEventRegistration Registration)
 {
     if (RegisteredEvents.find(Registration) == RegisteredEvents.end())
     {
@@ -74,14 +73,13 @@ bool NetworkEventBus::StopListenNetworkEvent(NetworkEventRegistration Registrati
             fmt::format("Could not find network event registration with EventReceiverId: {}, Event: {}. Deregistration denied.",
                 Registration.EventReceiverId, Registration.EventName)
                 .c_str());
-        return false;
+        return;
     }
 
     RegisteredEvents.erase(Registration);
-    return true;
 }
 
-bool NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiverId)
+void NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& EventReceiverId)
 {
     std::vector<NetworkEventRegistration> RegistrationsToRemove {};
 
@@ -104,10 +102,7 @@ bool NetworkEventBus::StopListenAllNetworkEvents(const csp::common::String& Even
         LogSystem.LogMsg(csp::common::LogLevel::Log,
             fmt::format("Could not find any network event registration with EventReceiverId: {}. No events were deregistered.", EventReceiverId)
                 .c_str());
-        return false;
     }
-
-    return true;
 }
 
 csp::common::Array<NetworkEventRegistration> NetworkEventBus::AllRegistrations() const
