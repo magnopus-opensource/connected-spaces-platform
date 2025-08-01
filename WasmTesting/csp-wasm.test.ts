@@ -65,7 +65,7 @@ test ('SendReceiveNetworkEvent', async() => {
   // We didn't actually fix it at time of writing, change `ListenNetworkEvent` to return a bool and you'll see what I mean.
   const user = await CreateTestUser();
   await LoginAsUser(user);
-  const spaceId = await CreatePublicTestSpace();;
+  const spaceId = await CreatePublicTestSpace();
 
   const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/SendReceiveNetworkEvent.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId);
 
