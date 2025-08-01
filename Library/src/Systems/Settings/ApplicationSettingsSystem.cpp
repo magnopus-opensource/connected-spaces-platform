@@ -89,14 +89,14 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
     if (ApplicationSettings.ApplicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
-            "The creation of an application setting was issued without a application name. You have to provide an asset application name.");
+            "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
 
     if (ApplicationSettings.Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("The creation of an application setting was issued without a context. You have to provide an asset context.");
+        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
@@ -125,14 +125,14 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
     if (ApplicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
-            "The retrieval of an application setting was issued without a application name. You have to provide an asset application name.");
+            "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
 
     if (Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("The retrieval of an application setting was issued without a context. You have to provide an asset context.");
+        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
@@ -157,14 +157,14 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
     if (ApplicationName.IsEmpty())
     {
         CSP_LOG_ERROR_MSG(
-            "The retrieval of an application setting was issued without a application name. You have to provide an asset application name.");
+            "Your request for application settings was made without a valid application name. A valid application name must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
 
     if (Context.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("The retrieval of an application setting was issued without a context. You have to provide an asset context.");
+        CSP_LOG_ERROR_MSG("Your request for application settings was made without a valid context. A valid application context must be provided.");
         OnCompleteEvent->set_exception(std::make_exception_ptr(std::exception()));
         return OnCompleteTask;
     }
