@@ -48,7 +48,29 @@ solution( "ConnectedSpacesPlatform" )
         CSP.Platforms.AddMac()
         CSP.Platforms.AddIOS()
     end
-    
+
+    postbuildcommands {
+        'if "$(ProjectName)" == "ConnectedSpacesPlatform" goto :run_cppcheck',
+        'if "$(ProjectName)" == "Tests" goto :run_cppcheck',
+        'if "$(ProjectName)" == "MultiplayerTestRunner" goto :run_cppcheck',
+        'goto :skip_cppcheck',
+
+        ':run_cppcheck',
+        'echo "Running Cppcheck analysis for $(ProjectName) - $(Configuration)..."',
+        'setlocal enabledelayedexpansion',
+        'set "DEFS=$(PreprocessorDefinitions)"',
+        'set "INCS=$(AdditionalIncludeDirectories)"',
+        'set "DEFS=!DEFS:;= -D!"',
+        'set "INCS=!INCS:;= -I!"',
+        'cppcheck --enable=all --xml --xml-version=2 --output-file="$(SolutionDir)$(ProjectName)_$(Configuration)_$(Platform).xml" --std=c++17 -D"!DEFS!" -I"!INCS!" "$(ProjectDir)src"',
+        'echo "Cppcheck analysis complete for $(ProjectName) - $(Configuration)."',
+        'goto :eof',
+
+        ':skip_cppcheck',
+        'echo "Skipping Cppcheck analysis for $(ProjectName) - not a specified project to run on."',
+        ':eof'
+    }
+
     -- Visual studio projects
     Project.AddProject()
     
