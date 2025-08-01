@@ -96,6 +96,7 @@ private:
     ~ApplicationSettingsSystem();
 
     /// @brief Asynchronously creates or updates application settings for a specific context.
+    /// This function is made private because it requires elevated permissions and is intended to be used only by internal tests.
     /// Elevated Permissions Required: This function requires elevated permissions to execute successfully. If the user does not possess any of the
     /// necessary roles, the operation will fail with a 403 Forbidden error.
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
