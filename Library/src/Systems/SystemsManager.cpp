@@ -27,6 +27,7 @@
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
+#include "CSP/Systems/Settings/ApplicationSettingsSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Spatial/AnchorSystem.h"
@@ -71,6 +72,8 @@ AnchorSystem* SystemsManager::GetAnchorSystem() { return AnchorSystem; }
 
 csp::common::LogSystem* SystemsManager::GetLogSystem() { return LogSystem; }
 
+ApplicationSettingsSystem* SystemsManager::GetApplicationSettingsSystem() { return ApplicationSettingsSystem; }
+
 SettingsSystem* SystemsManager::GetSettingsSystem() { return SettingsSystem; }
 
 GraphQLSystem* SystemsManager::GetGraphQLSystem() { return GraphQLSystem; }
@@ -108,6 +111,7 @@ SystemsManager::SystemsManager()
     , PointOfInterestSystem(nullptr)
     , AnchorSystem(nullptr)
     , LogSystem(nullptr)
+    , ApplicationSettingsSystem(nullptr)
     , SettingsSystem(nullptr)
     , GraphQLSystem(nullptr)
     , AnalyticsSystem(nullptr)
@@ -153,6 +157,7 @@ void SystemsManager::CreateSystems()
     AssetSystem = new csp::systems::AssetSystem(WebClient, NetworkEventBus, *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
+    ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, *LogSystem);
     SettingsSystem = new csp::systems::SettingsSystem(WebClient, *LogSystem);
     GraphQLSystem = new csp::systems::GraphQLSystem(WebClient, *LogSystem);
     MaintenanceSystem = new csp::systems::MaintenanceSystem(WebClient, *LogSystem);
@@ -181,6 +186,7 @@ void SystemsManager::DestroySystems()
     delete MaintenanceSystem;
     delete GraphQLSystem;
     delete SettingsSystem;
+    delete ApplicationSettingsSystem;
     delete PointOfInterestSystem;
     delete AnchorSystem;
     delete AssetSystem;

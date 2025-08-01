@@ -105,6 +105,13 @@ void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::Strin
     LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
 }
 
+void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified,
+    csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+{
+    // Attempt to log in with an admin account with elevated permissions.
+    LogIn(UserSystem, OutUserId, AdminAccountEmail(), AdminAccountPassword(), AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
+}
+
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode)
 {
     auto [Result] = Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await(RequestPredicate);
