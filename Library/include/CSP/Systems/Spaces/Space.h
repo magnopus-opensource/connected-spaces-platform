@@ -118,6 +118,7 @@ class CSP_API Space : public BasicSpace
 public:
     Space() = default;
     Space(const Space& Other) = default;
+    Space& operator=(const Space& other) = default;
 
     /** @name Data Values
      *   A Space contains some basic information that define it, this is a 1:1 mapping to a UserService Group
