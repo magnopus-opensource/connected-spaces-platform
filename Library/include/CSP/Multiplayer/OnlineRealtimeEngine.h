@@ -167,12 +167,12 @@ public:
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false if the entity already existed in the selection and thus could not be added.
-    virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
 
     /// @brief Removes an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully removed, false if the entity did not exist in the selection and thus could not be removed.
-    virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
+    CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override;
 
     /***** ENTITY ACCESS *****************************************************/
 
