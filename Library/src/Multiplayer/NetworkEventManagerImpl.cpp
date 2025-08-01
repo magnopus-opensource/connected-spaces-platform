@@ -38,7 +38,7 @@ NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultip
 {
 }
 
-void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection* InConnection) { Connection = InConnection; }
+void NetworkEventManagerImpl::SetConnection(csp::multiplayer::ISignalRConnection& InConnection) { Connection = &InConnection; }
 
 void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName,
     const csp::common::Array<csp::common::ReplicatedValue>& Arguments, uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)

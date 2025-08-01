@@ -16,6 +16,8 @@
 #pragma once
 
 #include "../../Library/src/Multiplayer/SignalR/ISignalRConnection.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
+#include "signalrclient/signalr_value.h"
 #include <gmock/gmock.h>
 
 class SignalRConnectionMock : public csp::multiplayer::ISignalRConnection
@@ -26,7 +28,7 @@ public:
     MOCK_METHOD(csp::multiplayer::ISignalRConnection::ConnectionState, GetConnectionState, (), (const, override));
     MOCK_METHOD(std::string, GetConnectionId, (), (const, override));
     MOCK_METHOD(void, SetDisconnected, (const std::function<void(std::exception_ptr)>&), (override));
-    MOCK_METHOD(void, On, (const std::string&, const MethodInvokedHandler&), (override));
+    MOCK_METHOD(bool, On, (const std::string&, const MethodInvokedHandler&, csp::common::LogSystem&), (override));
     MOCK_METHOD((async::task<std::tuple<signalr::value, std::exception_ptr>>), Invoke,
         (const std::string&, const signalr::value&, std::function<void(const signalr::value&, std::exception_ptr)>), (override));
     MOCK_METHOD(void, Send, (const std::string&, const signalr::value&, std::function<void(std::exception_ptr)>), (override));

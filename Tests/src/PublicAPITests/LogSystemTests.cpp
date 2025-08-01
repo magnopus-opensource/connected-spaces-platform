@@ -681,4 +681,6 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
     }
 
     EXPECT_TRUE(LogConfirmed);
+
+    csp::CSPFoundation::Shutdown();
 }

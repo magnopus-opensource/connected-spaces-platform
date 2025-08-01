@@ -18,7 +18,7 @@
 
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "ClientProxy.h"
 
 namespace csp::common
@@ -30,7 +30,7 @@ namespace csp::multiplayer
 {
 
 class IClientSelectionCriteria;
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 class SpaceEntity;
 
 enum class ElectionState
@@ -42,29 +42,29 @@ enum class ElectionState
 
 class ClientElectionManager
 {
+    typedef std::function<void(bool)> ScriptLeaderReadyCallback;
+
     /** @cond DO_NOT_DOCUMENT */
     friend class ClientProxy;
-    friend class SpaceEntitySystem;
+    friend class OnlineRealtimeEngine;
     friend class ClientElectionEventHandler;
     /** @endcond */
 
 public:
-    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
+    ClientElectionManager(OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
     ~ClientElectionManager();
 
-    void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
+    void OnConnect(const OnlineRealtimeEngine::SpaceEntityList& Avatars, const OnlineRealtimeEngine::SpaceEntityList& Objects);
     void OnDisconnect();
 
-    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
+    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
 
-    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
-    void OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
-    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
+    void OnClientAdd(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
+    void OnClientRemove(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const OnlineRealtimeEngine::SpaceEntityList& Objects);
+    void OnObjectRemove(const SpaceEntity* Object, const OnlineRealtimeEngine::SpaceEntityList& Objects);
 
     void Update();
-
-    SpaceEntitySystem* GetSpaceEntitySystem();
 
     bool IsLocalClientLeader() const;
 
@@ -106,10 +106,10 @@ private:
 
     void SetElectionState(ElectionState NewState);
 
-    void SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback);
+    void SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback);
 
 private:
-    SpaceEntitySystem* SpaceEntitySystemPtr;
+    OnlineRealtimeEngine* OnlineRealtimeEnginePtr;
     csp::common::LogSystem& LogSystem;
     class ClientElectionEventHandler* EventHandler;
 
@@ -122,7 +122,7 @@ private:
 
     ClientProxy* Leader;
 
-    csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
+    ScriptLeaderReadyCallback LeaderReadyCallback;
     csp::common::IJSScriptRunner& RemoteScriptRunner;
 };
 

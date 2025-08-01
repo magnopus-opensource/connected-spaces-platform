@@ -400,10 +400,14 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
 
 bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
 {
-    if (IsInitialised)
-    {
-        return false;
-    }
+    // Nullptr means the signalRConnection will be internally instantiated
+    return InitialiseWithInject(EndpointRootURI, InTenant, nullptr);
+}
+
+bool CSPFoundation::InitialiseWithInject(
+    const csp::common::String& EndpointRootURI, const csp::common::String& InTenant, csp::multiplayer::ISignalRConnection* SignalRInject)
+{
+    assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
 
     Tenant = new csp::common::String(InTenant);
 
@@ -412,7 +416,7 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
     DeviceId = new csp::common::String("");
     ClientUserAgentString = new csp::common::String("");
 
-    csp::systems::SystemsManager::Instantiate();
+    csp::systems::SystemsManager::Instantiate(SignalRInject);
 
     *DeviceId = LoadDeviceId().c_str();
     IsInitialised = true;

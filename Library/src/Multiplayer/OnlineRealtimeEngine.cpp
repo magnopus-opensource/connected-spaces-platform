@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 
 #include "CSP/Common/List.h"
 #include "CSP/Common/LoginState.h"
@@ -106,15 +106,15 @@ constexpr uint64_t ENTITY_PAGE_LIMIT = 100;
 class SpaceEntityEventHandler : public csp::events::EventListener
 {
 public:
-    SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem);
+    SpaceEntityEventHandler(OnlineRealtimeEngine* EntitySystem);
 
     void OnEvent(const csp::events::Event& InEvent) override;
 
 private:
-    SpaceEntitySystem* EntitySystem;
+    OnlineRealtimeEngine* EntitySystem;
 };
 
-SpaceEntityEventHandler::SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem)
+SpaceEntityEventHandler::SpaceEntityEventHandler(OnlineRealtimeEngine* EntitySystem)
     : EntitySystem(EntitySystem)
 {
 }
@@ -181,11 +181,11 @@ class DirtyComponent;
 
 using namespace std::chrono;
 
-SpaceEntitySystem::SpaceEntitySystem()
+OnlineRealtimeEngine::OnlineRealtimeEngine()
     : EntitiesLock(new std::recursive_mutex)
     , MultiplayerConnectionInst(nullptr)
-    , Connection(nullptr)
     , LogSystem(nullptr)
+    , ScriptBinding(nullptr)
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::mutex)
@@ -201,11 +201,10 @@ SpaceEntitySystem::SpaceEntitySystem()
 {
 }
 
-SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem,
+OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerConnection, csp::common::LogSystem& LogSystem,
     csp::multiplayer::NetworkEventBus& NetworkEventBus, csp::common::IJSScriptRunner& ScriptRunner)
     : EntitiesLock(new std::recursive_mutex)
-    , MultiplayerConnectionInst(InMultiplayerConnection)
-    , Connection(nullptr)
+    , MultiplayerConnectionInst(&InMultiplayerConnection)
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
@@ -220,12 +219,24 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
 {
-    Initialise();
+    EnableLeaderElection();
+
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 }
 
-SpaceEntitySystem::~SpaceEntitySystem()
+OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
-    Shutdown();
+
+    DisableLeaderElection();
+    LocalDestroyAllEntities();
+
+    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
     delete (EventHandler);
 
@@ -238,61 +249,28 @@ SpaceEntitySystem::~SpaceEntitySystem()
     delete (PendingIncomingUpdates);
 }
 
-void SpaceEntitySystem::Initialise()
-{
-    if (IsInitialised)
-    {
-        return;
-    }
+OnlineRealtimeEngine::SpaceEntityQueue* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
 
-    EnableLeaderElection();
+MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
 
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *LogSystem, *ScriptRunner);
-
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-
-    IsInitialised = true;
-}
-
-void SpaceEntitySystem::Shutdown()
-{
-    if (!IsInitialised)
-    {
-        return;
-    }
-
-    DisableLeaderElection();
-    LocalDestroyAllEntities();
-
-    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
-
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-
-    IsInitialised = false;
-}
-
-SpaceEntitySystem::SpaceEntityQueue* SpaceEntitySystem::GetPendingAdds() { return PendingAdds; }
-
-MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
+csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Online; }
 
 namespace
 {
-    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::LoginState& LoginState,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
+    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId,
+        csp::multiplayer::OnlineRealtimeEngine& OnlineRealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
         uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
         bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
         csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
-        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&SpaceEntitySystem, ScriptRunner,
+        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&OnlineRealtimeEngine, ScriptRunner,
             &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
         AvatarComponent->SetState(AvatarState);
         AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
-        AvatarComponent->SetUserId(LoginState.UserId);
+        AvatarComponent->SetUserId(UserId);
         AvatarComponent->SetIsVisible(IsVisible);
 
         return NewAvatar;
@@ -300,7 +278,7 @@ namespace
 
 }
 
-async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
+async::shared_task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
 {
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
     // I suspect literally no one knows if this is still neccesary.
@@ -308,7 +286,8 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
     const std::vector Arr { Param1 };
     const signalr::value Params(Arr);
 
-    return Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
+    return MultiplayerConnectionInst->GetSignalRConnection()
+        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
@@ -319,13 +298,13 @@ async::shared_task<uint64_t> SpaceEntitySystem::RemoteGenerateNewAvatarId()
         .share();
 }
 
-std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SpaceEntitySystem::SendNewAvatarObjectMessage(
-    const csp::common::String& Name, const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible,
+std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(
+    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
     const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode)
 {
-    return [Name, LoginState, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
+    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(LoginState, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
+        auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
@@ -334,16 +313,16 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return Connection->Invoke(
+        return MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
             MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get());
     };
 }
 
-std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> SpaceEntitySystem::CreateNewLocalAvatar(
-    const csp::common::String& Name, const csp::common::LoginState& LoginState, const SpaceTransform& Transform, bool IsVisible,
+std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> OnlineRealtimeEngine::CreateNewLocalAvatar(
+    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
     const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback)
 {
-    return [Name, LoginState, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
+    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
                std::tuple<async::shared_task<uint64_t>, async::task<void>> NetworkIdFromChain)
     {
         uint64_t NetworkId = std::get<0>(NetworkIdFromChain).get();
@@ -366,7 +345,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(LoginState, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
+        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
             Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -384,9 +363,9 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
     };
 }
 
-void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const csp::common::LoginState& LoginState,
-    const SpaceTransform& InSpaceTransform, bool IsVisible, AvatarState InState, const csp::common::String& InAvatarId,
-    AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
+    const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
+    const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
 
     // Ask the server for an avatar Id via "GenerateObjectIds"
@@ -394,14 +373,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const cs
 
     // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
     async::task<void> SerializeAndSendChain
-        = GetAvatarNetworkIdChain
-              .then(SendNewAvatarObjectMessage(InName, LoginState, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode))
+        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
               .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 
     // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
-        .then(CreateNewLocalAvatar(InName, LoginState, InSpaceTransform, IsVisible, InAvatarId, InState, InAvatarPlayMode, Callback))
+        .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
             [Callback, LogSystem = this->LogSystem](const std::exception& Except)
             {
@@ -411,12 +389,79 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const cs
             *LogSystem));
 }
 
-void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
-    CreateObjectInternal(InName, nullptr, InSpaceTransform, Callback);
+    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentID, Callback, &LogSystem = this->LogSystem](
+                                              const signalr::value& Result, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
+                std::rethrow_exception(Except);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
+            Callback(nullptr);
+        }
+
+        auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
+        auto* NewObject = new SpaceEntity(
+            this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+
+        if (ParentID.HasValue())
+        {
+            NewObject->SetParentId(static_cast<uint64_t>(*ParentID));
+        }
+
+        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
+
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+
+        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
+            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        {
+            try
+            {
+                if (Except)
+                {
+                    std::rethrow_exception(Except);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
+                Callback(nullptr);
+            }
+
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+            ResolveEntityHierarchy(NewObject);
+
+            Entities.Append(NewObject);
+            Objects.Append(NewObject);
+            Callback(NewObject);
+        };
+
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+            LocalSendCallback);
+    };
+
+    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
+    const signalr::value Param1((uint64_t)1ULL);
+    const std::vector Arr { Param1 };
+
+    const signalr::value Params(Arr);
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
 }
 
-void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
+void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
 {
     const auto& Children = Entity->GetChildEntities()->ToArray();
 
@@ -500,11 +545,11 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     LocalDestroyEntity(Entity);
 
     const std::vector InvokeArguments = { signalr::value(ObjectPatches) };
-    Connection->Invoke(
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), InvokeArguments, LocalCallback);
 }
 
-void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
+void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
 {
     if (Entity != nullptr)
     {
@@ -517,7 +562,7 @@ void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
     }
 }
 
-SpaceEntity* SpaceEntitySystem::FindSpaceEntity(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceEntity(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
@@ -532,7 +577,7 @@ SpaceEntity* SpaceEntitySystem::FindSpaceEntity(const csp::common::String& InNam
     return nullptr;
 }
 
-SpaceEntity* SpaceEntitySystem::FindSpaceEntityById(uint64_t EntityId)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
@@ -547,7 +592,7 @@ SpaceEntity* SpaceEntitySystem::FindSpaceEntityById(uint64_t EntityId)
     return nullptr;
 }
 
-SpaceEntity* SpaceEntitySystem::FindSpaceAvatar(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceAvatar(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
@@ -562,7 +607,7 @@ SpaceEntity* SpaceEntitySystem::FindSpaceAvatar(const csp::common::String& InNam
     return nullptr;
 }
 
-SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InName)
+SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
@@ -577,20 +622,7 @@ SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InNam
     return nullptr;
 }
 
-void SpaceEntitySystem::RegisterEntityScriptAsModule(SpaceEntity* NewEntity)
-{
-    EntityScript& Script = NewEntity->GetScript();
-    Script.RegisterSourceAsModule();
-}
-
-void SpaceEntitySystem::BindNewEntityToScript(SpaceEntity* NewEntity)
-{
-    EntityScript& Script = NewEntity->GetScript();
-    Script.Bind();
-    Script.Invoke();
-}
-
-void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
     if (SpaceEntityCreatedCallback)
     {
@@ -600,140 +632,153 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
     SpaceEntityCreatedCallback = std::move(Callback);
 }
 
-void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Callback)
+bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
 {
-    if (InitialEntitiesRetrievedCallback)
+    if (!SelectedEntities.Contains(Entity))
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
+        SelectedEntities.Append(Entity);
+        return true;
     }
-
-    InitialEntitiesRetrievedCallback = std::move(Callback);
+    return false;
 }
 
-void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
+bool OnlineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
+{
+    if (SelectedEntities.Contains(Entity))
+    {
+        SelectedEntities.RemoveItem(Entity);
+        return true;
+    }
+    return false;
+}
+
+void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback)
 {
     if (ScriptSystemReadyCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "ScriptLeaderReadyCallback has already been set. Previous callback overwritten.");
     }
 
     ScriptSystemReadyCallback = std::move(Callback);
 
     if (ElectionManager)
     {
-        ElectionManager->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
+        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
     }
 }
 
-SpaceEntity* SpaceEntitySystem::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem)
+namespace
 {
-    // Create object message from signalr value
+    // You should lock the entities mutex before calling this, and probably have processed entity operations
+    void InitialiseEntityScripts(csp::multiplayer::OnlineRealtimeEngine::SpaceEntityList& Entities)
+    {
+        // Register all scripts for import
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            EntityScript& Script = Entities[i]->GetScript();
+            Script.RegisterSourceAsModule();
+        }
+
+        // Bind and invoke all scripts
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
+            {
+                Script.Bind();
+                Script.Invoke();
+            }
+        }
+
+        // Tell all scripts that all entities are now loaded
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            EntityScript& Script = Entities[i]->GetScript();
+            Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+        }
+    }
+
+    void FireSpaceEntityCreatedCallback(
+        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
+    {
+        if (SpaceEntityCreatedCallback)
+        {
+            SpaceEntityCreatedCallback(SpaceEntity);
+        }
+        else
+        {
+            LogSystem.LogMsg(
+                common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+        }
+    }
+}
+
+SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage)
+{
+    //  Create object message from signalr value
     mcs::ObjectMessage Message;
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(EntitySystem, *ScriptRunner, LogSystem);
+    const auto NewEntity = new SpaceEntity(this, *ScriptRunner, LogSystem);
     NewEntity->FromObjectMessage(Message);
 
-    EntitySystem->AddEntity(NewEntity);
+    AddEntity(NewEntity);
 
     return NewEntity;
 }
 
-void SpaceEntitySystem::BindOnObjectMessage()
+void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
 {
-    Connection->On("OnObjectMessage",
-        [this](const signalr::value& Params)
-        {
-            // Params is an array of all params sent, so grab the first
-            auto& EntityMessage = Params.as_array()[0];
+    // Params is an array of all params sent, so grab the first
+    auto& EntityMessage = Params.as_array()[0];
 
-            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
+    SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
 
-            if (SpaceEntityCreatedCallback)
-            {
-                SpaceEntityCreatedCallback(NewEntity);
-            }
-            else
-            {
-                LogSystem->LogMsg(
-                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
-            }
-        });
+    if (NewEntity)
+    {
+        FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+    }
 }
 
-void SpaceEntitySystem::BindOnObjectPatch()
+void OnlineRealtimeEngine::OnObjectPatch(const signalr::value& Params)
 {
-    Connection->On("OnObjectPatch",
-        [this](const signalr::value& Params)
-        {
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-            // Params is an array of all params sent, so grab the first
-            auto& EntityMessage = Params.as_array()[0];
+    // Params is an array of all params sent, so grab the first
+    auto& EntityMessage = Params.as_array()[0];
 
-            PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
-        });
+    PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
 }
 
-void SpaceEntitySystem::BindOnRequestToSendObject()
+void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 {
-    Connection->On("OnRequestToSendObject",
-        [this](const signalr::value& Params)
-        {
-            const uint64_t EntityID = Params.as_array()[0].as_uinteger();
+    const uint64_t EntityID = Params.as_array()[0].as_uinteger();
 
-            // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
-            if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
-            {
-                mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
+    // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
+    if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
+    {
+        mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
 
-                SignalRSerializer Serializer;
-                Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
+        SignalRSerializer Serializer;
+        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
-                const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except)
-                { HandleException(Except, "Failed to send server requested object."); };
+        const std::function LocalSendCallback
+            = [this](const signalr::value&, const std::exception_ptr& Except) { HandleException(Except, "Failed to send server requested object."); };
 
-                Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE),
-                    Serializer.Get(), LocalSendCallback);
-            }
-            else
-            {
-                std::vector<signalr::value> const InvokeArguments = { EntityID };
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+            LocalSendCallback);
+    }
+    else
+    {
+        std::vector<signalr::value> const InvokeArguments = { EntityID };
 
-                Connection->Invoke(
-                    MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
-            }
-        });
+        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
+    }
 }
 
-void SpaceEntitySystem::BindOnRequestToDisconnect() const
-{
-    Connection->On("OnRequestToDisconnect",
-        [](const signalr::value& Params)
-        {
-            const std::string Reason = Params.as_array()[0].as_string();
-
-            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
-            DisconnectEvent->AddString("Reason", Reason.c_str());
-            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
-        });
-}
-
-void SpaceEntitySystem::SetConnection(csp::multiplayer::ISignalRConnection* InConnection)
-{
-    Connection = InConnection;
-
-    BindOnObjectMessage();
-
-    BindOnObjectPatch();
-
-    BindOnRequestToSendObject();
-
-    BindOnRequestToDisconnect();
-}
-
-void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
+void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
 {
     std::vector<signalr::value> ParamsVec;
     ParamsVec.push_back(signalr::value(true)); // excludeClientOwned
@@ -742,12 +787,14 @@ void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::functio
     ParamsVec.push_back(signalr::value((uint64_t)Limit)); // limit
     const auto Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
 }
 
-std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem::CreateRetrieveAllEntitiesCallback(int Skip)
+std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
+    int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
     {
         HandleException(Except, "Failed to retrieve paged entities.");
 
@@ -757,45 +804,81 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 
         for (const auto& EntityMessage : Items)
         {
-            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
-
-            if (SpaceEntityCreatedCallback)
-            {
-                SpaceEntityCreatedCallback(NewEntity);
-            }
-            else
-            {
-                LogSystem->LogMsg(
-                    common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
-            }
+            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
+            FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
         }
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
 
         if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
         {
-            GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount));
+            GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount, FetchCompleteCallback));
         }
         else
         {
-            OnAllEntitiesCreated();
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
+            // Ensure entity list is up to date
+            ProcessPendingEntityOperations();
+
+            InitialiseEntityScripts(Entities);
+            EnableEntityTick = true;
+
+            // Start leader election
+            if (IsLeaderElectionEnabled())
+            {
+                // Start listening for election events
+                //
+                // If we are the first client to connect then this
+                // will also set this client as the leader
+                ElectionManager->OnConnect(Avatars, Objects);
+            }
+            else
+            {
+                DetermineScriptOwners();
+            }
+
+            if (FetchCompleteCallback)
+            {
+                FetchCompleteCallback(CurrentEntityCount);
+            }
         }
     };
 
     return Callback;
 };
 
-void SpaceEntitySystem::RetrieveAllEntities()
+void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
+    const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback)
 {
-    if (Connection == nullptr)
+    /* Refresh the multiplayer connection to force the scopes to change
+     * This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
+    auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
+    auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
+
+    /* Investigate whether this needs to happen at all, it 's overwhelmingly complex... If you' re doing anything AOI,
+     * this probably wants rewritten or removed along with your work. */
+    RefreshMultiplayerConnectionToEnactScopeChange(SpaceId, RefreshMultiplayerConnectionEvent);
+
+    RefreshMultiplayerConnectionContinuation.then(async::inline_scheduler(),
+        [this, FetchStartedCallback]()
+        {
+            this->RetrieveAllEntities(EntityFetchCompleteCallback);
+            FetchStartedCallback();
+        });
+}
+
+void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
+{
+    if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))
     {
         return;
     }
 
-    GetEntitiesPaged(0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0)); // Get at most ENTITY_PAGE_LIMIT entities at a time
+    GetEntitiesPaged(
+        0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0, FetchCompleteCallback)); // Get at most ENTITY_PAGE_LIMIT entities at a time
 }
 
-void SpaceEntitySystem::LocalDestroyAllEntities()
+void OnlineRealtimeEngine::LocalDestroyAllEntities()
 {
     LockEntityUpdate();
 
@@ -833,7 +916,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
     UnlockEntityUpdate();
 }
 
-void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
+void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
     if (EntityToUpdate->GetDirtyComponents().Size() == 0 && EntityToUpdate->GetDirtyProperties().Size() == 0
@@ -859,7 +942,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     PendingOutgoingUpdateUniqueSet->emplace(EntityToUpdate);
 }
 
-void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
+void OnlineRealtimeEngine::RemoveEntity(SpaceEntity* EntityToRemove)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     PendingRemoves->emplace_back(EntityToRemove);
@@ -868,7 +951,7 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
     PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
 }
 
-void SpaceEntitySystem::TickEntities()
+void OnlineRealtimeEngine::TickEntities()
 {
     ProcessPendingEntityOperations();
 
@@ -894,65 +977,12 @@ void SpaceEntitySystem::TickEntities()
     }
 }
 
-void SpaceEntitySystem::MarkEntityForUpdate(SpaceEntity* Entity)
+void OnlineRealtimeEngine::MarkEntityForUpdate(SpaceEntity* Entity)
 {
     std::scoped_lock TickEntitiesLocker(*TickEntitiesLock);
 
     // Duplicates can be added here and will be ignored when sending updates
     TickUpdateEntities.push_back(Entity);
-}
-
-void SpaceEntitySystem::OnAllEntitiesCreated()
-{
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    // Ensure entity list is up to date
-    ProcessPendingEntityOperations();
-
-    // Register all scripts for import
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.RegisterSourceAsModule();
-    }
-
-    // Bind and invoke all scripts
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
-        {
-            Script.Bind();
-            Script.Invoke();
-        }
-    }
-
-    // Tell all scripts that all entities are now loaded
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        EntityScript& Script = Entities[i]->GetScript();
-        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
-    }
-
-    if (IsLeaderElectionEnabled())
-    {
-        // Start listening for election events
-        //
-        // If we are the first client to connect then this
-        // will also set this client as the leader
-        ElectionManager->OnConnect(Avatars, Objects);
-    }
-    else
-    {
-        DetermineScriptOwners();
-    }
-
-    // Enable entity tick events
-    EnableEntityTick = true;
-
-    if (InitialEntitiesRetrievedCallback)
-    {
-        InitialEntitiesRetrievedCallback(true);
-    }
 }
 
 // @brief Simple script ownership
@@ -965,7 +995,7 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 // when the owner will need to be re-assigned, although ownership will also
 // be claimed by anyone who interacts with an object
 //
-void SpaceEntitySystem::DetermineScriptOwners()
+void OnlineRealtimeEngine::DetermineScriptOwners()
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
@@ -973,7 +1003,7 @@ void SpaceEntitySystem::DetermineScriptOwners()
     }
 }
 
-void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
+void OnlineRealtimeEngine::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
     if (Deletion->GetParentEntity())
     {
@@ -987,7 +1017,7 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
     }
 }
 
-void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
+void OnlineRealtimeEngine::ResolveEntityHierarchy(SpaceEntity* Entity)
 {
     if (Entity->GetParentId().HasValue())
     {
@@ -1011,7 +1041,7 @@ void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
     Entity->ResolveParentChildRelationship();
 }
 
-bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
+bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
     for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
     {
@@ -1024,7 +1054,7 @@ bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
     return false;
 }
 
-void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
+void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
@@ -1035,7 +1065,7 @@ void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
     }
 }
 
-void SpaceEntitySystem::TickEntityScripts()
+void OnlineRealtimeEngine::TickEntityScripts()
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
@@ -1069,37 +1099,7 @@ void SpaceEntitySystem::TickEntityScripts()
     }
 }
 
-bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity)
-{
-    if (SelectedState && !Entity->IsSelected())
-    {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId()))
-        {
-            if (!SelectedEntities.Contains(Entity))
-            {
-                SelectedEntities.Append(Entity);
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    if (!SelectedState && Entity->GetSelectingClientID() == MultiplayerConnectionInst->GetClientId())
-    {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, 0))
-        {
-            SelectedEntities.RemoveItem(Entity);
-            return true;
-        }
-
-        return false;
-    }
-
-    return false;
-}
-
-void SpaceEntitySystem::EnableLeaderElection()
+void OnlineRealtimeEngine::EnableLeaderElection()
 {
     if (ElectionManager == nullptr)
     {
@@ -1107,7 +1107,7 @@ void SpaceEntitySystem::EnableLeaderElection()
     }
 }
 
-void SpaceEntitySystem::DisableLeaderElection()
+void OnlineRealtimeEngine::DisableLeaderElection()
 {
     if (ElectionManager != nullptr)
     {
@@ -1116,9 +1116,9 @@ void SpaceEntitySystem::DisableLeaderElection()
     }
 }
 
-bool SpaceEntitySystem::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr); }
+bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr); }
 
-uint64_t SpaceEntitySystem::GetLeaderId() const
+uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
     if (ElectionManager != nullptr && ElectionManager->GetLeader() != nullptr)
     {
@@ -1130,13 +1130,13 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
     }
 }
 
-bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
+bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 
-void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
+void OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
-const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
 
-void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
+void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
     csp::common::String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
 {
     // A refactor to a regular continuation would be appreciated ... assuming we need to keep this method at all.
@@ -1144,7 +1144,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
     MultiplayerConnectionInst->StopListening(
-        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent, this](
+        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent](
             csp::multiplayer::ErrorCode Error)
         {
             if (Error != csp::multiplayer::ErrorCode::None)
@@ -1155,7 +1155,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
             LogSystem->LogMsg(csp::common::LogLevel::Log, "MultiplayerConnection->StopListening success");
             MultiplayerConnection->SetScopes(SpaceId,
-                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem, this](csp::multiplayer::ErrorCode Error)
+                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem](csp::multiplayer::ErrorCode Error)
                 {
                     LogSystem->LogMsg(csp::common::LogLevel::Verbose, "SetScopes callback");
                     if (Error != csp::multiplayer::ErrorCode::None)
@@ -1170,12 +1170,9 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
 
                     MultiplayerConnection->StartListening()()
                         .then(async::inline_scheduler(),
-                            [RefreshMultiplayerContinuationEvent, &LogSystem, this]()
+                            [RefreshMultiplayerContinuationEvent, &LogSystem]()
                             {
                                 LogSystem->LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                // TODO: Support getting errors from RetrieveAllEntities
-                                this->RetrieveAllEntities();
 
                                 // Success!
                                 RefreshMultiplayerContinuationEvent->set({});
@@ -1194,7 +1191,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
         });
 }
 
-bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
+bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
 {
     if (!IsLeaderElectionEnabled())
     {
@@ -1209,7 +1206,7 @@ bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
     }
 }
 
-void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
+void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
 {
     // Run script on a remote leader...
     LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("RunScriptRemotely Script='{}'", ScriptText).c_str());
@@ -1222,60 +1219,60 @@ void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::
     }
 }
 
-void SpaceEntitySystem::ClaimScriptOwnership(SpaceEntity* Entity) const
+void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
     const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
     EntityScript& Script = Entity->GetScript();
     Script.SetOwnerId(ClientId);
 }
 
-void SpaceEntitySystem::LockEntityUpdate() const { EntitiesLock->lock(); }
+void OnlineRealtimeEngine::LockEntityUpdate() const { EntitiesLock->lock(); }
 
-void SpaceEntitySystem::UnlockEntityUpdate() const { EntitiesLock->unlock(); }
+void OnlineRealtimeEngine::UnlockEntityUpdate() const { EntitiesLock->unlock(); }
 
-size_t SpaceEntitySystem::GetNumEntities() const
+size_t OnlineRealtimeEngine::GetNumEntities() const
 {
     std::scoped_lock<std::recursive_mutex> EntitiesLocker(*EntitiesLock);
     return Entities.Size();
 }
 
-size_t SpaceEntitySystem::GetNumAvatars() const
+size_t OnlineRealtimeEngine::GetNumAvatars() const
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return Avatars.Size();
 }
 
-size_t SpaceEntitySystem::GetNumObjects() const
+size_t OnlineRealtimeEngine::GetNumObjects() const
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return Objects.Size();
 }
 
-SpaceEntity* SpaceEntitySystem::GetEntityByIndex(const size_t EntityIndex)
+SpaceEntity* OnlineRealtimeEngine::GetEntityByIndex(const size_t EntityIndex)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return Entities[EntityIndex];
 }
 
-SpaceEntity* SpaceEntitySystem::GetAvatarByIndex(const size_t AvatarIndex)
+SpaceEntity* OnlineRealtimeEngine::GetAvatarByIndex(const size_t AvatarIndex)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return Avatars[AvatarIndex];
 }
 
-SpaceEntity* SpaceEntitySystem::GetObjectByIndex(const size_t ObjectIndex)
+SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t ObjectIndex)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     return Objects[ObjectIndex];
 }
 
-void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
+void OnlineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     PendingAdds->emplace_back(EntityToAdd);
 }
 
-void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
+void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {
     const std::function LocalCallback = [&LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
     {
@@ -1308,11 +1305,11 @@ void SpaceEntitySystem::SendPatches(const csp::common::List<SpaceEntity*> Pendin
     }
     Serializer.EndWriteArray();
 
-    Connection->Invoke(
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), Serializer.Get(), LocalCallback);
 }
 
-void SpaceEntitySystem::ProcessPendingEntityOperations()
+void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
     csp::common::List<SpaceEntity*> PendingEntities;
@@ -1419,7 +1416,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
     }
 }
 
-void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
+void OnlineRealtimeEngine::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
     if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
     {
@@ -1444,7 +1441,7 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
     }
 }
 
-void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
+void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
 {
     assert(Entities.Contains(EntityToRemove));
 
@@ -1475,7 +1472,7 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
     delete (EntityToRemove);
 }
 
-void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
+void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1485,7 +1482,7 @@ void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntity
     }
 }
 
-void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
+void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1493,7 +1490,7 @@ void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEnt
     }
 }
 
-void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
+void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
 {
     if (ElectionManager != nullptr)
     {
@@ -1501,7 +1498,7 @@ void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntity
     }
 }
 
-void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
+void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
 {
     if (ElectionManager != nullptr)
     {
@@ -1509,77 +1506,7 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
     }
 }
 
-void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
-    const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
-{
-    const std::function LocalIDCallback = [this, InName, InParent, InSpaceTransform, Callback, &LogSystem = this->LogSystem](
-                                              const signalr::value& Result, const std::exception_ptr& Except)
-    {
-        try
-        {
-            if (Except)
-            {
-                std::rethrow_exception(Except);
-            }
-        }
-        catch (const std::exception& e)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
-            Callback(nullptr);
-        }
-
-        auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, InName, InSpaceTransform,
-            MultiplayerConnectionInst->GetClientId(), true, true);
-
-        if (InParent.HasValue())
-        {
-            NewObject->SetParentId(*InParent);
-        }
-
-        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
-
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
-
-        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-        {
-            try
-            {
-                if (Except)
-                {
-                    std::rethrow_exception(Except);
-                }
-            }
-            catch (const std::exception& e)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
-                Callback(nullptr);
-            }
-
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-            ResolveEntityHierarchy(NewObject);
-
-            Entities.Append(NewObject);
-            Objects.Append(NewObject);
-            Callback(NewObject);
-        };
-
-        Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-            LocalSendCallback);
-    };
-
-    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
-
-    const signalr::value Params(Arr);
-    Connection->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
-}
-
-void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
+void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
     mcs::ObjectPatch Patch;
     SignalRDeserializer Deserializer { *EntityMessage };
@@ -1638,7 +1565,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
     }
 }
 
-void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
+void OnlineRealtimeEngine::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
 {
     try
     {

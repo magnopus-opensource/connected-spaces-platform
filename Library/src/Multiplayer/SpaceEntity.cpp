@@ -42,8 +42,8 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Common/Convert.h"
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
@@ -109,7 +109,7 @@ SpaceEntity::SpaceEntity()
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
+SpaceEntity::SpaceEntity(OnlineRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
@@ -132,7 +132,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem, csp::common::IJSScri
 {
 }
 
-SpaceEntity::SpaceEntity(SpaceEntitySystem* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+SpaceEntity::SpaceEntity(OnlineRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
     SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
     bool IsTransferable, bool IsPersistent)
     : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
@@ -378,8 +378,6 @@ csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
-SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem() { return EntitySystem; }
-
 void SpaceEntity::SetParentId(uint64_t InParentId)
 {
     // If the current parentid differs from the input
@@ -405,7 +403,7 @@ SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
 
 void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-    EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
+    EntitySystem->CreateEntity(InName, InSpaceTransform, GetId(), Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
@@ -871,13 +869,13 @@ uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
 bool SpaceEntity::Select()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return EntitySystem->SetSelectionStateOfEntity(true, this);
+    return InternalSetSelectionStateOfEntity(true);
 }
 
 bool SpaceEntity::Deselect()
 {
     std::scoped_lock EntitiesLocker(EntityMutexLock);
-    return EntitySystem->SetSelectionStateOfEntity(false, this);
+    return InternalSetSelectionStateOfEntity(false);
 }
 
 bool SpaceEntity::IsModifiable() const
@@ -953,37 +951,43 @@ void SpaceEntity::Unlock()
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
 
-bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
+bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 {
+    uint64_t LocalClientId = EntitySystem->GetMultiplayerConnectionInstance()->GetClientId();
     if (SelectedState)
     {
         if (!IsSelected())
         {
             DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
 
-            if (SelectedId != ClientID)
+            if (SelectedId != LocalClientId)
             {
-                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(ClientID);
+                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(LocalClientId);
             }
 
-            SelectedId = ClientID;
+            SelectedId = LocalClientId;
 
-            return true;
+            return EntitySystem->AddEntityToSelectedEntities(this);
         }
         return false;
     }
 
-    if (IsSelected())
+    if (LocalClientId == GetSelectingClientID())
     {
-        DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
-
-        if (SelectedId != 0)
+        if (IsSelected())
         {
-            DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(0);
+            DirtyProperties.Remove(COMPONENT_KEY_VIEW_SELECTEDCLIENTID);
+
+            if (SelectedId != 0)
+            {
+                DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = static_cast<int64_t>(0);
+            }
+
+            SelectedId = 0;
+            return EntitySystem->RemoveEntityFromSelectedEntities(this);
         }
 
-        SelectedId = 0;
-        return true;
+        return false;
     }
 
     return false;
@@ -1064,7 +1068,7 @@ void SpaceEntity::ResolveParentChildRelationship()
         }
 
         // Set our new parent
-        Parent = GetSpaceEntitySystem()->FindSpaceEntityById(*ParentId);
+        Parent = EntitySystem->FindSpaceEntityById(*ParentId);
 
         if (Parent == nullptr)
         {

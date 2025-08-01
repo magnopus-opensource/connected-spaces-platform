@@ -41,7 +41,11 @@ enum class MultiplayerHubMethod
     SET_ALLOW_SELF_MESSAGING,
     SET_SCOPES,
     START_LISTENING,
-    STOP_LISTENING
+    STOP_LISTENING,
+    ON_OBJECT_MESSAGE,
+    ON_OBJECT_PATCH,
+    ON_REQUEST_TO_SEND_OBJECT,
+    ON_REQUEST_TO_DISCONNECT
 };
 
 /// @brief Utility class to map input values from MultiplayerHubMethod to string representations.
@@ -63,6 +67,10 @@ struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod,
         this->insert({ MultiplayerHubMethod::SET_SCOPES, "SetScopes" });
         this->insert({ MultiplayerHubMethod::START_LISTENING, "StartListening" });
         this->insert({ MultiplayerHubMethod::STOP_LISTENING, "StopListening" });
+        this->insert({ MultiplayerHubMethod::ON_OBJECT_MESSAGE, "OnObjectMessage" });
+        this->insert({ MultiplayerHubMethod::ON_OBJECT_PATCH, "OnObjectPatch" });
+        this->insert({ MultiplayerHubMethod::ON_REQUEST_TO_SEND_OBJECT, "OnRequestToSendObject" });
+        this->insert({ MultiplayerHubMethod::ON_REQUEST_TO_DISCONNECT, "OnRequestToDisconnect" });
     }
 
     ~MultiplayerHubMethodMap() { }

@@ -31,12 +31,12 @@ constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
 EntityScript::EntityScript(
-    SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem)
+    SpaceEntity* InEntity, OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem)
     : Entity(InEntity)
     , EntityScriptComponent(nullptr)
     , HasLastError(false)
     , HasBinding(false)
-    , SpaceEntitySystemPtr(InSpaceEntitySystem)
+    , OnlineRealtimeEnginePtr(InOnlineRealtimeEngine)
     , LogSystem(LogSystem)
     , ScriptRunner(ScriptRunner)
 {
@@ -91,9 +91,9 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
 {
     bool RunScriptLocally = true;
 
-    if (SpaceEntitySystemPtr)
+    if (OnlineRealtimeEnginePtr)
     {
-        RunScriptLocally = SpaceEntitySystemPtr->CheckIfWeShouldRunScriptsLocally();
+        RunScriptLocally = OnlineRealtimeEnginePtr->CheckIfWeShouldRunScriptsLocally();
     }
 
     if (RunScriptLocally)
@@ -103,7 +103,7 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     else
     {
 
-        SpaceEntitySystemPtr->RunScriptRemotely(Entity->GetId(), ScriptSource);
+        OnlineRealtimeEnginePtr->RunScriptRemotely(Entity->GetId(), ScriptSource);
     }
 }
 
