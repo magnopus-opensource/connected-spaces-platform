@@ -37,9 +37,14 @@
 
         await Systems.SystemsManager.get().getMultiplayerConnection().setAllowSelfMessagingFlag(true);
 
+        //Create multiplayer realtime engine
+        const realtimeEngine = Systems.SystemsManager.get().makeOnlineRealtimeEngine();
+        realtimeEngine.setEntityFetchCompleteCallback((entitiesFetchedNum) => {})
+
+
         //Enter the space
         const spaceSystem = Systems.SystemsManager.get().getSpaceSystem();
-        const enterSpaceResult = await spaceSystem.enterSpace(spaceId);
+        const enterSpaceResult = await spaceSystem.enterSpace(spaceId, realtimeEngine);
 
         if (enterSpaceResult.getResultCode() == Systems.EResultCode.Success){
           console.log("Successfully entered space");
@@ -75,6 +80,12 @@
 
         //Just getting the promise is good enough for the test
         await sendAndWaitForEvent();
+
+        //Exit the space
+        const exitSpaceResult = await spaceSystem.exitSpace(spaceId);
+
+        //Delete the realtime engine now that we've exited the space
+        realtimeEngine.delete();
 
       })();
     </script>
