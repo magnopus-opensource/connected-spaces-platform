@@ -25,9 +25,9 @@
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
+#include "CSP/Systems/Spatial/PointOfInterestSystem.h"
+#include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "gtest/gtest.h"
-#include <CSP/Systems/Spatial/PointOfInterestSystem.h>
-#include <CSP/Systems/Spatial/SpatialDataTypes.h>
 
 namespace
 {

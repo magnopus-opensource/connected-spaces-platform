@@ -29,11 +29,11 @@
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
 
+#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
+#include "PublicAPITests/SpaceSystemTestHelpers.h"
+#include "PublicAPITests/UserSystemTestHelpers.h"
 #include "gtest/gtest.h"
-#include <CSP/Multiplayer/Components/CustomSpaceComponent.h>
-#include <CSP/Multiplayer/Components/SplineSpaceComponent.h>
-#include <PublicAPITests/SpaceSystemTestHelpers.h>
-#include <PublicAPITests/UserSystemTestHelpers.h>
 #include <atomic>
 
 using namespace csp::multiplayer;

@@ -17,7 +17,7 @@
 
 #include "Common/Web/Uri.h"
 
-#include <Multiplayer/SignalR/ISignalRConnection.h>
+#include "Multiplayer/SignalR/ISignalRConnection.h"
 #include <atomic>
 #include <signalrclient/hub_connection_builder.h>
 

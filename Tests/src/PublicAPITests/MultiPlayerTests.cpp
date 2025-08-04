@@ -39,9 +39,9 @@
 #include "filesystem.hpp"
 #include "signalrclient/signalr_value.h"
 
+#include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
+#include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 #include "gtest/gtest.h"
-#include <CSP/Multiplayer/Components/ImageSpaceComponent.h>
-#include <CSP/Multiplayer/Components/LightSpaceComponent.h>
 #include <array>
 #include <chrono>
 #include <filesystem>

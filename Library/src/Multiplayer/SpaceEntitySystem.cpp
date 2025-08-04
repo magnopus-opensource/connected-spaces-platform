@@ -32,9 +32,9 @@
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "SignalRSerializer.h"
-#include <Multiplayer/SignalR/ISignalRConnection.h>
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
 #else
