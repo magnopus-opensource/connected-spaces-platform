@@ -1,8 +1,10 @@
-unusedMacro:CSP_API
 unusedMacro:CSP_NO_EXPORT
-unusedMacro:CSP_START_IGNORE
-unusedMacro:CSP_END_IGNORE
 unusedMacro:CSP_ASYNC_RESULT
 unusedMacro:CSP_ASYNC_RESULT_WITH_PROGRESS
 unusedMacro:CSP_EVENT
+unusedMacro:CSP_OUT
+unusedMacro:CSP_IN_OUT
+unusedMacro:CSP_START_IGNORE
+unusedMacro:CSP_END_IGNORE
 unusedMacro:CSP_INTERFACE
+unusedMacro:CSP_FLAGS
