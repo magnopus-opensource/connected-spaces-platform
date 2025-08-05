@@ -39,6 +39,7 @@ class ScriptSystem;
 class PointOfInterestSystem;
 class PointOfInterestInternalSystem;
 class AnchorSystem;
+class ApplicationSettingsSystem;
 class SettingsSystem;
 class GraphQLSystem;
 class AnalyticsSystem;
@@ -115,6 +116,10 @@ public:
     /// @return LogSystem : pointer to the Log system class
     csp::common::LogSystem* GetLogSystem();
 
+    /// @brief Retrieves the Application Settings system.
+    /// @return ApplicationSettingsSystem : pointer to the Application Settings system class
+    ApplicationSettingsSystem* GetApplicationSettingsSystem();
+
     /// @brief Retrieves the Settings system.
     /// @return SettingsSystem : pointer to the Settings system class
     SettingsSystem* GetSettingsSystem();
@@ -184,6 +189,7 @@ private:
     PointOfInterestInternalSystem* PointOfInterestSystem;
     AnchorSystem* AnchorSystem;
     csp::common::LogSystem* LogSystem;
+    ApplicationSettingsSystem* ApplicationSettingsSystem;
     SettingsSystem* SettingsSystem;
     GraphQLSystem* GraphQLSystem;
     AnalyticsSystem* AnalyticsSystem;
