@@ -72,6 +72,7 @@ public:
         const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& Message, const csp::common::String& MessageId);
 
     MessageInfo(const MessageInfo& MessageData);
+    MessageInfo& operator=(const MessageInfo& MessageData);
 };
 
 /// @ingroup Conversation
@@ -105,6 +106,7 @@ public:
     AnnotationData(const csp::common::String& AnnotationId, const csp::common::String& AnnotationThumbnailId, double InVerticalFov,
         const csp::common::Vector3& InAuthorCameraPosition, const csp::common::Vector4& InAuthorCameraRotation);
     AnnotationData(const AnnotationData& InAnnotationData);
+    AnnotationData& operator=(const AnnotationData& InAnnotationData);
 
     csp::common::String AnnotationId;
     csp::common::String AnnotationThumbnailId;
