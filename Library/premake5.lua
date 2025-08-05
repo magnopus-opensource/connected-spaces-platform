@@ -69,11 +69,14 @@ if not Project then
         end
 
         characterset ("ASCII")
-
-        -- Include directories for this project
-        externalincludedirs {
+		
+		-- Include directories for this project
+        includedirs {
             "%{wks.location}/Library/src",
-            "%{wks.location}/Library/include",
+            "%{wks.location}/Library/include"
+        }
+
+        externalincludedirs {
             "%{wks.location}/ThirdParty/signalrclient/include",
             "%{wks.location}/ThirdParty/rapidjson/include",
             "%{wks.location}/ThirdParty/msgpack/include",

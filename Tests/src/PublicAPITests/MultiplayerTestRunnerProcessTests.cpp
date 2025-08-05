@@ -18,8 +18,8 @@
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
+#include "PublicAPITests/UserSystemTestHelpers.h"
 #include "gtest/gtest.h"
-#include <PublicAPITests/UserSystemTestHelpers.h>
 
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTestRunnerProcessTests, ArgTest)
 {

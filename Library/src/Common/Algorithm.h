@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <optional>
 
 namespace csp::common
 {
@@ -28,8 +29,8 @@ namespace csp::common
 /// @brief Finds a given value in an array.
 /// @param Array const csp::common::Array<T>& : Array to search
 /// @param Value const T& : Value to search for
-/// @return int : Index of first found element or -1 if not found
-template <typename T> int Find(const Array<T>& Array, const T& Value)
+/// @return std::optional<size_t> : Index of first found element or nullopt if not found
+template <typename T> std::optional<size_t> Find(const Array<T>& Array, const T& Value)
 {
     for (size_t i = 0; i < Array.Size(); ++i)
     {
@@ -39,7 +40,7 @@ template <typename T> int Find(const Array<T>& Array, const T& Value)
         }
     }
 
-    return -1;
+    return std::nullopt;
 }
 
 /// @brief Finds a value in the array by using the provided callback.
@@ -47,18 +48,18 @@ template <typename T> int Find(const Array<T>& Array, const T& Value)
 /// If the callback returns true for a value, this signals that this value meets the find criteria.
 /// @param Array const csp::common::Array<T>& : Array to search
 /// @param Callback const F& : Function used to signal whether am array element matches search criteria
-/// @return int : Index of first found element or -1 if not found
-template <typename T, typename F> int FindIf(const Array<T>& Array, const F& Callback)
+/// @return std::optional<size_t> : Index of first found element or nullopt if not found
+template <typename T, typename F> std::optional<size_t> FindIf(const Array<T>& Array, const F& Callback)
 {
     for (size_t i = 0; i < Array.Size(); ++i)
     {
         if (Callback(Array[i]))
         {
-            return static_cast<int>(i);
+            return i;
         }
     }
 
-    return -1;
+    return std::nullopt;
 }
 
 /// @brief Sorts array using the provided callback.

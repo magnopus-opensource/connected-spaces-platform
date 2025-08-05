@@ -50,6 +50,7 @@ class CSP_API UserRoleInfo
 public:
     UserRoleInfo() = default;
     UserRoleInfo(const UserRoleInfo& Other) = default;
+    UserRoleInfo& operator=(const UserRoleInfo& other) = default;
 
     csp::common::String UserId;
     SpaceUserRole UserRole;
@@ -62,6 +63,7 @@ class CSP_API InviteUserRoleInfo
 public:
     InviteUserRoleInfo() = default;
     InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
+    InviteUserRoleInfo& operator=(const InviteUserRoleInfo& Other) = default;
 
     csp::common::String UserEmail;
     SpaceUserRole UserRole;
@@ -74,6 +76,7 @@ class CSP_API InviteUserRoleInfoCollection
 public:
     InviteUserRoleInfoCollection() = default;
     InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
+    InviteUserRoleInfoCollection& operator=(const InviteUserRoleInfoCollection& Other) = default;
 
     csp::common::String EmailLinkUrl;
     csp::common::String SignupUrl;

@@ -18,6 +18,7 @@
 #include "Common/Algorithm.h"
 #include "Debug/Logging.h"
 
+#include <optional>
 #include <string>
 
 namespace csp::systems
@@ -89,8 +90,8 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
 bool ValidateNewLODLevelForChain(const LODChain& Chain, int LODLevel)
 {
     // Ensure LODLevel doesnt already exist
-    int Index = csp::common::FindIf(Chain.LODAssets, [LODLevel](const LODAsset& LODAsset) { return LODAsset.Level == LODLevel; });
+    std::optional<size_t> Index = csp::common::FindIf(Chain.LODAssets, [LODLevel](const LODAsset& LODAsset) { return LODAsset.Level == LODLevel; });
 
-    return Index == -1;
+    return !Index.has_value();
 }
 } // namespace csp::systems

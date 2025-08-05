@@ -45,7 +45,7 @@ template <class T> inline csp::common::String TypeToJsonString(const std::shared
 
 template <class T>
 [[deprecated("Unsupported type for JSON (string) serialisation! You should probably add support for it :)")]] inline csp::common::String
-TypeToJsonString(const T& Value)
+TypeToJsonString(const T& /*Value*/)
 {
     return csp::common::String("");
 }
@@ -126,7 +126,7 @@ template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson
 // Catch-all template for notifying the user if no specialisation exists for serialising the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON serialisation! You should probably add support for it :)")]] inline rapidjson::Value TypeToJsonValue(
-    const T& Value, RapidJsonAlloc& Allocator)
+    const T& /*Value*/, RapidJsonAlloc& /*Allocator*/)
 {
     assert(false && "Unsupported type for JSON serialisation! You should probably add support for it :(");
 }
@@ -191,7 +191,7 @@ template <typename U, typename V> inline rapidjson::Value TypeToJsonValue(const 
 
 // Full template specialisations for TypeToJsonValue
 
-template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& Allocator)
+template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& /*Allocator*/)
 {
     rapidjson::Value JsonValue;
     JsonValue.SetBool(Value);
@@ -199,17 +199,17 @@ template <> inline rapidjson::Value TypeToJsonValue(const bool& Value, RapidJson
     return JsonValue;
 }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint32_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const int64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const uint64_t& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const float& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
-template <> inline rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& Allocator) { return rapidjson::Value(Value); }
+template <> inline rapidjson::Value TypeToJsonValue(const double& Value, RapidJsonAlloc& /*Allocator*/) { return rapidjson::Value(Value); }
 
 template <> inline rapidjson::Value TypeToJsonValue(const csp::common::String& Value, RapidJsonAlloc& Allocator)
 {
@@ -260,7 +260,7 @@ inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
 // Catch-all template for notifying the user if no specialisation exists for deserialising to the specified type
 template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON deserialisation! You should probably add support for it :)")]] inline void JsonValueToType(
-    const rapidjson::Value& Value, T& Type)
+    const rapidjson::Value& /*Value*/, T& /*Type*/)
 {
     assert(false && "Unsupported type for JSON deserialisation! You should probably add support for it :)");
 }

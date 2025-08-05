@@ -28,10 +28,10 @@
 #include "Events/EventSystem.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
+#include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
-#include <Multiplayer/SignalR/ISignalRConnection.h>
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"

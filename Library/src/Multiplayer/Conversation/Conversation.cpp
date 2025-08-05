@@ -46,6 +46,18 @@ AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
 {
 }
 
+AnnotationData& AnnotationData::operator=(const AnnotationData& InAnnotationData)
+{
+    if (this != &InAnnotationData)
+    {
+        VerticalFov = InAnnotationData.VerticalFov;
+        AuthorCameraPosition = InAnnotationData.AuthorCameraPosition;
+        AuthorCameraRotation = InAnnotationData.AuthorCameraRotation;
+    }
+
+    return *this;
+}
+
 MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
 
 const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
@@ -82,6 +94,21 @@ MessageInfo::MessageInfo(const MessageInfo& MessageData)
     , Message(MessageData.Message)
     , MessageId(MessageData.MessageId)
 {
+}
+
+MessageInfo& MessageInfo::operator=(const MessageInfo& MessageData)
+{
+    if (this != &MessageData)
+    {
+        ConversationId = MessageData.ConversationId;
+        CreatedTimestamp = MessageData.CreatedTimestamp;
+        EditedTimestamp = MessageData.EditedTimestamp;
+        UserId = MessageData.UserId;
+        Message = MessageData.Message;
+        MessageId = MessageData.MessageId;
+    }
+
+    return *this;
 }
 
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)

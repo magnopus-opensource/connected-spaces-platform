@@ -31,7 +31,7 @@
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
 
-#include <CallHelpers.h>
+#include "CallHelpers.h"
 
 namespace chs_user = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
@@ -849,6 +849,5 @@ void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData
     UserPermissionsChangedCallback(AccessControlChangedNetworkEventData);
 }
 
-csp::common::IAuthContext& UserSystem::GetAuthContext()
-{ return Auth; }
+csp::common::IAuthContext& UserSystem::GetAuthContext() { return Auth; }
 } // namespace csp::systems

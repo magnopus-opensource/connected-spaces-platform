@@ -27,10 +27,10 @@
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
+#include "CallHelpers.h"
+#include "Common/Web/HttpRequest.h"
+#include "Common/Web/WebClient.h"
 #include "gtest/gtest.h"
-#include <CallHelpers.h>
-#include <Common/Web/HttpRequest.h>
-#include <Common/Web/WebClient.h>
 
 #ifdef CSP_WASM
 #include "Common/Web/EmscriptenWebClient/EmscriptenWebClient.h"
@@ -48,7 +48,8 @@ typedef std::function<void(const NullResult& Result)> NullResultCallback;
 class TestWebClient : public csp::web::EmscriptenWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+    TestWebClient(
+        const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
         : EmscriptenWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
@@ -59,7 +60,8 @@ public:
 class TestWebClient : public csp::web::POCOWebClient
 {
 public:
-    TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
+    TestWebClient(
+        const csp::web::Port InPort, const csp::web::ETransferProtocol Tp, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem)
         : POCOWebClient(InPort, Tp, AuthContext, LogSystem, false)
     {
     }
