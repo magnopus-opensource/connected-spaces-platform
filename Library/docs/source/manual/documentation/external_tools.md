@@ -51,7 +51,7 @@ run_cppcheck_static_analysis.bat
 Alternatively, Cppcheck can be configured to run with the following command-line arguments to define the analysis scope and output format:
 
 ```
-"C:\Program Files\Cppcheck\cppcheck.exe" --xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppress=unknownMacro -I"Library/include" Library
+"C:\Program Files\Cppcheck\cppcheck.exe" --xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppressions-list=cppcheck_suppressions.txt -I"Library/include" Library
 ```
 
 A breakdown of the key configuration flags is as follows:

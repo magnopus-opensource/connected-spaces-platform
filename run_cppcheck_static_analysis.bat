@@ -10,7 +10,7 @@ rem This path can be updated if the installation location changes.
 set "CPPCHECK_EXE=C:\Program Files\Cppcheck\cppcheck.exe"
 
 rem Set the command-line arguments for the analysis.
-set "CPPCHECK_ARGS=--xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppress=unknownMacro -I'Library/include' Library"
+set "CPPCHECK_ARGS=--xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppressions-list=cppcheck_suppressions.txt -I'Library/include' Library"
 
 echo.
 echo ================================================================================
