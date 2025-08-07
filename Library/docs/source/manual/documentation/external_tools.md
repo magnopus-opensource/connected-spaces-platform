@@ -32,7 +32,7 @@ For more information and a complete list of checks, refer to the official Cppche
 
 ### Static Analysis in Connected Spaces Platform
 
-While Cppcheck is not currently an enforced part of the solution's build process, it is configured for optional use to assist developers in maintaining code quality. This may be subject to change in the future, with the analysis potentially becoming a mandatory part of the continuous integration (CI) pipeline.
+Cppcheck is not currently an enforced part of the Connected Spaces Platform, it is an optional tool that can be used to assist developers in maintaining code quality.
 
 The primary goal of using Cppcheck is to:
 - **Improve Code Reliability:** Automatically detect common programming errors that can lead to crashes or undefined behavior.
