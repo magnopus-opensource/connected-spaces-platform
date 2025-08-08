@@ -397,27 +397,26 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, ISignalRC
      */
 
     Start()
-        .then(async::inline_scheduler(), [this]() { Connected = true; })
-        .then(async::inline_scheduler(), DeleteEntities(ALL_ENTITIES_ID))
-        .then(async::inline_scheduler(), RequestClientId())
-        .then(async::inline_scheduler(), [this](uint64_t RetrievedClientId) { ClientId = RetrievedClientId; })
-        .then(async::inline_scheduler(), StartListening())
-        .then(async::inline_scheduler(),
+        .then([this]() { Connected = true; })
+        .then(DeleteEntities(ALL_ENTITIES_ID))
+        .then(RequestClientId())
+        .then([this](uint64_t RetrievedClientId) { ClientId = RetrievedClientId; })
+        .then(StartListening())
+        .then(
             [this, Callback]()
             {
                 // Success
                 INVOKE_IF_NOT_NULL(ConnectionCallback, "Successfully connected to SignalR hub.");
                 INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
             })
-        .then(async::inline_scheduler(),
-            csp::common::continuations::InvokeIfExceptionInChain(
-                // Handle any errors in chain
-                [Callback, this](const std::exception& Except)
-                {
-                    auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(Except);
-                    DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
-                },
-                LogSystem));
+        .then(csp::common::continuations::InvokeIfExceptionInChain(
+            // Handle any errors in chain
+            [Callback, this](const std::exception& Except)
+            {
+                auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(Except);
+                DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
+            },
+            LogSystem));
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)

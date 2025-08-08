@@ -64,14 +64,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInRemoteGenerateNe
             });
 
     SpaceEntitySystem->RemoteGenerateNewAvatarId()
-        .then(async::inline_scheduler(),
+        .then(
             [](async::shared_task<uint64_t> Result)
             {
                 EXPECT_FALSE(Result.get_exception());
                 EXPECT_EQ(Result.get(), uint64_t(55));
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then([](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 
@@ -113,8 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInRemoteGenerateNewA
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then([](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 
@@ -147,19 +145,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInSendNewAvatarObj
 
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
-        .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage(
-                "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
-        .then(async::inline_scheduler(),
+    async::spawn([]() { return uint64_t(55); }) // This continuation takes the ID as its input
+        .then(SpaceEntitySystem->SendNewAvatarObjectMessage(
+            "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+        .then(
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
                 auto [Result, Exception] = Results;
                 EXPECT_EQ(Result.as_bool(), true);
                 EXPECT_FALSE(Exception);
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then([](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 
@@ -194,11 +190,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
 
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
-        .then(async::inline_scheduler(),
-            SpaceEntitySystem->SendNewAvatarObjectMessage(
-                "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
-        .then(async::inline_scheduler(),
+    async::spawn([]() { return uint64_t(55); }) // This continuation takes the ID as its input
+        .then(SpaceEntitySystem->SendNewAvatarObjectMessage(
+            "Username", LoginState, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+        .then(
             [](std::tuple<const signalr::value&, std::exception_ptr> Results)
             {
                 auto [Result, Exception] = Results;
@@ -212,8 +207,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestErrorInSendNewAvatarObjec
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then([](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 
@@ -266,14 +260,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntitySystemTests, TestSuccessInCreateNewLocalAv
 
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    async::spawn(async::inline_scheduler(),
+    async::spawn(
         []()
         {
             return std::make_tuple(async::make_task(uint64_t { 55 }).share(), async::make_task());
         }) // This continuation takes the ID (and another void return from a when_all branch) as its input
-        .then(async::inline_scheduler(),
-            SpaceEntitySystem->CreateNewLocalAvatar(
-                Username, LoginState, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
+        .then(SpaceEntitySystem->CreateNewLocalAvatar(
+            Username, LoginState, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
 
     // During destruction (test cleanup) CSP can access the connection.
     // We can't leave the main Mock dangling because it needs to run RAII test assertion behaviour, so use a throwaway.

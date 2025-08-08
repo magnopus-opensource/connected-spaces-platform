@@ -1169,7 +1169,7 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                     }
 
                     MultiplayerConnection->StartListening()()
-                        .then(async::inline_scheduler(),
+                        .then(
                             [RefreshMultiplayerContinuationEvent, &LogSystem, this]()
                             {
                                 LogSystem->LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
@@ -1180,16 +1180,15 @@ void SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange(
                                 // Success!
                                 RefreshMultiplayerContinuationEvent->set({});
                             })
-                        .then(async::inline_scheduler(),
-                            csp::common::continuations::InvokeIfExceptionInChain(
-                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
-                                {
-                                    // Error case
-                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
-                                    RefreshMultiplayerContinuationEvent->set(Error);
-                                    return;
-                                },
-                                *LogSystem));
+                        .then(csp::common::continuations::InvokeIfExceptionInChain(
+                            [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                            {
+                                // Error case
+                                auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                RefreshMultiplayerContinuationEvent->set(Error);
+                                return;
+                            },
+                            *LogSystem));
                 });
         });
 }
