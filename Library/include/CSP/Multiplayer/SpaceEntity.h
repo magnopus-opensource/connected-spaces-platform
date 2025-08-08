@@ -148,11 +148,12 @@ public:
     SpaceEntity();
 
     /// @brief Creates a SpaceEntity instance using the space entity system provided.
-    SpaceEntity(OnlineRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
+    SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem);
 
     /// Internal constructor to explicitly create a SpaceEntity in a specified state.
     /// Initially implemented for use in OnlineRealtimeEngine::CreateAvatar
-    CSP_NO_EXPORT SpaceEntity(OnlineRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+    CSP_NO_EXPORT SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner,
+        csp::common::LogSystem* LogSystem,
         SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform, uint64_t OwnerId, bool IsTransferable,
         bool IsPersistent);
 
@@ -271,9 +272,6 @@ public:
     /// @return csp::common::List<SpaceEntity>
     const csp::common::List<SpaceEntity*>* GetChildEntities() const;
 
-    /// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
-    void QueueUpdate();
-
     /// @brief Sends a patch message with a flag to destroy the entity.
     ///
     /// Will remove the entity from endpoints and signal remote clients to delete the entity.
@@ -369,6 +367,9 @@ public:
     /// @return bool
     bool IsLocked() const;
 
+    /// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
+    void QueueUpdate();
+
     /// @brief Getter for the EntityUpdateCallback
     /// @return: UpdateCallback
     CSP_NO_EXPORT UpdateCallback GetEntityUpdateCallback();
@@ -440,7 +441,7 @@ public:
 
     /// @brief Apply a local patch
     /// @param InvokeUpdateCallback bool : whether to invoke the update callback (default: true)
-    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the OnlineRealtimeEngine state. Don't set this
+    /// @param AllowSelfMessaging bool : Whether or not to apply local patches. Normally sources from the RealtimeEngine state. Don't set this
     /// unless you know what you are doing. (default: false)
     CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
@@ -495,7 +496,7 @@ private:
     // Called when we're parsing a component from an mcs::ObjectPatch
     ComponentUpdateInfo ComponentFromItemComponentDataPatch(uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
 
-    OnlineRealtimeEngine* EntitySystem;
+    csp::common::IRealtimeEngine* EntitySystem;
 
     SpaceEntityType Type;
     uint64_t Id;
@@ -559,7 +560,7 @@ private:
     /// @brief Set ParentId to nullptr
     void RemoveParentId();
 
-    // Do NOT call directly, always call either Select() Deselect() or OnlineRealtimeEngine::InternalSetSelectionStateOfEntity()
+    // Do NOT call directly, always call either Select() Deselect()
     /// @brief Internal version of the selected state of the entity setter
     /// @param SelectedState bool : the selected state to set
     /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
