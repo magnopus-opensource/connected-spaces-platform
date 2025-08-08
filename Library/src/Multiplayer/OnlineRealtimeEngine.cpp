@@ -977,14 +977,6 @@ void OnlineRealtimeEngine::TickEntities()
     }
 }
 
-void OnlineRealtimeEngine::MarkEntityForUpdate(SpaceEntity* Entity)
-{
-    std::scoped_lock TickEntitiesLocker(*TickEntitiesLock);
-
-    // Duplicates can be added here and will be ignored when sending updates
-    TickUpdateEntities.push_back(Entity);
-}
-
 // @brief Simple script ownership
 //
 // Simple MVP script ownership for testing:

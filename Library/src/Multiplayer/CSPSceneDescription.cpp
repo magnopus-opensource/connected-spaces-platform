@@ -21,24 +21,30 @@
 
 namespace csp::multiplayer
 {
-CSPSceneDescription::CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::OnlineRealtimeEngine& EntitySystem,
-    csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+CSPSceneDescription::CSPSceneDescription(const csp::common::String& SceneDescriptionJson)
+    : SceneDescriptionJson { SceneDescriptionJson }
+{
+}
+
+csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(
+    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const
 {
     mcs::SceneDescription SceneDescription;
     csp::json::JsonDeserializer::Deserialize(SceneDescriptionJson.c_str(), SceneDescription);
 
-    Entities = csp::common::Array<csp::multiplayer::SpaceEntity*>(SceneDescription.Objects.size());
+    csp::common::Array<csp::multiplayer::SpaceEntity*> Entities { SceneDescription.Objects.size() };
 
     size_t ObjectsIndex = 0;
     for (const auto& Object : SceneDescription.Objects)
     {
-        auto* Entity = new multiplayer::SpaceEntity(&EntitySystem, RemoteScriptRunner, &LogSystem);
+        auto* Entity = new multiplayer::SpaceEntity(&RealtimeEngine, RemoteScriptRunner, &LogSystem);
         Entity->FromObjectMessage(Object);
 
-        EntitySystem.AddEntity(Entity);
         Entities[ObjectsIndex] = Entity;
         ObjectsIndex++;
     }
+
+    return Entities;
 }
 
 }

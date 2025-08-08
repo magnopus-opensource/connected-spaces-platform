@@ -357,7 +357,7 @@ public:
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
     /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
     /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity)
+    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 

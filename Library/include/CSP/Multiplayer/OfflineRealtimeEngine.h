@@ -164,7 +164,7 @@ public:
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
     /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
     /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity) override;
+    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) override;
 
     /// @brief Applies any pending changes to entities that have been marked for update.
     /// This only processes changes to existing entities, such as properties or components. All entity creations and deletions are handled instantly.
