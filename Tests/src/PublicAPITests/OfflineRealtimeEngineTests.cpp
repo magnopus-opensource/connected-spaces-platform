@@ -812,7 +812,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
     // Name should not have been updated yet.
     EXPECT_EQ(Entity->GetName(), EntityName);
 
-    Engine.MarkEntityForUpdate(Entity);
+    Engine.QueueEntityUpdate(Entity);
     Engine.ProcessPendingEntityOperations();
 
     EXPECT_EQ(Entity->GetName(), NewEntityName);

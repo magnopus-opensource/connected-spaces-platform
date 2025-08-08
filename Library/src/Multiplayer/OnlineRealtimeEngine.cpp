@@ -34,6 +34,7 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "SignalRSerializer.h"
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -1009,30 +1010,6 @@ void OnlineRealtimeEngine::ResolveParentChildForDeletion(SpaceEntity* Deletion)
     }
 }
 
-void OnlineRealtimeEngine::ResolveEntityHierarchy(SpaceEntity* Entity)
-{
-    if (Entity->GetParentId().HasValue())
-    {
-        for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
-        {
-            if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
-            {
-                RootHierarchyEntities.Remove(i);
-                break;
-            }
-        }
-    }
-    else
-    {
-        if (EntityIsInRootHierarchy(Entity) == false)
-        {
-            RootHierarchyEntities.Append(Entity);
-        }
-    }
-
-    Entity->ResolveParentChildRelationship();
-}
-
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
     for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
@@ -1127,6 +1104,11 @@ bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return Entit
 void OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
 const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+
+void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+{
+    csp::multiplayer::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+}
 
 void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
     csp::common::String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)

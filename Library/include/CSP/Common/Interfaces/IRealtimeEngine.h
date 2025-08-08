@@ -341,6 +341,16 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    /// @brief Adds the given entity to the hierarchy by updating entity children and root hierarchy.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to add to the hierarchy.
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+         // Avoiding unused params, see comment in top method
+        (void)Entity;
+    }
+
     /// @brief Set Callback that notifies when the OnlineRealtimeEngine is in a valid state
     /// after entering a space, and entity mutation can begin. Users should not mutate entities before receiving this callback.
     /// This callback should be emitted in response to FetchAllEntitiesAndPopulateBuffers completing, either syncronously or asyncronously.
