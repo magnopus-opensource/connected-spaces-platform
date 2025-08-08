@@ -142,6 +142,10 @@ public:
     CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
+    CSP_NO_EXPORT AssetCollectionResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
     AssetCollectionResult() = default;
 
 private:
@@ -181,6 +185,10 @@ public:
 
     CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AssetCollectionsResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
 private:
     AssetCollectionsResult(void*) {};
