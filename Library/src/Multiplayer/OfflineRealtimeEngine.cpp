@@ -72,7 +72,7 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
 
     std::scoped_lock EntitiesLocker { *EntitiesLock };
 
-    ResolveEntityHierarchy(*this, RootHierarchyEntities, NewEntity);
+   ResolveEntityHierarchy(NewEntity);
 
     Entities.Append(NewEntity);
     Objects.Append(NewEntity);
@@ -189,6 +189,11 @@ size_t OfflineRealtimeEngine::GetNumAvatars() const { return Avatars.Size(); }
 size_t OfflineRealtimeEngine::GetNumObjects() const { return Objects.Size(); }
 
 const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+
+void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+{
+    csp::multiplayer::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+}
 
 void OfflineRealtimeEngine::QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) { EntitiesToUpdate->insert(Entity); }
 

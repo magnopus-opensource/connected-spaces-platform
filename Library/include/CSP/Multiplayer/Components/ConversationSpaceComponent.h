@@ -293,10 +293,11 @@ public:
     /// @return const csp::common::Vector4& : The camera view rotation.
     const csp::common::Vector4& GetConversationCameraRotation() const;
 
+    CSP_NO_EXPORT void OnLocalDelete() override;
+
 protected:
     void OnCreated() override;
     void OnRemove() override;
-    void OnLocalDelete() override;
 
     void SetPropertyFromPatch(uint32_t Key, const csp::common::ReplicatedValue& Value) override;
 
