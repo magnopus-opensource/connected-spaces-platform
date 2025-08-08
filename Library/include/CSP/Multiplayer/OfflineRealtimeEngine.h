@@ -23,6 +23,12 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
+#include <memory>
+#include <mutex>
+#include <set>
+
+class CSPEngine_OfflineRealtimeEngineTests_SelectEntity_Test;
+
 namespace csp::common
 {
 class LoginState;
@@ -39,6 +45,12 @@ class CSPSceneDescription;
 /// The callbacks that are injected into functions are all synchronous, meaning they are called before the funciton ends.
 class CSP_API OfflineRealtimeEngine : public csp::common::IRealtimeEngine
 {
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class ::CSPEngine_OfflineRealtimeEngineTests_SelectEntity_Test;
+    /** @endcond */
+    CSP_END_IGNORE
+
 public:
     // Callback that will provide a pointer to a SpaceEntity object.
     typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
@@ -196,6 +208,30 @@ public:
     OfflineRealtimeEngine(
         const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
+    using SpaceEntityList = csp::common::List<SpaceEntity*>;
+
 private:
+    using SpaceEntitySet = std::set<SpaceEntity*>;
+
+    // Should not be null
+    csp::common::LogSystem* LogSystem;
+
+    // May not be null
+    csp::common::IJSScriptRunner* ScriptRunner;
+
+    SpaceEntityList Entities;
+    SpaceEntityList Avatars;
+    SpaceEntityList Objects;
+    SpaceEntityList SelectedEntities;
+    SpaceEntityList RootHierarchyEntities;
+
+    std::unique_ptr<SpaceEntitySet> EntitiesToUpdate;
+
+    std::unique_ptr<std::recursive_mutex> EntitiesLock;
+
+    EntityCreatedCallback SpaceEntityCreatedCallback;
+
+    void AddPendingEntity(SpaceEntity* EntityToAdd);
+    void RemovePendingEntity(SpaceEntity* EntityToRemove);
 };
 }
