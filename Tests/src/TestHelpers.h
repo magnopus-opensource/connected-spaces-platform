@@ -17,7 +17,7 @@
 
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 #include "uuid_v4.h"
@@ -65,6 +65,10 @@ inline const char* TESTS_CLIENT_SKU = "CPPTest";
 
 #define CSP_PUBLIC_TEST(namespace_name, test_case_name, test_name)                                                                                   \
     NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, ::PublicTestBase, ::testing::internal::GetTypeId<::PublicTestBase>())
+
+#define CSP_PUBLIC_TEST_WITH_MOCKS(namespace_name, test_case_name, test_name)                                                                        \
+    NAMESPACE_GTEST_TEST_(                                                                                                                           \
+        namespace_name, test_case_name, test_name, ::PublicTestBaseWithMocks, ::testing::internal::GetTypeId<::PublicTestBaseWithMocks>())
 
 #define CSP_INTERNAL_TEST(namespace_name, test_case_name, test_name)                                                                                 \
     NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, ::testing::Test, ::testing::internal::GetTestTypeId())
@@ -185,9 +189,9 @@ inline void LogFatal(std::string Message)
     exit(1);
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI)
+inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
 {
-    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS");
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", SignalRMock);
 
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
@@ -221,7 +225,7 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
     }
 }
 
-inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::SpaceEntitySystem* EntitySystem, int MaxTextTimeSeconds = 20)
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::OnlineRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
 {
     // Wait for message
     auto Start = std::chrono::steady_clock::now();
@@ -247,10 +251,10 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
     }
 }
 
-inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::SpaceEntitySystem* EntitySystem, csp::common::String Name = "Object")
+inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::OnlineRealtimeEngine* EntitySystem, csp::common::String Name = "Object")
 {
     csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, Name, ObjectTransform);
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
 }

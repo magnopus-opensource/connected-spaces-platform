@@ -18,6 +18,7 @@
 
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -33,6 +34,11 @@ public:
     SpaceRAII(std::optional<std::string> SpaceId);
     ~SpaceRAII();
 
+    SpaceRAII(const SpaceRAII&) = delete;
+    SpaceRAII& operator=(const SpaceRAII&) = delete;
+    SpaceRAII(SpaceRAII&&) = delete;
+    SpaceRAII& operator=(SpaceRAII&&) = delete;
+
     /*
      * The SpaceID of the space this object is managing.
      * If the object was constructed with an empty SpaceId, then this will be the ID of the newly created space.
@@ -45,7 +51,13 @@ public:
      */
     static csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem& SpaceSystem);
 
+    /*
+     * Get the RealtimeEngine that is instantiated for the lifetime that we are in the space for.
+     */
+    csp::multiplayer::OnlineRealtimeEngine& GetRealtimeEngine() const;
+
 private:
     bool CreatedThisSpace = false; // If we created this space, we should destroy it when done.
     std::string SpaceId;
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine;
 };

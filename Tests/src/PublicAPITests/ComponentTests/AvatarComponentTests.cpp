@@ -52,7 +52,6 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Login
     csp::common::String UserId;
@@ -62,8 +61,11 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -79,8 +81,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -187,7 +189,6 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     // Login
     csp::common::String UserId;
@@ -197,8 +198,11 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -214,8 +218,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar]
-        = AWAIT(EntitySystem, CreateAvatar, UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(
+        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -250,7 +254,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::Zero());
 
     Avatar->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Setup script to set new properties
     std::string AvatarComponentScriptText = R"xx(
@@ -275,7 +279,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     Avatar->GetScript().SetScriptSource(AvatarComponentScriptText.c_str());
     Avatar->GetScript().Invoke();
 
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Test scripts sets new properties
     EXPECT_EQ(AvatarComponent->GetAvatarId(), "TestAvatarId");

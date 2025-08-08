@@ -108,7 +108,7 @@ There are some important aspects to the ComponentBase class that it is worth rev
 
 ## Entity Lifetime Management
 
-In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created, modified, synchronized, and deleted within a virtual space. Understanding this flow is crucial for building responsive, real-time applications in multi-user environments. Below is an overview of the expected flow when using space entities.
+In CSP, the `OnlineRealtimeEngine` governs how objects (space entities) are created, modified, synchronized, and deleted within a virtual space. Understanding this flow is crucial for building responsive, real-time applications in multi-user environments. Below is an overview of the expected flow when using space entities.
 
 1. **Entity Creation** 
 
@@ -119,7 +119,7 @@ In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created
         // Respond to entity creation here...
     }
     SpaceTransform transform = SpaceTransform(); // Create an identity transform. 
-	SpaceEntity* entity = spaceEntitySystem->CreateEntity("myEntityName", transform, callback);
+	SpaceEntity* entity = OnlineRealtimeEngine->CreateEntity("myEntityName", transform, callback);
 	```
 
     This code creates a new `SpaceEntity` within the space. Once created, you can modify this entity by adding components that define its behavior and appearance.

@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
@@ -34,6 +35,8 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
+#include "Multiplayer/SignalR/SignalRClient.h"
+#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 #include "signalrclient/signalr_value.h"
@@ -92,17 +95,20 @@ SequenceSystem* SystemsManager::GetSequenceSystem() { return SequenceSystem; }
 
 HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem() { return HotspotSequenceSystem; }
 
-csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem() { return SpaceEntitySystem; }
-
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
+
+csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
+{
+    return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
+}
 
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
     , MultiplayerConnection(nullptr)
     , NetworkEventBus(nullptr)
-    , SpaceEntitySystem(nullptr)
+    , RealtimeEngine(nullptr)
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
@@ -128,7 +134,7 @@ SystemsManager::~SystemsManager() { DestroySystems(); }
 
 ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
 
-void SystemsManager::CreateSystems()
+void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject)
 {
     // Create Log system first, so we can log any startup issues in other systems
     LogSystem = new csp::common::LogSystem();
@@ -146,7 +152,12 @@ void SystemsManager::CreateSystems()
     ScriptSystem = new csp::systems::ScriptSystem();
     ScriptSystem->Initialise();
 
-    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem);
+    // At the moment, the inject is for mocking behaviour. In the future this will probably not even be instantiated here at all.
+    auto* SignalRConnection
+        = (SignalRInject == nullptr) ? csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(UserSystem->GetAuthContext()) : SignalRInject;
+
+    MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
+
     NetworkEventBus = MultiplayerConnection->GetEventBusPtr();
     AnalyticsSystem = new csp::systems::AnalyticsSystem();
     VoipSystem = new csp::systems::VoipSystem();
@@ -167,16 +178,12 @@ void SystemsManager::CreateSystems()
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, NetworkEventBus, *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, NetworkEventBus, *LogSystem);
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
-
-    // Not a SystemBase inheritor (to become IRealtimeEngine anyway)
-    SpaceEntitySystem = new csp::multiplayer::SpaceEntitySystem(MultiplayerConnection, *LogSystem, *NetworkEventBus, *ScriptSystem);
 }
 
 void SystemsManager::DestroySystems()
 {
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
-    delete SpaceEntitySystem;
     delete ConversationSystem;
     delete HotspotSequenceSystem;
     delete SequenceSystem;
@@ -201,11 +208,10 @@ void SystemsManager::DestroySystems()
     delete LogSystem;
 }
 
-void SystemsManager::Instantiate()
+void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject)
 {
-    assert(!Instance && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
     Instance = new SystemsManager();
-    Instance->CreateSystems();
+    Instance->CreateSystems(SignalRInject);
 }
 
 void SystemsManager::Destroy()

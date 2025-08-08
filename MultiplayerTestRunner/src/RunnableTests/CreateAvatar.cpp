@@ -16,23 +16,23 @@
 
 #include "CreateAvatar.h"
 
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
-#include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/Systems/Spaces/SpaceSystem.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "CSP/Systems/Users/UserSystem.h"
 #include "uuid_v4.h"
+#include <CSP/Common/Optional.h>
+#include <CSP/Multiplayer/OnlineRealtimeEngine.h>
+#include <CSP/Multiplayer/SpaceTransform.h>
+#include <CSP/Systems/Spaces/SpaceSystem.h>
+#include <CSP/Systems/SystemsManager.h>
+#include <CSP/Systems/Users/UserSystem.h>
 #include <future>
 
 namespace CreateAvatar
 {
 
-void RunTest()
+void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
     using namespace csp::multiplayer;
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
     auto& UserSystem = *SystemsManager.GetUserSystem();
 
     UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
@@ -48,19 +48,23 @@ void RunTest()
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
 
     const auto LoginState = UserSystem.GetLoginState();
 
-    EntitySystem.CreateAvatar(UserName, LoginState, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
+    RealtimeEngine.CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
         [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
-    ResultFuture.get();
+    csp::multiplayer::SpaceEntity* CreatedAvatar = ResultFuture.get();
+    if (CreatedAvatar == nullptr)
+    {
+        throw std::runtime_error("Failed to create avatar!");
+    }
 
-    EntitySystem.ProcessPendingEntityOperations();
+    RealtimeEngine.ProcessPendingEntityOperations();
 
     // This is a hail mary attempt to get this to stop being flaky on CI. CHS is known to sometimes have a processing delay, which is unfortunate.
     std::this_thread::sleep_for(std::chrono::seconds(7));

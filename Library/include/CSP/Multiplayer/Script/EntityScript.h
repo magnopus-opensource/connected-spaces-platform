@@ -34,7 +34,7 @@ class ScriptSystem;
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 
 class SpaceEntity;
 class ScriptSpaceComponent;
@@ -48,8 +48,8 @@ class CSP_API EntityScript
 public:
     // Don't want to be constructable by public users.
     CSP_START_IGNORE
-    EntityScript(
-        SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem);
+    EntityScript(SpaceEntity* InEntity, OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
+        csp::common::LogSystem* LogSystem);
     CSP_END_IGNORE
 
     /// @brief Destroy the instance of EntityScript.
@@ -153,7 +153,7 @@ private:
 
     bool HasBinding;
 
-    SpaceEntitySystem* SpaceEntitySystemPtr;
+    OnlineRealtimeEngine* OnlineRealtimeEnginePtr;
 
     // may be null
     csp::common::LogSystem* LogSystem = nullptr;

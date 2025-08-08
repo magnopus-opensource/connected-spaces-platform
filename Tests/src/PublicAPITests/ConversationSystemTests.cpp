@@ -19,7 +19,7 @@
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -71,7 +71,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* NetworkEventBus = SystemsManager.GetEventBus();
 
@@ -83,21 +82,24 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     // Create 2 objects with a conversation component each
-    csp::multiplayer::SpaceEntity* Object1 = CreateTestObject(EntitySystem, "Object1");
+    csp::multiplayer::SpaceEntity* Object1 = CreateTestObject(RealtimeEngine.get(), "Object1");
     auto* ConversationComponent1 = (ConversationSpaceComponent*)Object1->AddComponent(ComponentType::Conversation);
     ConversationComponent1->SetConversationId("TestId1");
 
-    csp::multiplayer::SpaceEntity* Object2 = CreateTestObject(EntitySystem, "Object2");
+    csp::multiplayer::SpaceEntity* Object2 = CreateTestObject(RealtimeEngine.get(), "Object2");
     auto* ConversationComponent2 = (ConversationSpaceComponent*)Object2->AddComponent(ComponentType::Conversation);
     ConversationComponent2->SetConversationId("TestId2");
 
     Object1->QueueUpdate();
     Object2->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Test that when we send an event with the first components id, that only the first component receives the event.
     {
@@ -182,7 +184,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* NetworkEventBus = SystemsManager.GetEventBus();
 
@@ -194,8 +195,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
     // Enter space
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     static constexpr const char* TestConversationId = "New Test Message";
 
@@ -216,14 +220,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     std::this_thread::sleep_for(std::chrono::milliseconds { 2 });
 
     // Create object to represent the conversation
-    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
     auto* ConversationComponent = (ConversationSpaceComponent*)Object->AddComponent(ComponentType::Conversation);
 
     // Ensure the conversation id is set so the event system can find the component
     ConversationComponent->SetConversationId(TestConversationId);
 
     Object->QueueUpdate();
-    EntitySystem->ProcessPendingEntityOperations();
+    RealtimeEngine->ProcessPendingEntityOperations();
 
     // Test that the conversation component receives the event
     {

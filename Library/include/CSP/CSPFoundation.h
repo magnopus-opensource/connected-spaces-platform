@@ -25,6 +25,11 @@ namespace csp::systems
 class ServicesDeploymentStatus;
 } // namespace csp::systems
 
+namespace csp::multiplayer
+{
+class ISignalRConnection;
+}
+
 namespace csp
 {
 
@@ -119,6 +124,12 @@ public:
     /// interact with each other.
     /// @return bool : True for successful initialisation.
     static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
+
+    // Hidden function for testing. Lets us pass in state that would otherwise be injected in a set way in the SystemsManager.
+    // In a different, perhaps better api, this wouldn't be necessary as constructors would inject this at client level and the configurability would
+    // be there by default
+    CSP_NO_EXPORT static bool InitialiseWithInject(
+        const csp::common::String& EndpointRootURI, const csp::common::String& Tenant, csp::multiplayer::ISignalRConnection* SignalRInject);
 
     /// @brief This should be used at the end of the application lifecycle.
     /// Clears event queues and destroys foundation systems.

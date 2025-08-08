@@ -19,7 +19,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "Events/Event.h"
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
@@ -58,8 +58,8 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
 }
 
 ClientElectionManager::ClientElectionManager(
-    SpaceEntitySystem* InSpaceEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
-    : SpaceEntitySystemPtr(InSpaceEntitySystem)
+    OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner)
+    : OnlineRealtimeEnginePtr(InOnlineRealtimeEngine)
     , LogSystem(LogSystem)
     , EventHandler(new ClientElectionEventHandler(this))
     , TheConnectionState(ConnectionState::Disconnected)
@@ -89,7 +89,7 @@ ClientElectionManager::~ClientElectionManager()
     }
 }
 
-void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnConnect(const OnlineRealtimeEngine::SpaceEntityList& Avatars, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
 
@@ -121,7 +121,7 @@ void ClientElectionManager::OnDisconnect()
 }
 
 void ClientElectionManager::OnLocalClientAdd(
-    const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
@@ -153,27 +153,27 @@ void ClientElectionManager::OnLocalClientAdd(
 }
 
 void ClientElectionManager::OnClientAdd(
-    const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& /*Avatars*/, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
     AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
 }
 
-void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& /*Avatars*/)
+void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& /*Avatars*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
     RemoveClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
     // @Todo - This event allows us to track individual object ownership
 }
 
-void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const SpaceEntitySystem::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
     // @Todo - This event allows us to track individual object ownership
@@ -328,8 +328,6 @@ void ClientElectionManager::Update()
     }
 }
 
-SpaceEntitySystem* ClientElectionManager::GetSpaceEntitySystem() { return SpaceEntitySystemPtr; }
-
 bool ClientElectionManager::IsLocalClientLeader() const { return (LocalClient && (LocalClient == Leader)); }
 
 ClientProxy* ClientElectionManager::GetLeader() const { return Leader; }
@@ -348,9 +346,9 @@ void ClientElectionManager::SetLeader(ClientProxy* Client)
     Leader = Client;
 
     // Notify Scripts ready callback now we have a valid leader
-    if (ScriptSystemReadyCallback)
+    if (LeaderReadyCallback)
     {
-        ScriptSystemReadyCallback(true);
+        LeaderReadyCallback(true);
     }
 }
 
@@ -402,9 +400,9 @@ void ClientElectionManager::SetElectionState(ElectionState NewState)
     TheElectionState = NewState;
 }
 
-void ClientElectionManager::SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback)
+void ClientElectionManager::SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback ScriptLeaderReadyCallback)
 {
-    ScriptSystemReadyCallback = InScriptSystemReadyCallback;
+    LeaderReadyCallback = ScriptLeaderReadyCallback;
 }
 
 void ClientElectionManager::HandleElectionStateIdle()
@@ -479,7 +477,7 @@ void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
 
 bool ClientElectionManager::IsConnected() const
 {
-    MultiplayerConnection* Connection = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance();
+    MultiplayerConnection* Connection = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance();
 
     if (Connection == nullptr)
     {
@@ -491,7 +489,7 @@ bool ClientElectionManager::IsConnected() const
 
 void ClientElectionManager::BindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
     NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
@@ -502,7 +500,7 @@ void ClientElectionManager::BindNetworkEvents()
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = SpaceEntitySystemPtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
 
     NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
     NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));

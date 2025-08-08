@@ -25,6 +25,7 @@
 namespace csp::common
 {
 class LogSystem;
+class IRealtimeEngine;
 }
 
 namespace csp::systems
@@ -156,11 +157,14 @@ public:
     /// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
     HotspotSequenceSystem* GetHotspotSequenceSystem();
 
-    csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
-
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
+
+    // Convenience method for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
+    // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
+    // @deprecated This method is a transitional method, and should not be expected to exist in the long term.
+    csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
 
 private:
     SystemsManager();
@@ -168,19 +172,21 @@ private:
 
     ConversationSystemInternal* GetConversationSystem();
 
-    static void Instantiate();
+    // Optional SignalR inject, null means the systemsmanager will make one of its own
+    static void Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject = nullptr);
     static void Destroy();
 
     static SystemsManager* Instance;
 
-    void CreateSystems();
+    // Optional SignalR inject, null means the systemsmanager will make one of its own
+    void CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject);
     void DestroySystems();
 
     csp::web::WebClient* WebClient;
 
     csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
-    csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
+    std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine;
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;

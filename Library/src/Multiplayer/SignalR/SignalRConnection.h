@@ -20,6 +20,7 @@
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include <atomic>
 #include <signalrclient/hub_connection_builder.h>
+#include <unordered_set>
 
 CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
@@ -55,7 +56,8 @@ public:
 
     void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback) override;
 
-    void On(const std::string& EventName, const MethodInvokedHandler& Handler) override;
+    // Returns false if the event has already been bound, true otherwise
+    bool On(const std::string& EventName, const MethodInvokedHandler& Handler, csp::common::LogSystem& LogSystem) override;
 
     async::task<std::tuple<signalr::value, std::exception_ptr>> Invoke(
         const std::string& MethodName, const signalr::value& Arguments = signalr::value(),

@@ -42,14 +42,16 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(
-        csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(),
+        csp::CSPFoundation::GetDeviceId());
 
     // Stop
     WebSocketStop(WebSocket);
 
     // Logout
     LogOut(UserSystem);
+
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
@@ -65,8 +67,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(
-        csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(),
+        csp::CSPFoundation::GetDeviceId());
 
     // Send
     WebSocketSend(WebSocket, "test");
@@ -76,6 +78,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 
     // Logout
     LogOut(UserSystem);
+
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
@@ -91,8 +95,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Start
-    auto* WebSocket = WebSocketStart(
-        csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(), csp::CSPFoundation::GetDeviceId());
+    auto* WebSocket = WebSocketStart(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), csp::web::HttpAuth::GetAccessToken().c_str(),
+        csp::CSPFoundation::GetDeviceId());
 
     // Receive
     WebSocketSendReceive(WebSocket);
@@ -102,6 +106,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 
     // Logout
     LogOut(UserSystem);
+
+    csp::CSPFoundation::Shutdown();
 }
 
 /*

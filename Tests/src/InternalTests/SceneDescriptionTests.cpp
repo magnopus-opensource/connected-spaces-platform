@@ -17,9 +17,10 @@
 #include "TestHelpers.h"
 #include "gtest/gtest.h"
 
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/CSPSceneData.h"
 #include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
@@ -238,6 +239,16 @@ class MockScriptRunner : public csp::common::IJSScriptRunner
     void ClearModuleSource(csp::common::String) override { }
 };
 
+class TestAuthContext : public csp::common::IAuthContext
+{
+public:
+    const csp::common::LoginState& GetLoginState() const override { return State; }
+    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+
+private:
+    csp::common::LoginState State;
+};
+
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeEmptyTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
@@ -258,9 +269,11 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    TestAuthContext AuthContext;
+
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -269,6 +282,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
     EXPECT_EQ(SceneData.AssetCollections.Size(), 0);
     EXPECT_EQ(SceneData.Assets.Size(), 0);
     EXPECT_EQ(SceneData.Sequences.Size(), 0);
+
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeTest)
@@ -291,9 +306,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    TestAuthContext AuthContext;
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -374,6 +390,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
 
     // Sequences
     EXPECT_EQ(SceneData.Sequences.Size(), 0);
+
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeserializeTest)
@@ -396,9 +414,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem };
+    TestAuthContext AuthContext;
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
     csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::SpaceEntitySystem EntitySystem(&Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
 
     CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
@@ -474,4 +493,6 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     // Sequences
     EXPECT_EQ(SceneData.Sequences.Size(), 0);
+
+    csp::CSPFoundation::Shutdown();
 }

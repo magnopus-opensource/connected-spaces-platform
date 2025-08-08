@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/Asset.h"
@@ -71,13 +72,17 @@ public:
      *   @{ */
 
     /// @brief Enter a space if you have permission to, based on the Space settings.
-    /// This includes setting scopes (and toggling event listening in order to set the scope).
-    /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
+    /// Registers the user as in the space on the backend service, and calls csp::common::IRealtimeEngine::FetchAllEntitiesAndPopulateBuffers.
+    /// The initial load behaviour will differ based on the concrete IRealtimeEngine passed to this function.
     /// If user does not have permission to discover or enter the space, callback will be called with EResultCode::Failed and
     /// ERequestFailureReason::UserSpaceAccessDenied
     /// @param Space Space : space to enter into
+    /// @param RealtimeEngine IRealtimeEngine* : RealtimeEngine to load the space with. This object belongs to the caller, and does not
+    /// transfer ownership. Once the space is loaded, the caller should be sure to maintain the lifetime of the RealtimeEngine so long
+    /// as the space is active. Once the caller has called csp::systems::SpaceSystem::ExitSpace and received the callback, then they are
+    /// free to release the memory.
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, csp::common::IRealtimeEngine* RealtimeEngine, SpaceResultCallback Callback);
 
     /// @brief Exits the space and deregisters from the space scope.
     CSP_ASYNC_RESULT void ExitSpace(NullResultCallback Callback);
@@ -385,10 +390,8 @@ private:
         SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
 
     // EnterSpace Continuations
-    auto AddUserToSpaceIfNecessary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
+    auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
-    // Wraps SpaceEntitySystem::RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
-    auto RefreshMultiplayerScopes();
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

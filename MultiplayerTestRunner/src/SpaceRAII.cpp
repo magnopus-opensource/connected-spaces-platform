@@ -18,6 +18,7 @@
 
 #include "../include/ErrorCodes.h"
 #include "../include/ProcessDescriptors.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Utils.h"
 #include "uuid_v4.h"
@@ -30,6 +31,7 @@ namespace
 } // namespace
 
 SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
+    : RealtimeEngine(csp::systems::SystemsManager::Get().MakeOnlineRealtimeEngine())
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
@@ -47,20 +49,25 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
     }
 
     // Enter space
-    std::promise<csp::systems::NullResult> ResultPromise;
-    std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
+    std::promise<csp::systems::SpaceResult> EnterSpacePromise;
+    std::future<csp::systems::SpaceResult> EnterSpaceFuture = EnterSpacePromise.get_future();
 
-    SpaceSystem.EnterSpace(SpaceId.c_str(),
-        [&ResultPromise](csp::systems::NullResult Result)
+    std::promise<uint32_t> InitialEntityFetchPromise;
+    std::future<uint32_t> InitialEntityFetchFuture = InitialEntityFetchPromise.get_future();
+    RealtimeEngine->SetEntityFetchCompleteCallback(
+        [&InitialEntityFetchPromise](uint32_t EntitiesFetched) { InitialEntityFetchPromise.set_value(EntitiesFetched); });
+
+    SpaceSystem.EnterSpace(SpaceId.c_str(), RealtimeEngine.get(),
+        [&EnterSpacePromise](csp::systems::SpaceResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets
             if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
             {
-                ResultPromise.set_value(Result);
+                EnterSpacePromise.set_value(Result);
             }
         });
 
-    csp::systems::NullResult EnterSpaceResult = ResultFuture.get();
+    csp::systems::SpaceResult EnterSpaceResult = EnterSpaceFuture.get();
 
     if (EnterSpaceResult.GetResultCode() != csp::systems::EResultCode::Success)
     {
@@ -68,6 +75,9 @@ SpaceRAII::SpaceRAII(std::optional<std::string> ExistingSpaceId)
             = "HTTP Code: " + std::to_string(EnterSpaceResult.GetHttpResultCode()) + " Body: " + EnterSpaceResult.GetResponseBody().c_str();
         throw Utils::ExceptionWithCode { MultiplayerTestRunner::ErrorCodes::FAILED_TO_ENTER_SPACE, FailureReason };
     }
+
+    InitialEntityFetchFuture.get(); // Fully enter the space before yielding to the test code
+
     MultiplayerTestRunner::ProcessDescriptors::PrintProcessDescriptor(MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR);
 }
 
@@ -160,3 +170,5 @@ csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem&
 
     return Result.GetSpace();
 }
+
+csp::multiplayer::OnlineRealtimeEngine& SpaceRAII::GetRealtimeEngine() const { return *RealtimeEngine; }

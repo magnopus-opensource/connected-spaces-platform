@@ -26,6 +26,7 @@
 #include <atomic>
 #include <functional>
 #include <map>
+#include <memory>
 #include <vector>
 
 CSP_START_IGNORE
@@ -43,13 +44,15 @@ namespace csp::common
 {
 class LogSystem;
 class ReplicatedValue;
+class IRealtimeEngine;
 class IAuthContext;
+class IRealtimeEngine;
 }
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
-class SpaceEntitySystem;
+class OnlineRealtimeEngine;
 class ClientElectionManager;
 class ISignalRConnection;
 class NetworkEventManagerImpl;
@@ -135,13 +138,7 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    /// @param ISignalRConnection* SignalRConnection : The SignalR connection to use when talking to the server. The MultiplayerConnection takes
-    /// ownership of this pointer.
-    /// @param SpaceEntitySystem SpaceEntitySystem& : System provided such that it can create bindings at the appropriate point in the connection
-    /// flow, prior to entity fetches.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, ISignalRConnection* SignalRConnection,
-        csp::multiplayer::SpaceEntitySystem& SpaceEntitySystem, [[maybe_unused]] const csp::common::String& MultiplayerUri,
-        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -182,7 +179,10 @@ public:
     CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
 
     /// @brief MultiplayerConnection constructor
-    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem);
+    /// @param LogSystem csp::common::LogSystem& LogSystem injection.
+    /// @param Connection csp::multiplayer::ISignalRConnection& Connection injection. Multiplayer connection allows connection/disconnection, and
+    /// tracks that with a boolean flag, but the connection object itself is invariant, always set.
+    CSP_NO_EXPORT MultiplayerConnection(csp::common::LogSystem& LogSystem, csp::multiplayer::ISignalRConnection& Connection);
 
     /// @brief MultiplayerConnection destructor
     CSP_NO_EXPORT ~MultiplayerConnection();
@@ -194,6 +194,17 @@ public:
     /// @brief Getter for the MultiplayerHubMethodMap
     /// @return MultiplayerHubMethodMap : the MultiplayerHubMethodMap instance
     CSP_NO_EXPORT MultiplayerHubMethodMap GetMultiplayerHubMethods() const { return MultiplayerHubMethods; }
+
+    /// @brief Sets the internal reference to the OnlineRealtimeEngine. Should be called when entering a space.
+    /// @param OnlineRealtimeEngine OnlineRealtimeEngine* : Non-owning pointer. Ideally this would be an owned structure, but we can't due to the
+    /// wrapper generator. Remember to null this when exiting a space as object dispatch depends on that, until clients are capable of managing this
+    /// themselves. Unfortunate manual state management.
+    CSP_NO_EXPORT void SetOnlineRealtimeEngine(csp::multiplayer::OnlineRealtimeEngine* OnlineRealtimeEngine);
+
+    /// @brief Get the currently set realtime engine.
+    /// @return Non-owning pointer to currently set realtime engine. This should be non-null when in a space, and null before entering, or after
+    /// exiting a space.
+    csp::multiplayer::OnlineRealtimeEngine* GetOnlineRealtimeEngine() const;
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -214,7 +225,22 @@ private:
 
     void Stop(ExceptionCallbackHandler Callback) const;
 
+    /*
+     * Bind the SignalR messages that are recieved from MCS to facilitate realtime communication.
+     * These are bound for the entire lifetime of the MultiplayerConnection (conceptually Login/Logout scoped).
+     * These messages are dispatched to the OnlineRealtimeEngine if it exists.
+     * For the future, consider how pleasant it might be if we bound everything all at once here, and had a single
+     * container of observers to recieve the bindings. That would make registering/deregistering AND lifetime the
+     * same concept, and we'd have a single pipe of realtime events that were obvious to trace.
+     */
+    void BindOnObjectMessage();
+    void BindOnObjectPatch();
+    void BindOnRequestToSendObject();
+    void BindOnRequestToDisconnect();
+
+    // May not be null
     class csp::multiplayer::ISignalRConnection* Connection;
+
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
     class NetworkEventBus* EventBusPtr;
@@ -233,6 +259,8 @@ private:
     bool AllowSelfMessaging = false;
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
+
+    OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
 };
 
 } // namespace csp::multiplayer

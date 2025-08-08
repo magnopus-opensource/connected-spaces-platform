@@ -16,7 +16,7 @@
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
 namespace
