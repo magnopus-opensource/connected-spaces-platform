@@ -824,13 +824,14 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
     GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
 
-void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, NullResultCallback Callback)
+void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, const bool AvatarSelected, NullResultCallback Callback)
 {
     rapidjson::Document Json;
     Json.SetObject();
     Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
     Json.AddMember(
         "identifier", rapidjson::Value(InIdentifier.c_str(), static_cast<rapidjson::SizeType>(InIdentifier.Length())), Json.GetAllocator());
+    Json.AddMember("avatarSelected", AvatarSelected, Json.GetAllocator());
     rapidjson::StringBuffer Buffer;
     rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
     Json.Accept(Writer);
@@ -872,7 +873,7 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         rapidjson::Document Json;
         Json.Parse(Value.c_str());
 
-        if (!Json.HasMember("type") || !Json.HasMember("identifier"))
+        if (!Json.HasMember("type") || !Json.HasMember("identifier") || !Json.HasMember("avatarSelected"))
         {
             CSP_LOG_ERROR_MSG("Invalid avatar info!");
 
@@ -908,6 +909,20 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         else
         {
             CSP_LOG_ERROR_MSG("Invalid identifier type!");
+
+            Callback(InternalResult);
+
+            return;
+        }
+
+        if (!Json.HasMember("avatarSelectedType") || (static_cast<VariantType>(Json["avatarSelectedType"].GetBool()) == VariantType::Boolean))
+        {
+            InternalResult.SetAvatarSelected(Json["avatarSelected"].GetBool());
+            Callback(InternalResult);
+        }
+        else
+        {
+            CSP_LOG_ERROR_MSG("Invalid avatar selected type!");
 
             Callback(InternalResult);
 
