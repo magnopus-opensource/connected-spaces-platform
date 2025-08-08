@@ -38,6 +38,8 @@ public:
     /// @brief Constructs an empty result.
     ResultBase();
 
+    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
+
     /// @brief Virtual destructor.
     virtual ~ResultBase() = default;
 
@@ -79,7 +81,6 @@ public:
 
 protected:
     ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
-    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
 
     void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
