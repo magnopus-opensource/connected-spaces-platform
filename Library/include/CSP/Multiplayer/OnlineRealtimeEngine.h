@@ -235,7 +235,7 @@ public:
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
     /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
     /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity) override;
+    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) override;
 
     /// @brief Applies any pending changes to entities that have been marked for update.
     virtual void ProcessPendingEntityOperations() override;
@@ -334,9 +334,6 @@ public:
 
     /// @brief Unlocks the entity mutex.
     void UnlockEntityUpdate() const;
-
-    /// @brief Queues a specific entity to update. Used in SpaceEntity to queue updates via passing the this pointer
-    void QueueEntityUpdate(SpaceEntity* EntityToUpdate);
 
     /// @brief "Resolves" the entity heirarchy, such that the entity is parented appropriately, and internal buffers are populated appropriately.
     /// (Vague, need more understanding about what this does)
