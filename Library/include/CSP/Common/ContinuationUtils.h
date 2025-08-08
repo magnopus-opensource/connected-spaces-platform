@@ -75,20 +75,16 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
  * abstraction, but pragmatically necessary to do the modularization.
  */
 template <typename ErrorResultT>
-inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::function<void(const ErrorResultT&)> Callback, std::string SuccessMsg,
-    ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
+    std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
-    return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem, LogLevel](
+    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem, LogLevel](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
     {
         if (ErrorCode.has_value())
         {
             // Error Case. We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            if (Callback)
-            {
-                Callback(ErrorResult);
-            }
             csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
         }
         else
