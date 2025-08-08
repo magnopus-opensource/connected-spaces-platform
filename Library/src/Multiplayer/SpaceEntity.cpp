@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/SpaceEntity.h"
 
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
@@ -110,7 +111,7 @@ SpaceEntity::SpaceEntity()
 {
 }
 
-SpaceEntity::SpaceEntity(OnlineRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
     : EntitySystem(InEntitySystem)
     , Type(SpaceEntityType::Avatar)
     , Id(0)
@@ -133,7 +134,7 @@ SpaceEntity::SpaceEntity(OnlineRealtimeEngine* InEntitySystem, csp::common::IJSS
 {
 }
 
-SpaceEntity::SpaceEntity(OnlineRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
+SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
     SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
     bool IsTransferable, bool IsPersistent)
     : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
@@ -409,14 +410,6 @@ void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const Spa
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
 
-void SpaceEntity::QueueUpdate()
-{
-    if (EntitySystem)
-    {
-        EntitySystem->QueueEntityUpdate(this);
-    }
-}
-
 void SpaceEntity::Destroy(CallbackHandler Callback)
 {
     if (EntitySystem)
@@ -430,25 +423,6 @@ void SpaceEntity::SetUpdateCallback(UpdateCallback Callback) { EntityUpdateCallb
 void SpaceEntity::SetDestroyCallback(DestroyCallback Callback) { EntityDestroyCallback = Callback; }
 
 void SpaceEntity::SetPatchSentCallback(CallbackHandler Callback) { EntityPatchSentCallback = Callback; }
-
-void SpaceEntity::MarkForUpdate()
-{
-    if (EntitySystem)
-    {
-#if defined(CSP_ENTITY_SCRIPT_UPDATE_DEFERRED)
-        EntitySystem->MarkEntityForUpdate(this);
-#else
-        EntitySystem->QueueEntityUpdate(this);
-#endif
-    }
-    else
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Warning, "Space Entity not marked for update, no local EntitySystem found.");
-        }
-    }
-}
 
 const csp::common::Map<uint16_t, ComponentBase*>* SpaceEntity::GetComponents() const { return &Components; }
 
@@ -543,6 +517,14 @@ void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
     {
         ChildEntities[Index]->RemoveParentEntity();
         ChildEntities[Index]->Parent = nullptr;
+    }
+}
+
+void SpaceEntity::MarkForUpdate() 
+{
+    if (EntitySystem)
+    {
+        EntitySystem->QueueEntityUpdate(this);
     }
 }
 
@@ -695,7 +677,8 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessa
 
         if (ShouldUpdateParent)
         {
-            EntitySystem->ResolveEntityHierarchy(this);
+            // TODO: Replace this with RealtineEngine utils
+            //EntitySystem->ResolveEntityHierarchy(this);
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
             ShouldUpdateParent = false;
         }
@@ -884,13 +867,33 @@ bool SpaceEntity::Deselect()
 
 bool SpaceEntity::IsModifiable() const
 {
-
-    // I do not know if we actually need to check multiplayer for nullness, this check was here when breaking dependencies ... one would hope it would
-    // be an invariant on EntitySystem.
-    if ((EntitySystem == nullptr) || (EntitySystem->GetMultiplayerConnectionInstance() == nullptr))
+    if (EntitySystem == nullptr)
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
+        return true;
+    }
+
+    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Offline)
+    {
+        if (EntityLock == LockType::UserAgnostic &&
+            // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
+            // so we skip the lock check they are about to unlock.
+            // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
+            (DirtyProperties.HasKey(COMPONENT_KEY_VIEW_LOCKTYPE) == false))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+
+    // I do not know if we actually need to check multiplayer for nullness, this check was here when breaking dependencies ... one would hope it would
+    // be an invariant on EntitySystem.
+    if (OnlineRealtimeEngine->GetMultiplayerConnectionInstance() == nullptr)
+    {
         return true;
     }
 
@@ -903,7 +906,7 @@ bool SpaceEntity::IsModifiable() const
         return false;
     }
 
-    return (OwnerId == EntitySystem->GetMultiplayerConnectionInstance()->GetClientId() || IsTransferable);
+    return (OwnerId == OnlineRealtimeEngine->GetMultiplayerConnectionInstance()->GetClientId() || IsTransferable);
 }
 
 void SpaceEntity::Lock()
@@ -955,9 +958,24 @@ void SpaceEntity::Unlock()
 
 bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
 
+void SpaceEntity::QueueUpdate()
+{
+    if (EntitySystem)
+    {
+        EntitySystem->QueueEntityUpdate(this);
+    }
+}
+
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 {
-    uint64_t LocalClientId = EntitySystem->GetMultiplayerConnectionInstance()->GetClientId();
+    uint64_t LocalClientId = 0;
+    
+    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    {
+        auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+        LocalClientId = OnlineRealtimeEngine->GetMultiplayerConnectionInstance()->GetClientId();
+    }
+    
     if (SelectedState)
     {
         if (!IsSelected())
@@ -1074,16 +1092,23 @@ void SpaceEntity::ResolveParentChildRelationship()
         // Set our new parent
         Parent = EntitySystem->FindSpaceEntityById(*ParentId);
 
-        if (Parent == nullptr)
+        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         {
-            // Parent may not have been added yet
-            // so check pending entities
-            for (const auto& PendingParent : *EntitySystem->GetPendingAdds())
+            if (Parent == nullptr)
             {
-                if (PendingParent->Id == *ParentId)
+                // For the OnlineRealtimeSystem, it's possible for parents to exist within the PendingAdds array,
+                // so we also need to check here.
+                auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+
+                // Parent may not have been added yet
+                // so check pending entities
+                for (const auto& PendingParent : *OnlineRealtimeEngine->GetPendingAdds())
                 {
-                    Parent = PendingParent;
-                    break;
+                    if (PendingParent->Id == *ParentId)
+                    {
+                        Parent = PendingParent;
+                        break;
+                    }
                 }
             }
         }
@@ -1309,7 +1334,8 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
 
     if (ShouldUpdateParent)
     {
-        EntitySystem->ResolveEntityHierarchy(this);
+        // TODO: Replace this with RealtineEngine utils
+        //EntitySystem->ResolveEntityHierarchy(this);
         UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
         ShouldUpdateParent = false;
     }
@@ -1433,7 +1459,14 @@ ComponentUpdateInfo SpaceEntity::ComponentFromItemComponentDataPatch(uint16_t Co
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }
 
-void SpaceEntity::ClaimScriptOwnership() { EntitySystem->ClaimScriptOwnership(this); }
+void SpaceEntity::ClaimScriptOwnership()
+{
+    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    {
+        auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+        OnlineRealtimeEngine->ClaimScriptOwnership(this);
+    }
+}
 
 void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
 {
