@@ -126,6 +126,18 @@ public:
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
         const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
     {
+        // Marking parameters as unused by casting them to void to suppress warnings.
+        // however this method is exported and the wrapper generator does not support that approach.
+        // C++ 17 adds support for the [[maybe_unused]] attribute, but again the wrapper generator does not support it.
+        (void)Name;
+        (void)UserId;
+        (void)SpaceTransform;
+        (void)IsVisible;
+        (void)AvatarState;
+        (void)AvatarId;
+        (void)AvatarPlayMode;
+        (void)Callback;
+
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
@@ -140,9 +152,21 @@ public:
         const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Name;
+        (void)SpaceTransform;
+        (void)ParentID;
+        (void)Callback;
     }
 
-    virtual void AddEntity(csp::multiplayer::SpaceEntity* EntityToAdd) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    virtual void AddEntity(csp::multiplayer::SpaceEntity* EntityToAdd)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)EntityToAdd;
+    }
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
@@ -150,6 +174,10 @@ public:
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
+        (void)Callback;
     }
 
     /// @brief Sets a callback to be executed when an entity is fully created.
@@ -162,6 +190,9 @@ public:
     CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Callback;
     }
 
     /// @brief Adds an entity to the set of selected entities
@@ -171,6 +202,9 @@ public:
     CSP_NO_EXPORT virtual bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
     }
 
     /// @brief Removes an entity to the set of selected entities
@@ -180,6 +214,9 @@ public:
     CSP_NO_EXPORT virtual bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
     }
 
     /**
@@ -197,6 +234,10 @@ public:
     CSP_NO_EXPORT virtual void FetchAllEntitiesAndPopulateBuffers(const csp::common::String& SpaceId, EntityFetchStartedCallback FetchStartedCallback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)SpaceId;
+        (void)FetchStartedCallback;
     }
 
     /***** ENTITY ACCESS *****************************************************/
@@ -207,6 +248,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntity(const csp::common::String& Name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Name;
     }
 
     /// @brief Finds the first found SpaceEntity that has the ID EntityId.
@@ -215,6 +259,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t EntityId)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)EntityId;
     }
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will contain an AvatarSpaceComponent.
@@ -223,6 +270,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceAvatar(const csp::common::String& Name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Name;
     }
 
     /// @brief Finds the first found SpaceEntity of a matching Name. The found SpaceEntity will not contain an AvatarSpaceComponent.
@@ -231,6 +281,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* FindSpaceObject(const csp::common::String& Name)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Name;
     }
 
     /// @brief Get an Entity by its index.
@@ -240,6 +293,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetEntityByIndex(size_t EntityIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)EntityIndex;
     }
 
     /// @brief Get an Avatar by its index. The returned pointer will be an entity that contains an AvatarSpaceComponent.
@@ -249,6 +305,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetAvatarByIndex(size_t AvatarIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)AvatarIndex;
     }
 
     /// @brief Get an Object by its index. The returned pointer will be an entity that does not contain an AvatarSpaceComponent.
@@ -258,6 +317,9 @@ public:
     [[nodiscard]] virtual csp::multiplayer::SpaceEntity* GetObjectByIndex(size_t ObjectIndex)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)ObjectIndex;
     }
 
     /// @brief Get the number of total entities in the system.
@@ -295,7 +357,13 @@ public:
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
     /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
     /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity) { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
+    }
 
     /// @brief Applies any pending changes to entities that have been marked for update.
     virtual void ProcessPendingEntityOperations() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
