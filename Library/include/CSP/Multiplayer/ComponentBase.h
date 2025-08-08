@@ -75,6 +75,7 @@ enum class ComponentType
     Text = 25,
     Hotspot = 26,
     CinematicCamera = 27,
+    ScreenSharing = 28,
     // spare values
     Delete = 56
 };

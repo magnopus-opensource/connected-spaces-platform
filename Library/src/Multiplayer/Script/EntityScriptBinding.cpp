@@ -37,6 +37,7 @@
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
@@ -523,6 +524,20 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
+
+    Module->class_<ScreenSharingSpaceComponentScriptInterface>("ScreenSharingSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, UserId, "userId")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageCollectionId, "defaultImageCollectionId")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, DefaultImageAssetId, "defaultImageAssetId")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, AttenuationRadius, "attenuationRadius")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Position, "position")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Scale, "scale")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsShadowCaster, "isShadowCaster");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -567,6 +582,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
             "getGaussianSplatComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
+        .fun<&EntityScriptInterface::GetComponentsOfType<ScreenSharingSpaceComponentScriptInterface, ComponentType::ScreenSharing>>(
+            "getScreenSharingComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
         .property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")

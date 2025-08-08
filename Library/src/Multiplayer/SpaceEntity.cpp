@@ -36,6 +36,7 @@
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
@@ -831,6 +832,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::Hotspot:
         Component = new HotspotSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::ScreenSharing:
+        Component = new ScreenSharingSpaceComponent(LogSystem, this);
         break;
     default:
     {
