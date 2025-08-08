@@ -49,7 +49,7 @@ void ApplicationSettingsSystem::GetSettingsByContext(
     const String& ApplicationName, const String& Context, const Optional<Array<String>>& Keys, ApplicationSettingsResultCallback Callback)
 {
     GetSettingsByContext(ApplicationName, Context, Keys)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings", "Failed to get application settings", {},
             {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
@@ -62,7 +62,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
     ApplicationSettingsResultCallback Callback)
 {
     GetSettingsByContextAnonymous(Tenant, ApplicationName, Context, Keys)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings",
             "Failed to get application settings", {}, {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
@@ -73,7 +73,7 @@ void ApplicationSettingsSystem::GetSettingsByContextAnonymous(const csp::common:
 void ApplicationSettingsSystem::CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback)
 {
     CreateSettingsByContext(ApplicationSettings)
-        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(Callback,
+        .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<ApplicationSettingsResult>(
             "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings", "Failed to create application settings",
             {}, {}, {}))
         .then([Callback](const ApplicationSettingsResult& Result) { Callback(Result); })
