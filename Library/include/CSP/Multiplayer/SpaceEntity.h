@@ -478,6 +478,12 @@ public:
     /// @param PropertyKey int32_t : the key of the property to update
     CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
 
+    /// @brief Remove child entities from parent.
+    CSP_NO_EXPORT void RemoveChildEntities();
+
+    /// @brief Sets the internal ParentId to nullptr
+    CSP_NO_EXPORT void RemoveParentId();
+
 private:
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
@@ -554,13 +560,7 @@ private:
     /// @param InOwnerId uint64_t : the owner ID to set
     void SetOwnerId(const uint64_t InOwnerId);
 
-    /// @brief Remove child entities from parent
-    void RemoveChildEntities();
-
-    /// @brief Set ParentId to nullptr
-    void RemoveParentId();
-
-    // Do NOT call directly, always call either Select() Deselect()
+    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
     /// @brief Internal version of the selected state of the entity setter
     /// @param SelectedState bool : the selected state to set
     /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state

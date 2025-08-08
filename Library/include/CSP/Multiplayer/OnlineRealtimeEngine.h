@@ -230,6 +230,10 @@ public:
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;
 
+    /// @brief Adds the given entity to the hierarchy by updating entity children and root hierarchy.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to add to the hierarchy.
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity) override;
+
     /***** ENTITY PROCESSING *************************************************/
 
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
@@ -334,10 +338,6 @@ public:
 
     /// @brief Unlocks the entity mutex.
     void UnlockEntityUpdate() const;
-
-    /// @brief "Resolves" the entity heirarchy, such that the entity is parented appropriately, and internal buffers are populated appropriately.
-    /// (Vague, need more understanding about what this does)
-    void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.

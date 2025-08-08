@@ -190,6 +190,11 @@ size_t OfflineRealtimeEngine::GetNumObjects() const { return Objects.Size(); }
 
 const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
 
+void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+{
+    csp::multiplayer::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+}
+
 void OfflineRealtimeEngine::QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) { EntitiesToUpdate->insert(Entity); }
 
 void OfflineRealtimeEngine::ProcessPendingEntityOperations()

@@ -52,6 +52,7 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
+#include "RealtimeEngineUtils.h"
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
@@ -677,8 +678,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessa
 
         if (ShouldUpdateParent)
         {
-            // TODO: Replace this with RealtineEngine utils
-            //EntitySystem->ResolveEntityHierarchy(this);
+            EntitySystem->ResolveEntityHierarchy(this);
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
             ShouldUpdateParent = false;
         }
@@ -1334,8 +1334,7 @@ void SpaceEntity::FromObjectPatch(const mcs::ObjectPatch& Patch)
 
     if (ShouldUpdateParent)
     {
-        // TODO: Replace this with RealtineEngine utils
-        //EntitySystem->ResolveEntityHierarchy(this);
+        EntitySystem->ResolveEntityHierarchy(this);
         UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
         ShouldUpdateParent = false;
     }
