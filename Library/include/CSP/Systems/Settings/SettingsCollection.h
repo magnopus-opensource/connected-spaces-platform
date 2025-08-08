@@ -95,22 +95,31 @@ public:
     /// @brief A getter which returns the String passed via the result.
     [[nodiscard]] AvatarType GetAvatarType() const;
     [[nodiscard]] const csp::common::String& GetAvatarIdentifier() const;
+    [[nodiscard]] const bool GetAvatarSelected() const;
 
     CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , Type(AvatarType::None) {};
+        , Type(AvatarType::None)
+        , AvatarSelected(false) {};
 
 private:
     AvatarInfoResult()
-        : Type(AvatarType::None) {};
+        : Type(AvatarType::None)
+        , AvatarSelected(false) {};
     AvatarInfoResult(void*)
-        : Type(AvatarType::None) {};
+        : Type(AvatarType::None)
+        , AvatarSelected(false) {};
 
     void SetAvatarType(AvatarType InValue);
     void SetAvatarIdentifier(const csp::common::String& InValue);
+    void SetAvatarSelected(const bool InValue);
 
+    /// @brief The type of avatar (predefined, Ready Player Me, or custom).
     AvatarType Type;
+    /// @brief A string used to identify or locate the avatar.
     csp::common::String Identifier;
+    /// @brief Represents whether the avatar has been selected by the user previously.
+    bool AvatarSelected;
 };
 
 /// @brief Callback containing Settings collection.
