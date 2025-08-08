@@ -155,6 +155,11 @@ public:
     /// @param Value - The new name to assign to the componenent.
     void SetComponentName(const csp::common::String& Value);
 
+    // Called when the component is locally deleted from the space,
+    // or the entity the component is attached to is locally deleted.
+    // Used for handling behavior when a client first deletes the component.
+    CSP_NO_EXPORT virtual void OnLocalDelete();
+
 protected:
     ComponentBase();
 
@@ -184,11 +189,6 @@ protected:
     // Called whenever an entity is removed from the system.
     // Used to shutdown any behavior managed by the entity.
     virtual void OnRemove();
-
-    // Called when the component is locally deleted from the space,
-    // or the entity the component is attached to is locally deleted.
-    // Used for handling behavior when a client first deletes the component.
-    virtual void OnLocalDelete();
 
     CSP_START_IGNORE
     void SetScriptInterface(ComponentScriptInterface* ScriptInterface);
