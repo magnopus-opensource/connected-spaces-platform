@@ -137,8 +137,7 @@ namespace detail
         }
 
         template <typename ExceptionHandlerCallable>
-        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(
-            ExceptionHandlerCallable&& ExceptionHandler, csp::systems::NullResultCallback ResultCallback)
+        inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
             async::spawn(
                 []() {
@@ -151,7 +150,7 @@ namespace detail
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
         inline void SpawnChainThatCallsLogHTTPErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
-            IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler, csp::systems::NullResultCallback ResultCallback)
+            IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler)
         {
             async::spawn(
                 []() {
