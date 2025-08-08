@@ -34,7 +34,7 @@ ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::Scale)] = csp::common::Vector3::One();
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster)] = true;
+    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster)] = false;
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::UserId)] = "";
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId)] = "";
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId)] = "";

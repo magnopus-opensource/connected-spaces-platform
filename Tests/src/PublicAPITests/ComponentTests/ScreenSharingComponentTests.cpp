@@ -85,7 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), true);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), true);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
+    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), false);
 
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
@@ -107,7 +107,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     ScreenSharingComponent->SetIsVisible(false);
     ScreenSharingComponent->SetIsARVisible(false);
-    ScreenSharingComponent->SetIsShadowCaster(false);
+    ScreenSharingComponent->SetIsShadowCaster(true);
 
     // Ensure values are set correctly
     EXPECT_EQ(ScreenSharingComponent->GetUserId(), ScreenSharingUserId);
@@ -121,7 +121,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), false);
+    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -180,7 +180,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 		component.scale = [0, 0, 0];
 		component.isVisible = false;
 		component.isARVisible = false;
-		component.isShadowCaster = false;
+		component.isShadowCaster = true;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(ScreenSharingScriptText.c_str());
@@ -200,7 +200,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
-    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), false);
+    EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
