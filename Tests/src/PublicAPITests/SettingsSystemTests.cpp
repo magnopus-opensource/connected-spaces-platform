@@ -463,7 +463,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
     // Set Avatar info
     {
-        auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, Type, Identifier);
+        auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, Type, Identifier, true);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
@@ -474,6 +474,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetAvatarType(), Type);
+        EXPECT_EQ(Result.GetAvatarSelected(), true);
     }
 
     // Log out
