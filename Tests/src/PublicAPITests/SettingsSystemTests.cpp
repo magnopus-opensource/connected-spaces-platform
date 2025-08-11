@@ -458,6 +458,15 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
 
+    // Get default avatar info (without the user ever having set it)
+    {
+        auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetAvatarType(), csp::systems::AvatarType::None);
+        EXPECT_EQ(Result.GetAvatarVisible(), true);
+    }
+
     auto Type = csp::systems::AvatarType::Custom;
     csp::common::String Identifier = "https://notarealweb.site/my_cool_avatar.glb";
 
@@ -474,7 +483,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
         EXPECT_EQ(Result.GetAvatarType(), Type);
-        EXPECT_EQ(Result.GetAvatarSelected(), true);
+        EXPECT_EQ(Result.GetAvatarVisible(), true);
     }
 
     // Log out

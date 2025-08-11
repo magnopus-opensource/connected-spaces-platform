@@ -137,10 +137,10 @@ public:
     /// @brief Sets the avatar type and identifier for a user.
     /// @param InType csp::systems::AvatarType : The type of avatar (predefined, Ready Player Me, or custom).
     /// @param InIdentifier csp::common::String : A string used to identify or locate the avatar.
-    /// @param AvatarSelected bool : A bool used to identify if the avatar has been selected by the user previously.
+    /// @param InAvatarVisible bool : A bool used to identify whether the user's avatar should be visible or not.
     /// @param Callback NullResultCallback : Callback to call when task finishes.
     CSP_ASYNC_RESULT void SetAvatarInfo(
-        AvatarType InType, const csp::common::String& InIdentifier, const bool AvatarSelected, NullResultCallback Callback);
+        AvatarType InType, const csp::common::String& InIdentifier, bool InAvatarVisible, NullResultCallback Callback);
 
     /// @brief Retrieves the avatar type and identifier for a user.
     /// @param Callback NullResultCallback : Callback to call when task finishes.

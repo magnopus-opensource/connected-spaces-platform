@@ -56,13 +56,13 @@ AvatarType AvatarInfoResult::GetAvatarType() const { return Type; }
 
 const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const { return Identifier; }
 
-const bool AvatarInfoResult::GetAvatarSelected() const { return AvatarSelected; }
+const bool AvatarInfoResult::GetAvatarVisible() const { return AvatarVisible; }
 
 void AvatarInfoResult::SetAvatarType(AvatarType InValue) { Type = InValue; }
 
 void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue) { Identifier = InValue; }
 
-void AvatarInfoResult::SetAvatarSelected(const bool InValue) { AvatarSelected = InValue; }
+void AvatarInfoResult::SetAvatarVisible(const bool InValue) { AvatarVisible = InValue; }
 
 const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return SettingsCollection; }
 
