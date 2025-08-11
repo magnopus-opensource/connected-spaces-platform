@@ -824,14 +824,14 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
     GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
 
-void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, const bool AvatarSelected, NullResultCallback Callback)
+void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, bool InAvatarVisible, NullResultCallback Callback)
 {
     rapidjson::Document Json;
     Json.SetObject();
     Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
     Json.AddMember(
         "identifier", rapidjson::Value(InIdentifier.c_str(), static_cast<rapidjson::SizeType>(InIdentifier.Length())), Json.GetAllocator());
-    Json.AddMember("avatarSelected", AvatarSelected, Json.GetAllocator());
+    Json.AddMember("avatarVisible", InAvatarVisible, Json.GetAllocator());
     rapidjson::StringBuffer Buffer;
     rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
     Json.Accept(Writer);
@@ -857,7 +857,6 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
             CSP_LOG_ERROR_MSG("Failed to retrieve avatar info.");
 
             Callback(InternalResult);
-
             return;
         }
 
@@ -865,69 +864,54 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
         if (Value.IsEmpty())
         {
+            CSP_LOG_MSG(csp::common::LogLevel::Verbose, "Whilst avatar info was successfully returned, no avatar settings data was found.");
             Callback(InternalResult);
-
             return;
         }
 
         rapidjson::Document Json;
         Json.Parse(Value.c_str());
 
-        if (!Json.HasMember("type") || !Json.HasMember("identifier") || !Json.HasMember("avatarSelected"))
+        // Avatar type
+        if (Json.HasMember("type") && Json["type"].IsInt())
         {
-            CSP_LOG_ERROR_MSG("Invalid avatar info!");
-
-            Callback(InternalResult);
-
-            return;
-        }
-
-        const auto& type = Json["type"];
-
-        if (!type.IsInt())
-        {
-            CSP_LOG_ERROR_MSG("Invalid avatar info!");
-
-            Callback(InternalResult);
-
-            return;
-        }
-
-        InternalResult.SetAvatarType(static_cast<AvatarType>(type.GetInt()));
-
-        if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
-        {
-            // Integer type is no longer supported -- convert to string
-            InternalResult.SetAvatarIdentifier(std::to_string(Json["identifier"].GetInt()).c_str());
-            Callback(InternalResult);
-        }
-        else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
-        {
-            InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
-            Callback(InternalResult);
+            InternalResult.SetAvatarType(static_cast<AvatarType>(Json["type"].GetInt()));
         }
         else
         {
-            CSP_LOG_ERROR_MSG("Invalid identifier type!");
-
-            Callback(InternalResult);
-
-            return;
+            CSP_LOG_ERROR_MSG("Whilst avatar info was successfully returned with data, no avatar type was included.");
         }
 
-        if (!Json.HasMember("avatarSelectedType") || (static_cast<VariantType>(Json["avatarSelectedType"].GetBool()) == VariantType::Boolean))
+        // Avatar identifier type (used to identify or locate the actual avatar asset)
+        if (Json.HasMember("identifier"))
         {
-            InternalResult.SetAvatarSelected(Json["avatarSelected"].GetBool());
-            Callback(InternalResult);
+            if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
+            {
+                // Integer type is no longer supported -- convert to string
+                InternalResult.SetAvatarIdentifier(std::to_string(Json["identifier"].GetInt()).c_str());
+            }
+            else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
+            {
+                InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("Invalid avatar identifier type!");
+            }
         }
         else
         {
-            CSP_LOG_ERROR_MSG("Invalid avatar selected type!");
-
-            Callback(InternalResult);
-
-            return;
+            // No identifier field was present in the json
+            CSP_LOG_ERROR_MSG("Whilst avatar info was successfully returned with data, no avatar identifier was included.");
         }
+
+        // Avatar visibility
+        if (Json.HasMember("avatarSelected") && Json["avatarSelected"].IsBool())
+        {
+            InternalResult.SetAvatarVisible(Json["avatarSelected"].GetBool());
+        }
+
+        Callback(InternalResult);
     };
 
     GetSettingValue("UserSettings", "AvatarInfo", GetSettingCallback);
