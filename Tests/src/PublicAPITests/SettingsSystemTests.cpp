@@ -447,7 +447,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
+CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, DefaultAvatarInfoTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -467,12 +467,41 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
         EXPECT_EQ(Result.GetAvatarVisible(), true);
     }
 
-    auto Type = csp::systems::AvatarType::Custom;
-    csp::common::String Identifier = "https://notarealweb.site/my_cool_avatar.glb";
+    // Log out
+    LogOut(UserSystem);
+}
+
+namespace CSPEngine
+{
+
+/*
+ * For convenience, we test various permutations of setting avatar info with a matrix-based approach.
+ * In all cases, we're assume the response is a success. The tests are concerned with validating that the data
+ * we set is what we get back.
+ */
+
+class SetAvatarInfo : public PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>
+{
+};
+
+TEST_P(SetAvatarInfo, SetAvatarInfoTest)
+{
+    const csp::systems::AvatarType AvatarType = std::get<0>(GetParam());
+    const csp::common::String AvatarIdentifier = std::get<1>(GetParam());
+    const bool AvatarVisible = std::get<2>(GetParam());
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
 
     // Set Avatar info
     {
-        auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, Type, Identifier, true);
+        auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, AvatarType, AvatarIdentifier, AvatarVisible);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     }
@@ -482,10 +511,18 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
         auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(Result.GetAvatarType(), Type);
-        EXPECT_EQ(Result.GetAvatarVisible(), true);
+        EXPECT_EQ(Result.GetAvatarType(), AvatarType);
+        EXPECT_EQ(Result.GetAvatarIdentifier(), AvatarIdentifier);
+        EXPECT_EQ(Result.GetAvatarVisible(), AvatarVisible);
     }
 
     // Log out
     LogOut(UserSystem);
 }
+
+INSTANTIATE_TEST_SUITE_P(SettingsSystemTests, SetAvatarInfo,
+    testing::Values(std::make_tuple(csp::systems::AvatarType::Custom, "https://notarealweb.site/my_avatar.glb", true),
+        std::make_tuple(csp::systems::AvatarType::Custom, "https://notarealweb.site/my_avatar.glb", false),
+        std::make_tuple(csp::systems::AvatarType::Premade, "1", false), std::make_tuple(csp::systems::AvatarType::None, "", true)));
+
+} // namespace CSPEngine
