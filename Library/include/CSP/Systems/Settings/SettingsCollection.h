@@ -102,15 +102,15 @@ public:
     CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
         , Type(AvatarType::None)
-        , AvatarVisible(false) {};
+        , AvatarVisible(true) {};
 
 private:
     AvatarInfoResult()
         : Type(AvatarType::None)
-        , AvatarVisible(false) {};
+        , AvatarVisible(true) {};
     AvatarInfoResult(void*)
         : Type(AvatarType::None)
-        , AvatarVisible(false) {};
+        , AvatarVisible(true) {};
 
     void SetAvatarType(AvatarType InValue);
     void SetAvatarIdentifier(const csp::common::String& InValue);
