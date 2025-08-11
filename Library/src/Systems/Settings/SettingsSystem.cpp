@@ -906,9 +906,9 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         }
 
         // Avatar visibility
-        if (Json.HasMember("avatarSelected") && Json["avatarSelected"].IsBool())
+        if (Json.HasMember("avatarVisible") && Json["avatarVisible"].IsBool())
         {
-            InternalResult.SetAvatarVisible(Json["avatarSelected"].GetBool());
+            InternalResult.SetAvatarVisible(Json["avatarVisible"].GetBool());
         }
 
         Callback(InternalResult);
