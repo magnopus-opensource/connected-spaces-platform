@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Systems/Settings/SettingsCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "Mocks/SignalRConnectionMock.h"
 #include <gtest/gtest.h>
@@ -68,3 +69,4 @@ protected:
 
 // If you want to use a new parameterized test structure, you need to explicitly instantiate here (and in the .cpp)
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
