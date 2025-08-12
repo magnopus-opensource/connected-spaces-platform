@@ -97,7 +97,7 @@ public:
     /// @brief Returns the string used to identify or locate the avatar.
     [[nodiscard]] const csp::common::String& GetAvatarIdentifier() const;
     /// @brief Returns whether or not the user's avatar is intended to be visible or not.
-    [[nodiscard]] const bool GetAvatarVisible() const;
+    [[nodiscard]] bool GetAvatarVisible() const;
 
     CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
@@ -114,7 +114,7 @@ private:
 
     void SetAvatarType(AvatarType InValue);
     void SetAvatarIdentifier(const csp::common::String& InValue);
-    void SetAvatarVisible(const bool InValue);
+    void SetAvatarVisible(bool InValue);
 
     /// @brief The type of avatar (predefined, Ready Player Me, or custom).
     AvatarType Type;
