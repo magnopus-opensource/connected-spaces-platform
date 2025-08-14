@@ -1,3 +1,4 @@
 unknownMacro
 missingInclude
 missingIncludeSystem
+syntaxError
