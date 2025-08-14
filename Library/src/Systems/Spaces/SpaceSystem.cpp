@@ -187,6 +187,9 @@ std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbna
         const auto SpaceId = Space->GetSpace().Id;
         auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
 
+        // This task is designed to be a link in another continuation chain
+        // It is not responsible for handling its own callbacks (success or failure). Instead,
+        // it returns the task that allows the next task in the chain to be executed.
         return CreateSpaceThumbnailAssetCollection(Space)
             .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
                 "SpaceSystem::CreateAndUploadSpaceThumbnailToSpace, successfully created space thumbnail asset collection.",
@@ -211,6 +214,9 @@ std::function<async::task<UriResult>()> SpaceSystem::CreateAndUploadSpaceThumbna
         const auto SpaceId = Space->GetSpace().Id;
         auto ThumbnailAssetCollection = std::make_shared<AssetCollectionResult>();
 
+        // This task is designed to be a link in another continuation chain
+        // It is not responsible for handling its own callbacks (success or failure). Instead,
+        // it returns the task that allows the next task in the chain to be executed.
         return CreateSpaceThumbnailAssetCollection(Space)
             .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<AssetCollectionResult>(
                 "SpaceSystem::CreateAndUploadSpaceThumbnailWithBufferToSpace, successfully created space thumbnail asset collection.",
@@ -240,6 +246,9 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
 
         const auto SpaceId = Space->GetSpace().Id;
 
+        // This task is designed to be a link in another continuation chain
+        // It is not responsible for handling its own callbacks (success or failure). Instead,
+        // it returns the task that allows the next task in the chain to be executed.
         return SpaceSystem->BulkInviteToSpace(SpaceId, *InviteUsers)
             .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
                 "SpaceSystem::BulkInviteUsersToSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}));
