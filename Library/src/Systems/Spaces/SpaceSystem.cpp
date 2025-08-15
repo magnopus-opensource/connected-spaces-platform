@@ -288,7 +288,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
             CSP_LOG_MSG(csp::common::LogLevel::Log, "Adding user to space.");
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
-            SpaceSystem.AddUserToSpace(SpaceToJoin.Id, UserId)
+            SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
                 .then(async::inline_scheduler(),
                     [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
                     { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
@@ -867,29 +867,18 @@ void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const Strin
         });
 }
 
-async::task<SpaceResult> SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId)
+async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, const String& UserId)
 {
     // Because we react in a continuation, we need to keep the event alive, hence shared ptr.
     std::shared_ptr<async::event_task<SpaceResult>> OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
     async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
 
-    GetSpace(SpaceId).then(async::inline_scheduler(),
-        [UserId, OnCompleteEvent, this](const SpaceResult& Result) mutable
-        {
-            // .then continuations are only called for success of failure (completion), no need to handle inprogress
-            if (Result.GetResultCode() == EResultCode::Failed)
-            {
-                OnCompleteEvent->set(Result); // Set the failure result for error handling
-                return;
-            }
+    const csp::common::String& SpaceCode = Result.GetSpaceCode();
 
-            const csp::common::String& SpaceCode = Result.GetSpaceCode();
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
-            csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-                [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
-
-            static_cast<chs::GroupApi*>(GroupAPI)->groupCodesGroupCodeUsersUserIdPut(SpaceCode, UserId, ResponseHandler);
-        });
+    static_cast<chs::GroupApi*>(GroupAPI)->groupCodesGroupCodeUsersUserIdPut(SpaceCode, UserId, ResponseHandler);
 
     return OnCompleteTask;
 }
