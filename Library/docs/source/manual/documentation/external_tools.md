@@ -52,7 +52,7 @@ run_cppcheck_static_analysis.bat
 Alternatively, Cppcheck can be configured to run with the following command-line arguments to define the analysis scope and output format:
 
 ```
-"C:\Program Files\Cppcheck\cppcheck.exe" --xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppressions-list=Tools\CppCheck\cppcheck_suppressions.txt -I"Library/include" -I"Library/src" Library
+"C:\Program Files\Cppcheck\cppcheck.exe" --xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all -j8 --suppressions-list=Tools\CppCheck\cppcheck_suppressions.txt -I"Library/include" -I"Library/src" Library
 ```
 
 A breakdown of the key configuration flags is as follows:
@@ -61,7 +61,8 @@ A breakdown of the key configuration flags is as follows:
 - `--xml` and `--xml-version=2`: The analysis results are output in an XML format. This is specifically chosen for easy integration with external tools and for viewing with dedicated applications.
 - `--output-file=cppcheck_output.xml`: The report is saved to a fixed file named `cppcheck_output.xml` in the current working directory.
 - `--enable=all`: This flag enables all available checks, including style, performance, portability, and unused function checks, for a comprehensive analysis.
-- `--suppress=unknownMacro`: This flag prevents Cppcheck from reporting warnings for macros that are not defined in the source but are provided by the compiler or build environment. This helps to reduce noise and focus the report on more critical issues.
+- `j8`: This flag instructs Cppcheck to use 8 threads to speed up the analysis process on multi-core machines. Using multiple threads significantly reduces the time it takes to scan a large codebase.
+- `--suppressions-list=Tools\CppCheck\cppcheck_suppressions.txt`: This flag points to a suppression file that contains a list of specific warnings or errors to ignore during the analysis. This helps to manage known issues without modifying the code or the command line.
 - `-I"Library/include"`: This specifies the include path Cppcheck should use to resolve headers. In this case, it's a fixed path relative to the current directory.
 - `Library`: This specifies the source directory to be analyzed. In this configuration, it is a fixed directory named `Library`.
 
