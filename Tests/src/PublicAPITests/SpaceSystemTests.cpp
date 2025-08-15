@@ -3247,8 +3247,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
+namespace CSPEngine
+{
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
+class ExitSpaceRealtimeEngine : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+TEST_P(ExitSpaceRealtimeEngine, ExitSpaceRealtimeEngineTest)
 {
     SetRandSeed();
 
@@ -3270,10 +3276,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    ASSERT_FALSE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    const csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    ASSERT_FALSE(SpaceSystem->IsInSpace());
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    }
+
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
@@ -3281,44 +3293,59 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
     ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     ASSERT_TRUE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
+    }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     ASSERT_FALSE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    }
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
 
-namespace CSPEngine
-{
+INSTANTIATE_TEST_SUITE_P(
+    SpaceSystemTests, ExitSpaceRealtimeEngine, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
 /*
  * Test all the permutations of EnterSpace, concerning space visibility and invite permissions.
  * Ensure that the method returns the correct success/failure's
  * First: The Attributes the space should be built with (gated, requiresinvite, etc)
  * Second: The expected result code from attempting to enter the space
  * Third: A string that is expected to be contained in stdout, (ie, what error message do we expect)
+ * Fourth: The type of realtime engine to instantiate when entering the space
  */
 
-class EnterSpaceWhenGuest : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+class EnterSpaceWhenGuest
+    : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>
 {
 };
 
-class EnterSpaceWhenUninvited : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+class EnterSpaceWhenUninvited
+    : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>
 {
 };
 
-class EnterSpaceWhenInvited : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+class EnterSpaceWhenInvited
+    : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>
 {
 };
 
-class EnterSpaceWhenCreator : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+class EnterSpaceWhenCreator
+    : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>
 {
 };
 
-class EnterSpaceWhenBanned : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string>>
+class EnterSpaceWhenBanned
+    : public PublicTestBaseWithParam<std::tuple<SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>
 {
 };
 
@@ -3328,6 +3355,7 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     const SpaceAttributes SpacePermission = std::get<0>(GetParam());
     const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
     const std::string ExpectedMsg = std::get<2>(GetParam());
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<3>(GetParam());
 
     SetRandSeed();
 
@@ -3352,7 +3380,7 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     String GuestUserId;
     LogInAsGuest(UserSystem, GuestUserId);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3380,6 +3408,7 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     const SpaceAttributes SpacePermission = std::get<0>(GetParam());
     const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
     const std::string ExpectedMsg = std::get<2>(GetParam());
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<3>(GetParam());
 
     SetRandSeed();
 
@@ -3405,7 +3434,7 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     csp::systems::Profile UninvitedUser = CreateTestUser();
     LogIn(UserSystem, UninvitedUserId, UninvitedUser.Email, GeneratedTestAccountPassword);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3432,6 +3461,7 @@ TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
     const SpaceAttributes SpacePermission = std::get<0>(GetParam());
     const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
     const std::string ExpectedMsg = std::get<2>(GetParam());
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<3>(GetParam());
 
     SetRandSeed();
 
@@ -3464,7 +3494,7 @@ TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
     String InvitedUserId;
     LogIn(UserSystem, InvitedUserId, InvitedUser.Email, GeneratedTestAccountPassword);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3491,6 +3521,7 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     const SpaceAttributes SpacePermission = std::get<0>(GetParam());
     const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
     const std::string ExpectedMsg = std::get<2>(GetParam());
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<3>(GetParam());
 
     SetRandSeed();
 
@@ -3510,7 +3541,7 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     Space CreatedSpace;
     CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3533,6 +3564,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     const SpaceAttributes SpacePermission = std::get<0>(GetParam());
     const csp::systems::EResultCode JoinSpaceResultExpected = std::get<1>(GetParam());
     const std::string ExpectedMsg = std::get<2>(GetParam());
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<3>(GetParam());
 
     SetRandSeed();
 
@@ -3567,7 +3599,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         // In order to ban the user, they have to have entered the space. (This seems like an underthought limitation)
@@ -3587,7 +3619,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
         // Login as the banned user and attempt to enter the space and check the expected result
         LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
 
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         testing::internal::CaptureStderr();
@@ -3608,62 +3640,126 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     LogOut(UserSystem);
 }
 
+// Before adding another matrix to this giant case, look into `testing::Combine` to see if we can get away with being terser
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenGuest,
     testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
-                        "Logged in user does not have permission to join this space. Failed to add to space."),
-        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+                        "Logged in user does not have permission to join this space. Failed to add to space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
-        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."), // RequiresInvite == Private, although the
-                                                                                                       // name dosen't really convey it. :(
-        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+            "Logged in user does not have permission to discover this space. Failed to enter space.",
+            RealtimeEngineType::Offline), // RequiresInvite == Private, although the
+                                          // name dosen't really convey it. :(
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to join this space. Failed to add to space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online)));
 
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenUninvited,
     testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
-                        "Logged in user does not have permission to join this space. Failed to add to space."),
-        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
+                        "Logged in user does not have permission to join this space. Failed to add to space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
-        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
-        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to join this space. Failed to add to space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online)));
 
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenInvited,
-    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+    testing::Values(
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online)));
 
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenCreator,
-    testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space."),
-        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.")));
+    testing::Values(
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(
+            SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(
+            SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Success, "Successfully entered space.", RealtimeEngineType::Online)));
 
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenBanned,
     testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
-                        "Logged in user does not have permission to discover this space. Failed to enter space."),
+                        "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space."),
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
         std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Failed,
-            "Logged in user does not have permission to discover this space. Failed to enter space.")));
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Offline),
+        std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::IsDiscoverable, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::None, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Private, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Public, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::RequiresInvite, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online),
+        std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Failed,
+            "Logged in user does not have permission to discover this space. Failed to enter space.", RealtimeEngineType::Online)));
 }
