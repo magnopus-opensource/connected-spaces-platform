@@ -104,3 +104,7 @@ Tests/assets/test_account_creds.txt
 
 # Ignore generated package directories
 package/
+
+# Ignore CppCheck artifacts
+Tools/CppCheck/.cppcheck-build-dir
+Tools/CppCheck/*.xml
