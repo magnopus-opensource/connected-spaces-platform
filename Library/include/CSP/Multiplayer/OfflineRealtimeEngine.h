@@ -235,26 +235,24 @@ public:
 
     // Get all the entities in the space, used in the OfflineSpaceEntityEventHandler
     // I wonder if this should be an IRealtimeEngine interface method? Seems useful.
-    CSP_NO_EXPORT SpaceEntityList& GetAllEntities();
+    CSP_NO_EXPORT csp::common::List<SpaceEntity*>& GetAllEntities();
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
 
 private:
-    using SpaceEntitySet = std::set<SpaceEntity*>;
-
     // Should not be null
     csp::common::LogSystem* LogSystem;
 
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
 
-    SpaceEntityList Entities;
-    SpaceEntityList Avatars;
-    SpaceEntityList Objects;
-    SpaceEntityList SelectedEntities;
-    SpaceEntityList RootHierarchyEntities;
+    csp::common::List<SpaceEntity*> Entities;
+    csp::common::List<SpaceEntity*> Avatars;
+    csp::common::List<SpaceEntity*> Objects;
+    csp::common::List<SpaceEntity*> SelectedEntities;
+    csp::common::List<SpaceEntity*> RootHierarchyEntities;
 
-    std::unique_ptr<SpaceEntitySet> EntitiesToUpdate;
+    std::unique_ptr<std::set<csp::multiplayer::SpaceEntity*>> EntitiesToUpdate;
 
     std::recursive_mutex EntitiesLock;
 

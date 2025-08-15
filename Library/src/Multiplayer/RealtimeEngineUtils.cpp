@@ -175,7 +175,7 @@ void StartEntityDeletion(
 }
 
 // You should lock the entities mutex before calling this, and probably have processed entity operations
-void InitialiseEntityScripts(csp::common::IRealtimeEngine::SpaceEntityList& Entities)
+void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& Entities)
 {
     // Register all scripts for import
     for (size_t i = 0; i < Entities.Size(); ++i)
@@ -212,7 +212,7 @@ void InitialiseEntityScripts(csp::common::IRealtimeEngine::SpaceEntityList& Enti
 // when the owner will need to be re-assigned, although ownership will also
 // be claimed by anyone who interacts with an object
 //
-void DetermineScriptOwners(const csp::common::IRealtimeEngine::SpaceEntityList& Entities, uint64_t ClientId)
+void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& Entities, uint64_t ClientId)
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
     {

@@ -202,9 +202,9 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
     , TickEntitiesLock(new std::mutex)
-    , PendingAdds(new(SpaceEntityQueue))
-    , PendingRemoves(new(SpaceEntityQueue))
-    , PendingOutgoingUpdateUniqueSet(new(SpaceEntitySet))
+    , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
+    , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
+    , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
     , PendingIncomingUpdates(new(PatchMessageQueue))
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
@@ -242,7 +242,7 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
     delete (PendingIncomingUpdates);
 }
 
-OnlineRealtimeEngine::SpaceEntityQueue* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
+std::deque<csp::multiplayer::SpaceEntity*>* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
 
 MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() const { return MultiplayerConnectionInst; }
 
@@ -329,7 +329,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * of a place to put them, we can't release to the client because we need shared ownership to do safe threadless chaining, but we also
          * cant chain shared ownership because we don't have a sink to put it.
          *
-         * The solution to this is to make `Entities` (ie SpaceEntityList) a true owner and have it contain shared_ptrs.
+         * The solution to this is to make `Entities` (ie csp::common::List<SpaceEntity*>) a true owner and have it contain shared_ptrs.
          * Then, we'd make the other containers (Avatars, etc), store weak_ptrs, the idea being that for any given object,
          * CSP owns it "uniquely" (In that there's one container in CSP memory space that has a true owning type, shared_ptr in this
          * instance), but also clients may own it, sharing the ownership with us. This interacts well with garbage collectors and removes
@@ -1352,7 +1352,7 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
     delete (EntityToRemove);
 }
 
-void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
+void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& AddedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1362,7 +1362,7 @@ void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEnt
     }
 }
 
-void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
+void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& RemovedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1370,7 +1370,7 @@ void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const Space
     }
 }
 
-void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
+void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& AddedObjects)
 {
     if (ElectionManager != nullptr)
     {
@@ -1378,7 +1378,7 @@ void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const SpaceEnt
     }
 }
 
-void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
+void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& RemovedObjects)
 {
     if (ElectionManager != nullptr)
     {
