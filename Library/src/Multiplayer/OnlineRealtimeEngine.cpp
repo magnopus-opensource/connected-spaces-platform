@@ -87,15 +87,6 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common:
 
     return EntityId;
 }
-
-csp::common::String JSONStringFromDeltaTime(double DeltaTime)
-{
-    return csp::common::StringFormat("{"
-                                     "\"deltaTimeMS\""
-                                     ": %lf}",
-        DeltaTime);
-}
-
 } // namespace
 
 template class csp::common::List<csp::multiplayer::SpaceEntity*>;
@@ -253,7 +244,7 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
 
 OnlineRealtimeEngine::SpaceEntityQueue* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
 
-MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
+MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() const { return MultiplayerConnectionInst; }
 
 csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Online; }
 
@@ -666,34 +657,6 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
 
 namespace
 {
-    // You should lock the entities mutex before calling this, and probably have processed entity operations
-    void InitialiseEntityScripts(csp::multiplayer::OnlineRealtimeEngine::SpaceEntityList& Entities)
-    {
-        // Register all scripts for import
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            EntityScript& Script = Entities[i]->GetScript();
-            Script.RegisterSourceAsModule();
-        }
-
-        // Bind and invoke all scripts
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
-            {
-                Script.Bind();
-                Script.Invoke();
-            }
-        }
-
-        // Tell all scripts that all entities are now loaded
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            EntityScript& Script = Entities[i]->GetScript();
-            Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
-        }
-    }
-
     void FireSpaceEntityCreatedCallback(
         SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
     {
@@ -830,7 +793,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             }
             else
             {
-                DetermineScriptOwners();
+                DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
             }
 
             if (FetchCompleteCallback)
@@ -862,6 +825,12 @@ void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
             FetchStartedCallback();
         });
 }
+
+void OnlineRealtimeEngine::LockEntityUpdate() { EntitiesLock->lock(); }
+
+bool OnlineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock->try_lock(); }
+
+void OnlineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock->unlock(); }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
@@ -952,7 +921,8 @@ void OnlineRealtimeEngine::TickEntities()
 
     if (EnableEntityTick)
     {
-        TickEntityScripts();
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
+            *TickEntitiesLock, GetRealtimeEngineType(), MultiplayerConnectionInst->GetClientId(), Entities, LastTickTime);
     }
 
     {
@@ -969,24 +939,6 @@ void OnlineRealtimeEngine::TickEntities()
         }
 
         TickUpdateEntities.clear();
-    }
-}
-
-// @brief Simple script ownership
-//
-// Simple MVP script ownership for testing:
-// * Everyone 'claims' ownership of scripts on connection
-// * Last person to do so 'wins'
-//
-// @note this does not currently handle when the owner leaves the session
-// when the owner will need to be re-assigned, although ownership will also
-// be claimed by anyone who interacts with an object
-//
-void OnlineRealtimeEngine::DetermineScriptOwners()
-{
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ClaimScriptOwnership(Entities[i]);
     }
 }
 
@@ -1023,43 +975,14 @@ void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
     {
         if (Entities[i]->GetScript().GetOwnerId() == ClientId)
         {
-            ClaimScriptOwnership(Entities[i]);
+            csp::multiplayer::ClaimScriptOwnership(Entities[i], GetMultiplayerConnectionInstance()->GetClientId());
         }
     }
 }
 
-void OnlineRealtimeEngine::TickEntityScripts()
+void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    const auto CurrentTime = std::chrono::system_clock::now();
-    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
-    LastTickTime = CurrentTime;
-
-    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
-
-    if (IsLeaderElectionEnabled())
-    {
-        if (ElectionManager->IsLocalClientLeader())
-        {
-            for (size_t i = 0; i < Entities.Size(); ++i)
-            {
-                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
-        }
-    }
-    else
-    {
-        const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            if (ClientId == Entities[i]->GetScript().GetOwnerId())
-            {
-                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
-        }
-    }
+    csp::multiplayer::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 void OnlineRealtimeEngine::EnableLeaderElection()
@@ -1186,17 +1109,6 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
         LeaderProxy->RunScript(ContextId, ScriptText);
     }
 }
-
-void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
-{
-    const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-    EntityScript& Script = Entity->GetScript();
-    Script.SetOwnerId(ClientId);
-}
-
-void OnlineRealtimeEngine::LockEntityUpdate() const { EntitiesLock->lock(); }
-
-void OnlineRealtimeEngine::UnlockEntityUpdate() const { EntitiesLock->unlock(); }
 
 size_t OnlineRealtimeEngine::GetNumEntities() const
 {
@@ -1335,7 +1247,7 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
                 PendingEntity->SetOwnerId(MultiplayerConnectionInst->GetClientId());
-                ClaimScriptOwnership(PendingEntity);
+                csp::multiplayer::ClaimScriptOwnership(PendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
 
                 PendingEntities.Append(PendingEntity);
 

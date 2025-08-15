@@ -38,6 +38,7 @@ class LogSystem;
 namespace csp::multiplayer
 {
 class CSPSceneDescription;
+class EntityScriptBinding;
 
 /// @brief Class for creating and managing objects in an offline context.
 ///
@@ -211,7 +212,8 @@ public:
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
-    /// @brief OnlineRealtimeEngine constructor
+    /// @brief OfflineRealtimeEngine constructor.
+    /// Creates a realtime engine pre-populated from a scene description. (Usually parsed from a checkpoint file)
     /// @param SceneDescription CSPSceneDescription : The scene description containing entities within the scene.
     /// These entities will be populated in the RealtimeEngine.
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
@@ -219,7 +221,23 @@ public:
     OfflineRealtimeEngine(
         const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
 
-    using SpaceEntityList = csp::common::List<SpaceEntity*>;
+    /// @brief OfflineRealtimeEngine constructor
+    /// Creates an empty realtime engine.
+    /// @param SceneDescription CSPSceneDescription : The scene description containing entities within the scene.
+    /// These entities will be populated in the RealtimeEngine.
+    /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
+    /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
+    OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+
+    /// @brief OfflineRealtimeEngine destructor
+    /// Removes entity script bindings and deregisters tick event listeners
+    ~OfflineRealtimeEngine();
+
+    // Get all the entities in the space, used in the OfflineSpaceEntityEventHandler
+    // I wonder if this should be an IRealtimeEngine interface method? Seems useful.
+    CSP_NO_EXPORT SpaceEntityList& GetAllEntities();
+
+    CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
 
 private:
     using SpaceEntitySet = std::set<SpaceEntity*>;
@@ -238,11 +256,14 @@ private:
 
     std::unique_ptr<SpaceEntitySet> EntitiesToUpdate;
 
-    std::unique_ptr<std::recursive_mutex> EntitiesLock;
+    std::recursive_mutex EntitiesLock;
 
     EntityCreatedCallback SpaceEntityCreatedCallback;
 
     void AddPendingEntity(SpaceEntity* EntityToAdd);
     void RemovePendingEntity(SpaceEntity* EntityToRemove);
+
+    std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
+    EntityScriptBinding* ScriptBinding;
 };
 }

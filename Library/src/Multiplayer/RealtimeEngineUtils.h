@@ -16,9 +16,12 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/String.h"
 
+#include <chrono>
 #include <memory>
+#include <mutex>
 
 namespace csp::common
 {
@@ -71,4 +74,18 @@ void ResolveParentChildForDeletion(
 // It also fires the entity patch callback, notifying clients that the child entities have been reparented.
 void StartEntityDeletion(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity);
+
+// You should lock the entities mutex before calling this, and probably have processed entity operations
+void InitialiseEntityScripts(csp::common::IRealtimeEngine::SpaceEntityList& Entities);
+
+// ClientID is the ID that comes from the multiplayerConnection
+void DetermineScriptOwners(const csp::common::IRealtimeEngine::SpaceEntityList& Entities, uint64_t ClientId);
+
+// ClientID is the ID that comes from the multiplayerConnection
+void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId);
+
+// Returns the current time, meant to be set as LastTickTime. If an offline engine, will not bother checking script ownership
+std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
+    uint64_t ClientId, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime);
+
 }
