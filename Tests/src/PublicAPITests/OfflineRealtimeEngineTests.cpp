@@ -194,7 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, AddEntity)
     OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
 
     auto ExternalEntity = new SpaceEntity { nullptr, *SystemsManager.GetScriptSystem(), SystemsManager.GetLogSystem(), SpaceEntityType::Object, 0,
-        "Name", SpaceTransform {}, 0, false, false };
+        "Name", SpaceTransform {}, 0, {}, false, false };
     Engine.AddEntity(ExternalEntity);
 
     // Check that our entity is registered as an entity in the engine.

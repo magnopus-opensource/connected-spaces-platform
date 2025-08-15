@@ -63,12 +63,8 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
     // Client id doesnt matter for single player
     uint64_t ClientId = 0;
 
-    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform, ClientId, false, false };
-
-    if (ParentID.HasValue())
-    {
-        NewEntity->SetParentId(*ParentID);
-    }
+    auto* NewEntity
+        = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform, ClientId, ParentID, false, false };
 
     std::scoped_lock EntitiesLocker { *EntitiesLock };
 
