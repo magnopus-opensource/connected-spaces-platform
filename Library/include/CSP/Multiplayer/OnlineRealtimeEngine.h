@@ -261,6 +261,17 @@ public:
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
         const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
 
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    virtual void LockEntityUpdate() override;
+
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex will fail to lock if already locked in order to avoid deadlocks.
+    virtual bool TryLockEntityUpdate() override;
+
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    virtual void UnlockEntityUpdate() override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
@@ -327,17 +338,11 @@ public:
 
     /// @brief Getter for the multiplayer connection instance
     /// @return: MultiplayerConnection*
-    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
+    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance() const;
 
     // @brief Ticks all entities and scripts, processing any pending local and remote updates
     // Will only tick scrips if EnableEntityTick is enabled, which it should be if entity fetch has completed.
     CSP_NO_EXPORT void TickEntities();
-
-    /// @brief Locks the entity mutex.
-    void LockEntityUpdate() const;
-
-    /// @brief Unlocks the entity mutex.
-    void UnlockEntityUpdate() const;
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
@@ -391,13 +396,10 @@ private:
     void ApplyIncomingPatch(const signalr::value*);
     void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-    void DetermineScriptOwners();
-
     void ResolveParentChildForDeletion(SpaceEntity* Deletion);
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);
-    void TickEntityScripts();
 
     void OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
     void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
@@ -425,7 +427,7 @@ private:
     class SpaceEntityEventHandler* EventHandler;
     class ClientElectionManager* ElectionManager;
 
-    std::mutex* TickEntitiesLock;
+    std::recursive_mutex* TickEntitiesLock;
 
     SpaceEntityQueue* PendingAdds;
     SpaceEntityQueue* PendingRemoves;

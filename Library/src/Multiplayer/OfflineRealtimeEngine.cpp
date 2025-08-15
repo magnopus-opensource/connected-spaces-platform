@@ -21,25 +21,109 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/UUIDGenerator.h"
+#include "Events/EventListener.h"
+#include "Events/EventSystem.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
+#include "Multiplayer/Script/EntityScriptBinding.h"
 
 #include <unordered_set>
 
 namespace csp::multiplayer
 {
 
+// Handler to listen to tick events, and do the script update
+class OfflineSpaceEntityEventHandler : public csp::events::EventListener
+{
+public:
+    OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* EntitySystem);
+
+    void OnEvent(const csp::events::Event& InEvent) override;
+
+private:
+    OfflineRealtimeEngine* EntitySystem;
+    std::chrono::system_clock::time_point LastTickTime;
+};
+
+OfflineSpaceEntityEventHandler::OfflineSpaceEntityEventHandler(OfflineRealtimeEngine* EntitySystem)
+    : EntitySystem(EntitySystem)
+    , LastTickTime(std::chrono::system_clock::now())
+{
+}
+
+void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
+{
+    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
+    {
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(),
+            OfflineRealtimeEngine::LocalClientId(), *EntitySystem->GetAllEntities(), LastTickTime);
+    }
+}
+
 csp::common::RealtimeEngineType OfflineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Offline; }
+
+namespace
+{
+    // This was initially just a random number, however, we need keep the ID's low
+    // This is because of a gnarly latent bug with EntityID's. The scripting system (QuickJS currently)
+    // binds EntityID's to native JS `numbers`, which are 64 bit floating points.
+    // Anything too high precision will not be bound properly by that ... it's a proper problem, we just havn't
+    // hit it because we normally keep our ID's in reasonably high-accuracy number space (relatively) near to zero.
+    // If you're worrying how much to wonder about this, I think it's 9,007,199,254,740,991, (2^53 - 1) where doubles stop being able to represent
+    // ints 1:1.
+    uint64_t NextId()
+    {
+        static std::atomic<uint64_t> counter { 0 };
+        static constexpr std::uint64_t Precision53Bits = 9007199254740991;
+        assert(counter < Precision53Bits && "Id's need to be able to be represented at double precision, because of JS bindings.");
+        return counter++;
+    }
+
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(
+    const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
+{
+    std::scoped_lock EntitiesLocker(EntitiesLock);
+
+    auto DeserializedEntities = SceneDescription.CreateEntities(*this, LogSystem, RemoteScriptRunner);
+
+    for (size_t i = 0; i < DeserializedEntities.Size(); ++i)
+    {
+        AddEntity(DeserializedEntities[i]);
+    }
+}
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+    : LogSystem { &LogSystem }
+    , ScriptRunner { &RemoteScriptRunner }
+{
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+
+    // Is this undefined behaviour? Probably only if we actually use the pointer during construction
+    EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
+
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+}
+
+OfflineRealtimeEngine::~OfflineRealtimeEngine()
+{
+    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+}
 
 void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
     const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, csp::multiplayer::AvatarState State, const csp::common::String& AvatarId,
     csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
-    const uint64_t Id = RandInt();
+    // Some of our interfaces use int64_t ... real bugs here.
+    const uint64_t Id = NextId();
 
     std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar
         = BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode);
 
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(EntitiesLock);
 
     Entities.Append(NewAvatar.get());
     Avatars.Append(NewAvatar.get());
@@ -50,23 +134,24 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
 
     if (SpaceEntityCreatedCallback)
     {
-        SpaceEntityCreatedCallback(Avatar);
+        SpaceEntityCreatedCallback(NewAvatar.get());
     }
 
-    Callback(Avatar);
+    Callback(NewAvatar.release());
 }
 
 void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
     const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
-    uint64_t Id = RandInt();
+    // Some of our interfaces use int64_t ... real bugs here.
+    uint64_t Id = NextId();
     // Client id doesnt matter for single player
     uint64_t ClientId = 0;
 
     auto* NewEntity
         = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform, ClientId, ParentID, false, false };
 
-    std::scoped_lock EntitiesLocker { *EntitiesLock };
+    std::scoped_lock EntitiesLocker { EntitiesLock };
 
     ResolveEntityHierarchy(NewEntity);
 
@@ -83,13 +168,13 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
 
 void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(EntitiesLock);
     AddPendingEntity(EntityToAdd);
 }
 
 void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(EntitiesLock);
 
     StartEntityDeletion(*this, RootHierarchyEntities, Entity);
 
@@ -208,19 +293,29 @@ void OfflineRealtimeEngine::ProcessPendingEntityOperations()
 
 void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback Callback)
 {
-    // TODO: Currently dont do anything here as Entities are populated in the constructor.
-    // This will likely change when integrating new RealtimeEngine changes.
+    // Entities are populated in the constructor, so can immediately call back.
     Callback();
+
+    // ClientID dosen't matter
+    static constexpr uint64_t ClientId = 0;
+
+    InitialiseEntityScripts(Entities);
+    DetermineScriptOwners(Entities, ClientId);
+
+    EntityFetchCompleteCallback(static_cast<uint32_t>(Entities.Size()));
 }
+
+void OfflineRealtimeEngine::LockEntityUpdate() { return EntitiesLock.lock(); }
+
+bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock(); }
+
+void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : LogSystem { &LogSystem }
-    , ScriptRunner { &RemoteScriptRunner }
-    , EntitiesToUpdate { std::make_unique<SpaceEntitySet>() }
-    , EntitiesLock { std::make_unique<std::recursive_mutex>() }
+    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    std::scoped_lock EntitiesLocker(EntitiesLock);
 
     auto DeserializedEntities = SceneDescription.CreateEntities(*this, LogSystem, RemoteScriptRunner);
 
@@ -229,6 +324,32 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
         AddPendingEntity(DeserializedEntities[i]);
     }
 }
+
+OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
+    : LogSystem { &LogSystem }
+    , ScriptRunner { &RemoteScriptRunner }
+    , EntitiesToUpdate { std::make_unique<std::set<csp::multiplayer::SpaceEntity*>>() }
+{
+    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+
+    // Is this undefined behaviour? Probably only if we actually use the pointer during construction
+    EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
+
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler.get());
+}
+
+OfflineRealtimeEngine::~OfflineRealtimeEngine()
+{
+    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler.get());
+}
+
+csp::common::IRealtimeEngine::SpaceEntityList& OfflineRealtimeEngine::GetAllEntities() { return Entities; }
+
+std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 
 void OfflineRealtimeEngine::AddPendingEntity(SpaceEntity* EntityToAdd)
 {

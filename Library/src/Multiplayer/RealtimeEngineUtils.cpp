@@ -17,8 +17,14 @@
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/RealtimeEngineUtils.h"
+#include <fmt/format.h>
+
+namespace
+{
+csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::format("{{\"deltaTimeMS\": {}}}", DeltaTime).c_str(); }
+}
 
 namespace csp::multiplayer
 {
@@ -94,6 +100,8 @@ bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, Space
 
 void ResolveEntityHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity)
 {
+    // Feels weird this not having a mutex lock, relies on the caller setting the entities lock
+
     if (Entity->GetParentId().HasValue())
     {
         for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
@@ -164,5 +172,79 @@ void StartEntityDeletion(
             ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
         }
     }
+}
+
+// You should lock the entities mutex before calling this, and probably have processed entity operations
+void InitialiseEntityScripts(csp::common::IRealtimeEngine::SpaceEntityList& Entities)
+{
+    // Register all scripts for import
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.RegisterSourceAsModule();
+    }
+
+    // Bind and invoke all scripts
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
+        {
+            Script.Bind();
+            Script.Invoke();
+        }
+    }
+
+    // Tell all scripts that all entities are now loaded
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        EntityScript& Script = Entities[i]->GetScript();
+        Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+    }
+}
+
+// @brief Simple script ownership
+//
+// Simple MVP script ownership for testing:
+// * Everyone 'claims' ownership of scripts on connection
+// * Last person to do so 'wins'
+//
+// @note this does not currently handle when the owner leaves the session
+// when the owner will need to be re-assigned, although ownership will also
+// be claimed by anyone who interacts with an object
+//
+void DetermineScriptOwners(const csp::common::IRealtimeEngine::SpaceEntityList& Entities, uint64_t ClientId)
+{
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        ClaimScriptOwnership(Entities[i], ClientId);
+    }
+}
+
+void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId)
+{
+    EntityScript& Script = Entity->GetScript();
+    Script.SetOwnerId(ClientId);
+}
+
+std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
+    uint64_t ClientId, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime)
+{
+    std::scoped_lock EntitiesLocker(EntitiesLock);
+
+    const auto CurrentTime = std::chrono::system_clock::now();
+    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
+
+    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
+
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        // Ownership is not a concern for offline realtime engines
+        if ((ClientId == Entities[i]->GetScript().GetOwnerId()) || (RealtimeEngineType != csp::common::RealtimeEngineType::Online))
+        {
+            Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
+        }
+    }
+
+    return CurrentTime;
 }
 }

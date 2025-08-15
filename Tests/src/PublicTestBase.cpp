@@ -126,5 +126,7 @@ template <typename T> void PublicTestBaseWithParam<T>::TearDown()
 }
 
 // Explicit instantiations
-template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;
+template class PublicTestBaseWithParam<
+    std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>;
+template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
