@@ -18,8 +18,8 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
 #include "Events/Event.h"
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
@@ -89,7 +89,7 @@ ClientElectionManager::~ClientElectionManager()
     }
 }
 
-void ClientElectionManager::OnConnect(const OnlineRealtimeEngine::SpaceEntityList& Avatars, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnConnect(const csp::common::List<SpaceEntity*>& Avatars, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager::OnConnect called");
 
@@ -121,7 +121,7 @@ void ClientElectionManager::OnDisconnect()
 }
 
 void ClientElectionManager::OnLocalClientAdd(
-    const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
@@ -153,27 +153,27 @@ void ClientElectionManager::OnLocalClientAdd(
 }
 
 void ClientElectionManager::OnClientAdd(
-    const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& /*Avatars*/, NetworkEventBus& NetworkEventBus)
+    const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/, NetworkEventBus& NetworkEventBus)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
     AddClientUsingAvatar(ClientAvatar, NetworkEventBus);
 }
 
-void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& /*Avatars*/)
+void ClientElectionManager::OnClientRemove(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& /*Avatars*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
         fmt::format("ClientElectionManager::OnLocalClientAdd called : ClientId={}", ClientAvatar->GetOwnerId()).c_str());
     RemoveClientUsingAvatar(ClientAvatar);
 }
 
-void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnObjectAdd(const SpaceEntity* /*Object*/, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectAdd called");
     // @Todo - This event allows us to track individual object ownership
 }
 
-void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const OnlineRealtimeEngine::SpaceEntityList& /*Objects*/)
+void ClientElectionManager::OnObjectRemove(const SpaceEntity* /*Object*/, const csp::common::List<SpaceEntity*>& /*Objects*/)
 {
     LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose, "ClientElectionManager::OnObjectRemove called");
     // @Todo - This event allows us to track individual object ownership

@@ -274,9 +274,6 @@ public:
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
-    using SpaceEntityList = csp::common::List<SpaceEntity*>;
-    using SpaceEntityQueue = std::deque<SpaceEntity*>;
-
     /// @brief Sets a callback to be executed when the script system is ready to run scripts.
     /// @param Callback CallbackHandler : the callback to execute.
     CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler Callback);
@@ -334,7 +331,7 @@ public:
 
     /// @brief Getter for the pending adds
     /// @return: SpaceEntityQueue*
-    CSP_NO_EXPORT SpaceEntityQueue* GetPendingAdds();
+    CSP_NO_EXPORT std::deque<csp::multiplayer::SpaceEntity*>* GetPendingAdds();
 
     /// @brief Getter for the multiplayer connection instance
     /// @return: MultiplayerConnection*
@@ -352,11 +349,11 @@ public:
     CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
 
 protected:
-    SpaceEntityList Entities;
-    SpaceEntityList Avatars;
-    SpaceEntityList Objects;
-    SpaceEntityList SelectedEntities;
-    SpaceEntityList RootHierarchyEntities;
+    csp::common::List<SpaceEntity*> Entities;
+    csp::common::List<SpaceEntity*> Avatars;
+    csp::common::List<SpaceEntity*> Objects;
+    csp::common::List<SpaceEntity*> SelectedEntities;
+    csp::common::List<SpaceEntity*> RootHierarchyEntities;
 
     std::recursive_mutex* EntitiesLock;
 
@@ -401,10 +398,10 @@ private:
 
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 
-    void OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
+    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
+    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
+    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
 
     void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
@@ -429,9 +426,9 @@ private:
 
     std::recursive_mutex* TickEntitiesLock;
 
-    SpaceEntityQueue* PendingAdds;
-    SpaceEntityQueue* PendingRemoves;
-    SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
+    std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
+    std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;
+    std::set<csp::multiplayer::SpaceEntity*>* PendingOutgoingUpdateUniqueSet;
     PatchMessageQueue* PendingIncomingUpdates;
 
     bool EnableEntityTick;

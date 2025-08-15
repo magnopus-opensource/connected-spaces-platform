@@ -347,7 +347,7 @@ OfflineRealtimeEngine::~OfflineRealtimeEngine()
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler.get());
 }
 
-csp::common::IRealtimeEngine::SpaceEntityList& OfflineRealtimeEngine::GetAllEntities() { return Entities; }
+csp::common::List<SpaceEntity*>& OfflineRealtimeEngine::GetAllEntities() { return Entities; }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

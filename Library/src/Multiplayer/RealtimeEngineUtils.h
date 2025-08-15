@@ -76,10 +76,10 @@ void StartEntityDeletion(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity);
 
 // You should lock the entities mutex before calling this, and probably have processed entity operations
-void InitialiseEntityScripts(csp::common::IRealtimeEngine::SpaceEntityList& Entities);
+void InitialiseEntityScripts(csp::common::List<SpaceEntity*>& Entities);
 
 // ClientID is the ID that comes from the multiplayerConnection
-void DetermineScriptOwners(const csp::common::IRealtimeEngine::SpaceEntityList& Entities, uint64_t ClientId);
+void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& Entities, uint64_t ClientId);
 
 // ClientID is the ID that comes from the multiplayerConnection
 void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId);
