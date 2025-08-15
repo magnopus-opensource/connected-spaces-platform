@@ -347,7 +347,7 @@ public:
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
-         // Avoiding unused params, see comment in top method
+        // Avoiding unused params, see comment in top method
         (void)Entity;
     }
 
@@ -377,6 +377,17 @@ public:
 
     /// @brief Applies any pending changes to entities that have been marked for update.
     virtual void ProcessPendingEntityOperations() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    CSP_NO_EXPORT virtual void LockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Attempt to lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex should fail to lock if already locked in order to avoid deadlocks.
+    CSP_NO_EXPORT virtual bool TryLockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    CSP_NO_EXPORT virtual void UnlockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.

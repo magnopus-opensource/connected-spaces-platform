@@ -31,10 +31,11 @@
 #include "MCS/MCSTypes.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
-#include "Multiplayer/RealtimeEngineUtils.h"
+#include "Multiplayer/SpaceEntityStatePatcher.h"
 #include "SignalRSerializer.h"
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -265,7 +266,7 @@ namespace
         csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&OnlineRealtimeEngine, ScriptRunner,
-            &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
+            &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
@@ -308,7 +309,9 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
-        mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
+        // A minor smell. The reason this we go through the patcher to make a message is because there may be dirty properties, but we know there
+        // isn't because we've only just created the avatar.
+        const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -408,15 +411,10 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(
-            this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
+            MultiplayerConnectionInst->GetClientId(), ParentID, true, true);
 
-        if (ParentID.HasValue())
-        {
-            NewObject->SetParentId(static_cast<uint64_t>(*ParentID));
-        }
-
-        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
+        const mcs::ObjectMessage Message = NewObject->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -533,7 +531,7 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
 
         if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
         {
-            ChildrenToUpdate[i]->SetEntityUpdateCallbackParams(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
+            ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
         }
     }
 
@@ -718,8 +716,7 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(this, *ScriptRunner, LogSystem);
-    NewEntity->FromObjectMessage(Message);
+    const auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
 
     AddEntity(NewEntity);
 
@@ -756,7 +753,7 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
     // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
     if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
     {
-        mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
+        mcs::ObjectMessage Message = MatchedEntity->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -918,8 +915,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
 void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
-    if (EntityToUpdate->GetDirtyComponents().Size() == 0 && EntityToUpdate->GetDirtyProperties().Size() == 0
-        && EntityToUpdate->GetTransientDeletionComponentIds().Size() == 0 && EntityToUpdate->GetShouldUpdateParent() == false)
+    if (!EntityToUpdate->GetStatePatcher()->HasPendingPatch())
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
         // etc. CSP_LOG_MSG(csp::common::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -1267,7 +1263,7 @@ void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> Pen
 
     for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
-        Patches.push_back(PendingEntities[i]->CreateObjectPatch());
+        Patches.push_back(PendingEntities[i]->GetStatePatcher()->CreateObjectPatch());
     }
 
     // We are writing multiple patches, so we need an additional nested array.
@@ -1343,9 +1339,9 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 
                 PendingEntities.Append(PendingEntity);
 
-                if (PendingEntity->GetEntityPatchSentCallback() != nullptr)
+                if (PendingEntity->GetStatePatcher()->GetEntityPatchSentCallback() != nullptr)
                 {
-                    PendingEntity->SetEntityPatchSentCallbackParams(true);
+                    PendingEntity->GetStatePatcher()->CallEntityPatchSentCallback(true);
                 }
 
                 PendingEntity->SetTimeOfLastPatch(CurrentTime);
@@ -1520,11 +1516,11 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
         bool EntityFound = false;
 
         // Update
-        for (size_t i = 0; i < Entities.Size(); ++i)
+        for (SpaceEntity* Entity : Entities)
         {
-            if (Entities[i]->GetId() == Patch.GetId())
+            if (Entity->GetId() == Patch.GetId())
             {
-                Entities[i]->FromObjectPatch(Patch);
+                Entity->GetStatePatcher()->ApplyPatchFromObjectPatch(Patch);
                 EntityFound = true;
             }
         }
@@ -1532,7 +1528,7 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
         if (!EntityFound)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Failed to find an entity with ID {} when recieved a patch message.", Patch.GetId()).c_str());
+                fmt::format("Failed to find an entity with ID {} when received a patch message.", Patch.GetId()).c_str());
         }
     }
 }

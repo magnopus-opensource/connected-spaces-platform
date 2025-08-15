@@ -165,6 +165,10 @@ public:
     /// @brief Removes all elements in this map.
     void Clear() { Container->clear(); }
 
+    // The fact that we can do this makes having this type a bit silly ... no actual ABI protection ... may as well just be a std::map.
+    CSP_NO_EXPORT const MapType& GetUnderlying() const { return *Container; }
+    CSP_NO_EXPORT MapType& GetUnderlying() { return *Container; }
+
 private:
     MapType* Container;
 };

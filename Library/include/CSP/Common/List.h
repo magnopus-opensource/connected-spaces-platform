@@ -158,6 +158,15 @@ public:
     /// @return const T*
     CSP_NO_EXPORT const T* Data() const { return CurrentSize > 0 ? &ObjectArray[0] : nullptr; }
 
+    // Iterators
+    CSP_NO_EXPORT T* begin() { return Data(); }
+    CSP_NO_EXPORT const T* begin() const { return Data(); }
+    CSP_NO_EXPORT const T* cbegin() const { return Data(); }
+
+    CSP_NO_EXPORT T* end() { return Data() + Size(); }
+    CSP_NO_EXPORT const T* end() const { return Data() + Size(); }
+    CSP_NO_EXPORT const T* cend() const { return Data() + Size(); }
+
     /// @brief Copy assignment.
     /// @param Other const List<T>&
     /// @return List<T>&

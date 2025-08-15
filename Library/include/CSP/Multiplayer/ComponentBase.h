@@ -102,6 +102,9 @@ public:
     /// to the component, the action name as a string and parameters as a string.
     typedef std::function<void(ComponentBase*, const csp::common::String&, const csp::common::String&)> EntityActionHandler;
 
+    // The LogSystem input may be null, components do not _have_ to log.
+    ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
     /// @brief Virtual destructor for the component.
     virtual ~ComponentBase();
 
@@ -111,7 +114,10 @@ public:
     /// within the context of the entity it is attached to.
     ///
     /// @return The ID.
-    uint16_t GetId();
+    uint16_t GetId() const;
+
+    /// @brief Set the ID for this component.
+    CSP_NO_EXPORT void SetId(uint16_t NewId);
 
     /// @brief Get the ComponentType of the component.
     /// @return The type of the component as an enum.
@@ -162,9 +168,6 @@ public:
 
 protected:
     ComponentBase();
-
-    // The LogSystem input may be null, components do not _have_ to log.
-    ComponentBase(ComponentType Type, csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;

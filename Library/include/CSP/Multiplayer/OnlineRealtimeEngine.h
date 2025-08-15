@@ -261,6 +261,17 @@ public:
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
         const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
 
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    CSP_NO_EXPORT virtual void LockEntityUpdate() override;
+
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex will fail to lock if already locked in order to avoid deadlocks.
+    CSP_NO_EXPORT virtual bool TryLockEntityUpdate() override;
+
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     using SpaceEntityList = csp::common::List<SpaceEntity*>;

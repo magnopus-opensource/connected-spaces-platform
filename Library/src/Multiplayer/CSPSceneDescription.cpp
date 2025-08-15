@@ -17,6 +17,7 @@
 #include "CSP/Multiplayer/CSPSceneDescription.h"
 #include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
+#include "Multiplayer/SpaceEntityStatePatcher.h"
 #include "Json/JsonSerializer.h"
 
 namespace csp::multiplayer
@@ -37,8 +38,7 @@ csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEn
     size_t ObjectsIndex = 0;
     for (const auto& Object : SceneDescription.Objects)
     {
-        auto* Entity = new multiplayer::SpaceEntity(&RealtimeEngine, RemoteScriptRunner, &LogSystem);
-        Entity->FromObjectMessage(Object);
+        auto* Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, RemoteScriptRunner, LogSystem);
 
         Entities[ObjectsIndex] = Entity;
         ObjectsIndex++;
