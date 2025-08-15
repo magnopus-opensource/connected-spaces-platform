@@ -867,13 +867,13 @@ void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const Strin
         });
 }
 
-async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Space, const String& UserId)
+async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, const String& UserId)
 {
     // Because we react in a continuation, we need to keep the event alive, hence shared ptr.
     std::shared_ptr<async::event_task<SpaceResult>> OnCompleteEvent = std::make_shared<async::event_task<SpaceResult>>();
     async::task<SpaceResult> OnCompleteTask = OnCompleteEvent->get_task();
 
-    const csp::common::String& SpaceCode = Space.GetSpaceCode();
+    const csp::common::String& SpaceCode = Result.GetSpaceCode();
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
         [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));

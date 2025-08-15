@@ -232,7 +232,12 @@ public:
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId, SpaceResultCallback Callback);
-    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const SpaceResult& Space, const csp::common::String& UserId);
+
+    /// @brief Adds a user to a space.
+    /// @param Result SpaceResult : result object of the space to which the user will be added
+    /// @param UserId csp::common::String : unique ID of user
+    /// @return async::task<SpaceResult> : a task containing the result of the operation
+    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const SpaceResult& Result, const csp::common::String& UserId);
 
     /// @brief Creates new Site information and associates it with the Space.
     /// @param SpaceId csp::common::String : Space ID to associate the Site information with
