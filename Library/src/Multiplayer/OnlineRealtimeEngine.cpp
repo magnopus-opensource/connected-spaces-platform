@@ -36,6 +36,7 @@
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SpaceEntityStatePatcher.h"
+#include "RealtimeEngineUtils.h"
 #include "SignalRSerializer.h"
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -507,24 +508,9 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
 
     delete (Keys);
 
-    csp::common::Array<ComponentUpdateInfo> Info;
-
     RootHierarchyEntities.RemoveItem(Entity);
 
-    // Manually process the parent updates locally
-    // We want this callback to fire before the deletion so clients can react to children first
-    auto ChildrenToUpdate = Children;
-
-    for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
-    {
-        ChildrenToUpdate[i]->RemoveParentId();
-        ResolveEntityHierarchy(ChildrenToUpdate[i]);
-
-        if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
-        {
-            ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
-        }
-    }
+    RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
 
     // We break the usual pattern of not considering local state to be true until we get the ack back from CHS here
     // and instead immediately delete the local view of the entity before issuing the delete for the remote view.
@@ -779,7 +765,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             // Ensure entity list is up to date
             ProcessPendingEntityOperations();
 
-            InitialiseEntityScripts(Entities);
+            RealtimeEngineUtils::InitialiseEntityScripts(Entities);
             EnableEntityTick = true;
 
             // Start leader election
@@ -793,7 +779,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             }
             else
             {
-                DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
+                RealtimeEngineUtils::DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
             }
 
             if (FetchCompleteCallback)
@@ -942,20 +928,6 @@ void OnlineRealtimeEngine::TickEntities()
     }
 }
 
-void OnlineRealtimeEngine::ResolveParentChildForDeletion(SpaceEntity* Deletion)
-{
-    if (Deletion->GetParentEntity())
-    {
-        Deletion->RemoveChildEntities();
-    }
-
-    for (size_t i = 0; i < Deletion->GetChildEntities()->Size(); ++i)
-    {
-        Deletion->RemoveParentFromChildEntity(i);
-        ResolveEntityHierarchy(Deletion->GetChildEntities()->ToArray()[i]);
-    }
-}
-
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
     for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
@@ -975,14 +947,14 @@ void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
     {
         if (Entities[i]->GetScript().GetOwnerId() == ClientId)
         {
-            csp::multiplayer::ClaimScriptOwnership(Entities[i], GetMultiplayerConnectionInstance()->GetClientId());
+            RealtimeEngineUtils::ClaimScriptOwnership(Entities[i], GetMultiplayerConnectionInstance()->GetClientId());
         }
     }
 }
 
 void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
-    csp::multiplayer::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
+    RealtimeEngineUtils::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 void OnlineRealtimeEngine::EnableLeaderElection()
@@ -1024,7 +996,7 @@ const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEnt
 
 void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
 {
-    csp::multiplayer::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
 }
 
 void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
@@ -1247,7 +1219,7 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
                 PendingEntity->SetOwnerId(MultiplayerConnectionInst->GetClientId());
-                csp::multiplayer::ClaimScriptOwnership(PendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
+                RealtimeEngineUtils::ClaimScriptOwnership(PendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
 
                 PendingEntities.Append(PendingEntity);
 
@@ -1347,7 +1319,7 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
     }
 
     RootHierarchyEntities.RemoveItem(EntityToRemove);
-    ResolveParentChildForDeletion(EntityToRemove);
+    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, EntityToRemove);
 
     Entities.RemoveItem(EntityToRemove);
 

@@ -43,6 +43,10 @@ class SpaceTransform;
 class AvatarSpaceComponent;
 enum class AvatarState;
 enum class AvatarPlayMode;
+}
+
+namespace csp::multiplayer::RealtimeEngineUtils
+{
 
 // Finds a space entity in the Entities container. Returns nullptr if the entity is not found.
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
@@ -66,13 +70,13 @@ bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, Space
 void ResolveEntityHierarchy(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
 
-// Unparents any child entities from the entity to be deleted and removed the parent relationship.
-void ResolveParentChildForDeletion(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Deletion);
+// Unparents any child entities from the entity and remove the parent relationship. Need to call this before deleting an entity
+void RemoveParentChildRelationshipsFromEntity(
+    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
 
 // Ensures compoennts attached to the entitiy are notified of deletion by calling OnLocalDelete.
 // It also fires the entity patch callback, notifying clients that the child entities have been reparented.
-void StartEntityDeletion(
+void LocalProcessChildUpdates(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity);
 
 // You should lock the entities mutex before calling this, and probably have processed entity operations

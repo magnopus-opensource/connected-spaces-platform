@@ -26,6 +26,9 @@
 #include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 
+#include "CSP/Common/fmt_Formatters.h"
+
+#include <fmt/format.h>
 #include <unordered_set>
 
 namespace csp::multiplayer
@@ -120,17 +123,13 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
     // Some of our interfaces use int64_t ... real bugs here.
     const uint64_t Id = NextId();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar
-        = BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode);
+    std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = RealtimeEngineUtils::BuildNewAvatar(
+        UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode);
 
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
     Entities.Append(NewAvatar.get());
     Avatars.Append(NewAvatar.get());
-
-    auto* Avatar = NewAvatar.release();
-
-    Avatar->ApplyLocalPatch(false, false);
 
     if (SpaceEntityCreatedCallback)
     {
@@ -166,19 +165,50 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
     Callback(NewEntity);
 }
 
-void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
-{
-    std::scoped_lock EntitiesLocker(EntitiesLock);
-    AddPendingEntity(EntityToAdd);
-}
-
 void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
 {
+    if (!Entities.Contains(Entity))
+    {
+        LogSystem->LogMsg(
+            csp::common::LogLevel::Warning, fmt::format("Attempting to delete unknown Entity `{}`. Aborting operation.", Entity->GetName()).c_str());
+        Callback(false);
+        return;
+    }
+
+    csp::common::List<csp::multiplayer::SpaceEntity*>& AvatarOrObjectList = Entity->GetEntityType() == SpaceEntityType::Avatar ? Avatars : Objects;
+    if (!AvatarOrObjectList.Contains(Entity))
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Fatal,
+            fmt::format("Entity `{}` is not in the expected Avatar/Object container. Aborting operation.", Entity->GetName()).c_str());
+        Callback(false);
+        return;
+    }
+
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
-    StartEntityDeletion(*this, RootHierarchyEntities, Entity);
+    // At time of writing, the only reason to do this is to call cleanup behaviour in ConversationSpaceComponent.
+    // This feels like an unfortunate pattern break and an unnecesary concept (OnLocalDelete). An opportunity to
+    // refactor. This also happens in OnlineRealtimeEngine.
+    auto EntityComponents = Entity->GetComponents();
+    auto Keys = EntityComponents->Keys();
 
-    RemovePendingEntity(Entity);
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        auto EntityComponent = Entity->GetComponent((*Keys)[i]);
+        EntityComponent->OnLocalDelete();
+    }
+
+    delete (Keys);
+
+    // We want to do heirarchy changes before destroy notification, there _seems_ to be some assertion that this is a platform requirement, although
+    // I'm personally dubious. Nonetheless, we have tests that assert this ordering.
+    RootHierarchyEntities.RemoveItem(Entity);
+    RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
+    AvatarOrObjectList.RemoveItem(Entity);
+    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, Entity);
+    Entities.RemoveItem(Entity);
+
+    delete (Entity);
 
     Callback(true);
 }
@@ -215,7 +245,7 @@ bool OfflineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::S
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntity(const csp::common::String& Name)
 {
-    return csp::multiplayer::FindSpaceEntity(*this, Name);
+    return RealtimeEngineUtils::FindSpaceEntity(*this, Name);
 }
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
@@ -273,22 +303,17 @@ const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::
 
 void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
 {
-    csp::multiplayer::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
 }
 
-void OfflineRealtimeEngine::QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) { EntitiesToUpdate->insert(Entity); }
+void OfflineRealtimeEngine::QueueEntityUpdate(csp::multiplayer::SpaceEntity* /*Entity*/)
+{
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Calling QueueEntityUpdate on offline RealtimeEngine is redundant.");
+}
 
 void OfflineRealtimeEngine::ProcessPendingEntityOperations()
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    // Process any changes that have been made to entities.
-    for (const auto& Entity : *EntitiesToUpdate)
-    {
-        Entity->ApplyLocalPatch(true, false);
-    }
-
-    EntitiesToUpdate->clear();
+    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Calling ProcessPendingEntityOperations on offline RealtimeEngine is redundant.");
 }
 
 void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback Callback)
@@ -299,8 +324,8 @@ void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common
     // ClientID dosen't matter
     static constexpr uint64_t ClientId = 0;
 
-    InitialiseEntityScripts(Entities);
-    DetermineScriptOwners(Entities, ClientId);
+    RealtimeEngineUtils::InitialiseEntityScripts(Entities);
+    RealtimeEngineUtils::DetermineScriptOwners(Entities, ClientId);
 
     EntityFetchCompleteCallback(static_cast<uint32_t>(Entities.Size()));
 }
@@ -338,34 +363,5 @@ void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
     {
         LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
     }
-}
-
-void OfflineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
-{
-    assert(Entities.Contains(EntityToRemove));
-
-    switch (EntityToRemove->GetEntityType())
-    {
-    case SpaceEntityType::Avatar:
-        assert(Avatars.Contains(EntityToRemove));
-        Avatars.RemoveItem(EntityToRemove);
-        break;
-
-    case SpaceEntityType::Object:
-        assert(Objects.Contains(EntityToRemove));
-        Objects.RemoveItem(EntityToRemove);
-        break;
-
-    default:
-        assert(false && "Unhandled entity type encountered during its destruction!");
-        break;
-    }
-
-    RootHierarchyEntities.RemoveItem(EntityToRemove);
-    ResolveParentChildForDeletion(*this, RootHierarchyEntities, EntityToRemove);
-
-    Entities.RemoveItem(EntityToRemove);
-
-    delete (EntityToRemove);
 }
 }

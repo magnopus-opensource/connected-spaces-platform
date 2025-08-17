@@ -429,7 +429,7 @@ public:
     CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
 
     /// @brief Remove child entities from parent.
-    CSP_NO_EXPORT void RemoveChildEntities();
+    CSP_NO_EXPORT void RemoveAsChildFromParent();
 
     /// @brief Sets the internal ParentId to nullptr
     CSP_NO_EXPORT void RemoveParentId();
