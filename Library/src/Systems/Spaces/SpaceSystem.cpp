@@ -377,7 +377,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                 "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
         .then(async::inline_scheduler(),
-            // Temporarily use the member callbacks, this will just be on the realtime engine in later commits and thus simpler.
             [RealtimeEngine](const SpaceResult& SpaceResult)
             {
                 /* Because this is external api (RealtimeEngine) we use the callback for chaining, rather than a nicer interface.
