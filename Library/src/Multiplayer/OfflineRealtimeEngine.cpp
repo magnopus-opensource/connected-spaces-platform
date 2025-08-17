@@ -311,48 +311,14 @@ bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock
 
 void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
-OfflineRealtimeEngine::OfflineRealtimeEngine(
-    const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
-{
-    std::scoped_lock EntitiesLocker(EntitiesLock);
-
-    auto DeserializedEntities = SceneDescription.CreateEntities(*this, LogSystem, RemoteScriptRunner);
-
-    for (size_t i = 0; i < DeserializedEntities.Size(); ++i)
-    {
-        AddPendingEntity(DeserializedEntities[i]);
-    }
-}
-
-OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
-    : LogSystem { &LogSystem }
-    , ScriptRunner { &RemoteScriptRunner }
-    , EntitiesToUpdate { std::make_unique<std::set<csp::multiplayer::SpaceEntity*>>() }
-{
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
-
-    // Is this undefined behaviour? Probably only if we actually use the pointer during construction
-    EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
-
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler.get());
-}
-
-OfflineRealtimeEngine::~OfflineRealtimeEngine()
-{
-    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
-
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler.get());
-}
-
 csp::common::List<SpaceEntity*>& OfflineRealtimeEngine::GetAllEntities() { return Entities; }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 
-void OfflineRealtimeEngine::AddPendingEntity(SpaceEntity* EntityToAdd)
+void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
+    std::scoped_lock EntitiesLocker(EntitiesLock);
+
     if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
     {
         Entities.Append(EntityToAdd);
