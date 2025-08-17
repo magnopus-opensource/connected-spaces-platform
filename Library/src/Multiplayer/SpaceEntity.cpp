@@ -624,12 +624,12 @@ uint16_t SpaceEntity::GenerateComponentId()
 
     // We want to also account for dirty components. If we're in a context that has them (online, patching), account for them, otherwise we can just
     // use an empty container (ie, ignore it)
-    auto DirtyComponents
-        = StatePatcher != nullptr ? StatePatcher->GetDirtyComponents() : csp::common::Map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> {};
+    const auto& DirtyComponents
+        = StatePatcher != nullptr ? StatePatcher->GetDirtyComponents() : std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> {};
 
     for (;;)
     {
-        if (!Components.HasKey(NextId) && !DirtyComponents.HasKey(NextId))
+        if (!Components.HasKey(NextId) && !(DirtyComponents.count(NextId) > 0))
         {
             NextComponentId = NextId + 1;
 

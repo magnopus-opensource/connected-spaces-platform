@@ -38,7 +38,7 @@ bool SpaceEntityStatePatcher::SetDirtyComponent(uint16_t ComponentKey, DirtyComp
 {
     std::scoped_lock ComponentsLocker(DirtyComponentsLock);
 
-    if (DirtyComponents.HasKey(ComponentKey))
+    if (DirtyComponents.count(ComponentKey) > 0)
     {
         if (LogSystem)
         {
@@ -56,9 +56,12 @@ bool SpaceEntityStatePatcher::SetDirtyComponent(uint16_t ComponentKey, DirtyComp
 
 bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const csp::common::Map<uint16_t, ComponentBase*>& CurrentComponents)
 {
+    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+
     if (!TransientDeletionComponentIds.Contains(ComponentKey) || CurrentComponents.HasKey(ComponentKey))
     {
-        DirtyComponents.Remove(ComponentKey);
+
+        DirtyComponents.erase(ComponentKey);
         TransientDeletionComponentIds.Append(ComponentKey);
         return true;
     }
@@ -80,32 +83,31 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
 
     auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
-    const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
-
     // Allocate a ComponentUpdates array (to pass update info to the client), with
     // sufficient size for all dirty components and scheduled deletions.
-    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(DirtyComponentKeys->Size() + TransientDeletionComponentIds.Size());
+    csp::common::Array<ComponentUpdateInfo> ComponentUpdates(DirtyComponents.size() + TransientDeletionComponentIds.Size());
 
-    if (DirtyComponentKeys->Size() > 0)
+    if (DirtyComponents.size() > 0)
     {
         UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
 
-        for (size_t i = 0; i < DirtyComponentKeys->Size(); ++i)
+        size_t Index = 0;
+        for (const auto& DirtyComponent : DirtyComponents)
         {
-            uint16_t ComponentKey = DirtyComponentKeys->operator[](i);
+            uint16_t ComponentKey = DirtyComponent.first;
 
             switch (DirtyComponents[ComponentKey].UpdateType)
             {
             case ComponentUpdateType::Add:
                 SpaceEntity.AddComponentDirect(ComponentKey, DirtyComponents[ComponentKey].Component, false);
                 // Components[ComponentKey] = DirtyComponents[ComponentKey].Component;
-                ComponentUpdates[i].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
-                ComponentUpdates[i].UpdateType = ComponentUpdateType::Add;
+                ComponentUpdates[Index].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
+                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Add;
                 break;
             case ComponentUpdateType::Delete:
                 SpaceEntity.RemoveComponentDirect(ComponentKey, false);
-                ComponentUpdates[i].ComponentId = ComponentKey;
-                ComponentUpdates[i].UpdateType = ComponentUpdateType::Delete;
+                ComponentUpdates[Index].ComponentId = ComponentKey;
+                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Delete;
                 break;
             case ComponentUpdateType::Update:
             {
@@ -113,8 +115,8 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
                 // data was set by this point as we change the properties in the components themselves. Odd pattern break.
                 SpaceEntity.UpdateComponentDirect(ComponentKey, DirtyComponents[ComponentKey].Component, false);
 
-                ComponentUpdates[i].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
-                ComponentUpdates[i].UpdateType = ComponentUpdateType::Update;
+                ComponentUpdates[Index].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
+                ComponentUpdates[Index].UpdateType = ComponentUpdateType::Update;
 
                 // TODO: For the moment, we update all properties on a dirty component, in future we need to change this to per property
                 // replication. Components[DirtyComponents[i].Component->GetId()]->Properties = DirtyComponents[i].Component->DirtyProperties;
@@ -138,20 +140,19 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
             default:
                 break;
             }
+
+            Index++;
         }
 
-        DirtyComponents.Clear();
+        DirtyComponents.clear();
     }
 
-    delete (DirtyComponentKeys);
-
-    if (DirtyProperties.Size() > 0)
+    if (DirtyProperties.size() > 0)
     {
-        const csp::common::Array<uint16_t>* DirtyViewKeys = DirtyProperties.Keys();
 
-        for (size_t i = 0; i < DirtyViewKeys->Size(); ++i)
+        for (const auto& DirtyProperty : DirtyProperties)
         {
-            uint16_t PropertyKey = DirtyViewKeys->operator[](i);
+            uint16_t PropertyKey = DirtyProperty.first;
             switch (PropertyKey)
             {
             case COMPONENT_KEY_VIEW_ENTITYNAME:
@@ -191,14 +192,11 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
             }
         }
 
-        DirtyProperties.Clear();
-        delete (DirtyViewKeys);
+        DirtyProperties.clear();
     }
 
     if (TransientDeletionComponentIds.Size() > 0)
     {
-        DirtyComponentKeys = DirtyComponents.Keys();
-
         for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
         {
             if (SpaceEntity.GetComponents()->HasKey(TransientDeletionComponentIds[i]))
@@ -211,13 +209,14 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
                 // Start indexing from the end of the section reserved for DirtyComponents.
                 // We start adding DirtyComponents to ComponentUpdates first, so here we need to respect that
                 // and start at an offset to add our deletion updates.
-                ComponentUpdates[DirtyComponentKeys->Size() + i].ComponentId = TransientDeletionComponentIds[i];
-                ComponentUpdates[DirtyComponentKeys->Size() + i].UpdateType = ComponentUpdateType::Delete;
+                ComponentUpdates[DirtyComponents.size() + i].ComponentId = TransientDeletionComponentIds[i];
+                ComponentUpdates[DirtyComponents.size() + i].UpdateType = ComponentUpdateType::Delete;
+
+                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
             }
         }
 
         TransientDeletionComponentIds.Clear();
-        delete (DirtyComponentKeys);
     }
 
     if (ShouldUpdateParent)
@@ -232,9 +231,9 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
     return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(UpdateFlags, ComponentUpdates);
 }
 
-csp::common::Map<uint16_t, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const { return DirtyProperties; }
+std::unordered_map<uint16_t, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const { return DirtyProperties; }
 
-csp::common::Map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return DirtyComponents; }
+std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return DirtyComponents; }
 
 std::chrono::milliseconds SpaceEntityStatePatcher::GetTimeOfLastPatch() const { return TimeOfLastPatch; }
 
@@ -247,13 +246,15 @@ void SpaceEntityStatePatcher::SetShouldUpdateParent(bool Value) { ShouldUpdatePa
 bool SpaceEntityStatePatcher::HasPendingPatch() const
 {
     return !(
-        DirtyComponents.Size() == 0 && DirtyProperties.Size() == 0 && TransientDeletionComponentIds.Size() == 0 && GetShouldUpdateParent() == false);
+        DirtyComponents.size() == 0 && DirtyProperties.size() == 0 && TransientDeletionComponentIds.Size() == 0 && GetShouldUpdateParent() == false);
 }
 
 csp::multiplayer::ComponentBase* SpaceEntityStatePatcher::GetFirstPendingComponentOfType(
     ComponentType Type, std::set<ComponentUpdateType> InterestingUpdateTypes) const
 {
-    for (const std::pair<uint16_t, DirtyComponent>& DirtyComp : DirtyComponents.GetUnderlying())
+    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+
+    for (const std::pair<uint16_t, DirtyComponent>& DirtyComp : DirtyComponents)
     {
         // If any of our dirty components are :
         //  - Of the type requested AND
@@ -283,7 +284,7 @@ mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
 
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
 
-    for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : GetDirtyComponents().GetUnderlying())
+    for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
     {
         assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
 
@@ -306,7 +307,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
     // 1. Convert our modified view components to mcs compatible types.
     {
         // Loop through modfied view components and convert to ItemComponentData.
-        for (const std::pair<uint16_t, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties.GetUnderlying())
+        for (const std::pair<uint16_t, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
         {
             ComponentPacker.WriteValue(DirtyProp.first, DirtyProp.second);
         }
@@ -317,7 +318,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
         std::scoped_lock ComponentsLocker(DirtyComponentsLock);
 
         // Loop through all components and convert to ItemComponentData.
-        for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : GetDirtyComponents().GetUnderlying())
+        for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
         {
             assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
 
