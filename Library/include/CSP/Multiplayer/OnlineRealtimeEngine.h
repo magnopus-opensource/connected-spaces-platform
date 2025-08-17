@@ -393,7 +393,6 @@ private:
     void ApplyIncomingPatch(const signalr::value*);
     void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-    void ResolveParentChildForDeletion(SpaceEntity* Deletion);
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);

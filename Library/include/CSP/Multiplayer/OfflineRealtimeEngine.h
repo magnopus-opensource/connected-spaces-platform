@@ -252,14 +252,9 @@ private:
     csp::common::List<SpaceEntity*> SelectedEntities;
     csp::common::List<SpaceEntity*> RootHierarchyEntities;
 
-    std::unique_ptr<std::set<csp::multiplayer::SpaceEntity*>> EntitiesToUpdate;
-
     std::recursive_mutex EntitiesLock;
 
     EntityCreatedCallback SpaceEntityCreatedCallback;
-
-    void AddPendingEntity(SpaceEntity* EntityToAdd);
-    void RemovePendingEntity(SpaceEntity* EntityToRemove);
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;

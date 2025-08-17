@@ -160,16 +160,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common
     this->ParentId = ParentId;
 }
 
-SpaceEntity::~SpaceEntity()
-{
-    auto& Keys = *Components.Keys();
-
-    size_t i = 0;
-    for (i = 0; i < Keys.Size(); ++i)
-    {
-        delete (Components[Keys[i]]);
-    }
-}
+SpaceEntity::~SpaceEntity() { }
 
 uint64_t SpaceEntity::GetId() const { return Id; }
 
@@ -562,7 +553,15 @@ bool SpaceEntity::RemoveComponent(uint16_t Key)
     return StatePatcher != nullptr ? StatePatcher->RemoveDirtyComponent(Key, *GetComponents()) : RemoveComponentDirect(Key, true);
 }
 
-void SpaceEntity::RemoveChildEntities() { GetParentEntity()->ChildEntities.RemoveItem(this); }
+void SpaceEntity::RemoveAsChildFromParent()
+{
+    // Pretty naff way to do this, entity heirarchy must be fragile. Wouldn't be hard to redesign and make solid.
+    if (Parent != nullptr)
+    {
+        Parent->ChildEntities.RemoveItem(this);
+        Parent = nullptr;
+    }
+}
 
 void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
 {

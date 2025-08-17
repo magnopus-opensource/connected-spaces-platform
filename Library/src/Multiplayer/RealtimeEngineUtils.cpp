@@ -26,7 +26,7 @@ namespace
 csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::format("{{\"deltaTimeMS\": {}}}", DeltaTime).c_str(); }
 }
 
-namespace csp::multiplayer
+namespace csp::multiplayer::RealtimeEngineUtils
 {
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
 {
@@ -124,39 +124,27 @@ void ResolveEntityHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, csp::c
     Entity->ResolveParentChildRelationship();
 }
 
-void ResolveParentChildForDeletion(
-    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Deletion)
+void RemoveParentChildRelationshipsFromEntity(
+    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity)
 {
-    if (Deletion->GetParentEntity())
+    if (Entity->GetParentEntity())
     {
-        Deletion->RemoveChildEntities();
+        Entity->RemoveAsChildFromParent();
     }
 
-    auto ChildEntities = Deletion->GetChildEntities()->ToArray();
-
+    const auto& ChildEntities = Entity->GetChildEntities()->ToArray();
     for (size_t i = 0; i < ChildEntities.Size(); ++i)
     {
-        Deletion->RemoveParentFromChildEntity(i);
+        Entity->RemoveParentFromChildEntity(i);
 
         ResolveEntityHierarchy(RealtimeEngine, RootHierarchyEntities, ChildEntities[i]);
     }
 }
 
-void StartEntityDeletion(
+void LocalProcessChildUpdates(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity)
 {
-    auto EntityComponents = Entity->GetComponents();
-    std::unique_ptr<common::Array<uint16_t>> Keys(const_cast<common::Array<uint16_t>*>(EntityComponents->Keys()));
-
-    for (size_t i = 0; i < Keys->Size(); ++i)
-    {
-        auto EntityComponent = Entity->GetComponent((*Keys)[i]);
-        EntityComponent->OnLocalDelete();
-    }
-
-    csp::common::Array<ComponentUpdateInfo> Info;
-
-    RootHierarchyEntities.RemoveItem(Entity);
+    // Messy, taken from existing cleanup code. Needs a conceptual facelift
 
     // Manually process the parent updates locally
     // We want this callback to fire before the deletion so clients can react to children first
@@ -169,7 +157,8 @@ void StartEntityDeletion(
 
         if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
         {
-            ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
+            csp::common::Array<ComponentUpdateInfo> Empty;
+            ChildrenToUpdate[i]->GetEntityUpdateCallback()(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Empty);
         }
     }
 }
