@@ -84,7 +84,7 @@ public:
     {
         std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
 
-        DirtyProperties.Remove(PropertyKey);
+        DirtyProperties.erase(PropertyKey);
 
         if (NewValue != static_cast<U>(PriorValue))
         {
@@ -106,8 +106,8 @@ public:
     [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPatch(
         csp::common::IRealtimeEngine& RealtimeEngine);
 
-    csp::common::Map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties() const;
-    csp::common::Map<uint16_t, DirtyComponent> GetDirtyComponents() const;
+    std::unordered_map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties() const;
+    std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
 
     std::chrono::milliseconds GetTimeOfLastPatch() const;
     void SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch);
@@ -141,8 +141,8 @@ private:
     mutable std::mutex DirtyComponentsLock;
     CSP_END_IGNORE
 
-    csp::common::Map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
-    csp::common::Map<uint16_t, DirtyComponent> DirtyComponents;
+    std::unordered_map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
+    std::unordered_map<uint16_t, DirtyComponent> DirtyComponents;
     csp::common::List<uint16_t> TransientDeletionComponentIds;
     std::chrono::milliseconds TimeOfLastPatch;
 
