@@ -253,6 +253,12 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
         // TODO, fix. Look at `SetPropertyFromPatch` below, it's basically a `SetPropetyDirect`
         Properties[Key] = Value;
         Parent->UpdateComponent(this);
+
+        // MEGA HACK
+        // So, this is for the case where we already have a dirty component of update type ADD pending, but we've just updated it.
+        // It just so happens that the ADD is enough to replicate the component well enough, as anything will do, BUT, we still
+        // need to notify the scripting system here that a property has changed. Absolutely awful, must fix.
+        Parent->OnPropertyChanged(this, Key);
     }
 }
 
