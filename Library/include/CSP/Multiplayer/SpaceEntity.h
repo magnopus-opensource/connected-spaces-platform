@@ -269,6 +269,10 @@ public:
     /// @param Callback CallbackHandler : Contains a bool that is true when the patch message is sent.
     CSP_EVENT void SetPatchSentCallback(CallbackHandler Callback);
 
+    /// @brief Get a pointer to the first component on the entity of specified type
+    /// @return Non-owning pointer to component, nullptr if component of type cannot be found
+    ComponentBase* FindFirstComponentOfType(ComponentType Type) const;
+
     /// @brief Get the map of components on this SpaceEntity.
     /// @return A map of components indexed with the component ID.
     const csp::common::Map<uint16_t, ComponentBase*>* GetComponents() const;
@@ -419,7 +423,6 @@ public:
     // If this is null, then the space entity does immediate updates without any deferred patching.
     CSP_NO_EXPORT const std::unique_ptr<SpaceEntityStatePatcher>& GetStatePatcher();
 
-public:
     /// @brief Update after the property of a component was changed
     /// @param DirtyComponent ComponentBase* : the dirty component to update
     /// @param PropertyKey int32_t : the key of the property to update
@@ -462,8 +465,6 @@ public:
 private:
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
-
-    ComponentBase* FindFirstComponentOfType(ComponentType Type) const;
 
     void AddChildEntity(SpaceEntity* ChildEntity);
 

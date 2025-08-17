@@ -181,7 +181,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , ScriptBinding(nullptr)
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::mutex)
+    , TickEntitiesLock(new std::recursive_mutex)
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
     , PendingOutgoingUpdateUniqueSet(nullptr)
@@ -201,7 +201,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::mutex)
+    , TickEntitiesLock(new std::recursive_mutex)
     , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
     , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
@@ -1261,6 +1261,8 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
             }
             else
             {
+                LogSystem->LogMsg(common::LogLevel::Verbose,
+                    "Skipping patch send in ProcessPendingEntityOperations as not enough time has passed since the last patch");
                 ++it;
             }
         }
