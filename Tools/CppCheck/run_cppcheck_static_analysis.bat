@@ -5,12 +5,15 @@ rem #############################################################
 rem # Configuration
 rem #############################################################
 
+rem Create a build directory to make subsequent runs faster.
+md .cppcheck-build-dir
+
 rem Set the path to the Cppcheck executable.
 rem This path can be updated if the installation location changes.
 set "CPPCHECK_EXE=C:\Program Files\Cppcheck\cppcheck.exe"
 
 rem Set the command-line arguments for the analysis.
-set "CPPCHECK_ARGS=--xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all --suppressions-list=cppcheck_suppressions.txt -I'Library/include' Library"
+set "CPPCHECK_ARGS=--xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all -j8 --cppcheck-build-dir=.cppcheck-build-dir --suppressions-list=cppcheck_suppressions.txt -I"../../Library/include" -I"../../Library/src" "../../Library""
 
 echo.
 echo ================================================================================

@@ -1,3 +1,5 @@
 unknownMacro
 missingInclude
 missingIncludeSystem
+toomanyconfigs
+syntaxError
