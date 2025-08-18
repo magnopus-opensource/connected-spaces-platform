@@ -103,8 +103,7 @@ public:
 
     //@return First: Flags of the components that got updated by the patch (as represented by the dirty properties on this type)
     //        Second: Record of all component updates made in the patch application
-    [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPatch(
-        csp::common::IRealtimeEngine& RealtimeEngine);
+    [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPatch();
 
     std::unordered_map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties() const;
     std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
@@ -112,8 +111,8 @@ public:
     std::chrono::milliseconds GetTimeOfLastPatch() const;
     void SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch);
 
-    bool GetShouldUpdateParent() const;
-    void SetShouldUpdateParent(bool Boolean);
+    csp::common::Optional<csp::common::Optional<uint64_t>> GetNewParentId() const;
+    void SetNewParentId(csp::common::Optional<uint64_t> NewParentId);
 
     bool HasPendingPatch() const;
 
@@ -146,7 +145,12 @@ private:
     csp::common::List<uint16_t> TransientDeletionComponentIds;
     std::chrono::milliseconds TimeOfLastPatch;
 
-    bool ShouldUpdateParent = false;
+    // Weird eh?
+    // The deal here is that we need to know :
+    // 1. If there is a "new" parent ID, ie, is there a change
+    // 2. Is that "new" ID an actual parent ID, or empty to mean "no parent"
+    // That's why there's these nested optionals
+    csp::common::Optional<csp::common::Optional<uint64_t>> NewParentId = nullptr;
 
     csp::common::LogSystem* LogSystem = nullptr; // May be null
     csp::multiplayer::SpaceEntity& SpaceEntity;

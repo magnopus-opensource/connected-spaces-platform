@@ -376,37 +376,17 @@ SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
 void SpaceEntity::SetParentId(uint64_t InParentId)
 {
-    // Sort of frustrating how this being a special bool rather than a regular dirtyable property makes this flow different and harder to reason
-    // about. TODO: Fix this.
-    if (ParentId.HasValue() == false || InParentId != *ParentId)
-    {
-        // Weird, not great. Should fix, `SetShouldUpdateParent` needs to be richer than just true or false to keep the sequencing normalized.
-        // No other properties work like this.
-        ParentId = InParentId;
-        StatePatcher != nullptr ? StatePatcher->SetShouldUpdateParent(true) : SetParentIdDirect(InParentId, true);
-    }
+    // No lock, parents may always be changed. (Seems odd)
+    return StatePatcher != nullptr ? StatePatcher->SetNewParentId(InParentId) : SetParentIdDirect(InParentId, true);
 }
 
 void SpaceEntity::RemoveParentEntity()
 {
     if (ParentId.HasValue())
     {
-        // Weird, not great. Should fix, `SetShouldUpdateParent` needs to be richer than just true or false to keep the sequencing normalized.
-        // No other properties work like this.
-        ParentId = nullptr;
-        StatePatcher != nullptr ? StatePatcher->SetShouldUpdateParent(true) : SetParentIdDirect({}, true);
-    }
-}
-
-void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback)
-{
-    ParentId = Value;
-    EntitySystem->ResolveEntityHierarchy(this);
-
-    if (EntityUpdateCallback && CallNotifyingCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_PARENT, Empty);
+        // Need to send a full optional containing an empty optional to mean "There's a new ID, but it's to no-parent"
+        StatePatcher != nullptr ? StatePatcher->SetNewParentId(csp::common::Optional<uint64_t> { csp::common::Optional<uint64_t> {} })
+                                : SetParentIdDirect({}, true);
     }
 }
 
@@ -598,7 +578,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessa
     /// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
     if (!AllowSelfMessaging)
     {
-        auto [UpdateFlags, ComponentUpdates] = StatePatcher->ApplyLocalPatch(*EntitySystem);
+        auto [UpdateFlags, ComponentUpdates] = StatePatcher->ApplyLocalPatch();
 
         if (InvokeUpdateCallback && EntityUpdateCallback != nullptr)
         {
@@ -1026,6 +1006,18 @@ void SpaceEntity::SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback
     {
         csp::common::Array<ComponentUpdateInfo> Empty;
         EntityUpdateCallback(this, UPDATE_FLAGS_SELECTION_ID, Empty);
+    }
+}
+
+void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback)
+{
+    ParentId = Value;
+    EntitySystem->ResolveEntityHierarchy(this);
+
+    if (EntityUpdateCallback && CallNotifyingCallback)
+    {
+        csp::common::Array<ComponentUpdateInfo> Empty;
+        EntityUpdateCallback(this, UPDATE_FLAGS_PARENT, Empty);
     }
 }
 

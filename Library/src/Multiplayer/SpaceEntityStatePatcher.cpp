@@ -75,8 +75,7 @@ bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const 
     }
 }
 
-std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> SpaceEntityStatePatcher::ApplyLocalPatch(
-    csp::common::IRealtimeEngine& RealtimeEngine)
+std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> SpaceEntityStatePatcher::ApplyLocalPatch()
 {
     std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
@@ -195,6 +194,15 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
         DirtyProperties.clear();
     }
 
+    // Parent ID, (this would be a dirty property as above, but the wrapper generator stops us expressing optional values. Very not nice.)
+    if (NewParentId.HasValue()) // If the outer optional is set, then we want to change the parent
+    {
+        SpaceEntity.SetParentIdDirect(*NewParentId, false);
+        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+        NewParentId = nullptr; // Reset, as we've just set it
+    }
+
+    // Component Deletes
     if (TransientDeletionComponentIds.Size() > 0)
     {
         for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
@@ -219,15 +227,6 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
         TransientDeletionComponentIds.Clear();
     }
 
-    if (ShouldUpdateParent)
-    {
-        RealtimeEngine.ResolveEntityHierarchy(&SpaceEntity);
-        // Assume that ShouldUpdateParent being set means that there actually has been a parent update. Multiple, temporally disconnected
-        // sources-of-truth, Fragile.
-        UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
-        ShouldUpdateParent = false;
-    }
-
     return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(UpdateFlags, ComponentUpdates);
 }
 
@@ -239,14 +238,14 @@ std::chrono::milliseconds SpaceEntityStatePatcher::GetTimeOfLastPatch() const { 
 
 void SpaceEntityStatePatcher::SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch) { this->TimeOfLastPatch = NewTimeOfLastPatch; }
 
-bool SpaceEntityStatePatcher::GetShouldUpdateParent() const { return ShouldUpdateParent; }
+csp::common::Optional<csp::common::Optional<uint64_t>> SpaceEntityStatePatcher::GetNewParentId() const { return NewParentId; }
 
-void SpaceEntityStatePatcher::SetShouldUpdateParent(bool Value) { ShouldUpdateParent = Value; }
+void SpaceEntityStatePatcher::SetNewParentId(csp::common::Optional<uint64_t> Value) { NewParentId = Value; }
 
 bool SpaceEntityStatePatcher::HasPendingPatch() const
 {
-    return !(
-        DirtyComponents.size() == 0 && DirtyProperties.size() == 0 && TransientDeletionComponentIds.Size() == 0 && GetShouldUpdateParent() == false);
+    return !(DirtyComponents.size() == 0 && DirtyProperties.size() == 0 && TransientDeletionComponentIds.Size() == 0
+        && GetNewParentId().HasValue() == false);
 }
 
 csp::multiplayer::ComponentBase* SpaceEntityStatePatcher::GetFirstPendingComponentOfType(
@@ -341,8 +340,11 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
     }
 
     // 4. Create the object patch using the required properties and our created components.
-    return mcs::ObjectPatch { SpaceEntity.GetId(), SpaceEntity.GetOwnerId(), false, ShouldUpdateParent, Convert(SpaceEntity.GetParentId()),
-        ComponentPacker.GetComponents() };
+    // Seems like a bit of a mixed bag here, Components + Parent updates are disconnected state, but pulling Id's from SpaceEntity feels like it
+    // leaves us vulnerable to sequencing bugs. Fine if ID + OwnerID never change, but dubious about that for OwnerId.
+    const bool HasBeenParentUpdate = NewParentId.HasValue();
+    return mcs::ObjectPatch { SpaceEntity.GetId(), SpaceEntity.GetOwnerId(), false, HasBeenParentUpdate,
+        HasBeenParentUpdate ? Convert(*NewParentId) : Convert(SpaceEntity.GetParentId()), ComponentPacker.GetComponents() };
 }
 
 SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message, csp::common::IRealtimeEngine& RealtimeEngine,
