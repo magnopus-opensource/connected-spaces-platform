@@ -380,12 +380,13 @@ void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const c
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
         .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(
-            [Callback, LogSystem = this->LogSystem](const std::exception& Except)
+            *LogSystem,
+            [Callback, LogSystem = this->LogSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", Except.what()).c_str());
+                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", exception.what()).c_str());
                 Callback(nullptr);
             },
-            *LogSystem));
+            []([[maybe_unused]] const std::exception& exception) {}));
 }
 
 void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
@@ -1178,14 +1179,16 @@ void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
                             })
                         .then(async::inline_scheduler(),
                             csp::common::continuations::InvokeIfExceptionInChain(
-                                [&RefreshMultiplayerContinuationEvent](const std::exception& Except)
+                                *LogSystem,
+                                [&RefreshMultiplayerContinuationEvent](
+                                    [[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                                 {
                                     // Error case
-                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(Except);
+                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(exception);
                                     RefreshMultiplayerContinuationEvent->set(Error);
                                     return;
                                 },
-                                *LogSystem));
+                                []([[maybe_unused]] const std::exception& exception) {}));
                 });
         });
 }

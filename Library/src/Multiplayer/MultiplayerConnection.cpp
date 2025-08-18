@@ -132,22 +132,6 @@ namespace
 
     constexpr const uint64_t ALL_ENTITIES_ID = std::numeric_limits<uint64_t>::max();
     constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
-
-    // Exception type used for internal chaining in response to signalR exceptions
-    class ErrorCodeException : public std::runtime_error
-    {
-    public:
-        explicit ErrorCodeException(ErrorCode Code, const std::string& Message)
-            : std::runtime_error(Message)
-            , m_Code(Code)
-        {
-        }
-
-        ErrorCode Code() const noexcept { return m_Code; }
-
-    private:
-        ErrorCode m_Code;
-    };
 }
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(csp::common::IAuthContext& AuthContext)
@@ -245,7 +229,8 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
         auto EntitiesDeletedContinuation = EntitiesDeletedEvent->get_task();
         if (!Connected)
         {
-            throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::DeleteEntities, Error not connected.");
+            throw csp::common::continuations::ErrorCodeException(
+                ErrorCode::NotConnected, "MultiplayerConnection::DeleteEntities, Error not connected.");
         }
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
             = [EntitiesDeletedEvent](signalr::value /*Result*/, std::exception_ptr Except)
@@ -253,7 +238,7 @@ auto MultiplayerConnection::DeleteEntities(uint64_t EntityId) const
             if (Except != nullptr)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-                EntitiesDeletedEvent->set_exception(std::make_exception_ptr(ErrorCodeException(
+                EntitiesDeletedEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ErrorCodeException(
                     Error, "MultiplayerConnection::DeleteEntities, Unexpected error response from SignalR \"DeleteObjects\" invocation.")));
                 return;
             }
@@ -297,7 +282,8 @@ auto MultiplayerConnection::RequestClientId()
 
         if (!Connected)
         {
-            throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::RequestClientId, Error not connected.");
+            throw csp::common::continuations::ErrorCodeException(
+                ErrorCode::NotConnected, "MultiplayerConnection::RequestClientId, Error not connected.");
         }
 
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
@@ -306,8 +292,8 @@ auto MultiplayerConnection::RequestClientId()
             if (Except != nullptr)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-                ClientIdRequestedEvent->set_exception(std::make_exception_ptr(
-                    ErrorCodeException(Error, "MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
+                ClientIdRequestedEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ErrorCodeException(
+                    Error, "MultiplayerConnection::RequestClientId, Error when starting requesting Client Id.")));
                 return;
             }
 
@@ -333,7 +319,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
 
         if (!Connected)
         {
-            throw ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::StartListening, Error not connected.");
+            throw csp::common::continuations::ErrorCodeException(
+                ErrorCode::NotConnected, "MultiplayerConnection::StartListening, Error not connected.");
         }
 
         std::function<void(signalr::value, std::exception_ptr)> LocalCallback
@@ -342,8 +329,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
             if (Except != nullptr)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-                StartListeningEvent->set_exception(
-                    std::make_exception_ptr(ErrorCodeException(Error, "MultiplayerConnection::StartListening, Error when starting listening.")));
+                StartListeningEvent->set_exception(std::make_exception_ptr(
+                    csp::common::continuations::ErrorCodeException(Error, "MultiplayerConnection::StartListening, Error when starting listening.")));
                 return;
             }
 
@@ -358,7 +345,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+    const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
 
     if (Connected)
@@ -415,13 +403,14 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
             })
         .then(async::inline_scheduler(),
             csp::common::continuations::InvokeIfExceptionInChain(
+                LogSystem,
                 // Handle any errors in chain
-                [Callback, this](const std::exception& Except)
+                [Callback, this]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                 {
-                    auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(Except);
+                    auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(exception);
                     DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
                 },
-                LogSystem));
+                []([[maybe_unused]] const std::exception& exception) {}));
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
@@ -469,8 +458,8 @@ async::task<void> MultiplayerConnection::Start() const
             if (exception)
             {
                 auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(exception);
-                OnCompleteEvent->set_exception(
-                    std::make_exception_ptr(ErrorCodeException(Error, "MultiplayerConnection::Start, Error when starting SignalR connection.")));
+                OnCompleteEvent->set_exception(std::make_exception_ptr(
+                    csp::common::continuations::ErrorCodeException(Error, "MultiplayerConnection::Start, Error when starting SignalR connection.")));
                 return;
             }
 
@@ -484,7 +473,8 @@ void MultiplayerConnection::Stop(const ExceptionCallbackHandler Callback) const
 {
     if (!Connected)
     {
-        INVOKE_IF_NOT_NULL(Callback, std::make_exception_ptr(std::runtime_error("No Connection!")));
+        INVOKE_IF_NOT_NULL(
+            Callback, std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::NotConnected, "No Connection!")));
         return;
     }
 
