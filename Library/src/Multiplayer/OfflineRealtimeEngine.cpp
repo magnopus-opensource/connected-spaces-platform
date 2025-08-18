@@ -131,11 +131,6 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
     Entities.Append(NewAvatar.get());
     Avatars.Append(NewAvatar.get());
 
-    if (SpaceEntityCreatedCallback)
-    {
-        SpaceEntityCreatedCallback(NewAvatar.get());
-    }
-
     Callback(NewAvatar.release());
 }
 
@@ -156,11 +151,6 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
 
     Entities.Append(NewEntity);
     Objects.Append(NewEntity);
-
-    if (SpaceEntityCreatedCallback)
-    {
-        SpaceEntityCreatedCallback(NewEntity);
-    }
 
     Callback(NewEntity);
 }
@@ -213,14 +203,10 @@ void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity,
     Callback(true);
 }
 
-void OfflineRealtimeEngine::SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
+void OfflineRealtimeEngine::SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
 {
-    if (SpaceEntityCreatedCallback)
-    {
-        LogSystem->LogMsg(common::LogLevel::Warning, "OfflineRealtimeEngine has already been set. Previous callback overwritten.");
-    }
-
-    SpaceEntityCreatedCallback = std::move(Callback);
+    LogSystem->LogMsg(csp::common::LogLevel::Warning,
+        "Calling SetRemoteEntityCreatedCallback on offline RealtimeEngine is redundant. Callback will never be called.");
 }
 
 bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)

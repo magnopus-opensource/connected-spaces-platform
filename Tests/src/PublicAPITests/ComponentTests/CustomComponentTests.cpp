@@ -87,7 +87,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         // Create object to represent the Custom fields
         SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -190,7 +190,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-        RealtimeEngine->SetEntityCreatedCallback(
+        RealtimeEngine->SetRemoteEntityCreatedCallback(
             [&](SpaceEntity* Entity)
             {
                 if (Entity->GetName() == ObjectName)

@@ -63,9 +63,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateAvatar)
     CSPSceneDescription SceneDescription;
     OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
 
-    bool EntityCreatedCallbackCalled = false;
-    Engine.SetEntityCreatedCallback([&EntityCreatedCallbackCalled](SpaceEntity*) { EntityCreatedCallbackCalled = true; });
-
     // Create test properties for our avatar.
     const common::String TestName = "TestName";
     const SpaceTransform Transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
@@ -84,8 +81,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateAvatar)
     {
         FAIL();
     }
-
-    EXPECT_TRUE(EntityCreatedCallbackCalled);
 
     // Ensure created entity is populated correctly.
     EXPECT_EQ(CreatedEntity->GetName(), TestName);
@@ -137,9 +132,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
     CSPSceneDescription SceneDescription;
     OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
 
-    bool EntityCreatedCallbackCalled = false;
-    Engine.SetEntityCreatedCallback([&EntityCreatedCallbackCalled](SpaceEntity*) { EntityCreatedCallbackCalled = true; });
-
     // Create test properties for our entity.
     const common::String TestName = "TestName";
     const SpaceTransform Transform { common::Vector3::One(), common::Vector4::One(), common::Vector3::Zero() };
@@ -157,8 +149,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
     {
         FAIL();
     }
-
-    EXPECT_TRUE(EntityCreatedCallbackCalled);
 
     // Ensure created entity is populated correctly.
     EXPECT_EQ(CreatedEntity->GetName(), TestName);

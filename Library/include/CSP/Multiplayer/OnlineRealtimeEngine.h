@@ -157,12 +157,13 @@ public:
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
 
-    /// @brief Sets a callback to be executed when an entity is fully created.
+    /// @brief Sets a callback to be executed when a remote entity is created.
+    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
     ///
     /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
@@ -373,7 +374,7 @@ private:
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
 
-    EntityCreatedCallback SpaceEntityCreatedCallback;
+    EntityCreatedCallback RemoteSpaceEntityCreatedCallback;
     CallbackHandler ScriptSystemReadyCallback;
 
     void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
