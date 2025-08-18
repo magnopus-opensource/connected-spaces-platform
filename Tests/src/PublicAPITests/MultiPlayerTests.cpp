@@ -313,7 +313,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
@@ -367,7 +367,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -408,7 +408,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     WaitForTestTimeoutCountMs = 0;
     int KeepAliveInterval = 200;
@@ -460,7 +460,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     OnConnect(RealtimeEngine.get());
 
@@ -541,7 +541,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
         SpaceTransform ObjectTransform
             = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-        RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
         auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
@@ -621,7 +621,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -694,7 +694,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Creator 1";
     const SpaceTransform& UserTransform
@@ -863,7 +863,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -936,7 +936,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform
@@ -985,7 +985,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -1080,7 +1080,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String ObjectName = "Object 1";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
@@ -1310,7 +1310,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     const auto LoginState = UserSystem->GetLoginState();
 
@@ -1371,7 +1371,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create 3 seperate objects to ensure there is too many updates for the rate limiter to process in one tick
 
@@ -1434,7 +1434,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -1513,7 +1513,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](auto) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](auto) {});
 
     EXPECT_EQ(RealtimeEngine->GetNumEntities(), 0);
     EXPECT_EQ(RealtimeEngine->GetNumObjects(), 0);
@@ -1611,7 +1611,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String CallbackAssetId;
 
@@ -1671,7 +1671,7 @@ void RunParentEntityReplicationTest(bool Local)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
     auto [CreatedChildEntity1] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName1, ObjectTransform, csp::common::Optional<uint64_t> {});
@@ -1895,7 +1895,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     SpaceTransform ObjectTransformExpected
         = { csp::common::Vector3 { 2, 1, 1 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity]
         = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
@@ -1984,7 +1984,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     SpaceTransform ObjectTransformExpected
         = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity]
         = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
@@ -2076,7 +2076,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     SpaceTransform ObjectTransformExpected = { csp::common::Vector3 { 0, 0, -0.5f }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f },
         csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity]
         = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
@@ -2165,7 +2165,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     SpaceTransform ObjectTransformExpected
         = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity]
         = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransformParent, csp::common::Optional<uint64_t> {});
@@ -2251,7 +2251,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ParentEntityEnterSpaceRepl
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
     auto [CreatedChildEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
@@ -2365,7 +2365,7 @@ void RunParentChildDeletionTest(bool Local)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
     auto [CreatedChildEntity1] = AWAIT(RealtimeEngine.get(), CreateEntity, ChildEntityName1, ObjectTransform, csp::common::Optional<uint64_t> {});
@@ -2533,7 +2533,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
     SpaceTransform ObjectTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
 
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     auto [CreatedParentEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, ParentEntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
     auto [CreatedChildEntity] = AWAIT(CreatedParentEntity, CreateChildEntity, ChildEntityName, ObjectTransform);
@@ -2577,7 +2577,7 @@ void RunParentDeletionTest(bool Local)
     auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
 
     RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

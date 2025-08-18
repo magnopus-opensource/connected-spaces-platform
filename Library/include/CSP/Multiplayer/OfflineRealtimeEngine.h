@@ -119,12 +119,10 @@ public:
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
 
-    /// @brief Sets a callback to be executed when an entity is fully created.
-    ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
+    /// @brief Does nothing, irrelevant for Offline Realtime Engine
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
@@ -253,8 +251,6 @@ private:
     csp::common::List<SpaceEntity*> RootHierarchyEntities;
 
     std::recursive_mutex EntitiesLock;
-
-    EntityCreatedCallback SpaceEntityCreatedCallback;
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;

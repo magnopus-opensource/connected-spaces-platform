@@ -596,14 +596,14 @@ SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& In
     return nullptr;
 }
 
-void OnlineRealtimeEngine::SetEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback Callback)
 {
-    if (SpaceEntityCreatedCallback)
+    if (RemoteSpaceEntityCreatedCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "RemoteSpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
-    SpaceEntityCreatedCallback = std::move(Callback);
+    RemoteSpaceEntityCreatedCallback = std::move(Callback);
 }
 
 bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
@@ -643,17 +643,17 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
 
 namespace
 {
-    void FireSpaceEntityCreatedCallback(
-        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
+    void FireRemoteSpaceEntityCreatedCallback(
+        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback RemoteSpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
     {
-        if (SpaceEntityCreatedCallback)
+        if (RemoteSpaceEntityCreatedCallback)
         {
-            SpaceEntityCreatedCallback(SpaceEntity);
+            RemoteSpaceEntityCreatedCallback(SpaceEntity);
         }
         else
         {
-            LogSystem.LogMsg(
-                common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+            LogSystem.LogMsg(common::LogLevel::Warning,
+                "Called RemoteSpaceEntityCreatedCallback without it being set! Call SetRemoteEntityCreatedCallback first!");
         }
     }
 }
@@ -681,7 +681,7 @@ void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
 
     if (NewEntity)
     {
-        FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+        FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
     }
 }
 
@@ -750,7 +750,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
         for (const auto& EntityMessage : Items)
         {
             SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
-            FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+            FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
         }
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());

@@ -643,7 +643,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRe
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -757,7 +757,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFr
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -1259,7 +1259,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     {
         bool CallbackCalled = false;
 
-        RealtimeEngine->SetEntityCreatedCallback(
+        RealtimeEngine->SetRemoteEntityCreatedCallback(
             [&CallbackCalled, &Entity](csp::multiplayer::SpaceEntity* NewEntity)
             {
                 if (NewEntity->GetName() == "TestObject")
@@ -1399,7 +1399,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Add the second test user to the space
     {

@@ -136,7 +136,7 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
@@ -280,7 +280,7 @@ TEST_P(UpdateSpaceEntityGlobalRotation, UpdateSpaceEntityGlobalRotationTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
@@ -418,7 +418,7 @@ TEST_P(UpdateSpaceEntityGlobalScale, UpdateSpaceEntityGlobalScaleTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
@@ -556,7 +556,7 @@ TEST_P(UpdateSpaceEntityParentId, UpdateSpaceEntityParentIdTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
@@ -694,7 +694,7 @@ TEST_P(RemoveSpaceEntityParent, RemoveSpaceEntityParentTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
@@ -830,7 +830,7 @@ TEST_P(GetRootHierarchyEntities, GetRootHierarchyEntitiesTest)
     csp::common::RealtimeEngineType EngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);

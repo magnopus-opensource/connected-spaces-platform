@@ -180,14 +180,13 @@ public:
         (void)Callback;
     }
 
-    /// @brief Sets a callback to be executed when an entity is fully created.
+    /// @brief Sets a callback to be executed when a remote entity is created.
+    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
     ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    /// The better way to set this and avoid initialisation race conditions is via passing this in the constructor, only use this if you wish to
-    /// override or remove this callback.
+    /// Only one RemoteEntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
     ///
     /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
+    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 
