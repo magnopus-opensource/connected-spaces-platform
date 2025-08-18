@@ -447,11 +447,10 @@ public:
     CSP_NO_EXPORT void SetThirdPartyPlatformDirect(const csp::systems::EThirdPartyPlatform Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT void SetEntityLockDirect(LockType Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT void SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback = false);
+    CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback);
     CSP_NO_EXPORT void AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback);
-
     /// @brief Setter for the owner ID
     /// @param InOwnerId uint64_t : the owner ID to set
     CSP_NO_EXPORT void SetOwnerId(const uint64_t InOwnerId);
