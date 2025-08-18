@@ -49,12 +49,6 @@ cd Tools\CppCheck
 run_cppcheck_static_analysis.bat
 ```
 
-Alternatively, Cppcheck can be configured to run with the following command-line arguments to define the analysis scope and output format:
-
-```
-"C:\Program Files\Cppcheck\cppcheck.exe" --xml --xml-version=2 --output-file=cppcheck_output.xml --enable=all -j8 --suppressions-list=Tools\CppCheck\cppcheck_suppressions.txt -I"Library/include" -I"Library/src" Library
-```
-
 A breakdown of the key configuration flags is as follows:
 
 - `"C:\Program Files\Cppcheck\cppcheck.exe"`: This specifies the full path to the Cppcheck executable.
