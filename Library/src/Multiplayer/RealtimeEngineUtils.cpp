@@ -41,6 +41,19 @@ csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& Rea
     return nullptr;
 }
 
+csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& RealtimeEngine, uint64_t EntityId)
+{
+    for (size_t i = 0; i < RealtimeEngine.GetNumEntities(); ++i)
+    {
+        if (RealtimeEngine.GetEntityByIndex(i)->GetId() == EntityId)
+        {
+            return RealtimeEngine.GetEntityByIndex(i);
+        }
+    }
+
+    return nullptr;
+}
+
 csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
 {
     for (size_t i = 0; i < RealtimeEngine.GetNumAvatars(); ++i)
