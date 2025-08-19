@@ -236,41 +236,17 @@ csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntity(const csp:
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
 {
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetId() == EntityId)
-        {
-            return Entities[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceEntityById(*this, EntityId);
 }
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceAvatar(const csp::common::String& Name)
 {
-    for (size_t i = 0; i < Avatars.Size(); ++i)
-    {
-        if (Avatars[i]->GetName() == Name)
-        {
-            return Avatars[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceAvatar(*this, Name);
 }
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::FindSpaceObject(const csp::common::String& Name)
 {
-    for (size_t i = 0; i < Objects.Size(); ++i)
-    {
-        if (Objects[i]->GetName() == Name)
-        {
-            return Objects[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceObject(*this, Name);
 }
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetEntityByIndex(size_t EntityIndex) { return Entities[EntityIndex]; }

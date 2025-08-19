@@ -539,61 +539,25 @@ void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
 SpaceEntity* OnlineRealtimeEngine::FindSpaceEntity(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetName() == InName)
-        {
-            return Entities[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceEntity(*this, InName);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetId() == EntityId)
-        {
-            return Entities[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceEntityById(*this, EntityId);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceAvatar(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Avatars.Size(); ++i)
-    {
-        if (Avatars[i]->GetName() == InName)
-        {
-            return Avatars[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceAvatar(*this, InName);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Objects.Size(); ++i)
-    {
-        if (Objects[i]->GetName() == InName)
-        {
-            return Objects[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceObject(*this, InName);
 }
 
 void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback Callback)

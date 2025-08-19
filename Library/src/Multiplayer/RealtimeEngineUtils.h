@@ -51,6 +51,8 @@ namespace csp::multiplayer::RealtimeEngineUtils
 // Finds a space entity in the Entities container. Returns nullptr if the entity is not found.
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
 
+csp::multiplayer::SpaceEntity* FindSpaceEntityById(csp::common::IRealtimeEngine& RealtimeEngine, uint64_t EntityId);
+
 // Finds an avatar entity in the Avatar container. Returns nullptr if the avatar is not found.
 csp::multiplayer::SpaceEntity* FindSpaceAvatar(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
 
