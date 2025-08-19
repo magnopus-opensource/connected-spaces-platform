@@ -291,7 +291,9 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateLODChainFromAssetsTest)
     TestAsset2.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(1) };
     TestAsset3.Styles = csp::common::Array<csp::common::String> { csp::systems::CreateLODStyleVar(2) };
 
-    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1, TestAsset2, TestAsset3 };
+    // Adding TestAssets to collection out of sequence to ensure they are
+    // correctly sorted by the call to CreateLODChainFromAssets().
+    csp::common::Array<csp::systems::Asset> TestAssets { TestAsset1, TestAsset3, TestAsset2 };
 
     csp::systems::LODChain Chain = csp::systems::CreateLODChainFromAssets(TestAssets, TestCollectionId);
 

@@ -15,9 +15,9 @@
  */
 #include "LODHelpers.h"
 
-#include "Common/Algorithm.h"
 #include "Debug/Logging.h"
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -82,7 +82,8 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
         Chain.LODAssets[i] = std::move(AssetList[i]);
     }
 
-    csp::common::Sort(Chain.LODAssets, [](const LODAsset& Asset1, const LODAsset& Asset2) { return Asset1.Level < Asset2.Level; });
+    std::sort(
+        Chain.LODAssets.begin(), Chain.LODAssets.end(), [](const LODAsset& Asset1, const LODAsset& Asset2) { return Asset1.Level < Asset2.Level; });
 
     return Chain;
 }
@@ -90,8 +91,8 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
 bool ValidateNewLODLevelForChain(const LODChain& Chain, int LODLevel)
 {
     // Ensure LODLevel doesnt already exist
-    std::optional<size_t> Index = csp::common::FindIf(Chain.LODAssets, [LODLevel](const LODAsset& LODAsset) { return LODAsset.Level == LODLevel; });
-
-    return !Index.has_value();
+    const auto it
+        = std::find_if(Chain.LODAssets.begin(), Chain.LODAssets.end(), [LODLevel](const LODAsset& Asset) { return Asset.Level == LODLevel; });
+    return it == Chain.LODAssets.end();
 }
 } // namespace csp::systems
