@@ -76,7 +76,7 @@ void ResolveEntityHierarchy(
 void RemoveParentChildRelationshipsFromEntity(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
 
-// Ensures compoennts attached to the entitiy are notified of deletion by calling OnLocalDelete.
+// Ensures components attached to the entity are notified of deletion by calling OnLocalDelete.
 // It also fires the entity patch callback, notifying clients that the child entities have been reparented.
 void LocalProcessChildUpdates(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, csp::multiplayer::SpaceEntity* Entity);
