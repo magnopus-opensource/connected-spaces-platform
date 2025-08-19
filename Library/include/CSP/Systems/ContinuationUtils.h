@@ -55,7 +55,11 @@ inline auto AssertRequestSuccessOrErrorFromResult(std::string SuccessMsg, std::s
     {
         if (Result.GetResultCode() != EResultCode::Success)
         {
-            LogHTTPErrorAndCancelContinuation<ResultT>(std::move(ErrorMsg), Result, LogLevel);
+            auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
+            auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
+            auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
+            ResultT InternalResult(ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse);
+            LogHTTPErrorAndCancelContinuation<ResultT>(std::move(ErrorMsg), InternalResult, LogLevel);
         }
         else
         {
