@@ -17,6 +17,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
@@ -48,7 +49,6 @@
 #include <thread>
 
 #include "Mocks/SignalRConnectionMock.h"
-#include <CSP/Common/ContinuationUtils.h>
 
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;

@@ -17,6 +17,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
 #include "CallHelpers.h"
 #include "LODHelpers.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
@@ -28,7 +29,6 @@
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
-#include <CSP/Common/ContinuationUtils.h>
 #include "Common/Convert.h"
 
 using namespace csp;
