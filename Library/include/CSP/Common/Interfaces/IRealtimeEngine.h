@@ -321,6 +321,14 @@ public:
         (void)ObjectIndex;
     }
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A non-owning pointer to a List of non-owning pointers to all entities.
+    [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const
+    {
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
+    }
+
     /// @brief Get the number of total entities in the system.
     /// @return The total number of entities.
     virtual size_t GetNumEntities() const { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }

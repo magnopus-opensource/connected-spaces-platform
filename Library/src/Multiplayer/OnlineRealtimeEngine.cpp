@@ -1082,6 +1082,8 @@ SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t ObjectIndex)
     return Objects[ObjectIndex];
 }
 
+const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetAllEntities() const { return &Entities; }
+
 void OnlineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);

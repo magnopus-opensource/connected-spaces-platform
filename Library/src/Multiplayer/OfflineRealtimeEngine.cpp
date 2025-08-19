@@ -255,6 +255,8 @@ csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetAvatarByIndex(size_t Av
 
 csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetObjectByIndex(size_t ObjectIndex) { return Objects[ObjectIndex]; }
 
+const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetAllEntities() const { return &Entities; }
+
 size_t OfflineRealtimeEngine::GetNumEntities() const { return Entities.Size(); }
 
 size_t OfflineRealtimeEngine::GetNumAvatars() const { return Avatars.Size(); }
@@ -297,8 +299,6 @@ void OfflineRealtimeEngine::LockEntityUpdate() { return EntitiesLock.lock(); }
 bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock(); }
 
 void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
-
-csp::common::List<SpaceEntity*>& OfflineRealtimeEngine::GetAllEntities() { return Entities; }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 

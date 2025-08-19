@@ -227,6 +227,11 @@ public:
     /// @return The total number of object entities.
     virtual size_t GetNumObjects() const override;
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A List of non-owning pointers to all entities.
+    virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const override;
+
     /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;

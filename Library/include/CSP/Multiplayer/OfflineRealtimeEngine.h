@@ -186,6 +186,11 @@ public:
     /// @return The total number of object entities.
     virtual size_t GetNumObjects() const override;
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A non-owning pointer to a List of non-owning pointers to all entities.
+    virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const override;
+
     /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;
@@ -230,10 +235,6 @@ public:
     CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
-
-    // Get all the entities in the space, used in the OfflineSpaceEntityEventHandler
-    // I wonder if this should be an IRealtimeEngine interface method? Seems useful.
-    CSP_NO_EXPORT csp::common::List<SpaceEntity*>& GetAllEntities();
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
 
