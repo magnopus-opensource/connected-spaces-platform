@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -25,7 +26,6 @@
 
 #include "signalrclient/signalr_value.h"
 #include "gtest/gtest.h"
-#include <CSP/Common/ContinuationUtils.h>
 #include <memory>
 
 using namespace csp::multiplayer;

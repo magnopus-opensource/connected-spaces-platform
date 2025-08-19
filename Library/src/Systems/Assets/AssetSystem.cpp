@@ -17,6 +17,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
@@ -29,7 +30,6 @@
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
-#include <CSP/Common/ContinuationUtils.h>
 
 using namespace csp;
 using namespace csp::common;
