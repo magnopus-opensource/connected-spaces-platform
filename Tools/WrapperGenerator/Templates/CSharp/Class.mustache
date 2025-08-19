@@ -106,7 +106,12 @@
             IntPtr
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
-            {{ name }}
+{{# is_enum}}
+           {{> Type }}
+{{/ is_enum }}
+{{^ is_enum}}
+           {{ name }}
+{{/ is_enum }}
 {{/ is_pointer_or_reference }}
 {{/ type }}
                 {{ name }},
