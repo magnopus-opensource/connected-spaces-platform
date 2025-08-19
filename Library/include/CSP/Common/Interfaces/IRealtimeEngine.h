@@ -20,12 +20,11 @@
 #include "CSP/Common/Interfaces/InvalidInterfaceUserError.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
 namespace csp::multiplayer
 {
-enum class AvatarPlayMode;
-enum class AvatarState;
 class SpaceTransform;
 class SpaceEntity;
 }
@@ -43,7 +42,6 @@ typedef std::function<void(bool)> CallbackHandler;
 
 // Callback that provides a non-owning pointer to a SpaceEntity object.
 typedef std::function<void(csp::multiplayer::SpaceEntity*)> EntityCreatedCallback;
-
 }
 
 namespace csp::common

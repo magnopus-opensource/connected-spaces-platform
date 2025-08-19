@@ -20,40 +20,13 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 namespace csp::multiplayer
 {
-
-/// @brief Enumerates the supported states for an avatar.
-///        These are used to establish the related animation that the avatar will use on its state machine.
-enum class AvatarState
-{
-    Idle = 0,
-    Walking,
-    Running,
-    Flying,
-    Jumping,
-    Falling,
-    Num
-};
-
-/// @brief Enumerates the supported play mode for the avatar.
-enum class AvatarPlayMode
-{
-    /// Viewer mode, with desktop or mobile viewer
-    Default = 0,
-    /// Intended for use with augmented reality viewers (e.g. mobile AR)
-    AR,
-    /// Intended for use with virtual reality viewers (e.g. Quest 2)
-    VR,
-    /// Intended for use with creator privileges (e.g. designers and editors customizing a space)
-    Creator,
-    Num
-};
-
 /// @brief Enumerates the supported locomotion models available for the avatar movements.
 enum class LocomotionModel
 {
