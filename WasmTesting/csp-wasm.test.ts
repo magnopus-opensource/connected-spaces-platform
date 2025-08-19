@@ -80,6 +80,23 @@ test ('SendReceiveNetworkEvent', async() => {
   await LogoutUser(user);
 })
 
+test ('CreateAvatar', async() => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+  const spaceId = await CreatePublicTestSpace();
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/CreateAvatar.html', USE_DEBUG_CSP, null, spaceId)
+
+  console.log(consoleMessages);
+  console.log(errors);
+
+  assert.ok(consoleMessages.some(e => e.includes('Successfully created avatar')));
+  assert.ok(errors.length == 0); //Should be no errors
+
+  //Cleanup
+  await DeleteSpace(spaceId);
+  await LogoutUser(user);
+})
+
 
 test.run();
 

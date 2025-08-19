@@ -123,8 +123,8 @@ public:
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-        const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
-        const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
+        const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState AvatarState,
+        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
     {
         // Marking parameters as unused by casting them to void to suppress warnings.
         // however this method is exported and the wrapper generator does not support that approach.

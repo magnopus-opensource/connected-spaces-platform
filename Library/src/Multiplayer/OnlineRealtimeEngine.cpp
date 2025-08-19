@@ -364,10 +364,9 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
 }
 
 void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
-    const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, const csp::multiplayer::AvatarState& AvatarState,
-    const csp::common::String& AvatarId, const csp::multiplayer::AvatarPlayMode& AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
+    const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState AvatarState,
+    const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
-
     // Ask the server for an avatar Id via "GenerateObjectIds"
     async::shared_task<uint64_t> GetAvatarNetworkIdChain = RemoteGenerateNewAvatarId();
 
