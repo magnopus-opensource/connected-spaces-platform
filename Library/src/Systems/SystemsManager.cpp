@@ -18,7 +18,6 @@
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
@@ -81,8 +80,6 @@ SettingsSystem* SystemsManager::GetSettingsSystem() { return SettingsSystem; }
 
 GraphQLSystem* SystemsManager::GetGraphQLSystem() { return GraphQLSystem; }
 
-AnalyticsSystem* SystemsManager::GetAnalyticsSystem() { return AnalyticsSystem; }
-
 MaintenanceSystem* SystemsManager::GetMaintenanceSystem() { return MaintenanceSystem; }
 
 EventTicketingSystem* SystemsManager::GetEventTicketingSystem() { return EventTicketingSystem; }
@@ -120,7 +117,6 @@ SystemsManager::SystemsManager()
     , ApplicationSettingsSystem(nullptr)
     , SettingsSystem(nullptr)
     , GraphQLSystem(nullptr)
-    , AnalyticsSystem(nullptr)
     , MaintenanceSystem(nullptr)
     , EventTicketingSystem(nullptr)
     , ECommerceSystem(nullptr)
@@ -159,7 +155,6 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 
     NetworkEventBus = MultiplayerConnection->GetEventBusPtr();
-    AnalyticsSystem = new csp::systems::AnalyticsSystem();
     VoipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors
@@ -200,7 +195,6 @@ void SystemsManager::DestroySystems()
     delete SpaceSystem;
     delete UserSystem;
     delete VoipSystem;
-    delete AnalyticsSystem;
     delete MultiplayerConnection; // Also deletes NetworkEventBus
     delete ScriptSystem;
 

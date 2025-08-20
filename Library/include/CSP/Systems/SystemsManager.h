@@ -43,7 +43,6 @@ class AnchorSystem;
 class ApplicationSettingsSystem;
 class SettingsSystem;
 class GraphQLSystem;
-class AnalyticsSystem;
 class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
@@ -129,10 +128,6 @@ public:
     /// @return GraphQLSystem : pointer to the GraphQL system class
     GraphQLSystem* GetGraphQLSystem();
 
-    /// @brief Retrieves the Analytics system.
-    /// @return AnalyticsSystem : pointer to the Analytics system class
-    AnalyticsSystem* GetAnalyticsSystem();
-
     /// @brief Retrieves the Maintenance system.
     /// @return MaintenanceSystem : pointer to the Maintenance system class
     MaintenanceSystem* GetMaintenanceSystem();
@@ -198,7 +193,6 @@ private:
     ApplicationSettingsSystem* ApplicationSettingsSystem;
     SettingsSystem* SettingsSystem;
     GraphQLSystem* GraphQLSystem;
-    AnalyticsSystem* AnalyticsSystem;
     MaintenanceSystem* MaintenanceSystem;
     EventTicketingSystem* EventTicketingSystem;
     ECommerceSystem* ECommerceSystem;
