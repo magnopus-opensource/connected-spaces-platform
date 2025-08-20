@@ -66,6 +66,8 @@ csp::common::RealtimeEngineType OfflineRealtimeEngine::GetRealtimeEngineType() c
 
 namespace
 {
+    static constexpr std::uint64_t Precision53Bits = 9007199254740991;
+
     // This was initially just a random number, however, we need keep the ID's low
     // This is because of a gnarly latent bug with EntityID's. The scripting system (QuickJS currently)
     // binds EntityID's to native JS `numbers`, which are 64 bit floating points.
@@ -75,8 +77,7 @@ namespace
     // ints 1:1.
     uint64_t NextId()
     {
-        static std::atomic<uint64_t> counter { 0 };
-        static constexpr std::uint64_t Precision53Bits = 9007199254740991;
+        static std::atomic<uint64_t> counter { 1 }; // Start at 1 to be safe as sometimes people innapripriately use 0 to express nullness.
         assert(counter < Precision53Bits && "Id's need to be able to be represented at double precision, because of JS bindings.");
         return counter++;
     }
@@ -139,11 +140,9 @@ void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const 
 {
     // Some of our interfaces use int64_t ... real bugs here.
     uint64_t Id = NextId();
-    // Client id doesnt matter for single player
-    uint64_t ClientId = 0;
 
-    auto* NewEntity
-        = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform, ClientId, ParentID, false, false };
+    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
+        OfflineRealtimeEngine::LocalClientId(), ParentID, false, false };
 
     std::scoped_lock EntitiesLocker { EntitiesLock };
 
@@ -285,11 +284,8 @@ void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common
     // Entities are populated in the constructor, so can immediately call back.
     Callback();
 
-    // ClientID dosen't matter
-    static constexpr uint64_t ClientId = 0;
-
     RealtimeEngineUtils::InitialiseEntityScripts(Entities);
-    RealtimeEngineUtils::DetermineScriptOwners(Entities, ClientId);
+    RealtimeEngineUtils::DetermineScriptOwners(Entities, OfflineRealtimeEngine::LocalClientId());
 
     EntityFetchCompleteCallback(static_cast<uint32_t>(Entities.Size()));
 }
@@ -301,6 +297,8 @@ bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock
 void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
+
+uint64_t OfflineRealtimeEngine::LocalClientId() { return Precision53Bits; }
 
 void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
