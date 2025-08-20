@@ -180,8 +180,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         std::this_thread::sleep_for(7s);
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(7));
-
     // Re-Enter space and verify contents
     {
         // Retrieve all entities

@@ -914,6 +914,11 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 
     // Exit the space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Ensure data has been written to database by chs before entering the space again
+    // This is due to an enforced 2 second chs database write delay
+    std::this_thread::sleep_for(7s);
+
     // Reenter the space
     auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
