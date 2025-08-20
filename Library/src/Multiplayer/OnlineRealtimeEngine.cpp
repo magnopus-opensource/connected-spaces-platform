@@ -530,7 +530,7 @@ void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
     {
         if (Entity->GetEntityDestroyCallback() != nullptr)
         {
-            Entity->SetEntityDestroyCallbackParams(true);
+            Entity->GetEntityDestroyCallback()(true);
         }
 
         RemoveEntity(Entity);

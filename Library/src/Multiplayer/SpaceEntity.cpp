@@ -592,8 +592,6 @@ SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return Enti
 
 SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return EntityDestroyCallback; }
 
-void SpaceEntity::SetEntityDestroyCallbackParams(bool Boolean) { EntityDestroyCallback(Boolean); }
-
 SpaceEntity* SpaceEntity::GetParent() { return Parent; }
 
 void SpaceEntity::SetParent(SpaceEntity* InParent) { Parent = InParent; }
