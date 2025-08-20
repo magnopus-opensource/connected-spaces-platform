@@ -77,7 +77,6 @@ namespace
         {
             if (Result.GetAssetCollection().ParentId != ConversationId)
             {
-                CSP_LOG_ERROR_MSG("Given message doesn't exist on the conversation.");
                 throw csp::common::continuations::ResultException(
                     "Given message doesn't exist on the conversation.", MakeInvalid<AssetCollectionResult>());
             }
@@ -106,7 +105,6 @@ namespace
             }
             else
             {
-                CSP_LOG_ERROR_MSG("Result didn't contain a valid asset.");
                 throw csp::common::continuations::ResultException("Result didn't contain a valid asset.", MakeInvalid<AssetsResult>());
             }
         };
@@ -158,12 +156,10 @@ namespace
             }
             else if (Result.GetAssets().Size() == 0)
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Annotation asset doesn't exist");
                 throw csp::common::continuations::ResultException("Annotation asset doesn't exist", MakeInvalid<NullResult>());
             }
             else
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Invalid number of annotation asset collections exist for this message");
                 throw csp::common::continuations::ResultException(
                     "Invalid number of annotation asset collections exist for this message", MakeInvalid<NullResult>());
             }
@@ -226,7 +222,6 @@ namespace
                         }
                         else
                         {
-                            CSP_LOG_MSG(csp::common::LogLevel::Log, "Invalid number of annotation assets exist for this message");
                             throw csp::common::continuations::ResultException(
                                 "Invalid number of annotation assets exist for this message", MakeInvalid<AssetsResult>());
                         }
@@ -276,7 +271,6 @@ namespace
 
             if (HasAnnotationData == false)
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Message asset collection doesn't contain annotation data.");
                 throw csp::common::continuations::ResultException(
                     "Message asset collection doesn't contain annotation data.", MakeInvalid<AssetCollectionResult>());
             }
@@ -293,7 +287,6 @@ namespace
 
             if (ThumbnailIds.size() == 0)
             {
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "No Thumbnails exist.");
                 throw csp::common::continuations::ResultException("No Thumbnails exist.", Result);
             }
 

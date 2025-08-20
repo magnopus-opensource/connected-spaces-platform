@@ -133,7 +133,8 @@ inline auto InvokeIfExceptionInChain(
         }
         catch (const ExpectedExceptionBase& ExpectedException)
         {
-            LogSystem.LogMsg(LogLevel::Verbose, "Caught Exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            LogSystem.LogMsg(LogLevel::Verbose, "Caught expected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            LogSystem.LogMsg(LogLevel::Verbose, ExpectedException.what());
             InvokeIfExpectedErrorCallable(ExpectedException);
         }
         catch (const csp::common::InvalidInterfaceUseError& exception)
