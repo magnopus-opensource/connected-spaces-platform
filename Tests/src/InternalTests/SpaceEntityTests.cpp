@@ -28,6 +28,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
 
@@ -958,4 +959,34 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     SpaceEntityTests, GetRootHierarchyEntities, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
 
+}
+CSP_PUBLIC_TEST(CSPEngine, LockPrerequisites, LockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+
+    // Ensure the lock error message is called when we try and lock an entity that is already locked
+    const csp::common::String LockErrorMsg = "Entity is already locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
+
+    // Set the entity as locked first
+    Entity.Lock();
+    // Check that we error if we try to lock again
+    Entity.Lock();
+}
+CSP_PUBLIC_TEST(CSPEngine, UnlockPrerequisites, UnlockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+
+    // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
+    const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(UnlockErrorMsg)).Times(1);
+
+    Entity.Unlock();
 }
