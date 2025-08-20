@@ -16,8 +16,9 @@
 
 #include "CSP/Systems/Maintenance/Maintenance.h"
 
-#include "Common/Algorithm.h"
 #include "Services/ApiBase/ApiBase.h"
+
+#include <algorithm>
 
 namespace csp::systems
 {
@@ -111,7 +112,7 @@ void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 {
     const csp::common::DateTime CurrentTime(csp::common::DateTime::UtcTimeNow());
 
-    csp::common::Sort(MaintenanceInfos,
+    std::sort(MaintenanceInfos.begin(), MaintenanceInfos.end(),
         [CurrentTime](const MaintenanceInfo& Item1, const MaintenanceInfo& Item2)
         {
             const csp::common::DateTime Item1Time(Item1.EndDateTimestamp);

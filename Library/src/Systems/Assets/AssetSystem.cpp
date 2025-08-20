@@ -18,7 +18,6 @@
 
 #include "CSP/Common/CSPAsyncScheduler.h"
 #include "CallHelpers.h"
-#include "Common/Algorithm.h"
 #include "LODHelpers.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Services/PrototypeService/Api.h"
@@ -29,6 +28,7 @@
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
+#include "Common/Convert.h"
 
 using namespace csp;
 using namespace csp::common;
