@@ -44,6 +44,7 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "Multiplayer/MCS/MCSTypes.h"
@@ -852,13 +853,9 @@ void SpaceEntity::QueueUpdate()
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 {
-    uint64_t LocalClientId = 0;
-
-    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
-    {
-        auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
-        LocalClientId = OnlineRealtimeEngine->GetMultiplayerConnectionInstance()->GetClientId();
-    }
+    uint64_t LocalClientId = (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        ? static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->GetMultiplayerConnectionInstance()->GetClientId()
+        : csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
 
     if (SelectedState)
     {

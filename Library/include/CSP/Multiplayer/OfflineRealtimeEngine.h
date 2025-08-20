@@ -238,6 +238,10 @@ public:
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
 
+    /// @brief The client ID of the local client. An arbitrary unchanging value.
+    /// @return INT53_MAX, the maximum number expressible in all our interop languages (you can thank javascript for the weird sizing).
+    static uint64_t LocalClientId();
+
 private:
     // Should not be null
     csp::common::LogSystem* LogSystem;
