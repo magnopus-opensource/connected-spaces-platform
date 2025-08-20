@@ -72,4 +72,5 @@ protected:
 extern template class PublicTestBaseWithParam<
     std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>;
 extern template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;

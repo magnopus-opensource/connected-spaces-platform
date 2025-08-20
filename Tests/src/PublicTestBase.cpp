@@ -129,4 +129,5 @@ template <typename T> void PublicTestBaseWithParam<T>::TearDown()
 template class PublicTestBaseWithParam<
     std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>;
 template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
+template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
