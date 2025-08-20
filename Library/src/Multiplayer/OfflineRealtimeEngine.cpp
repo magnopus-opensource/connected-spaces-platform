@@ -193,6 +193,12 @@ void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity,
     // I'm personally dubious. Nonetheless, we have tests that assert this ordering.
     RootHierarchyEntities.RemoveItem(Entity);
     RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
+
+    if (Entity->GetEntityDestroyCallback() != nullptr)
+    {
+        Entity->GetEntityDestroyCallback()(true);
+    }
+
     AvatarOrObjectList.RemoveItem(Entity);
     RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, Entity);
     Entities.RemoveItem(Entity);

@@ -371,10 +371,6 @@ public:
     /// @return: DestroyCallback
     CSP_NO_EXPORT DestroyCallback GetEntityDestroyCallback();
 
-    /// @brief Setter for the parameters of the EntityDestroyCallbackParams
-    /// @param bool : the boolean to set
-    CSP_NO_EXPORT void SetEntityDestroyCallbackParams(const bool Boolean);
-
     /// @brief Getter for the parent entity
     /// @return SpaceEntity*
     CSP_NO_EXPORT SpaceEntity* GetParent();
