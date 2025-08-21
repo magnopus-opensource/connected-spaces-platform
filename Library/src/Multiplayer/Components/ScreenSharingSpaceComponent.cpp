@@ -39,6 +39,7 @@ ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId)] = "";
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId)] = "";
     Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
+    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new ScreenSharingSpaceComponentScriptInterface(this));
 }
@@ -141,6 +142,16 @@ void ScreenSharingSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_
 bool ScreenSharingSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible)); }
 
 void ScreenSharingSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible), Value); }
+
+bool ScreenSharingSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible));
+}
+
+void ScreenSharingSpaceComponent::SetIsVirtualVisible(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible), Value);
+}
 
 /* IShadowCaster */
 
