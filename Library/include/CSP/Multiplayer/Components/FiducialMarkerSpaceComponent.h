@@ -39,6 +39,7 @@ enum class FiducialMarkerPropertyKeys
     Scale,
     IsVisible,
     IsARVisible,
+    IsVirtualVisible,
     Num
 };
 
@@ -107,6 +108,10 @@ public:
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsVirtualVisible()
+    bool GetIsVirtualVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVirtualVisible()
+    void SetIsVirtualVisible(bool InValue) override;
     /// @}
 };
 
