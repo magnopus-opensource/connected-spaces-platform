@@ -85,6 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(TextComponent->GetComponentType(), ComponentType::Text);
     EXPECT_EQ(TextComponent->GetHeight(), 1.0f);
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(TextComponent->GetIsARVisible(), true);
     EXPECT_EQ(TextComponent->GetIsVisible(), true);
     EXPECT_EQ(TextComponent->GetRotation().W, 1);
@@ -105,6 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     TextComponent->SetHeight(2.0f);
     TextComponent->SetWidth(2.0f);
     TextComponent->SetBillboardMode(BillboardMode::YawLockedBillboard);
+    TextComponent->SetIsVirtualVisible(false);
     TextComponent->SetIsARVisible(false);
     TextComponent->SetIsVisible(false);
     TextComponent->SetBackgroundColor(csp::common::Vector3::One());
@@ -124,6 +126,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
     EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
     EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(TextComponent->GetIsARVisible(), false);
     EXPECT_EQ(TextComponent->GetIsVisible(), false);
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().W, 1.0f);
@@ -193,18 +196,20 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 		const assetCollectionId = "TEST_COLLECTION_ID";
 
 		var text = ThisEntity.getTextComponents()[0];
+        text.text = "Text";
 		text.position = [1.0,1.0,1.0];
+        text.scale = [2.0, 2.0, 2.0];
+        text.rotation = [1.0, 1.0, 1.0, 1.0];
+        text.textColor = [0.0,0.0,0.0];
+        text.backgroundColor = [1.0,1.0,1.0];
+        text.isBackgroundVisible = false;
+        text.width = 2.0;
 		text.height = 2.0;
-		text.width = 2.0;
 		text.billboardMode = 2;
-		text.isARVisible = false;
 		text.isVisible = false;
-		text.backgroundColor = [1.0,1.0,1.0];
-		text.textColor = [0.0,0.0,0.0];
-		text.rotation = [1.0, 1.0, 1.0, 1.0];
-		text.text = "Text";
-		text.scale = [2.0, 2.0, 2.0];
-		text.isBackgroundVisible = false;
+		text.isARVisible = false;
+		text.isVirtualVisible = false;
+
     )xx";
 
     ScriptComponent->SetScriptSource(TextScriptText.c_str());
@@ -214,28 +219,41 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     RealtimeEngine->ProcessPendingEntityOperations();
 
     // Ensure values are set correctly
+    EXPECT_EQ(TextComponent->GetText(), "Text");
+
     EXPECT_FLOAT_EQ(TextComponent->GetPosition().X, 1.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetPosition().Y, 1.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetPosition().Z, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().X, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Y, 1.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
-    EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
-    EXPECT_EQ(TextComponent->GetIsARVisible(), false);
-    EXPECT_EQ(TextComponent->GetIsVisible(), false);
+
+    EXPECT_FLOAT_EQ(TextComponent->GetScale().X, 2.0f);
+    EXPECT_FLOAT_EQ(TextComponent->GetScale().Y, 2.0f);
+    EXPECT_FLOAT_EQ(TextComponent->GetScale().Z, 2.0f);
+
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().W, 1.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().X, 1.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().Y, 1.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().Z, 1.0f);
-    EXPECT_EQ(TextComponent->GetText(), "Text");
+
     EXPECT_FLOAT_EQ(TextComponent->GetTextColor().X, 0.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Y, 0.0f);
     EXPECT_FLOAT_EQ(TextComponent->GetTextColor().Z, 0.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().X, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Y, 2.0f);
-    EXPECT_FLOAT_EQ(TextComponent->GetScale().Z, 2.0f);
+
+    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().X, 1.0f);
+    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Y, 1.0f);
+    EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
+
+    EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
+
     EXPECT_FLOAT_EQ(TextComponent->GetWidth(), 2.0f);
+
+    EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
+
+    EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
+
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(TextComponent->GetIsARVisible(), false);
+    EXPECT_EQ(TextComponent->GetIsVisible(), false);
+
     EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
