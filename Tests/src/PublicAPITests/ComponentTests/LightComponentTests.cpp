@@ -21,6 +21,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -226,6 +227,111 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
     LightSpaceComponentInstance->InvokeAction("TestAction", "TestParam");
 
     EXPECT_TRUE(ActionCalled);
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+
+    // Create parent entity
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+
+    // Create light component
+    auto* LightComponent = (LightSpaceComponent*)CreatedObject->AddComponent(ComponentType::Light);
+
+    // Create script component
+    auto* ScriptComponent = (ScriptSpaceComponent*)CreatedObject->AddComponent(ComponentType::ScriptData);
+
+    CreatedObject->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    EXPECT_EQ(LightComponent->GetLightType(), LightType::Point);
+    EXPECT_EQ(LightComponent->GetIntensity(), 5000.f);
+    EXPECT_EQ(LightComponent->GetRange(), 1000.f);
+    EXPECT_EQ(LightComponent->GetInnerConeAngle(), 0.f);
+    EXPECT_EQ(LightComponent->GetOuterConeAngle(), 0.78539816339f);
+    EXPECT_EQ(LightComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(LightComponent->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(LightComponent->GetColor(), csp::common::Vector3(255, 255, 255));
+    EXPECT_EQ(LightComponent->GetIsVisible(), true);
+    EXPECT_EQ(LightComponent->GetIsARVisible(), true);
+    EXPECT_EQ(LightComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "");
+    EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::NoCookie);
+
+    // Setup script
+    const std::string LightSpaceScriptText = R"xx(
+
+		var light = ThisEntity.getLightComponents()[0];
+        
+        light.lightType = 2;
+        light.Intensity = 10000;
+        light.range = 5000;
+        light.innerConeAngle = 0.78539816339;
+        light.outerConeAngle = 0.15915494309;
+        light.position = [1, 1, 1];
+		light.rotation = [1, 1, 1, 1];
+        light.color = [0, 0, 0];
+		light.isVisible = false;
+        light.isARVisible = false;
+        light.isVirtualVisible = false;
+        light.cookieAssetId = "TestLightCookieAssetId";
+        light.lightCookieType = 0;
+
+    )xx";
+
+    ScriptComponent->SetScriptSource(LightSpaceScriptText.c_str());
+    CreatedObject->GetScript().Invoke();
+
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
+    EXPECT_FALSE(ScriptHasErrors);
+
+    EXPECT_EQ(LightComponent->GetLightType(), LightType::Spot);
+    EXPECT_EQ(LightComponent->GetIntensity(), 10000.f);
+    EXPECT_EQ(LightComponent->GetRange(), 5000.f);
+    EXPECT_EQ(LightComponent->GetInnerConeAngle(), 0.78539816339f);
+    EXPECT_EQ(LightComponent->GetOuterConeAngle(), 0.15915494309f);
+    EXPECT_EQ(LightComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(LightComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(LightComponent->GetColor(), csp::common::Vector3(0, 0, 0));
+    EXPECT_EQ(LightComponent->GetIsVisible(), false);
+    EXPECT_EQ(LightComponent->GetIsARVisible(), false);
+    EXPECT_EQ(LightComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "TestLightCookieAssetId");
+    EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::ImageCookie);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
