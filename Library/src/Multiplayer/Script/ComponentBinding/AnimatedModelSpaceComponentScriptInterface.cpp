@@ -40,6 +40,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsLoopPlayb
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsPlaying);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVirtualVisible);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, int32_t, int32_t, AnimationIndex);
 

@@ -37,5 +37,7 @@ DEFINE_SCRIPT_PROPERTY_VEC3(StaticModelSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(StaticModelSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer
