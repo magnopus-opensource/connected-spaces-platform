@@ -16,6 +16,7 @@
 
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
+#include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
@@ -66,8 +67,6 @@ csp::common::RealtimeEngineType OfflineRealtimeEngine::GetRealtimeEngineType() c
 
 namespace
 {
-    static constexpr std::uint64_t Precision53Bits = 9007199254740991;
-
     // This was initially just a random number, however, we need keep the ID's low
     // This is because of a gnarly latent bug with EntityID's. The scripting system (QuickJS currently)
     // binds EntityID's to native JS `numbers`, which are 64 bit floating points.
@@ -78,7 +77,7 @@ namespace
     uint64_t NextId()
     {
         static std::atomic<uint64_t> counter { 1 }; // Start at 1 to be safe as sometimes people innapripriately use 0 to express nullness.
-        assert(counter < Precision53Bits && "Id's need to be able to be represented at double precision, because of JS bindings.");
+        assert(counter < csp::common::Precision53Bits && "Id's need to be able to be represented at double precision, because of JS bindings.");
         return counter++;
     }
 
@@ -304,7 +303,7 @@ void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 
-uint64_t OfflineRealtimeEngine::LocalClientId() { return Precision53Bits; }
+uint64_t OfflineRealtimeEngine::LocalClientId() { return csp::common::LocalClientID; }
 
 void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {

@@ -69,8 +69,8 @@ protected:
 };
 
 // If you want to use a new parameterized test structure, you need to explicitly instantiate here (and in the .cpp)
-extern template class PublicTestBaseWithParam<
-    std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string, csp::common::RealtimeEngineType>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool, csp::systems::EResultCode, std::string>>;
 extern template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;

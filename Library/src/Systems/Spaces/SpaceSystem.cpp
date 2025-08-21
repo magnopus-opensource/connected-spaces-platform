@@ -17,6 +17,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
@@ -355,9 +356,19 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
         return;
     }
 
-    // Hack alert. Not the best place to be doing this, but don't want to force the client to do this right this second, the api isn't strong enough
-    // and it'll be too easy to get wrong. Will need to break this dependency. We do the opposite in ExitSpace because we need to null the pointer,
-    // shared_ptrs and weak_ptrs would solve this entirely if they could be passed across the interface.
+    // It's invalid to enter an online space without a multiplayer connection
+    if ((RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        && (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->IsConnected()))
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Error,
+            "Cannot enter an online space without an established multiplayer connection. Did you create one when logging in?");
+        Callback(SpaceResult(EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, ERequestFailureReason::None));
+        return;
+    }
+
+    // Hack alert. Not the best place to be doing this, but don't want to force the client to do this right this second, the api isn't strong
+    // enough and it'll be too easy to get wrong. Will need to break this dependency. We do the opposite in ExitSpace because we need to null
+    // the pointer, shared_ptrs and weak_ptrs would solve this entirely if they could be passed across the interface.
     if (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
     {
         csp::systems::SystemsManager::Get().GetMultiplayerConnection()->SetOnlineRealtimeEngine(
@@ -366,15 +377,42 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 
     CSP_LOG_MSG(csp::common::LogLevel::Log, "SpaceSystem::EnterSpace");
 
-    GetSpace(SpaceId)
-        .then(async::inline_scheduler(),
-            systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>("SpaceSystem::EnterSpace, successfully discovered space.",
-                "Logged in user does not have permission to discover this space. Failed to enter space.", {}, {}, {}))
-        .then(async::inline_scheduler(), AddUserToSpaceIfNecessary(Callback, *this))
-        .then(async::inline_scheduler(),
-            systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
-                "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
-                "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+    // If online, get the space, add the user to it. If offline, create a local space and forward a local result through.
+    auto UpstreamConnectionTask = (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        ? GetSpace(SpaceId)
+              .then(async::inline_scheduler(),
+                  systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
+                      "SpaceSystem::EnterSpace, successfully discovered space.",
+                      "Logged in user does not have permission to discover this space. Failed to enter space.", {}, {}, {}))
+              .then(async::inline_scheduler(), AddUserToSpaceIfNecessary(Callback, *this))
+              .then(async::inline_scheduler(),
+                  systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
+                      "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
+                      "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
+        : async::spawn(async::inline_scheduler(),
+            [SpaceId]()
+            {
+                // Offline, build a local space result
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
+
+                Space LocalSpace {};
+                csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
+                LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
+                LocalSpace.Name = "Offline Space";
+                LocalSpace.Id = SpaceId;
+                LocalSpace.CreatedBy = LocalUser;
+                LocalSpace.OwnerId = LocalUser;
+                LocalSpace.UserIds = { LocalUser };
+                LocalSpace.ModeratorIds = { LocalUser };
+
+                SpaceResult LocalSpaceResult {};
+                LocalSpaceResult.SetSpace(LocalSpace);
+                LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                return LocalSpaceResult;
+            });
+
+    // Whether we've done an upstream online connection or just a local one, finish entering the space
+    UpstreamConnectionTask
         .then(async::inline_scheduler(), FireEnterSpaceEvent(CurrentSpace)) // Neccesary?
         .then(async::inline_scheduler(),
             [RealtimeEngine](const SpaceResult& SpaceResult)
@@ -386,9 +424,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                  * they can't be synchronous because we need to wait until one callback finishes until we can call the next one.
                  * Once that's done, we're free to request entities from the backend. It is at this point, once we have fired the
                  * entity request, that the login is free to continue.
-                 * That means there are two callback points, when we've made the request, AND, when the request is finished and
+                 * However, more generally, there are two callback points, when we've made the request, AND, when the request is finished and
                  * all the entities are fetched. We internally care about the first in order to progress the EnterSpace flow, as you
                  * can enter a space before all the entities are fetched. Clients need to know about the latter however.
+                 * Via this mechanism, a realtime engine can abstractly decide if its data fetch is synchronous or not, and whether to yield
+                 * back to clients before or after all entities have been fetched.
                  *
                  * If we can get rid of this refreshScopes behaviour, this all gets extremely simpler.
                  */

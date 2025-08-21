@@ -1538,3 +1538,55 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
     // Log out
     LogOut(UserSystem);
 }
+
+/* Check that the SignalR connection is not used when we login without creating a multiplayer connection
+ * Ideally, this shouldn't be as simple as checking if MultiplayerConnection is null, managed by whether the
+ * user chooses to instantiate and inject a multiplayer connection or not, but we're not there yet
+ */
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MultiplayerTestsMock, TestNoSignalRCommunicationWhenLoggedInWithoutConnection)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, false, true);
+
+    std::unique_ptr<csp::multiplayer::OfflineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOfflineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    EXPECT_FALSE(Connection->IsConnected());
+
+    // Expect that none of the signalR methods are ever called
+    EXPECT_CALL(*SignalRMock, Start).Times(0);
+    EXPECT_CALL(*SignalRMock, Stop).Times(0);
+    EXPECT_CALL(*SignalRMock, GetConnectionState).Times(0);
+    EXPECT_CALL(*SignalRMock, GetConnectionId).Times(0);
+    EXPECT_CALL(*SignalRMock, SetDisconnected).Times(0);
+    EXPECT_CALL(*SignalRMock, On).Times(0);
+    EXPECT_CALL(*SignalRMock, Invoke).Times(0);
+    EXPECT_CALL(*SignalRMock, Send).Times(0);
+    EXPECT_CALL(*SignalRMock, HTTPHeaders).Times(0);
+
+    // Do some stuff
+    const csp::common::String LocalSpaceId = "LocalSpace";
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, LocalSpaceId, RealtimeEngine.get());
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const csp::common::String EntityName = "Entity";
+    const SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+
+    auto [CreatedEntity] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
+
+    csp::common::Vector3 Position = { static_cast<float>(rand() % 100), static_cast<float>(rand() % 100), static_cast<float>(rand() % 100) };
+    CreatedEntity->SetPosition(Position);
+
+    csp::common::Vector4 Rotation
+        = { static_cast<float>(rand() % 100), static_cast<float>(rand() % 100), static_cast<float>(rand() % 100), static_cast<float>(rand() % 100) };
+    CreatedEntity->SetRotation(Rotation);
+
+    csp::CSPFoundation::Tick();
+}
