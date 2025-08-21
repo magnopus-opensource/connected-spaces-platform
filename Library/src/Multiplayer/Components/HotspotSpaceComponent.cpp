@@ -31,6 +31,7 @@ HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, 
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint)] = false;
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }
@@ -95,5 +96,9 @@ void HotspotSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<u
 bool HotspotSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)); }
 
 void HotspotSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value); }
+
+bool HotspotSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible)); }
+
+void HotspotSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible), Value); }
 
 } // namespace csp::multiplayer
