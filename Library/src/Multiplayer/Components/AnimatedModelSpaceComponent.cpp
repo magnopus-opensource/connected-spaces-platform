@@ -40,6 +40,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)] = true;
+    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new AnimatedModelSpaceComponentScriptInterface(this));
 }
@@ -183,6 +184,16 @@ void AnimatedModelSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_
 bool AnimatedModelSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)); }
 
 void AnimatedModelSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value); }
+
+bool AnimatedModelSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible));
+}
+
+void AnimatedModelSpaceComponent::SetIsVirtualVisible(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible), Value);
+}
 
 /* IThirdPartyRefComponent */
 
