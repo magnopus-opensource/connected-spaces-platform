@@ -86,8 +86,10 @@ enum class RealtimeEngineType
  * experiences. However, other implementations exist for alternate use cases, such as
  * OnlineSingleUserRealtimeEngine for single-user flows inside an online space.
  *
- * A RealtimeEngine should be created before CSP initialization using one of the provided
- * factory functions, and then passed to CSPFoundation::Initialize.
+ * A RealtimeEngine should be created before entering a space, and provided to the EnterSpace
+ * call. Users are responsible for deleting RealtimeEngines, CSP does not claim ownership.
+ * RealtimeEngines must not be deleted whilst users are in space, wait until the user
+ * has exited a space before performing cleanup.
  *
  * @note
  * Terminology:
