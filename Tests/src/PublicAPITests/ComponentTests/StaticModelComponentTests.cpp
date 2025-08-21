@@ -84,6 +84,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         const SpaceTransform TestTransform(TestPosition, TestRotation, TestScale);
         constexpr const bool TestIsVisible = false;
         constexpr const bool TestIsARVisible = false;
+        constexpr const bool TestIsVirtualVisible = false;
         constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
         constexpr const bool TestIsShadowCaster = false;
 
@@ -97,6 +98,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
         EXPECT_EQ(StaticModelComponent->GetIsVisible(), true);
         EXPECT_EQ(StaticModelComponent->GetIsARVisible(), true);
+        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), true);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), "");
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
 
@@ -108,6 +110,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         StaticModelComponent->SetScale(TestScale);
         StaticModelComponent->SetIsVisible(TestIsVisible);
         StaticModelComponent->SetIsARVisible(TestIsARVisible);
+        StaticModelComponent->SetIsVirtualVisible(TestIsVirtualVisible);
         StaticModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
         StaticModelComponent->SetIsShadowCaster(TestIsShadowCaster);
 
@@ -121,6 +124,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetScale(), TestScale);
         EXPECT_EQ(StaticModelComponent->GetIsVisible(), TestIsVisible);
         EXPECT_EQ(StaticModelComponent->GetIsARVisible(), TestIsARVisible);
+        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), TestIsVirtualVisible);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
 
@@ -190,9 +194,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 		model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
 		model.externalResourceAssetId = "TestExternalResourceAssetId";
 		model.position = [1, 1, 1];
+        model.scale = [2, 2, 2];
 		model.rotation = [1, 1, 1, 1];
-		model.scale = [2, 2, 2];
 		model.isVisible = false;
+        model.isARVisible = false;
+        model.isVirtualVisible = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
@@ -204,9 +210,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
     EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
     EXPECT_EQ(StaticModelComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(StaticModelComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(StaticModelComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(StaticModelComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(StaticModelComponent->GetIsVisible(), false);
+    EXPECT_EQ(StaticModelComponent->GetIsARVisible(), false);
+    EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
