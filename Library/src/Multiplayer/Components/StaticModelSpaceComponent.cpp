@@ -36,6 +36,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
+    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
@@ -157,6 +158,16 @@ void StaticModelSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_
 bool StaticModelSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)); }
 
 void StaticModelSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue); }
+
+bool StaticModelSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible));
+}
+
+void StaticModelSpaceComponent::SetIsVirtualVisible(bool InValue)
+{
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), InValue);
+}
 
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
 {
