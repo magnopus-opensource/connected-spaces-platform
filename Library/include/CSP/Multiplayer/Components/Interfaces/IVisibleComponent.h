@@ -23,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the visibility of the component when in default mode or in AR mode.
+/// @brief Controls the visibility of the component when in default mode, AR mode or Virtual mode.
 CSP_INTERFACE class CSP_API IVisibleComponent
 {
 public:
