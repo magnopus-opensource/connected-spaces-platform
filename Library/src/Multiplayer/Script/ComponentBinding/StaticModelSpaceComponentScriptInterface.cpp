@@ -40,4 +40,7 @@ DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsARVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVirtualVisible);
 
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, ShowAsHoldoutInAR);
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, ShowAsHoldoutInVirtual);
+
 } // namespace csp::multiplayer

@@ -314,6 +314,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex");
 
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
@@ -452,7 +454,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible");
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual");
 
     Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
         .constructor<>()
