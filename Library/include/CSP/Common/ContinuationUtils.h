@@ -137,17 +137,17 @@ inline auto InvokeIfExceptionInChain(
         {
             ExceptionTask.get();
         }
-        catch (const ExpectedExceptionBase& ExpectedException)
-        {
-            LogSystem.LogMsg(LogLevel::Verbose, "Caught expected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
-            LogSystem.LogMsg(LogLevel::Verbose, ExpectedException.what());
-            InvokeIfExpectedErrorCallable(ExpectedException);
-        }
         catch (const csp::common::InvalidInterfaceUseError& exception)
         {
             // Keep specific custom catches here for other types.
             LogSystem.LogMsg(LogLevel::Verbose, "Error, CSP expects derived IRealtimeEngine type, but has received a base instantiation.");
             InvokeIfUnexpectedErrorCallable(std::runtime_error(exception.msg));
+        }
+        catch (const ExpectedExceptionBase& ExpectedException)
+        {
+            LogSystem.LogMsg(LogLevel::Verbose, "Caught expected exception during async++ chain. Invoking callable from InvokeIfExceptionInChain");
+            LogSystem.LogMsg(LogLevel::Verbose, ExpectedException.what());
+            InvokeIfExpectedErrorCallable(ExpectedException);
         }
         catch (const std::exception& exception)
         {
