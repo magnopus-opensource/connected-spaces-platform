@@ -54,7 +54,7 @@ public:
 
 /**
  * @brief An exception class for API request results.
- * @details This template class captures a the result object alongside the
+ * @details This template class captures the result object alongside the
  * exception. It's ideal for handling errors from HTTP requests where specific
  * result codes, HTTP status, and failure reasons need to be preserved.
  */
@@ -77,23 +77,20 @@ private:
 
 /**
  * @brief An exception class for Multiplayer Error code.
- * @details This template class captures a the Multiplayer Error code object alongside the
+ * @details This template class captures the Multiplayer Error code object alongside the
  * exception. It's ideal for handling errors from Multiplayer where specific
  * error codes need to be preserved.
  */
-class ErrorCodeException : public csp::common::continuations::ExpectedExceptionBase
+class ErrorCodeException : public ExpectedExceptionBase
 {
 public:
     explicit ErrorCodeException(csp::multiplayer::ErrorCode Code, const std::string& Message)
-        : csp::common::continuations::ExpectedExceptionBase(Message)
+        : ExpectedExceptionBase(Message)
         , m_Code(Code)
     {
     }
 
-    const csp::common::continuations::ExceptionType GetExceptionType() const override
-    {
-        return csp::common::continuations::ExceptionType::Multiplayer;
-    }
+    const ExceptionType GetExceptionType() const override { return ExceptionType::Multiplayer; }
 
     csp::multiplayer::ErrorCode Code() const noexcept { return m_Code; }
 
