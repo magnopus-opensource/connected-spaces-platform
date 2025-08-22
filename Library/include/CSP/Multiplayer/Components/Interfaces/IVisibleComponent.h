@@ -43,12 +43,12 @@ public:
     /// @param InValue True if the component is visible in AR mode, false otherwise.
     virtual void SetIsARVisible(bool InValue) = 0;
 
-    /// @brief Checks if the component is visible when in virtual modalities.
-    /// @return True if the component is visible when in virtual modalities, false otherwise.
+    /// @brief Checks if the component is visible when in VR mode.
+    /// @return True if the component is visible when in VR mode, false otherwise.
     virtual bool GetIsVirtualVisible() const = 0;
 
-    /// @brief Sets if the component is visible in virtual modalities.
-    /// @param InValue True if the component is visible in virtual modalities, false otherwise.
+    /// @brief Sets if the component is visible in VR mode.
+    /// @param InValue True if the component is visible in VR mode, false otherwise.
     virtual void SetIsVirtualVisible(bool InValue) = 0;
 
 protected:
