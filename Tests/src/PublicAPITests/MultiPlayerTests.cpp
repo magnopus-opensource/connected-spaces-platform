@@ -17,6 +17,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
@@ -2815,7 +2816,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRStartErrorsThenDisconnec
 
     // The start function will throw internally
     EXPECT_CALL(*SignalRMock, Start)
-        .WillOnce([](std::function<void(std::exception_ptr)> Callback) { Callback(std::make_exception_ptr(std::runtime_error("mock exception"))); });
+        .WillOnce([](std::function<void(std::exception_ptr)> Callback)
+            { Callback(std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::None, "mock exception"))); });
 
     // Then the error callback we be called with an unknown error code
     MockMultiplayerErrorCallback MockErrorCallback;
@@ -2847,7 +2849,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeDeleteObjectsError
                 std::function<void(const signalr::value&, std::exception_ptr)> Callback)
             {
                 auto Value = signalr::value("Irrelevant value from DeleteObjects");
-                auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                auto Except = std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::None, "mock exception"));
                 Callback(Value, Except);
                 return async::make_task(std::make_tuple(Value, Except));
             });
@@ -2892,7 +2894,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeGetClientIdErrorsT
                 {
                     // Fail getting client Id
                     auto Value = signalr::value("Irrelevant value from GetClientId");
-                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    auto Except = std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::None, "mock exception"));
                     Callback(Value, Except);
                     return async::make_task(std::make_tuple(Value, Except));
                 }
@@ -2946,13 +2948,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
                 else if (HubMethodName == Connection.GetMultiplayerHubMethods().Get(MultiplayerHubMethod::START_LISTENING))
                 {
                     // Fail to start listening
-                    auto Except = std::make_exception_ptr(std::runtime_error("mock exception"));
+                    auto Except = std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::None, "mock exception"));
                     Callback(signalr::value(std::uint64_t(0)), Except);
                     return async::make_task(std::make_tuple(signalr::value(std::uint64_t(0)), Except));
                 }
 
                 // Just a default case, shouldn't matter
-                return async::make_task(std::make_tuple(signalr::value("mock value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
+                return async::make_task(std::make_tuple(signalr::value("mock value"),
+                    std::make_exception_ptr(csp::common::continuations::ErrorCodeException(ErrorCode::None, "mock exception"))));
             });
 
     // Then the error callback we be called with no error code
