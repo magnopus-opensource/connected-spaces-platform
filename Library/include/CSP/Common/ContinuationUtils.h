@@ -35,6 +35,12 @@ enum class ExceptionType
     Multiplayer
 };
 
+/**
+ * @brief Serves as the base class for all expected, or business-logic, exceptions.
+ * @details This class provides a common interface for exceptions that are
+ * part of the normal program flow, distinguishing them from unexpected system-level
+ * errors like out-of-memory or file not found.
+ */
 class ExpectedExceptionBase : public std::runtime_error
 {
 public:
