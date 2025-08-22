@@ -132,6 +132,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     EXPECT_EQ(ImageSpaceComponentInstance->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(ImageSpaceComponentInstance->GetDisplayMode(), DisplayMode::DoubleSided);
     EXPECT_EQ(ImageSpaceComponentInstance->GetIsARVisible(), true);
+    EXPECT_EQ(ImageSpaceComponentInstance->GetIsVirtualVisible(), true);
     EXPECT_EQ(ImageSpaceComponentInstance->GetIsEmissive(), false);
 
     ImageSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
@@ -139,6 +140,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     ImageSpaceComponentInstance->SetBillboardMode(BillboardMode::YawLockedBillboard);
     ImageSpaceComponentInstance->SetDisplayMode(DisplayMode::SingleSided);
     ImageSpaceComponentInstance->SetIsARVisible(false);
+    ImageSpaceComponentInstance->SetIsVirtualVisible(false);
     ImageSpaceComponentInstance->SetIsEmissive(true);
 
     auto ImageSpaceComponentKey = ImageSpaceComponentInstance->GetId();
@@ -149,6 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     EXPECT_EQ(StoredImageSpaceComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
     EXPECT_EQ(StoredImageSpaceComponent->GetDisplayMode(), DisplayMode::SingleSided);
     EXPECT_EQ(StoredImageSpaceComponent->GetIsARVisible(), false);
+    EXPECT_EQ(StoredImageSpaceComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(StoredImageSpaceComponent->GetIsEmissive(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -198,20 +201,32 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
-    EXPECT_EQ(ImageComponent->GetIsVisible(), true);
-    EXPECT_EQ(ImageComponent->GetIsEmissive(), false);
-    EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSided);
+    EXPECT_EQ(ImageComponent->GetName(), "");
+    EXPECT_EQ(ImageComponent->GetImageAssetId(), "");
+    EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3::One());
+    EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::Identity());
     EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Off);
+    EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSided);
+    EXPECT_EQ(ImageComponent->GetIsEmissive(), false);
+    EXPECT_EQ(ImageComponent->GetIsVisible(), true);
+    EXPECT_EQ(ImageComponent->GetIsARVisible(), true);
+    EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), true);
 
     // Setup script
     const std::string ImageScriptText = R"xx(
-	
 		var image = ThisEntity.getImageComponents()[0];
-		
-		image.isVisible = false;
-		image.isEmissive = true;
-		image.displayMode = 2;
+        image.name = "TestName";
+        image.imageAssetId = "TestImageAssetId";
+        image.position = [1, 1, 1];
+        image.scale = [2, 2, 2];
+		image.rotation = [1, 1, 1, 1];
 		image.billboardMode = 1;
+        image.displayMode = 2;
+		image.isEmissive = true;
+        image.isVisible = false;
+        image.isARVisible = false;
+        image.isVirtualVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
@@ -222,10 +237,17 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
-    EXPECT_EQ(ImageComponent->GetIsVisible(), false);
-    EXPECT_EQ(ImageComponent->GetIsEmissive(), true);
-    EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSidedReversed);
+    EXPECT_EQ(ImageComponent->GetName(), "TestName");
+    EXPECT_EQ(ImageComponent->GetImageAssetId(), "TestImageAssetId");
+    EXPECT_EQ(ImageComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(ImageComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(ImageComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Billboard);
+    EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSidedReversed);
+    EXPECT_EQ(ImageComponent->GetIsEmissive(), true);
+    EXPECT_EQ(ImageComponent->GetIsVisible(), false);
+    EXPECT_EQ(ImageComponent->GetIsARVisible(), false);
+    EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

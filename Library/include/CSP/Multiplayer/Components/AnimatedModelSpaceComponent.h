@@ -26,6 +26,7 @@
 #include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IVisibilityBehaviourComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
@@ -59,6 +60,9 @@ enum class AnimatedModelPropertyKeys
     ThirdPartyComponentRef,
     IsShadowCaster,
     MaterialOverrides,
+    IsVirtualVisible,
+    ShowAsHoldoutInAR,
+    ShowAsHoldoutInVirtual,
     Num
 };
 
@@ -72,7 +76,8 @@ class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
                                             public IVisibleComponent,
                                             public IExternalResourceComponent,
                                             public IThirdPartyComponentRef,
-                                            public IShadowCasterComponent
+                                            public IShadowCasterComponent,
+                                            public IVisibilityBehaviourComponent
 {
 public:
     /// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
@@ -167,6 +172,10 @@ public:
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsVirtualVisible()
+    bool GetIsVirtualVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVirtualVisible()
+    void SetIsVirtualVisible(bool InValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -183,6 +192,18 @@ public:
     bool GetIsShadowCaster() const override;
     /// @copydoc IShadowCasterComponent::SetIsShadowCaster()
     void SetIsShadowCaster(bool Value) override;
+    /// @}
+
+    /// \addtogroup IVisibilityBehaviourComponent
+    /// @{
+    /// @copydoc IVisibleComponent::GetShowAsHoldoutInAR()
+    bool GetShowAsHoldoutInAR() const override;
+    /// @copydoc IVisibleComponent::SetShowAsHoldoutInAR()
+    void SetShowAsHoldoutInAR(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetShowAsHoldoutInVirtual()
+    bool GetShowAsHoldoutInVirtual() const override;
+    /// @copydoc IVisibleComponent::SetShowAsHoldoutInVirtual()
+    void SetShowAsHoldoutInVirtual(bool InValue) override;
     /// @}
 };
 

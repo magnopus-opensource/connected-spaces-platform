@@ -46,6 +46,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(int32_t, LocomotionModel);
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
     DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVirtualVisible);
 };
 
 } // namespace csp::multiplayer

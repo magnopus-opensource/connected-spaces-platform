@@ -19,8 +19,8 @@
 #include "CSP/Common//Systems/Log/LogSystem.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -278,6 +278,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ButtonSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(ButtonSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(ButtonSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(ButtonSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(ButtonSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(ButtonSpaceComponent, IsEnabled, "isEnabled");
 
     Module->class_<LightSpaceComponentScriptInterface>("LightSpaceComponent")
@@ -292,6 +294,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(LightSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(LightSpaceComponent, Color, "color")
         .PROPERTY_GET_SET(LightSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(LightSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(LightSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieAssetId, "cookieAssetId")
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieType, "lightCookieType");
 
@@ -308,6 +312,10 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsLoopPlayback, "isLoopPlayback")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsPlaying, "isPlaying")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex");
 
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
@@ -328,6 +336,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, TimeSincePlay, "timeSincePlay")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, VideoPlayerSourceType, "videoPlayerSourceType")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsEnabled, "isEnabled");
 
     Module->class_<AvatarSpaceComponentScriptInterface>("AvatarSpaceComponent")
@@ -348,7 +358,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AvatarSpaceComponent, AvatarPlayMode, "avatarPlayMode")
         .PROPERTY_GET_SET(AvatarSpaceComponent, LocomotionModel, "locomotionModel")
         .PROPERTY_GET_SET(AvatarSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible");
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<ExternalLinkSpaceComponentScriptInterface>("ExternalLinkSpaceComponent")
         .constructor<>()
@@ -360,7 +371,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(ExternalLinkSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsEnabled, "isEnabled")
-        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVisible, "isVisible");
+        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(ExternalLinkSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<FogSpaceComponentScriptInterface>("FogSpaceComponent")
         .constructor<>()
@@ -375,7 +388,10 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(FogSpaceComponent, Density, "density")
         .PROPERTY_GET_SET(FogSpaceComponent, HeightFalloff, "heightFalloff")
         .PROPERTY_GET_SET(FogSpaceComponent, MaxOpacity, "maxOpacity")
-        .PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric");
+        .PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric")
+        .PROPERTY_GET_SET(FogSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(FogSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(FogSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
         .constructor<>()
@@ -405,7 +421,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ImageSpaceComponent, BillboardMode, "billboardMode")
         .PROPERTY_GET_SET(ImageSpaceComponent, DisplayMode, "displayMode")
         .PROPERTY_GET_SET(ImageSpaceComponent, IsEmissive, "isEmissive")
-        .PROPERTY_GET_SET(ImageSpaceComponent, IsVisible, "isVisible");
+        .PROPERTY_GET_SET(ImageSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(ImageSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(ImageSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
         .constructor<>()
@@ -421,7 +439,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(TextSpaceComponent, Height, "height")
         .PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
         .PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
-        .PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible");
+        .PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(TextSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<StaticModelSpaceComponentScriptInterface>("StaticModelSpaceComponent")
         .constructor<>()
@@ -433,7 +452,11 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(StaticModelSpaceComponent, Position, "position")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible");
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual");
 
     Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
         .constructor<>()
@@ -500,7 +523,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Position, "position")
         .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Rotation, "rotation")
-        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible");
+        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible")
+        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVirtualVisible, "isVirtualVisible");
 
     Module->class_<GaussianSplatSpaceComponentScriptInterface>("GaussianSplatSpaceComponent")
         .constructor<>()
@@ -512,6 +537,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
 
     Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
@@ -522,6 +548,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(HotspotSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(HotspotSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
         .PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 
@@ -537,6 +564,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsARVisible, "isARVisible")
+        .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsShadowCaster, "isShadowCaster");
 }
 
