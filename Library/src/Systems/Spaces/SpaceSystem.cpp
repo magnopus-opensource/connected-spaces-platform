@@ -405,14 +405,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
             })
         .then(async::inline_scheduler(), systems::continuations::ReportSuccess(Callback, "Successfully entered space."))
         .then(async::inline_scheduler(),
-            csp::common::continuations::InvokeIfExceptionInChain(
-                *csp::systems::SystemsManager::Get().GetLogSystem(),
+            csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
                 [Callback, &CurrentSpace = CurrentSpace]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& Except)
                 {
                     CurrentSpace = {};
                     Callback(MakeInvalid<SpaceResult>());
-                },
-                []([[maybe_unused]] const std::exception& exception) {}));
+                }));
 }
 
 void SpaceSystem::ExitSpace(NullResultCallback Callback)

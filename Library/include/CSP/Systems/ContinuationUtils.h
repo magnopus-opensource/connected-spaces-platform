@@ -122,8 +122,8 @@ namespace detail
         inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
         {
             async::spawn([]() { return; })
-                .then(csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), []([[maybe_unused]] const std::exception& exception) {}));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename ExpectedHandlerCallable, typename UnexpectedHandlerCallable, typename ExceptionThrowable>
@@ -144,8 +144,8 @@ namespace detail
                     NullResult Result(EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
                     LogHTTPErrorAndCancelContinuation<NullResult>("", Result);
                 })
-                .then(csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), []([[maybe_unused]] const std::exception& exception) {}));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
         template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
@@ -159,8 +159,8 @@ namespace detail
                     LogHTTPErrorAndCancelContinuation<NullResult>("", Result);
                 })
                 .then(std::forward<IntermediateStepCallable>(IntermediateStep))
-                .then(csp::common::continuations::InvokeIfExceptionInChain(*csp::systems::SystemsManager::Get().GetLogSystem(),
-                    std::forward<ExceptionHandlerCallable>(ExceptionHandler), []([[maybe_unused]] const std::exception& exception) {}));
+                .then(csp::common::continuations::InvokeIfExceptionInChain(
+                    *csp::systems::SystemsManager::Get().GetLogSystem(), std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
     }
 }

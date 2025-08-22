@@ -379,14 +379,12 @@ void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const c
     // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
     async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
         .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
-        .then(csp::common::continuations::InvokeIfExceptionInChain(
-            *LogSystem,
+        .then(csp::common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback, LogSystem = this->LogSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
                 LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", exception.what()).c_str());
                 Callback(nullptr);
-            },
-            []([[maybe_unused]] const std::exception& exception) {}));
+            }));
 }
 
 void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
@@ -1178,8 +1176,7 @@ void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
                                 RefreshMultiplayerContinuationEvent->set({});
                             })
                         .then(async::inline_scheduler(),
-                            csp::common::continuations::InvokeIfExceptionInChain(
-                                *LogSystem,
+                            csp::common::continuations::InvokeIfExceptionInChain(*LogSystem,
                                 [&RefreshMultiplayerContinuationEvent](
                                     [[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                                 {
@@ -1187,8 +1184,7 @@ void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
                                     auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(exception);
                                     RefreshMultiplayerContinuationEvent->set(Error);
                                     return;
-                                },
-                                []([[maybe_unused]] const std::exception& exception) {}));
+                                }));
                 });
         });
 }
