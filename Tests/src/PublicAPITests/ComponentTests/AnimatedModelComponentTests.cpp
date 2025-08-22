@@ -91,6 +91,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
         constexpr const bool TestIsVirtualVisible = false;
         constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
         constexpr const bool TestIsShadowCaster = false;
+        constexpr const bool TestShowAsHoldoutInAR = true;
+        constexpr const bool TestShowAsHoldoutInVirtual = true;
 
         // Test defaults
         EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "");
@@ -108,6 +110,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
         EXPECT_EQ(AnimatedModelComponent->GetIsVirtualVisible(), true);
         EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), "");
         EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), true);
+        EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInAR(), false);
+        EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInVirtual(), false);
 
         AnimatedModelComponent->SetExternalResourceAssetCollectionId(TestExternalResourceAssetCollectionId);
         AnimatedModelComponent->SetExternalResourceAssetId(TestExternalResourceAssetId);
@@ -123,6 +127,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
         AnimatedModelComponent->SetIsVirtualVisible(TestIsVirtualVisible);
         AnimatedModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
         AnimatedModelComponent->SetIsShadowCaster(TestIsShadowCaster);
+        AnimatedModelComponent->SetShowAsHoldoutInAR(TestShowAsHoldoutInAR);
+        AnimatedModelComponent->SetShowAsHoldoutInVirtual(TestShowAsHoldoutInVirtual);
 
         // Test new values
         EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), TestExternalResourceAssetCollectionId);
@@ -140,6 +146,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
         EXPECT_EQ(AnimatedModelComponent->GetIsVirtualVisible(), TestIsVirtualVisible);
         EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
         EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
+        EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInAR(), TestShowAsHoldoutInAR);
+        EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInVirtual(), TestShowAsHoldoutInVirtual);
 
         // Test transform separately, as this just sets position, rotation, scale
         AnimatedModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
@@ -214,6 +222,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 		model.isVisible = false;
         model.isARVisible = false;
         model.isVirtualVisible = false;
+        model.showAsHoldoutInAR = true;
+        model.showAsHoldoutInVirtual = true;
 		model.animationIndex = 1;
     )xx";
 
@@ -233,6 +243,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
     EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), false);
     EXPECT_EQ(AnimatedModelComponent->GetIsARVisible(), false);
     EXPECT_EQ(AnimatedModelComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInAR(), true);
+    EXPECT_EQ(AnimatedModelComponent->GetShowAsHoldoutInVirtual(), true);
     EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), 1);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
