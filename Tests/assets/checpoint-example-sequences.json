@@ -1,0 +1,268 @@
+{
+  "checkpointVersion": 1,
+  "checkpointTimestamp": "2025-07-11T22:54:53.4141732+00:00",
+  "spaceId": "67518bd5c6526ed239d34a61",
+  "tenantName": "OKO_TESTS",
+  "environment": "O2Dev",
+  "data": {
+    "group": {
+      "id": "686fa189302e07e7e570737d",
+      "createdBy": "686fa185302e07e7e570737c",
+      "createdAt": "2025-07-10T11:18:33.242+00:00",
+      "groupOwnerId": "686fa185302e07e7e570737c",
+      "groupType": "space",
+      "name": "OLY-UNITTEST-SPACE-MAG-502624a4-fa6b-453b-87fa-456734e03bca",
+      "description": "OLY-UNITTEST-SPACEDESC-MAG",
+      "users": [
+        "686fa185302e07e7e570737c"
+      ],
+      "bannedUsers": [],
+      "moderators": [],
+      "discoverable": false,
+      "autoModerator": false,
+      "requiresInvite": true,
+      "archived": false,
+      "tags": [],
+      "isCurrentUserOwner": false,
+      "isCurrentUserMember": false,
+      "isCurrentUserModerator": false,
+      "isCurrentUserBanned": false
+    },
+    "objectMessages": [
+      {
+        "id": 227378,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "components": {
+          "64511": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": "Object"
+          },
+          "64512": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64513": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64514": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64517": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts"
+          },
+          "64518": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64519": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          }
+        },
+        "aoiCenter": false
+      },
+      {
+        "id": 227377,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "components": {
+          "64511": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": "Object"
+          },
+          "64512": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64513": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64514": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64517": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts"
+          },
+          "64518": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64519": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          }
+        },
+        "aoiCenter": false
+      },
+      {
+        "id": 227376,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "components": {
+          "64511": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": "Object"
+          },
+          "64512": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64513": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "64514": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64517": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts"
+          },
+          "64518": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          },
+          "64519": {
+            "$type": "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts",
+            "item": 0
+          }
+        },
+        "aoiCenter": false
+      }
+    ],
+    "prototypes": [
+      {
+        "originalPrototypeId": "686fa18a403362f97a225453",
+        "name": "ASSET_COLLECTION_SPACE_METADATA_686fa189302e07e7e570737d",
+        "nameLower": "asset_collection_space_metadata_686fa189302e07e7e570737d",
+        "tags": [
+          "origin-686fa18a403362f97a225453"
+        ],
+        "tagsLower": [
+          "origin-686fa18a403362f97a225453"
+        ],
+        "metadata": {
+          "site": "Void"
+        },
+        "uiStrings": {},
+        "state": {},
+        "highlander": false,
+        "type": "FoundationInternal",
+        "systemOwned": false,
+        "groupIds": [
+          "686fa189302e07e7e570737d"
+        ],
+        "readAccess": [],
+        "writeAccess": [],
+        "createdBy": "686fa185302e07e7e570737c",
+        "createdAt": "2025-07-10T11:18:34.834+00:00",
+        "updatedBy": "686fa185302e07e7e570737c",
+        "updatedAt": "2025-07-10T11:18:34.834+00:00",
+        "isSeeded": false,
+        "tenantName": "OKO_TESTS",
+        "id": "686fa18a403362f97a225453"
+      }
+    ],
+    "assetDetails": [],
+    "sequences": [
+      {
+        "key": "%2ACSP%20UNITTEST%20SEQUENCE%20MAG%2A-739904c3-2cac-464d-893c-42b14e1e8271",
+        "items": [
+          "Hotspot1",
+          "Hotspot2",
+          "Hotspot3"
+        ],
+        "referenceType": "GroupId",
+        "referenceId": "686fa189302e07e7e570737d",
+        "metadata": {},
+        "createdId": "e45e06f2-dee6-4086-813b-d666e7e2c7bb",
+        "createdBy": "686fa185302e07e7e570737c",
+        "createdAt": "2025-07-10T11:18:38.677+00:00",
+        "updatedBy": "686fa185302e07e7e570737c",
+        "updatedAt": "2025-07-10T11:18:38.677+00:00",
+        "isSeeded": false,
+        "tenantName": "OKO_TESTS",
+        "id": "686fa18eb81a0d5d06f57f19"
+      },
+      {
+        "key": "CSP%20UNITTEST%20SEQUENCE%20MAG-e8c2fb30-0f76-49ab-9bbe-315cfaac96e5",
+        "items": [
+          "Hotspot1",
+          "Hotspot2",
+          "Hotspot3"
+        ],
+        "referenceType": "GroupId",
+        "referenceId": "686fa189302e07e7e570737d",
+        "metadata": {},
+        "createdId": "4aba0202-2a4c-452e-b38d-fa1218237a84",
+        "createdBy": "686fa185302e07e7e570737c",
+        "createdAt": "2025-07-10T11:18:39.576+00:00",
+        "updatedBy": "686fa185302e07e7e570737c",
+        "updatedAt": "2025-07-10T11:18:39.576+00:00",
+        "isSeeded": false,
+        "tenantName": "OKO_TESTS",
+        "id": "686fa18f557b454b85776abb"
+      }
+    ],
+    "anchors": []
+  }
+}

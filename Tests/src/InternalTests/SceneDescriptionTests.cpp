@@ -496,3 +496,40 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     csp::CSPFoundation::Shutdown();
 }
+
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeSequenceTest)
+{
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    auto FilePath = std::filesystem::absolute("assets/checpoint-example-sequences.json");
+
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    std::string Json = SStream.str();
+
+    MockScriptRunner ScriptRunner;
+    csp::common::LogSystem LogSystem;
+    TestAuthContext AuthContext;
+
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
+    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
+    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+
+    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
+    CSPSceneData SceneData { Json.c_str() };
+
+    EXPECT_EQ(SceneDescription.Entities.Size(), 3);
+    EXPECT_EQ(SceneData.AssetCollections.Size(), 1);
+    EXPECT_EQ(SceneData.Assets.Size(), 0);
+    EXPECT_EQ(SceneData.Sequences.Size(), 0);
+
+    csp::CSPFoundation::Shutdown();
+}
