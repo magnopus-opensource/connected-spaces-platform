@@ -481,7 +481,6 @@ async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection
 
     if (PrototypeId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
         OnCompleteEvent.set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
             "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.", MakeInvalid<NullResult>())));
 
@@ -1110,7 +1109,6 @@ async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Ar
 
     if (AssetCollectionIds.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("You have to provide at least one AssetCollectionId");
         OnCompleteEvent.set_exception(std::make_exception_ptr(
             csp::common::continuations::ResultException("You have to provide at least one AssetCollectionId", MakeInvalid<AssetsResult>())));
 
@@ -1269,7 +1267,6 @@ async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& Ass
 
     if (Asset.Name.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("Asset name cannot be empty");
         OnCompleteEvent.set_exception(
             std::make_exception_ptr(csp::common::continuations::ResultException("Asset name cannot be empty", MakeInvalid<UriResult>())));
 
