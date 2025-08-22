@@ -402,15 +402,13 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
                 INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
             })
         .then(async::inline_scheduler(),
-            csp::common::continuations::InvokeIfExceptionInChain(
-                LogSystem,
+            csp::common::continuations::InvokeIfExceptionInChain(LogSystem,
                 // Handle any errors in chain
                 [Callback, this]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
                 {
                     auto [Error, ExceptionErrorMsg] = ParseMultiplayerError(exception);
                     DisconnectWithReason(ExceptionErrorMsg.c_str(), Callback);
-                },
-                []([[maybe_unused]] const std::exception& exception) {}));
+                }));
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
