@@ -163,18 +163,6 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
         ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(SuccessMsg.c_str(),
             MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
-
-        ::testing::Mock::VerifyAndClearExpectations(&MockLogger.MockLogCallback);
-    }
-    {
-        // When we pass empty optionals, we expect default values to be used to construct the result passed in the callback
-        NullResult DefaultFailureResult = MakeInvalid<NullResult>();
-
-        // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
-
-        ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(SuccessMsg.c_str(),
-            MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
     }
 }
 
