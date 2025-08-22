@@ -251,7 +251,7 @@ std::function<async::task<NullResult>()> SpaceSystem::BulkInviteUsersToSpaceIfNe
         // it returns the task that allows the next task in the chain to be executed.
         return SpaceSystem->BulkInviteToSpace(SpaceId, *InviteUsers)
             .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-                "SpaceSystem::BulkInviteUsersToSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}));
+                "SpaceSystem::BulkInviteUsersToSpace, successfully invited users to space.", "Failed to invite users to space.", {}, {}, {}));
     };
 }
 
@@ -510,7 +510,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
             "SpaceSystem::CreateSpace, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
+            "SpaceSystem::CreateSpace, successfully invited users to space.", "Failed to invite users to space.", {}, {}, {}))
         .then(
             [CurrentSpaceResult, Callback]()
             {
@@ -573,7 +573,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
             "SpaceSystem::CreateSpaceWithBuffer, successfully created thumbnail.", "Failed to create thumbnail.", {}, {}, {}))
         .then(BulkInviteUsersToSpaceIfNeccesary(this, CurrentSpaceResult, InviteUsers))
         .then(systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
-            "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invited users to space.", {}, {}, {}))
+            "SpaceSystem::CreateSpaceWithBuffer, successfully invited users to space.", "Failed to invite users to space.", {}, {}, {}))
         .then(
             [CurrentSpaceResult, Callback]()
             {
