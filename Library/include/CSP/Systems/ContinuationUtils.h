@@ -36,7 +36,7 @@ template <typename ResultT>
 inline void LogHTTPErrorAndCancelContinuation(std::string ErrorMsg, ResultT Result, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
 {
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
-    throw csp::common::continuations::ResultException("Continuation cancelled", Result); // Cancels the continuation chain.
+    throw csp::common::continuations::ResultException("Continuation cancelled", std::forward<ResultT>(Result)); // Cancels the continuation chain.
 }
 
 /*
