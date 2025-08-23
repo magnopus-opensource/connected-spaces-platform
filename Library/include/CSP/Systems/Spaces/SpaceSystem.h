@@ -76,7 +76,8 @@ public:
     /// The initial load behaviour will differ based on the concrete IRealtimeEngine passed to this function.
     /// If user does not have permission to discover or enter the space, callback will be called with EResultCode::Failed and
     /// ERequestFailureReason::UserSpaceAccessDenied
-    /// @param SpaceId csp::common::String : space ID to enter into
+    /// @param SpaceId csp::common::String : ID of space to enter into. In the case where you are using an offline realtime engine, this will be the
+    /// ID of the local space.
     /// @param RealtimeEngine IRealtimeEngine* : RealtimeEngine to load the space with. This object belongs to the caller, and does not
     /// transfer ownership. Once the space is loaded, the caller should be sure to maintain the lifetime of the RealtimeEngine so long
     /// as the space is active. Once the caller has called csp::systems::SpaceSystem::ExitSpace and received the callback, then they are

@@ -396,7 +396,15 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                 CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
 
                 Space LocalSpace {};
+
+                /* Depending on how you think about this, you might think this is a bit of a bug.
+                   Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
+                   One might think we should be using that. The reason we don't is simply because we don't
+                   store that ID in the system currently, and it dosen't really matter currently.
+                   However this may be an improvement we want to make, although consider that it would get in the way
+                   of any fully-offline flows we might to add. */
                 csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
+
                 LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
                 LocalSpace.Name = "Offline Space";
                 LocalSpace.Id = SpaceId;

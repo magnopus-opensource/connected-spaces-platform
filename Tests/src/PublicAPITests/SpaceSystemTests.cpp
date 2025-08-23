@@ -3722,25 +3722,20 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    // We only need to bother creating a space if we're online
     Space CreatedSpace;
     csp::systems::Profile SpaceOwnerUser;
     String SpaceOwnerUserId;
+    // Make this space even if using an offline engine, to allow us to check that we've not added a user to it in offline mode later
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
 
-    if (IsOnline)
-    {
+    SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
 
-        std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
-
-        // Create a space according to param attribute
-        SpaceOwnerUser = CreateTestUser();
-        LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
-        CreateSpace(
-            SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
-        LogOut(UserSystem);
-    }
-
-    // Log in as guest
+    // Log in as guest (best to check offline engine logins, as it's the expected case ... although it shouldn't matter access permissions don't apply
+    // to offline)
     String GuestUserId;
     LogInAsGuest(UserSystem, GuestUserId, LoginWithMultiplayerConnection);
 
@@ -3759,7 +3754,21 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     std::string OutStdErr = testing::internal::GetCapturedStderr();
     EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
 
-    // Log out
+    // If we're offline, check that we havn't actually entered the space as far as CHS is concerned
+    // This is a bit of an encapsulation break, as this depends on knowing that the local user ID and the logged in one are different.
+    // With network mocks, we could check that we never actually call the endpoints, which would be better
+    if (!IsOnline)
+    {
+        ::Space QueriedSpace;
+        GetSpace(SpaceSystem, CreatedSpace.Id, QueriedSpace);
+        EXPECT_FALSE(std::any_of(QueriedSpace.UserIds.cbegin(), QueriedSpace.UserIds.cend(),
+            [&EnterResult](const csp::common::String& UserId)
+            {
+                // dag
+                return UserId == EnterResult.GetSpace().CreatedBy;
+            }));
+    }
+
     LogOut(UserSystem);
 
     if (IsOnline)
