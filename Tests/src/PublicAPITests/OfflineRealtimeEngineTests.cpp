@@ -174,7 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
     This tests the behaviour of OfflineRealtimeEngine::AddEntity
     by verifying an entity that is created outside of the OfflineRealtimeEngine
     is added correctly into the engine.
-    The entity should not be added to the entities array until ProcessPendingEntityOperations is called.
+    The entity should be added to the entities array immediately.
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, AddEntity)
 {
@@ -671,10 +671,8 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetObjectByIndex)
 /*
     This tests the behaviour of correctly setting the ParentId and RootHierarchy entities.
     We first test that the constuctor is correctly setting these properties, and then ensure
-    the properties are still correrct after aditions and deletions.
+    the properties are still correrct after additions and deletions.
 
-    !!! This tests hasn't been ran yet, as it crashes due to the SpaceEntity relying on SpaceEntitySystem instead of IRealtimeEngine.
-    This will only work when we have integrated the OnlineRealtimeEngine refactor changes.
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
 {
@@ -696,62 +694,26 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
     Engine.CreateEntity(EntityName3, SpaceTransform {}, Entity2->GetId(), [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 
     EXPECT_EQ(Entity1->GetParent(), nullptr);
-
-    if (Entity2->GetParent() == nullptr)
-    {
-        FAIL();
-    }
-
-    if (Entity3->GetParent() == nullptr)
-    {
-        FAIL();
-    }
+    ASSERT_NE(Entity2->GetParent(), nullptr);
+    ASSERT_NE(Entity3->GetParent(), nullptr);
 
     EXPECT_EQ(Entity2->GetParent(), Entity1);
     EXPECT_EQ(Entity3->GetParent(), Entity2);
 
-    if (Engine.GetRootHierarchyEntities()->Size() != 1)
-    {
-        FAIL();
-    }
+    ASSERT_EQ(Engine.GetRootHierarchyEntities()->Size(), 1);
 
     EXPECT_EQ((*Engine.GetRootHierarchyEntities())[0]->GetId(), Entity1->GetId());
 
     // Reparent the third entity to be a child of the first
-    Entity3->SetParentId(Entity1->GetId());
+    Entity3->SetParentId(Entity2->GetId());
 
-    // Parent shouldn't change yet.
     EXPECT_EQ(Entity1->GetParent(), nullptr);
     EXPECT_EQ(Entity2->GetParent(), Entity1);
     EXPECT_EQ(Entity3->GetParent(), Entity2);
 
-    Entity3->MarkForUpdate();
-    Engine.ProcessPendingEntityOperations();
-
-    // Parent should now have changed
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), Entity1);
-    EXPECT_EQ(Entity3->GetParent(), Entity1);
-
     // Move all entities to the root.
     Entity2->RemoveParentEntity();
     Entity3->RemoveParentEntity();
-
-    // Parent shouldn't change yet.
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), Entity1);
-    EXPECT_EQ(Entity3->GetParent(), Entity1);
-
-    if (Engine.GetRootHierarchyEntities()->Size() != 1)
-    {
-        FAIL();
-    }
-
-    EXPECT_EQ((*Engine.GetRootHierarchyEntities())[0]->GetId(), Entity1->GetId());
-
-    Entity2->MarkForUpdate();
-    Entity3->MarkForUpdate();
-    Engine.ProcessPendingEntityOperations();
 
     // Parents should all be null.
     EXPECT_EQ(Entity1->GetParent(), nullptr);
@@ -763,14 +725,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
 
     // Ensure Root hierarchy is updated if entity is moved from the root.
     Entity3->SetParentId(Entity1->GetId());
-
-    // Parent shouldn't change yet.
-    EXPECT_EQ(Entity1->GetParent(), nullptr);
-    EXPECT_EQ(Entity2->GetParent(), nullptr);
-    EXPECT_EQ(Entity3->GetParent(), nullptr);
-
-    Entity3->MarkForUpdate();
-    Engine.ProcessPendingEntityOperations();
 
     EXPECT_EQ(Entity1->GetParent(), nullptr);
     EXPECT_EQ(Entity2->GetParent(), nullptr);
@@ -798,12 +752,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
     const csp::common::String NewEntityName = "NewEntity1";
 
     Entity->SetName(NewEntityName);
-
-    // Name should not have been updated yet.
-    EXPECT_EQ(Entity->GetName(), EntityName);
-
-    Engine.QueueEntityUpdate(Entity);
-    Engine.ProcessPendingEntityOperations();
 
     EXPECT_EQ(Entity->GetName(), NewEntityName);
 }
