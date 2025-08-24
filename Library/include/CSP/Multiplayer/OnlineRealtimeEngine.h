@@ -157,14 +157,6 @@ public:
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
 
-    /// @brief Sets a callback to be executed when a remote entity is created.
-    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
-    ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
-
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false if the entity already existed in the selection and thus could not be added.
@@ -242,14 +234,6 @@ public:
 
     /***** ENTITY PROCESSING *************************************************/
 
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) override;
-
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    virtual void ProcessPendingEntityOperations() override;
-
     /**
      * @brief Fetch all entities in the space from MCS
      *
@@ -279,6 +263,22 @@ public:
     CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
+
+    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
+    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
+    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
+    void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity);
+
+    /// @brief Applies any pending changes to entities that have been marked for update.
+    void ProcessPendingEntityOperations();
+
+    /// @brief Sets a callback to be executed when a remote entity is created.
+    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
+    ///
+    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
+    ///
+    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
+    CSP_EVENT void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback);
 
     /// @brief Sets a callback to be executed when the script system is ready to run scripts.
     /// @param Callback CallbackHandler : the callback to execute.

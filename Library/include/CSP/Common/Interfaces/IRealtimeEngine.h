@@ -180,20 +180,6 @@ public:
         (void)Callback;
     }
 
-    /// @brief Sets a callback to be executed when a remote entity is created.
-    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
-    ///
-    /// Only one RemoteEntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
-        (void)Callback;
-    }
-
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
@@ -370,20 +356,6 @@ public:
     CSP_NO_EXPORT EntityFetchCompleteCallback GetEntityFetchCompleteCallback() const { return EntityFetchCompleteCallback; }
 
     /***** ENTITY PROCESSING *************************************************/
-
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
-        (void)Entity;
-    }
-
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    virtual void ProcessPendingEntityOperations() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
     /// @brief Lock a mutex that guards against any changes to the entity list.
     /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.

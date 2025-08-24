@@ -207,12 +207,6 @@ void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity,
     Callback(true);
 }
 
-void OfflineRealtimeEngine::SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
-{
-    LogSystem->LogMsg(csp::common::LogLevel::Warning,
-        "Calling SetRemoteEntityCreatedCallback on offline RealtimeEngine is redundant. Callback will never be called.");
-}
-
 bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
 {
     if (!SelectedEntities.Contains(Entity))
@@ -272,16 +266,6 @@ const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::
 void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
 {
     RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
-}
-
-void OfflineRealtimeEngine::QueueEntityUpdate(csp::multiplayer::SpaceEntity* /*Entity*/)
-{
-    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Calling QueueEntityUpdate on offline RealtimeEngine is redundant.");
-}
-
-void OfflineRealtimeEngine::ProcessPendingEntityOperations()
-{
-    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Calling ProcessPendingEntityOperations on offline RealtimeEngine is redundant.");
 }
 
 void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback Callback)
