@@ -107,6 +107,7 @@ SpaceEntity::SpaceEntity()
     , Script(this, nullptr, nullptr, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(nullptr)
+    , StatePatcher(nullptr)
 {
 }
 
@@ -128,6 +129,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , Script(this, InEntitySystem, &ScriptRunner, LogSystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(LogSystem)
+    , StatePatcher(nullptr)
 {
     if (EntitySystem == nullptr)
     {
@@ -1011,7 +1013,7 @@ void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool 
     }
 }
 
-void SpaceEntity::AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
+bool SpaceEntity::AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
 {
     std::scoped_lock ComponentsLocker(ComponentsLock);
     Components[ComponentKey] = Component;
@@ -1022,6 +1024,8 @@ void SpaceEntity::AddComponentDirect(uint16_t ComponentKey, ComponentBase* Compo
         UpdateInfo[0] = ComponentUpdateInfo { ComponentKey, ComponentUpdateType::Add };
         EntityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, UpdateInfo);
     }
+
+    return true;
 }
 
 bool SpaceEntity::UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
@@ -1077,7 +1081,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) con
 {
     ComponentBase* LocatedComponent = nullptr;
 
-    for (const std::pair<uint16_t, ComponentBase*>& Component : Components.GetUnderlying())
+    for (const std::pair<const uint16_t, ComponentBase*>& Component : Components.GetUnderlying())
     {
 
         if (Component.second->GetComponentType() == FindType)

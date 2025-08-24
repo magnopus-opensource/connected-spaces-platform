@@ -18,6 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/PatchTypes.h"
 #include "MCS/MCSTypes.h"
@@ -25,11 +26,11 @@
 #include <cstdint>
 #include <mutex>
 #include <set>
+#include <unordered_map>
 #include <utility>
 
 namespace csp::common
 {
-class LogSystem;
 class IJSScriptRunner;
 class IRealtimeEngine;
 }
@@ -123,7 +124,7 @@ public:
     [[nodiscard]] mcs::ObjectMessage CreateObjectMessage() const;
     [[nodiscard]] mcs::ObjectPatch CreateObjectPatch() const;
 
-    static [[nodiscard]] SpaceEntity* NewFromObjectMessage(const mcs::ObjectMessage& Message, csp::common::IRealtimeEngine& RealtimeEngine,
+    [[nodiscard]] static SpaceEntity* NewFromObjectMessage(const mcs::ObjectMessage& Message, csp::common::IRealtimeEngine& RealtimeEngine,
         csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem);
 
     // Apply the data inside the object patch to the space entity this patcher relates to.

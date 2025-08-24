@@ -28,9 +28,9 @@ namespace csp::multiplayer
 {
 
 SpaceEntityStatePatcher::SpaceEntityStatePatcher(csp::common::LogSystem* LogSystem, csp::multiplayer::SpaceEntity& SpaceEntity)
-    : LogSystem(LogSystem)
+    : TimeOfLastPatch(0)
+    , LogSystem(LogSystem)
     , SpaceEntity(SpaceEntity)
-    , TimeOfLastPatch(0)
 {
 }
 
@@ -199,7 +199,7 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
     {
         SpaceEntity.SetParentIdDirect(*NewParentId, false);
         UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
-        NewParentId = nullptr; // Reset, as we've just set it
+        NewParentId = csp::common::Optional<csp::common::Optional<uint64_t>> {}; // Reset, as we've just set it
     }
 
     // Component Deletes
@@ -253,7 +253,7 @@ csp::multiplayer::ComponentBase* SpaceEntityStatePatcher::GetFirstPendingCompone
 {
     std::scoped_lock ComponentsLocker(DirtyComponentsLock);
 
-    for (const std::pair<uint16_t, DirtyComponent>& DirtyComp : DirtyComponents)
+    for (const std::pair<const uint16_t, DirtyComponent>& DirtyComp : DirtyComponents)
     {
         // If any of our dirty components are :
         //  - Of the type requested AND
@@ -283,7 +283,7 @@ mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
 
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
 
-    for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
+    for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
     {
         assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
 
@@ -306,7 +306,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
     // 1. Convert our modified view components to mcs compatible types.
     {
         // Loop through modfied view components and convert to ItemComponentData.
-        for (const std::pair<uint16_t, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
+        for (const std::pair<const uint16_t, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
         {
             ComponentPacker.WriteValue(DirtyProp.first, DirtyProp.second);
         }
@@ -317,7 +317,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
         std::scoped_lock ComponentsLocker(DirtyComponentsLock);
 
         // Loop through all components and convert to ItemComponentData.
-        for (const std::pair<uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
+        for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
         {
             assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
 
