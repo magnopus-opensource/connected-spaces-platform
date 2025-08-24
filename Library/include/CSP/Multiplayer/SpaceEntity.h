@@ -441,7 +441,7 @@ public:
     CSP_NO_EXPORT void SetEntityLockDirect(LockType Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT void SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback);
-    CSP_NO_EXPORT void AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
+    CSP_NO_EXPORT bool AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback = false);
     /// @brief Setter for the owner ID
@@ -496,7 +496,7 @@ private:
     // patch based property updates. Otherwise it's syncronous.
     // Non-ideal, move all logic to realtimeengine instead of keeping
     // this long term. May be null.
-    std::unique_ptr<SpaceEntityStatePatcher> StatePatcher = nullptr;
+    std::unique_ptr<SpaceEntityStatePatcher> StatePatcher;
 
     CSP_START_IGNORE
     std::recursive_mutex EntityMutexLock;
