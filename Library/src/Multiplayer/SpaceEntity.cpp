@@ -555,9 +555,13 @@ void SpaceEntity::RemoveParentFromChildEntity(size_t Index)
 
 void SpaceEntity::MarkForUpdate()
 {
+    // Redundant right? Does the same thing as QueueUpdate below. This one is used less, so expect this to get deleted.
     if (EntitySystem)
     {
-        EntitySystem->QueueEntityUpdate(this);
+        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        {
+            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->QueueEntityUpdate(this);
+        }
     }
 }
 
@@ -845,7 +849,10 @@ void SpaceEntity::QueueUpdate()
 {
     if (EntitySystem)
     {
-        EntitySystem->QueueEntityUpdate(this);
+        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+        {
+            static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->QueueEntityUpdate(this);
+        }
     }
 }
 

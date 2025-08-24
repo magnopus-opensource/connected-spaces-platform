@@ -119,11 +119,6 @@ public:
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
 
-    /// @brief Does nothing, irrelevant for Offline Realtime Engine
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
-
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false if the entity already existed in the selection and thus could not be added.
@@ -201,24 +196,16 @@ public:
 
     /***** ENTITY PROCESSING *************************************************/
 
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity) override;
-
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    /// This only processes changes to existing entities, such as properties or components. All entity creations and deletions are handled instantly.
-    virtual void ProcessPendingEntityOperations() override;
-
     /**
-     * @brief TODO: I'm not sure what this function will do yet.
+     * @brief Fetch entities from our data source. As the offline realtime engine constructs any pre-existing entities in the constructor,
+     * both csp::common::EntityFetchStartedCallback and csp::common::EntityFetchCompleteCallback are called immediately.
+     * Also initialises the script system.
      *
      * @param SpaceId const csp::common::String& : MCS formatted SpaceId
      * @param FetchStartedCallback EntityFetchStartedCallback Callback called once scopes are reset and entity fetch has begun.
      *
      * @pre Space represented by SpaceId must exist on the configured server endpoint. See csp::systems::SpaceSystem::CreateSpace
-     * @post FetchStartedCallback will be called. The csp::common::EntityFetchCompleteCallback passed in the constructor will be called async
-     * once all the entities are fetched.
+     * @post FetchStartedCallback and the csp::common::EntityFetchCompleteCallback passed in the constructor will be called .
      */
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
         const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;

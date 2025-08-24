@@ -225,6 +225,14 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
     }
 }
 
+inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& RealtimeEngine)
+{
+    if (RealtimeEngine.GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine&>(RealtimeEngine).ProcessPendingEntityOperations();
+    }
+}
+
 inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::common::IRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
 {
     // Wait for message
@@ -233,11 +241,11 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::common::IRealti
     int64_t TestTime = 0;
 
     // Call at least once
-    EntitySystem->ProcessPendingEntityOperations();
+    ProcessPendingIfOnline(*EntitySystem);
 
     while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
     {
-        EntitySystem->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*EntitySystem);
 
         std::this_thread::sleep_for(50ms);
 
