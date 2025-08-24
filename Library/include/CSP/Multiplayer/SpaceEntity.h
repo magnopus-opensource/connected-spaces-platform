@@ -395,9 +395,6 @@ public:
     /// @param Index size_t : the index of the child entity
     CSP_NO_EXPORT void RemoveParentFromChildEntity(size_t Index);
 
-    /// @brief Mark for update
-    CSP_NO_EXPORT void MarkForUpdate();
-
     /// @brief Getter for the script interface
     /// @return EntityScriptInterface*
     CSP_NO_EXPORT EntityScriptInterface* GetScriptInterface();

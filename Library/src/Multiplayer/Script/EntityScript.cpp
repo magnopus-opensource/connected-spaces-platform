@@ -30,8 +30,8 @@ namespace csp::multiplayer
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
-EntityScript::EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine,
-    csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem)
+EntityScript::EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
+    csp::common::LogSystem* LogSystem)
     : Entity(InEntity)
     , EntityScriptComponent(nullptr)
     , HasLastError(false)
@@ -131,7 +131,7 @@ void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 
     EntityScriptComponent->SetScriptSource(InScriptSource);
 
-    Entity->MarkForUpdate();
+    Entity->QueueUpdate();
 }
 
 bool EntityScript::HasError() { return HasLastError; }
@@ -171,7 +171,7 @@ void EntityScript::SetOwnerId(uint64_t ClientId)
         if (GetOwnerId() != ClientId)
         {
             EntityScriptComponent->SetOwnerId(ClientId);
-            Entity->MarkForUpdate();
+            Entity->QueueUpdate();
         }
     }
 }
