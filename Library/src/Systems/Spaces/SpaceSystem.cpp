@@ -468,7 +468,8 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     auto& SystemsManager = systems::SystemsManager::Get();
     auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
 
-    if (MultiplayerConnection != nullptr)
+    // If not connected, do not attempt to disconnect
+    if ((MultiplayerConnection != nullptr) && (MultiplayerConnection->IsConnected()))
     {
         MultiplayerConnection->StopListening(
             [MultiplayerConnection, Callback](multiplayer::ErrorCode Error)
@@ -511,6 +512,11 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
                         INVOKE_IF_NOT_NULL(Callback, Result);
                     });
             });
+    }
+    else
+    {
+        csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(
+            csp::common::LogLevel::Verbose, "Multiplayer connection not connected when exiting space, skipping disconnect.");
     }
 
     events::Event* ExitSpaceEvent = events::EventSystem::Get().AllocateEvent(events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
