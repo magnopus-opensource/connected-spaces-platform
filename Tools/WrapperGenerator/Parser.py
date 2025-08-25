@@ -13,7 +13,7 @@ from MetadataTypes import *
 from word_reader import WordReader
 
 
-__log_file: TextIOWrapper = None
+_log_file: TextIOWrapper = None
 
 
 COLOUR_ERROR = '\033[91m'    # Bright red
@@ -60,7 +60,7 @@ def read_whole_file(filename: str) -> str:
 
 
 def log(message: str, indent_level: int = 0, indent_width: int = 2) -> None:
-    print(f"{'': <{indent_level * indent_width}}{message}", file=__log_file)
+    print(f"{'': <{indent_level * indent_width}}{message}", file=_log_file)
 
 
 class AccessModifier(Enum):
@@ -128,10 +128,10 @@ class Parser:
 
 
     def __init__(self, log_file: TextIOWrapper = None):
-        global __log_file
-        __log_file = log_file
-        if __log_file is None:
-            __log_file = sys.stdout
+        global _log_file
+        _log_file = log_file
+        if _log_file is None:
+            _log_file = sys.stdout
 
 
     def __exit_scope(self, reader: WordReader, current_scope: int, opening_char: str = '{', closing_char: str = '}'):
