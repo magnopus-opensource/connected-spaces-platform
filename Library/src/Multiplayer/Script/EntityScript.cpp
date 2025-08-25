@@ -30,13 +30,13 @@ namespace csp::multiplayer
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
-EntityScript::EntityScript(
-    SpaceEntity* InEntity, OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner, csp::common::LogSystem* LogSystem)
+EntityScript::EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
+    csp::common::LogSystem* LogSystem)
     : Entity(InEntity)
     , EntityScriptComponent(nullptr)
     , HasLastError(false)
     , HasBinding(false)
-    , OnlineRealtimeEnginePtr(InOnlineRealtimeEngine)
+    , RealtimeEnginePtr(InRealtimeEngine)
     , LogSystem(LogSystem)
     , ScriptRunner(ScriptRunner)
 {
@@ -89,11 +89,19 @@ bool EntityScript::Invoke()
 
 void EntityScript::RunScript(const csp::common::String& ScriptSource)
 {
+    if (RealtimeEnginePtr->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Offline)
+    {
+        ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
+        return;
+    }
+
+    auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEnginePtr);
+
     bool RunScriptLocally = true;
 
-    if (OnlineRealtimeEnginePtr)
+    if (RealtimeEnginePtr)
     {
-        RunScriptLocally = OnlineRealtimeEnginePtr->CheckIfWeShouldRunScriptsLocally();
+        RunScriptLocally = OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally();
     }
 
     if (RunScriptLocally)
@@ -103,7 +111,7 @@ void EntityScript::RunScript(const csp::common::String& ScriptSource)
     else
     {
 
-        OnlineRealtimeEnginePtr->RunScriptRemotely(Entity->GetId(), ScriptSource);
+        OnlineRealtimeEngine->RunScriptRemotely(Entity->GetId(), ScriptSource);
     }
 }
 
@@ -123,7 +131,7 @@ void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 
     EntityScriptComponent->SetScriptSource(InScriptSource);
 
-    Entity->MarkForUpdate();
+    Entity->QueueUpdate();
 }
 
 bool EntityScript::HasError() { return HasLastError; }
@@ -163,7 +171,7 @@ void EntityScript::SetOwnerId(uint64_t ClientId)
         if (GetOwnerId() != ClientId)
         {
             EntityScriptComponent->SetOwnerId(ClientId);
-            Entity->MarkForUpdate();
+            Entity->QueueUpdate();
         }
     }
 }

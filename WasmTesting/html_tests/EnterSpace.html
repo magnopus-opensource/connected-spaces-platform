@@ -21,7 +21,7 @@
         const userSystem = Systems.SystemsManager.get().getUserSystem();
 
         //Login as a guest
-        const loginResult = await userSystem.loginAsGuest(true);
+        const loginResult = await userSystem.loginAsGuest(true, true);
         if (loginResult.getResultCode() == Systems.EResultCode.Success){
           console.log("Successfully logged in");
         }

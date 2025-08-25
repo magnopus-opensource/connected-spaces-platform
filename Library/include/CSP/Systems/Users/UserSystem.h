@@ -92,26 +92,36 @@ public:
     /// @param UserName csp::common::String
     /// @param Email csp::common::String
     /// @param Password csp::common::String
+    /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
+    /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
     /// @pre One of either UserName or Email must not be empty.
     /// @pre Password must not be empty.
     CSP_ASYNC_RESULT void Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
-        const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
+        bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
     /// @brief Resume a previous session for the associated user ID using a refresh token
     /// The refresh token can be obtained after registering a callback with `SetNewLoginTokenReceivedCallback` and logging in regularly.
     /// @param UserId csp::common::String : User ID for the previous session
     /// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
+    /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
+    /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
     /// @pre UserId must not be empty.
-    CSP_ASYNC_RESULT void LoginWithRefreshToken(
-        const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken,
+        bool CreateMultiplayerConnection, LoginStateResultCallback Callback);
 
     /// @brief Log in to Magnopus Connected Services as a guest.
+    /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
+    /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void LoginAsGuest(
+        bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
     /// @ingroup Third Party Authentication
     /// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
@@ -136,10 +146,14 @@ public:
     /// Note: The Authentication Provider and the Redirect URL you've passed in the first step will be used now
     /// @param ThirdPartyToken csp::common::String : The authentication token returned by the Provider
     /// @param ThirdPartyStateId csp::common::String : The state Id returned by the Provider
+    /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
+    /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
+    /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Connected Services Authentication operation
     CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
-        const csp::common::String& ThirdPartyStateId, const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
+        const csp::common::String& ThirdPartyStateId, bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
+        LoginStateResultCallback Callback);
 
     /// @brief Logout from Magnopus Connected Services.
     /// @param Callback NullResultCallback : callback to call when a response is received

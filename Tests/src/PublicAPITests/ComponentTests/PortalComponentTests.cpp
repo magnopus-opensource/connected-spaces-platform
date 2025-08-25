@@ -79,7 +79,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         const auto LoginState = UserSystem->GetLoginState();
 
@@ -112,7 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-        RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
         const auto LoginState = UserSystem->GetLoginState();
 
@@ -164,7 +164,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the portal
     csp::common::String ObjectName = "Object 1";
@@ -226,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the portal
     csp::common::String ObjectName = "Object 1";

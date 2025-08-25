@@ -178,21 +178,6 @@ public:
         (void)Callback;
     }
 
-    /// @brief Sets a callback to be executed when an entity is fully created.
-    ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    /// The better way to set this and avoid initialisation race conditions is via passing this in the constructor, only use this if you wish to
-    /// override or remove this callback.
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
-        (void)Callback;
-    }
-
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
     /// @return True if the entity was succesfully added, false otherwise. Refer to your specific IRealtimeEngine instantiation for specific failure
@@ -320,6 +305,14 @@ public:
         (void)ObjectIndex;
     }
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A non-owning pointer to a List of non-owning pointers to all entities.
+    [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const
+    {
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
+    }
+
     /// @brief Get the number of total entities in the system.
     /// @return The total number of entities.
     virtual size_t GetNumEntities() const { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
@@ -339,6 +332,16 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    /// @brief Adds the given entity to the hierarchy by updating entity children and root hierarchy.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to add to the hierarchy.
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
+    }
+
     /// @brief Set Callback that notifies when the OnlineRealtimeEngine is in a valid state
     /// after entering a space, and entity mutation can begin. Users should not mutate entities before receiving this callback.
     /// This callback should be emitted in response to FetchAllEntitiesAndPopulateBuffers completing, either syncronously or asyncronously.
@@ -352,19 +355,16 @@ public:
 
     /***** ENTITY PROCESSING *************************************************/
 
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    virtual void LockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
-        // Avoiding unused params, see comment in top method
-        (void)Entity;
-    }
+    /// @brief Attempt to lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex should fail to lock if already locked in order to avoid deadlocks.
+    virtual bool TryLockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    virtual void ProcessPendingEntityOperations() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    virtual void UnlockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.

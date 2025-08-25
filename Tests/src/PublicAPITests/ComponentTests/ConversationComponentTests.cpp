@@ -22,12 +22,14 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
 #include "MultiplayerTestRunnerProcess.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -643,7 +645,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetNumberOfRe
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -757,7 +759,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentGetMessagesFr
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -1259,7 +1261,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientE
     {
         bool CallbackCalled = false;
 
-        RealtimeEngine->SetEntityCreatedCallback(
+        RealtimeEngine->SetRemoteEntityCreatedCallback(
             [&CallbackCalled, &Entity](csp::multiplayer::SpaceEntity* NewEntity)
             {
                 if (NewEntity->GetName() == "TestObject")
@@ -1399,7 +1401,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Add the second test user to the space
     {
@@ -3218,6 +3220,49 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentUpdateMessage
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+/*
+    Tests that when using an offline engine, ConversationComponents, which are dependent on the network
+    event bus, don't crash, and at least emit somewhat helpful errors.
+    Conversations being dependent on the NetworkEventBus like this is another unfortunate exception
+    to them being "systems", they're probably better expressed as multiplayer components.
+*/
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateConversationOfflineTest)
+{
+    // We can't really test more than this one because other conversation functions are guarded by a valid
+    // conversation ID, which isn't possible to make without a SignalR connection.
+    // HOWEVER, if we are to enable loading conversations via a scene description, then we must test attempting
+    // to update it without a connection, as we're essentially creating read-only functionality.
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
+
+    // Login without a signalR connection
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false, true);
+
+    std::unique_ptr<csp::multiplayer::OfflineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOfflineRealtimeEngine() };
+
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
+
+    // Create conversation component
+    auto* ConversationComponent = static_cast<ConversationSpaceComponent*>(Object->AddComponent(ComponentType::Conversation));
+
+    RAIIMockLogger MockLogger {};
+    const csp::common::String LockErrorMsg = "Create Conversation: SignalR connection error: NotConnected";
+    const csp::common::String DisconnectErrorMsg = "Error disconnecting MultiplayerConnection: NotConnected";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(DisconnectErrorMsg)).Times(1);
+
+    static constexpr const char* TestMessage = "TestConversation";
+    auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestMessage);
 
     // Log out
     LogOut(UserSystem);
