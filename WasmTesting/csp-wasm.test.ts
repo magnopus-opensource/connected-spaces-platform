@@ -14,7 +14,7 @@ test.before(async () => {
   return initializeCSP(USE_DEBUG_CSP); //gotta return the promise or tests wont automatically await
 });
 
-test ('Login', async() => {
+test('Login', async() => {
   const user = await CreateTestUser();
   const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
@@ -23,12 +23,9 @@ test ('Login', async() => {
 
   assert.ok(consoleMessages.some(e => e.includes('Successfully logged in')));
   assert.ok(errors.length == 0); //Should be no errors
-
-  //Cleanup
-  await LogoutUser(user);
 })
 
-test ('EnterSpace', async() => {
+test('EnterSpace', async() => {
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
@@ -59,7 +56,7 @@ test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
   
 });
 
-test ('SendReceiveNetworkEvent', async() => {
+test('SendReceiveNetworkEvent', async() => {
   // This test was added as a regression test against `RuntimeError: null function or function signature mismatch`
   // Caused by a wrapper gen bug when you make a return type of an enclosing function different for the return type of the callback
   // We didn't actually fix it at time of writing, change `ListenNetworkEvent` to return a bool and you'll see what I mean.
@@ -80,7 +77,7 @@ test ('SendReceiveNetworkEvent', async() => {
   await LogoutUser(user);
 })
 
-test ('CreateAvatar', async() => {
+test('CreateAvatar', async() => {
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
@@ -95,6 +92,21 @@ test ('CreateAvatar', async() => {
   //Cleanup
   await DeleteSpace(spaceId);
   await LogoutUser(user);
+})
+
+test('Offline', async() => {
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Offline.html', USE_DEBUG_CSP, null, null)
+
+  console.log(consoleMessages);
+  console.log(errors);
+
+  assert.ok(consoleMessages.some(e => e.includes('Not starting a Multiplayer Connection')));
+  assert.ok(consoleMessages.some(e => e.includes('Entering Offline Space')));
+  assert.ok(consoleMessages.some(e => e.includes('Successfully entered space.')));
+  assert.ok(consoleMessages.some(e => e.includes('Successfully created avatar')));
+  assert.ok(consoleMessages.some(e => e.includes('Exiting Space Offline Space')));
+  assert.ok(consoleMessages.some(e => e.includes('Multiplayer connection not connected when exiting space, skipping disconnect.')));
+  assert.ok(errors.length == 0); //Should be no errors
 })
 
 
