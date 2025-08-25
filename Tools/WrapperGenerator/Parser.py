@@ -6,7 +6,6 @@ import sys
 from copy import deepcopy
 from io import TextIOWrapper
 from enum import Enum
-from pathlib import Path
 from typing import Dict, List, Union, Any
 
 from Config import config
@@ -14,7 +13,7 @@ from MetadataTypes import *
 from word_reader import WordReader
 
 
-log_file: TextIOWrapper
+__log_file: TextIOWrapper = None
 
 
 COLOUR_ERROR = '\033[91m'    # Bright red
@@ -34,12 +33,14 @@ PRIMITIVE_TYPES = [
     'double'
 ]
 
+class ParserError(Exception):
+    """ Exception raised for errors in the parsing process. """
+    pass
+
 
 def error_in_file(filename: str, line: int, message: str) -> None:
     print(f"{COLOUR_ERROR}** Error in file: {filename} line: {line}  {message}{COLOUR_RESET}", file=sys.stderr)
-    log_file.flush()
-    log_file.close()
-    sys.exit(1)
+    raise ParserError(f"Error in file: {filename} line: {line}  {message}")
 
 
 def warning_in_file(filename: str | None, line: int, message: str) -> None:
@@ -59,7 +60,7 @@ def read_whole_file(filename: str) -> str:
 
 
 def log(message: str, indent_level: int = 0, indent_width: int = 2) -> None:
-    print(f"{'': <{indent_level * indent_width}}{message}", file=log_file)
+    print(f"{'': <{indent_level * indent_width}}{message}", file=__log_file)
 
 
 class AccessModifier(Enum):
@@ -124,6 +125,13 @@ class Parser:
         '()': 'op_Call',
         '[]': 'op_Index'
     }
+
+
+    def __init__(self, log_file: TextIOWrapper = None):
+        global __log_file
+        __log_file = log_file
+        if __log_file is None:
+            __log_file = sys.stdout
 
 
     def __exit_scope(self, reader: WordReader, current_scope: int, opening_char: str = '{', closing_char: str = '}'):
@@ -1973,12 +1981,6 @@ class Parser:
                 i.full_safe_type_name = full_safe_type_name
 
     def parse(self, headers: List[str]) -> None:
-        global log_file
-
-        # Create output directory if it doesn't exist
-        Path(config['output_directory']).mkdir(parents=True, exist_ok=True)
-        log_file = open(f"{config['output_directory']}log.parser.txt", 'w')
-
         # Stage 1 processing
         for h in headers:
             log(f"Begin parsing {get_rel_path(h)}")
@@ -1993,6 +1995,3 @@ class Parser:
             log(f"End parsing {get_rel_path(h)}\n")
 
         self.__post_process()
-
-        log_file.flush()
-        log_file.close()

@@ -3,6 +3,7 @@
 import os
 import sys
 import argparse
+import pathlib
 from glob import glob
 
 from CWrapperGenerator import CWrapperGenerator
@@ -34,14 +35,19 @@ print('Output Folder: ' + config['output_directory'])
 results = [y for x in os.walk(config['public_include_directory']) for y in glob(os.path.join(x[0], '*.h'))] 
 print('Header Count: ' + str(len(results)))
 
-parser = Parser()
+# Create output directory if it doesn't exist
+pathlib.Path(config['output_directory']).mkdir(parents=True, exist_ok=True)
 
-# For every header parse exported functionality by macro.
-# We export structs, classes, interfaces(pure virtual classes), global functions, enums, and typedefs
-try:
-    parser.parse(results)
-except SystemExit as e:
-    os._exit(e.code)
+
+with open(f"{config['output_directory']}log.parser.txt", 'w') as log_file:
+    parser = Parser(log_file=log_file)
+
+    # For every header parse exported functionality by macro.
+    # We export structs, classes, interfaces(pure virtual classes), global functions, enums, and typedefs
+    try:
+        parser.parse(results)
+    except SystemExit as e:
+        os._exit(e.code)
 
 enums = parser.enums
 structs = parser.structs
