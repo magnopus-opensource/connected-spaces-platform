@@ -1477,230 +1477,214 @@ class Parser:
                 object.full_safe_type_name += '_' + ta.full_safe_type_name
 
 
-    def parse(self, headers: List[str]) -> None:
-        global log_file
+    def __parse_header(self, filename:str, reader: WordReader) -> None:
+        doc_comments: List[str] = []
 
-        # Create output directory if it doesn't exist
-        Path(config['output_directory']).mkdir(parents=True, exist_ok=True)
-        log_file = open(f"{config['output_directory']}log.parser.txt", 'w')
-
-        # Stage 1 processing
-        for h in headers:
-            log(f"Begin parsing {get_rel_path(h)}")
-            self.indent += 1
-
-            reader = WordReader(read_whole_file(h))
-            reader.skip_whitespace()
-
-            doc_comments: List[str] = []
-
-            while True:
-                next_char = reader.peek_char()
+        while True:
+            next_char = reader.peek_char()
 
                 # Break if we hit the end of the file
-                if next_char == None:
-                    break
+            if next_char == None:
+                break
 
                 # Read comments
+            if next_char == '/':
+                next_char = reader.peek_char(1)
+
                 if next_char == '/':
-                    next_char = reader.peek_char(1)
+                    next_char = reader.peek_char(2)
 
-                    if next_char == '/':
-                        next_char = reader.peek_char(2)
+                    if next_char == '/':    # Doxygen documentation
+                        self.__read_doc_comments(reader, doc_comments)
+                    else:                   # Single line comment
+                        reader.skip_line()
 
-                        if next_char == '/':    # Doxygen documentation
-                            self.__read_doc_comments(reader, doc_comments)
-                        else:                   # Single line comment
-                            reader.skip_line()
-
-                        continue
-                    elif next_char == '*':
-                        doc_comments.clear()
-                        offset = 2
+                    continue
+                elif next_char == '*':
+                    doc_comments.clear()
+                    offset = 2
 
                         # Find the end of the block comment
-                        while not (reader.peek_char(offset) == '*' and reader.peek_char(offset + 1) == '/'):
-                            offset += 1
+                    while not (reader.peek_char(offset) == '*' and reader.peek_char(offset + 1) == '/'):
+                        offset += 1
                         
-                        offset += 2
+                    offset += 2
 
-                        reader.skip(offset)
+                    reader.skip(offset)
 
-                        continue
+                    continue
 
-                word = reader.next_word()
+            word = reader.next_word()
 
-                if word == None:
-                    break
+            if word == None:
+                break
 
                 # TODO: Look at this... It kinda seems like this will stop processing the file if it detects a top-level CSP_NO_EXPORT. Obviously, this is not what we want!
-                if word == config['no_export_macro']:
-                    break
+            if word == config['no_export_macro']:
+                break
 
-                if word == '#':
-                    doc_comments.clear()
-                    current_line = reader.current_line
+            if word == '#':
+                doc_comments.clear()
+                current_line = reader.current_line
 
-                    if reader.next_word() == 'pragma':
-                        if reader.next_word() == 'pack':
-                            error_in_file(h, current_line, 'Pragma pack is currently not supported. Please do not use it as it will break struct marshalling.')
-                    else:
+                if reader.next_word() == 'pragma':
+                    if reader.next_word() == 'pack':
+                        error_in_file(filename, current_line, 'Pragma pack is currently not supported. Please do not use it as it will break struct marshalling.')
+                else:
                         # Skip all preprocessor directives
-                        reader.skip_line()
-                elif word == '[':
-                    doc_comments.clear()
-                    self.__exit_scope(reader, 1, opening_char='[', closing_char=']')
-                elif word == 'CSP_START_IGNORE':
-                    word = reader.next_word()
+                    reader.skip_line()
+            elif word == '[':
+                doc_comments.clear()
+                self.__exit_scope(reader, 1, opening_char='[', closing_char=']')
+            elif word == 'CSP_START_IGNORE':
+                word = reader.next_word()
 
-                    while word != 'CSP_END_IGNORE':
-                        word = reader.next_word()
-                elif word == '}':
+                while word != 'CSP_END_IGNORE':
+                    word = reader.next_word()
+            elif word == '}':
                     # We've exited a namespace
-                    doc_comments.clear()
-                    self.indent -= 1
-                    log(f"Exiting namespace '{'::'.join(self.namespaces)}'", self.indent)
-                    self.namespaces.pop()
+                doc_comments.clear()
+                self.indent -= 1
+                log(f"Exiting namespace '{'::'.join(self.namespaces)}'", self.indent)
+                self.namespaces.pop()
                     
-                    if reader.peek_char() == ';':
-                        reader.next_word()
-                elif word == 'namespace':
-                    doc_comments.clear()
-                    assert not self.namespaces
-                    namespace = reader.next_word()
+                if reader.peek_char() == ';':
+                    reader.next_word()
+            elif word == 'namespace':
+                doc_comments.clear()
+                assert not self.namespaces
+                namespace = reader.next_word()
+                word = reader.next_word()
+
+                while word == ':':
+                    reader.next_word()  # ':'
+                    namespace = namespace + '::' + reader.next_word()
                     word = reader.next_word()
 
-                    while word == ':':
-                        reader.next_word()  # ':'
-                        namespace = namespace + '::' + reader.next_word()
-                        word = reader.next_word()
+                self.namespaces.append(namespace)
 
-                    self.namespaces.append(namespace)
-
-                    if word != '{':
-                        error_in_file(h, reader.current_line, f"Expected '{{' after namespace declaration. Got '{word}'.")
+                if word != '{':
+                    error_in_file(filename, reader.current_line, f"Expected '{{' after namespace declaration. Got '{word}'.")
                     
-                    log(f"Entering namespace '{'::'.join(self.namespaces)}'", self.indent)
-                    self.indent += 1
-                elif word == 'enum':
-                    res = self.__parse_enum(h, reader)
+                log(f"Entering namespace '{'::'.join(self.namespaces)}'", self.indent)
+                self.indent += 1
+            elif word == 'enum':
+                res = self.__parse_enum(filename, reader)
 
-                    if res != None:
-                        res.doc_comments = deepcopy(doc_comments)
-                        self.enums[f"{res.namespace}::{res.name}"] = res
+                if res != None:
+                    res.doc_comments = deepcopy(doc_comments)
+                    self.enums[f"{res.namespace}::{res.name}"] = res
                     
-                    doc_comments.clear()
-                elif word == 'struct':
-                    res = self.__parse_struct(h, reader)
+                doc_comments.clear()
+            elif word == 'struct':
+                res = self.__parse_struct(filename, reader)
 
-                    if res != None:
-                        res.doc_comments = deepcopy(doc_comments)
-                        self.structs[f"{res.namespace}::{res.name}"] = res
+                if res != None:
+                    res.doc_comments = deepcopy(doc_comments)
+                    self.structs[f"{res.namespace}::{res.name}"] = res
                     
-                    doc_comments.clear()
-                elif word == 'class':
-                    res = self.__parse_class(h, reader)
+                doc_comments.clear()
+            elif word == 'class':
+                res = self.__parse_class(filename, reader)
 
-                    if res != None:
-                        res.doc_comments = deepcopy(doc_comments)
-                        self.classes[f"{res.namespace}::{res.name}"] = res
+                if res != None:
+                    res.doc_comments = deepcopy(doc_comments)
+                    self.classes[f"{res.namespace}::{res.name}"] = res
                     
-                    doc_comments.clear()
-                elif word == 'typedef':
-                    word = reader.next_word()
-                    typedef_type, word = self.__parse_type(reader, word)
-                    typedef_name = word
-                    word = reader.next_word()
+                doc_comments.clear()
+            elif word == 'typedef':
+                word = reader.next_word()
+                typedef_type, word = self.__parse_type(reader, word)
+                typedef_name = word
+                word = reader.next_word()
 
-                    assert typedef_type is not None
+                assert typedef_type is not None
 
-                    typedef = TypedefMetadata(
+                typedef = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
                         name=typedef_name,
                         type=typedef_type,
                         doc_comments=deepcopy(doc_comments)
                     )
-                    doc_comments.clear()
-                    self.typedefs[f"{typedef.namespace}::{typedef.name}"] = typedef
+                doc_comments.clear()
+                self.typedefs[f"{typedef.namespace}::{typedef.name}"] = typedef
                     
-                    log(f"Found typedef: {typedef}", self.indent)
-                elif word == 'using':
-                    word = reader.next_word()
-                    alias_name = word
-                    reader.next_word()  # '='
-                    word = reader.next_word()
-                    alias_type, word = self.__parse_type(reader, word)
+                log(f"Found typedef: {typedef}", self.indent)
+            elif word == 'using':
+                word = reader.next_word()
+                alias_name = word
+                reader.next_word()  # '='
+                word = reader.next_word()
+                alias_type, word = self.__parse_type(reader, word)
 
-                    assert alias_type is not None
+                assert alias_type is not None
 
-                    alias = TypedefMetadata(
+                alias = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
                         name=alias_name,
                         type=alias_type,
                         doc_comments=deepcopy(doc_comments)
                     )
-                    doc_comments.clear()
-                    self.typedefs[f"{alias.namespace}::{alias.name}"] = alias
+                doc_comments.clear()
+                self.typedefs[f"{alias.namespace}::{alias.name}"] = alias
 
-                    log(f"Found using alias: {alias}", self.indent)
-                elif word == 'template':
-                    doc_comments.clear()
-                    reader.next_word()  # '<'
-                    word = reader.next_word()
+                log(f"Found using alias: {alias}", self.indent)
+            elif word == 'template':
+                doc_comments.clear()
+                reader.next_word()  # '<'
+                word = reader.next_word()
 
-                    parameters: List[TemplateParameterMetadata] = []
+                parameters: List[TemplateParameterMetadata] = []
 
-                    while word != '>':
-                        if word == ',':
-                            word = reader.next_word()
-
-                        word = reader.next_word()   # 'typename', 'class', 'int', etc
-                        parameters.append(TemplateParameterMetadata(word))
-
+                while word != '>':
+                    if word == ',':
                         word = reader.next_word()
-                    
-                    parameters[-1].is_last = True
+
+                    word = reader.next_word()   # 'typename', 'class', 'int', etc
+                    parameters.append(TemplateParameterMetadata(word))
 
                     word = reader.next_word()
+                    
+                parameters[-1].is_last = True
 
-                    if word == 'class':
-                        res = self.__parse_class(h, reader)
+                word = reader.next_word()
 
-                        assert res is not None
+                if word == 'class':
+                    res = self.__parse_class(filename, reader)
 
-                        self.templates[f"{res.namespace}::{res.name}"] = TemplateMetadata(
+                    assert res is not None
+
+                    self.templates[f"{res.namespace}::{res.name}"] = TemplateMetadata(
                             definition=res,
                             template_parameters=parameters
                         )
-                    else:
-                        error_in_file(h, reader.current_line, "Only class templates are currently supported.")
-                elif word == config['interface_macro']:
-                    res = self.__parse_interface(h, reader)
+                else:
+                    error_in_file(filename, reader.current_line, "Only class templates are currently supported.")
+            elif word == config['interface_macro']:
+                res = self.__parse_interface(filename, reader)
 
-                    if res != None:
-                        res.doc_comments = deepcopy(doc_comments)
-                        self.interfaces[f"{res.namespace}::{res.name}"] = res
+                if res != None:
+                    res.doc_comments = deepcopy(doc_comments)
+                    self.interfaces[f"{res.namespace}::{res.name}"] = res
                     
+                doc_comments.clear()
+            else:
+                    # Assume we found a function
+                if word == config['cpp_export_macro']:
+                    word = reader.next_word()
+                    res = self.__parse_function(filename, reader, word)
+                    res.unique_name = self.__create_unique_function_name(res)
+                    res.doc_comments = deepcopy(doc_comments)
+                    self.functions[f"{res.namespace}::{res.name}"] = res
+                    log(f"Found function: {res}", self.indent)
                     doc_comments.clear()
                 else:
-                    # Assume we found a function
+                    doc_comments.clear()
+                    log(f"Skipping unexported function", self.indent)
+                    self.__parse_function(filename, reader, word)
 
-                    if word == config['cpp_export_macro']:
-                        word = reader.next_word()
-                        res = self.__parse_function(h, reader, word)
-                        res.unique_name = self.__create_unique_function_name(res)
-                        res.doc_comments = deepcopy(doc_comments)
-                        self.functions[f"{res.namespace}::{res.name}"] = res
-                        log(f"Found function: {res}", self.indent)
-                        doc_comments.clear()
-                    else:
-                        doc_comments.clear()
-                        log(f"Skipping unexported function", self.indent)
-                        self.__parse_function(h, reader, word)
 
-            self.indent -= 1
-            log(f"End parsing {get_rel_path(h)}\n")
-
+    def __post_process(self) -> None:
         # Stage 2 processing (templates)
         types = { **self.classes, **self.enums, **self.structs, **self.interfaces }
 
@@ -1987,6 +1971,28 @@ class Parser:
                     full_safe_type_name += '_' + a.full_safe_type_name
                 
                 i.full_safe_type_name = full_safe_type_name
+
+    def parse(self, headers: List[str]) -> None:
+        global log_file
+
+        # Create output directory if it doesn't exist
+        Path(config['output_directory']).mkdir(parents=True, exist_ok=True)
+        log_file = open(f"{config['output_directory']}log.parser.txt", 'w')
+
+        # Stage 1 processing
+        for h in headers:
+            log(f"Begin parsing {get_rel_path(h)}")
+            self.indent += 1
+
+            reader = WordReader(read_whole_file(h))
+            reader.skip_whitespace()
+
+            self.__parse_header(h, reader)
+
+            self.indent -= 1
+            log(f"End parsing {get_rel_path(h)}\n")
+
+        self.__post_process()
 
         log_file.flush()
         log_file.close()
