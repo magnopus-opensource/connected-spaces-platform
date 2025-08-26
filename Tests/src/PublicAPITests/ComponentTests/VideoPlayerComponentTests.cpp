@@ -89,7 +89,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
     EXPECT_EQ(VideoComponent->GetIsVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsARVisible(), true);
-    EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(VideoComponent->GetIsVRVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
 
     CreatedObject->QueueUpdate();
@@ -113,7 +113,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     VideoComponent->SetVideoPlayerSourceType(VideoPlayerSourceType::URLSource);
     VideoComponent->SetIsVisible(false);
     VideoComponent->SetIsARVisible(false);
-    VideoComponent->SetIsVirtualVisible(false);
+    VideoComponent->SetIsVRVisible(false);
     VideoComponent->SetIsEnabled(false);
 
     // Ensure values are set correctly
@@ -131,7 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
     EXPECT_EQ(VideoComponent->GetIsVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsARVisible(), false);
-    EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(VideoComponent->GetIsVRVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -197,7 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
     EXPECT_EQ(VideoPlayerComponent->GetIsVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), true);
-    EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(VideoPlayerComponent->GetIsVRVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), true);
 
     // Setup script
@@ -220,7 +220,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.videoPlayerSourceType = 0;
 		video.isVisible = false;
         video.isARVisible = false;
-        video.isVirtualVisible = false;
+        video.isVRVisible = false;
         video.isEnabled = false;
 
     )xx";
@@ -248,7 +248,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
     EXPECT_EQ(VideoPlayerComponent->GetIsVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), false);
-    EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(VideoPlayerComponent->GetIsVRVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

@@ -34,7 +34,7 @@ ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, Spac
     Properties[static_cast<uint32_t>(ImagePropertyKeys::DisplayMode)] = static_cast<int64_t>(DisplayMode::DoubleSided);
     Properties[static_cast<uint32_t>(ImagePropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(ImagePropertyKeys::IsEmissive)] = false;
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
@@ -117,9 +117,9 @@ bool ImageSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(sta
 
 void ImageSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible), Value); }
 
-bool ImageSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible)); }
+bool ImageSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVRVisible)); }
 
-void ImageSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible), Value); }
+void ImageSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVRVisible), Value); }
 
 BillboardMode ImageSpaceComponent::GetBillboardMode() const
 {

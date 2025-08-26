@@ -129,13 +129,13 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     delete[] UploadFileData;
 
-    EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVirtualVisible(), true);
+    EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVRVisible(), true);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsARVisible(), true);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVisible(), true);
 
     FiducialMarkerSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
     FiducialMarkerSpaceComponentInstance->SetMarkerAssetId(Asset.Id);
-    FiducialMarkerSpaceComponentInstance->SetIsVirtualVisible(false);
+    FiducialMarkerSpaceComponentInstance->SetIsVRVisible(false);
     FiducialMarkerSpaceComponentInstance->SetIsARVisible(false);
 
     auto FiducialMarkerSpaceComponentKey = FiducialMarkerSpaceComponentInstance->GetId();
@@ -143,7 +143,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetAssetCollectionId(), Asset.AssetCollectionId);
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetMarkerAssetId(), Asset.Id);
-    EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetIsVRVisible(), false);
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetIsARVisible(), false);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVisible(), true);
 
@@ -206,7 +206,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 		marker.rotation = [1, 1, 1, 1];
 		marker.isVisible = false;
         marker.isARVisible = false;
-        marker.isVirtualVisible = false;
+        marker.isVRVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
@@ -223,7 +223,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     EXPECT_EQ(FiducialMarkerComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
     EXPECT_EQ(FiducialMarkerComponent->GetIsARVisible(), false);
-    EXPECT_EQ(FiducialMarkerComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(FiducialMarkerComponent->GetIsVRVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

@@ -60,9 +60,9 @@ enum class AnimatedModelPropertyKeys
     ThirdPartyComponentRef,
     IsShadowCaster,
     MaterialOverrides,
-    IsVirtualVisible,
+    IsVRVisible,
     ShowAsHoldoutInAR,
-    ShowAsHoldoutInVirtual,
+    ShowAsHoldoutInVR,
     Num
 };
 
@@ -172,10 +172,10 @@ public:
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
-    /// @copydoc IVisibleComponent::GetIsVirtualVisible()
-    bool GetIsVirtualVisible() const override;
-    /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    void SetIsVirtualVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsVRVisible()
+    bool GetIsVRVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVRVisible()
+    void SetIsVRVisible(bool InValue) override;
     /// @}
 
     /// \addtogroup IThirdPartyComponentRef
@@ -200,10 +200,10 @@ public:
     bool GetShowAsHoldoutInAR() const override;
     /// @copydoc IVisibleComponent::SetShowAsHoldoutInAR()
     void SetShowAsHoldoutInAR(bool InValue) override;
-    /// @copydoc IVisibleComponent::GetShowAsHoldoutInVirtual()
-    bool GetShowAsHoldoutInVirtual() const override;
-    /// @copydoc IVisibleComponent::SetShowAsHoldoutInVirtual()
-    void SetShowAsHoldoutInVirtual(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetShowAsHoldoutInVR()
+    bool GetShowAsHoldoutInVR() const override;
+    /// @copydoc IVisibleComponent::SetShowAsHoldoutInVR()
+    void SetShowAsHoldoutInVR(bool InValue) override;
     /// @}
 };
 

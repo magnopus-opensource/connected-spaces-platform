@@ -24,7 +24,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Controls the holdout visibility behaviour of the component when in default mode, AR mode or Virtual mode.
-/// A holdout is an object that is rendered as a “mask”, cutting it out from the final image.
+/// A holdout is an object that is rendered as a mask, cutting it out from the final image.
 /// It still participates in depth testing, allowing objects to move behind it, but does not contribute pixels to the final image.
 CSP_INTERFACE class CSP_API IVisibilityBehaviourComponent
 {
@@ -39,11 +39,11 @@ public:
 
     /// @brief Checks if the component is shown as holdout when in VR mode.
     /// @return True if the component is shown as holdout when in VR mode, false otherwise.
-    virtual bool GetShowAsHoldoutInVirtual() const = 0;
+    virtual bool GetShowAsHoldoutInVR() const = 0;
 
     /// @brief Sets if the component is shown as holdout in VR mode.
     /// @param InValue True if the component is shown as holdout in VR mode, false otherwise.
-    virtual void SetShowAsHoldoutInVirtual(bool InValue) = 0;
+    virtual void SetShowAsHoldoutInVR(bool InValue) = 0;
 
 protected:
     virtual ~IVisibilityBehaviourComponent() = default;

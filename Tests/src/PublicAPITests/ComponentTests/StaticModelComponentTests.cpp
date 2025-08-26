@@ -84,11 +84,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         const SpaceTransform TestTransform(TestPosition, TestRotation, TestScale);
         constexpr const bool TestIsVisible = false;
         constexpr const bool TestIsARVisible = false;
-        constexpr const bool TestIsVirtualVisible = false;
+        constexpr const bool TestIsVRVisible = false;
         constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
         constexpr const bool TestIsShadowCaster = false;
         constexpr const bool TestShowAsHoldoutInAR = true;
-        constexpr const bool TestShowAsHoldoutInVirtual = true;
+        constexpr const bool TestShowAsHoldoutInVR = true;
 
         // Test defaults
         EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "");
@@ -100,11 +100,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
         EXPECT_EQ(StaticModelComponent->GetIsVisible(), true);
         EXPECT_EQ(StaticModelComponent->GetIsARVisible(), true);
-        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), true);
+        EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), true);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), "");
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), false);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), false);
+        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), false);
 
         StaticModelComponent->SetExternalResourceAssetCollectionId(TestExternalResourceAssetCollectionId);
         StaticModelComponent->SetExternalResourceAssetId(TestExternalResourceAssetId);
@@ -114,11 +114,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         StaticModelComponent->SetScale(TestScale);
         StaticModelComponent->SetIsVisible(TestIsVisible);
         StaticModelComponent->SetIsARVisible(TestIsARVisible);
-        StaticModelComponent->SetIsVirtualVisible(TestIsVirtualVisible);
+        StaticModelComponent->SetIsVRVisible(TestIsVRVisible);
         StaticModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
         StaticModelComponent->SetIsShadowCaster(TestIsShadowCaster);
         StaticModelComponent->SetShowAsHoldoutInAR(TestShowAsHoldoutInAR);
-        StaticModelComponent->SetShowAsHoldoutInVirtual(TestShowAsHoldoutInVirtual);
+        StaticModelComponent->SetShowAsHoldoutInVR(TestShowAsHoldoutInVR);
 
         // Test new values
         EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), TestExternalResourceAssetCollectionId);
@@ -130,11 +130,11 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetScale(), TestScale);
         EXPECT_EQ(StaticModelComponent->GetIsVisible(), TestIsVisible);
         EXPECT_EQ(StaticModelComponent->GetIsARVisible(), TestIsARVisible);
-        EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), TestIsVirtualVisible);
+        EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), TestIsVRVisible);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), TestShowAsHoldoutInAR);
-        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), TestShowAsHoldoutInVirtual);
+        EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), TestShowAsHoldoutInVR);
 
         // Test transform separately, as this just sets position, rotation, scale
         StaticModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
@@ -206,9 +206,9 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 		model.rotation = [1, 1, 1, 1];
 		model.isVisible = false;
         model.isARVisible = false;
-        model.isVirtualVisible = false;
+        model.isVRVisible = false;
         model.showAsHoldoutInAR = true;
-        model.showAsHoldoutInVirtual = true;
+        model.showAsHoldoutInVR = true;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
@@ -224,9 +224,9 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     EXPECT_EQ(StaticModelComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(StaticModelComponent->GetIsVisible(), false);
     EXPECT_EQ(StaticModelComponent->GetIsARVisible(), false);
-    EXPECT_EQ(StaticModelComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), false);
     EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), true);
-    EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVirtual(), true);
+    EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

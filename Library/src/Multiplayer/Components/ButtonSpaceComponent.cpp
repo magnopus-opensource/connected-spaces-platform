@@ -32,7 +32,7 @@ ButtonSpaceComponent::ButtonSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled)] = true;
     Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new ButtonSpaceComponentScriptInterface(this));
 }
@@ -120,8 +120,8 @@ bool ButtonSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(st
 
 void ButtonSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible), Value); }
 
-bool ButtonSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible)); }
+bool ButtonSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVRVisible)); }
 
-void ButtonSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVirtualVisible), Value); }
+void ButtonSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVRVisible), Value); }
 
 } // namespace csp::multiplayer

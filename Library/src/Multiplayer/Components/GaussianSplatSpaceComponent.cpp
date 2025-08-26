@@ -33,7 +33,7 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)] = true;
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
@@ -122,14 +122,11 @@ void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
     SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
 }
 
-bool GaussianSplatSpaceComponent::GetIsVirtualVisible() const
-{
-    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible));
-}
+bool GaussianSplatSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVRVisible)); }
 
-void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool InValue)
+void GaussianSplatSpaceComponent::SetIsVRVisible(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible), InValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVRVisible), InValue);
 }
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const

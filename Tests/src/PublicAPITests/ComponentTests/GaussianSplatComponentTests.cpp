@@ -93,7 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
     EXPECT_EQ(GaussianSplatComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_EQ(GaussianSplatComponent->GetIsVisible(), true);
     EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), true);
-    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVRVisible(), true);
     EXPECT_EQ(GaussianSplatComponent->GetIsShadowCaster(), true);
     EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3::One());
 
@@ -112,8 +112,8 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
     GaussianSplatComponent->SetIsARVisible(false);
     EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), false);
 
-    GaussianSplatComponent->SetIsVirtualVisible(false);
-    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), false);
+    GaussianSplatComponent->SetIsVRVisible(false);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVRVisible(), false);
 
     GaussianSplatComponent->SetIsShadowCaster(false);
     EXPECT_EQ(GaussianSplatComponent->GetIsShadowCaster(), false);
@@ -179,7 +179,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 		splat.rotation = [1, 1, 1, 1];
         splat.isVisible = false;
         splat.isARVisible = false;
-        splat.isVirtualVisible = false;
+        splat.isVRVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(ScriptSource.c_str());
@@ -198,7 +198,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
     EXPECT_EQ(GaussianSplatComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(GaussianSplatComponent->GetIsVisible(), false);
     EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), false);
-    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVRVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

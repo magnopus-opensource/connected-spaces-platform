@@ -36,9 +36,9 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVRVisible)] = true;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR)] = false;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual)] = false;
+    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVR)] = false;
 
     SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
@@ -161,15 +161,9 @@ bool StaticModelSpaceComponent::GetIsARVisible() const { return GetBooleanProper
 
 void StaticModelSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue); }
 
-bool StaticModelSpaceComponent::GetIsVirtualVisible() const
-{
-    return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible));
-}
+bool StaticModelSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVRVisible)); }
 
-void StaticModelSpaceComponent::SetIsVirtualVisible(bool InValue)
-{
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible), InValue);
-}
+void StaticModelSpaceComponent::SetIsVRVisible(bool InValue) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVRVisible), InValue); }
 
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
 {
@@ -200,14 +194,14 @@ void StaticModelSpaceComponent::SetShowAsHoldoutInAR(bool InValue)
     SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR), InValue);
 }
 
-bool StaticModelSpaceComponent::GetShowAsHoldoutInVirtual() const
+bool StaticModelSpaceComponent::GetShowAsHoldoutInVR() const
 {
-    return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual));
+    return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVR));
 }
 
-void StaticModelSpaceComponent::SetShowAsHoldoutInVirtual(bool InValue)
+void StaticModelSpaceComponent::SetShowAsHoldoutInVR(bool InValue)
 {
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual), InValue);
+    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVR), InValue);
 }
 
 } // namespace csp::multiplayer
