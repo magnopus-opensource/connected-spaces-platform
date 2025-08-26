@@ -490,8 +490,7 @@ class Parser:
             
             fields.append(EnumFieldMetadata(
                 name=field,
-                value=value,
-                doc_comments=doc_comments
+                value=value
             ))
 
         log('Fields:', self.indent)
