@@ -29,6 +29,7 @@
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "MCS/MCSTypes.h"
+#include "MCS/Multiplayer.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -56,31 +57,18 @@ namespace
 
 const csp::common::String SequenceTypeName = "EntityHierarchy";
 
-uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common::LogSystem& LogSystem)
+uint64_t ParseGenerateObjectIDsResult(const std::vector<uint64_t> Ids, csp::common::LogSystem& LogSystem)
 {
     uint64_t EntityId = 0;
 
-    if (Result.is_array())
+    if (Ids.size() == 1)
     {
-        const std::vector<signalr::value>& Ids = Result.as_array();
-
-        // GenerateObjectIds can in theory create multiple Ids at once,
-        // but we just assume one for now
-        for (const signalr::value& IdValue : Ids)
-        {
-            if (IdValue.is_uinteger())
-            {
-                LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("Entity Id={}", IdValue.as_uinteger()).c_str());
-                EntityId = IdValue.as_uinteger();
-                break;
-            }
-
-            assert(false && "Unsupported Entity Id type!");
-        }
+        EntityId = Ids[0];
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, fmt::format("Entity Id={}", EntityId).c_str());
     }
     else
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Recieved an ID result not formatted as an array");
+        assert(false && "Invalid Ids generated");
     }
 
     return EntityId;
@@ -308,13 +296,7 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
-
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
-
-        // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get());
+        return MultiplayerConnectionInst->Multiplayer->SendObjectMessage(Message);
     };
 }
 
@@ -418,46 +400,33 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
 
         mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
 
-        SignalRSerializer Serializer;
-        Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
-
-        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-            = [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-        {
-            try
+        MultiplayerConnectionInst->Multiplayer->SendObjectMessage(Message).then(
+            [this, Callback, NewObject, &LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
             {
-                if (Except)
+                try
                 {
-                    std::rethrow_exception(Except);
+                    if (Except)
+                    {
+                        std::rethrow_exception(Except);
+                    }
                 }
-            }
-            catch (const std::exception& e)
-            {
-                LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
-                Callback(nullptr);
-            }
+                catch (const std::exception& e)
+                {
+                    LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
+                    Callback(nullptr);
+                }
 
-            std::scoped_lock EntitiesLocker(*EntitiesLock);
+                std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-            ResolveEntityHierarchy(NewObject);
+                ResolveEntityHierarchy(NewObject);
 
-            Entities.Append(NewObject);
-            Objects.Append(NewObject);
-            Callback(NewObject);
-        };
-
-        MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
-            LocalSendCallback);
+                Entities.Append(NewObject);
+                Objects.Append(NewObject);
+                Callback(NewObject);
+            });
     };
 
-    // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-    const signalr::value Param1((uint64_t)1ULL);
-    const std::vector Arr { Param1 };
-
-    const signalr::value Params(Arr);
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, LocalIDCallback);
+    MultiplayerConnectionInst->Multiplayer->GenerateObjectIds(1).then(LocalIDCallback);
 }
 
 void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
@@ -711,13 +680,8 @@ namespace
     }
 }
 
-SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage)
+SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const mcs::ObjectMessage& Message)
 {
-    //  Create object message from signalr value
-    mcs::ObjectMessage Message;
-    SignalRDeserializer Deserializer { EntityMessage };
-    Deserializer.ReadValue(Message);
-
     const auto NewEntity = new SpaceEntity(this, *ScriptRunner, LogSystem);
     NewEntity->FromObjectMessage(Message);
 
@@ -726,12 +690,9 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
     return NewEntity;
 }
 
-void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
+void OnlineRealtimeEngine::OnObjectMessage(const mcs::ObjectMessage& Message)
 {
-    // Params is an array of all params sent, so grab the first
-    auto& EntityMessage = Params.as_array()[0];
-
-    SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
+    SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(Message);
 
     if (NewEntity)
     {
@@ -739,22 +700,16 @@ void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
     }
 }
 
-void OnlineRealtimeEngine::OnObjectPatch(const signalr::value& Params)
+void OnlineRealtimeEngine::OnObjectPatch(const mcs::ObjectPatch& Patch)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    // Params is an array of all params sent, so grab the first
-    auto& EntityMessage = Params.as_array()[0];
-
-    PendingIncomingUpdates->emplace_back(new signalr::value(EntityMessage));
+    PendingIncomingUpdates->emplace_back(Patch);
 }
 
-void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
+void OnlineRealtimeEngine::OnRequestToSendObject(uint64_t EntityId)
 {
-    const uint64_t EntityID = Params.as_array()[0].as_uinteger();
-
-    // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
-    if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
+    // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityId, Entity> ?)
+    if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityId))
     {
         mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
 
@@ -770,46 +725,35 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
     }
     else
     {
-        std::vector<signalr::value> const InvokeArguments = { EntityID };
+        std::vector<signalr::value> const InvokeArguments = { EntityId };
 
         MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
             MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_NOT_FOUND), InvokeArguments);
     }
 }
 
-void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
+void OnlineRealtimeEngine::GetEntitiesPaged(
+    int Skip, int Limit, const std::function<void(mcs::PageScopedObjectsResult&&, const std::exception_ptr&)>& Callback)
 {
-    std::vector<signalr::value> ParamsVec;
-    ParamsVec.push_back(signalr::value(true)); // excludeClientOwned
-    ParamsVec.push_back(signalr::value(true)); // includeClientOwnedPersistentObjects
-    ParamsVec.push_back(signalr::value((uint64_t)Skip)); // skip
-    ParamsVec.push_back(signalr::value((uint64_t)Limit)); // limit
-    const auto Params = signalr::value(std::move(ParamsVec));
-
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::PAGE_SCOPED_OBJECTS), Params, Callback);
+    MultiplayerConnectionInst->Multiplayer->PageScopedObjects(true, true, Skip, Limit, Callback);
 }
 
-std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
+std::function<void(mcs::PageScopedObjectsResult&&, const std::exception_ptr&)> OnlineRealtimeEngine::CreateRetrieveAllEntitiesCallback(
     int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
-    const std::function Callback = [this, Skip, FetchCompleteCallback](const signalr::value& Result, std::exception_ptr Except)
+    const std::function Callback = [this, Skip, FetchCompleteCallback](mcs::PageScopedObjectsResult&& Result, const std::exception_ptr& Except)
     {
         HandleException(Except, "Failed to retrieve paged entities.");
 
-        const auto& Results = Result.as_array();
-        const auto& Items = Results[0].as_array();
-        auto ItemTotalCount = Results[1].as_uinteger();
-
-        for (const auto& EntityMessage : Items)
+        for (const auto& EntityMessage : Result.Objects)
         {
             SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
             FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
         }
 
-        int CurrentEntityCount = Skip + static_cast<int>(Items.size());
+        int CurrentEntityCount = Skip + static_cast<int>(Result.Objects.size());
 
-        if (static_cast<uint64_t>(CurrentEntityCount) < ItemTotalCount)
+        if (static_cast<uint64_t>(CurrentEntityCount) < Result.ObjectTotalCount)
         {
             GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount, FetchCompleteCallback));
         }
@@ -1273,39 +1217,32 @@ void OnlineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 
 void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {
-    const std::function LocalCallback = [&LogSystem = this->LogSystem](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-    {
-        try
-        {
-            if (Except)
-            {
-                std::rethrow_exception(Except);
-            }
-        }
-        catch (const std::exception& e)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Failed to send list of entity update due to a signalr exception! Exception: {}", e.what()).c_str());
-        }
-    };
-
+    // Create an array of object patches
     std::vector<mcs::ObjectPatch> Patches;
-    SignalRSerializer Serializer;
 
     for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
         Patches.push_back(PendingEntities[i]->CreateObjectPatch());
     }
 
-    // We are writing multiple patches, so we need an additional nested array.
-    Serializer.StartWriteArray();
-    {
-        Serializer.WriteValue(Patches);
-    }
-    Serializer.EndWriteArray();
-
-    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), Serializer.Get(), LocalCallback);
+    // Send patches
+    MultiplayerConnectionInst->Multiplayer->SendObjectPatches(Patches).then(
+        [&LogSystem = this->LogSystem](const std::exception_ptr& Except)
+        {
+            // Throw and log exception if it exists
+            try
+            {
+                if (Except)
+                {
+                    std::rethrow_exception(Except);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("Failed to send list of entity update due to a signalr exception! Exception: {}", e.what()).c_str());
+            }
+        });
 }
 
 void OnlineRealtimeEngine::ProcessPendingEntityOperations()
@@ -1505,12 +1442,8 @@ void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const Space
     }
 }
 
-void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessage)
+void OnlineRealtimeEngine::ApplyIncomingPatch(const mcs::ObjectPatch& Patch)
 {
-    mcs::ObjectPatch Patch;
-    SignalRDeserializer Deserializer { *EntityMessage };
-    Deserializer.ReadValue(Patch);
-
     if (Patch.GetDestroy())
     {
         // This is an entity deletion.

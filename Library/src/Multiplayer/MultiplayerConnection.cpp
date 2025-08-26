@@ -26,6 +26,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CallHelpers.h"
 #include "Events/EventSystem.h"
+#include "MCS/Multiplayer.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
@@ -358,7 +359,8 @@ std::function<async::task<void>()> MultiplayerConnection::StartListening()
     };
 }
 
-void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId)
+void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+    const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
 
     if (Connected)
@@ -627,62 +629,53 @@ bool MultiplayerConnection::GetAllowSelfMessagingFlag() const { return AllowSelf
 
 void MultiplayerConnection::BindOnObjectMessage()
 {
-    const std::string OnObjectMessage = GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_OBJECT_MESSAGE);
-    GetSignalRConnection()->On(
-        OnObjectMessage,
-        [this](const signalr::value& Params)
+    Multiplayer->BindOnObjectMessage(
+        [this](mcs::ObjectMessage&& Object)
         {
             if (MultiplayerRealtimeEngine != nullptr)
             {
-                MultiplayerRealtimeEngine->OnObjectMessage(Params);
+                MultiplayerRealtimeEngine->OnObjectMessage(Object);
             }
             else
             {
                 LogSystem.LogMsg(
                     common::LogLevel::Verbose, "Received OnObjectMessage without an alive EntitySystem. This is expected if leaving a space.");
             }
-        },
-        LogSystem);
+        });
 }
 
 void MultiplayerConnection::BindOnObjectPatch()
 {
-    const std::string OnObjectPatch = GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_OBJECT_PATCH);
-    GetSignalRConnection()->On(
-        OnObjectPatch,
-        [this](const signalr::value& Params)
+    Multiplayer->BindOnObjectPatch(
+        [this](const mcs::ObjectPatch& Patch)
         {
             if (MultiplayerRealtimeEngine != nullptr)
             {
-                MultiplayerRealtimeEngine->OnObjectPatch(Params);
+                MultiplayerRealtimeEngine->OnObjectPatch(Patch);
             }
             else
             {
                 LogSystem.LogMsg(
                     common::LogLevel::Verbose, "Received OnObjectPatch without an alive EntitySystem. This is expected if leaving a space.");
             }
-        },
-        LogSystem);
+        });
 }
 
 void MultiplayerConnection::BindOnRequestToSendObject()
 {
-    const std::string OnRequestToSendObject = GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_REQUEST_TO_SEND_OBJECT);
-    GetSignalRConnection()->On(
-        OnRequestToSendObject,
-        [this](const signalr::value& Params)
+    Multiplayer->BindOnRequestToSendObject(
+        [this](uint64_t ObjectId)
         {
             if (MultiplayerRealtimeEngine != nullptr)
             {
-                MultiplayerRealtimeEngine->OnRequestToSendObject(Params);
+                MultiplayerRealtimeEngine->OnRequestToSendObject(ObjectId);
             }
             else
             {
                 LogSystem.LogMsg(
                     common::LogLevel::Verbose, "Received OnRequestToSendObject without an alive EntitySystem. This is expected if leaving a space.");
             }
-        },
-        LogSystem);
+        });
 }
 
 void MultiplayerConnection::BindOnRequestToDisconnect()

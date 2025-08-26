@@ -44,11 +44,6 @@ template <typename T> class event_task;
 CSP_END_IGNORE
 }
 
-namespace signalr
-{
-class value;
-} // namespace signalr
-
 class CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
 class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
 class CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
@@ -67,9 +62,21 @@ namespace csp::common::events
 class Event;
 }
 
+namespace signalr
+{
+class value;
+}
+
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
+namespace mcs
+{
+    class Multiplayer;
+    class ObjectPatch;
+    class ObjectMessage;
+    struct PageScopedObjectsResult;
+} // namespace mcs
 
 class ClientElectionManager;
 class MultiplayerConnection;
@@ -345,9 +352,9 @@ public:
     /*
      * Called when MultiplayerConnection recieved signalR events.
      */
-    CSP_NO_EXPORT void OnObjectMessage(const signalr::value& Params);
-    CSP_NO_EXPORT void OnObjectPatch(const signalr::value& Params);
-    CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
+    CSP_NO_EXPORT void OnObjectMessage(const mcs::ObjectMessage& Message);
+    CSP_NO_EXPORT void OnObjectPatch(const mcs::ObjectPatch& Patch);
+    CSP_NO_EXPORT void OnRequestToSendObject(uint64_t EntityId);
 
 protected:
     SpaceEntityList Entities;
@@ -371,14 +378,15 @@ private:
     /// @param Entity SpaceEntity : The entity to be destroyed locally.
     void LocalDestroyEntity(SpaceEntity* Entity);
 
-    using PatchMessageQueue = std::deque<signalr::value*>;
+    using PatchMessageQueue = std::deque<mcs::ObjectPatch>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
 
     EntityCreatedCallback SpaceEntityCreatedCallback;
     CallbackHandler ScriptSystemReadyCallback;
 
-    void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
-    std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(
+    void GetEntitiesPaged(int Skip, int Limit, const std::function<void(mcs::PageScopedObjectsResult&&, const std::exception_ptr&)>& Callback);
+
+    std::function<void(mcs::PageScopedObjectsResult&&, const std::exception_ptr&)> CreateRetrieveAllEntitiesCallback(
         int Skip, csp::common::EntityFetchCompleteCallback FetchCompleteCallback);
 
     // Calls GetEntitiesPaged to start off a paged recursive fetch of all the entities in the space
@@ -391,7 +399,7 @@ private:
 
     void AddPendingEntity(SpaceEntity* EntityToAdd);
     void RemovePendingEntity(SpaceEntity* EntityToRemove);
-    void ApplyIncomingPatch(const signalr::value*);
+    void ApplyIncomingPatch(const mcs::ObjectPatch& Patch);
     void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
     void DetermineScriptOwners();
@@ -411,7 +419,7 @@ private:
 
     // Used in OnObjectMessage as well as in the initial entity fetch. Uses CreateEntity to make entities when instructed to from the server, via
     // signalR message.
-    SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage);
+    SpaceEntity* CreateRemotelyRetrievedEntity(const mcs::ObjectMessage& Message);
 
     // CreateAvatar Continuations
     CSP_START_IGNORE

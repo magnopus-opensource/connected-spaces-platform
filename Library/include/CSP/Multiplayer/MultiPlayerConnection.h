@@ -52,6 +52,13 @@ class IRealtimeEngine;
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
+namespace mcs
+{
+    class Multiplayer;
+    class ObjectPatch;
+    class ObjectMessage;
+} // namespace mcs
+
 class OnlineRealtimeEngine;
 class ClientElectionManager;
 class ISignalRConnection;
@@ -138,7 +145,8 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -205,6 +213,8 @@ public:
     /// @return Non-owning pointer to currently set realtime engine. This should be non-null when in a space, and null before entering, or after
     /// exiting a space.
     csp::multiplayer::OnlineRealtimeEngine* GetOnlineRealtimeEngine() const;
+
+    std::unique_ptr<mcs::Multiplayer> Multiplayer;
 
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
