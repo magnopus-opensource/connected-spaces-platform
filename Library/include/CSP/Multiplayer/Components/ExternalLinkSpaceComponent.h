@@ -48,7 +48,7 @@ enum class ExternalLinkPropertyKeys
     IsEnabled,
     IsVisible,
     IsARVisible,
-    IsVirtualVisible,
+    IsVRVisible,
     Num
 };
 
@@ -117,10 +117,10 @@ public:
     virtual bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
     virtual void SetIsARVisible(bool InValue) override;
-    /// @copydoc IVisibleComponent::GetIsVirtualVisible()
-    virtual bool GetIsVirtualVisible() const override;
-    /// @copydoc IVisibleComponent::SetIsVirtualVisible()
-    virtual void SetIsVirtualVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsVRVisible()
+    virtual bool GetIsVRVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVRVisible()
+    virtual void SetIsVRVisible(bool InValue) override;
     /// @}
 };
 

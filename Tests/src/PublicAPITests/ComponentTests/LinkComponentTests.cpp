@@ -121,10 +121,10 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 
         EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
 
-        bool IsVirtualVisible = false;
-        ExternalLinkComponent->SetIsVirtualVisible(IsVirtualVisible);
+        bool IsVRVisible = false;
+        ExternalLinkComponent->SetIsVRVisible(IsVRVisible);
 
-        EXPECT_EQ(ExternalLinkComponent->GetIsVirtualVisible(), IsVirtualVisible);
+        EXPECT_EQ(ExternalLinkComponent->GetIsVRVisible(), IsVRVisible);
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
@@ -184,7 +184,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
     EXPECT_EQ(LinkComponent->GetIsEnabled(), true);
     EXPECT_EQ(LinkComponent->GetIsVisible(), true);
     EXPECT_EQ(LinkComponent->GetIsARVisible(), true);
-    EXPECT_EQ(LinkComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(LinkComponent->GetIsVRVisible(), true);
 
     // Setup script
     const std::string ExternalLinkScriptText = R"xx(
@@ -200,7 +200,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
         link.isEnabled = false;
 		link.isVisible = false;
         link.isARVisible = false;
-        link.isVirtualVisible = false;
+        link.isVRVisible = false;
 
     )xx";
 
@@ -221,7 +221,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkScriptInterfaceTest)
     EXPECT_EQ(LinkComponent->GetIsEnabled(), false);
     EXPECT_EQ(LinkComponent->GetIsVisible(), false);
     EXPECT_EQ(LinkComponent->GetIsARVisible(), false);
-    EXPECT_EQ(LinkComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(LinkComponent->GetIsVRVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

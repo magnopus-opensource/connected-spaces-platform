@@ -43,6 +43,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, float, uint32_t, Width);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, float, uint32_t, Height);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsVirtualVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsVRVisible);
 
 } // namespace csp::multiplayer

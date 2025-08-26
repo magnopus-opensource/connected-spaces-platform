@@ -286,7 +286,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetColor(), csp::common::Vector3(255, 255, 255));
     EXPECT_EQ(LightComponent->GetIsVisible(), true);
     EXPECT_EQ(LightComponent->GetIsARVisible(), true);
-    EXPECT_EQ(LightComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(LightComponent->GetIsVRVisible(), true);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::NoCookie);
 
@@ -305,7 +305,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
         light.color = [0, 0, 0];
 		light.isVisible = false;
         light.isARVisible = false;
-        light.isVirtualVisible = false;
+        light.isVRVisible = false;
         light.cookieAssetId = "TestLightCookieAssetId";
         light.lightCookieType = 0;
 
@@ -329,7 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
     EXPECT_EQ(LightComponent->GetColor(), csp::common::Vector3(0, 0, 0));
     EXPECT_EQ(LightComponent->GetIsVisible(), false);
     EXPECT_EQ(LightComponent->GetIsARVisible(), false);
-    EXPECT_EQ(LightComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(LightComponent->GetIsVRVisible(), false);
     EXPECT_EQ(LightComponent->GetLightCookieAssetId(), "TestLightCookieAssetId");
     EXPECT_EQ(LightComponent->GetLightCookieType(), LightCookieType::ImageCookie);
 

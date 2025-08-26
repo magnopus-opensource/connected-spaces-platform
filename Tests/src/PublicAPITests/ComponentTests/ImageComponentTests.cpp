@@ -132,7 +132,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     EXPECT_EQ(ImageSpaceComponentInstance->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(ImageSpaceComponentInstance->GetDisplayMode(), DisplayMode::DoubleSided);
     EXPECT_EQ(ImageSpaceComponentInstance->GetIsARVisible(), true);
-    EXPECT_EQ(ImageSpaceComponentInstance->GetIsVirtualVisible(), true);
+    EXPECT_EQ(ImageSpaceComponentInstance->GetIsVRVisible(), true);
     EXPECT_EQ(ImageSpaceComponentInstance->GetIsEmissive(), false);
 
     ImageSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
@@ -140,7 +140,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     ImageSpaceComponentInstance->SetBillboardMode(BillboardMode::YawLockedBillboard);
     ImageSpaceComponentInstance->SetDisplayMode(DisplayMode::SingleSided);
     ImageSpaceComponentInstance->SetIsARVisible(false);
-    ImageSpaceComponentInstance->SetIsVirtualVisible(false);
+    ImageSpaceComponentInstance->SetIsVRVisible(false);
     ImageSpaceComponentInstance->SetIsEmissive(true);
 
     auto ImageSpaceComponentKey = ImageSpaceComponentInstance->GetId();
@@ -151,7 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     EXPECT_EQ(StoredImageSpaceComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
     EXPECT_EQ(StoredImageSpaceComponent->GetDisplayMode(), DisplayMode::SingleSided);
     EXPECT_EQ(StoredImageSpaceComponent->GetIsARVisible(), false);
-    EXPECT_EQ(StoredImageSpaceComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(StoredImageSpaceComponent->GetIsVRVisible(), false);
     EXPECT_EQ(StoredImageSpaceComponent->GetIsEmissive(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -211,7 +211,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     EXPECT_EQ(ImageComponent->GetIsEmissive(), false);
     EXPECT_EQ(ImageComponent->GetIsVisible(), true);
     EXPECT_EQ(ImageComponent->GetIsARVisible(), true);
-    EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), true);
+    EXPECT_EQ(ImageComponent->GetIsVRVisible(), true);
 
     // Setup script
     const std::string ImageScriptText = R"xx(
@@ -226,7 +226,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 		image.isEmissive = true;
         image.isVisible = false;
         image.isARVisible = false;
-        image.isVirtualVisible = false;
+        image.isVRVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
@@ -247,7 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     EXPECT_EQ(ImageComponent->GetIsEmissive(), true);
     EXPECT_EQ(ImageComponent->GetIsVisible(), false);
     EXPECT_EQ(ImageComponent->GetIsARVisible(), false);
-    EXPECT_EQ(ImageComponent->GetIsVirtualVisible(), false);
+    EXPECT_EQ(ImageComponent->GetIsVRVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

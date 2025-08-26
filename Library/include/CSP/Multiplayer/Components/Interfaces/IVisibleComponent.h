@@ -45,11 +45,11 @@ public:
 
     /// @brief Checks if the component is visible when in VR mode.
     /// @return True if the component is visible when in VR mode, false otherwise.
-    virtual bool GetIsVirtualVisible() const = 0;
+    virtual bool GetIsVRVisible() const = 0;
 
     /// @brief Sets if the component is visible in VR mode.
     /// @param InValue True if the component is visible in VR mode, false otherwise.
-    virtual void SetIsVirtualVisible(bool InValue) = 0;
+    virtual void SetIsVRVisible(bool InValue) = 0;
 
 protected:
     virtual ~IVisibleComponent() = default;
