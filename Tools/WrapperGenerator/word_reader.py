@@ -116,10 +116,10 @@ class WordReader:
         end_index = self.index + 1
 
         while True:
-            next_char = self.peek_char()
-
-            if next_char == "\n":
-                self.current_line += 1
+            if start_index == len(self.text):
+                return None
+            
+            next_char = self.text[start_index]
 
             if next_char in delimiters and next_char not in self.WHITESPACE_CHARS:
                 self.index = end_index
@@ -143,8 +143,6 @@ class WordReader:
             start_index = end_index
             end_index = start_index + 1
 
-            if start_index == len(self.text):
-                return None
 
     def peek_char(self, offset: int = 0) -> str:
         """
