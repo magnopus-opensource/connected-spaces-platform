@@ -249,3 +249,18 @@ class TestParserParseType(unittest.TestCase):
         expected.template_arguments = []
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_optional_type(self):
+        """ Test the special parsing of optional types (using csp::common::Optional). """
+        wordreader = WordReader("csp::common::Optional<int>")
+        word = wordreader.next_word()
+        result, word = self.parser._Parser__parse_type(wordreader, word)
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_const = False
+        expected.is_primitive = True
+        expected.is_optional = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
