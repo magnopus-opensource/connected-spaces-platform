@@ -139,6 +139,25 @@ class TestParserParseType(unittest.TestCase):
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
 
+    def test_parse_pointer_to_pointer_type(self):
+        """ Test parsing a pointer to pointer type. """
+        result = self.__parse_type("int**")
+
+        expected = self.__parse_type("int")
+        expected.is_pointer = True
+        expected.is_pointer_pointer = True
+        expected.is_pointer_or_reference = True
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_pointer_to_pointer_to_pointer_type_fails(self):
+        """
+        Test parsing a pointer to pointer to pointer type.
+        This test case fails because the parser fails to parse the third * and leaves it as
+        a leftover word.
+        """
+        self.assertRaises(AssertionError, self.__parse_type, "int***")
+
     def test_parse_reference_type(self):
         """ Test parsing a reference type. """
         result = self.__parse_type("int&")
