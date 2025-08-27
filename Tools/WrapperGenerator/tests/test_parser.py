@@ -236,3 +236,16 @@ class TestParserParseType(unittest.TestCase):
         ]
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_forward_declared_type(self):
+        """ Test parsing a forward-declared type. """
+        wordreader = WordReader("class Foo")
+        word = wordreader.next_word()
+        result, word = self.parser._Parser__parse_type(wordreader, word)
+
+        expected = MetadataTypes.TypeMetadata("", "Foo")
+        expected.is_inline_forward = True
+        expected.template_name = "Foo"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
