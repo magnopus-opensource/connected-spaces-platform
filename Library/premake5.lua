@@ -16,7 +16,6 @@ include "ThirdParty/quickjs/premake5.lua"
 include "ThirdParty/asyncplusplus/premake5.lua"
 include "modules/premake5.lua"
 
-
 if not Project then
     Project = {}
     
@@ -85,6 +84,7 @@ if not Project then
 			"%{wks.location}/ThirdParty/asyncplusplus/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/ThirdParty/fmt/include",
+			"%{wks.location}/ThirdParty/miniz",
             "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"
         }
@@ -376,6 +376,23 @@ if not Project then
             targetname( "ConnectedSpacesPlatform_WASM.js" )
             kind "None"
         filter {}
+		
+	-- The miniz implementation file is a C-style include and must not use
+    -- the project's C++ Precompiled Header. It must also be compiled as a C file.
+    filter "files:**MinizImplementation.cpp"
+        pchheader ""
+        buildoptions { "/Y-", "/TC" }
+        forceincludes {}
+    filter {}
+
+    -- The CompressionUtils file includes the C miniz.h header, which conflicts
+    -- with the project's C++ Precompiled Header. This filter disables PCH
+    -- for this specific file, forcing it to be compiled as a standalone unit.
+    filter "files:**CompressionUtils.cpp"
+        pchheader ""
+        buildoptions { "/Y-"}
+        forceincludes {}
+    filter {}
     end
         
     function Project.AddProject()
