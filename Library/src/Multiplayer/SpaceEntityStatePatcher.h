@@ -59,7 +59,7 @@ The way this works is,
  - Else, directly call SetPositionDirect(true) which sets the position and calls the callback. This is Synchronous, as opposed to the above which
    happens in response to SignalR events)
 
-The state of the entity is more-or-less exactly representative of a "Patch".
+The state of the patcher is more-or-less exactly representative of a "Patch".
 */
 class SpaceEntityStatePatcher
 {

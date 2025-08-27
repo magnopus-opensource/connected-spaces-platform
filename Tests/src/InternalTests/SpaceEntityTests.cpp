@@ -153,8 +153,6 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
 		var entities = TheEntitySystem.getEntities();
 		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
 
-        CSP.Log(`entityIndex: ${entityIndex}`);
-
 		globalThis.onTick = () => {
 			var entity = entities[entityIndex];
 			var parent = TheEntitySystem.getEntityByName("Object 1");
@@ -214,8 +212,6 @@ TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
                     }
                 }
             });
-
-        std::this_thread::sleep_for(200ms);
 
         csp::CSPFoundation::Tick();
 

@@ -1541,7 +1541,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityLockPersistanceTest)
 }
 
 /* Check that the SignalR connection is not used when we login without creating a multiplayer connection
- * Ideally, this shouldn't be as simple as checking if MultiplayerConnection is null, managed by whether the
+ * Ideally, this should be as simple as checking if MultiplayerConnection is null, managed by whether the
  * user chooses to instantiate and inject a multiplayer connection or not, but we're not there yet
  */
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MultiplayerTestsMock, TestNoSignalRCommunicationWhenLoggedInWithoutConnection)

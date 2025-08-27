@@ -54,7 +54,7 @@ namespace
  * This does a fair amount more than binding and starting the connection, which it perhaps shouldn't.
  * Does a lot of state management resetting entities and such, as well as registering callbacks.
  *
- * CreateMultiplayerConnection supports offline flows, if false this function is a no-op, save for a log.
+ * CreateMultiplayerConnection supports offline flows, if false this function does merely calls the ConnectionCallback.
  *
  * This dependency needs to be broken prior to formal modularization, I suspect by injecting the MultiplayerConnection much like we inject
  * the RealtimeEngine. */
