@@ -508,10 +508,6 @@ private:
     /// @param InParent SpaceEntity : the parent entity to set
     void SetParent(SpaceEntity* InParent);
 
-    /// @brief Setter for the time of the last patch
-    /// @param NewTime std::chrono::milliseconds : the time to set
-    void SetTimeOfLastPatch(std::chrono::milliseconds NewTime);
-
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
     /// @brief Internal version of the selected state of the entity setter
     /// @param SelectedState bool : the selected state to set

@@ -900,16 +900,6 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 
 std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return StatePatcher != nullptr ? StatePatcher->GetTimeOfLastPatch() : 0ms; }
 
-void SpaceEntity::SetTimeOfLastPatch(std::chrono::milliseconds NewTime)
-{
-    if (StatePatcher == nullptr)
-    {
-        throw std::runtime_error("Do not call SetTimeOfLastPatch in an offline context");
-    }
-
-    StatePatcher->SetTimeOfLastPatch(NewTime);
-}
-
 // Why is this not a dirtyable property? Must be non-replicable state ... would be nice to differentiate more strongly in the types/patterns we use.
 void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
 

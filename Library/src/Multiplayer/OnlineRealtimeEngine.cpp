@@ -1194,7 +1194,7 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
                     PendingEntity->GetStatePatcher()->CallEntityPatchSentCallback(true);
                 }
 
-                PendingEntity->SetTimeOfLastPatch(CurrentTime);
+                PendingEntity->GetStatePatcher()->SetTimeOfLastPatch(CurrentTime);
                 it = PendingOutgoingUpdateUniqueSet->erase(it);
             }
             else
