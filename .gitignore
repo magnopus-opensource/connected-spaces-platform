@@ -55,6 +55,9 @@ OlympusBuildTool.spec
 /Library/codegen/openapi30/*
 /Library/codegen/tmp
 
+# Ignore code coverage files
+.coverage
+
 # Ignore sonar scanner files
 .scannerwork/*
 */Makefile
