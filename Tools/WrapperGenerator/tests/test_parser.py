@@ -253,3 +253,17 @@ class TestParserParseType(unittest.TestCase):
         expected.template_arguments = []
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_type(self):
+        """ Test parsing a function type. """
+        result = self.__parse_type("std::function<void()>")
+
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, None, False, False, [])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
