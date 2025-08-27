@@ -286,3 +286,39 @@ class TestParserParseType(unittest.TestCase):
         expected.template_name = "function"
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_type_with_args(self):
+        """ Test parsing a function type with arguments. """
+        result = self.__parse_type("std::function<void(int, const std::string&)>")
+
+        int_type = self.__parse_type("int")
+        string_type = self.__parse_type("const std::string&")
+
+        arg0 = MetadataTypes.ParameterMetadata("arg1", int_type, False, False, False)
+        arg1 = MetadataTypes.ParameterMetadata("arg2", string_type, False, False, True)
+
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, None, False, True, parameters=[
+            arg0, arg1])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_with_return_type(self):
+        """ Test parsing a function type with a return type. """
+        result = self.__parse_type("std::function<int()>")
+
+        int_type = self.__parse_type("int")
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, int_type, True, False, [])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
