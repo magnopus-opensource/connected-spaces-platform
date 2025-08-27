@@ -85,11 +85,17 @@ class TestParserParseType(unittest.TestCase):
         self.parser = Parser.Parser(log_file=sys.stdout)
         self.maxDiff = None
 
-    def test_parse_primitive_type(self):
-        """ Test parsing a simple type. """
-        wordreader = WordReader("int")
+    def __parse_type(self, type_str: str) -> MetadataTypes.TypeMetadata:
+        wordreader = WordReader(type_str)
         word = wordreader.next_word()
         result, word = self.parser._Parser__parse_type(wordreader, word)
+
+        self.assertIsNone(word, f"Expected to consume entire type string, but got leftover word '{word}'")
+        return result
+
+    def test_parse_primitive_type(self):
+        """ Test parsing a simple type. """
+        result = self.__parse_type("int")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_primitive = True
@@ -100,9 +106,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_const_simple_type(self):
         """ Test parsing a simple type. """
-        wordreader = WordReader("const int")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("const int")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_const = True
@@ -114,9 +118,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_namespaced_type(self):
         """ Test parsing a namespaced type. """
-        wordreader = WordReader("eggs::and::bacon")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("eggs::and::bacon")
 
         expected = MetadataTypes.TypeMetadata("eggs::and", "bacon")
         expected.template_name = "bacon"
@@ -126,9 +128,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_pointer_type(self):
         """ Test parsing a pointer type. """
-        wordreader = WordReader("int*")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("int*")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_pointer = True
@@ -141,9 +141,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_reference_type(self):
         """ Test parsing a reference type. """
-        wordreader = WordReader("int&")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("int&")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_reference = True
@@ -156,9 +154,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_const_pointer_type(self):
         """ Test parsing a const pointer type. """
-        wordreader = WordReader("const int*")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("const int*")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_const = True
@@ -172,16 +168,16 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_template_type(self):
         """ Test parsing a template type. """
-        wordreader = WordReader("std::vector<int>")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("std::vector<int>")
+
+        int_type = self.__parse_type("int")
 
         expected = MetadataTypes.TypeMetadata("std", "vector")
         expected.is_template = True
         expected.template_name = "vector"
         expected.template_arguments = [
             MetadataTypes.TemplateArgumentMetadata(
-                type=MetadataTypes.TypeMetadata("", "int", template_name="int", template_arguments=[], is_primitive=True),
+                type=int_type,
                 is_last=True
             )
         ]
@@ -190,20 +186,21 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_multi_template_type(self):
         """ Test parsing a template type with two arguments to the template. """
-        wordreader = WordReader("std::map<int, std::string>")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("std::map<int, std::string>")
+
+        int_type = self.__parse_type("int")
+        string_type = self.__parse_type("std::string")
 
         expected = MetadataTypes.TypeMetadata("std", "map")
         expected.is_template = True
         expected.template_name = "map"
         expected.template_arguments = [
             MetadataTypes.TemplateArgumentMetadata(
-                type=MetadataTypes.TypeMetadata("", "int", template_name="int", template_arguments=[], is_primitive=True),
+                type=int_type,
                 is_last=False
             ),
             MetadataTypes.TemplateArgumentMetadata(
-                type=MetadataTypes.TypeMetadata("std", "string", template_name="string", template_arguments=[]),
+                type=string_type,
                 is_last=True
             )
         ]
@@ -212,25 +209,21 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_nested_template_type(self):
         """ Test parsing a template type with a nested template argument. """
-        wordreader = WordReader("std::map<int, std::vector<std::string>>")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("std::map<int, std::vector<std::string>>")
+
+        int_type = self.__parse_type("int")
+        vector_type = self.__parse_type("std::vector<std::string>")
 
         expected = MetadataTypes.TypeMetadata("std", "map")
         expected.is_template = True
         expected.template_name = "map"
         expected.template_arguments = [
             MetadataTypes.TemplateArgumentMetadata(
-                type=MetadataTypes.TypeMetadata("", "int", template_name="int", template_arguments=[], is_primitive=True),
+                type=int_type,
                 is_last=False
             ),
             MetadataTypes.TemplateArgumentMetadata(
-                type=MetadataTypes.TypeMetadata("std", "vector", is_template=True, template_name="vector", template_arguments=[
-                    MetadataTypes.TemplateArgumentMetadata(
-                        type=MetadataTypes.TypeMetadata("std", "string", template_name="string", template_arguments=[]),
-                        is_last=True
-                    )
-                ]),
+                type=vector_type,
                 is_last=True
             )
         ]
@@ -239,9 +232,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_forward_declared_type(self):
         """ Test parsing a forward-declared type. """
-        wordreader = WordReader("class Foo")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("class Foo")
 
         expected = MetadataTypes.TypeMetadata("", "Foo")
         expected.is_inline_forward = True
@@ -252,9 +243,7 @@ class TestParserParseType(unittest.TestCase):
 
     def test_parse_optional_type(self):
         """ Test the special parsing of optional types (using csp::common::Optional). """
-        wordreader = WordReader("csp::common::Optional<int>")
-        word = wordreader.next_word()
-        result, word = self.parser._Parser__parse_type(wordreader, word)
+        result = self.__parse_type("csp::common::Optional<int>")
 
         expected = MetadataTypes.TypeMetadata("", "int")
         expected.is_const = False
