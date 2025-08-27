@@ -17,6 +17,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
 #include "CallHelpers.h"
 #include "LODHelpers.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
@@ -480,8 +481,8 @@ async::task<NullResult> AssetSystem::DeleteAssetCollection(const AssetCollection
 
     if (PrototypeId.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
-        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
+        OnCompleteEvent.set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
+            "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.", MakeInvalid<NullResult>())));
 
         return OnCompleteTask;
     }
@@ -1108,8 +1109,8 @@ async::task<AssetsResult> AssetSystem::GetAssetsByCriteria(const csp::common::Ar
 
     if (AssetCollectionIds.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("You have to provide at least one AssetCollectionId");
-        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
+        OnCompleteEvent.set_exception(std::make_exception_ptr(
+            csp::common::continuations::ResultException("You have to provide at least one AssetCollectionId", MakeInvalid<AssetsResult>())));
 
         return OnCompleteTask;
     }
@@ -1266,8 +1267,8 @@ async::task<UriResult> AssetSystem::UploadAssetDataEx(const AssetCollection& Ass
 
     if (Asset.Name.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("Asset name cannot be empty");
-        OnCompleteEvent.set_exception(std::make_exception_ptr(std::exception()));
+        OnCompleteEvent.set_exception(
+            std::make_exception_ptr(csp::common::continuations::ResultException("Asset name cannot be empty", MakeInvalid<UriResult>())));
 
         return OnCompleteTask;
     }
