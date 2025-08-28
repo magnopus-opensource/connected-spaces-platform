@@ -64,8 +64,6 @@ public:
 
     /// @brief OfflineRealtimeEngine constructor
     /// Creates an empty realtime engine.
-    /// @param SceneDescription CSPSceneDescription : The scene description containing entities within the scene.
-    /// These entities will be populated in the RealtimeEngine.
     /// @param LogSystem csp::common::LogSystem : Logger such that this system can print status and debug output
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : Object capable of running a script.
     OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
