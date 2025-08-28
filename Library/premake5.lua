@@ -51,7 +51,8 @@ if not Project then
             "%{wks.location}/Library/**.cpp",
 			"%{wks.location}/Library/docs/source/**.md",
             "%{wks.location}/modules/csp-services/generated/**.h",
-            "%{wks.location}/modules/csp-services/generated/**.cpp"
+            "%{wks.location}/modules/csp-services/generated/**.cpp",
+			"%{wks.location}/Library/src/Common/Compression/MinizImplementation.c"
         }
         
         -- Exclude signalr clients as appropriate for specified configs
@@ -377,22 +378,30 @@ if not Project then
             kind "None"
         filter {}
 		
-	-- The miniz implementation file is a C-style include and must not use
-    -- the project's C++ Precompiled Header. It must also be compiled as a C file.
-    filter "files:**MinizImplementation.cpp"
-        pchheader ""
-        buildoptions { "/Y-", "/TC" }
-        forceincludes {}
-    filter {}
+		-- === Configuration for the C Implementation File ===
+		filter "files:**MinizImplementation.c"
+			-- This is the most important line. It tells Premake to treat this
+			-- as a C file, which will cause it to use the C compiler and ignore
+			-- the project-wide C++ settings. This solves the C2086 redefinition error.
+			language "C"
 
-    -- The CompressionUtils file includes the C miniz.h header, which conflicts
-    -- with the project's C++ Precompiled Header. This filter disables PCH
-    -- for this specific file, forcing it to be compiled as a standalone unit.
-    filter "files:**CompressionUtils.cpp"
-        pchheader ""
-        buildoptions { "/Y-"}
-        forceincludes {}
-    filter {}
+			-- We still need to disable PCH for this file.
+			pchheader ""
+			filter "system:windows"
+				buildoptions { "/Y-" }
+				forceincludes {}
+			filter {}
+		filter {}
+
+		-- === Configuration for the C++ Wrapper File ===
+		-- We keep this filter to ensure PCH is disabled, which prevents header guard collisions.
+		filter "files:**CompressionUtils.cpp"
+			pchheader ""
+			filter "system:windows"
+				buildoptions { "/Y-" }
+				forceincludes {}
+			filter {}
+		filter {}
     end
         
     function Project.AddProject()
