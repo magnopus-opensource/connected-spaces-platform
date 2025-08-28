@@ -34,8 +34,8 @@ public:
     CSPSceneDescription() { }
 
     /// @brief Generates an array of entities from the SceneDescription Json
-    /// This function exists because the constuction of SpaceEntites relies on a RealtimeEngine, and the OfflineRealtimeEngine requires a
-    /// CSPSceneDescription for constuction.
+    /// This function exists because the construction of SpaceEntites relies on a RealtimeEngine, and the OfflineRealtimeEngine requires a
+    /// CSPSceneDescription for construction.
     /// @param RealtimeEngine csp::common::IRealtimeEngine& : The RealtimeEngine for this session.
     /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
     /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.

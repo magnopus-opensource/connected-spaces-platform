@@ -508,7 +508,7 @@ private:
     /// @param InParent SpaceEntity : the parent entity to set
     void SetParent(SpaceEntity* InParent);
 
-    // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
+    // Do NOT call directly, always call either Select(), Deselect(), or SpaceEntitySystem::InternalSetSelectionStateOfEntity()
     /// @brief Internal version of the selected state of the entity setter
     /// @param SelectedState bool : the selected state to set
     /// @param ClientID uint64_t : the client ID of the entity for which to set the selected state
