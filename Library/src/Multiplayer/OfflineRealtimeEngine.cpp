@@ -209,6 +209,12 @@ void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity,
 
 bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
 {
+    if (Entity == nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity to selected entities. Aborting operation.");
+        return false;
+    }
+
     if (!SelectedEntities.Contains(Entity))
     {
         SelectedEntities.Append(Entity);
@@ -219,6 +225,12 @@ bool OfflineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceE
 
 bool OfflineRealtimeEngine::RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
 {
+    if (Entity == nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to remove null entity from selected entities. Aborting operation.");
+        return false;
+    }
+
     if (SelectedEntities.Contains(Entity))
     {
         SelectedEntities.RemoveItem(Entity);
@@ -291,6 +303,12 @@ uint64_t OfflineRealtimeEngine::LocalClientId() { return csp::common::LocalClien
 
 void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
 {
+    if (EntityToAdd == nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Attempting to add null entity. Aborting operation.");
+        return;
+    }
+
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
     if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
@@ -310,7 +328,7 @@ void OfflineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
     }
     else
     {
-        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add a pending entity that we already have!");
+        LogSystem->LogMsg(common::LogLevel::Error, "Attempted to add an entity already known to the RealtimeEngine. Aborting operation.");
     }
 }
 }
