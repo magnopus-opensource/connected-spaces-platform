@@ -68,7 +68,10 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common:
 // Checks if an entity exists within the root hierarchy array
 bool EntityIsInRootHierarchy(csp::common::IRealtimeEngine& RealtimeEngine, SpaceEntity* Entity);
 
-// Adds or removed entity from the root hierarchy list and calls SpaceEntity::ResolveParentChildRelationship
+// "Resolves" the entity heirarchy, which is really a bit of an unhelpful catch all term to mean
+// "Walk the entity tree, and make sure all our internal buffers are set up to have the right pointers in them".
+// Sets the entities in the root entity heirarchy list, as well as calling SpaceEntity::ResolveParentChildRelationship,
+// which also "resolves" itself, by setting the `Parent` pointer to the correct entity, and making sure it's list of children is correctly populated.
 void ResolveEntityHierarchy(
     csp::common::IRealtimeEngine& RealtimeEngine, csp::common::List<SpaceEntity*>& RootHierarchyEntities, SpaceEntity* Entity);
 
