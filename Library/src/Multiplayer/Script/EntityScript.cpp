@@ -89,22 +89,22 @@ bool EntityScript::Invoke()
 
 void EntityScript::RunScript(const csp::common::String& ScriptSource)
 {
-    if (RealtimeEnginePtr->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Offline)
+    if (RealtimeEnginePtr == nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Fatal, "Null RealtimeEngine when trying to run script. Aborting Operation.");
+        return;
+    }
+
+    // If offline, just run the script
+    if (RealtimeEnginePtr->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
     {
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
         return;
     }
 
+    // Otherwise we're online
     auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEnginePtr);
-
-    bool RunScriptLocally = true;
-
-    if (RealtimeEnginePtr)
-    {
-        RunScriptLocally = OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally();
-    }
-
-    if (RunScriptLocally)
+    if (OnlineRealtimeEngine->CheckIfWeShouldRunScriptsLocally())
     {
         ScriptRunner->RunScript(Entity->GetId(), ScriptSource);
     }
