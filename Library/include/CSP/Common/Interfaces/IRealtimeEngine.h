@@ -334,8 +334,9 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
-    /// @brief Adds the given entity to the hierarchy by updating entity children and root hierarchy.
-    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to add to the hierarchy.
+    /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
+    /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
     CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
