@@ -502,19 +502,8 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 
 bool SpaceEntity::UpdateComponent(ComponentBase* Component)
 {
-    // See ... you'd think this would be the thing, but component property updates are notification only as far as SpaceEntity is concerned,
+    // You'd think there would be an IsModifiable check here, but component property updates are notification only as far as SpaceEntity is concerned,
     // as the data is set directly on components. This is done in ComponentBase.h instead. Seems confused and inconsistent to me.
-    /*
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. Components can not be modified on a locked Entity.");
-        }
-
-        return false;
-    }
-    */
 
     return StatePatcher != nullptr
         ? StatePatcher->SetDirtyComponent(Component->GetId(), SpaceEntityStatePatcher::DirtyComponent { Component, ComponentUpdateType::Update })

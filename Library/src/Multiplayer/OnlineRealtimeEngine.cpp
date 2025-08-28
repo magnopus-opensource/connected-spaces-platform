@@ -301,8 +301,6 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
-        // A minor smell. The reason this we go through the patcher to make a message is because there may be dirty properties, but we know there
-        // isn't because we've only just created the avatar.
         const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
