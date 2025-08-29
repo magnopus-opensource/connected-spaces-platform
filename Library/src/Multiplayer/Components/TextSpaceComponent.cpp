@@ -35,6 +35,7 @@ TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceE
     Properties[static_cast<uint32_t>(TextPropertyKeys::BillboardMode)] = static_cast<int64_t>(BillboardMode::Off);
     Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(TextPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
@@ -112,6 +113,10 @@ void TextSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint
 bool TextSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible)); }
 
 void TextSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible), Value); }
+
+bool TextSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsVRVisible)); }
+
+void TextSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsVRVisible), Value); }
 
 BillboardMode TextSpaceComponent::GetBillboardMode() const
 {

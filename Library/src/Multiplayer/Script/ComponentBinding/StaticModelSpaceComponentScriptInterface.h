@@ -39,6 +39,11 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVRVisible);
+
+    DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInAR);
+    DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInVR);
 };
 
 } // namespace csp::multiplayer

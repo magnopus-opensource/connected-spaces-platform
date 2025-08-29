@@ -32,6 +32,7 @@ ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* L
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled)] = true;
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new ExternalLinkSpaceComponentScriptInterface(this));
 }
@@ -128,5 +129,9 @@ void ExternalLinkSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static
 bool ExternalLinkSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)); }
 
 void ExternalLinkSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible), InValue); }
+
+bool ExternalLinkSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVRVisible)); }
+
+void ExternalLinkSpaceComponent::SetIsVRVisible(bool InValue) { SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVRVisible), InValue); }
 
 } // namespace csp::multiplayer

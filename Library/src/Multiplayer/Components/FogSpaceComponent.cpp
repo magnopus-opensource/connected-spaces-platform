@@ -37,6 +37,7 @@ FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEnt
     Properties[static_cast<uint32_t>(FogPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef)] = "";
+    Properties[static_cast<uint32_t>(FogPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new FogSpaceComponentScriptInterface(this));
 }
@@ -113,6 +114,10 @@ void FogSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_cast<uint3
 bool FogSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible)); }
 
 void FogSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible), Value); }
+
+bool FogSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVRVisible)); }
+
+void FogSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVRVisible), Value); }
 
 const csp::common::String& FogSpaceComponent::GetThirdPartyComponentRef() const
 {

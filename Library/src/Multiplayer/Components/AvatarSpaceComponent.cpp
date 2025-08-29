@@ -40,6 +40,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)] = static_cast<int64_t>(LocomotionModel::Grounded);
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVRVisible)] = true;
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
@@ -198,5 +199,9 @@ void AvatarSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<
 bool AvatarSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)); }
 
 void AvatarSpaceComponent::SetIsARVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible), InValue); }
+
+bool AvatarSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVRVisible)); }
+
+void AvatarSpaceComponent::SetIsVRVisible(bool InValue) { SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVRVisible), InValue); }
 
 } // namespace csp::multiplayer
