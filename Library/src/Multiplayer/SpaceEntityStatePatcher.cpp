@@ -110,9 +110,8 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
                 break;
             case ComponentUpdateType::Update:
             {
-                // This is weird ... we wern't doing any actual data update here before ... just notification stuff. I guess because all the actual
-                // data was set by this point as we change the properties in the components themselves. Odd pattern break.
-                SpaceEntity.UpdateComponentDirect(ComponentKey, DirtyComponents[ComponentKey].Component, false);
+                // You may expect a `SpaceEntity.UpdateComponentDirect`, but component property updates
+                // are still out-of-pattern and set immediately rather than looping back. Should change.
 
                 ComponentUpdates[Index].ComponentId = DirtyComponents[ComponentKey].Component->GetId();
                 ComponentUpdates[Index].UpdateType = ComponentUpdateType::Update;
