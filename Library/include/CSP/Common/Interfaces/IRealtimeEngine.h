@@ -160,14 +160,6 @@ public:
         (void)Callback;
     }
 
-    virtual void AddEntity(csp::multiplayer::SpaceEntity* EntityToAdd)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
-        (void)EntityToAdd;
-    }
-
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.

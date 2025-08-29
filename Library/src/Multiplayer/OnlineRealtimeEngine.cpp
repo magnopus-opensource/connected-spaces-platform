@@ -629,7 +629,8 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
 
     const auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
 
-    AddEntity(NewEntity);
+    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    PendingAdds->emplace_back(NewEntity);
 
     return NewEntity;
 }
@@ -1081,12 +1082,6 @@ SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t ObjectIndex)
 }
 
 const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetAllEntities() const { return &Entities; }
-
-void OnlineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
-{
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    PendingAdds->emplace_back(EntityToAdd);
-}
 
 void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {

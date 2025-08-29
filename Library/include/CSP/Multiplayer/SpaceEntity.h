@@ -127,10 +127,6 @@ public:
     /// @return The uint64_t ID of the SpaceEntity.
     uint64_t GetId() const;
 
-    /// @brief Set the ID of this SpaceEntity, this should be unique to each Entity.
-    /// @param NewId uint64_t New ID of the SpaceEntity.
-    void SetId(uint64_t NewId);
-
     /// @brief Get the ClientID of the owner of the SpaceEntity.
     ///
     /// This starts as the user that creates the Entity but can change if another user patches the Entity.

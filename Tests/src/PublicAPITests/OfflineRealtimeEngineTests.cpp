@@ -171,33 +171,6 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateEntity)
 }
 
 /*
-    This tests the behaviour of OfflineRealtimeEngine::AddEntity
-    by verifying an entity that is created outside of the OfflineRealtimeEngine
-    is added correctly into the engine.
-    The entity should be added to the entities array immediately.
-*/
-CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, AddEntity)
-{
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-
-    CSPSceneDescription SceneDescription;
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
-
-    auto ExternalEntity = new SpaceEntity { nullptr, *SystemsManager.GetScriptSystem(), SystemsManager.GetLogSystem(), SpaceEntityType::Object, 0,
-        "Name", SpaceTransform {}, 0, {}, false, false };
-    Engine.AddEntity(ExternalEntity);
-
-    // Check that our entity is registered as an entity in the engine.
-    EXPECT_EQ(Engine.GetNumEntities(), 1);
-
-    // Check our entity is NOT registered as an avatar in the engine.
-    EXPECT_EQ(Engine.GetNumAvatars(), 0);
-
-    // Check our entity is also registered as an object in the engine.
-    EXPECT_EQ(Engine.GetNumObjects(), 1);
-}
-
-/*
     This tests the behaviour of OfflineRealtimeEngine::DestroyEntity
     by verifying it is removed from the engine when called.
     It also verifies that the SetDestroyCallback is called correctly.

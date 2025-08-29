@@ -167,8 +167,6 @@ SpaceEntity::~SpaceEntity() { }
 
 uint64_t SpaceEntity::GetId() const { return Id; }
 
-void SpaceEntity::SetId(uint64_t NewId) { this->Id = NewId; }
-
 uint64_t SpaceEntity::GetOwnerId() const { return OwnerId; }
 
 const csp::common::String& SpaceEntity::GetName() const { return Name; }
@@ -788,7 +786,6 @@ bool SpaceEntity::Lock()
 
     const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
     const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
-    ;
 
     return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, OldLockReplicatedVal, NewLockReplicatedVal)
                                    : [this]()

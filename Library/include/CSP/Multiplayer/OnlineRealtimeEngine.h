@@ -143,15 +143,6 @@ public:
     CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
         const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
 
-    /// @brief Add a new entity to the system.
-    ///
-    /// This can be called at any time from any thread and internally add the entity to a pending
-    /// list which is then updated in a thread safe manner when ProcessPendingEntityOperations
-    /// is called from the main thread.
-    ///
-    /// @param EntityToAdd SpaceEntity : Pointer to the entity to be added.
-    void AddEntity(SpaceEntity* EntityToAdd) override;
-
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
