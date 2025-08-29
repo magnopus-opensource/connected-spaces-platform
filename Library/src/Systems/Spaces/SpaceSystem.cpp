@@ -381,7 +381,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
     auto UpstreamConnectionTask = (RealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
         ? GetSpace(SpaceId)
               .then(async::inline_scheduler(),
-                  systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(Callback,
+                  systems::continuations::AssertRequestSuccessOrErrorFromResult<SpaceResult>(
                       "SpaceSystem::EnterSpace, successfully discovered space.",
                       "Logged in user does not have permission to discover this space. Failed to enter space.", {}, {}, {}))
               .then(async::inline_scheduler(), AddUserToSpaceIfNecessary(Callback, *this))
