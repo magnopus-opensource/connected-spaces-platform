@@ -140,11 +140,9 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     }
     else
     {
-        // This is how we branch between doing deferred patch logic or just direct sets.
-        if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
-        {
-            StatePatcher = std::make_unique<SpaceEntityStatePatcher>(LogSystem, *this);
-        }
+        // This is how we branch between doing deferred patch logic or just direct sets. The engine tells us if it uses a patch model or not, by
+        // either returning a patcher, or not.
+        StatePatcher = std::unique_ptr<SpaceEntityStatePatcher>(EntitySystem->MakeStatePatcher(*this));
     }
 }
 

@@ -781,6 +781,11 @@ bool OnlineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock->try_lock
 
 void OnlineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock->unlock(); }
 
+csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
+{
+    return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
+}
+
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
     if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))

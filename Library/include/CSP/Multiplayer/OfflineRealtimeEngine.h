@@ -39,6 +39,7 @@ namespace csp::multiplayer
 {
 class CSPSceneDescription;
 class EntityScriptBinding;
+class SpaceEntityStatePatcher;
 
 /// @brief Class for creating and managing objects in an offline context.
 ///
@@ -213,6 +214,12 @@ public:
 
     /// @brief Unlock a mutex that guards against any changes to the entity list.
     CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
+
+    /// @brief Creates the state patcher to use for space entities created with this engine
+    /// Offline realtime engine syncronously sets data, rather than use a patch flow, so this returns null.
+    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @return nullptr
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 

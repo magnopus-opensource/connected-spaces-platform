@@ -297,6 +297,8 @@ bool OfflineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock.try_lock
 
 void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
+SpaceEntityStatePatcher* OfflineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& /*SpaceEntity*/) const { return nullptr; }
+
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 
 uint64_t OfflineRealtimeEngine::LocalClientId() { return csp::common::LocalClientID; }

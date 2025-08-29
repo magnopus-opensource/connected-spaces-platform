@@ -27,6 +27,7 @@ namespace csp::multiplayer
 {
 class SpaceTransform;
 class SpaceEntity;
+class SpaceEntityStatePatcher;
 }
 
 namespace csp::multiplayer
@@ -360,6 +361,18 @@ public:
 
     /// @brief Unlock a mutex that guards against any changes to the entity list.
     CSP_NO_EXPORT virtual void UnlockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Create the state patcher to use for space entities created with this engine
+    /// If your engine does not require a patch workflow, return null.
+    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @return A pointer to a statepatcher, or null. Pointer ownership is transferred to the caller.
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
+    {
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)SpaceEntity;
+    }
 
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.

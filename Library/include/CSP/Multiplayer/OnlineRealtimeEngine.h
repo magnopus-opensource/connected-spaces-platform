@@ -254,6 +254,11 @@ public:
     /// @brief Unlock a mutex that guards against any changes to the entity list.
     CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
 
+    /// @brief Creates the state patcher to use for space entities created with this engine
+    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @return A pointer to a new statepatcher. Pointer ownership is transferred to the caller.
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
