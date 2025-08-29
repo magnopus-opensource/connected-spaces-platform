@@ -178,15 +178,15 @@ void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity,
     // This feels like an unfortunate pattern break and an unnecesary concept (OnLocalDelete). An opportunity to
     // refactor. This also happens in OnlineRealtimeEngine.
     auto EntityComponents = Entity->GetComponents();
-    auto Keys = EntityComponents->Keys();
+
+    using KeysType = std::remove_pointer_t<decltype(EntityComponents)>::MapType::key_type;
+    std::unique_ptr<const csp::common::Array<KeysType>> Keys(EntityComponents->Keys());
 
     for (size_t i = 0; i < Keys->Size(); ++i)
     {
         auto EntityComponent = Entity->GetComponent((*Keys)[i]);
         EntityComponent->OnLocalDelete();
     }
-
-    delete (Keys);
 
     // We want to do heirarchy changes before destroy notification, there _seems_ to be some assertion that this is a platform requirement, although
     // I'm personally dubious. Nonetheless, we have tests that assert this ordering.

@@ -32,9 +32,9 @@ namespace csp::common
 /// @tparam TValue : Type to use as the value
 template <typename TKey, typename TValue> class CSP_API Map
 {
+public:
     using MapType = std::map<TKey, TValue>;
 
-public:
     /// @brief Constructs a map with 0 elements.
     Map() { Container = new MapType(); }
 
