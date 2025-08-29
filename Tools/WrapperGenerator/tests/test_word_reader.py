@@ -9,6 +9,30 @@ class TestWordReader(unittest.TestCase):
         self.assertEqual(w.next_word(), "world!")
         self.assertIsNone(w.next_word())
 
+    def test_line_tracking(self):
+        w = WordReader("Line1\nLine2\nLine3")
+        self.assertEqual(w.current_line, 1)
+        w.next_word()
+        self.assertEqual(w.current_line, 2)
+        w.next_word()
+        self.assertEqual(w.current_line, 3)
+
+    def test_multiline_tracking(self):
+        w = WordReader(
+        """
+        Line1
+        Line2
+        Line3
+        """)
+        self.assertEqual(w.current_line, 1)
+        w.next_word()
+        self.assertEqual(w.current_line, 2)
+        w.next_word()
+        self.assertEqual(w.current_line, 3)
+        w.next_word()
+        self.assertIsNone(w.next_word())
+        self.assertEqual(w.current_line, 4)
+
     def test_skip_whitespace_and_peek_char(self):
         w = WordReader("   \t\n  Meow")
         w.skip_whitespace()
