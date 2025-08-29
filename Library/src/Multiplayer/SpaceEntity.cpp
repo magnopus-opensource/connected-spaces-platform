@@ -782,6 +782,8 @@ bool SpaceEntity::Lock()
         return false;
     }
 
+    // We do it this way just so we can reuse the `SetDirtyProperty` function. It dosen't really matter that we're not checking if the "true"
+    // old lock is the same before setting the val again.
     const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
     const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
 
@@ -804,6 +806,8 @@ bool SpaceEntity::Unlock()
         return false;
     }
 
+    // We do it this way just so we can reuse the `SetDirtyProperty` function. It dosen't really matter that we're not checking if the "true"
+    // old lock is the same before setting the val again.
     const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
     const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
 
