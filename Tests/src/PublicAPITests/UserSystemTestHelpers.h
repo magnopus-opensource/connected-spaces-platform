@@ -21,19 +21,22 @@
 const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[] = "3R{d2}3C<x[J7=jU";
 
+// The implementation for all this is in UserSystemTests.cpp, if you can believe it.
+
 void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, const csp::common::String& Email,
-    const csp::common::String& Password, bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+    const csp::common::String& Password, bool CreateMultiplayerConnection = true, bool AgeVerified = true,
+    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
-void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
+void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
     csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
 
-void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified = true,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
+    bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
-void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool AgeVerified = true,
-    csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
+    bool AgeVerified = true, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);

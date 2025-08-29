@@ -71,7 +71,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String CallbackAssetId;
 
@@ -176,7 +176,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
     csp::common::String ObjectName = "Object 1";

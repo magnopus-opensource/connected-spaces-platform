@@ -27,6 +27,7 @@ namespace csp::multiplayer
 {
 class SpaceTransform;
 class SpaceEntity;
+class SpaceEntityStatePatcher;
 }
 
 namespace csp::multiplayer
@@ -160,14 +161,6 @@ public:
         (void)Callback;
     }
 
-    virtual void AddEntity(csp::multiplayer::SpaceEntity* EntityToAdd)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
-        (void)EntityToAdd;
-    }
-
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
@@ -177,21 +170,6 @@ public:
 
         // Avoiding unused params, see comment in top method
         (void)Entity;
-        (void)Callback;
-    }
-
-    /// @brief Sets a callback to be executed when an entity is fully created.
-    ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    /// The better way to set this and avoid initialisation race conditions is via passing this in the constructor, only use this if you wish to
-    /// override or remove this callback.
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback)
-    {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
-
-        // Avoiding unused params, see comment in top method
         (void)Callback;
     }
 
@@ -322,6 +300,14 @@ public:
         (void)ObjectIndex;
     }
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A non-owning pointer to a List of non-owning pointers to all entities.
+    [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const
+    {
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
+    }
+
     /// @brief Get the number of total entities in the system.
     /// @return The total number of entities.
     virtual size_t GetNumEntities() const { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
@@ -341,6 +327,17 @@ public:
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
+    /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
+    /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Entity;
+    }
+
     /// @brief Set Callback that notifies when the OnlineRealtimeEngine is in a valid state
     /// after entering a space, and entity mutation can begin. Users should not mutate entities before receiving this callback.
     /// This callback should be emitted in response to FetchAllEntitiesAndPopulateBuffers completing, either syncronously or asyncronously.
@@ -354,19 +351,28 @@ public:
 
     /***** ENTITY PROCESSING *************************************************/
 
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity)
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    CSP_NO_EXPORT virtual void LockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Attempt to lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex should fail to lock if already locked in order to avoid deadlocks.
+    CSP_NO_EXPORT virtual bool TryLockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    CSP_NO_EXPORT virtual void UnlockEntityUpdate() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
+
+    /// @brief Create the state patcher to use for space entities created with this engine
+    /// If your engine does not require a patch workflow, return null.
+    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @return A pointer to a statepatcher, or null. Pointer ownership is transferred to the caller.
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
     {
-        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
 
         // Avoiding unused params, see comment in top method
-        (void)Entity;
+        (void)SpaceEntity;
     }
-
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    virtual void ProcessPendingEntityOperations() { throw InvalidInterfaceUseError("Illegal use of \"abstract\" type."); }
 
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.

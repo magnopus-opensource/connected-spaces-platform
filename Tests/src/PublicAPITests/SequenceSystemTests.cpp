@@ -1032,7 +1032,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
     LogOut(UserSystem);
 
     // Login with another user
-    LogInAsNewTestUser(UserSystem, UserId, true);
+    LogInAsNewTestUser(UserSystem, UserId, true, true);
 
     // Ensure we can still get the sequence from a space we are not an editor of
     csp::systems::Sequence RetrievedSequence;

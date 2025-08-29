@@ -31,9 +31,12 @@
 #include "MCS/MCSTypes.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/ISignalRConnection.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
+#include "Multiplayer/SpaceEntityStatePatcher.h"
+#include "RealtimeEngineUtils.h"
 #include "SignalRSerializer.h"
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -85,15 +88,6 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result, csp::common:
 
     return EntityId;
 }
-
-csp::common::String JSONStringFromDeltaTime(double DeltaTime)
-{
-    return csp::common::StringFormat("{"
-                                     "\"deltaTimeMS\""
-                                     ": %lf}",
-        DeltaTime);
-}
-
 } // namespace
 
 template class csp::common::List<csp::multiplayer::SpaceEntity*>;
@@ -188,7 +182,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine()
     , ScriptBinding(nullptr)
     , EventHandler(nullptr)
     , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::mutex)
+    , TickEntitiesLock(new std::recursive_mutex)
     , PendingAdds(nullptr)
     , PendingRemoves(nullptr)
     , PendingOutgoingUpdateUniqueSet(nullptr)
@@ -208,10 +202,10 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , LogSystem(&LogSystem)
     , EventHandler(new SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
-    , TickEntitiesLock(new std::mutex)
-    , PendingAdds(new(SpaceEntityQueue))
-    , PendingRemoves(new(SpaceEntityQueue))
-    , PendingOutgoingUpdateUniqueSet(new(SpaceEntitySet))
+    , TickEntitiesLock(new std::recursive_mutex)
+    , PendingAdds(new(std::deque<csp::multiplayer::SpaceEntity*>))
+    , PendingRemoves(new(std::deque<csp::multiplayer::SpaceEntity*>))
+    , PendingOutgoingUpdateUniqueSet(new(std::set<csp::multiplayer::SpaceEntity*>))
     , PendingIncomingUpdates(new(PatchMessageQueue))
     , EnableEntityTick(false)
     , LastTickTime(std::chrono::system_clock::now())
@@ -249,9 +243,9 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
     delete (PendingIncomingUpdates);
 }
 
-OnlineRealtimeEngine::SpaceEntityQueue* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
+std::deque<csp::multiplayer::SpaceEntity*>* OnlineRealtimeEngine::GetPendingAdds() { return PendingAdds; }
 
-MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() { return MultiplayerConnectionInst; }
+MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() const { return MultiplayerConnectionInst; }
 
 csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Online; }
 
@@ -264,7 +258,7 @@ namespace
         csp::multiplayer::AvatarPlayMode AvatarPlayMode)
     {
         auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&OnlineRealtimeEngine, ScriptRunner,
-            &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, IsTransferable, IsPersistent));
+            &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
 
         auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
         AvatarComponent->SetAvatarId(AvatarId);
@@ -307,7 +301,7 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
-        mcs::ObjectMessage Message = NewAvatar->CreateObjectMessage();
+        const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -334,7 +328,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
          * of a place to put them, we can't release to the client because we need shared ownership to do safe threadless chaining, but we also
          * cant chain shared ownership because we don't have a sink to put it.
          *
-         * The solution to this is to make `Entities` (ie SpaceEntityList) a true owner and have it contain shared_ptrs.
+         * The solution to this is to make `Entities` (ie csp::common::List<SpaceEntity*>) a true owner and have it contain shared_ptrs.
          * Then, we'd make the other containers (Avatars, etc), store weak_ptrs, the idea being that for any given object,
          * CSP owns it "uniquely" (In that there's one container in CSP memory space that has a true owning type, shared_ptr in this
          * instance), but also clients may own it, sharing the ownership with us. This interacts well with garbage collectors and removes
@@ -407,15 +401,10 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(
-            this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform, MultiplayerConnectionInst->GetClientId(), true, true);
+        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
+            MultiplayerConnectionInst->GetClientId(), ParentID, true, true);
 
-        if (ParentID.HasValue())
-        {
-            NewObject->SetParentId(static_cast<uint64_t>(*ParentID));
-        }
-
-        mcs::ObjectMessage Message = NewObject->CreateObjectMessage();
+        const mcs::ObjectMessage Message = NewObject->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -517,24 +506,9 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
 
     delete (Keys);
 
-    csp::common::Array<ComponentUpdateInfo> Info;
-
     RootHierarchyEntities.RemoveItem(Entity);
 
-    // Manually process the parent updates locally
-    // We want this callback to fire before the deletion so clients can react to children first
-    auto ChildrenToUpdate = Children;
-
-    for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
-    {
-        ChildrenToUpdate[i]->RemoveParentId();
-        ResolveEntityHierarchy(ChildrenToUpdate[i]);
-
-        if (ChildrenToUpdate[i]->GetEntityUpdateCallback())
-        {
-            ChildrenToUpdate[i]->SetEntityUpdateCallbackParams(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
-        }
-    }
+    RealtimeEngineUtils::LocalProcessChildUpdates(*this, RootHierarchyEntities, Entity);
 
     // We break the usual pattern of not considering local state to be true until we get the ack back from CHS here
     // and instead immediately delete the local view of the entity before issuing the delete for the remote view.
@@ -553,7 +527,7 @@ void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
     {
         if (Entity->GetEntityDestroyCallback() != nullptr)
         {
-            Entity->SetEntityDestroyCallbackParams(true);
+            Entity->GetEntityDestroyCallback()(true);
         }
 
         RemoveEntity(Entity);
@@ -563,71 +537,35 @@ void OnlineRealtimeEngine::LocalDestroyEntity(SpaceEntity* Entity)
 SpaceEntity* OnlineRealtimeEngine::FindSpaceEntity(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetName() == InName)
-        {
-            return Entities[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceEntity(*this, InName);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceEntityById(uint64_t EntityId)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetId() == EntityId)
-        {
-            return Entities[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceEntityById(*this, EntityId);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceAvatar(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Avatars.Size(); ++i)
-    {
-        if (Avatars[i]->GetName() == InName)
-        {
-            return Avatars[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceAvatar(*this, InName);
 }
 
 SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& InName)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    for (size_t i = 0; i < Objects.Size(); ++i)
-    {
-        if (Objects[i]->GetName() == InName)
-        {
-            return Objects[i];
-        }
-    }
-
-    return nullptr;
+    return RealtimeEngineUtils::FindSpaceObject(*this, InName);
 }
 
-void OnlineRealtimeEngine::SetEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback Callback)
 {
-    if (SpaceEntityCreatedCallback)
+    if (RemoteSpaceEntityCreatedCallback)
     {
-        LogSystem->LogMsg(common::LogLevel::Warning, "SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+        LogSystem->LogMsg(common::LogLevel::Warning, "RemoteSpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
-    SpaceEntityCreatedCallback = std::move(Callback);
+    RemoteSpaceEntityCreatedCallback = std::move(Callback);
 }
 
 bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
@@ -667,45 +605,17 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
 
 namespace
 {
-    // You should lock the entities mutex before calling this, and probably have processed entity operations
-    void InitialiseEntityScripts(csp::multiplayer::OnlineRealtimeEngine::SpaceEntityList& Entities)
+    void FireRemoteSpaceEntityCreatedCallback(
+        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback RemoteSpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
     {
-        // Register all scripts for import
-        for (size_t i = 0; i < Entities.Size(); ++i)
+        if (RemoteSpaceEntityCreatedCallback)
         {
-            EntityScript& Script = Entities[i]->GetScript();
-            Script.RegisterSourceAsModule();
-        }
-
-        // Bind and invoke all scripts
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            if (EntityScript& Script = Entities[i]->GetScript(); Script.HasEntityScriptComponent())
-            {
-                Script.Bind();
-                Script.Invoke();
-            }
-        }
-
-        // Tell all scripts that all entities are now loaded
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            EntityScript& Script = Entities[i]->GetScript();
-            Script.PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
-        }
-    }
-
-    void FireSpaceEntityCreatedCallback(
-        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback SpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
-    {
-        if (SpaceEntityCreatedCallback)
-        {
-            SpaceEntityCreatedCallback(SpaceEntity);
+            RemoteSpaceEntityCreatedCallback(SpaceEntity);
         }
         else
         {
-            LogSystem.LogMsg(
-                common::LogLevel::Warning, "Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+            LogSystem.LogMsg(common::LogLevel::Warning,
+                "Called RemoteSpaceEntityCreatedCallback without it being set! Call SetRemoteEntityCreatedCallback first!");
         }
     }
 }
@@ -717,10 +627,10 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = new SpaceEntity(this, *ScriptRunner, LogSystem);
-    NewEntity->FromObjectMessage(Message);
+    const auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
 
-    AddEntity(NewEntity);
+    std::scoped_lock EntitiesLocker(*EntitiesLock);
+    PendingAdds->emplace_back(NewEntity);
 
     return NewEntity;
 }
@@ -734,7 +644,7 @@ void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)
 
     if (NewEntity)
     {
-        FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+        FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
     }
 }
 
@@ -755,7 +665,7 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
     // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
     if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
     {
-        mcs::ObjectMessage Message = MatchedEntity->CreateObjectMessage();
+        mcs::ObjectMessage Message = MatchedEntity->GetStatePatcher()->CreateObjectMessage();
 
         SignalRSerializer Serializer;
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
@@ -803,7 +713,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
         for (const auto& EntityMessage : Items)
         {
             SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage);
-            FireSpaceEntityCreatedCallback(NewEntity, SpaceEntityCreatedCallback, *LogSystem);
+            FireRemoteSpaceEntityCreatedCallback(NewEntity, RemoteSpaceEntityCreatedCallback, *LogSystem);
         }
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
@@ -818,7 +728,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             // Ensure entity list is up to date
             ProcessPendingEntityOperations();
 
-            InitialiseEntityScripts(Entities);
+            RealtimeEngineUtils::InitialiseEntityScripts(Entities);
             EnableEntityTick = true;
 
             // Start leader election
@@ -832,7 +742,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             }
             else
             {
-                DetermineScriptOwners();
+                RealtimeEngineUtils::DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
             }
 
             if (FetchCompleteCallback)
@@ -863,6 +773,17 @@ void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
             this->RetrieveAllEntities(EntityFetchCompleteCallback);
             FetchStartedCallback();
         });
+}
+
+void OnlineRealtimeEngine::LockEntityUpdate() { EntitiesLock->lock(); }
+
+bool OnlineRealtimeEngine::TryLockEntityUpdate() { return EntitiesLock->try_lock(); }
+
+void OnlineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock->unlock(); }
+
+csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const
+{
+    return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
 }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
@@ -917,8 +838,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
 void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
-    if (EntityToUpdate->GetDirtyComponents().Size() == 0 && EntityToUpdate->GetDirtyProperties().Size() == 0
-        && EntityToUpdate->GetTransientDeletionComponentIds().Size() == 0 && EntityToUpdate->GetShouldUpdateParent() == false)
+    if (!EntityToUpdate->GetStatePatcher()->HasPendingPatch())
     {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges',
         // etc. CSP_LOG_MSG(csp::common::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -955,7 +875,8 @@ void OnlineRealtimeEngine::TickEntities()
 
     if (EnableEntityTick)
     {
-        TickEntityScripts();
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
+            *TickEntitiesLock, GetRealtimeEngineType(), MultiplayerConnectionInst->GetClientId(), Entities, LastTickTime);
     }
 
     {
@@ -973,70 +894,6 @@ void OnlineRealtimeEngine::TickEntities()
 
         TickUpdateEntities.clear();
     }
-}
-
-void OnlineRealtimeEngine::MarkEntityForUpdate(SpaceEntity* Entity)
-{
-    std::scoped_lock TickEntitiesLocker(*TickEntitiesLock);
-
-    // Duplicates can be added here and will be ignored when sending updates
-    TickUpdateEntities.push_back(Entity);
-}
-
-// @brief Simple script ownership
-//
-// Simple MVP script ownership for testing:
-// * Everyone 'claims' ownership of scripts on connection
-// * Last person to do so 'wins'
-//
-// @note this does not currently handle when the owner leaves the session
-// when the owner will need to be re-assigned, although ownership will also
-// be claimed by anyone who interacts with an object
-//
-void OnlineRealtimeEngine::DetermineScriptOwners()
-{
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ClaimScriptOwnership(Entities[i]);
-    }
-}
-
-void OnlineRealtimeEngine::ResolveParentChildForDeletion(SpaceEntity* Deletion)
-{
-    if (Deletion->GetParentEntity())
-    {
-        Deletion->RemoveChildEntities();
-    }
-
-    for (size_t i = 0; i < Deletion->GetChildEntities()->Size(); ++i)
-    {
-        Deletion->RemoveParentFromChildEntity(i);
-        ResolveEntityHierarchy(Deletion->GetChildEntities()->ToArray()[i]);
-    }
-}
-
-void OnlineRealtimeEngine::ResolveEntityHierarchy(SpaceEntity* Entity)
-{
-    if (Entity->GetParentId().HasValue())
-    {
-        for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
-        {
-            if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
-            {
-                RootHierarchyEntities.Remove(i);
-                break;
-            }
-        }
-    }
-    else
-    {
-        if (EntityIsInRootHierarchy(Entity) == false)
-        {
-            RootHierarchyEntities.Append(Entity);
-        }
-    }
-
-    Entity->ResolveParentChildRelationship();
 }
 
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
@@ -1058,43 +915,14 @@ void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
     {
         if (Entities[i]->GetScript().GetOwnerId() == ClientId)
         {
-            ClaimScriptOwnership(Entities[i]);
+            RealtimeEngineUtils::ClaimScriptOwnership(Entities[i], GetMultiplayerConnectionInstance()->GetClientId());
         }
     }
 }
 
-void OnlineRealtimeEngine::TickEntityScripts()
+void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-    const auto CurrentTime = std::chrono::system_clock::now();
-    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
-    LastTickTime = CurrentTime;
-
-    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
-
-    if (IsLeaderElectionEnabled())
-    {
-        if (ElectionManager->IsLocalClientLeader())
-        {
-            for (size_t i = 0; i < Entities.Size(); ++i)
-            {
-                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
-        }
-    }
-    else
-    {
-        const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-
-        for (size_t i = 0; i < Entities.Size(); ++i)
-        {
-            if (ClientId == Entities[i]->GetScript().GetOwnerId())
-            {
-                Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
-        }
-    }
+    RealtimeEngineUtils::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
 }
 
 void OnlineRealtimeEngine::EnableLeaderElection()
@@ -1133,6 +961,11 @@ bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return Entit
 void OnlineRealtimeEngine::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPatchRateLimitEnabled = Enabled; }
 
 const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
+
+void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+{
+    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+}
 
 void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
     csp::common::String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
@@ -1217,17 +1050,6 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
     }
 }
 
-void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
-{
-    const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-    EntityScript& Script = Entity->GetScript();
-    Script.SetOwnerId(ClientId);
-}
-
-void OnlineRealtimeEngine::LockEntityUpdate() const { EntitiesLock->lock(); }
-
-void OnlineRealtimeEngine::UnlockEntityUpdate() const { EntitiesLock->unlock(); }
-
 size_t OnlineRealtimeEngine::GetNumEntities() const
 {
     std::scoped_lock<std::recursive_mutex> EntitiesLocker(*EntitiesLock);
@@ -1264,11 +1086,7 @@ SpaceEntity* OnlineRealtimeEngine::GetObjectByIndex(const size_t ObjectIndex)
     return Objects[ObjectIndex];
 }
 
-void OnlineRealtimeEngine::AddEntity(SpaceEntity* EntityToAdd)
-{
-    std::scoped_lock EntitiesLocker(*EntitiesLock);
-    PendingAdds->emplace_back(EntityToAdd);
-}
+const csp::common::List<SpaceEntity*>* OnlineRealtimeEngine::GetAllEntities() const { return &Entities; }
 
 void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> PendingEntities)
 {
@@ -1293,7 +1111,7 @@ void OnlineRealtimeEngine::SendPatches(const csp::common::List<SpaceEntity*> Pen
 
     for (size_t i = 0; i < PendingEntities.Size(); ++i)
     {
-        Patches.push_back(PendingEntities[i]->CreateObjectPatch());
+        Patches.push_back(PendingEntities[i]->GetStatePatcher()->CreateObjectPatch());
     }
 
     // We are writing multiple patches, so we need an additional nested array.
@@ -1365,20 +1183,22 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
                 PendingEntity->SetOwnerId(MultiplayerConnectionInst->GetClientId());
-                ClaimScriptOwnership(PendingEntity);
+                RealtimeEngineUtils::ClaimScriptOwnership(PendingEntity, GetMultiplayerConnectionInstance()->GetClientId());
 
                 PendingEntities.Append(PendingEntity);
 
-                if (PendingEntity->GetEntityPatchSentCallback() != nullptr)
+                if (PendingEntity->GetStatePatcher()->GetEntityPatchSentCallback() != nullptr)
                 {
-                    PendingEntity->SetEntityPatchSentCallbackParams(true);
+                    PendingEntity->GetStatePatcher()->CallEntityPatchSentCallback(true);
                 }
 
-                PendingEntity->SetTimeOfLastPatch(CurrentTime);
+                PendingEntity->GetStatePatcher()->SetTimeOfLastPatch(CurrentTime);
                 it = PendingOutgoingUpdateUniqueSet->erase(it);
             }
             else
             {
+                LogSystem->LogMsg(common::LogLevel::Verbose,
+                    "Skipping patch send in ProcessPendingEntityOperations as not enough time has passed since the last patch");
                 ++it;
             }
         }
@@ -1463,14 +1283,14 @@ void OnlineRealtimeEngine::RemovePendingEntity(SpaceEntity* EntityToRemove)
     }
 
     RootHierarchyEntities.RemoveItem(EntityToRemove);
-    ResolveParentChildForDeletion(EntityToRemove);
+    RealtimeEngineUtils::RemoveParentChildRelationshipsFromEntity(*this, RootHierarchyEntities, EntityToRemove);
 
     Entities.RemoveItem(EntityToRemove);
 
     delete (EntityToRemove);
 }
 
-void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& AddedAvatars)
+void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& AddedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1480,7 +1300,7 @@ void OnlineRealtimeEngine::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEnt
     }
 }
 
-void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& RemovedAvatars)
+void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& RemovedAvatars)
 {
     if (ElectionManager != nullptr)
     {
@@ -1488,7 +1308,7 @@ void OnlineRealtimeEngine::OnAvatarRemove(const SpaceEntity* Avatar, const Space
     }
 }
 
-void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& AddedObjects)
+void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& AddedObjects)
 {
     if (ElectionManager != nullptr)
     {
@@ -1496,7 +1316,7 @@ void OnlineRealtimeEngine::OnObjectAdd(const SpaceEntity* Object, const SpaceEnt
     }
 }
 
-void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& RemovedObjects)
+void OnlineRealtimeEngine::OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& RemovedObjects)
 {
     if (ElectionManager != nullptr)
     {
@@ -1546,11 +1366,11 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
         bool EntityFound = false;
 
         // Update
-        for (size_t i = 0; i < Entities.Size(); ++i)
+        for (SpaceEntity* Entity : Entities)
         {
-            if (Entities[i]->GetId() == Patch.GetId())
+            if (Entity->GetId() == Patch.GetId())
             {
-                Entities[i]->FromObjectPatch(Patch);
+                Entity->GetStatePatcher()->ApplyPatchFromObjectPatch(Patch);
                 EntityFound = true;
             }
         }
@@ -1558,7 +1378,7 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
         if (!EntityFound)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Failed to find an entity with ID {} when recieved a patch message.", Patch.GetId()).c_str());
+                fmt::format("Failed to find an entity with ID {} when received a patch message.", Patch.GetId()).c_str());
         }
     }
 }

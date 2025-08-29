@@ -18,6 +18,8 @@
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Systems/ContinuationUtils.h"
 
+#include <fmt/format.h>
+
 namespace csp::systems
 {
 
@@ -367,7 +369,8 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
         {
             if (Error != multiplayer::ErrorCode::None)
             {
-                CSP_LOG_ERROR_MSG("Create Conversation: SignalR connection: Error");
+                const auto ErrorMsg = fmt::format("Create Conversation: SignalR connection error: {}", ErrorCodeToString(Error));
+                CSP_LOG_ERROR_MSG(ErrorMsg.c_str());
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
                 return;

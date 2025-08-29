@@ -1989,7 +1989,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -2077,7 +2077,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

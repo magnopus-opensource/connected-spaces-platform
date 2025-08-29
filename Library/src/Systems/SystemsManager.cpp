@@ -15,9 +15,10 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
-#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
@@ -99,6 +100,24 @@ csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return Networ
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
     return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
+}
+
+csp::multiplayer::OfflineRealtimeEngine* SystemsManager::MakeOfflineRealtimeEngine()
+{
+    return new csp::multiplayer::OfflineRealtimeEngine { *GetLogSystem(), *GetScriptSystem() };
+}
+
+csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::RealtimeEngineType RealtimeEngineType)
+{
+    switch (RealtimeEngineType)
+    {
+    case RealtimeEngineType::Online:
+        return MakeOnlineRealtimeEngine();
+    case RealtimeEngineType::Offline:
+        return MakeOfflineRealtimeEngine();
+    default:
+        throw std::runtime_error("Unknown Realtime Engine Type");
+    }
 }
 
 SystemsManager::SystemsManager()

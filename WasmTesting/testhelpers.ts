@@ -31,7 +31,7 @@ export async function LoginAsUser(creds: Systems.ProfileResult){
   const userSystem = Systems.SystemsManager.get().getUserSystem();
 
   // Logs or errors are validated in the invoking test.
-  const loginResult = await userSystem.login('', creds.getProfile().email, TEST_ACCOUNT_PASSWORD, true);
+  const loginResult = await userSystem.login('', creds.getProfile().email, TEST_ACCOUNT_PASSWORD, true, true);
   if (loginResult.getResultCode() == Systems.EResultCode.Success){
     console.log("Successfully logged in");
   }

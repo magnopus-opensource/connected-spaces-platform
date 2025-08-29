@@ -143,26 +143,10 @@ public:
     CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
         const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
 
-    /// @brief Add a new entity to the system.
-    ///
-    /// This can be called at any time from any thread and internally add the entity to a pending
-    /// list which is then updated in a thread safe manner when ProcessPendingEntityOperations
-    /// is called from the main thread.
-    ///
-    /// @param EntityToAdd SpaceEntity : Pointer to the entity to be added.
-    void AddEntity(SpaceEntity* EntityToAdd) override;
-
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
     /// @param Callback csp::multiplayer::CallbackHandler : A callback that executes when the entity destruction is complete.
     CSP_ASYNC_RESULT virtual void DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback) override;
-
-    /// @brief Sets a callback to be executed when an entity is fully created.
-    ///
-    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
-    ///
-    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
-    CSP_EVENT virtual void SetEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Adds an entity to the set of selected entities
     /// @param Entity csp::multiplayer::SpaceEntity* Entity to set as selected
@@ -226,19 +210,21 @@ public:
     /// @return The total number of object entities.
     virtual size_t GetNumObjects() const override;
 
+    /// @brief Return all the entities currently known to the realtime engine.
+    /// @warning This list may be extremely large.
+    /// @return A non-owning pointer to a List of non-owning pointers to all entities.
+    virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const override;
+
     /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;
 
+    /// @brief "Resolves" the entity heirarchy for the given entity, setting all internal parent/child buffers correctly.
+    /// This method is called whenever parent/child relationships are changed for a given entity, including when one is first created.
+    /// @param Entity csp::multiplayer::SpaceEntity* : The Entity to resolve
+    CSP_NO_EXPORT virtual void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity) override;
+
     /***** ENTITY PROCESSING *************************************************/
-
-    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
-    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
-    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
-    virtual void MarkEntityForUpdate(csp::multiplayer::SpaceEntity* Entity) override;
-
-    /// @brief Applies any pending changes to entities that have been marked for update.
-    virtual void ProcessPendingEntityOperations() override;
 
     /**
      * @brief Fetch all entities in the space from MCS
@@ -257,10 +243,39 @@ public:
     CSP_NO_EXPORT void FetchAllEntitiesAndPopulateBuffers(
         const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback) override;
 
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// If the mutex is already locked, will wait until it is able to acquire the lock. May cause deadlocks.
+    CSP_NO_EXPORT virtual void LockEntityUpdate() override;
+
+    /// @brief Lock a mutex that guards against any changes to the entity list.
+    /// @return Whether the mutex successfully locked. The mutex will fail to lock if already locked in order to avoid deadlocks.
+    CSP_NO_EXPORT virtual bool TryLockEntityUpdate() override;
+
+    /// @brief Unlock a mutex that guards against any changes to the entity list.
+    CSP_NO_EXPORT virtual void UnlockEntityUpdate() override;
+
+    /// @brief Creates the state patcher to use for space entities created with this engine
+    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @return A pointer to a new statepatcher. Pointer ownership is transferred to the caller.
+    CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
-    using SpaceEntityList = csp::common::List<SpaceEntity*>;
-    using SpaceEntityQueue = std::deque<SpaceEntity*>;
+    /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.
+    /// From a client perspective, ProcessPendingEntityOperations is normally called via the CSPFoundation::Tick method.
+    /// @param Entity SpaceEntity : A non-owning pointer to the entity to be marked.
+    void QueueEntityUpdate(csp::multiplayer::SpaceEntity* Entity);
+
+    /// @brief Applies any pending changes to entities that have been marked for update.
+    void ProcessPendingEntityOperations();
+
+    /// @brief Sets a callback to be executed when a remote entity is created.
+    /// To wait for local entities to be created, await the callback provided in the CreateObject/CreateAvatar methods.
+    ///
+    /// Only one EntityCreatedCallback may be registered, calling this function again will override whatever was previously set.
+    ///
+    /// @param Callback csp::multiplayer::EntityCreatedCallback : the callback to execute.
+    CSP_EVENT void SetRemoteEntityCreatedCallback(csp::multiplayer::EntityCreatedCallback Callback);
 
     /// @brief Sets a callback to be executed when the script system is ready to run scripts.
     /// @param Callback CallbackHandler : the callback to execute.
@@ -319,28 +334,15 @@ public:
 
     /// @brief Getter for the pending adds
     /// @return: SpaceEntityQueue*
-    CSP_NO_EXPORT SpaceEntityQueue* GetPendingAdds();
+    CSP_NO_EXPORT std::deque<csp::multiplayer::SpaceEntity*>* GetPendingAdds();
 
     /// @brief Getter for the multiplayer connection instance
     /// @return: MultiplayerConnection*
-    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance();
+    CSP_NO_EXPORT MultiplayerConnection* GetMultiplayerConnectionInstance() const;
 
     // @brief Ticks all entities and scripts, processing any pending local and remote updates
     // Will only tick scrips if EnableEntityTick is enabled, which it should be if entity fetch has completed.
     CSP_NO_EXPORT void TickEntities();
-
-    /// @brief Locks the entity mutex.
-    void LockEntityUpdate() const;
-
-    /// @brief Unlocks the entity mutex.
-    void UnlockEntityUpdate() const;
-
-    /// @brief Queues a specific entity to update. Used in SpaceEntity to queue updates via passing the this pointer
-    void QueueEntityUpdate(SpaceEntity* EntityToUpdate);
-
-    /// @brief "Resolves" the entity heirarchy, such that the entity is parented appropriately, and internal buffers are populated appropriately.
-    /// (Vague, need more understanding about what this does)
-    void ResolveEntityHierarchy(SpaceEntity* Entity);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.
@@ -350,11 +352,11 @@ public:
     CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
 
 protected:
-    SpaceEntityList Entities;
-    SpaceEntityList Avatars;
-    SpaceEntityList Objects;
-    SpaceEntityList SelectedEntities;
-    SpaceEntityList RootHierarchyEntities;
+    csp::common::List<SpaceEntity*> Entities;
+    csp::common::List<SpaceEntity*> Avatars;
+    csp::common::List<SpaceEntity*> Objects;
+    csp::common::List<SpaceEntity*> SelectedEntities;
+    csp::common::List<SpaceEntity*> RootHierarchyEntities;
 
     std::recursive_mutex* EntitiesLock;
 
@@ -374,7 +376,7 @@ private:
     using PatchMessageQueue = std::deque<signalr::value*>;
     using SpaceEntitySet = std::set<SpaceEntity*>;
 
-    EntityCreatedCallback SpaceEntityCreatedCallback;
+    EntityCreatedCallback RemoteSpaceEntityCreatedCallback;
     CallbackHandler ScriptSystemReadyCallback;
 
     void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
@@ -394,18 +396,14 @@ private:
     void ApplyIncomingPatch(const signalr::value*);
     void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-    void DetermineScriptOwners();
-
-    void ResolveParentChildForDeletion(SpaceEntity* Deletion);
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);
-    void TickEntityScripts();
 
-    void OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
-    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
+    void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
+    void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
+    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
 
     void SendPatches(const csp::common::List<SpaceEntity*> PendingEntities);
 
@@ -428,11 +426,11 @@ private:
     class SpaceEntityEventHandler* EventHandler;
     class ClientElectionManager* ElectionManager;
 
-    std::mutex* TickEntitiesLock;
+    std::recursive_mutex* TickEntitiesLock;
 
-    SpaceEntityQueue* PendingAdds;
-    SpaceEntityQueue* PendingRemoves;
-    SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
+    std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
+    std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;
+    std::set<csp::multiplayer::SpaceEntity*>* PendingOutgoingUpdateUniqueSet;
     PatchMessageQueue* PendingIncomingUpdates;
 
     bool EnableEntityTick;
