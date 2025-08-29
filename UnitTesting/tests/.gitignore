@@ -1,4 +1,8 @@
 test_results.xml
+
+# Unity specific ignores
+# We want to explicitly exclude all files and folders that Unity generates
+csharp/**/*.meta
 csharp/Assets/Tests/generated/
 csharp/Assets/Tests/generated.meta
 csharp/Library/

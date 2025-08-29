@@ -98,8 +98,8 @@ Tools/Emscripten/EmscriptenBuild.log
 
 # Ignore unit test artifacts
 UnitTesting/*.Make
-UnitTesting/include/**/*
-UnitTesting/src/**/*
+UnitTesting/include/generated/**/*
+UnitTesting/src/generated/**/*
 UnitTesting/tests/*_test_results.xml
 UnitTesting/tests/csharp/Assets/Tests/generated/**/*
 UnitTesting/tests/javascript/tests.js
