@@ -185,6 +185,25 @@ class TestParserParseType(unittest.TestCase):
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
 
+    def test_parse_pointer_const_type_unsupported(self):
+        """ Test that parsing a pointer to a const type is unsupported. """
+        with self.assertRaises(AssertionError):
+            self.__parse_type("int const *")
+
+    def test_parse_const_reference_type(self):
+        """ Test parsing a const reference type. """
+        result = self.__parse_type("const int&")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_const = True
+        expected.is_reference = True
+        expected.is_pointer_or_reference = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
     def test_parse_template_type(self):
         """ Test parsing a template type. """
         result = self.__parse_type("std::vector<int>")
