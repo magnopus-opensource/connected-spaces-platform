@@ -889,7 +889,8 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
 
 std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return StatePatcher != nullptr ? StatePatcher->GetTimeOfLastPatch() : 0ms; }
 
-// Why is this not a dirtyable property? Must be non-replicable state ... would be nice to differentiate more strongly in the types/patterns we use.
+// Not dirtyable because it is a mandatory type in ObjectMessage. It's sent no matter what.
+// It may still be nicer to make this in-pattern and do loopbacks like the dirtyable props, but no formal need.
 void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
 
 void SpaceEntity::SetNameDirect(const csp::common::String& Value, bool CallNotifyingCallback)
