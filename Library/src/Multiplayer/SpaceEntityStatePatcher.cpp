@@ -356,7 +356,8 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
     const auto OwnerId = Message.GetOwnerId();
     const auto ParentId = common::Convert(Message.GetParentId());
 
-    // This stuff read from the component unpacker, I guess the above are first-class pieces of data.
+    // This stuff read from the component unpacker.
+    // The above is first-class, mandatory data for MCS objects. All else are optional components, hence the split.
     csp::common::String Name = "";
     SpaceTransform Transform {};
     uint64_t SelectedId = 0;
