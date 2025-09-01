@@ -43,6 +43,7 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsARVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, IsVRVisible);
 
+DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldout);
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldoutInAR);
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldoutInVR);
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// @file IVisibilityBehaviourComponent.h
+/// @file IRenderBehaviourComponent.h
 /// @brief Holdout visibility control for components.
 
 #pragma once
@@ -23,30 +23,52 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the holdout visibility behaviour of the component when in default mode, AR mode or Virtual mode.
-/// A holdout is an object that is rendered as a mask, cutting it out from the final image.
-/// It still participates in depth testing, allowing objects to move behind it, but does not contribute pixels to the final image.
-CSP_INTERFACE class CSP_API IVisibilityBehaviourComponent
+/// @brief Controls rendering behavior properties, such as a holdout state related to display modes, for a component.
+CSP_INTERFACE class CSP_API IRenderBehaviourComponent
 {
 public:
+    /// @defgroup HoldoutConcept Holdouts and Data Access
+    /// A holdout is an object that is rendered as a mask, cutting it out from the final image.
+    /// It still participates in depth testing, allowing objects to move behind it, but does not contribute pixels to the final image.
+
+    /// @brief Checks if the component is shown as holdout when in default mode.
+    /// @return True if the component is shown as holdout when in default mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
+    virtual bool GetShowAsHoldout() const = 0;
+
+    /// @brief Sets if the component is shown as holdout in default mode.
+    /// @param InValue True if the component is shown as holdout in default mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
+    virtual void SetShowAsHoldout(bool InValue) = 0;
+
     /// @brief Checks if the component is shown as holdout when in AR mode.
     /// @return True if the component is shown as holdout when in AR mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
     virtual bool GetShowAsHoldoutInAR() const = 0;
 
     /// @brief Sets if the component is shown as holdout in AR mode.
     /// @param InValue True if the component is shown as holdout in AR mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
     virtual void SetShowAsHoldoutInAR(bool InValue) = 0;
 
     /// @brief Checks if the component is shown as holdout when in VR mode.
     /// @return True if the component is shown as holdout when in VR mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
     virtual bool GetShowAsHoldoutInVR() const = 0;
 
     /// @brief Sets if the component is shown as holdout in VR mode.
     /// @param InValue True if the component is shown as holdout in VR mode, false otherwise.
+    ///
+    /// @see HoldoutConcept
     virtual void SetShowAsHoldoutInVR(bool InValue) = 0;
 
 protected:
-    virtual ~IVisibilityBehaviourComponent() = default;
+    virtual ~IRenderBehaviourComponent() = default;
 };
 
 } // namespace csp::multiplayer

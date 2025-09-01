@@ -314,6 +314,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVRVisible, "isVRVisible")
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldout, "showAsHoldout")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVR, "showAsHoldoutInVR")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex");
@@ -455,6 +456,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVRVisible, "isVRVisible")
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldout, "showAsHoldout")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVR, "showAsHoldoutInVR");
 

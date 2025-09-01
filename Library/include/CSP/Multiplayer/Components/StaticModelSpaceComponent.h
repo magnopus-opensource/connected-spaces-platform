@@ -23,10 +23,10 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IExternalResourceComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IRenderBehaviourComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
-#include "CSP/Multiplayer/Components/Interfaces/IVisibilityBehaviourComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 namespace csp::multiplayer
@@ -47,6 +47,7 @@ enum class StaticModelPropertyKeys
     IsShadowCaster,
     MaterialOverrides,
     IsVRVisible,
+    ShowAsHoldout,
     ShowAsHoldoutInAR,
     ShowAsHoldoutInVR,
     Num
@@ -63,7 +64,7 @@ class CSP_API StaticModelSpaceComponent : public ComponentBase,
                                           public IThirdPartyComponentRef,
                                           public ITransformComponent,
                                           public IVisibleComponent,
-                                          public IVisibilityBehaviourComponent
+                                          public IRenderBehaviourComponent
 
 {
 public:
@@ -157,15 +158,19 @@ public:
     void SetIsShadowCaster(bool Value) override;
     /// @}
 
-    /// \addtogroup IVisibilityBehaviourComponent
+    /// \addtogroup IRenderBehaviourComponent
     /// @{
-    /// @copydoc IVisibleComponent::GetShowAsHoldoutInAR()
+    /// @copydoc IRenderBehaviourComponent::GetShowAsHoldout()
+    bool GetShowAsHoldout() const override;
+    /// @copydoc IRenderBehaviourComponent::SetShowAsHoldout()
+    void SetShowAsHoldout(bool InValue) override;
+    /// @copydoc IRenderBehaviourComponent::GetShowAsHoldoutInAR()
     bool GetShowAsHoldoutInAR() const override;
-    /// @copydoc IVisibleComponent::SetShowAsHoldoutInAR()
+    /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInAR()
     void SetShowAsHoldoutInAR(bool InValue) override;
-    /// @copydoc IVisibleComponent::GetShowAsHoldoutInVR()
+    /// @copydoc IRenderBehaviourComponent::GetShowAsHoldoutInVR()
     bool GetShowAsHoldoutInVR() const override;
-    /// @copydoc IVisibleComponent::SetShowAsHoldoutInVR()
+    /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInVR()
     void SetShowAsHoldoutInVR(bool InValue) override;
     /// @}
 };

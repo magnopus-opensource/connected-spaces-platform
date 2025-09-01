@@ -87,6 +87,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         constexpr const bool TestIsVRVisible = false;
         constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
         constexpr const bool TestIsShadowCaster = false;
+        constexpr const bool TestShowAsHoldout = true;
         constexpr const bool TestShowAsHoldoutInAR = true;
         constexpr const bool TestShowAsHoldoutInVR = true;
 
@@ -103,6 +104,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), true);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), "");
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), true);
+        EXPECT_EQ(StaticModelComponent->GetShowAsHoldout(), false);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), false);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), false);
 
@@ -117,6 +119,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         StaticModelComponent->SetIsVRVisible(TestIsVRVisible);
         StaticModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
         StaticModelComponent->SetIsShadowCaster(TestIsShadowCaster);
+        StaticModelComponent->SetShowAsHoldout(TestShowAsHoldout);
         StaticModelComponent->SetShowAsHoldoutInAR(TestShowAsHoldoutInAR);
         StaticModelComponent->SetShowAsHoldoutInVR(TestShowAsHoldoutInVR);
 
@@ -133,6 +136,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
         EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), TestIsVRVisible);
         EXPECT_EQ(StaticModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
         EXPECT_EQ(StaticModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
+        EXPECT_EQ(StaticModelComponent->GetShowAsHoldout(), TestShowAsHoldout);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), TestShowAsHoldoutInAR);
         EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), TestShowAsHoldoutInVR);
 
@@ -207,6 +211,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 		model.isVisible = false;
         model.isARVisible = false;
         model.isVRVisible = false;
+        model.showAsHoldout = true;
         model.showAsHoldoutInAR = true;
         model.showAsHoldoutInVR = true;
     )xx";
@@ -225,6 +230,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     EXPECT_EQ(StaticModelComponent->GetIsVisible(), false);
     EXPECT_EQ(StaticModelComponent->GetIsARVisible(), false);
     EXPECT_EQ(StaticModelComponent->GetIsVRVisible(), false);
+    EXPECT_EQ(StaticModelComponent->GetShowAsHoldout(), true);
     EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInAR(), true);
     EXPECT_EQ(StaticModelComponent->GetShowAsHoldoutInVR(), true);
 
