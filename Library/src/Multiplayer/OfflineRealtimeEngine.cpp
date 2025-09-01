@@ -76,7 +76,7 @@ namespace
     // ints 1:1.
     uint64_t NextId()
     {
-        static std::atomic<uint64_t> counter { 1 }; // Start at 1 to be safe as sometimes people innapripriately use 0 to express nullness.
+        static std::atomic<uint64_t> counter { 1 }; // Start at 1 to be safe as sometimes people inappropriately use 0 to express nullness.
         assert(counter < csp::common::Precision53Bits && "Id's need to be able to be represented at double precision, because of JS bindings.");
         return counter++;
     }
