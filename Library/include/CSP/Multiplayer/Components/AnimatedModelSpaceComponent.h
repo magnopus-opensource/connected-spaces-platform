@@ -61,7 +61,6 @@ enum class AnimatedModelPropertyKeys
     IsShadowCaster,
     MaterialOverrides,
     IsVRVisible,
-    ShowAsHoldout,
     ShowAsHoldoutInAR,
     ShowAsHoldoutInVR,
     Num
@@ -197,10 +196,6 @@ public:
 
     /// \addtogroup IRenderBehaviourComponent
     /// @{
-    /// /// @copydoc IRenderBehaviourComponent::GetShowAsHoldout()
-    bool GetShowAsHoldout() const override;
-    /// @copydoc IRenderBehaviourComponent::SetShowAsHoldout()
-    void SetShowAsHoldout(bool InValue) override;
     /// @copydoc IRenderBehaviourComponent::GetShowAsHoldoutInAR()
     bool GetShowAsHoldoutInAR() const override;
     /// @copydoc IRenderBehaviourComponent::SetShowAsHoldoutInAR()

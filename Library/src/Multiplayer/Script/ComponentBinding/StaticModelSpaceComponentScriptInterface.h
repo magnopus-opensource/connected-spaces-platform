@@ -42,7 +42,6 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
     DECLARE_SCRIPT_PROPERTY(bool, IsVRVisible);
 
-    DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldout);
     DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInAR);
     DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInVR);
 };

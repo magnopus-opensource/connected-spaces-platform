@@ -40,7 +40,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsARVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVRVisible);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, ShowAsHoldout);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, ShowAsHoldoutInAR);
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, ShowAsHoldoutInVR);
 

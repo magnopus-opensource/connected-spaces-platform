@@ -31,18 +31,6 @@ public:
     /// A holdout is an object that is rendered as a mask, cutting it out from the final image.
     /// It still participates in depth testing, allowing objects to move behind it, but does not contribute pixels to the final image.
 
-    /// @brief Checks if the component is shown as holdout when in default mode.
-    /// @return True if the component is shown as holdout when in default mode, false otherwise.
-    ///
-    /// @see HoldoutConcept
-    virtual bool GetShowAsHoldout() const = 0;
-
-    /// @brief Sets if the component is shown as holdout in default mode.
-    /// @param InValue True if the component is shown as holdout in default mode, false otherwise.
-    ///
-    /// @see HoldoutConcept
-    virtual void SetShowAsHoldout(bool InValue) = 0;
-
     /// @brief Checks if the component is shown as holdout when in AR mode.
     /// @return True if the component is shown as holdout when in AR mode, false otherwise.
     ///
@@ -55,14 +43,14 @@ public:
     /// @see HoldoutConcept
     virtual void SetShowAsHoldoutInAR(bool InValue) = 0;
 
-    /// @brief Checks if the component is shown as holdout when in VR mode.
-    /// @return True if the component is shown as holdout when in VR mode, false otherwise.
+    /// @brief Checks if the component is shown as holdout when in VR and Desktop mode.
+    /// @return True if the component is shown as holdout when in VR and Desktop mode, false otherwise.
     ///
     /// @see HoldoutConcept
     virtual bool GetShowAsHoldoutInVR() const = 0;
 
-    /// @brief Sets if the component is shown as holdout in VR mode.
-    /// @param InValue True if the component is shown as holdout in VR mode, false otherwise.
+    /// @brief Sets if the component is shown as holdout in VR and Desktop mode.
+    /// @param InValue True if the component is shown as holdout in VR and Desktop mode, false otherwise.
     ///
     /// @see HoldoutConcept
     virtual void SetShowAsHoldoutInVR(bool InValue) = 0;

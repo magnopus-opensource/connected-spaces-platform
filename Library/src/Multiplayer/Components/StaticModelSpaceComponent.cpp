@@ -37,7 +37,6 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVRVisible)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldout)] = false;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR)] = false;
     Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVR)] = false;
 
@@ -184,13 +183,6 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
 void StaticModelSpaceComponent::SetIsShadowCaster(bool Value) { SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value); }
 
 /* IRenderBehaviourComponent */
-
-bool StaticModelSpaceComponent::GetShowAsHoldout() const { return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldout)); }
-
-void StaticModelSpaceComponent::SetShowAsHoldout(bool InValue)
-{
-    SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldout), InValue);
-}
 
 bool StaticModelSpaceComponent::GetShowAsHoldoutInAR() const
 {

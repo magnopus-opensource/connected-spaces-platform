@@ -41,7 +41,6 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)] = true;
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVRVisible)] = true;
-    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldout)] = false;
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR)] = false;
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVR)] = false;
 
@@ -217,16 +216,6 @@ void AnimatedModelSpaceComponent::SetIsShadowCaster(bool Value)
 }
 
 /* IRenderBehaviourComponent */
-
-bool AnimatedModelSpaceComponent::GetShowAsHoldout() const
-{
-    return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldout));
-}
-
-void AnimatedModelSpaceComponent::SetShowAsHoldout(bool Value)
-{
-    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldout), Value);
-}
 
 bool AnimatedModelSpaceComponent::GetShowAsHoldoutInAR() const
 {
