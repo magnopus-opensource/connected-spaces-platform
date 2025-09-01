@@ -378,14 +378,9 @@ if not Project then
             kind "None"
         filter {}
 		
-		-- === Configuration for the C Implementation File ===
+		-- Configuration for the C Miniz implementation File
 		filter "files:**MinizImplementation.c"
-			-- This is the most important line. It tells Premake to treat this
-			-- as a C file, which will cause it to use the C compiler and ignore
-			-- the project-wide C++ settings. This solves the C2086 redefinition error.
 			language "C"
-
-			-- We still need to disable PCH for this file.
 			pchheader ""
 			filter "system:windows"
 				buildoptions { "/Y-" }
@@ -393,8 +388,7 @@ if not Project then
 			filter {}
 		filter {}
 
-		-- === Configuration for the C++ Wrapper File ===
-		-- We keep this filter to ensure PCH is disabled, which prevents header guard collisions.
+		-- Configuration for the C++ Miniz wrapper file
 		filter "files:**CompressionUtils.cpp"
 			pchheader ""
 			filter "system:windows"
