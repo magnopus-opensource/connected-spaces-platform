@@ -4,7 +4,7 @@ from word_reader import WordReader
 import Parser
 import MetadataTypes
 
-class TestParser(unittest.TestCase):
+class TestParserParseEnum(unittest.TestCase):
     def setUp(self):
         self.parser = Parser.Parser(log_file=sys.stdout)
 
@@ -78,3 +78,262 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result.is_flags, False)
         self.assertEqual(result.is_nested_type, False)
         self.assertEqual(result.doc_comments, None)
+
+
+class TestParserParseType(unittest.TestCase):
+    def setUp(self):
+        self.parser = Parser.Parser(log_file=sys.stdout)
+        self.maxDiff = None
+
+    def __parse_type(self, type_str: str) -> MetadataTypes.TypeMetadata:
+        wordreader = WordReader(type_str)
+        word = wordreader.next_word()
+        result, word = self.parser._Parser__parse_type(wordreader, word)
+
+        self.assertIsNone(word, f"Expected to consume entire type string, but got leftover word '{word}'")
+        return result
+
+    def test_parse_primitive_type(self):
+        """ Test parsing a simple type. """
+        result = self.__parse_type("int")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_const_simple_type(self):
+        """ Test parsing a simple type. """
+        result = self.__parse_type("const int")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_const = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_namespaced_type(self):
+        """ Test parsing a namespaced type. """
+        result = self.__parse_type("eggs::and::bacon")
+
+        expected = MetadataTypes.TypeMetadata("eggs::and", "bacon")
+        expected.template_name = "bacon"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_pointer_type(self):
+        """ Test parsing a pointer type. """
+        result = self.__parse_type("int*")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_pointer = True
+        expected.is_pointer_or_reference = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_pointer_to_pointer_type(self):
+        """ Test parsing a pointer to pointer type. """
+        result = self.__parse_type("int**")
+
+        expected = self.__parse_type("int")
+        expected.is_pointer = True
+        expected.is_pointer_pointer = True
+        expected.is_pointer_or_reference = True
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_pointer_to_pointer_to_pointer_type_fails(self):
+        """
+        Test parsing a pointer to pointer to pointer type.
+        This test case fails because the parser fails to parse the third * and leaves it as
+        a leftover word.
+        """
+        self.assertRaises(AssertionError, self.__parse_type, "int***")
+
+    def test_parse_reference_type(self):
+        """ Test parsing a reference type. """
+        result = self.__parse_type("int&")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_reference = True
+        expected.is_pointer_or_reference = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_const_pointer_type(self):
+        """ Test parsing a const pointer type. """
+        result = self.__parse_type("const int*")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_const = True
+        expected.is_pointer = True
+        expected.is_pointer_or_reference = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_pointer_const_type_unsupported(self):
+        """ Test that parsing a pointer to a const type is unsupported. """
+        with self.assertRaises(AssertionError):
+            self.__parse_type("int const *")
+
+    def test_parse_const_reference_type(self):
+        """ Test parsing a const reference type. """
+        result = self.__parse_type("const int&")
+
+        expected = MetadataTypes.TypeMetadata("", "int")
+        expected.is_const = True
+        expected.is_reference = True
+        expected.is_pointer_or_reference = True
+        expected.is_primitive = True
+        expected.template_name = "int"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_template_type(self):
+        """ Test parsing a template type. """
+        result = self.__parse_type("std::vector<int>")
+
+        int_type = self.__parse_type("int")
+
+        expected = MetadataTypes.TypeMetadata("std", "vector")
+        expected.is_template = True
+        expected.template_name = "vector"
+        expected.template_arguments = [
+            MetadataTypes.TemplateArgumentMetadata(
+                type=int_type,
+                is_last=True
+            )
+        ]
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_multi_template_type(self):
+        """ Test parsing a template type with two arguments to the template. """
+        result = self.__parse_type("std::map<int, std::string>")
+
+        int_type = self.__parse_type("int")
+        string_type = self.__parse_type("std::string")
+
+        expected = MetadataTypes.TypeMetadata("std", "map")
+        expected.is_template = True
+        expected.template_name = "map"
+        expected.template_arguments = [
+            MetadataTypes.TemplateArgumentMetadata(
+                type=int_type,
+                is_last=False
+            ),
+            MetadataTypes.TemplateArgumentMetadata(
+                type=string_type,
+                is_last=True
+            )
+        ]
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_nested_template_type(self):
+        """ Test parsing a template type with a nested template argument. """
+        result = self.__parse_type("std::map<int, std::vector<std::string>>")
+
+        int_type = self.__parse_type("int")
+        vector_type = self.__parse_type("std::vector<std::string>")
+
+        expected = MetadataTypes.TypeMetadata("std", "map")
+        expected.is_template = True
+        expected.template_name = "map"
+        expected.template_arguments = [
+            MetadataTypes.TemplateArgumentMetadata(
+                type=int_type,
+                is_last=False
+            ),
+            MetadataTypes.TemplateArgumentMetadata(
+                type=vector_type,
+                is_last=True
+            )
+        ]
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_forward_declared_type(self):
+        """ Test parsing a forward-declared type. """
+        result = self.__parse_type("class Foo")
+
+        expected = MetadataTypes.TypeMetadata("", "Foo")
+        expected.is_inline_forward = True
+        expected.template_name = "Foo"
+        expected.template_arguments = []
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_optional_type(self):
+        """ Test the special parsing of optional types (using csp::common::Optional). """
+        result = self.__parse_type("csp::common::Optional<csp::common::String>")
+
+        expected = self.__parse_type("csp::common::String")
+        expected.is_optional = True
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_type(self):
+        """ Test parsing a function type. """
+        result = self.__parse_type("std::function<void()>")
+
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, None, False, False, [])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_type_with_args(self):
+        """ Test parsing a function type with arguments. """
+        result = self.__parse_type("std::function<void(int, const std::string&)>")
+
+        int_type = self.__parse_type("int")
+        string_type = self.__parse_type("const std::string&")
+
+        arg0 = MetadataTypes.ParameterMetadata("arg1", int_type, False, False, False)
+        arg1 = MetadataTypes.ParameterMetadata("arg2", string_type, False, False, True)
+
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, None, False, True, parameters=[
+            arg0, arg1])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
+
+    def test_parse_function_with_return_type(self):
+        """ Test parsing a function type with a return type. """
+        result = self.__parse_type("std::function<int()>")
+
+        int_type = self.__parse_type("int")
+        function_metadata = MetadataTypes.FunctionMetadata(None, 0, 0, None, None, int_type, True, False, [])
+
+        expected = MetadataTypes.TypeMetadata("std", "function")
+        expected.is_function_signature = True
+        expected.function_signature = function_metadata
+        expected.template_arguments = []
+        expected.template_name = "function"
+
+        self.assertDictEqual(result.__dict__, expected.__dict__)
