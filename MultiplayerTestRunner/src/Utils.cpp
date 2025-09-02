@@ -77,8 +77,6 @@ void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
     constexpr char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
 
-    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS");
-
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
     ClientHeaderInfo.ClientOS = "MultiplayerTestOS";
@@ -87,7 +85,7 @@ void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
     ClientHeaderInfo.ClientEnvironment = "ODev";
     ClientHeaderInfo.CHSEnvironment = "oDev";
 
-    csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo);
 }
 
 } // namespace Utils

@@ -122,14 +122,16 @@ public:
     /// @param EndpointRootURI csp::common::String : Root URI for service endpoints
     /// @param Tenant csp::common::String : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants cannot
     /// interact with each other.
+    /// @param ClientUserAgentHeader csp::ClientUserAgent : The Client Info data
     /// @return bool : True for successful initialisation.
-    static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
+    static bool Initialise(
+        const csp::common::String& EndpointRootURI, const csp::common::String& Tenant, const csp::ClientUserAgent& ClientUserAgentHeader);
 
     // Hidden function for testing. Lets us pass in state that would otherwise be injected in a set way in the SystemsManager.
     // In a different, perhaps better api, this wouldn't be necessary as constructors would inject this at client level and the configurability would
     // be there by default
-    CSP_NO_EXPORT static bool InitialiseWithInject(
-        const csp::common::String& EndpointRootURI, const csp::common::String& Tenant, csp::multiplayer::ISignalRConnection* SignalRInject);
+    CSP_NO_EXPORT static bool InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
+        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject);
 
     /// @brief This should be used at the end of the application lifecycle.
     /// Clears event queues and destroys foundation systems.
@@ -173,11 +175,6 @@ public:
     /// @return EndpointURIs class with deduced endpoint URIs.
     static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI);
 
-    /// @brief Sets a class containing all relevant Client info currently set for Foundation.
-    /// Used internally to generate ClientUserAgentString.
-    /// @param The Client Info class with current Client Info data
-    static void SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader);
-
     /// @brief Gets a class containing all relevant Client info currently set for Foundation.
     /// @return const ClientUserAgent& : The Client Info class with current Client Info data
     static const ClientUserAgent& GetClientUserAgentInfo();
@@ -192,6 +189,10 @@ public:
     static const csp::common::String& GetTenant();
 
 private:
+    // Populates ClientUserAgentInfo data object with the relevant Client info set during initialisation
+    // and generates the ClientUserAgentString which is sent as part of the Http payload.
+    static void SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader);
+
     static bool IsInitialised;
     static EndpointURIs* Endpoints;
     static ClientUserAgent* ClientUserAgentInfo;
