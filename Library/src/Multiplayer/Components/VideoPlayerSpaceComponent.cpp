@@ -15,8 +15,8 @@
  */
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
 namespace
@@ -50,6 +50,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)] = static_cast<int64_t>(0);
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)] = true;
+    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
@@ -215,6 +216,16 @@ void VideoPlayerSpaceComponent::SetIsVisible(bool Value) { SetProperty(static_ca
 bool VideoPlayerSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)); }
 
 void VideoPlayerSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible), Value); }
+
+bool VideoPlayerSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible));
+}
+
+void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), Value);
+}
 
 /* IEnableableComponent */
 

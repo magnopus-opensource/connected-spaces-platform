@@ -33,6 +33,7 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)] = true;
     Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)] = csp::common::Vector3::One();
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
@@ -119,6 +120,16 @@ bool GaussianSplatSpaceComponent::GetIsARVisible() const { return GetBooleanProp
 void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
 {
     SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
+}
+
+bool GaussianSplatSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible));
+}
+
+void GaussianSplatSpaceComponent::SetIsVirtualVisible(bool InValue)
+{
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVirtualVisible), InValue);
 }
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const

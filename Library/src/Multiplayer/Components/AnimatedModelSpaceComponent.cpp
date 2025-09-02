@@ -40,6 +40,9 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(csp::common::LogSystem*
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)] = true;
+    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR)] = false;
+    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual)] = false;
 
     SetScriptInterface(new AnimatedModelSpaceComponentScriptInterface(this));
 }
@@ -184,6 +187,16 @@ bool AnimatedModelSpaceComponent::GetIsARVisible() const { return GetBooleanProp
 
 void AnimatedModelSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value); }
 
+bool AnimatedModelSpaceComponent::GetIsVirtualVisible() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible));
+}
+
+void AnimatedModelSpaceComponent::SetIsVirtualVisible(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVirtualVisible), Value);
+}
+
 /* IThirdPartyRefComponent */
 
 const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRef() const
@@ -206,6 +219,28 @@ bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
 void AnimatedModelSpaceComponent::SetIsShadowCaster(bool Value)
 {
     SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster), Value);
+}
+
+/* IRenderBehaviourComponent */
+
+bool AnimatedModelSpaceComponent::GetShowAsHoldoutInAR() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR));
+}
+
+void AnimatedModelSpaceComponent::SetShowAsHoldoutInAR(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInAR), Value);
+}
+
+bool AnimatedModelSpaceComponent::GetShowAsHoldoutInVirtual() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual));
+}
+
+void AnimatedModelSpaceComponent::SetShowAsHoldoutInVirtual(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ShowAsHoldoutInVirtual), Value);
 }
 
 } // namespace csp::multiplayer
