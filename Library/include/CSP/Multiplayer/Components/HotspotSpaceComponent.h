@@ -40,7 +40,7 @@ enum class HotspotPropertyKeys
     IsSpawnPoint,
     IsVisible,
     IsARVisible,
-    IsVRVisible,
+    IsVirtualVisible,
     Num
 };
 
@@ -106,10 +106,10 @@ public:
     bool GetIsARVisible() const override;
     /// @copydoc IVisibleComponent::SetIsARVisible()
     void SetIsARVisible(bool InValue) override;
-    /// @copydoc IVisibleComponent::GetIsVRVisible()
-    bool GetIsVRVisible() const override;
-    /// @copydoc IVisibleComponent::SetIsVRVisible()
-    void SetIsVRVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsVirtualVisible()
+    bool GetIsVirtualVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVirtualVisible()
+    void SetIsVirtualVisible(bool InValue) override;
     /// @}
 };
 

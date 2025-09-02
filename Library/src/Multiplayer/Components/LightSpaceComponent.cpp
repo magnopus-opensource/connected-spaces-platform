@@ -38,7 +38,7 @@ LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, Spac
     Properties[static_cast<uint32_t>(LightPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef)] = "";
     Properties[static_cast<uint32_t>(LightPropertyKeys::LightShadowType)] = static_cast<int64_t>(LightShadowType::None);
-    Properties[static_cast<uint32_t>(LightPropertyKeys::IsVRVisible)] = true;
+    Properties[static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new LightSpaceComponentScriptInterface(this));
 }
@@ -101,9 +101,9 @@ bool LightSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(sta
 
 void LightSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsARVisible), Value); }
 
-bool LightSpaceComponent::GetIsVRVisible() const { return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsVRVisible)); }
+bool LightSpaceComponent::GetIsVirtualVisible() const { return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible)); }
 
-void LightSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVRVisible), Value); }
+void LightSpaceComponent::SetIsVirtualVisible(bool Value) { SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVirtualVisible), Value); }
 
 const csp::common::String& LightSpaceComponent::GetLightCookieAssetId() const
 {

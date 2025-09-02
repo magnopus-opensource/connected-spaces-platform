@@ -40,7 +40,7 @@ DEFINE_SCRIPT_PROPERTY_VEC3(ScreenSharingSpaceComponent, Scale);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(ScreenSharingSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ScreenSharingSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(ScreenSharingSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(ScreenSharingSpaceComponent, bool, bool, IsVirtualVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ScreenSharingSpaceComponent, bool, bool, IsShadowCaster);
 
 } // namespace csp::multiplayer

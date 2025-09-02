@@ -47,6 +47,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, bool, bool, IsVolumetric);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(FogSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer

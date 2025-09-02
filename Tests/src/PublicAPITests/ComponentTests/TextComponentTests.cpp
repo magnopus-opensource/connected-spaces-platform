@@ -85,7 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(TextComponent->GetComponentType(), ComponentType::Text);
     EXPECT_EQ(TextComponent->GetHeight(), 1.0f);
-    EXPECT_EQ(TextComponent->GetIsVRVisible(), true);
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(TextComponent->GetIsARVisible(), true);
     EXPECT_EQ(TextComponent->GetIsVisible(), true);
     EXPECT_EQ(TextComponent->GetRotation().W, 1);
@@ -106,7 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     TextComponent->SetHeight(2.0f);
     TextComponent->SetWidth(2.0f);
     TextComponent->SetBillboardMode(BillboardMode::YawLockedBillboard);
-    TextComponent->SetIsVRVisible(false);
+    TextComponent->SetIsVirtualVisible(false);
     TextComponent->SetIsARVisible(false);
     TextComponent->SetIsVisible(false);
     TextComponent->SetBackgroundColor(csp::common::Vector3::One());
@@ -126,7 +126,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
     EXPECT_FLOAT_EQ(TextComponent->GetBackgroundColor().Z, 1.0f);
     EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
     EXPECT_FLOAT_EQ(TextComponent->GetHeight(), 2.0f);
-    EXPECT_EQ(TextComponent->GetIsVRVisible(), false);
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(TextComponent->GetIsARVisible(), false);
     EXPECT_EQ(TextComponent->GetIsVisible(), false);
     EXPECT_FLOAT_EQ(TextComponent->GetRotation().W, 1.0f);
@@ -208,7 +208,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 		text.billboardMode = 2;
 		text.isVisible = false;
 		text.isARVisible = false;
-		text.isVRVisible = false;
+		text.isVirtualVisible = false;
 
     )xx";
 
@@ -250,7 +250,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 
     EXPECT_EQ(TextComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
 
-    EXPECT_EQ(TextComponent->GetIsVRVisible(), false);
+    EXPECT_EQ(TextComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(TextComponent->GetIsARVisible(), false);
     EXPECT_EQ(TextComponent->GetIsVisible(), false);
 

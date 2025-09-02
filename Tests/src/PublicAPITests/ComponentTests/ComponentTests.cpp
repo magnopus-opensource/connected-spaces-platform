@@ -179,15 +179,15 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, VirtualVisibleTest)
     {
         auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
 
-        EXPECT_TRUE(VisibleComponent->GetIsVRVisible());
+        EXPECT_TRUE(VisibleComponent->GetIsVirtualVisible());
     }
 
     for (auto Component : Components)
     {
         auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
-        VisibleComponent->SetIsVRVisible(false);
+        VisibleComponent->SetIsVirtualVisible(false);
 
-        EXPECT_FALSE(VisibleComponent->GetIsVRVisible());
+        EXPECT_FALSE(VisibleComponent->GetIsVirtualVisible());
 
         delete Component;
     }

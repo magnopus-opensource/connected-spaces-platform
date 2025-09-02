@@ -38,7 +38,7 @@ DEFINE_SCRIPT_PROPERTY_VEC4(ButtonSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(ButtonSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ButtonSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(ButtonSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(ButtonSpaceComponent, bool, bool, IsVirtualVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ButtonSpaceComponent, bool, bool, IsEnabled);
 
 } // namespace csp::multiplayer

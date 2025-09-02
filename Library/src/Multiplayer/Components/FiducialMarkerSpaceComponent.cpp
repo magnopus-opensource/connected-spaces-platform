@@ -32,7 +32,7 @@ FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(csp::common::LogSyste
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale)] = csp::common::Vector3::One();
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVRVisible)] = true;
+    Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible)] = true;
 
     SetScriptInterface(new FiducialMarkerSpaceComponentScriptInterface(this));
 }
@@ -129,11 +129,14 @@ bool FiducialMarkerSpaceComponent::GetIsARVisible() const
 
 void FiducialMarkerSpaceComponent::SetIsARVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible), Value); }
 
-bool FiducialMarkerSpaceComponent::GetIsVRVisible() const
+bool FiducialMarkerSpaceComponent::GetIsVirtualVisible() const
 {
-    return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVRVisible));
+    return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible));
 }
 
-void FiducialMarkerSpaceComponent::SetIsVRVisible(bool Value) { SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVRVisible), Value); }
+void FiducialMarkerSpaceComponent::SetIsVirtualVisible(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVirtualVisible), Value);
+}
 
 } // namespace csp::multiplayer

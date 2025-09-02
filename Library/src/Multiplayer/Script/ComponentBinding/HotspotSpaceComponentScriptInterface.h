@@ -39,7 +39,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsSpawnPoint);
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
     DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
-    DECLARE_SCRIPT_PROPERTY(bool, IsVRVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVirtualVisible);
 };
 
 } // namespace csp::multiplayer

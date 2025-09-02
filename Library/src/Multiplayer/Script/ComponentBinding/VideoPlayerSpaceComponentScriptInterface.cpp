@@ -52,7 +52,7 @@ DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPl
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVirtualVisible);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsEnabled);
 

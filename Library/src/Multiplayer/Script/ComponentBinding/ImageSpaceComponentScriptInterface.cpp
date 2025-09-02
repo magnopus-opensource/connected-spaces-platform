@@ -41,6 +41,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, csp::multiplayer::DisplayMode, 
 DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsEmissive);
 DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(ImageSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer

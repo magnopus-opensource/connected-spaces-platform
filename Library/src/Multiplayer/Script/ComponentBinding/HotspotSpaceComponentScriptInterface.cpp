@@ -41,6 +41,6 @@ DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsSpawnPoint);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsARVisible);
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVRVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer

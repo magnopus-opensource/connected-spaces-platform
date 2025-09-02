@@ -176,7 +176,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 		fog.isVolumetric = true;
         fog.isVisible = false;
         fog.isARVisible = false;
-        fog.isVRVisible = false;
+        fog.isVirtualVisible = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(FogScriptText.c_str());
@@ -197,7 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     EXPECT_TRUE(FogComponent->GetIsVolumetric());
     EXPECT_EQ(FogComponent->GetIsVisible(), false);
     EXPECT_EQ(FogComponent->GetIsARVisible(), false);
-    EXPECT_EQ(FogComponent->GetIsVRVisible(), false);
+    EXPECT_EQ(FogComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
