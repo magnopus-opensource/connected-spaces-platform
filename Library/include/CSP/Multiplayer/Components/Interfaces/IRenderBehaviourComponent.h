@@ -43,17 +43,17 @@ public:
     /// @see HoldoutConcept
     virtual void SetShowAsHoldoutInAR(bool InValue) = 0;
 
-    /// @brief Checks if the component is shown as holdout when in VR and Desktop mode.
-    /// @return True if the component is shown as holdout when in VR and Desktop mode, false otherwise.
+    /// @brief Checks if the component is shown as holdout when in Virtual mode.
+    /// @return True if the component is shown as holdout when in Virtual mode, false otherwise.
     ///
     /// @see HoldoutConcept
-    virtual bool GetShowAsHoldoutInVR() const = 0;
+    virtual bool GetShowAsHoldoutInVirtual() const = 0;
 
-    /// @brief Sets if the component is shown as holdout in VR and Desktop mode.
-    /// @param InValue True if the component is shown as holdout in VR and Desktop mode, false otherwise.
+    /// @brief Sets if the component is shown as holdout in Virtual mode.
+    /// @param InValue True if the component is shown as holdout in Virtual mode, false otherwise.
     ///
     /// @see HoldoutConcept
-    virtual void SetShowAsHoldoutInVR(bool InValue) = 0;
+    virtual void SetShowAsHoldoutInVirtual(bool InValue) = 0;
 
 protected:
     virtual ~IRenderBehaviourComponent() = default;
