@@ -129,11 +129,13 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     delete[] UploadFileData;
 
+    EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVirtualVisible(), true);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsARVisible(), true);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVisible(), true);
 
     FiducialMarkerSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
     FiducialMarkerSpaceComponentInstance->SetMarkerAssetId(Asset.Id);
+    FiducialMarkerSpaceComponentInstance->SetIsVirtualVisible(false);
     FiducialMarkerSpaceComponentInstance->SetIsARVisible(false);
 
     auto FiducialMarkerSpaceComponentKey = FiducialMarkerSpaceComponentInstance->GetId();
@@ -141,6 +143,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetAssetCollectionId(), Asset.AssetCollectionId);
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetMarkerAssetId(), Asset.Id);
+    EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(StoredFiducialMarkerSpaceComponent->GetIsARVisible(), false);
     EXPECT_EQ(FiducialMarkerSpaceComponentInstance->GetIsVisible(), true);
 
@@ -196,10 +199,14 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 
     // Setup script
     const std::string FiducialMarkerScriptText = R"xx(
-	
 		var marker = ThisEntity.getFiducialMarkerComponents()[0];
-		
+		marker.name = "Updated_FiducialMarkerScriptName";
+        marker.position = [1, 1, 1];
+        marker.scale = [2, 2, 2];
+		marker.rotation = [1, 1, 1, 1];
 		marker.isVisible = false;
+        marker.isARVisible = false;
+        marker.isVirtualVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
@@ -210,7 +217,13 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
+    EXPECT_EQ(FiducialMarkerComponent->GetName(), "Updated_FiducialMarkerScriptName");
+    EXPECT_EQ(FiducialMarkerComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(FiducialMarkerComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(FiducialMarkerComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(FiducialMarkerComponent->GetIsVisible(), false);
+    EXPECT_EQ(FiducialMarkerComponent->GetIsARVisible(), false);
+    EXPECT_EQ(FiducialMarkerComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

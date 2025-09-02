@@ -39,5 +39,6 @@ DEFINE_SCRIPT_PROPERTY_VEC4(ExternalLinkSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_TYPE(ExternalLinkSpaceComponent, bool, bool, IsEnabled);
 DEFINE_SCRIPT_PROPERTY_TYPE(ExternalLinkSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(ExternalLinkSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(ExternalLinkSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer

@@ -51,6 +51,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, TimeSincePl
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerSourceType, int32_t, VideoPlayerSourceType);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVirtualVisible);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsEnabled);
 
