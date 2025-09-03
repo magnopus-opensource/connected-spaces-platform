@@ -1866,7 +1866,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = std::make_shared<chsaggregation::DuplicateSpaceRequest>();
+    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
     Request->SetSpaceId(SpaceId);
     Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
     Request->SetNewUniqueName(NewName);

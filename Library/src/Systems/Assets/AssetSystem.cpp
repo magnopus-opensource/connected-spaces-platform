@@ -571,31 +571,20 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
         = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
             Callback, nullptr);
 
+    auto PrototypeFilters = std::shared_ptr<chs::PrototypeFilters>();
+    PrototypeFilters->SetHasGroup(true);
+
+    auto DuplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>();
+    DuplicateGroupPrototypesOptions->SetOriginalGroupId(SourceSpaceId);
+    DuplicateGroupPrototypesOptions->SetNewGroupId(DestSpaceId);
+    DuplicateGroupPrototypesOptions->SetAdditionalFilters(PrototypeFilters);
+    DuplicateGroupPrototypesOptions->SetAsyncCall(CopyAsync);
+
     // Use `GET /api/v1/prototypes` and only pass asset collection IDs
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
-        ->prototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(std::nullopt, // Tags
-            std::nullopt, // ExcludedTags
-            std::nullopt, // TagsAll
-            AssetCollectionIds, // const std::optional<std::vector<utility::string_t>>& Ids
-            std::nullopt, // Names
-            std::nullopt, // PartialNames
-            std::nullopt, // ExcludedIds
-            std::nullopt, // PointOfInterestIds
-            std::nullopt, // ParentId
-            std::nullopt, // GroupIds
-            std::nullopt, // Types
-            true, // HasGroup
-            std::nullopt, // CreatedBy
-            std::nullopt, // CreatedAfter
-            std::nullopt, // PrototypeOwnerIds
-            std::nullopt, // ReadAccessFilters
-            std::nullopt, // WriteAccessFilters
-            std::nullopt, // OrganizationIds (no longer used)
-            SourceSpaceId, // originalGroupId
+        ->prototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(SourceSpaceId, // originalGroupId
             DestSpaceId, // newGroupId
-            std::nullopt, // shallowCopy
-            CopyAsync, // asyncCall
-            std::nullopt, // onBehalfOf
+            DuplicateGroupPrototypesOptions, // RequestBody
             ResponseHandler, // ResponseHandler
             csp::common::CancellationToken::Dummy() // CancellationToken
         );
