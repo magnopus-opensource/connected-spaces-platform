@@ -1,0 +1,84 @@
+{
+    "checkpointVersion": 1,
+    "checkpointTimestamp": "2025-08-29T15:39:23.415991+00:00",
+    "spaceId": "68b1c760015bb6793cad24a7",
+    "tenantName": "OKO_TESTS",
+    "data": {
+        "group": {
+            "id": "68b1c760015bb6793cad24a7",
+            "createdBy": "68b1c75c015bb6793cad24a5",
+            "createdAt": "2025-08-29T15:29:36.802+00:00",
+            "groupOwnerId": "68b1c75c015bb6793cad24a5",
+            "groupType": "space",
+            "name": "checkpoint-material",
+            "users": [
+                "68b1c75c015bb6793cad24a5"
+            ],
+            "bannedUsers": [],
+            "moderators": [],
+            "discoverable": false,
+            "autoModerator": false,
+            "requiresInvite": true,
+            "archived": false,
+            "tags": [],
+            "isCurrentUserOwner": false,
+            "isCurrentUserMember": false,
+            "isCurrentUserModerator": false,
+            "isCurrentUserBanned": false
+        },
+        "objectMessages": [],
+        "prototypes": [
+            {
+                "id": "68b1c76243534f7d58ea977c",
+                "name": "ASSET_COLLECTION_MATERIAL_68b1c760015bb6793cad24a7_Material",
+                "tags": [
+                    "Tag",
+                    "origin-68b1c76243534f7d58ea977c"
+                ],
+                "metadata": {
+                    "Key": "Value",
+                    "ShaderType": "Standard"
+                },
+                "uiStrings": {},
+                "state": {},
+                "groupIds": [
+                    "68b1c760015bb6793cad24a7"
+                ],
+                "createdBy": "68b1c75c015bb6793cad24a5",
+                "createdAt": "2025-08-29T15:29:38.42+00:00",
+                "updatedBy": "68b1c75c015bb6793cad24a5",
+                "updatedAt": "2025-08-29T15:29:38.42+00:00",
+                "highlander": false,
+                "type": "Default",
+                "systemOwned": false,
+                "readAccess": [],
+                "writeAccess": []
+            }
+        ],
+        "assetDetails": [
+            {
+                "prototypeId": "68b1c76243534f7d58ea977c",
+                "id": "68b1c76343534f7d58ea977d",
+                "fileName": "ASSET_MATERIAL_FILE_68b1c760015bb6793cad24a7_Material.json",
+                "name": "ASSET_MATERIAL_68b1c760015bb6793cad24a7_Material",
+                "languageCode": "en-us",
+                "assetType": "Material",
+                "supportedPlatforms": [
+                    "Default"
+                ],
+                "style": [
+                    "Default"
+                ],
+                "uri": "https://world-streaming.magnopus-dev.cloud/O2Dev/68b1c76243534f7d58ea977c/68b1c76343534f7d58ea977d/1/ASSET_MATERIAL_FILE_68b1c760015bb6793cad24a7_Material.json?t=1756481380162",
+                "version": "1",
+                "mimeType": "application/json",
+                "tags": [
+                    "origin-68b1c76343534f7d58ea977d"
+                ],
+                "sizeInBytes": 231
+            }
+        ],
+        "sequences": [],
+        "anchors": []
+    }
+}

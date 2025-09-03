@@ -1,0 +1,35 @@
+{
+    "checkpointVersion": 1,
+    "checkpointTimestamp": "2025-08-26T16:15:24.6191891+00:00",
+    "spaceId": "68addce4985d7612f76b9461",
+    "tenantName": "OKO_TESTS",
+    "data": {
+        "group": {
+            "id": "68addce4985d7612f76b9461",
+            "createdBy": "68addce0985d7612f76b945e",
+            "createdAt": "2025-08-26T16:12:20.701+00:00",
+            "groupOwnerId": "68addce0985d7612f76b945e",
+            "groupType": "space",
+            "name": "checkpoint-empty",
+            "users": [
+                "68addce0985d7612f76b945e"
+            ],
+            "bannedUsers": [],
+            "moderators": [],
+            "discoverable": false,
+            "autoModerator": false,
+            "requiresInvite": true,
+            "archived": false,
+            "tags": [],
+            "isCurrentUserOwner": false,
+            "isCurrentUserMember": false,
+            "isCurrentUserModerator": false,
+            "isCurrentUserBanned": false
+        },
+        "objectMessages": [],
+        "prototypes": [],
+        "assetDetails": [],
+        "sequences": [],
+        "anchors": []
+    }
+}
