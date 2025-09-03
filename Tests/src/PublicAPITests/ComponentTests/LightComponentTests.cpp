@@ -70,7 +70,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String CallbackAssetId;
 
@@ -199,7 +199,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String CallbackAssetId;
 
@@ -260,7 +260,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightSpaceScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
     csp::common::String ObjectName = "Object 1";

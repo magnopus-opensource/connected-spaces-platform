@@ -51,18 +51,19 @@ class ClientElectionManager
     /** @endcond */
 
 public:
-    ClientElectionManager(OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
+    ClientElectionManager(
+        OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
     ~ClientElectionManager();
 
-    void OnConnect(const OnlineRealtimeEngine::SpaceEntityList& Avatars, const OnlineRealtimeEngine::SpaceEntityList& Objects);
+    void OnConnect(const csp::common::List<SpaceEntity*>& Avatars, const csp::common::List<SpaceEntity*>& Objects);
     void OnDisconnect();
 
-    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
+    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus);
 
-    void OnClientAdd(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars, NetworkEventBus& NetworkEventBus);
-    void OnClientRemove(const SpaceEntity* ClientAvatar, const OnlineRealtimeEngine::SpaceEntityList& Avatars);
-    void OnObjectAdd(const SpaceEntity* Object, const OnlineRealtimeEngine::SpaceEntityList& Objects);
-    void OnObjectRemove(const SpaceEntity* Object, const OnlineRealtimeEngine::SpaceEntityList& Objects);
+    void OnClientAdd(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars, NetworkEventBus& NetworkEventBus);
+    void OnClientRemove(const SpaceEntity* ClientAvatar, const csp::common::List<SpaceEntity*>& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Objects);
+    void OnObjectRemove(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Objects);
 
     void Update();
 

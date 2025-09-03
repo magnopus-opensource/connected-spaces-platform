@@ -63,7 +63,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
     csp::common::String ObjectName = "Object 1";

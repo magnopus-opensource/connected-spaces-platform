@@ -24,6 +24,7 @@
 namespace csp::common
 {
 class LogSystem;
+class IRealtimeEngine;
 }
 
 namespace csp::systems
@@ -48,7 +49,7 @@ class CSP_API EntityScript
 public:
     // Don't want to be constructable by public users.
     CSP_START_IGNORE
-    EntityScript(SpaceEntity* InEntity, OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
+    EntityScript(SpaceEntity* InEntity, csp::common::IRealtimeEngine* InRealtimeEngine, csp::common::IJSScriptRunner* ScriptRunner,
         csp::common::LogSystem* LogSystem);
     CSP_END_IGNORE
 
@@ -153,7 +154,7 @@ private:
 
     bool HasBinding;
 
-    OnlineRealtimeEngine* OnlineRealtimeEnginePtr;
+    csp::common::IRealtimeEngine* RealtimeEnginePtr;
 
     // may be null
     csp::common::LogSystem* LogSystem = nullptr;

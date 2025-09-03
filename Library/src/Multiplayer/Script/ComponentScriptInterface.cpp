@@ -86,7 +86,7 @@ void ComponentScriptInterface::SendPropertyUpdate()
 {
     if (Component)
     {
-        Component->GetParent()->MarkForUpdate();
+        Component->GetParent()->QueueUpdate();
     }
 }
 

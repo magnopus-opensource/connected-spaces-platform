@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include <chrono>
@@ -52,6 +53,12 @@ class HotspotSequenceSystem;
 class ConversationSystemInternal;
 
 } // namespace csp::systems
+
+namespace csp::multiplayer
+{
+class OnlineRealtimeEngine;
+class OfflineRealtimeEngine;
+} // namespace csp::multiplayer
 
 namespace csp
 {
@@ -156,10 +163,11 @@ public:
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
 
-    // Convenience method for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
+    // Convenience methods for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
     // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
-    // @deprecated This method is a transitional method, and should not be expected to exist in the long term.
-    csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
+    CSP_NO_EXPORT csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
+    CSP_NO_EXPORT csp::multiplayer::OfflineRealtimeEngine* MakeOfflineRealtimeEngine();
+    CSP_NO_EXPORT csp::common::IRealtimeEngine* MakeRealtimeEngine(csp::common::RealtimeEngineType RealtimeEngineType);
 
 private:
     SystemsManager();
