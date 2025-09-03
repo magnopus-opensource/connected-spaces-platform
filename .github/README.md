@@ -38,7 +38,7 @@ NPM packages are available for Web and Unity and can be found on npmjs.
 - Web: https://www.npmjs.com/package/connected-spaces-platform.web
 
 - Unity: https://www.npmjs.com/package/connected-spaces-platform.unity.core
-  - For detailed installation instructions head over [here](https://builds.magnoboard.com/connected-spaces-platform/manual/getting_started/csharp.html).
+  - For detailed installation instructions head over [here](https://connected-spaces-platform.net/manual/building/csharp.html).
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
@@ -72,12 +72,12 @@ To help you get started using the Connected Spaces Platform, we have a set of ex
 
 CSP build instructions for each supported language are below.
 
-- [Building for Web](https://builds.magnoboard.com/connected-spaces-platform/manual/building/web.html)
-- [Building for C++](https://builds.magnoboard.com/connected-spaces-platform/manual/building/cpp.html)
-- [Building for C#](https://builds.magnoboard.com/connected-spaces-platform/manual/building/csharp.html)
-- [Building for Android](https://builds.magnoboard.com/connected-spaces-platform/manual/building/android.html)
-- [Building for MacOS](https://builds.magnoboard.com/connected-spaces-platform/manual/building/macos.html)
-- [Building for IOS](https://builds.magnoboard.com/connected-spaces-platform/manual/building/ios.html)
+- [Building for Web](https://connected-spaces-platform.net/manual/building/web.html)
+- [Building for C++](https://connected-spaces-platform.net/manual/building/cpp.html)
+- [Building for C#](https://connected-spaces-platform.net/manual/building/csharp.html)
+- [Building for Android](https://connected-spaces-platform.net/manual/building/android.html)
+- [Building for MacOS](https://connected-spaces-platform.net/manual/building/macos.html)
+- [Building for IOS](https://connected-spaces-platform.net/manual/building/ios.html)
 
 ## 👷‍♂️ Contributions
 
