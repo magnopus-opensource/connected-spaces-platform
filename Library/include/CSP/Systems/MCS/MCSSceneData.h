@@ -17,6 +17,7 @@
 
 #include "Services/AggregationService/Dto.h"
 #include "Services/PrototypeService/Dto.h"
+#include "Services/SpatialDataService/Dto.h"
 #include "Services/UserService/Dto.h"
 
 namespace csp::json
@@ -37,6 +38,7 @@ public:
     std::vector<csp::services::generated::prototypeservice::PrototypeDto> Prototypes;
     std::vector<csp::services::generated::prototypeservice::AssetDetailDto> AssetDetails;
     std::vector<csp::services::generated::aggregationservice::SequenceDto> Sequences;
+    std::vector<csp::services::generated::spatialdataservice::AnchorDto> Anchors;
 };
 
 }

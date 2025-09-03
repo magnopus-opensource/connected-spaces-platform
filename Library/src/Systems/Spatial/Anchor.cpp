@@ -23,6 +23,28 @@ namespace chs = csp::services::generated::spatialdataservice;
 namespace
 {
 
+void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, csp::systems::AnchorResolution& AnchorResolution)
+{
+    AnchorResolution.Id = Dto.GetId();
+    AnchorResolution.AnchorId = Dto.GetAnchorId();
+    AnchorResolution.SuccessfullyResolved = Dto.GetSuccessfullyResolved();
+    AnchorResolution.ResolveAttempted = Dto.GetResolveAttempted();
+    AnchorResolution.ResolveTime = Dto.GetResolveTime();
+
+    const auto& DtoTags = Dto.GetTags();
+    AnchorResolution.Tags = csp::common::Array<csp::common::String>(DtoTags.size());
+
+    for (size_t idx = 0; idx < DtoTags.size(); ++idx)
+    {
+        AnchorResolution.Tags[idx] = DtoTags[idx];
+    }
+}
+
+} // namespace
+
+namespace csp::systems
+{
+
 void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
 {
     Anchor.Id = Dto.GetMgsId();
@@ -107,28 +129,6 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
         }
     }
 }
-
-void AnchorResolutionDtoToAnchorResolution(const chs::AnchorResolutionDto& Dto, csp::systems::AnchorResolution& AnchorResolution)
-{
-    AnchorResolution.Id = Dto.GetId();
-    AnchorResolution.AnchorId = Dto.GetAnchorId();
-    AnchorResolution.SuccessfullyResolved = Dto.GetSuccessfullyResolved();
-    AnchorResolution.ResolveAttempted = Dto.GetResolveAttempted();
-    AnchorResolution.ResolveTime = Dto.GetResolveTime();
-
-    const auto& DtoTags = Dto.GetTags();
-    AnchorResolution.Tags = csp::common::Array<csp::common::String>(DtoTags.size());
-
-    for (size_t idx = 0; idx < DtoTags.size(); ++idx)
-    {
-        AnchorResolution.Tags[idx] = DtoTags[idx];
-    }
-}
-
-} // namespace
-
-namespace csp::systems
-{
 
 OlyAnchorPosition::OlyAnchorPosition()
     : X(0.0)

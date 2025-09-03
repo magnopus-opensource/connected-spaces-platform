@@ -22,6 +22,11 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/WebService.h"
 
+namespace csp::services::generated::spatialdataservice
+{
+class AnchorDto;
+}
+
 namespace csp::services
 {
 
@@ -33,6 +38,7 @@ CSP_END_IGNORE
 
 namespace csp::systems
 {
+class Anchor;
 
 enum class AnchorProvider
 {
@@ -54,6 +60,8 @@ public:
     double Y;
     double Z;
 };
+
+void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::AnchorDto& Dto, csp::systems::Anchor& Anchor);
 
 /// @ingroup Anchor System
 /// @brief Data representation of an Anchor
