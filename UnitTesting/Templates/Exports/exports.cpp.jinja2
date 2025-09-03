@@ -1,7 +1,7 @@
 {% from 'helpers.jinja2' import are_values_notequal %}
 
 // Include the generated C interface so it gets compiled
-#include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
+#include "../../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 
 #include <cassert>
 #include <cmath>
@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <chrono>
 
-#include "generated_exports.h"
+#include "generated/generated_exports.h"
 
 
 using namespace std::chrono_literals;

@@ -23,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the visibility of the component when in default mode or in AR mode.
+/// @brief Controls the visibility of the component when in default mode, AR mode or Virtual mode.
 CSP_INTERFACE class CSP_API IVisibleComponent
 {
 public:
@@ -42,6 +42,14 @@ public:
     /// @brief Sets if the component is visible in AR mode.
     /// @param InValue True if the component is visible in AR mode, false otherwise.
     virtual void SetIsARVisible(bool InValue) = 0;
+
+    /// @brief Checks if the component is visible when in Virtual mode.
+    /// @return True if the component is visible when in Virtual mode, false otherwise.
+    virtual bool GetIsVirtualVisible() const = 0;
+
+    /// @brief Sets if the component is visible in Virtual mode.
+    /// @param InValue True if the component is visible in Virtual mode, false otherwise.
+    virtual void SetIsVirtualVisible(bool InValue) = 0;
 
 protected:
     virtual ~IVisibleComponent() = default;

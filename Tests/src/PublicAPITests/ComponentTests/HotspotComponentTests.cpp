@@ -65,7 +65,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -80,6 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
     EXPECT_EQ(HotspotComponent->GetPosition().Y, 0.0f);
     EXPECT_EQ(HotspotComponent->GetPosition().Z, 0.0f);
     EXPECT_EQ(HotspotComponent->GetComponentType(), ComponentType::Hotspot);
+    EXPECT_EQ(HotspotComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(HotspotComponent->GetIsARVisible(), true);
     EXPECT_EQ(HotspotComponent->GetIsVisible(), true);
     EXPECT_EQ(HotspotComponent->GetRotation().W, 1);
@@ -104,6 +105,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
     // Set new values
     HotspotComponent->SetPosition(csp::common::Vector3::One());
+    HotspotComponent->SetIsVirtualVisible(false);
     HotspotComponent->SetIsARVisible(false);
     HotspotComponent->SetIsVisible(false);
     HotspotComponent->SetPosition(csp::common::Vector3::One());
@@ -115,6 +117,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().X, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().Y, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().Z, 1.0f);
+    EXPECT_EQ(HotspotComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(HotspotComponent->GetIsARVisible(), false);
     EXPECT_EQ(HotspotComponent->GetIsVisible(), false);
     EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().W, 1.0f);
@@ -156,7 +159,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -178,9 +181,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
 		var hotspot = ThisEntity.getHotspotComponents()[0];
 		hotspot.position = [1.0,1.0,1.0];
-		hotspot.isARVisible = false;
+        hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
 		hotspot.isVisible = false;
-		hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
+        hotspot.isARVisible = false;
+        hotspot.isVirtualVisible = false;
 		hotspot.isSpawnPoint = true;
 		hotspot.isTeleportPoint = false;
 
@@ -201,12 +205,13 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().X, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().Y, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().Z, 1.0f);
-    EXPECT_EQ(HotspotComponent->GetIsARVisible(), false);
-    EXPECT_EQ(HotspotComponent->GetIsVisible(), false);
     EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().W, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().X, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Y, 1.0f);
     EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Z, 1.0f);
+    EXPECT_EQ(HotspotComponent->GetIsVisible(), false);
+    EXPECT_EQ(HotspotComponent->GetIsARVisible(), false);
+    EXPECT_EQ(HotspotComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), true);
     EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), false);
 

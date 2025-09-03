@@ -15,8 +15,8 @@
  */
 #pragma once
 
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 
 namespace csp::multiplayer
 {
@@ -29,14 +29,21 @@ class CSP_API CSPSceneDescription
 public:
     /// @brief Constructor for CSPSceneDescription by deserializing a SceneDescription json file.
     /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
-    /// @param EntitySystem csp::multiplayer::OnlineRealtimeEngine& : The OnlineRealtimeEngine for this session.
-    /// @param LogSystem csp::common::LogSystem& : The OnlineRealtimeEngine for this session.
-    /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
-    CSPSceneDescription(const csp::common::String& SceneDescriptionJson, csp::multiplayer::OnlineRealtimeEngine& EntitySystem,
-        csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner);
+    CSPSceneDescription(const csp::common::String& SceneDescriptionJson);
 
-    /// @brief The Entities that exist for this scene.
-    csp::common::Array<csp::multiplayer::SpaceEntity*> Entities;
+    CSPSceneDescription() { }
+
+    /// @brief Generates an array of entities from the SceneDescription Json
+    /// This function exists because the construction of SpaceEntites relies on a RealtimeEngine, and the OfflineRealtimeEngine requires a
+    /// CSPSceneDescription for construction.
+    /// @param RealtimeEngine csp::common::IRealtimeEngine& : The RealtimeEngine for this session.
+    /// @param LogSystem csp::common::LogSystem& : The SpaceEntitySystem for this session.
+    /// @param RemoteScriptRunner csp::common::IJSScriptRunner& : The ScriptRunner for this session.
+    CSP_NO_EXPORT csp::common::Array<csp::multiplayer::SpaceEntity*> CreateEntities(
+        csp::common::IRealtimeEngine& RealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner) const;
+
+private:
+    csp::common::String SceneDescriptionJson;
 };
 
 }

@@ -36,5 +36,7 @@ DEFINE_SCRIPT_PROPERTY_VEC3(FiducialMarkerSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(FiducialMarkerSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(FiducialMarkerSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(FiducialMarkerSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(FiducialMarkerSpaceComponent, bool, bool, IsVirtualVisible);
 
 } // namespace csp::multiplayer

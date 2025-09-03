@@ -225,7 +225,15 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
     }
 }
 
-inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::OnlineRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
+inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& RealtimeEngine)
+{
+    if (RealtimeEngine.GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine&>(RealtimeEngine).ProcessPendingEntityOperations();
+    }
+}
+
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::common::IRealtimeEngine* EntitySystem, int MaxTextTimeSeconds = 20)
 {
     // Wait for message
     auto Start = std::chrono::steady_clock::now();
@@ -233,11 +241,11 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::On
     int64_t TestTime = 0;
 
     // Call at least once
-    EntitySystem->ProcessPendingEntityOperations();
+    ProcessPendingIfOnline(*EntitySystem);
 
     while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
     {
-        EntitySystem->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*EntitySystem);
 
         std::this_thread::sleep_for(50ms);
 
@@ -251,7 +259,7 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::On
     }
 }
 
-inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::multiplayer::OnlineRealtimeEngine* EntitySystem, csp::common::String Name = "Object")
+inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEngine* EntitySystem, csp::common::String Name = "Object")
 {
     csp::multiplayer::SpaceTransform ObjectTransform { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
     auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});

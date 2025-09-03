@@ -32,9 +32,9 @@ namespace csp::common
 /// @tparam TValue : Type to use as the value
 template <typename TKey, typename TValue> class CSP_API Map
 {
+public:
     using MapType = std::map<TKey, TValue>;
 
-public:
     /// @brief Constructs a map with 0 elements.
     Map() { Container = new MapType(); }
 
@@ -164,6 +164,10 @@ public:
 
     /// @brief Removes all elements in this map.
     void Clear() { Container->clear(); }
+
+    // The fact that we can do this makes having this type a bit silly ... no actual ABI protection ... may as well just be a std::map.
+    CSP_NO_EXPORT const MapType& GetUnderlying() const { return *Container; }
+    CSP_NO_EXPORT MapType& GetUnderlying() { return *Container; }
 
 private:
     MapType* Container;

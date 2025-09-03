@@ -63,7 +63,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
     csp::common::String ObjectName = "Object 1";
@@ -85,6 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), true);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), true);
+    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), false);
 
     CreatedObject->QueueUpdate();
@@ -107,6 +108,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     ScreenSharingComponent->SetIsVisible(false);
     ScreenSharingComponent->SetIsARVisible(false);
+    ScreenSharingComponent->SetIsVirtualVisible(false);
     ScreenSharingComponent->SetIsShadowCaster(true);
 
     // Ensure values are set correctly
@@ -121,6 +123,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
+    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -155,7 +158,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent Space Entity
     csp::common::String ObjectName = "Object 1";
@@ -180,6 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 		component.scale = [0, 0, 0];
 		component.isVisible = false;
 		component.isARVisible = false;
+        component.isVirtualVisible = false;
 		component.isShadowCaster = true;
     )xx";
 
@@ -200,6 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScreenSharingTests, ScreenSharingComponentScriptTest)
 
     EXPECT_EQ(ScreenSharingComponent->GetIsVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsARVisible(), false);
+    EXPECT_EQ(ScreenSharingComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(ScreenSharingComponent->GetIsShadowCaster(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

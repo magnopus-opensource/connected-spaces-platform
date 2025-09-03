@@ -66,7 +66,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the fog
     csp::common::String ObjectName = "Object 1";
@@ -147,7 +147,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create object to represent the fog
     csp::common::String ObjectName = "Object 1";
@@ -165,8 +165,8 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 		var fog = ThisEntity.getFogComponents()[0];
 		fog.fogMode = 1;
 		fog.position = [1, 1, 1];
+        fog.scale = [2, 2, 2];
 		fog.rotation = [1, 1, 1, 2];
-		fog.scale = [2, 2, 2];
 		fog.startDistance = 1.1;
 		fog.endDistance = 2.2;
 		fog.color = [1, 1, 1];
@@ -174,6 +174,9 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 		fog.heightFalloff = 4.4;
 		fog.maxOpacity = 5.5;
 		fog.isVolumetric = true;
+        fog.isVisible = false;
+        fog.isARVisible = false;
+        fog.isVirtualVisible = false;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(FogScriptText.c_str());
@@ -183,8 +186,8 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
     EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
     EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(1, 1, 1, 2));
     EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(1, 1, 1, 2));
     EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
     EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
     EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
@@ -192,6 +195,9 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
     EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
     EXPECT_TRUE(FogComponent->GetIsVolumetric());
+    EXPECT_EQ(FogComponent->GetIsVisible(), false);
+    EXPECT_EQ(FogComponent->GetIsARVisible(), false);
+    EXPECT_EQ(FogComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

@@ -67,7 +67,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     csp::common::String CallbackAssetId;
 
@@ -93,6 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
     EXPECT_EQ(GaussianSplatComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_EQ(GaussianSplatComponent->GetIsVisible(), true);
     EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), true);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(GaussianSplatComponent->GetIsShadowCaster(), true);
     EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3::One());
 
@@ -110,6 +111,9 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 
     GaussianSplatComponent->SetIsARVisible(false);
     EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), false);
+
+    GaussianSplatComponent->SetIsVirtualVisible(false);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), false);
 
     GaussianSplatComponent->SetIsShadowCaster(false);
     EXPECT_EQ(GaussianSplatComponent->GetIsShadowCaster(), false);
@@ -149,7 +153,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     // Create parent entity
     csp::common::String ObjectName = "Object 1";
@@ -166,9 +170,16 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
     // Setup script
     const std::string ScriptSource = R"xx(
-	
 		var splat = ThisEntity.getGaussianSplatComponents()[0];
+        splat.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
+		splat.externalResourceAssetId = "TestExternalResourceAssetId";
 		splat.tint = [0.0, 0.1, 0.2];
+        splat.position = [1, 1, 1];
+        splat.scale = [2, 2, 2];
+		splat.rotation = [1, 1, 1, 1];
+        splat.isVisible = false;
+        splat.isARVisible = false;
+        splat.isVirtualVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(ScriptSource.c_str());
@@ -179,7 +190,15 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
     const bool ScriptHasErrors = CreatedObject->GetScript().HasError();
     EXPECT_FALSE(ScriptHasErrors);
 
+    EXPECT_EQ(GaussianSplatComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
+    EXPECT_EQ(GaussianSplatComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
     EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(0.0f, 0.1f, 0.2f));
+    EXPECT_EQ(GaussianSplatComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(GaussianSplatComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(GaussianSplatComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(GaussianSplatComponent->GetIsVisible(), false);
+    EXPECT_EQ(GaussianSplatComponent->GetIsARVisible(), false);
+    EXPECT_EQ(GaussianSplatComponent->GetIsVirtualVisible(), false);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
