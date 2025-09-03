@@ -18,6 +18,8 @@
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -26,6 +28,7 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventManagerImpl.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
+#include "RAIIMockLogger.h"
 #include "TestHelpers.h"
 #include "quickjspp.hpp"
 
@@ -33,6 +36,7 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "PublicAPITests/SpaceSystemTestHelpers.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
+#include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 #include <atomic>
 
@@ -43,7 +47,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void CreateAvatarForLeaderElection(csp::multiplayer::OnlineRealtimeEngine* EntitySystem)
+void CreateAvatarForLeaderElection(csp::common::IRealtimeEngine* EntitySystem)
 {
     const csp::common::String& UserName = "Player 1";
     const SpaceTransform& UserTransform
@@ -77,7 +81,34 @@ void CreateAvatarForLeaderElection(csp::multiplayer::OnlineRealtimeEngine* Entit
 
 } // namespace
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest)
+namespace CSPEngine
+{
+
+class UpdateSpaceEntityGlobalPosition : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+class UpdateSpaceEntityGlobalRotation : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+class UpdateSpaceEntityGlobalScale : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+class UpdateSpaceEntityParentId : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+class RemoveSpaceEntityParent : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+class GetRootHierarchyEntities : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+TEST_P(UpdateSpaceEntityGlobalPosition, UpdateSpaceEntityGlobalPositionTest)
 {
     SetRandSeed();
 
@@ -94,19 +125,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -130,14 +164,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptLeaderIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        EXPECT_EQ(ResponseWaiter::WaitFor(ScriptLeaderIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -152,7 +189,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalPosition(), csp::common::Vector3(1, 1, 1));
         EXPECT_EQ(ChildObject->GetGlobalPosition(), csp::common::Vector3(11, 11, 11));
@@ -180,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         const bool ScriptHasErrors = ChildObject->GetScript().HasError();
         EXPECT_FALSE(ScriptHasErrors);
@@ -188,7 +225,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
@@ -210,7 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest)
+TEST_P(UpdateSpaceEntityGlobalRotation, UpdateSpaceEntityGlobalRotationTest)
 {
     SetRandSeed();
 
@@ -227,19 +264,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -263,14 +303,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -285,7 +328,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
         EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(20, 20, 20, -20));
@@ -293,17 +336,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        csp::CSPFoundation::Tick();
-
-        Object->QueueUpdate();
-        ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
-
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
-
         bool EntityUpdated = false;
-
         ChildObject->SetUpdateCallback(
             [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
             {
@@ -320,14 +353,23 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
         };
 
+        csp::CSPFoundation::Tick();
+
+        Object->QueueUpdate();
+        ChildObject->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+
         // Wait until the property have been updated and correct callback has been recieved
-        ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
         EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(2, 2, 2, -2));
@@ -342,7 +384,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
+TEST_P(UpdateSpaceEntityGlobalScale, UpdateSpaceEntityGlobalScaleTest)
 {
     SetRandSeed();
 
@@ -359,19 +401,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -395,14 +440,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -417,22 +465,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_EQ(Object->GetGlobalScale(), csp::common::Vector3(2, 2, 2));
         EXPECT_EQ(ChildObject->GetGlobalScale(), csp::common::Vector3(20, 20, 20));
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         ChildObject->GetScript().Invoke();
-
-        csp::CSPFoundation::Tick();
-
-        Object->QueueUpdate();
-        ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
-
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
 
@@ -452,14 +491,23 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
         };
 
+        csp::CSPFoundation::Tick();
+
+        Object->QueueUpdate();
+        ChildObject->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+
         // Wait until the property have been updated and correct callback has been recieved
-        ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetGlobalScale(), csp::common::Vector3(2, 2, 2));
         EXPECT_EQ(ChildObject->GetGlobalScale(), csp::common::Vector3(4, 4, 4));
@@ -473,8 +521,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
     // Log out
     LogOut(UserSystem);
 }
-
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
+TEST_P(UpdateSpaceEntityParentId, UpdateSpaceEntityParentIdTest)
 {
     SetRandSeed();
 
@@ -491,19 +538,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -528,14 +578,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -550,21 +603,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
         ChildObject->QueueUpdate();
         Object->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_NE(Object, ChildObject->GetParentEntity());
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         ChildObject->GetScript().Invoke();
-
-        csp::CSPFoundation::Tick();
-
-        ChildObject->QueueUpdate();
-        Object->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
-
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
 
@@ -584,14 +628,23 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
         };
 
+        csp::CSPFoundation::Tick();
+
+        ChildObject->QueueUpdate();
+        Object->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+
         // Wait until the property have been updated and correct callback has been recieved
-        ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object, ChildObject->GetParentEntity());
     }
@@ -605,7 +658,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
+TEST_P(RemoveSpaceEntityParent, RemoveSpaceEntityParentTest)
 {
     SetRandSeed();
 
@@ -622,19 +675,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -657,14 +713,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -679,21 +738,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_EQ(Object, ChildObject->GetParentEntity());
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         ChildObject->GetScript().Invoke();
-
-        csp::CSPFoundation::Tick();
-
-        Object->QueueUpdate();
-        ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
-
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
 
         bool EntityUpdated = false;
 
@@ -713,14 +763,23 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
         };
 
+        csp::CSPFoundation::Tick();
+
+        Object->QueueUpdate();
+        ChildObject->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+
         // Wait until the property have been updated and correct callback has been recieved
-        ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_NE(Object, ChildObject->GetParentEntity());
     }
@@ -734,7 +793,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
+TEST_P(GetRootHierarchyEntities, GetRootHierarchyEntitiesTest)
 {
     SetRandSeed();
 
@@ -751,19 +810,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    std::atomic_bool ScriptSystemReady = false;
+    std::atomic_bool ScriptLeaderReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    auto ScriptLeaderReadyCallback = [&ScriptLeaderReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptLeaderReadyCallback called" << std::endl;
-        ScriptSystemReady = true;
+        ScriptLeaderReady = true;
     };
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    csp::common::RealtimeEngineType EngineType = GetParam();
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
-    RealtimeEngine->SetEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
-    RealtimeEngine->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+    if (EngineType == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetScriptLeaderReadyCallback(ScriptLeaderReadyCallback);
+    }
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -786,14 +848,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    if (EngineType == csp::common::RealtimeEngineType::Online)
     {
-        std::cout << "Waiting for ScriptSystemReady" << std::endl;
-        return (ScriptSystemReady == true);
-    };
+        auto ScriptSystemIsReady = [&ScriptLeaderReady]()
+        {
+            std::cout << "Waiting for ScriptLeaderReady" << std::endl;
+            return (ScriptLeaderReady == true);
+        };
 
-    // Wait until the property have been updated and correct callback has been recieved
-    EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+        // Wait until the property have been updated and correct callback has been recieved
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
 
     {
         const csp::common::String ObjectName = "Object 1";
@@ -808,7 +873,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
         Object->QueueUpdate();
         ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
+        ProcessPendingIfOnline(*RealtimeEngine);
 
         EXPECT_EQ(Object->GetPosition(), csp::common::Vector3::Zero());
         EXPECT_EQ(ChildObject->GetPosition(), csp::common::Vector3::Zero());
@@ -816,25 +881,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         ChildObject->GetScript().Invoke();
 
-        csp::CSPFoundation::Tick();
-
-        Object->QueueUpdate();
-        ChildObject->QueueUpdate();
-        RealtimeEngine->ProcessPendingEntityOperations();
-
-        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
-        EXPECT_FALSE(ScriptHasErrors);
-
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback(
+        Object->SetUpdateCallback(
             [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
             {
-                if (Entity->GetName() == "Child Object 1")
+                auto Namer = Entity->GetName();
+                if (Entity->GetName() == "Object 1")
                 {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
                     {
-                        std::cout << "Parent Updated" << std::endl;
+                        std::cout << "Position Updated" << std::endl;
                         EntityUpdated = true;
                     }
                 }
@@ -843,14 +900,23 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
         // Create callback to process pending entity operations
         auto EntityUpdatedIsReady = [&EntityUpdated, &RealtimeEngine]()
         {
-            RealtimeEngine->ProcessPendingEntityOperations();
+            ProcessPendingIfOnline(*RealtimeEngine);
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
             return (EntityUpdated == true);
         };
 
+        csp::CSPFoundation::Tick();
+
+        Object->QueueUpdate();
+        ChildObject->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+
+        const bool ScriptHasErrors = ChildObject->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+
         // Wait until the property have been updated and correct callback has been recieved
-        ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
+        ASSERT_TRUE(ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5)));
 
         EXPECT_EQ(Object->GetPosition(), csp::common::Vector3::One());
         EXPECT_EQ(ChildObject->GetPosition(), csp::common::Vector3::Zero());
@@ -863,4 +929,54 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     // Log out
     LogOut(UserSystem);
+}
+
+INSTANTIATE_TEST_SUITE_P(SpaceEntityTests, UpdateSpaceEntityGlobalPosition,
+    testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+INSTANTIATE_TEST_SUITE_P(SpaceEntityTests, UpdateSpaceEntityGlobalRotation,
+    testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+INSTANTIATE_TEST_SUITE_P(SpaceEntityTests, UpdateSpaceEntityGlobalScale,
+    testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpaceEntityTests, UpdateSpaceEntityParentId, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpaceEntityTests, RemoveSpaceEntityParent, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpaceEntityTests, GetRootHierarchyEntities, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
+}
+CSP_PUBLIC_TEST(CSPEngine, LockPrerequisites, LockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+
+    // Ensure the lock error message is called when we try and lock an entity that is already locked
+    const csp::common::String LockErrorMsg = "Entity is already locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
+
+    // Set the entity as locked first
+    Entity.Lock();
+    // Check that we error if we try to lock again
+    Entity.Lock();
+}
+CSP_PUBLIC_TEST(CSPEngine, UnlockPrerequisites, UnlockPrerequisitesTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+
+    // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
+    const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(UnlockErrorMsg)).Times(1);
+
+    Entity.Unlock();
 }

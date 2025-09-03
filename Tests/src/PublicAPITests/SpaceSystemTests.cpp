@@ -3247,8 +3247,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
     // Log out
     LogOut(UserSystem);
 }
+namespace CSPEngine
+{
 
-CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
+class ExitSpaceRealtimeEngine : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
+TEST_P(ExitSpaceRealtimeEngine, ExitSpaceRealtimeEngineTest)
 {
     SetRandSeed();
 
@@ -3270,10 +3276,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-    ASSERT_FALSE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    const csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    ASSERT_FALSE(SpaceSystem->IsInSpace());
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    }
+
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
@@ -3281,19 +3293,28 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, ExitSpaceRealtimeEngineTest)
     ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     ASSERT_TRUE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == RealtimeEngine.get());
+    }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     ASSERT_FALSE(SpaceSystem->IsInSpace());
-    ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        ASSERT_TRUE(MultiplayerConnection->GetOnlineRealtimeEngine() == nullptr);
+    }
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
 
-namespace CSPEngine
-{
+INSTANTIATE_TEST_SUITE_P(
+    SpaceSystemTests, ExitSpaceRealtimeEngine, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+
 /*
  * Test all the permutations of EnterSpace, concerning space visibility and invite permissions.
  * Ensure that the method returns the correct success/failure's
@@ -3352,7 +3373,7 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     String GuestUserId;
     LogInAsGuest(UserSystem, GuestUserId);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3405,7 +3426,7 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     csp::systems::Profile UninvitedUser = CreateTestUser();
     LogIn(UserSystem, UninvitedUserId, UninvitedUser.Email, GeneratedTestAccountPassword);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3464,7 +3485,7 @@ TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
     String InvitedUserId;
     LogIn(UserSystem, InvitedUserId, InvitedUser.Email, GeneratedTestAccountPassword);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3510,7 +3531,7 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     Space CreatedSpace;
     CreateSpace(SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpacePermission, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
 
-    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Attempt to enter the space and check the expected result
@@ -3567,7 +3588,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
 
     {
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         // In order to ban the user, they have to have entered the space. (This seems like an underthought limitation)
@@ -3587,7 +3608,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
         // Login as the banned user and attempt to enter the space and check the expected result
         LogIn(UserSystem, BannedUserId, BannedUser.Email, GeneratedTestAccountPassword);
 
-        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType::Online) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
         testing::internal::CaptureStderr();
@@ -3608,6 +3629,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     LogOut(UserSystem);
 }
 
+// Before adding another matrix to this giant case, look into `testing::Combine` to see if we can get away with being terser
 INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenGuest,
     testing::Values(std::make_tuple(SpaceAttributes::Gated, csp::systems::EResultCode::Failed,
                         "Logged in user does not have permission to join this space. Failed to add to space."),
@@ -3666,4 +3688,99 @@ INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceWhenBanned,
             "Logged in user does not have permission to discover this space. Failed to enter space."),
         std::make_tuple(SpaceAttributes::Unlisted, csp::systems::EResultCode::Failed,
             "Logged in user does not have permission to discover this space. Failed to enter space.")));
+
+/*
+ * Test all the permutations of EnterSpace, concerning realtime engine type and whether or not the multiplayer connection is established.
+ * Tested seperately to the access control tests above, as the logic is isolated. Access control is not performed on offline engines.
+ * First: The realtime engine type to create
+ * Second: Whether or not to create a multiplayer connection on login
+ * Third: The expected result code from attempting to enter the space
+ * Fourth: A string that is expected to be contained in stdout, (ie, what error message do we expect)
+ */
+
+class EnterSpaceOnlineOffline
+    : public PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool, csp::systems::EResultCode, std::string>>
+{
+};
+
+TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
+{
+    // Conditions & Expectations
+    const csp::common::RealtimeEngineType RealtimeEngineType = std::get<0>(GetParam());
+    const bool LoginWithMultiplayerConnection = std::get<1>(GetParam());
+    const csp::systems::EResultCode JoinSpaceResultExpected = std::get<2>(GetParam());
+    const std::string ExpectedMsg = std::get<3>(GetParam());
+
+    const bool IsOnline = (RealtimeEngineType == csp::common::RealtimeEngineType::Online);
+
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    Space CreatedSpace;
+    csp::systems::Profile SpaceOwnerUser;
+    String SpaceOwnerUserId;
+    // Make this space even if using an offline engine, to allow us to check that we've not added a user to it in offline mode later
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+
+    SpaceOwnerUser = CreateTestUser();
+    LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName.c_str(), TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, CreatedSpace);
+    LogOut(UserSystem);
+
+    // Log in as guest (best to check offline engine logins, as it's the expected case ... although it shouldn't matter access permissions don't apply
+    // to offline)
+    String GuestUserId;
+    LogInAsGuest(UserSystem, GuestUserId, LoginWithMultiplayerConnection);
+
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    // Attempt to enter the space and check the expected result
+    testing::internal::CaptureStderr();
+
+    const auto CreatedSpaceId = IsOnline ? CreatedSpace.Id : "Offline Space";
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
+    ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
+
+    // Verify that Stderr contains expected message.
+    std::string OutStdErr = testing::internal::GetCapturedStderr();
+    EXPECT_NE(OutStdErr.find(ExpectedMsg), std::string::npos);
+
+    // If we're offline, check that we havn't actually entered the space as far as CHS is concerned
+    // This is a bit of an encapsulation break, as this depends on knowing that the local user ID and the logged in one are different.
+    // With network mocks, we could check that we never actually call the endpoints, which would be better
+    if (!IsOnline)
+    {
+        ::Space QueriedSpace;
+        GetSpace(SpaceSystem, CreatedSpace.Id, QueriedSpace);
+        EXPECT_FALSE(std::any_of(QueriedSpace.UserIds.cbegin(), QueriedSpace.UserIds.cend(),
+            [&EnterResult](const csp::common::String& UserId) { return UserId == EnterResult.GetSpace().CreatedBy; }));
+    }
+
+    LogOut(UserSystem);
+
+    if (IsOnline)
+    {
+        // Login as owner user in order to be able to delete the test space
+        LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
+        DeleteSpace(SpaceSystem, CreatedSpace.Id);
+        LogOut(UserSystem);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(SpaceSystemTests, EnterSpaceOnlineOffline,
+    testing::Values(std::make_tuple(RealtimeEngineType::Online, true, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(RealtimeEngineType::Online, false, csp::systems::EResultCode::Failed,
+            "Cannot enter an online space without an established multiplayer connection. Did you create one when logging in?"),
+        std::make_tuple(RealtimeEngineType::Offline, true, csp::systems::EResultCode::Success, "Successfully entered space."),
+        std::make_tuple(RealtimeEngineType::Offline, false, csp::systems::EResultCode::Success, "Successfully entered space.")));
+
 }

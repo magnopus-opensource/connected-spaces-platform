@@ -58,7 +58,9 @@ ComponentBase::~ComponentBase()
     }
 }
 
-uint16_t ComponentBase::GetId() { return Id; }
+uint16_t ComponentBase::GetId() const { return Id; }
+
+void ComponentBase::SetId(uint16_t NewId) { this->Id = NewId; }
 
 ComponentType ComponentBase::GetComponentType() const { return Type; }
 
@@ -242,30 +244,29 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
         return;
     }
 
-    /*DirtyProperties.Remove(Key);
-
-    if (Properties[Key] != Value)
-    {
-            DirtyProperties[Key] = Value;
-
-            Parent->AddDirtyComponent(this);
-    }*/
-
     if (!Properties.HasKey(Key) || Properties[Key] != Value)
     {
+        // Weird that this is instant and dosen't go through the regular lock/patch flow
+        // I think it should ... note the lock above which every other SpaceEntity thing has in its setter methods.
+        // This is the _one_ thing that in online mode, dosen't need ProcessPending() to be called ... _Weird_.
+        // Note how `UpdateComponent` dosen't actually set the data, just does notification in this case. :(
+        // TODO, fix. Look at `SetPropertyFromPatch` below, it's basically a `SetPropetyDirect`
         Properties[Key] = Value;
+        Parent->UpdateComponent(this);
 
-        Parent->AddDirtyComponent(this);
+        // Hack alert
+        // So, this is for the case where we already have a dirty component of update type ADD pending, but we've just updated it.
+        // It just so happens that the ADD is enough to replicate the component well enough, as anything will do, BUT, we still
+        // need to notify the scripting system here that a property has changed.
         Parent->OnPropertyChanged(this, Key);
     }
 }
 
 void ComponentBase::RemoveProperty(uint32_t Key)
 {
-    // DirtyProperties.Remove(Key);
+    // Weird that this is instant and dosen't go through the regular lock/patch flow
     Properties.Remove(Key);
-
-    Parent->AddDirtyComponent(this);
+    Parent->UpdateComponent(this);
 }
 
 void ComponentBase::SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value) { Properties = Value; }

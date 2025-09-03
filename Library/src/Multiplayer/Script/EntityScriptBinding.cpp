@@ -19,7 +19,7 @@
 #include "CSP/Common//Systems/Log/LogSystem.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Vector.h"
-#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
@@ -52,10 +52,41 @@ namespace csp::multiplayer
 
 using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
+namespace
+{
+    // Because we don't put std::types across interface boundaries, we can't get a direct std::mutex to use scoped_lock. Adapt.
+    template <typename LockFunc, typename UnlockFunc> class RAIILock
+    {
+    public:
+        // A bit paranoid, but make sure that we're storing value types to prevent potential dangling/pointer lifetime issues if you're doing
+        // something funky with funciton pointers.
+        using LockFuncValueT = std::decay_t<LockFunc>;
+        using UnlockFuncValueT = std::decay_t<UnlockFunc>;
+
+        RAIILock(LockFunc&& Lock, UnlockFunc&& Unlock)
+            : _LockFunc(std::forward<LockFunc>(Lock))
+            , _UnlockFunc(std::forward<UnlockFunc>(Unlock))
+        {
+            std::invoke(_LockFunc);
+        }
+
+        ~RAIILock() noexcept { std::invoke(_UnlockFunc); }
+
+        RAIILock(const RAIILock&) = delete;
+        RAIILock& operator=(const RAIILock&) = delete;
+        RAIILock(RAIILock&&) = delete;
+        RAIILock& operator=(RAIILock&&) = delete;
+
+    private:
+        LockFuncValueT _LockFunc;
+        UnlockFuncValueT _UnlockFunc;
+    };
+}
+
 class EntitySystemScriptInterface
 {
 public:
-    EntitySystemScriptInterface(OnlineRealtimeEngine* InEntitySystem = nullptr)
+    EntitySystemScriptInterface(csp::common::IRealtimeEngine* InEntitySystem = nullptr)
         : EntitySystem(InEntitySystem)
     {
     }
@@ -66,8 +97,7 @@ public:
 
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
-
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
@@ -75,8 +105,6 @@ public:
                 uint64_t Id = Entity->GetId();
                 EntityIds.push_back(Id);
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return EntityIds;
@@ -88,15 +116,12 @@ public:
 
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
-
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
                 Entities.push_back(Entity->GetScriptInterface());
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return Entities;
@@ -140,19 +165,18 @@ public:
 
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
 
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
+
                 if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
                 }
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return IndexOfEntity;
@@ -163,7 +187,7 @@ public:
         EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
 
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
@@ -174,8 +198,6 @@ public:
                     break;
                 }
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return ScriptInterface;
@@ -186,7 +208,7 @@ public:
         EntityScriptInterface* ScriptInterface = nullptr;
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
 
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
@@ -197,8 +219,6 @@ public:
                     break;
                 }
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return ScriptInterface;
@@ -209,15 +229,13 @@ public:
         std::vector<EntityScriptInterface*> RootHierarchyEntities;
         if (EntitySystem)
         {
-            EntitySystem->LockEntityUpdate();
+            RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
 
             for (size_t i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
             {
                 SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
                 RootHierarchyEntities.push_back(Entity->GetScriptInterface());
             }
-
-            EntitySystem->UnlockEntityUpdate();
         }
 
         return RootHierarchyEntities;
@@ -226,7 +244,7 @@ public:
     std::string GetFoundationVersion() { return csp::CSPFoundation::GetVersion().c_str(); }
 
 private:
-    OnlineRealtimeEngine* EntitySystem;
+    csp::common::IRealtimeEngine* EntitySystem;
 };
 
 void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSystem)
@@ -241,14 +259,14 @@ void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSys
     LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
-EntityScriptBinding::EntityScriptBinding(OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
     : EntitySystem(InEntitySystem)
     , LogSystem(LogSystem)
 {
 }
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    OnlineRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
 {
     EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);

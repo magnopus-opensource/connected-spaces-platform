@@ -48,7 +48,7 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     csp::common::String UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    RealtimeEngine.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine.SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
     std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
     std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();

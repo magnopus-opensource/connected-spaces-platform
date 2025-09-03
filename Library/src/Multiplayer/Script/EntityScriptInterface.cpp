@@ -54,7 +54,7 @@ void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
     if (CurrentPosition != NewPosition)
     {
         Entity->SetPosition(NewPosition);
-        Entity->MarkForUpdate();
+        Entity->QueueUpdate();
     }
 }
 
@@ -100,7 +100,7 @@ void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 Rot)
     if (CurrentRotation != NewRotation)
     {
         Entity->SetRotation(NewRotation);
-        Entity->MarkForUpdate();
+        Entity->QueueUpdate();
     }
 }
 
@@ -181,7 +181,7 @@ void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 Scale)
     if (CurrentScale != NewScale)
     {
         Entity->SetScale(NewScale);
-        Entity->MarkForUpdate();
+        Entity->QueueUpdate();
     }
 }
 

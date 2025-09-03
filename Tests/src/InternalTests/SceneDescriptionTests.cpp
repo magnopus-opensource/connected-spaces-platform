@@ -20,7 +20,7 @@
 #include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/CSPSceneDescription.h"
-#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Systems/CSPSceneData.h"
 #include "Multiplayer/MCS/MCSSceneDescription.h"
 #include "Multiplayer/MCS/MCSTypes.h"
@@ -269,16 +269,15 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    TestAuthContext AuthContext;
 
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
-    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    CSPSceneDescription SceneDescription { Json.c_str() };
+    csp::multiplayer::OfflineRealtimeEngine Engine { SceneDescription, LogSystem, ScriptRunner };
 
-    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
 
-    EXPECT_EQ(SceneDescription.Entities.Size(), 0);
+    auto Entities = SceneDescription.CreateEntities(Engine, LogSystem, ScriptRunner);
+
+    EXPECT_EQ(Entities.Size(), 0);
     EXPECT_EQ(SceneData.AssetCollections.Size(), 0);
     EXPECT_EQ(SceneData.Assets.Size(), 0);
     EXPECT_EQ(SceneData.Sequences.Size(), 0);
@@ -306,13 +305,12 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    TestAuthContext AuthContext;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
-    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    CSPSceneDescription SceneDescription { Json.c_str() };
+    csp::multiplayer::OfflineRealtimeEngine Engine { SceneDescription, LogSystem, ScriptRunner };
 
-    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
+
+    auto Entities = SceneDescription.CreateEntities(Engine, LogSystem, ScriptRunner);
 
     // Test csp scene description values are correct
 
@@ -334,9 +332,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeT
     EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
     // Entities
-    EXPECT_EQ(SceneDescription.Entities.Size(), 74);
+    EXPECT_EQ(Entities.Size(), 74);
 
-    csp::multiplayer::SpaceEntity* SpaceEntity = SceneDescription.Entities[0];
+    csp::multiplayer::SpaceEntity* SpaceEntity = Entities[0];
     EXPECT_EQ(SpaceEntity->GetId(), 1484);
     EXPECT_EQ(SpaceEntity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
     EXPECT_EQ(SpaceEntity->IsTransferable, true);
@@ -414,13 +412,12 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
 
     MockScriptRunner ScriptRunner;
     csp::common::LogSystem LogSystem;
-    TestAuthContext AuthContext;
-    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *csp::multiplayer::MultiplayerConnection::MakeSignalRConnection(AuthContext) };
-    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
-    csp::multiplayer::OnlineRealtimeEngine EntitySystem(Connection, LogSystem, NetworkEventBus, ScriptRunner);
+    CSPSceneDescription SceneDescription { Json.c_str() };
+    csp::multiplayer::OfflineRealtimeEngine Engine { SceneDescription, LogSystem, ScriptRunner };
 
-    CSPSceneDescription SceneDescription { Json.c_str(), EntitySystem, LogSystem, ScriptRunner };
     CSPSceneData SceneData { Json.c_str() };
+
+    auto Entities = SceneDescription.CreateEntities(Engine, LogSystem, ScriptRunner);
 
     // Test csp scene description values are correct
 
@@ -438,9 +435,9 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionMinimalDeser
     EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
     // Entities
-    EXPECT_EQ(SceneDescription.Entities.Size(), 1);
+    EXPECT_EQ(Entities.Size(), 1);
 
-    csp::multiplayer::SpaceEntity* SpaceEntity = SceneDescription.Entities[0];
+    csp::multiplayer::SpaceEntity* SpaceEntity = Entities[0];
     EXPECT_EQ(SpaceEntity->GetId(), 1484);
     EXPECT_EQ(SpaceEntity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
     EXPECT_EQ(SpaceEntity->IsTransferable, true);

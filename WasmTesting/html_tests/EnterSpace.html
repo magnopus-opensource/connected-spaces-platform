@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <title>CSP WASM Browser Test, EnterSpace</title>
     <script type="module">
-      import { ready, CSPFoundation, Systems } from './node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
+      import { ready, CSPFoundation, Systems, Multiplayer } from './node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
       import { initializeCSP } from './shared/csp-initializer.js';
       (async () => {
         // Get spaceID from query parameters
@@ -18,10 +18,11 @@
 
         await initializeCSP(useDebugCSP);
 
-        const userSystem = Systems.SystemsManager.get().getUserSystem();
+        const systemsManager = Systems.SystemsManager.get();
+        const userSystem = systemsManager.getUserSystem();
 
         //Login as a guest
-        const loginResult = await userSystem.loginAsGuest(true);
+        const loginResult = await userSystem.loginAsGuest(true, true);
         if (loginResult.getResultCode() == Systems.EResultCode.Success){
           console.log("Successfully logged in");
         }
@@ -30,7 +31,13 @@
         }
 
         //Create multiplayer realtime engine
-        const realtimeEngine = Systems.SystemsManager.get().makeOnlineRealtimeEngine();
+        const realtimeEngine = Multiplayer.OnlineRealtimeEngine
+        .create_multiplayerConnection_logSystem_networkEventBus_remoteScriptRunner(
+          systemsManager.getMultiplayerConnection(),
+          systemsManager.getLogSystem(),
+          systemsManager.getEventBus(),
+          systemsManager.getScriptSystem()
+        );
         realtimeEngine.setEntityFetchCompleteCallback((entitiesFetchedNum) => {})
 
         //Enter the space
