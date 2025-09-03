@@ -1682,52 +1682,60 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 
             // 3. Download material
             const Asset& FoundAsset = CreateAssetResult.GetAsset();
-
-            auto DownloadMaterialCallback = [Callback, FoundAssetCollection, FoundAsset](const AssetDataResult& DownloadResult)
-            {
-                if (DownloadResult.GetResultCode() != EResultCode::Success)
-                {
-                    Callback(MaterialResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
-                    return;
-                }
-
-                const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
-
-                std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(FoundAssetCollection);
-                if (!ShaderType.has_value())
-                {
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
-                    return;
-                }
-
-                // Create material of the specific derived type.
-                Material* FoundMaterial = InstantiateMaterialOfType(ShaderType.value(), "", FoundAssetCollection.Id, FoundAsset.Id);
-
-                // Deserialse material data.
-                auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType.value(), FoundMaterial);
-
-                if (!DeserializationResult.has_value())
-                {
-                    CSP_LOG_ERROR_MSG("Failed to deserialize material");
-
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
-
-                    return;
-                }
-
-                MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-                Result.SetMaterial(DeserializationResult.value());
-
-                Callback(Result);
-            };
-
-            DownloadAssetData(FoundAsset, DownloadMaterialCallback);
+            GetMaterialFromUri(FoundAssetCollection, FoundAsset.Id, FoundAsset.Uri, Callback);
         };
 
         GetAssetById(AssetCollectionId, AssetId, GetAssetCB);
     };
 
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
+}
+
+void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
+    const csp::common::String& Uri, MaterialResultCallback Callback)
+{
+    auto DownloadMaterialCallback = [Callback, AssetCollection, AssetId](const AssetDataResult& DownloadResult)
+    {
+        if (DownloadResult.GetResultCode() != EResultCode::Success)
+        {
+            Callback(MaterialResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+            return;
+        }
+
+        const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
+
+        std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+        if (!ShaderType.has_value())
+        {
+            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+            return;
+        }
+
+        // Create material of the specific derived type.
+        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType.value(), "", AssetCollection.Id, AssetId);
+
+        // Deserialse material data.
+        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType.value(), FoundMaterial);
+
+        if (!DeserializationResult.has_value())
+        {
+            CSP_LOG_ERROR_MSG("Failed to deserialize material");
+
+            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+
+            return;
+        }
+
+        MaterialResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
+        Result.SetMaterial(DeserializationResult.value());
+
+        Callback(Result);
+    };
+
+    Asset Asset;
+    Asset.Uri = Uri;
+
+    DownloadAssetData(Asset, DownloadMaterialCallback);
 }
 
 void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
