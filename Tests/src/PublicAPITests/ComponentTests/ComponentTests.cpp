@@ -164,6 +164,35 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
     }
 }
 
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, VirtualVisibleTest)
+{
+    SpaceEntity* MySpaceEntity = new SpaceEntity();
+
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+
+    std::vector<ComponentBase*> Components { new AnimatedModelSpaceComponent(LogSystem, MySpaceEntity),
+        new ButtonSpaceComponent(LogSystem, MySpaceEntity), new ImageSpaceComponent(LogSystem, MySpaceEntity),
+        new LightSpaceComponent(LogSystem, MySpaceEntity), new StaticModelSpaceComponent(LogSystem, MySpaceEntity),
+        new VideoPlayerSpaceComponent(LogSystem, MySpaceEntity) };
+
+    for (auto Component : Components)
+    {
+        auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
+
+        EXPECT_TRUE(VisibleComponent->GetIsVirtualVisible());
+    }
+
+    for (auto Component : Components)
+    {
+        auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
+        VisibleComponent->SetIsVirtualVisible(false);
+
+        EXPECT_FALSE(VisibleComponent->GetIsVirtualVisible());
+
+        delete Component;
+    }
+}
+
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 {
     SpaceEntity* MySpaceEntity = new SpaceEntity();

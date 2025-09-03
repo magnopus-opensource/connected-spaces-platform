@@ -40,6 +40,8 @@ DEFINE_SCRIPT_PROPERTY_VEC3(LightSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(LightSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, bool, bool, IsVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, bool, bool, IsARVisible);
+DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, bool, bool, IsVirtualVisible);
 
 DEFINE_SCRIPT_PROPERTY_STRING(LightSpaceComponent, LightCookieAssetId);
 DEFINE_SCRIPT_PROPERTY_TYPE(LightSpaceComponent, csp::multiplayer::LightCookieType, int32_t, LightCookieType);

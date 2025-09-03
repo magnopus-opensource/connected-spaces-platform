@@ -105,6 +105,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
+    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), -1);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
     EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), "");
@@ -123,6 +124,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::FreeCamera;
     const bool NewIsVisible = true;
     const bool NewIsARVisible = false;
+    const bool NewIsVirtualVisible = false;
     const int64_t NewAvatarMeshIndex = 42;
     const csp::common::String NewAgoraUserId = "AgoraUser123";
     const csp::common::String NewCustomAvatarUrl = "https://example.com/avatar.png";
@@ -140,6 +142,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     AvatarComponent->SetLocomotionModel(NewAvatarLocomotionModel);
     AvatarComponent->SetIsVisible(NewIsVisible);
     AvatarComponent->SetIsARVisible(NewIsARVisible);
+    AvatarComponent->SetIsVirtualVisible(NewIsVirtualVisible);
     AvatarComponent->SetAvatarMeshIndex(NewAvatarMeshIndex);
     AvatarComponent->SetAgoraUserId(NewAgoraUserId);
     AvatarComponent->SetCustomAvatarUrl(NewCustomAvatarUrl);
@@ -158,6 +161,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), NewAvatarLocomotionModel);
     EXPECT_EQ(AvatarComponent->GetIsVisible(), NewIsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), NewIsARVisible);
+    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), NewIsVirtualVisible);
     EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), NewAvatarMeshIndex);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), NewAgoraUserId);
     EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), NewCustomAvatarUrl);
@@ -242,6 +246,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
+    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), -1);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
     EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), "");
@@ -274,6 +279,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
             avatar.torsoTwistAlpha = 0.5;
             avatar.isVisible = true;
             avatar.isARVisible = false;
+            avatar.isVirtualVisible = false;
 		)xx";
 
     Avatar->GetScript().SetScriptSource(AvatarComponentScriptText.c_str());
@@ -297,6 +303,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetTorsoTwistAlpha(), 0.5f);
     EXPECT_EQ(AvatarComponent->GetIsVisible(), true);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), false);
+    EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), false);
 
     // Exit space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
