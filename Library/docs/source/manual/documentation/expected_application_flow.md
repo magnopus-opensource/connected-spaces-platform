@@ -10,17 +10,10 @@ For details about the sending of data using the Multiplayer System, please see t
 
 ## 1. Initialise CSP
 ```c++
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant, const csp::ClientUserAgent& ClientUserAgentHeader)
 ```
 
 This starts up CSP and its various systems, including the MultiplayerConnection.
-
-### a. Set UserAgent information
-```c++
-void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
-```
-
-While not strictly necessary for multiplayer functionality, this is a recommended step which should be done following the initialisation of CSP.
 
 ## 2. Log In
 ```c++

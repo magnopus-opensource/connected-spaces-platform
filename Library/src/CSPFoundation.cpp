@@ -398,14 +398,15 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
     return EndpointsURI;
 }
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+bool CSPFoundation::Initialise(
+    const csp::common::String& EndpointRootURI, const csp::common::String& InTenant, const csp::ClientUserAgent& ClientUserAgentHeader)
 {
     // Nullptr means the signalRConnection will be internally instantiated
-    return InitialiseWithInject(EndpointRootURI, InTenant, nullptr);
+    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr);
 }
 
-bool CSPFoundation::InitialiseWithInject(
-    const csp::common::String& EndpointRootURI, const csp::common::String& InTenant, csp::multiplayer::ISignalRConnection* SignalRInject)
+bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
+    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject)
 {
     assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
 
@@ -421,16 +422,7 @@ bool CSPFoundation::InitialiseWithInject(
     *DeviceId = LoadDeviceId().c_str();
     IsInitialised = true;
 
-    // Initialises ClientAgentHeaderInfo with default values in case the client doesn't call SetClientUserAgentInfo().
-    ClientUserAgent ClientAgentHeaderInfo;
-    ClientAgentHeaderInfo.CSPVersion = CSP_TEXT("CSPVersionUnset");
-    ClientAgentHeaderInfo.ClientOS = CSP_TEXT("ClientOSUnset");
-    ClientAgentHeaderInfo.ClientSKU = CSP_TEXT("ClientSKUUnset");
-    ClientAgentHeaderInfo.ClientVersion = CSP_TEXT("ClientVersionUnset");
-    ClientAgentHeaderInfo.ClientEnvironment = CSP_TEXT("ClientBuildTypeUnset");
-    ClientAgentHeaderInfo.CHSEnvironment = CSP_TEXT("CHSEnvironmentUnset");
-
-    SetClientUserAgentInfo(ClientAgentHeaderInfo);
+    SetClientUserAgentInfo(ClientUserAgentHeader);
 
     return true;
 }
