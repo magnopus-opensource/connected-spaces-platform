@@ -417,12 +417,12 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     DeviceId = new csp::common::String("");
     ClientUserAgentString = new csp::common::String("");
 
+    SetClientUserAgentInfo(ClientUserAgentHeader);
+
     csp::systems::SystemsManager::Instantiate(SignalRInject);
 
     *DeviceId = LoadDeviceId().c_str();
     IsInitialised = true;
-
-    SetClientUserAgentInfo(ClientUserAgentHeader);
 
     return true;
 }

@@ -15,10 +15,12 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
+#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
@@ -93,6 +95,8 @@ SequenceSystem* SystemsManager::GetSequenceSystem() { return SequenceSystem; }
 
 HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem() { return HotspotSequenceSystem; }
 
+AnalyticsSystem* SystemsManager::GetAnalyticsSystem() { return AnalyticsSystem; }
+
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
@@ -142,6 +146,7 @@ SystemsManager::SystemsManager()
     , QuotaSystem(nullptr)
     , SequenceSystem(nullptr)
     , HotspotSequenceSystem(nullptr)
+    , AnalyticsSystem(nullptr)
 {
 }
 
@@ -192,12 +197,14 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     SequenceSystem = new csp::systems::SequenceSystem(WebClient, NetworkEventBus, *LogSystem);
     HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, NetworkEventBus, *LogSystem);
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
+    AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
 }
 
 void SystemsManager::DestroySystems()
 {
     // Systems must be shut down in reverse order to CreateSystems() to ensure that any
     // dependencies continue to exist until each system is successfully shut down.
+    delete AnalyticsSystem;
     delete ConversationSystem;
     delete HotspotSequenceSystem;
     delete SequenceSystem;
