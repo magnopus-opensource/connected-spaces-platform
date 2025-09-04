@@ -19,9 +19,12 @@
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
+#include "CSP/Systems/CSPSceneData.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "UserSystemTestHelpers.h"
 
 #include "TestHelpers.h"
 
@@ -32,6 +35,11 @@
 
 using namespace csp;
 using namespace csp::multiplayer;
+
+namespace
+{
+bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+}
 
 /*
     Checks OfflineRealtimeEngine is returning the correct enum for GetRealtimeEngineType
@@ -730,14 +738,20 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
 }
 
 /*
-    The CSPSceneDecription has already been thoroughly tested in our SceneDescription tests.
-    This just ensures that the correct amount of objects are populated.
+    This is a basic integration test, showing that an empty CSPSceneDescription is correctly processed in the full online flow.
 */
-CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructorTest)
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    auto FilePath = std::filesystem::absolute("assets/checkpoint-example.json");
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false);
+
+    // Get checkpoint file
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-empty.json");
 
     std::ifstream Stream { FilePath.u8string().c_str() };
 
@@ -751,8 +765,101 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ConstructorTest)
 
     std::string Json = SStream.str();
 
+    systems::CSPSceneData SceneData { Json.c_str() };
     CSPSceneDescription SceneDescription { Json.c_str() };
-    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
 
-    EXPECT_EQ(Engine.GetNumEntities(), 74);
+    // Enter space from scene description
+    auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
+        SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem());
+
+    // Ensure callback is called correctly with the correct number of entities.
+    bool CallbackCalled = false;
+
+    RealtimeEngine->SetEntityFetchCompleteCallback(
+        [&CallbackCalled](uint32_t Count)
+        {
+            EXPECT_EQ(Count, 0);
+            CallbackCalled = true;
+        });
+
+    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, SceneData.Space.Id, RealtimeEngine.get());
+    EXPECT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_TRUE(CallbackCalled);
+
+    EXPECT_EQ(RealtimeEngine->GetAllEntities()->Size(), 0);
+
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    LogOut(UserSystem);
+}
+
+/*
+    This is a basic integration test, showing that a basic CSPSceneDescription with one entity is correctly processed in the full online flow.
+*/
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, false);
+
+    // Get checkpoint file
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    std::string Json = SStream.str();
+
+    // Enter space from scene description
+    systems::CSPSceneData SceneData { Json.c_str() };
+    CSPSceneDescription SceneDescription { Json.c_str() };
+
+    auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
+        SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem());
+
+    // Ensure callback is called correctly with the correct number of entities.
+    bool CallbackCalled = false;
+
+    RealtimeEngine->SetEntityFetchCompleteCallback(
+        [&CallbackCalled](uint32_t Count)
+        {
+            EXPECT_EQ(Count, 1);
+            CallbackCalled = true;
+        });
+
+    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, SceneData.Space.Id, RealtimeEngine.get());
+    EXPECT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_TRUE(CallbackCalled);
+
+    if (RealtimeEngine->GetAllEntities()->Size() != 1)
+    {
+        FAIL();
+    }
+
+    // Ensure entity has a static model component.
+    SpaceEntity* Entity = (*RealtimeEngine->GetAllEntities())[0];
+
+    if (Entity->GetComponents()->Size() != 1)
+    {
+        FAIL();
+    }
+
+    EXPECT_EQ(Entity->GetComponent(0)->GetComponentType(), csp::multiplayer::ComponentType::StaticModel);
+
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    LogOut(UserSystem);
 }
