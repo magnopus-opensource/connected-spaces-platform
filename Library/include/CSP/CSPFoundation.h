@@ -53,21 +53,22 @@ public:
     /// @return csp::common::String : URI of the service endpoint.
     csp::common::String GetURI() const { return URI; }
     /// @brief Sets the URI for the service endpoint.
-    /// @param InURI csp::common::String : URI for service endpoint.
+    /// @param InURI const csp::common::String& : URI for service endpoint.
     void SetURI(const csp::common::String& InURI) { URI = InURI; }
 
     /// @brief Gets the current version of the service endpoint.
     /// @return int32_t : Representing the current version of the service endpoint.
     int32_t GetVersion() const { return Version; }
     /// @brief Sets the current Version for the service endpoint.
-    /// @param InVersion uint32_t : Version for service endpoint.
+    /// @param InVersion const uint32_t : Version for service endpoint.
     CSP_NO_EXPORT void SetVersion(const uint32_t InVersion) { Version = InVersion; }
 
     /// @brief Compares the service definition against services deployment status to evaluate state differences.
     /// This function analyzes the provided `ServiceDefinition` and compares it with the corresponding
     /// `ServicesDeploymentStatus` to determine the differences between the two. The comparison is performed with
     /// respect to a defined set of service states: 'Latest', 'Deployed', 'Deprecated', and 'Retired'.
-    /// @param ServicesDeploymentStatus The current status information against which the service definition is compared.
+    /// @param ServicesDeploymentStatus const csp::systems::ServicesDeploymentStatus& : The current status information against which the service
+    /// definition is compared.
     /// @return bool : true if all services are available, false otherwise
     CSP_NO_EXPORT bool CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const;
 
@@ -119,10 +120,10 @@ class CSP_API CSPFoundation
 public:
     /// @brief Sets the endpoints for the various services needed for foundation, passes over the client header information and initialises the
     /// systems required for foundation to operate.
-    /// @param EndpointRootURI csp::common::String : Root URI for service endpoints
-    /// @param Tenant csp::common::String : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants cannot
-    /// interact with each other.
-    /// @param ClientUserAgentHeader csp::ClientUserAgent : The Client Info data
+    /// @param EndpointRootURI const csp::common::String& : Root URI for service endpoints
+    /// @param Tenant const csp::common::String& : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants
+    /// cannot interact with each other.
+    /// @param ClientUserAgentHeader const csp::ClientUserAgent& : The Client Info data
     /// @return bool : True for successful initialisation.
     static bool Initialise(
         const csp::common::String& EndpointRootURI, const csp::common::String& Tenant, const csp::ClientUserAgent& ClientUserAgentHeader);
@@ -153,12 +154,12 @@ public:
 
     /// @brief Gets the full foundation build ID in use.
     /// Generated at project generation time using the lastest commit timestamp and hash.
-    /// @return const csp::common::String : Returns the build ID for the foundation build
+    /// @return const csp::common::String& : Returns the build ID for the foundation build
     static const csp::common::String& GetBuildID();
 
     /// @brief Unique identifier for the current device.
     /// Used internally by certain user authentication endpoints.
-    /// @return csp::common::String& : A string representing the current device
+    /// @return const csp::common::String& : A string representing the current device
     static const csp::common::String& GetDeviceId();
 
     /// @brief Is this instance of Foundation initialised.
@@ -171,7 +172,7 @@ public:
     static const EndpointURIs& GetEndpoints();
 
     /// @brief Create an EndpointsURIs object containing URIs to the various services needed by CSP.
-    /// @param EndpointRootURI csp::common::String: URI to the root of the cloud services.
+    /// @param EndpointRootURI const csp::common::String&: URI to the root of the cloud services.
     /// @return EndpointURIs class with deduced endpoint URIs.
     static EndpointURIs CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI);
 
@@ -181,11 +182,11 @@ public:
 
     /// @brief Gets a string containing the Client UserAgent header information.
     /// Used internally in headers for all Magnopus Service requests.
-    /// @return csp::common::String& : Returns Client UserAgent header
+    /// @return const csp::common::String& : Returns Client UserAgent header
     static const csp::common::String& GetClientUserAgentString();
 
     /// @brief Gets the tenant that foundation is currently using, based on what was provided during initialisation.
-    /// @return csp::common::String&
+    /// @return const csp::common::String&
     static const csp::common::String& GetTenant();
 
 private:
