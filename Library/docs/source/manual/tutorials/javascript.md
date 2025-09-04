@@ -4,21 +4,7 @@
 
 Connected Spaces Platform needs to be initialized before making any calls to other parts of its API. For this, you will need a valid CSP tenant. If you don't already have one, you'll need to [apply for one](https://www.magnopus.com/csp/for-developers#tenant-id).
 
-```javascript
-import { ready, CSPFoundation } from 'connected-spaces-platform.web';
-
-// We first need to load the CSP WASM module by calling `ready`
-await ready();
-
-/* 
- * The first parameter passed to Initialise is the CHS services root URL.
- * "ogs-ostage" is the environment, and is currently the only environment publicly available for clients.
- * The last parameter is your tenant ID.
- */
-CSPFoundation.initialise('https://ogs-ostage.magnoboard.com', '<your tenant>');
-```
-
-After initialising, you should then set the user agent information that will be used for all requests made by CSP.
+You will need to provide your user agent information as part of the call to initialise CSP.
 
 ```javascript
 import { ClientUserAgent } from 'connected-spaces-platform.web';
@@ -29,10 +15,27 @@ userAgent.clientOS          = '<your current OS identifier>';
 userAgent.clientSKU         = '<an identifier for your project>';
 userAgent.clientVersion     = '<your project version identifier>';
 userAgent.clientEnvironment = '<your project environment>';
+```
 
-CSPFoundation.setClientUserAgentInfo(userAgent);
+Once the userAgent object has been constructed, CSP can be initialised as shown below.
+
+```javascript
+import { ready, CSPFoundation } from 'connected-spaces-platform.web';
+
+// We first need to load the CSP WASM module by calling `ready`
+await ready();
+
+/* 
+ * The first parameter passed to Initialise is the CHS services root URL.
+ * "ogs-ostage" is the environment, and is currently the only environment publicly available for clients.
+ * The second parameter is your tenant ID.
+ * The final parameter is your userAgent object.
+ */
+CSPFoundation.initialise('https://ogs-ostage.magnoboard.com', '<your tenant>', userAgent);
 userAgent.delete();
 ```
+
+
 
 ## Authenticating
 
