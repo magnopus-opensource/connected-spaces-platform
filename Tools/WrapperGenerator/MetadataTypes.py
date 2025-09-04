@@ -175,6 +175,7 @@ class ClassMetadata:
     is_static: bool = False
     is_nested_type: bool = False
     has_nested_types: bool = False
+    is_template: bool = False
     is_template_instance: bool = False
     template_name: str = None
     template_arguments: List[TemplateArgumentMetadata] = None
