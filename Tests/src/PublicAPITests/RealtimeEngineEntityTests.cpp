@@ -152,16 +152,22 @@ TEST_P(CreateAvatar, CreateAvatarTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -208,6 +214,7 @@ TEST_P(CreateAvatar, CreateAvatarTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -224,16 +231,22 @@ TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -280,6 +293,7 @@ TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -296,16 +310,22 @@ TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -345,6 +365,7 @@ TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
     EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::One());
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -366,10 +387,17 @@ TEST_P(ObjectCreate, ObjectCreateTest)
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -377,7 +405,6 @@ TEST_P(ObjectCreate, ObjectCreateTest)
 
     InitialiseTestingConnection();
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -400,6 +427,7 @@ TEST_P(ObjectCreate, ObjectCreateTest)
     EXPECT_EQ(CreatedObject->GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -416,16 +444,22 @@ TEST_P(ObjectAddComponent, ObjectAddComponentTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -501,6 +535,7 @@ TEST_P(ObjectAddComponent, ObjectAddComponentTest)
     EXPECT_EQ(RealImageComponent->GetImageAssetId(), ImageAssetId);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -517,16 +552,22 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -598,6 +639,7 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     EXPECT_FALSE(RealComponents.HasKey(ImageComponentKey));
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -614,11 +656,17 @@ TEST_P(ObjectRemoveComponentTestReenterSpace, ObjectRemoveComponentTestReenterSp
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
-    const csp::common::String ObjectName = "Object 1";
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -627,9 +675,10 @@ TEST_P(ObjectRemoveComponentTestReenterSpace, ObjectRemoveComponentTestReenterSp
     bool EntitiesCreated = false;
     auto EntitiesReadyCallback = [&EntitiesCreated](int /*NumEntitiesFetched*/) { EntitiesCreated = true; };
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback(EntitiesReadyCallback);
+
+    const csp::common::String ObjectName = "Object 1";
 
     uint16_t KeepKey = 0;
     uint16_t DeleteKey = 0;
@@ -727,6 +776,7 @@ TEST_P(ObjectRemoveComponentTestReenterSpace, ObjectRemoveComponentTestReenterSp
 
         // Exit space
         auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        RealtimeEngine.reset();
     }
 
     // Delete space
@@ -747,15 +797,22 @@ TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -792,6 +849,7 @@ TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
     csp::CSPFoundation::Tick();
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -808,16 +866,22 @@ TEST_P(EntitySelection, EntitySelectionTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -855,6 +919,7 @@ TEST_P(EntitySelection, EntitySelectionTest)
     EXPECT_FALSE(CreatedObject->IsSelected());
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -871,16 +936,22 @@ TEST_P(InvalidComponentFields, InvalidComponentFieldsTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
-    csp::common::String UserId;
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -905,6 +976,7 @@ TEST_P(InvalidComponentFields, InvalidComponentFieldsTest)
     ProcessPendingIfOnline(*RealtimeEngine);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -923,15 +995,22 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -993,6 +1072,7 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
     SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1011,15 +1091,22 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1081,6 +1168,7 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
     SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1099,15 +1187,22 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1172,6 +1267,7 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
     SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1190,15 +1286,22 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1255,6 +1358,7 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     EXPECT_EQ(ObjectTransformExpected.Scale == ObjectTransformActual.Scale, true);
 
     SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1271,15 +1375,22 @@ TEST_P(CreateObjectParent, CreateObjectParentTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
 
-    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1303,6 +1414,7 @@ TEST_P(CreateObjectParent, CreateObjectParentTest)
     EXPECT_EQ(RealtimeEngine->GetRootHierarchyEntities()->Size(), 1);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1319,10 +1431,18 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
     const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -1330,7 +1450,6 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
 
     // Enter a space and lock an entity
     {
-        csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1366,6 +1485,7 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
 
         // Exit Space
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        RealtimeEngine.reset();
     }
 
     // Delete space
@@ -1383,10 +1503,18 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
     const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -1394,7 +1522,6 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
 
     // Enter a space and lock an entity
     {
-        csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
         RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
@@ -1432,6 +1559,7 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
 
         // Exit Space
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        RealtimeEngine.reset();
     }
 
     // Delete space
@@ -1503,7 +1631,14 @@ TEST_P(EntityLock, EntityLockTest)
 
     // Log in
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -1618,6 +1753,7 @@ TEST_P(EntityLock, EntityLockTest)
 
     // Exit space
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1639,9 +1775,15 @@ TEST_P(ParentDeletion, ParentDeletionTest)
     const bool Local = std::get<1>(GetParam());
 
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+    const csp::systems::Profile TestUser = CreateTestUser();
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -1854,6 +1996,7 @@ TEST_P(ParentDeletion, ParentDeletionTest)
     }
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -1875,8 +2018,14 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
     const bool Local = std::get<1>(GetParam());
 
     // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
     csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
     // Create space
     csp::systems::Space Space;
@@ -2020,6 +2169,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
         }
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        RealtimeEngine.reset();
 
         // Delete space
         DeleteSpace(SpaceSystem, Space.Id);
