@@ -738,7 +738,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, MarkEntityForUpdate)
 }
 
 /*
-    This is a basic integration test, showing that an empty CSPSceneDescription is correctly processed in the full online flow.
+    This is a basic integration test, showing that an empty CSPSceneDescription is correctly processed in the full offline flow.
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest)
 {
@@ -795,7 +795,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest
 }
 
 /*
-    This is a basic integration test, showing that a basic CSPSceneDescription with one entity is correctly processed in the full online flow.
+    This is a basic integration test, showing that a basic CSPSceneDescription with one entity is correctly processed in the full offline flow.
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest)
 {
