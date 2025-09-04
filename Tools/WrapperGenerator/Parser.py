@@ -1729,8 +1729,6 @@ class Parser:
                     self.__find_and_set_templated_type(f.type, c.namespace, types)
         
         for t in self.templates.values():
-            t.definition.is_template = True
-
             for f in t.definition.fields:
                 if any(f.type.name == tp.name for tp in t.template_parameters):
                     f.type.is_template_argument = True
