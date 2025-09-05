@@ -450,9 +450,16 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
+    bool TokenHasBeenRefresh = false;
+    // Ensure that the token is refresh when attempting to make a authenticated call after expiry
+    UserSystem->SetNewLoginTokenReceivedCallback(
+        [&TokenHasBeenRefresh](const csp::systems::LoginTokenInfoResult& /*Result*/) { TokenHasBeenRefresh = true; });
+
     std::this_thread::sleep_for(10s);
 
     auto Profile = GetFullProfileByUserId(UserSystem, UserId);
+
+    EXPECT_EQ(TokenHasBeenRefresh, true);
 
     // Log out
     LogOut(UserSystem);
