@@ -15,11 +15,6 @@ export async function initializeCSP(useDebugCSP) {
 
     await ready(useDebugCSP);
 
-    CSPFoundation.initialise(CHS_ENDPOINT_ROOT, TENANT);
-    if (!CSPFoundation.getIsInitialised()) {
-      throw new Error("CSPFoundation failed to initialize");
-    }
-
     const userAgent = ClientUserAgent.create();
     userAgent.cSPVersion = CSPFoundation.getBuildID();
     userAgent.clientOS = TESTS_CLIENT_OS;
@@ -28,7 +23,11 @@ export async function initializeCSP(useDebugCSP) {
     userAgent.clientEnvironment = "ODev";
     userAgent.cHSEnvironment = "oDev";
 
-    CSPFoundation.setClientUserAgentInfo(userAgent);
+    CSPFoundation.initialise(CHS_ENDPOINT_ROOT, TENANT, userAgent);
+    if (!CSPFoundation.getIsInitialised()) {
+      throw new Error("CSPFoundation failed to initialize");
+    }
+
     console.log("CSP Initialization complete.");
   } catch (error) {
     console.error("Failed to initialize CSP:", error.message);

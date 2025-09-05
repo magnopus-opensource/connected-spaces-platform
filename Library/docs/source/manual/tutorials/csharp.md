@@ -4,18 +4,7 @@
 
 Connected Spaces Platform needs to be initialized before making any calls to other parts of its API. For this, you will need a valid CSP tenant. If you don't already have one, you'll need to [apply for one](https://www.magnopus.com/csp/for-developers#tenant-id).
 
-```c#
-using Csp;
-
-/* 
- * The first parameter passed to Initialise is the CHS services root URL.
- * "ogs-ostage" is the environment, and is currently the only environment publicly available for clients.
- * The last parameter is your tenant ID.
- */
-CSPFoundation.Initialise("https://ogs-ostage.magnoboard.com", "<your tenant>");
-```
-
-After initialising, you should then set the user agent information that will be used for all requests made by CSP.
+You will need to provide your user agent information as part of the call to initialise CSP.
 
 ```c#
 using var userAgent = new ClientUserAgent()
@@ -26,9 +15,23 @@ using var userAgent = new ClientUserAgent()
   ClientVersion     = "<your project version identifier>",
   ClientEnvironment = "<your project environment>"
 };
-
-CSPFoundation.SetClientUserAgentInfo(userAgent);
 ```
+
+Once the userAgent object has been constructed, CSP can be initialised as shown below.
+
+```c#
+using Csp;
+
+/* 
+ * The first parameter passed to Initialise is the CHS services root URL.
+ * "ogs-ostage" is the environment, and is currently the only environment publicly available for clients.
+ * The second parameter is your tenant ID.
+ * The final parameter is your userAgent object.
+ */
+CSPFoundation.Initialise("https://ogs-ostage.magnoboard.com", "<your tenant>", userAgent);
+```
+
+
 
 ## Authenticating
 

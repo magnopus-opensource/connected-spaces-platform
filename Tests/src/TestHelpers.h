@@ -191,8 +191,6 @@ inline void LogFatal(std::string Message)
 
 inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
 {
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", SignalRMock);
-
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
     ClientHeaderInfo.ClientOS = "CPPTestsOS";
@@ -201,7 +199,7 @@ inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& End
     ClientHeaderInfo.ClientEnvironment = "ODev";
     ClientHeaderInfo.CHSEnvironment = "oDev";
 
-    csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo, SignalRMock);
 }
 
 inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)

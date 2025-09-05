@@ -180,6 +180,11 @@ class ClassMetadata:
     template_arguments: List[TemplateArgumentMetadata] = None
     doc_comments: List[str] = None
 
+    # is_template is used during code generation when expanding {{> Type}}
+    # to indicate a _template specialization_.
+    # For a class definition, this is always False.
+    is_template: bool = False
+
 
 @dataclass
 class ClassInterfaceMetadata:

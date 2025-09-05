@@ -34,12 +34,6 @@ HttpPayload::HttpPayload()
 {
     std::string ResponseContent = csp::CSPFoundation::GetClientUserAgentString().c_str();
 
-    if (ResponseContent.find("Unset") != std::string::npos)
-    {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning,
-            "ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
-    }
-
     // Using custom header as User-Agent is protected on web SKUs
     AddHeader(CSP_TEXT("X-AssetPlatform"), csp::common::String(ResponseContent.c_str()));
 }
