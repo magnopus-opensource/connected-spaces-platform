@@ -1651,11 +1651,11 @@ TEST_P(EntityLock, EntityLockTest)
     {
         // Ensure patch rate limiting is off, as we're sending patches in quick succession.
         static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine.get())->SetEntityPatchRateLimitEnabled(false);
-    }
 
-    // If local is false, test DeserialiseFromPatch functionality
-    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
-    EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
+        // If local is false, test DeserialiseFromPatch functionality
+        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+        EXPECT_EQ(FlagSetResult, csp::multiplayer::ErrorCode::None);
+    }
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1801,8 +1801,11 @@ TEST_P(ParentDeletion, ParentDeletionTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    // If local is false, test DeserialiseFromPatch functionality
-    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        // If local is false, test DeserialiseFromPatch functionality
+        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    }
 
     // Create Entities
     csp::common::String ParentEntityName = "ParentEntity";
@@ -2038,8 +2041,11 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    // If local is false, test DeserialiseFromPatch functionality
-    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        // If local is false, test DeserialiseFromPatch functionality
+        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+    }
 
     // Create Entities
     csp::common::String ParentEntityName = "ParentEntity";
@@ -2163,9 +2169,12 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
         EXPECT_EQ(RealtimeEngine->GetNumEntities(), 1);
         EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
-        if (!Local)
+        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
         {
-            auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+            if (!Local)
+            {
+                auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+            }
         }
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
