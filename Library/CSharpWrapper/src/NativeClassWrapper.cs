@@ -39,13 +39,41 @@ namespace Csp
 
     public class NativeClassWrapper
     {
-        internal IntPtr _ptr;
+        private IntPtr _ptrValue = IntPtr.Zero;
         internal bool _ownsPtr;
         internal bool _disposed = false;
 
         internal virtual string _safeTypeName { get; }
 
-        public bool PointerIsValid => _ptr != IntPtr.Zero;
+        public bool PointerIsValid => _ptrValue != IntPtr.Zero;
+
+        /// <summary>
+        /// Pointer to the native object.
+        /// </summary>
+        /// <exception cref="NullReferenceException">Thrown if the pointer is null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if attempting to change the pointer once it's set to a non-null value.</exception>
+        internal IntPtr _ptr
+        {
+            get
+            {
+                // Prevent accessing the pointer if it's null
+                if (_ptrValue == IntPtr.Zero)
+                {
+                    throw new NullReferenceException($"Attempting to access a null pointer for {_safeTypeName}");
+                }
+                return _ptrValue;
+            }
+            set
+            {
+                // Prevent changing the pointer once it's set to a non-null value
+                if (_ptrValue != IntPtr.Zero && value != IntPtr.Zero)
+                {
+                    throw new InvalidOperationException($"Attempting to change the native pointer for {_safeTypeName} from {_ptrValue} to {value}");
+                }
+
+                _ptrValue = value;
+            }
+        }
 
         public NativeClassWrapper() { }
 
