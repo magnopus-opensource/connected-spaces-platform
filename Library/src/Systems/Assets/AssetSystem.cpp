@@ -1590,6 +1590,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
 
                 if (!ShaderType.has_value())
                 {
+                    CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialsResult>());
                     return;
                 }
@@ -1707,6 +1708,7 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
         std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
         if (!ShaderType.has_value())
         {
+            CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
             return;
         }
