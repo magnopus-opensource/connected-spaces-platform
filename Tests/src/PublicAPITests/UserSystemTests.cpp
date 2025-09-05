@@ -70,11 +70,12 @@ csp::systems::Profile CreateTestUser()
 }
 
 void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, const csp::common::String& Email,
-    const csp::common::String& Password, bool CreateMultiplayerConnection, bool AgeVerified, csp::systems::EResultCode ExpectedResultCode,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+    const csp::common::String& Password, bool CreateMultiplayerConnection, bool AgeVerified, const csp::systems::TokenOptions& TokenOptions,
+    csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, CreateMultiplayerConnection, AgeVerified)
-                        .Await(RequestPredicate);
+    auto [Result]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, CreateMultiplayerConnection, AgeVerified, TokenOptions)
+              .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 
@@ -89,7 +90,8 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
 void LogInAsGuest(
     csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection, csp::systems::EResultCode ExpectedResult)
 {
-    auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, CreateMultiplayerConnection, true).Await(RequestPredicate);
+    auto [Result]
+        = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, CreateMultiplayerConnection, true, nullptr).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
@@ -100,20 +102,22 @@ void LogInAsGuest(
 }
 
 void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection, bool AgeVerified,
-    csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+    csp::systems::TokenOptions TokenOptions, csp::systems::EResultCode ExpectedResultCode,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
     csp::systems::Profile NewTestUser = CreateTestUser();
 
-    LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, CreateMultiplayerConnection, AgeVerified, ExpectedResultCode,
-        ExpectedResultFailureCode);
+    LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, CreateMultiplayerConnection, AgeVerified, TokenOptions,
+        ExpectedResultCode, ExpectedResultFailureCode);
 }
 
 void LogInAsAdminUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection, bool AgeVerified,
-    csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+    csp::systems::TokenOptions TokenOptions, csp::systems::EResultCode ExpectedResultCode,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
     // Attempt to log in with an admin account with elevated permissions.
-    LogIn(UserSystem, OutUserId, AdminAccountEmail(), AdminAccountPassword(), CreateMultiplayerConnection, AgeVerified, ExpectedResultCode,
-        ExpectedResultFailureCode);
+    LogIn(UserSystem, OutUserId, AdminAccountEmail(), AdminAccountPassword(), CreateMultiplayerConnection, AgeVerified, TokenOptions,
+        ExpectedResultCode, ExpectedResultFailureCode);
 }
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode)
@@ -298,7 +302,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
     LogOut(UserSystem);
 
     // Log in
-    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId, "badtoken", true);
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId, "badtoken", true, nullptr);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
@@ -321,7 +325,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
 
     csp::common::String UserId;
     // Log in with empty email and username
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "", GeneratedTestAccountPassword, true, true).Await(RequestPredicate);
+    auto [Result]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "", GeneratedTestAccountPassword, true, true, nullptr).Await(RequestPredicate);
 
     EXPECT_TRUE(CallbackCalled);
     EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -347,7 +352,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
 
     csp::common::String UserId;
     // Log in with empty password
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", "", true, true).Await(RequestPredicate);
+    auto [Result]
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", "", true, true, nullptr).Await(RequestPredicate);
 
     EXPECT_TRUE(CallbackCalled);
     EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -373,7 +379,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsRefreshTokenLogi
 
     csp::common::String UserId;
     // Log in with empty userId
-    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, "", "fakeToken", true);
+    auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, "", "fakeToken", true, nullptr);
 
     EXPECT_TRUE(CallbackCalled);
     EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -407,7 +413,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
     // Attempt to log in again
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::EResultCode::Failed);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        csp::systems::EResultCode::Failed);
 
     // Log out
     LogOut(UserSystem);
@@ -421,7 +428,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
     csp::common::String UserId;
 
     // Log in with invalid credentials
-    LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", true, true, csp::systems::EResultCode::Failed);
+    LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", true, true, csp::systems::TokenOptions(), csp::systems::EResultCode::Failed);
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
@@ -1115,12 +1122,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
     csp::systems::Profile TestUser = CreateTestUser();
 
     // False Log in
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, false, csp::systems::EResultCode::Failed,
-        csp::systems::ERequestFailureReason::UserAgeNotVerified);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, false, csp::systems::TokenOptions(),
+        csp::systems::EResultCode::Failed, csp::systems::ERequestFailureReason::UserAgeNotVerified);
 
     // null Log in
     // does not use login helper function as the login helper function defaults to false.
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", TestUser.Email, GeneratedTestAccountPassword, true, nullptr)
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", TestUser.Email, GeneratedTestAccountPassword, true, true, nullptr)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1130,8 +1137,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
     LogOut(UserSystem);
 
     // true Log in
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::EResultCode::Success,
-        csp::systems::ERequestFailureReason::None);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None);
 
     LogOut(UserSystem);
 }
@@ -1149,8 +1156,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
     csp::systems::Profile TestUser = CreateTestUser();
 
     // False Log in
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::EResultCode::Success,
-        csp::systems::ERequestFailureReason::None);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None);
 
     auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
 
@@ -1172,8 +1179,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
     csp::systems::Profile TestUser = CreateTestUser();
 
     // False Log in
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::EResultCode::Success,
-        csp::systems::ERequestFailureReason::None);
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, true, csp::systems::TokenOptions(),
+        csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None);
 
     auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, csp::systems::TierNames::Pro);
 
