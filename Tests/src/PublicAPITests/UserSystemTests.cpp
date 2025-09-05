@@ -437,8 +437,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
     LogOut(UserSystem);
 }
 
-// This will be updated and re-instated in OF-1533
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -446,12 +445,12 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
     csp::common::String UserId;
 
     // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
+    auto TokenOptions = csp::systems::TokenOptions();
+    TokenOptions.ExpiryLength = "00:00:05";
 
-    // Tokens are issued with a 30 min expiry but may be accepted up to 5 mins after their expiry.
-    // We set at 40 mins to make sure we're definitely dealing with a fully expired token that will
-    // not be accepted.
-    std::this_thread::sleep_for(40min);
+    LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    std::this_thread::sleep_for(10s);
 
     auto Profile = GetFullProfileByUserId(UserSystem, UserId);
 
