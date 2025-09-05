@@ -16,9 +16,9 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Common//Systems/Log/LogSystem.h"
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
