@@ -851,6 +851,17 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest
     // Ensure entity has a static model component.
     SpaceEntity* Entity = (*RealtimeEngine->GetAllEntities())[0];
 
+    EXPECT_EQ(Entity->GetName(), "Entity");
+    EXPECT_EQ(Entity->GetId(), 255223);
+    EXPECT_EQ(Entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
+    EXPECT_EQ(Entity->GetIsTransferable(), true);
+    EXPECT_EQ(Entity->GetIsPersistent(), true);
+    EXPECT_EQ(Entity->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(Entity->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(Entity->GetScale(), csp::common::Vector3::One());
+    EXPECT_FALSE(Entity->GetParentId().HasValue());
+    EXPECT_EQ(Entity->GetOwnerId(), 0);
+
     if (Entity->GetComponents()->Size() != 1)
     {
         FAIL();

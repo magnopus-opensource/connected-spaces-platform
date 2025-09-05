@@ -303,6 +303,21 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     EXPECT_EQ(SceneData.Space.Id, "68addce4985d7612f76b9461");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-empty");
+    EXPECT_EQ(SceneData.Space.OwnerId, "68addce0985d7612f76b945e");
+    EXPECT_EQ(SceneData.Space.CreatedAt, "2025-08-26T16:12:20.701+00:00");
+
+    if (SceneData.Space.UserIds.Size() != 1)
+    {
+        FAIL();
+    }
+
+    EXPECT_EQ(SceneData.Space.UserIds[0], "68addce0985d7612f76b945e");
+    EXPECT_EQ(SceneData.Space.BannedUserIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.ModeratorIds.Size(), 0);
+    EXPECT_EQ(SceneData.Space.Tags.Size(), 0);
+
+    EXPECT_FALSE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    EXPECT_TRUE(csp::systems::HasFlag(SceneData.Space.Attributes, csp::systems::SpaceAttributes::RequiresInvite));
 
     EXPECT_EQ(Entities.Size(), 0);
     EXPECT_EQ(SceneData.AssetCollections.Size(), 0);
@@ -369,6 +384,15 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     // Check entity is parsed correctly.
     csp::multiplayer::SpaceEntity* Entity = Entities[0];
     EXPECT_EQ(Entity->GetName(), "Entity");
+    EXPECT_EQ(Entity->GetId(), 255223);
+    EXPECT_EQ(Entity->GetEntityType(), csp::multiplayer::SpaceEntityType::Object);
+    EXPECT_EQ(Entity->GetIsTransferable(), true);
+    EXPECT_EQ(Entity->GetIsPersistent(), true);
+    EXPECT_EQ(Entity->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(Entity->GetRotation(), csp::common::Vector4::Identity());
+    EXPECT_EQ(Entity->GetScale(), csp::common::Vector3::One());
+    EXPECT_FALSE(Entity->GetParentId().HasValue());
+    EXPECT_EQ(Entity->GetOwnerId(), 0);
 
     if (Entity->GetComponents()->Size() != 1)
     {
@@ -384,9 +408,26 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     EXPECT_EQ(StaticModelComponent->GetExternalResourceAssetCollectionId(), "TestAssetCollectionId");
 
     // Test asset collection is parsed correctly.
-    const csp::systems::AssetCollection& Collection = SceneData.AssetCollections[0];
+    csp::systems::AssetCollection Collection = SceneData.AssetCollections[0];
     EXPECT_EQ(Collection.Name, "BasicCheckpointAssetCollection2");
     EXPECT_EQ(Collection.SpaceId, "68af162f015bb6793cacf4a2");
+
+    if (Collection.Tags.Size() != 1)
+    {
+        FAIL();
+    }
+
+    EXPECT_EQ(Collection.GetMetadataMutable().Size(), 0);
+    EXPECT_EQ(Collection.Id, "68af1633e321a47fd460550e");
+    EXPECT_EQ(Collection.Type, csp::systems::EAssetCollectionType::DEFAULT);
+    EXPECT_EQ(Collection.Tags[0], "origin-68af1633e321a47fd460550e");
+    EXPECT_EQ(Collection.PointOfInterestId, "");
+    EXPECT_EQ(Collection.CreatedBy, "68af162b626ccc0c332bd60d");
+    EXPECT_EQ(Collection.CreatedAt, "2025-08-27T14:29:07.329+00:00");
+    EXPECT_EQ(Collection.UpdatedBy, "68af162b626ccc0c332bd60d");
+    EXPECT_EQ(Collection.UpdatedAt, "2025-08-27T14:29:07.329+00:00");
+    EXPECT_EQ(Collection.IsUnique, false);
+    EXPECT_EQ(Collection.Version, "");
 
     // Test asset is parsed correctly
     const csp::systems::Asset& Asset = SceneData.Assets[0];
