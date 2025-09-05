@@ -147,6 +147,14 @@ public:
     csp::common::Map<csp::common::String, csp::common::String> Parameters;
 };
 
+/// @brief Data structure for overrides to the default token token options
+class CSP_API TokenOptions
+{
+public:
+    /// @brief The length of time for a token to expire formatted as "HH:MM:SS", must be between "00:00:01" and "00:30:00"
+    csp::common::String ExpiryLength;
+};
+
 typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;
 typedef std::function<void(const NullResult& Result)> NullResultCallback;
 typedef std::function<void(const LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
