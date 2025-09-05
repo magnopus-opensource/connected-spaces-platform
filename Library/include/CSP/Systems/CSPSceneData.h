@@ -19,6 +19,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
+#include "CSP/Systems/Spatial/Anchor.h"
 
 namespace csp::systems
 {
@@ -41,6 +42,8 @@ public:
     csp::common::Array<csp::systems::Asset> Assets;
     /// @brief The sequences for this scene.
     csp::common::Array<csp::systems::Sequence> Sequences;
+    /// @brief The anchors for this scene.
+    csp::common::Array<csp::systems::Anchor> Anchors;
 };
 
 }

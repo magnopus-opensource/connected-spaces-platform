@@ -51,7 +51,8 @@ class ClientElectionManager
     /** @endcond */
 
 public:
-    ClientElectionManager(OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
+    ClientElectionManager(
+        OnlineRealtimeEngine* InOnlineRealtimeEngine, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& JSScriptRunner);
     ~ClientElectionManager();
 
     void OnConnect(const csp::common::List<SpaceEntity*>& Avatars, const csp::common::List<SpaceEntity*>& Objects);

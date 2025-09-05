@@ -517,6 +517,9 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     {
         csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(
             csp::common::LogLevel::Verbose, "Multiplayer connection not connected when exiting space, skipping disconnect.");
+
+        const NullResult Result(EResultCode::Success, 200);
+        INVOKE_IF_NOT_NULL(Callback, Result);
     }
 
     events::Event* ExitSpaceEvent = events::EventSystem::Get().AllocateEvent(events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);

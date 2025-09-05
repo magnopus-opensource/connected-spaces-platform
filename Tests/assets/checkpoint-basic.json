@@ -1,0 +1,206 @@
+{
+    "checkpointVersion": 1,
+    "checkpointTimestamp": "2025-08-27T14:33:22.7204028+00:00",
+    "spaceId": "68af162f015bb6793cacf4a2",
+    "tenantName": "OKO_TESTS",
+    "data": {
+        "group": {
+            "id": "68af162f015bb6793cacf4a2",
+            "createdBy": "68af162b626ccc0c332bd60d",
+            "createdAt": "2025-08-27T14:29:03.773+00:00",
+            "groupOwnerId": "68af162b626ccc0c332bd60d",
+            "groupType": "space",
+            "name": "checkpoint-basic",
+            "users": [
+                "68af162b626ccc0c332bd60d"
+            ],
+            "bannedUsers": [],
+            "moderators": [],
+            "discoverable": false,
+            "autoModerator": false,
+            "requiresInvite": true,
+            "archived": false,
+            "tags": [],
+            "isCurrentUserOwner": false,
+            "isCurrentUserMember": false,
+            "isCurrentUserModerator": false,
+            "isCurrentUserBanned": false
+        },
+        "objectMessages": [
+            {
+                "id": 255223,
+                "prefabId": 2,
+                "isTransferable": true,
+                "isPersistent": true,
+                "components": {
+                    "64511": {
+                        "$type": "ComponentData[[String]]",
+                        "item": "Entity"
+                    },
+                    "64512": {
+                        "$type": "ComponentData[[Single[]]]",
+                        "item": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "64513": {
+                        "$type": "ComponentData[[Single[]]]",
+                        "item": [
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0
+                        ]
+                    },
+                    "64514": {
+                        "$type": "ComponentData[[Single[]]]",
+                        "item": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    "64515": {
+                        "$type": "ComponentData[[UInt64]]",
+                        "item": 0
+                    },
+                    "64517": {
+                        "$type": "ComponentData[[String]]"
+                    },
+                    "64518": {
+                        "$type": "ComponentData[[UInt64]]",
+                        "item": 0
+                    },
+                    "64519": {
+                        "$type": "ComponentData[[UInt64]]",
+                        "item": 0
+                    },
+                    "0": {
+                        "$type": "ComponentData[[Dictionary[[UInt16],[ComponentData]]]]",
+                        "item": {
+                            "1": {
+                                "$type": "ComponentData[[String]]"
+                            },
+                            "2": {
+                                "$type": "ComponentData[[String]]",
+                                "item": "TestAssetCollectionId"
+                            },
+                            "3": {
+                                "$type": "ComponentData[[Single[]]]",
+                                "item": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ]
+                            },
+                            "4": {
+                                "$type": "ComponentData[[Single[]]]",
+                                "item": [
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    1.0
+                                ]
+                            },
+                            "5": {
+                                "$type": "ComponentData[[Single[]]]",
+                                "item": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            },
+                            "6": {
+                                "$type": "ComponentData[[Boolean]]",
+                                "item": true
+                            },
+                            "7": {
+                                "$type": "ComponentData[[Boolean]]",
+                                "item": true
+                            },
+                            "8": {
+                                "$type": "ComponentData[[String]]"
+                            },
+                            "9": {
+                                "$type": "ComponentData[[Boolean]]",
+                                "item": true
+                            },
+                            "10": {
+                                "$type": "ComponentData[[Dictionary[[String],[ComponentData]]]]",
+                                "item": {}
+                            },
+                            "64511": {
+                                "$type": "ComponentData[[String]]"
+                            },
+                            "64516": {
+                                "$type": "ComponentData[[UInt64]]",
+                                "item": 3
+                            }
+                        }
+                    }
+                },
+                "aoiCenter": false
+            }
+        ],
+        "prototypes": [
+            {
+                "id": "68af1633e321a47fd460550e",
+                "name": "BasicCheckpointAssetCollection2",
+                "tags": [
+                    "origin-68af1633e321a47fd460550e"
+                ],
+                "metadata": {},
+                "uiStrings": {},
+                "state": {},
+                "groupIds": [
+                    "68af162f015bb6793cacf4a2"
+                ],
+                "createdBy": "68af162b626ccc0c332bd60d",
+                "createdAt": "2025-08-27T14:29:07.329+00:00",
+                "updatedBy": "68af162b626ccc0c332bd60d",
+                "updatedAt": "2025-08-27T14:29:07.329+00:00",
+                "highlander": false,
+                "type": "Default",
+                "systemOwned": false,
+                "readAccess": [],
+                "writeAccess": []
+            }
+        ],
+        "assetDetails": [
+            {
+                "prototypeId": "68af1633e321a47fd460550e",
+                "id": "68af1634e321a47fd460550f",
+                "name": "BasicCheckpointAsset2",
+                "languageCode": "en-us",
+                "assetType": "Model",
+                "supportedPlatforms": [
+                    "Default"
+                ],
+                "style": [
+                    "Default"
+                ],
+                "tags": [
+                    "origin-68af1634e321a47fd460550f"
+                ],
+                "sizeInBytes": 0
+            }
+        ],
+        "sequences": [
+            {
+                "id": "68af1635af748805cc1417b8",
+                "key": "%2ABasicCheckpointSequence2%2A",
+                "items": [
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "referenceType": "GroupId",
+                "referenceId": "68af162f015bb6793cacf4a2",
+                "metadata": {}
+            }
+        ],
+        "anchors": []
+    }
+}

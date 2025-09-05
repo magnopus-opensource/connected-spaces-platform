@@ -24,28 +24,15 @@
 
 namespace csp::multiplayer::mcs
 {
-static constexpr const char* BooleanType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Boolean, "
-                                           "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* Int64Type = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Int64, "
-                                         "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* UInt64Type = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.UInt64, "
-                                          "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* SinglePrecisionType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single, "
-                                                   "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* SinglePrecisionArrayType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Single[], "
-                                                        "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* DoubleType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Double, "
-                                          "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* StringType = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.String, "
-                                          "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* UInt16DictionaryType
-    = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Collections.Generic.IDictionary`2[[System.UInt16, "
-      "System.Private.CoreLib],[Magnopus.Service.Multiplayer.Messages.Components.IComponentData, Magnopus.Service.Multiplayer.Contracts]], "
-      "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
-static constexpr const char* StringDictionaryType
-    = "Magnopus.Service.Multiplayer.Messages.Components.ItemComponentData`1[[System.Collections.Generic.IDictionary`2[[System.String, "
-      "System.Private.CoreLib],[Magnopus.Service.Multiplayer.Messages.Components.IComponentData, Magnopus.Service.Multiplayer.Contracts]], "
-      "System.Private.CoreLib]], Magnopus.Service.Multiplayer.Contracts";
+static constexpr const char* BooleanType = "ComponentData[[Boolean]]";
+static constexpr const char* Int64Type = "ComponentData[[Int64]]";
+static constexpr const char* UInt64Type = "ComponentData[[UInt64]]";
+static constexpr const char* SinglePrecisionType = "ComponentData[[Single]]";
+static constexpr const char* SinglePrecisionArrayType = "ComponentData[[Single[]]]";
+static constexpr const char* DoubleType = "ComponentData[[Double]]";
+static constexpr const char* StringType = "ComponentData[[String]]";
+static constexpr const char* UInt16DictionaryType = "ComponentData[[Dictionary[[UInt16],[ComponentData]]]]";
+static constexpr const char* StringDictionaryType = "ComponentData[[Dictionary[[String],[ComponentData]]]]";
 
 namespace
 {
@@ -187,8 +174,8 @@ void DeserializeComponents(const csp::json::JsonDeserializer& Deserializer, std:
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::SceneDescription& Obj)
 {
-    Deserializer.EnterMember("Data");
-    Deserializer.SafeDeserializeMember("ObjectMessages", Obj.Objects);
+    Deserializer.EnterMember("data");
+    Deserializer.SafeDeserializeMember("objectMessages", Obj.Objects);
     Deserializer.ExitMember();
 }
 

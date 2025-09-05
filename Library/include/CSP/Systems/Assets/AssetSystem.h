@@ -321,11 +321,22 @@ public:
     CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback);
 
     /// @brief Gets a material using its AssetCollection and Asset Id.
+    /// @details This is slower than GetMaterialFromUri, as it needs to first retrieve the internal AssetCollection and Asset.
     /// @param AssetCollectionId const csp::common::String& : The asset collection id this material is associated with.
     /// @param AssetId const csp::common::String& : The asset id this material is associated with.
     /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void GetMaterial(
         const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback);
+
+    /// @brief Gets a material using it's Uri.
+    /// @details This function does not retrieve the AssetCollection or Asset remotely. It downloads the material directly from the uri.
+    /// This should be used in an offline context where The AssetCollection and Asset has been parsed from a SceneData file.
+    /// @param AssetCollection const csp::system::AssetCollection& : The asset collection this material is associated with.
+    /// @param AssetId const csp::common::String& : The asset id this material is associated with.
+    /// @param Uri const csp::common::String& : The uri this material was uploaded to.
+    /// @param Callback MaterialResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
+        const csp::common::String& Uri, MaterialResultCallback Callback);
 
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
     typedef std::function<void(const csp::common::AssetDetailBlobChangedNetworkEventData&)> AssetDetailBlobChangedCallbackHandler;
