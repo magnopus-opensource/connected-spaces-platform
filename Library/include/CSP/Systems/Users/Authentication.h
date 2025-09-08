@@ -147,11 +147,13 @@ public:
     csp::common::Map<csp::common::String, csp::common::String> Parameters;
 };
 
-/// @brief Data structure for overrides to the default token token options
+/// @brief Data structure for overrides to the default token options
 class CSP_API TokenOptions
 {
 public:
     /// @brief The length of time for a token to expire formatted as "HH:MM:SS", must be between "00:00:01" and "00:30:00"
+    /// The default token expiry length is configured by MCS and defaults to 40 minutes. Value must be less than the default expiry length, or it will
+    /// be ignored.
     csp::common::String ExpiryLength;
 };
 
