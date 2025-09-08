@@ -53,6 +53,11 @@ ApplicationSettings GetApplicationSettingsTestData(const csp::common::String& Co
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByContextTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -92,6 +97,11 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettingsByContextTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -131,6 +141,11 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettin
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -185,6 +200,11 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextWithKeysTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -276,6 +296,11 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -323,6 +348,11 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 
 CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextAnonymousWithKeysTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
