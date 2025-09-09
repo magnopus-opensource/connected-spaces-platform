@@ -82,12 +82,15 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
     std::regex Regex("^[0-9]{2}:[0-9]{2}:[0-9]{2}$");
-    if (ExpiryLength.IsEmpty() || std::regex_search(ExpiryLength.c_str(), Regex))
+    if (!ExpiryLength.IsEmpty() && std::regex_search(ExpiryLength.c_str(), Regex))
     {
         return true;
     }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
+    }
 
-    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
 }
 
@@ -247,14 +250,11 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue())
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
         {
-            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
-            {
-                auto Options = std::make_shared<chs_user::TokenOptions>();
-                Options->SetExpiryLength(TokenOptions->ExpiryLength);
-                Request->SetTokenOptions(Options);
-            }
+            auto Options = std::make_shared<chs_user::TokenOptions>();
+            Options->SetExpiryLength(TokenOptions->ExpiryLength);
+            Request->SetTokenOptions(Options);
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -321,14 +321,11 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         Request->SetUserId(UserId);
         Request->SetRefreshToken(RefreshToken);
 
-        if (TokenOptions.HasValue())
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
         {
-            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
-            {
-                auto Options = std::make_shared<chs_user::TokenOptions>();
-                Options->SetExpiryLength(TokenOptions->ExpiryLength);
-                Request->SetTokenOptions(Options);
-            }
+            auto Options = std::make_shared<chs_user::TokenOptions>();
+            Options->SetExpiryLength(TokenOptions->ExpiryLength);
+            Request->SetTokenOptions(Options);
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -390,14 +387,11 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue())
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
         {
-            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
-            {
-                auto Options = std::make_shared<chs_user::TokenOptions>();
-                Options->SetExpiryLength(TokenOptions->ExpiryLength);
-                Request->SetTokenOptions(Options);
-            }
+            auto Options = std::make_shared<chs_user::TokenOptions>();
+            Options->SetExpiryLength(TokenOptions->ExpiryLength);
+            Request->SetTokenOptions(Options);
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -566,14 +560,11 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
         Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
     }
 
-    if (TokenOptions.HasValue())
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
     {
-        if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
-        {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
-        }
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+        Options->SetExpiryLength(TokenOptions->ExpiryLength);
+        Request->SetTokenOptions(Options);
     }
 
     CurrentLoginState.State = csp::common::ELoginState::LoginRequested;
