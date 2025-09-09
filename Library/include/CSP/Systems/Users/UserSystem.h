@@ -134,6 +134,18 @@ public:
     CSP_ASYNC_RESULT void LoginAsGuest(bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
         const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
 
+    /// @brief Log in to Magnopus Connected Services as a guest, allowing the backend to defer profile creation and perform other optimizations.
+    /// This login method is intended only for use with offline realtime engines, and as such does not start a multiplayer connection.
+    /// @warning Unless you have a good reason, you should prefer the regular LoginAsGuest function. This method is designed for specific
+    /// non-multiplayer cases where the backend services are expecting a huge amount of anonymous profiles and wish to be allowed to buffer profile
+    /// creation. For this reason, there is an undefined delay after calling this function until the session can be thought to be conceptually "logged
+    /// in". Beware if you are calling user system methods after having logged in using this method. If you find yourself doing that, you may wish to
+    /// use the regular LoginAsGuest method instead.
+    /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
+    /// @param Callback LoginStateResultCallback : callback to call when a response is received
+    CSP_ASYNC_RESULT void LoginAsGuestWithDeferredProfileCreation(
+        const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
+
     /// @ingroup Third Party Authentication
     /// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
     /// GetThirdPartyProviderAuthoriseURL followed by LoginToThirdPartyAuthenticationProvider You can see a Sequence Diagram with all the parties

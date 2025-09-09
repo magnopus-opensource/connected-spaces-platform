@@ -103,6 +103,19 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
     }
 }
 
+void LogInAsGuestWithDeferredProfileCreation(
+    csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, csp::systems::EResultCode ExpectedResult)
+{
+    auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuestWithDeferredProfileCreation, UserSystem, true).Await(RequestPredicate);
+
+    EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        OutUserId = Result.GetLoginState().UserId;
+    }
+}
+
 void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection, bool AgeVerified,
     csp::systems::TokenOptions TokenOptions, csp::systems::EResultCode ExpectedResultCode,
     csp::systems::ERequestFailureReason ExpectedResultFailureCode)
@@ -285,6 +298,24 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
 
     // Log in
     LogInAsGuest(UserSystem, UserId);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestDeferredProfileCreationTest)
+{
+    // We can't really test more than this. This deferred endpoint explicitly provides
+    // no guarentees of actually creating a profile in any sort of timely manner.
+    // Any subsequent failures to query endpoints would be within the bounds of permitted behaviour.
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsGuestWithDeferredProfileCreation(UserSystem, UserId);
 
     // Log out
     LogOut(UserSystem);
