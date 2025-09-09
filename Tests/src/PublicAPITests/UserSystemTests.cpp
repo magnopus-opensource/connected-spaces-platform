@@ -89,11 +89,11 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
     }
 }
 
-void LogInAsGuest(
-    csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection, csp::systems::EResultCode ExpectedResult)
+void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection,
+    const csp::systems::TokenOptions& TokenOptions, csp::systems::EResultCode ExpectedResult)
 {
     auto [Result]
-        = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, CreateMultiplayerConnection, true, nullptr).Await(RequestPredicate);
+        = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, CreateMultiplayerConnection, true, TokenOptions).Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
