@@ -32,6 +32,7 @@
 #include "Systems/Users/Authentication.h"
 
 #include "CallHelpers.h"
+#include <regex>
 
 namespace chs_user = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
@@ -73,6 +74,21 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
         LogSystem.LogMsg(csp::common::LogLevel::Log, "Not starting a Multiplayer Connection");
         ConnectionCallback(csp::multiplayer::ErrorCode::None);
     }
+}
+
+/* Check if the provided expiry length in token options is formatted as "HH:MM:SS"
+ *
+ * Return True if expiry length matches format "HH:MM:SS" or empty, false otherwise */
+bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
+{
+    std::regex Regex("^[0-9]{2}:[0-9]{2}:[0-9]{2}$");
+    if (ExpiryLength.IsEmpty() || std::regex_search(ExpiryLength.c_str(), Regex))
+    {
+        return true;
+    }
+
+    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
+    return false;
 }
 
 }
@@ -199,7 +215,8 @@ const csp::common::LoginState& UserSystem::GetLoginState() const { return Curren
 void UserSystem::SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback) { RefreshTokenChangedCallback = Callback; }
 
 void UserSystem::Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
+    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
+    LoginStateResultCallback Callback)
 {
     if (UserName.IsEmpty() && Email.IsEmpty())
     {
@@ -232,9 +249,12 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
 
         if (TokenOptions.HasValue())
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+            {
+                auto Options = std::make_shared<chs_user::TokenOptions>();
+                Options->SetExpiryLength(TokenOptions->ExpiryLength);
+                Request->SetTokenOptions(Options);
+            }
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -282,9 +302,8 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
     }
 }
 
-void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken,
-    bool CreateMultiplayerConnection, const csp::common::Optional<TokenOptions>& TokenOptions, 
-    LoginStateResultCallback Callback)
+void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken, bool CreateMultiplayerConnection,
+    const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
 {
     if (UserId.IsEmpty())
     {
@@ -304,9 +323,12 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 
         if (TokenOptions.HasValue())
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+            {
+                auto Options = std::make_shared<chs_user::TokenOptions>();
+                Options->SetExpiryLength(TokenOptions->ExpiryLength);
+                Request->SetTokenOptions(Options);
+            }
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -352,9 +374,8 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
     }
 }
 
-void UserSystem::LoginAsGuest(
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions, 
-    LoginStateResultCallback Callback)
+void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
+    const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
 {
     if (CurrentLoginState.State == csp::common::ELoginState::LoggedOut || CurrentLoginState.State == csp::common::ELoginState::Error)
     {
@@ -371,9 +392,12 @@ void UserSystem::LoginAsGuest(
 
         if (TokenOptions.HasValue())
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+            {
+                auto Options = std::make_shared<chs_user::TokenOptions>();
+                Options->SetExpiryLength(TokenOptions->ExpiryLength);
+                Request->SetTokenOptions(Options);
+            }
         }
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
@@ -476,7 +500,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions, 
+    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
     LoginStateResultCallback Callback)
 {
     if (CurrentLoginState.State != csp::common::ELoginState::LoginThirdPartyProviderDetailsRequested)
@@ -544,9 +568,12 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 
     if (TokenOptions.HasValue())
     {
-        auto Options = std::make_shared<chs_user::TokenOptions>();
-        Options->SetExpiryLength(TokenOptions->ExpiryLength);
-        Request->SetTokenOptions(Options);
+        if (CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        {
+            auto Options = std::make_shared<chs_user::TokenOptions>();
+            Options->SetExpiryLength(TokenOptions->ExpiryLength);
+            Request->SetTokenOptions(Options);
+        }
     }
 
     CurrentLoginState.State = csp::common::ELoginState::LoginRequested;
