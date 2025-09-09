@@ -21,7 +21,9 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/DateTime.h"
 #include "Common/Web/HttpPayload.h"
+#include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -453,7 +455,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
     bool TokenHasBeenRefreshed = false;
     // Ensure that the token is refresh when attempting to make a authenticated call after expiry
     UserSystem->SetNewLoginTokenReceivedCallback(
-        [&TokenHasBeenRefreshed](const csp::systems::LoginTokenInfoResult& /*Result*/) { TokenHasBeenRefreshed = true; });
+        [&TokenHasBeenRefreshed](const csp::systems::LoginTokenInfoResult& Result)
+        {
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            TokenHasBeenRefreshed = true;
+        });
 
     std::this_thread::sleep_for(10s);
 
@@ -463,6 +470,127 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     // Log out
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    auto TokenOptions = csp::systems::TokenOptions();
+    TokenOptions.ExpiryLength = "00:00:05";
+
+    // Ensure that the token expiry time matched the provided token options
+    UserSystem->SetNewLoginTokenReceivedCallback(
+        [](const csp::systems::LoginTokenInfoResult& Result)
+        {
+            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+            const auto TokenInfo = Result.GetLoginTokenInfo();
+
+            const auto AccessExpiryTime = csp::common::DateTime(TokenInfo.AccessExpiryTime);
+            const auto CurrentTime = csp::common::DateTime::UtcTimeNow();
+
+            // Calculate the delta from the available time points as we do not support duration in DateTime
+            const auto Delta = AccessExpiryTime.GetTimePoint() - CurrentTime.GetTimePoint();
+            EXPECT_LE(Delta, 10s);
+        });
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Warning);
+
+    RAIIMockLogger MockLogger {};
+    csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(WarningLog)).Times(1);
+
+    auto TokenOptions = csp::systems::TokenOptions();
+    TokenOptions.ExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRangeTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Warning);
+    auto TokenOptions = csp::systems::TokenOptions();
+
+    // Ensure MCS clamps the value of expiry length when above bounds
+    {
+        TokenOptions.ExpiryLength = "12:00:00";
+
+        // Ensure that the token expiry time matched the provided token options
+        UserSystem->SetNewLoginTokenReceivedCallback(
+            [](const csp::systems::LoginTokenInfoResult& Result)
+            {
+                EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+                const auto TokenInfo = Result.GetLoginTokenInfo();
+
+                const csp::common::DateTime CurrentDateTime = csp::common::DateTime::UtcTimeNow();
+                const std::chrono::system_clock::time_point TimeFuture = CurrentDateTime.GetTimePoint() + std::chrono::system_clock::duration(2h);
+
+                const csp::common::DateTime FutureDateTime(TimeFuture);
+                const csp::common::DateTime ExpiryDateTime(TokenInfo.AccessExpiryTime);
+
+                ASSERT_GE(FutureDateTime, ExpiryDateTime);
+            });
+
+        // Log in
+        csp::common::String UserId;
+        LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+        // Log out
+        LogOut(UserSystem);
+    }
+
+    // Ensure MCS clamps the value of expiry length when below bounds
+    {
+        TokenOptions.ExpiryLength = "00:00:00";
+
+        // Ensure that the token expiry time matched the provided token options
+        UserSystem->SetNewLoginTokenReceivedCallback(
+            [](const csp::systems::LoginTokenInfoResult& Result)
+            {
+                EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+                const auto TokenInfo = Result.GetLoginTokenInfo();
+
+                const csp::common::DateTime CurrentDateTime = csp::common::DateTime::UtcTimeNow();
+                const std::chrono::system_clock::time_point TimeFuture = CurrentDateTime.GetTimePoint() + std::chrono::system_clock::duration(5min);
+
+                const csp::common::DateTime FutureDateTime(TimeFuture);
+                const csp::common::DateTime ExpiryDateTime(TokenInfo.AccessExpiryTime);
+
+                ASSERT_GE(ExpiryDateTime, FutureDateTime);
+            });
+
+        // Log in
+        csp::common::String UserId;
+        LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+        // Log out
+        LogOut(UserSystem);
+    }
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
