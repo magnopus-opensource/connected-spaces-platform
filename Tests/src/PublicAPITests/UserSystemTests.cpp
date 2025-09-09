@@ -538,7 +538,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
     {
         TokenOptions.ExpiryLength = "12:00:00";
 
-        // Ensure that the token expiry time matched the provided token options
+        // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(
             [](const csp::systems::LoginTokenInfoResult& Result)
             {
@@ -567,7 +567,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
     {
         TokenOptions.ExpiryLength = "00:00:00";
 
-        // Ensure that the token expiry time matched the provided token options
+        // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(
             [](const csp::systems::LoginTokenInfoResult& Result)
             {
