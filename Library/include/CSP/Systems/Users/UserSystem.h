@@ -98,7 +98,7 @@ public:
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
-    /// The default token expiry length is configured by MCS and defaults to 40 minutes. Value must be less than the default expiry length, or it will
+    /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
     /// @pre One of either UserName or Email must not be empty.
@@ -115,7 +115,7 @@ public:
     /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
-    /// The default token expiry length is configured by MCS and defaults to 40 minutes. Value must be less than the default expiry length, or it will
+    /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
     /// @pre UserId must not be empty.
@@ -128,7 +128,7 @@ public:
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
-    /// The default token expiry length is configured by MCS and defaults to 40 minutes. Value must be less than the default expiry length, or it will
+    /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void LoginAsGuest(bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
@@ -162,7 +162,7 @@ public:
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
-    /// The default token expiry length is configured by MCS and defaults to 40 minutes. Value must be less than the default expiry length, or it will
+    /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Connected Services Authentication operation
     CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
