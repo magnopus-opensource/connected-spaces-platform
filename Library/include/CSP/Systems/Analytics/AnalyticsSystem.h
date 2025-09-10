@@ -55,15 +55,26 @@ public:
      * @brief Sends an analytics event to the Analytics service.
      * @details Please note: The BatchAnalyticsEvent method should be used by default as it will batch events before sending them.
      * This method will immediately send the analytics event and should therefore only be used when this behaviour is required.
-     * Constructs an Analytics Record with the following format:
-     *      {ProductIdentifer}.{ProductContext}.{Tenant}.{ProductContextSection}.{Category}.{InteractionType}.{SubCategory}
-     *      csp.web-client-x.CLIENT_TENANT_X.UI.menus.click
-     * @param ProductContextSection const csp::common::String& : Section of the client or runtime-context - 'UI' in the example provided above.
-     * @param Category const csp::common::String& : Categorization field - 'menus' in the example provided above.
-     * @param InteractionType const csp::common::String& : The interaction that occurred - 'click' in the example provided above.
-     * @param SubCategory const csp::common::Optional<csp::common::String>& : Optional sub-category field - not used in the example provided above.
-     * @param Metadata const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& : Optional analytics event metadata -
-     * not used in the example provided above.
+     *
+     * Example: Consider the following user action that is to be captured as an analytics event:
+     *      A [web client] user [clicks] on a [menu] item in the [UI].
+     *
+     * In this example:
+     *      [web client] is captured internally.
+     *      [clicks] is the InteractionType.
+     *      [menu] is the Category.
+     *      [UI] is the ProductContextSection.
+     *
+     * @note The following data is captured internally and included in the analytics record: tenant name, client sku, client version and client build
+     * environment.
+     *
+     * @param ProductContextSection const csp::common::String& : Section of the client or runtime-context.
+     * @param Category const csp::common::String& : Categorization field.
+     * @param InteractionType const csp::common::String& : The interaction that occurred.
+     * @param SubCategory const csp::common::Optional<csp::common::String>& : Optional sub-category field.
+     * @param Metadata const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& : Optional analytics event metadata.
+     * @note Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region as well as
+     * relevant device specs.
      */
     void SendAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
         const csp::common::String& InteractionType, const csp::common::Optional<csp::common::String>& SubCategory,
