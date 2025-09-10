@@ -83,17 +83,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
 
     if (Metadata.HasValue())
     {
-        std::map<String, String> AnalyticsRecordMetadata;
-
-        auto* Keys = Metadata->Keys();
-
-        for (size_t idx = 0; idx < Keys->Size(); ++idx)
-        {
-            auto Key = Keys->operator[](idx);
-            auto Value = Metadata->operator[](Key);
-            AnalyticsRecordMetadata.insert(std::pair<String, String>(Key, Value));
-        }
-
+        std::map<String, String> AnalyticsRecordMetadata = Metadata->GetUnderlying();
         Record->SetMetadata(AnalyticsRecordMetadata);
     }
 
