@@ -85,7 +85,7 @@ private:
     CSP_NO_EXPORT AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, common::LogSystem& LogSystem);
     ~AnalyticsSystem();
 
-    csp::services::ApiBase* AnalyticsApi;
+    std::unique_ptr<csp::services::ApiBase> AnalyticsApi;
 
     const csp::ClientUserAgent* UserAgentInfo;
 };

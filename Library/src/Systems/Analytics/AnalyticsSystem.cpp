@@ -42,11 +42,11 @@ AnalyticsSystem::AnalyticsSystem()
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    AnalyticsApi = new chs::AnalyticsApi(InWebClient);
+    AnalyticsApi = std::unique_ptr<csp::services::ApiBase>(new chs::AnalyticsApi(InWebClient));
     UserAgentInfo = AgentInfo;
 }
 
-AnalyticsSystem::~AnalyticsSystem() { delete (AnalyticsApi); }
+AnalyticsSystem::~AnalyticsSystem() { }
 
 void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
     const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata, NullResultCallback Callback)
@@ -127,7 +127,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendAnalyticsCallback, nullptr);
 
-    static_cast<chs::AnalyticsApi*>(AnalyticsApi)->analyticsBulkPost(Records, ResponseHandler);
+    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost(Records, ResponseHandler);
 }
 
 } // namespace csp::systems
