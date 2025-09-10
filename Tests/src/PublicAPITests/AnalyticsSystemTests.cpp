@@ -60,7 +60,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventTest)
         TestSubCategory, TestMetadata);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetHttpResultCode(), 201);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseCreated));
 
     // Log out
     LogOut(UserSystem);
