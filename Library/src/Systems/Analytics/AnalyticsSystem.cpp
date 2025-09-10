@@ -92,7 +92,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
     std::vector<std::shared_ptr<chs::AnalyticsRecord>> Records;
     Records.push_back(Record);
 
-    NullResultCallback SendAnalyticsCallback = [Callback](const NullResult& Result)
+    NullResultCallback SendAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -101,8 +101,10 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
 
         if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            CSP_LOG_FORMAT(common::LogLevel::Error, "Failed to send Analytics Event. ResCode: %d, HttpResCode: %d",
-                static_cast<int>(Result.GetResultCode()), Result.GetHttpResultCode());
+            LogSystem->LogMsg(common::LogLevel::Error,
+                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
+                    Result.GetHttpResultCode())
+                    .c_str());
 
             NullResult ErrorResult(Result.GetResultCode(), Result.GetHttpResultCode());
             Callback(ErrorResult);
