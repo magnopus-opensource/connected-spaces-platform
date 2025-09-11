@@ -31,8 +31,10 @@ class CSP_API CSPSceneData
 {
 public:
     /// @brief Constructor for CSPSceneData by deserializing a SceneDescription json file.
-    /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
-    CSPSceneData(const csp::common::String& SceneDescriptionJson);
+    /// @param SceneDescriptionJson csp::common::List<csp::common::String> : The SceneDescription JSON.
+    /// The specific packing of the JSON string into this list is not specific, you may pack by character
+    /// or by token, so long as when naively concatenated, the original string is reproduced.
+    CSPSceneData(const csp::common::List<csp::common::String>& SceneDescriptionJson);
 
     /// @brief The space the scene data represents.
     csp::systems::Space Space;

@@ -28,8 +28,9 @@ class CSP_API CSPSceneDescription
 {
 public:
     /// @brief Constructor for CSPSceneDescription by deserializing a SceneDescription json file.
-    /// @param SceneDescriptionJson csp::common::String : The SceneDescription to deserialize.
-    CSPSceneDescription(const csp::common::String& SceneDescriptionJson);
+    /// The specific packing of the JSON string into this list is not specific, you may pack by character
+    /// or by token, so long as when naively concatenated, the original string is reproduced.
+    CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson);
 
     CSPSceneDescription() { }
 

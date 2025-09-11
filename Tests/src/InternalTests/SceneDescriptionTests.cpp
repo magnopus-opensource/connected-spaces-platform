@@ -296,10 +296,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
 
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
     auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
     EXPECT_EQ(SceneData.Space.Id, "68addce4985d7612f76b9461");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-empty");
@@ -352,10 +352,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 
     csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
 
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
     auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
     EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
@@ -470,7 +470,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeM
 
     std::string Json = SStream.str();
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-material");
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
