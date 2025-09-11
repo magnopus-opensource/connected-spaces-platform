@@ -51,6 +51,7 @@ class QuotaSystem;
 class SequenceSystem;
 class HotspotSequenceSystem;
 class ConversationSystemInternal;
+class AnalyticsSystem;
 
 } // namespace csp::systems
 
@@ -159,6 +160,10 @@ public:
     /// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
     HotspotSequenceSystem* GetHotspotSequenceSystem();
 
+    /// @brief Retrieves the AnalyticsSystem system.
+    /// @return AnalyticsSystem : pointer to the AnalyticsSystem system class
+    AnalyticsSystem* GetAnalyticsSystem();
+
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
@@ -208,6 +213,7 @@ private:
     SequenceSystem* SequenceSystem;
     HotspotSequenceSystem* HotspotSequenceSystem;
     ConversationSystemInternal* ConversationSystem;
+    AnalyticsSystem* AnalyticsSystem;
 };
 
 } // namespace csp::systems
