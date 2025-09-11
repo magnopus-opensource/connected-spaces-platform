@@ -451,6 +451,48 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     csp::CSPFoundation::Shutdown();
 }
 
+// The same test as above, but test that when we split the input, everything still works
+// The interface that forces us to pass a split array rather than a string is a wrapper gen constraint
+// rather than the true form of the, but lets still test it
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeBasicSplitInputTest)
+{
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    // Build our line array
+    csp::common::List<csp::common::String> JsonChars;
+    std::string line;
+    while (std::getline(SStream, line))
+    {
+        JsonChars.Append(csp::common::String(line.c_str()));
+    }
+
+    MockScriptRunner ScriptRunner;
+    csp::common::LogSystem LogSystem;
+
+    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
+
+    CSPSceneDescription SceneDescription { JsonChars };
+    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+
+    CSPSceneData SceneData { JsonChars };
+
+    // Just do a minimal check, we don't need to fully validate everything here, we're just checking the string concatanation works.
+    EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
+    EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
+}
+
 // Tests that a material parsed from scene data is valid
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeMaterialTest)
 {
