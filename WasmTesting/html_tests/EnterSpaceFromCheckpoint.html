@@ -41,6 +41,8 @@
 
         let sceneData = Systems.CSPSceneData.create_sceneDescriptionJson(jsonStringList);
         let sceneDescription = Multiplayer.CSPSceneDescription.create_sceneDescriptionJson(jsonStringList);
+
+        jsonStringList.delete();
         
         //Create offline realtime engine
         const realtimeEngine = Multiplayer.OfflineRealtimeEngine.create_sceneDescription_logSystem_remoteScriptRunner(
