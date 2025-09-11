@@ -33,7 +33,7 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
     std::promise<csp::systems::LoginStateResult> ResultPromise;
     std::future<csp::systems::LoginStateResult> ResultFuture = ResultPromise.get_future();
 
-    UserSystem.Login("", Email, Password, true, AgeVerified,
+    UserSystem.Login("", Email, Password, true, AgeVerified, nullptr,
         [&ResultPromise](csp::systems::LoginStateResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets
