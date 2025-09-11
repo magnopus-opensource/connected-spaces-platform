@@ -436,6 +436,66 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
     }
 }
 
+void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
+{
+    if (CurrentLoginState.State == csp::common::ELoginState::LoggedOut || CurrentLoginState.State == csp::common::ELoginState::Error)
+    {
+        CurrentLoginState.State = csp::common::ELoginState::LoginRequested;
+
+        auto Request = std::make_shared<chs_user::LoginGuestRequest>();
+        Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+        Request->SetTenant(csp::CSPFoundation::GetTenant());
+
+        if (UserHasVerifiedAge.HasValue())
+        {
+            Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
+        }
+
+        LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
+        {
+            if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
+                    = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+                {
+                    if (ErrCode != csp::multiplayer::ErrorCode::None)
+                    {
+                        // It would be extremely strange to hit this branch, but it remains here just in case.
+                        CSP_LOG_ERROR_FORMAT("Unexpected error connecting MultiplayerConnection. This is strange! : %s",
+                            csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+                        Callback(LoginStateRes);
+                        return;
+                    }
+
+                    Callback(LoginStateRes);
+                };
+
+                // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
+                StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
+            }
+            else
+            {
+                Callback(LoginStateRes);
+            }
+        };
+
+        csp::services::ResponseHandlerPtr ResponseHandler
+            = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
+                LoginStateResCallback, &CurrentLoginState);
+
+        // Despite the naming, "login-guest" is the deferred, optimized, non-standard guest login.
+        // The regular login endpoint that "loginAsGuest" uses is the "real" one.
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginGuestPost(Request, ResponseHandler);
+    }
+    else
+    {
+        csp::systems::LoginStateResult BadResult;
+        BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(BadResult);
+    }
+}
+
 csp::common::Array<EThirdPartyAuthenticationProviders> UserSystem::GetSupportedThirdPartyAuthenticationProviders() const
 {
     csp::common::Array<EThirdPartyAuthenticationProviders> Providers((EThirdPartyAuthenticationProviders::Num));

@@ -33,6 +33,9 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
     const csp::systems::TokenOptions& TokenOptions = csp::systems::TokenOptions(),
     csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
 
+void LogInAsGuestWithDeferredProfileCreation(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
+    csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
+
 void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, bool CreateMultiplayerConnection = true,
     bool AgeVerified = true, csp::systems::TokenOptions TokenOptions = csp::systems::TokenOptions(),
     csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
