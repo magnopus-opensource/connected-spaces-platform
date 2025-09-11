@@ -64,7 +64,7 @@ private:
 CSP_END_IGNORE
 
 /// @ingroup User System
-/// @brief Public facing system that allows interfacing with Magnopus Connected Services' user service.
+/// @brief Public facing system that allows interfacing with Magnopus Cloud Services' user service.
 /// Offers methods for creating accounts, authenticating, and retrieving user profiles.
 class CSP_API UserSystem : public SystemBase
 {
@@ -89,7 +89,7 @@ public:
     /// @param Callback LoginTokenInfoResultCallback : callback that gets called as described above
     CSP_EVENT void SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback);
 
-    /// @brief Log in to Magnopus Connected Services services using a username-password or email-password combination.
+    /// @brief Log in to Magnopus Cloud Services services using a username-password or email-password combination.
     /// @param UserName csp::common::String
     /// @param Email csp::common::String
     /// @param Password csp::common::String
@@ -122,7 +122,7 @@ public:
     CSP_ASYNC_RESULT void LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken,
         bool CreateMultiplayerConnection, const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
 
-    /// @brief Log in to Magnopus Connected Services as a guest.
+    /// @brief Log in to Magnopus Cloud Services as a guest.
     /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
     /// connection to backend services, and thus be unable to receive messages or events. This session will also be unable to enter online spaces via
     /// a csp::multiplayer::OnlineRealtimeEngine. If true, this session will receive events, and may enter both online and offline spaces.
@@ -134,7 +134,7 @@ public:
     CSP_ASYNC_RESULT void LoginAsGuest(bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
         const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
 
-    /// @brief Log in to Magnopus Connected Services as a guest, allowing the backend to defer profile creation and perform other optimizations.
+    /// @brief Log in to Magnopus Cloud Services as a guest, allowing the backend to defer profile creation and perform other optimizations.
     /// This login method is intended only for use with offline realtime engines, and as such does not start a multiplayer connection.
     /// @warning Unless you have a good reason, you should prefer the regular LoginAsGuest function. This method is designed for specific
     /// non-multiplayer cases where the backend services are expecting a huge amount of anonymous profiles and wish to be allowed to buffer profile
@@ -176,12 +176,12 @@ public:
     /// @param TokenOptions csp::common::Optional<TokenOptions> : Optional override for default token options.
     /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
-    /// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Connected Services Authentication operation
+    /// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Cloud Services Authentication operation
     CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
         const csp::common::String& ThirdPartyStateId, bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
         const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
 
-    /// @brief Logout from Magnopus Connected Services.
+    /// @brief Logout from Magnopus Cloud Services.
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void Logout(NullResultCallback Callback);
 
@@ -192,7 +192,7 @@ public:
     /// @param DisplayName csp::common::Optional<csp::common::String> : user display name associated with the new profile
     /// @param Email csp::common::String : email address associated with the new profile
     /// @param Password csp::common::String : password associated with the new profile
-    /// @param ReceiveNewsletter bool : `true` if the user wants to receive the Magnopus Connected Services newsletter
+    /// @param ReceiveNewsletter bool : `true` if the user wants to receive the Magnopus Cloud Services newsletter
     /// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
     /// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
     /// @param InviteToken csp::common::Optional<csp::common::String> : A token provided to the user that can be used to auto-confirm their account
@@ -257,7 +257,7 @@ public:
     /// @param Callback BasicProfilesResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
 
-    /// @brief Ping Magnopus Connected Services
+    /// @brief Ping Magnopus Cloud Services
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void Ping(NullResultCallback Callback);
 
