@@ -73,7 +73,7 @@ void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const
         = ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyProductsProductIdGet(SpaceId, ProductId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyProductsProductIdGet({ SpaceId, ProductId }, ResponseHandler);
 }
 
 void ECommerceSystem::GetProductInfoCollectionByVariantIds(
@@ -84,7 +84,7 @@ void ECommerceSystem::GetProductInfoCollectionByVariantIds(
 
     const std::vector<common::String> VariantIds = common::Convert(InVariantIds);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyProductsVariantsGet(SpaceId, VariantIds, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyProductsVariantsGet({ SpaceId, VariantIds }, ResponseHandler);
 }
 
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
@@ -103,7 +103,7 @@ void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, cons
         = ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet(SpaceId, CartId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet({ SpaceId, CartId }, ResponseHandler);
 }
 
 void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback)
@@ -111,7 +111,7 @@ void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCa
     csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsPost(SpaceId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsPost({ SpaceId }, ResponseHandler);
 }
 
 void ECommerceSystem::GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback)
@@ -119,7 +119,7 @@ void ECommerceSystem::GetCart(const common::String& SpaceId, const common::Strin
     csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdGet({ SpaceId, CartId }, ResponseHandler);
 }
 
 void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback)
@@ -141,7 +141,7 @@ void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActi
     const auto& UserId = UserSystem->GetLoginState().UserId;
 
     static_cast<chs::ShopifyApi*>(ShopifyAPI)
-        ->vendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
+        ->vendorsShopifyUsersUserIdStorefrontsGet({ UserId, ActiveParam, std::nullopt, std::nullopt }, ResponseHandler);
 }
 
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive,
@@ -156,7 +156,7 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName, const com
         = ShopifyAPI->CreateHandler<AddShopifyStoreResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyPut({ SpaceId, ShopifyStorefrontInfo }, ResponseHandler);
 }
 
 void ECommerceSystem::SetECommerceActiveInSpace(
@@ -170,7 +170,7 @@ void ECommerceSystem::SetECommerceActiveInSpace(
         = ShopifyAPI->CreateHandler<SetECommerceActiveResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyPut({ SpaceId, ShopifyStorefrontInfo }, ResponseHandler);
 }
 
 void ECommerceSystem::ValidateShopifyStore(
@@ -184,7 +184,7 @@ void ECommerceSystem::ValidateShopifyStore(
         = ShopifyAPI->CreateHandler<ValidateShopifyStoreResultCallback, ValidateShopifyStoreResult, void, chs::ShopifyStorefrontValidationRequest>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->vendorsShopifyValidatePut(ShopifyStorefrontValidationInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->vendorsShopifyValidatePut({ ShopifyStorefrontValidationInfo }, ResponseHandler);
 }
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
@@ -253,7 +253,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
     csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
     static_cast<chs::ShopifyApi*>(ShopifyAPI)
-        ->spacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
+        ->spacesSpaceIdVendorsShopifyCartsCartIdPut({ CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo }, ResponseHandler);
 }
 
 } // namespace csp::systems
