@@ -85,7 +85,7 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextPut(UserId, InContext, InSettings, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextPut({ UserId, InContext, InSettings }, SettingsResponseHandler);
 }
 
 void SettingsSystem::GetSettingValue(const String& InContext, const String& InKey, StringResultCallback Callback) const
@@ -133,7 +133,7 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
         = SettingsAPI->CreateHandler<SettingsResultCallback, SettingsCollectionResult, void, chs::SettingsDto>(
             InternalCallback, nullptr, web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextGet(UserId, InContext, MyKey, SettingsResponseHandler);
+    static_cast<chs::SettingsApi*>(SettingsAPI)->usersUserIdSettingsContextGet({ UserId, InContext, MyKey }, SettingsResponseHandler);
 }
 
 void SettingsSystem::SetNDAStatus(bool InValue, NullResultCallback Callback)
