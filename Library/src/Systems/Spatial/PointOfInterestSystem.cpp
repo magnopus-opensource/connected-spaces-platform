@@ -95,7 +95,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<POIResultCallback, POIResult, void, chs::PointOfInterestDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost(POIInfo, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
 
 void PointOfInterestSystem::DeletePOI(const PointOfInterest& POI, NullResultCallback Callback)
@@ -120,10 +120,11 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
         TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
     }
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(std::nullopt, std::nullopt, TypeOption, std::nullopt, std::nullopt, std::nullopt,
-        OriginLocation.Longitude, OriginLocation.Latitude, AreaRadius, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
+        { std::nullopt, std::nullopt, TypeOption, std::nullopt, std::nullopt, std::nullopt, OriginLocation.Longitude, OriginLocation.Latitude,
+            AreaRadius, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt },
+        ResponseHandler);
 }
 
 CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteResultCallback Callback)
@@ -167,7 +168,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<SiteResultCallback, SiteResult, void, chs::PointOfInterestDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost(POIInfo, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
 
 void PointOfInterestSystem::DeleteSite(const Site& Site, NullResultCallback Callback) { DeletePOIInternal(Site.Id, Callback); }
@@ -180,9 +181,11 @@ void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCo
 
     std::vector<csp::common::String> SpaceID({ SpaceId });
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, SpaceID, std::nullopt, std::nullopt, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
+        { std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, SpaceID, std::nullopt, std::nullopt },
+        ResponseHandler);
 }
 
 void PointOfInterestSystem::DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback)
@@ -190,7 +193,7 @@ void PointOfInterestSystem::DeletePOIInternal(const csp::common::String POIId, N
     csp::services::ResponseHandlerPtr ResponseHandler = POIApiPtr->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdDelete(POIId, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdDelete({ POIId }, ResponseHandler);
 }
 
 void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
@@ -298,7 +301,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
         = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost(POIInfo, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiPost({ POIInfo }, ResponseHandler);
 }
 
 void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::String& SpaceGeoLocationId,
@@ -407,7 +410,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
         = POIApiPtr->CreateHandler<SpaceGeoLocationResultCallback, SpaceGeoLocationResult, void, chs::PointOfInterestDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdPut(SpaceGeoLocationId, POIInfo, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiIdPut({ SpaceGeoLocationId, POIInfo }, ResponseHandler);
 }
 
 void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
@@ -440,9 +443,11 @@ void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& Space
         = POIApiPtr->CreateHandler<SpaceGeoLocationCollectionResultCallback, SpaceGeoLocationCollectionResult, void,
             csp::services::DtoArray<chs::PointOfInterestDto>>(CollectionCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(std::nullopt, std::nullopt, SpacePOIType, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-        std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, SpaceIds, std::nullopt, Limit, ResponseHandler);
+    static_cast<chs::PointOfInterestApi*>(POIApiPtr)->poiGet(
+        { std::nullopt, std::nullopt, SpacePOIType, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, SpaceIds, std::nullopt, Limit },
+        ResponseHandler);
 }
 
 void PointOfInterestSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceGeoLocationId, NullResultCallback Callback)
