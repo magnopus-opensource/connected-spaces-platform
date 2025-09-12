@@ -21,13 +21,21 @@
 #include "Services/UserService/Dto.h"
 #include "Json/JsonSerializer.h"
 
+#include <numeric>
+
 namespace csp::systems
 {
 
-CSPSceneData::CSPSceneData(const csp::common::String& SceneDescriptionJson)
+CSPSceneData::CSPSceneData(const csp::common::List<csp::common::String>& SceneDescriptionJson)
 {
+    // Unpack the list into a single JSON string.
+    // The reason this JSON is packed into a list _at all_ is merely a wrapper generator workaround,
+    // csp::common::Strings cannot be passed as heap objects, and these SceneDescriptions can be large
+    // enough to blow the stack
+    csp::common::String SceneDescriptionStr = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
+
     mcs::SceneData SceneData;
-    csp::json::JsonDeserializer::Deserialize(SceneDescriptionJson.c_str(), SceneData);
+    csp::json::JsonDeserializer::Deserialize(SceneDescriptionStr.c_str(), SceneData);
 
     csp::systems::GroupDtoToSpace(SceneData.Group, Space);
 

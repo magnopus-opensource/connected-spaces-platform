@@ -109,6 +109,22 @@ test('Offline', async() => {
   assert.ok(errors.length == 0); //Should be no errors
 })
 
+test('EnterSpaceFromCheckpoint', async() => {
+  // This test specifically also checks a stack overflow that occurred passing large data (the checkpoint json) over the ABI boundary.
+  // The JSON in question is an anonymized, in-progress test one, so all the asset paths are nonsense. What matters here is that it's largish.
+  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/EnterSpaceFromCheckpoint.html', USE_DEBUG_CSP, null, null)
+
+  console.log(consoleMessages);
+  console.log(errors);
+
+  assert.ok(consoleMessages.some(e => e.includes('Not starting a Multiplayer Connection')));
+  assert.ok(consoleMessages.some(e => e.includes('Entering Offline Space')));
+  assert.ok(consoleMessages.some(e => e.includes('Successfully entered space.')));
+  assert.ok(consoleMessages.some(e => e.includes('Successfully created avatar')));
+  assert.ok(consoleMessages.some(e => e.includes('Exiting Space Offline Space')));
+  assert.ok(consoleMessages.some(e => e.includes('Multiplayer connection not connected when exiting space, skipping disconnect.')));
+  assert.ok(errors.length == 0); //Should be no errors
+})
 
 test.run();
 

@@ -19,12 +19,18 @@
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/SpaceEntityStatePatcher.h"
 #include "Json/JsonSerializer.h"
+#include <numeric>
 
 namespace csp::multiplayer
 {
-CSPSceneDescription::CSPSceneDescription(const csp::common::String& SceneDescriptionJson)
-    : SceneDescriptionJson { SceneDescriptionJson }
+CSPSceneDescription::CSPSceneDescription(const csp::common::List<csp::common::String>& SceneDescriptionJson)
+
 {
+    // Unpack the list into a single JSON string.
+    // The reason this JSON is packed into a list _at all_ is merely a wrapper generator workaround,
+    // csp::common::Strings cannot be passed as heap objects, and these SceneDescriptions can be large
+    // enough to blow the stack
+    this->SceneDescriptionJson = std::accumulate(SceneDescriptionJson.begin(), SceneDescriptionJson.end(), csp::common::String {});
 }
 
 csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEntities(

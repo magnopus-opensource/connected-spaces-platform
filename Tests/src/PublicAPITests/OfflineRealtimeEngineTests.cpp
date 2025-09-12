@@ -765,8 +765,8 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, EmptySceneDescriptionTest
 
     std::string Json = SStream.str();
 
-    systems::CSPSceneData SceneData { Json.c_str() };
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    systems::CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
 
     // Enter space from scene description
     auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
@@ -822,9 +822,9 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest
 
     std::string Json = SStream.str();
 
-    // Enter space from scene description
-    systems::CSPSceneData SceneData { Json.c_str() };
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    // Enter space from scene description{
+    systems::CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
 
     auto RealtimeEngine = std::make_unique<csp::multiplayer::OfflineRealtimeEngine>(
         SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem());

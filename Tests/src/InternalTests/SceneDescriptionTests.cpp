@@ -296,10 +296,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeE
 
     csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
 
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
     auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
     EXPECT_EQ(SceneData.Space.Id, "68addce4985d7612f76b9461");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-empty");
@@ -352,10 +352,10 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 
     csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
 
-    CSPSceneDescription SceneDescription { Json.c_str() };
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
     auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
 
     EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
@@ -451,6 +451,50 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     csp::CSPFoundation::Shutdown();
 }
 
+// The same test as above, but test that when we split the input, everything still works
+// The interface that forces us to pass a split array rather than a string is a wrapper gen constraint
+// rather than the true form of the, but lets still test it
+// WARNING, this isn't the best way to be doing this, just put the whole string as the first element of the list,
+// we support this behaviour because we are forced by the wrapper gen to provide this non-optimal interface expression.
+CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeBasicSplitInputTest)
+{
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-basic.json");
+
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    // Build our line array
+    csp::common::List<csp::common::String> JsonChars;
+    std::string line;
+    while (std::getline(SStream, line))
+    {
+        JsonChars.Append(csp::common::String(line.c_str()));
+    }
+
+    MockScriptRunner ScriptRunner;
+    csp::common::LogSystem LogSystem;
+
+    csp::multiplayer::OfflineRealtimeEngine RealtimeEngine(LogSystem, ScriptRunner);
+
+    CSPSceneDescription SceneDescription { JsonChars };
+    auto Entities = SceneDescription.CreateEntities(RealtimeEngine, LogSystem, ScriptRunner);
+
+    CSPSceneData SceneData { JsonChars };
+
+    // Just do a minimal check, we don't need to fully validate everything here, we're just checking the string concatanation works.
+    EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
+    EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
+}
+
 // Tests that a material parsed from scene data is valid
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeMaterialTest)
 {
@@ -470,7 +514,7 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeM
 
     std::string Json = SStream.str();
 
-    CSPSceneData SceneData { Json.c_str() };
+    CSPSceneData SceneData { csp::common::List<csp::common::String> { Json.c_str() } };
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-material");
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
