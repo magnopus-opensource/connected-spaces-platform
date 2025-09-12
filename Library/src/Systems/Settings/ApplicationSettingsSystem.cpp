@@ -114,7 +114,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->applicationsApplicationNameSettingsContextPut(
-            ApplicationSettings.ApplicationName, ApplicationSettings.Context, Request, SettingsResponseHandler);
+            { ApplicationSettings.ApplicationName, ApplicationSettings.Context, Request }, SettingsResponseHandler);
 
     return OnCompleteTask;
 }
@@ -145,7 +145,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
             [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
-        ->applicationsApplicationNameSettingsContextGet(ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
+        ->applicationsApplicationNameSettingsContextGet({ ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);
 
     return OnCompleteTask;
 }
@@ -177,7 +177,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
             [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
-        ->tenantsTenantApplicationsApplicationNameSettingsContextGet(Tenant, ApplicationName, Context, Convert(Keys), SettingsResponseHandler);
+        ->tenantsTenantApplicationsApplicationNameSettingsContextGet({ Tenant, ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);
 
     return OnCompleteTask;
 }
