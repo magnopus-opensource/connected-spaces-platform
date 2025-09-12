@@ -34,10 +34,12 @@
           return await response.text(); 
         }
 
-        // Split the json string and construct the scene representation objects
+        // Get the json string and construct the scene representation objects
         const jsonString = await loadJsonString();
         const jsonStringList = Common.List.ofString()
-        for (const ch of jsonString){ jsonStringList.append(ch); }
+
+        // Workaround for wrapper generator, this needs to be passed as a list, despite only being one element.
+        jsonStringList.append(jsonString)
 
         let sceneData = Systems.CSPSceneData.create_sceneDescriptionJson(jsonStringList);
         let sceneDescription = Multiplayer.CSPSceneDescription.create_sceneDescriptionJson(jsonStringList);

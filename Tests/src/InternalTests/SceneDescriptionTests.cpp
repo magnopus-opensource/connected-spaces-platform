@@ -454,6 +454,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
 // The same test as above, but test that when we split the input, everything still works
 // The interface that forces us to pass a split array rather than a string is a wrapper gen constraint
 // rather than the true form of the, but lets still test it
+// WARNING, this isn't the best way to be doing this, just put the whole string as the first element of the list,
+// we support this behaviour because we are forced by the wrapper gen to provide this non-optimal interface expression.
 CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeBasicSplitInputTest)
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
