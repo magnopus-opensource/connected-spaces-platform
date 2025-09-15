@@ -79,19 +79,19 @@ public:
     /**
      * @brief Constructs an Analytics Record which is added to a queue to be sent to MCS in a single batch.
      * @details The batch will be sent when one of the following conditions are met:
-     * 1) The time since the last batch was sent reaches the batch rate (default 60 seconds).
-     * 2) The number of events in the queue reaches the maximum batch size (default 25 events).
-     * 3) The client application calls FlushAnalyticsEvents() as part of their log out or shut down procedure to force the batch to be sent.
-     * For more information about FlushAnalyticsEvents(), see the method documentation @ref AnalyticsSystem::FlushAnalyticsEvents().
+     * 1. The time since the last batch was sent reaches the batch rate (default 60 seconds).
+     * 2. The number of events in the queue reaches the maximum batch size (default 25 events).
+     * 3. The client application calls FlushAnalyticsEvents() as part of their log out or shut down procedure to force the batch to be sent.
+     * For more information about flushing events see the method documentation @ref AnalyticsSystem::FlushAnalyticsEvents().
      *
      * Example: Consider the following user action that is to be captured as an analytics event:
-     *      A [web client] user [clicks] on a [menu] item in the [UI].
+     * A [web client] user [clicks] on a [menu] item in the [UI].
      *
      * In this example:
-     *      [web client] is captured internally.
-     *      [clicks] is the InteractionType.
-     *      [menu] is the Category.
-     *      [UI] is the ProductContextSection.
+     * - [web client] is captured internally.
+     * - [clicks] is the InteractionType.
+     * - [menu] is the Category.
+     * - [UI] is the ProductContextSection.
      *
      * @note The following data is captured internally and included in the analytics record: tenant name, client sku, client version and client build
      * environment.
@@ -102,7 +102,7 @@ public:
      * @param InteractionType const csp::common::String& : The interaction that occurred.
      * @param SubCategory const csp::common::Optional<csp::common::String>& : Optional sub-category field.
      * @param Metadata const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& : Optional analytics event metadata.
-     * @note Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region as well as
+     * Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region as well as
      * relevant device specs.
      */
     void BatchAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
@@ -111,12 +111,10 @@ public:
 
     /**
      * @brief Constructs an Analytics Record which is immediately sent to MCS.
-     * @note: The BatchAnalyticsEvent method should be used by default as it will batch events before sending them.
+     * @note The BatchAnalyticsEvent method should be used by default as it will batch events before sending them.
      * This method will immediately send the analytics event and should therefore only be used when this behaviour is required.
      *
-     * For more information about how the Analytics Record is constructed, see the documentation for @ref AnalyticsSystem::BatchAnalyticsEvent(const
-     csp::common::String&, const csp::common::String&, const csp::common::String&, const csp::common::Optional<csp::common::String>&, const
-     csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>&).
+     * For more information about how the Analytics Record is constructed, see the documentation for @ref AnalyticsSystem::BatchAnalyticsEvent().
      *
      * @pre The user must be logged in to send an Analytics Record to MCS.
      * @param ProductContextSection const csp::common::String& : Section of the client or runtime-context.
@@ -124,7 +122,7 @@ public:
      * @param InteractionType const csp::common::String& : The interaction that occurred.
      * @param SubCategory const csp::common::Optional<csp::common::String>& : Optional sub-category field.
      * @param Metadata const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& : Optional analytics event metadata.
-     * @note Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region as well as
+     * Metadata is the event payload. It may be used to store such information as the space the user is in, their geographical region as well as
      * relevant device specs.
      */
     void SendAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
