@@ -19,6 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
@@ -78,6 +79,20 @@ enum class LockType
     None,
     /// @brief The Entity cannot be mutated by anyone. Anyone can remove the lock.
     UserAgnostic
+};
+
+class EntityProperty
+{
+public:
+    EntityProperty() = default;
+    EntityProperty(csp::common::ReplicatedValue& Value, SpaceEntityUpdateFlags UpdateFlag)
+        : Value { &Value }
+        , UpdateFlag { UpdateFlag }
+    {
+    }
+
+    csp::common::ReplicatedValue* Value = nullptr;
+    SpaceEntityUpdateFlags UpdateFlag;
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -145,7 +160,7 @@ public:
 
     /// @brief Get the SpaceTransform of the SpaceEntity.
     /// @return SpaceTransform.
-    const SpaceTransform& GetTransform() const;
+    SpaceTransform GetTransform() const;
 
     /// @brief Get the Global SpaceTransform of the SpaceEntity, derived from it's parent.
     /// @return SpaceTransform.
@@ -428,15 +443,13 @@ public:
     // once. At least with these, we can move the logic out to another type and quarantine the complexity.
     // These should really be the only things SpaceEntity has. Neither the network management, nor really the locking, should matter to what is
     // essentially a data-type.
-    CSP_NO_EXPORT void SetNameDirect(const csp::common::String& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetPositionDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetRotationDirect(const csp::common::Vector4& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetScaleDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetThirdPartyRefDirect(const csp::common::String& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetThirdPartyPlatformDirect(const csp::systems::EThirdPartyPlatform Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetEntityLockDirect(LockType Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback);
+
+    CSP_NO_EXPORT template <typename T, typename U> bool SetProperty(uint16_t PropertyKey, const T& PriorValue, const U& Value);
+    CSP_NO_EXPORT void SetPropertyDirect(uint16_t PropertyKey, const csp::common::ReplicatedValue& Value, bool CallNotifyingCallback = false);
+
+    CSP_NO_EXPORT const std::map<uint16_t, EntityProperty>& GetProperties() const;
+
     CSP_NO_EXPORT bool AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback = false);
@@ -456,6 +469,8 @@ private:
 
     void AddChildEntity(SpaceEntity* ChildEntity);
 
+    void RegisterProperties();
+
     csp::common::IRealtimeEngine* EntitySystem;
 
     SpaceEntityType Type;
@@ -465,16 +480,17 @@ private:
     uint64_t OwnerId;
     csp::common::Optional<uint64_t> ParentId;
 
-    csp::common::String Name;
-    SpaceTransform Transform;
-    csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
-    csp::common::String ThirdPartyRef;
-    uint64_t SelectedId;
+    csp::common::ReplicatedValue Name;
+    csp::common::ReplicatedValue Position;
+    csp::common::ReplicatedValue Rotation;
+    csp::common::ReplicatedValue Scale;
+    csp::common::ReplicatedValue ThirdPartyPlatform;
+    csp::common::ReplicatedValue ThirdPartyRef;
+    csp::common::ReplicatedValue SelectedId;
+    csp::common::ReplicatedValue EntityLock;
 
     SpaceEntity* Parent = nullptr;
     csp::common::List<SpaceEntity*> ChildEntities;
-
-    LockType EntityLock;
 
     UpdateCallback EntityUpdateCallback;
     DestroyCallback EntityDestroyCallback;
@@ -494,8 +510,9 @@ private:
     // this long term. May be null.
     std::unique_ptr<SpaceEntityStatePatcher> StatePatcher;
 
-    CSP_START_IGNORE
-    std::recursive_mutex EntityMutexLock;
+    std::map<uint16_t, EntityProperty> PropertyMap;
+
+    CSP_START_IGNORE std::recursive_mutex EntityMutexLock;
     std::recursive_mutex PropertiesLock;
     std::recursive_mutex ComponentsLock;
     CSP_END_IGNORE
@@ -511,5 +528,35 @@ private:
     /// @return bool : the selection state of the entity
     bool InternalSetSelectionStateOfEntity(const bool SelectedState);
 };
+
+template <typename T, typename U> inline bool SpaceEntity::SetProperty(uint16_t PropertyKey, const T& PriorValue, const U& Value)
+{
+    if (!IsModifiable())
+    {
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+                            "owner of. Entity name: {}",
+                    Name.GetString())
+                    .c_str());
+        }
+        return false;
+    }
+
+    if (StatePatcher != nullptr)
+    {
+        return StatePatcher->SetDirtyProperty(PropertyKey, PriorValue, Value);
+    }
+    else
+    {
+        if (PriorValue != static_cast<U>(PriorValue))
+        {
+            SetPropertyDirect(PropertyKey, Value);
+            return true;
+        }
+        return false;
+    }
+}
 
 } // namespace csp::multiplayer

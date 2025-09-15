@@ -60,7 +60,6 @@ bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const 
 
     if (!TransientDeletionComponentIds.Contains(ComponentKey) || CurrentComponents.HasKey(ComponentKey))
     {
-
         DirtyComponents.erase(ComponentKey);
         TransientDeletionComponentIds.Append(ComponentKey);
         return true;
@@ -147,47 +146,13 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
 
     if (DirtyProperties.size() > 0)
     {
-
         for (const auto& DirtyProperty : DirtyProperties)
         {
             uint16_t PropertyKey = DirtyProperty.first;
-            switch (PropertyKey)
-            {
-            case COMPONENT_KEY_VIEW_ENTITYNAME:
-                SpaceEntity.SetNameDirect(DirtyProperties[PropertyKey].GetString());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_NAME);
-                break;
-            case COMPONENT_KEY_VIEW_POSITION:
-                SpaceEntity.SetPositionDirect(DirtyProperties[PropertyKey].GetVector3());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_POSITION);
-                break;
-            case COMPONENT_KEY_VIEW_ROTATION:
-                SpaceEntity.SetRotationDirect(DirtyProperties[PropertyKey].GetVector4());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_ROTATION);
-                break;
-            case COMPONENT_KEY_VIEW_SCALE:
-                SpaceEntity.SetScaleDirect(DirtyProperties[PropertyKey].GetVector3());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_SCALE);
-                break;
-            case COMPONENT_KEY_VIEW_SELECTEDCLIENTID:
-                SpaceEntity.SetSelectedIdDirect(DirtyProperties[PropertyKey].GetInt());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-                break;
-            case COMPONENT_KEY_VIEW_THIRDPARTYREF:
-                SpaceEntity.SetThirdPartyRefDirect(DirtyProperties[PropertyKey].GetString());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-                break;
-            case COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM:
-                SpaceEntity.SetThirdPartyPlatformDirect(static_cast<csp::systems::EThirdPartyPlatform>(DirtyProperties[PropertyKey].GetInt()));
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-                break;
-            case COMPONENT_KEY_VIEW_LOCKTYPE:
-                SpaceEntity.SetEntityLockDirect(static_cast<LockType>(DirtyProperties[PropertyKey].GetInt()));
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-                break;
-            default:
-                break;
-            }
+
+            SpaceEntityUpdateFlags Flag = SpaceEntity.GetProperties().find(PropertyKey)->second.UpdateFlag;
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Flag);
+            SpaceEntity.SetPropertyDirect(PropertyKey, DirtyProperty.second);
         }
 
         DirtyProperties.clear();
@@ -271,14 +236,10 @@ mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
     // 1. Convert all of our view components to mcs compatible types.
     MCSComponentPacker ComponentPacker;
 
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ENTITYNAME, SpaceEntity.GetName());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_POSITION, SpaceEntity.GetPosition());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ROTATION, SpaceEntity.GetRotation());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SCALE, SpaceEntity.GetScale());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SpaceEntity.GetSelectingClientID());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, SpaceEntity.GetThirdPartyPlatformType());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, SpaceEntity.GetThirdPartyRef());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_LOCKTYPE, SpaceEntity.GetLockType());
+    for (const auto& Property : SpaceEntity.GetProperties())
+    {
+        ComponentPacker.WriteValue(Property.first, Property.second.Value);
+    }
 
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
 
@@ -356,54 +317,38 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
     const auto OwnerId = Message.GetOwnerId();
     const auto ParentId = common::Convert(Message.GetParentId());
 
-    // This stuff read from the component unpacker.
-    // The above is first-class, mandatory data for MCS objects. All else are optional components, hence the split.
-    csp::common::String Name = "";
-    SpaceTransform Transform {};
-    uint64_t SelectedId = 0;
-    csp::systems::EThirdPartyPlatform ThirdPartyPlatform = csp::systems::EThirdPartyPlatform::NONE;
-    csp::common::String ThirdPartyRef = "";
-    LockType EntityLock = LockType::None;
-
     auto MessageComponents = Message.GetComponents();
 
     std::vector<std::pair<uint16_t, mcs::ItemComponentData>> ComponentsToAdd;
 
+    csp::multiplayer::SpaceEntity* NewEntity = new csp::multiplayer::SpaceEntity(
+        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent);
+
     if (MessageComponents.has_value())
     {
-        // Get view components
+        // This stuff read from the component unpacker.
+        // The above is first-class, mandatory data for MCS objects. All else are optional components, hence the split.
         MCSComponentUnpacker ComponentUnpacker { *Message.GetComponents() };
-
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {
-            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+            // All key values before COMPONENT_KEYS_START_VIEWS are our properties
+            if (ComponentDataPair.first < COMPONENT_KEYS_START_VIEWS)
             {
-                // This is the end of our components
-                break;
+                ComponentsToAdd.push_back(ComponentDataPair);
             }
+            else
+            {
+                // Anything within COMPONENT_KEYS_START_VIEWS range is a csp runtime component, e.g StaticModelComponent
+                csp::common::ReplicatedValue Value;
 
-            ComponentsToAdd.push_back(ComponentDataPair);
+                if (ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value))
+                {
+                    NewEntity->SetPropertyDirect(ComponentDataPair.first, Value);
+                }
+            }
         }
     }
-
-    csp::multiplayer::SpaceEntity* NewEntity = new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, Name, Transform, OwnerId, ParentId, IsTransferable, IsPersistent);
-
-    // We need a consistent strategy for ensuring fully constructed SpaceEntities. Either they're simple enough data objects that they can just have
-    // public data, or they have preconditions and should have guarded construction ... this mix is dangerous.
-    NewEntity->SetSelectedIdDirect(SelectedId);
-    NewEntity->SetThirdPartyPlatformDirect(ThirdPartyPlatform);
-    NewEntity->SetThirdPartyRefDirect(ThirdPartyRef);
-    NewEntity->SetEntityLockDirect(EntityLock);
 
     for (const auto& Comp : ComponentsToAdd)
     {
@@ -416,85 +361,43 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
 
 void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch)
 {
-
+    auto PatchComponents = Patch.GetComponents();
     SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
     csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
-    auto PatchComponents = Patch.GetComponents();
-
     if (PatchComponents.has_value())
     {
-        csp::common::String Name;
-        SpaceTransform Transform;
-        uint64_t SelectedId;
-        csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
-        csp::common::String ThirdPartyRef;
-        LockType EntityLock;
-
         MCSComponentUnpacker ComponentUnpacker { *Patch.GetComponents() };
-
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
-            SpaceEntity.SetNameDirect(Name);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
-            SpaceEntity.SetPositionDirect(Transform.Position);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
-            SpaceEntity.SetRotationDirect(Transform.Rotation);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
-            SpaceEntity.SetScaleDirect(Transform.Scale);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-            SpaceEntity.SetSelectedIdDirect(SelectedId);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-            SpaceEntity.SetThirdPartyPlatformDirect(ThirdPartyPlatform);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-            SpaceEntity.SetThirdPartyRefDirect(ThirdPartyRef);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-            SpaceEntity.SetEntityLockDirect(EntityLock);
-        }
-
         uint64_t ComponentCount = ComponentUnpacker.GetRuntimeComponentsCount();
+        ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
+        size_t ComponentIndex = 0;
 
         if (ComponentCount > 0)
         {
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+        }
 
-            ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
-            size_t ComponentIndex = 0;
-
-            for (const auto& ComponentDataPair : *PatchComponents)
+        for (const auto& ComponentDataPair : *PatchComponents)
+        {
+            // All key values before COMPONENT_KEYS_START_VIEWS are our properties
+            if (ComponentDataPair.first < COMPONENT_KEYS_START_VIEWS)
             {
-                if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
-                {
-                    // This is the end of our components
-                    break;
-                }
-
                 ComponentUpdateInfo UpdateInfo
                     = SpaceEntity.AddComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
                 ComponentUpdates[ComponentIndex] = UpdateInfo;
                 ComponentIndex++;
+            }
+            else
+            {
+                // Anything within COMPONENT_KEYS_START_VIEWS range is a csp runtime component, e.g StaticModelComponent
+                csp::common::ReplicatedValue Value;
+
+                if (ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value))
+                {
+                    SpaceEntityUpdateFlags Flag = SpaceEntity.GetProperties().find(ComponentDataPair.first)->second.UpdateFlag;
+                    UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Flag);
+                    SpaceEntity.SetPropertyDirect(ComponentDataPair.first, Value);
+                }
             }
         }
     }

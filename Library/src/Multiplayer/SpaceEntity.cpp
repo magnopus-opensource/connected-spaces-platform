@@ -97,18 +97,21 @@ SpaceEntity::SpaceEntity()
     , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
-    , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
+    , Position { csp::common::Vector3 { 0, 0, 0 } }
+    , Rotation { csp::common::Vector4 { 0, 0, 0, 1 } }
+    , Scale { csp::common::Vector3 { 1, 1, 1 } }
+    , ThirdPartyPlatform(static_cast<int64_t>(csp::systems::EThirdPartyPlatform::NONE))
     , ThirdPartyRef("")
-    , SelectedId(0)
+    , SelectedId(0ll)
     , Parent(nullptr)
-    , EntityLock(LockType::None)
+    , EntityLock(static_cast<int64_t>(LockType::None))
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(this, nullptr, nullptr, nullptr)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(nullptr)
     , StatePatcher(nullptr)
 {
+    RegisterProperties();
 }
 
 SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem)
@@ -119,18 +122,22 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , IsPersistent(true)
     , OwnerId(0)
     , ParentId(nullptr)
-    , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
+    , Position { csp::common::Vector3 { 0, 0, 0 } }
+    , Rotation { csp::common::Vector4 { 0, 0, 0, 1 } }
+    , Scale { csp::common::Vector3 { 1, 1, 1 } }
+    , ThirdPartyPlatform(static_cast<int64_t>(csp::systems::EThirdPartyPlatform::NONE))
     , ThirdPartyRef("")
-    , SelectedId(0)
+    , SelectedId(0ll)
     , Parent(nullptr)
-    , EntityLock(LockType::None)
+    , EntityLock(static_cast<int64_t>(LockType::None))
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(this, InEntitySystem, &ScriptRunner, LogSystem)
     , ScriptInterface(std::make_unique<EntityScriptInterface>(this))
     , LogSystem(LogSystem)
     , StatePatcher(nullptr)
 {
+    RegisterProperties();
+
     if (EntitySystem == nullptr)
     {
         if (LogSystem)
@@ -151,10 +158,14 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common
     csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent)
     : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
 {
+    RegisterProperties();
+
     this->Id = Id;
     this->Type = Type;
     this->Name = Name;
-    this->Transform = Transform;
+    this->Position = Transform.Position;
+    this->Rotation = Transform.Rotation;
+    this->Scale = Transform.Scale;
     this->OwnerId = OwnerId;
     this->IsTransferable = IsTransferable;
     this->IsPersistent = IsPersistent;
@@ -167,32 +178,11 @@ uint64_t SpaceEntity::GetId() const { return Id; }
 
 uint64_t SpaceEntity::GetOwnerId() const { return OwnerId; }
 
-const csp::common::String& SpaceEntity::GetName() const { return Name; }
+const csp::common::String& SpaceEntity::GetName() const { return Name.GetString(); }
 
-bool SpaceEntity::SetName(const csp::common::String& Value)
-{
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
+bool SpaceEntity::SetName(const csp::common::String& Value) { return SetProperty(COMPONENT_KEY_VIEW_ENTITYNAME, GetName(), Value); }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_ENTITYNAME, GetName(), Value)
-                                   : [this, &Value]()
-    {
-        SetNameDirect(Value, true);
-        return true;
-    }();
-}
-
-const SpaceTransform& SpaceEntity::GetTransform() const { return Transform; }
+SpaceTransform SpaceEntity::GetTransform() const { return SpaceTransform { Position.GetVector3(), Rotation.GetVector4(), Scale.GetVector3() }; }
 
 SpaceTransform SpaceEntity::GetGlobalTransform() const
 {
@@ -204,172 +194,81 @@ SpaceTransform SpaceEntity::GetGlobalTransform() const
         GlobalTransform.Scale = GetGlobalScale();
         return GlobalTransform;
     }
-    return Transform;
+    return GetTransform();
 }
 
-const csp::common::Vector3& SpaceEntity::GetPosition() const { return Transform.Position; }
+const csp::common::Vector3& SpaceEntity::GetPosition() const { return Position.GetVector3(); }
 
 csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
 {
+    const csp::common::Vector3 Pos = GetPosition();
+
     if (Parent != nullptr)
     {
-        glm::mat4 ParentTransform = computeParentMat4(Parent->GetGlobalTransform());
-
-        glm::vec3 GlobalEntityPosition = ParentTransform * glm::vec4(Transform.Position.X, Transform.Position.Y, Transform.Position.Z, 1.0f);
+        const glm::mat4 ParentTransform = computeParentMat4(Parent->GetGlobalTransform());
+        const glm::vec3 GlobalEntityPosition = ParentTransform * glm::vec4(Pos.X, Pos.Y, Pos.Z, 1.0f);
 
         return { GlobalEntityPosition.x, GlobalEntityPosition.y, GlobalEntityPosition.z };
     }
     else
-        return Transform.Position;
+        return Pos;
 }
 
-bool SpaceEntity::SetPosition(const csp::common::Vector3& Value)
-{
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
+bool SpaceEntity::SetPosition(const csp::common::Vector3& Value) { return SetProperty(COMPONENT_KEY_VIEW_POSITION, GetPosition(), Value); }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_POSITION, GetPosition(), Value)
-                                   : [this, &Value]()
-    {
-        SetPositionDirect(Value, true);
-        return true;
-    }();
-}
-
-const csp::common::Vector4& SpaceEntity::GetRotation() const { return Transform.Rotation; }
+const csp::common::Vector4& SpaceEntity::GetRotation() const { return Rotation.GetVector4(); }
 
 csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
 {
+    const csp::common::Vector4 Rot = GetRotation();
+
     if (Parent != nullptr)
     {
-        csp::common::Vector4 GlobalRotation = Parent->GetGlobalRotation();
-        glm::quat Orientation { Transform.Rotation.W, Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z };
-        glm::quat GlobalOrientation(GlobalRotation.W, GlobalRotation.X, GlobalRotation.Y, GlobalRotation.Z);
+        const csp::common::Vector4 GlobalRotation = Parent->GetGlobalRotation();
+        const glm::quat Orientation { Rot.W, Rot.X, Rot.Y, Rot.Z };
+        const glm::quat GlobalOrientation(GlobalRotation.W, GlobalRotation.X, GlobalRotation.Y, GlobalRotation.Z);
 
-        glm::quat FinalOrientation = GlobalOrientation * Orientation;
+        const glm::quat FinalOrientation = GlobalOrientation * Orientation;
         return csp::common::Vector4 { FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w };
     }
     else
-        return Transform.Rotation;
+        return Rot;
 }
 
-bool SpaceEntity::SetRotation(const csp::common::Vector4& Value)
-{
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
+bool SpaceEntity::SetRotation(const csp::common::Vector4& Value) { return SetProperty(COMPONENT_KEY_VIEW_ROTATION, GetRotation(), Value); }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_ROTATION, GetRotation(), Value)
-                                   : [this, &Value]()
-    {
-        SetRotationDirect(Value, true);
-        return true;
-    }();
-}
-
-const csp::common::Vector3& SpaceEntity::GetScale() const { return Transform.Scale; }
+const csp::common::Vector3& SpaceEntity::GetScale() const { return Scale.GetDefaultVector3(); }
 
 csp::common::Vector3 SpaceEntity::GetGlobalScale() const
 {
+    const csp::common::Vector3 Sc = GetScale();
+
     if (Parent != nullptr)
-        return Parent->GetGlobalScale() * Transform.Scale;
-    return Transform.Scale;
+        return Parent->GetGlobalScale() * Sc;
+    return Sc;
 }
 
-bool SpaceEntity::SetScale(const csp::common::Vector3& Value)
-{
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
-
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SCALE, GetScale(), Value)
-                                   : [this, &Value]()
-    {
-        SetScaleDirect(Value, true);
-        return true;
-    }();
-}
+bool SpaceEntity::SetScale(const csp::common::Vector3& Value) { return SetProperty(COMPONENT_KEY_VIEW_SCALE, GetScale(), Value); }
 
 bool SpaceEntity::GetIsTransient() const { return !IsPersistent; }
 
-const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdPartyRef; }
+const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdPartyRef.GetString(); }
 
 bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
-
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef(), InThirdPartyRef)
-                                   : [this, &InThirdPartyRef]()
-    {
-        SetThirdPartyRefDirect(InThirdPartyRef, true);
-        return true;
-    }();
+    return SetProperty(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef(), InThirdPartyRef);
 }
 
 bool SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
 {
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
-
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(
-               COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, GetThirdPartyPlatformType(), static_cast<int64_t>(InThirdPartyPlatformType))
-                                   : [this, &InThirdPartyPlatformType]()
-    {
-        SetThirdPartyPlatformDirect(InThirdPartyPlatformType, true);
-        return true;
-    }();
+    return SetProperty(
+        COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(GetThirdPartyPlatformType()), static_cast<int64_t>(InThirdPartyPlatformType));
 }
 
-csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
+csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const
+{
+    return static_cast<csp::systems::EThirdPartyPlatform>(ThirdPartyPlatform.GetInt());
+}
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -698,9 +597,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
 
 EntityScript& SpaceEntity::GetScript() { return Script; }
 
-bool SpaceEntity::IsSelected() const { return SelectedId != 0; }
+bool SpaceEntity::IsSelected() const { return SelectedId.GetInt() != 0; }
 
-uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId; }
+uint64_t SpaceEntity::GetSelectingClientID() const { return SelectedId.GetInt(); }
 
 bool SpaceEntity::Select()
 {
@@ -725,7 +624,7 @@ bool SpaceEntity::IsModifiable() const
 
     if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Offline)
     {
-        if (EntityLock == LockType::UserAgnostic)
+        if (GetLockType() == LockType::UserAgnostic)
         {
             return false;
         }
@@ -750,7 +649,7 @@ bool SpaceEntity::IsModifiable() const
     // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
     // Note : This will stop working if we ever add another lock type
     const bool AboutToUnlock = StatePatcher->GetDirtyProperties().count(COMPONENT_KEY_VIEW_LOCKTYPE) > 0;
-    if (EntityLock == LockType::UserAgnostic && !AboutToUnlock)
+    if (GetLockType() == LockType::UserAgnostic && !AboutToUnlock)
     {
         return false;
     }
@@ -769,30 +668,7 @@ bool SpaceEntity::Lock()
         return false;
     }
 
-    if (!IsModifiable())
-    {
-        if (LogSystem != nullptr)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Name)
-                    .c_str());
-        }
-        return false;
-    }
-
-    // We do it this way just so we can reuse the `SetDirtyProperty` function. It dosen't really matter that we're not checking if the "true"
-    // old lock is the same before setting the val again.
-    const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
-    const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
-
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, OldLockReplicatedVal, NewLockReplicatedVal)
-                                   : [this]()
-    {
-        SetEntityLockDirect(LockType::UserAgnostic, true);
-        return true;
-    }();
+    return SetProperty(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock.GetInt(), static_cast<int64_t>(LockType::UserAgnostic));
 }
 
 bool SpaceEntity::Unlock()
@@ -806,22 +682,22 @@ bool SpaceEntity::Unlock()
         return false;
     }
 
-    // We do it this way just so we can reuse the `SetDirtyProperty` function. It dosen't really matter that we're not checking if the "true"
-    // old lock is the same before setting the val again.
-    const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
-    const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
-
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, OldLockReplicatedVal, NewLockReplicatedVal)
-                                   : [this]()
+    // For unlocking, we dont want to call SetProperty, as it does an internal IsModifiable check,
+    // which will always fail due to the entity being locked.
+    if (StatePatcher != nullptr)
     {
-        SetEntityLockDirect(LockType::None, true);
+        return StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock.GetInt(), static_cast<int64_t>(LockType::None));
+    }
+    else
+    {
+        SetPropertyDirect(COMPONENT_KEY_VIEW_LOCKTYPE, static_cast<int64_t>(LockType::None));
         return true;
-    }();
+    }
 }
 
-csp::multiplayer::LockType SpaceEntity::GetLockType() const { return EntityLock; }
+csp::multiplayer::LockType SpaceEntity::GetLockType() const { return static_cast<LockType>(EntityLock.GetInt()); }
 
-bool SpaceEntity::IsLocked() const { return EntityLock != LockType::None; }
+bool SpaceEntity::IsLocked() const { return GetLockType() != LockType::None; }
 
 void SpaceEntity::QueueUpdate()
 {
@@ -848,13 +724,13 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
             if (StatePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId, static_cast<int64_t>(LocalClientId));
+                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, GetSelectingClientID(), static_cast<int64_t>(LocalClientId));
             }
 
             bool Added = EntitySystem->AddEntityToSelectedEntities(this);
             if (Added)
             {
-                SetSelectedIdDirect(LocalClientId, true);
+                SetPropertyDirect(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(LocalClientId), true);
                 return true;
             }
         }
@@ -869,13 +745,13 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
             if (StatePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId, static_cast<int64_t>(0));
+                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, GetSelectingClientID(), static_cast<int64_t>(0));
             }
 
             bool Removed = EntitySystem->RemoveEntityFromSelectedEntities(this);
             if (Removed)
             {
-                SetSelectedIdDirect(0, true);
+                SetPropertyDirect(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, 0ll, true);
                 return true;
             }
         }
@@ -892,94 +768,6 @@ std::chrono::milliseconds SpaceEntity::GetTimeOfLastPatch() { return StatePatche
 // It may still be nicer to make this in-pattern and do loopbacks like the dirtyable props, but no formal need.
 void SpaceEntity::SetOwnerId(uint64_t InOwnerId) { OwnerId = InOwnerId; }
 
-void SpaceEntity::SetNameDirect(const csp::common::String& Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    Name = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_NAME, Empty);
-    }
-}
-
-void SpaceEntity::SetPositionDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    Transform.Position = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_POSITION, Empty);
-    }
-}
-
-void SpaceEntity::SetRotationDirect(const csp::common::Vector4& Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    Transform.Rotation = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_ROTATION, Empty);
-    }
-}
-
-void SpaceEntity::SetScaleDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    Transform.Scale = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_SCALE, Empty);
-    }
-}
-
-void SpaceEntity::SetThirdPartyRefDirect(const csp::common::String& Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    ThirdPartyRef = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_THIRD_PARTY_REF, Empty);
-    }
-}
-
-void SpaceEntity::SetThirdPartyPlatformDirect(const csp::systems::EThirdPartyPlatform Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    ThirdPartyPlatform = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_THIRD_PARTY_PLATFORM, Empty);
-    }
-}
-
-void SpaceEntity::SetEntityLockDirect(LockType Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    EntityLock = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_LOCK_TYPE, Empty);
-    }
-}
-
-void SpaceEntity::SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback)
-{
-    std::scoped_lock PropertiesLocker(PropertiesLock);
-    SelectedId = Value;
-    if (CallNotifyingCallback && EntityUpdateCallback)
-    {
-        csp::common::Array<ComponentUpdateInfo> Empty;
-        EntityUpdateCallback(this, UPDATE_FLAGS_SELECTION_ID, Empty);
-    }
-}
-
 void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback)
 {
     ParentId = Value;
@@ -991,6 +779,27 @@ void SpaceEntity::SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool 
         EntityUpdateCallback(this, UPDATE_FLAGS_PARENT, Empty);
     }
 }
+
+void SpaceEntity::SetPropertyDirect(uint16_t PropertyKey, const csp::common::ReplicatedValue& Value, bool CallNotifyingCallback)
+{
+    auto It = PropertyMap.find(PropertyKey);
+
+    if (It == PropertyMap.end())
+    {
+        // TODO: Error
+        return;
+    }
+
+    *It->second.Value = Value;
+
+    if (CallNotifyingCallback && EntityUpdateCallback)
+    {
+        csp::common::Array<ComponentUpdateInfo> Empty;
+        EntityUpdateCallback(this, It->second.UpdateFlag, Empty);
+    }
+}
+
+const std::map<uint16_t, EntityProperty>& SpaceEntity::GetProperties() const { return PropertyMap; }
 
 bool SpaceEntity::AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback)
 {
@@ -1081,6 +890,18 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) con
 }
 
 void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
+
+void SpaceEntity::RegisterProperties()
+{
+    PropertyMap[COMPONENT_KEY_VIEW_ENTITYNAME] = EntityProperty { this->Name, UPDATE_FLAGS_NAME };
+    PropertyMap[COMPONENT_KEY_VIEW_POSITION] = EntityProperty { this->Position, UPDATE_FLAGS_POSITION };
+    PropertyMap[COMPONENT_KEY_VIEW_ROTATION] = EntityProperty { this->Rotation, UPDATE_FLAGS_ROTATION };
+    PropertyMap[COMPONENT_KEY_VIEW_SCALE] = EntityProperty { this->Scale, UPDATE_FLAGS_SCALE };
+    PropertyMap[COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM] = EntityProperty { this->ThirdPartyPlatform, UPDATE_FLAGS_THIRD_PARTY_PLATFORM };
+    PropertyMap[COMPONENT_KEY_VIEW_THIRDPARTYREF] = EntityProperty { this->ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF };
+    PropertyMap[COMPONENT_KEY_VIEW_SELECTEDCLIENTID] = EntityProperty { this->SelectedId, UPDATE_FLAGS_SELECTION_ID };
+    PropertyMap[COMPONENT_KEY_VIEW_LOCKTYPE] = EntityProperty { this->EntityLock, UPDATE_FLAGS_LOCK_TYPE };
+}
 
 void SpaceEntity::ResolveParentChildRelationship()
 {
