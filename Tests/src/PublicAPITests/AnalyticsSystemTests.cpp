@@ -26,6 +26,8 @@
 
 #include "gtest/gtest.h"
 
+#include <future>
+
 using namespace csp::common;
 using namespace csp::systems;
 
@@ -47,9 +49,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    String UserId;
-
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Analytics Data
@@ -82,9 +83,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    String UserId;
-
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
@@ -113,38 +113,38 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
 }
 
 /*
- * Test that we can successfully send a batch of analytics events based on batch rate
- * The batch size has been set high enough that it won't trigger the batch to be sent
+ * Test that we can successfully send a queue of analytics events based on queue send rate
+ * The queue size has been set high enough that it won't trigger the queue to be sent
  */
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventBatchRateTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRateTest)
 {
     SetRandSeed();
-
-    RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
+    // Reset time of last batch
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    // Reset time of last batch otherwise the analytics event batch will immediately be sent
-    AnalyticsSystem->SetTimeOfLastBatch(CurrentTime);
-    // The default batch rate and size are too large for testing so set them to something more reasonable
-    AnalyticsSystem->SetBatchRateAndSize(std::chrono::seconds(3), 5);
+    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
 
-    String UserId;
+    // The default batch rate and size are too large for testing so set them to something more reasonable
+    AnalyticsSystem->SetQueueBatchRateAndSize(std::chrono::seconds(3), 5);
 
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
-
-    // We can confirm that the batch has been successfully sent by checking for this success log message
-    const csp::common::String BatchAnalyticsSuccessMsg = "Batched Analytics Events sent.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(BatchAnalyticsSuccessMsg)).Times(1);
+    std::promise<NullResult> ResultPromise;
+    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+    AnalyticsSystem->SetQueueAnalyticsEventCallback(
+        [&ResultPromise](const NullResult& Result)
+        {
+            EXPECT_TRUE(Result.GetResultCode() == csp::systems::EResultCode::Success);
+            ResultPromise.set_value(Result);
+        });
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -154,75 +154,58 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventBatchRat
     const Map<String, String> TestMetadata = { { "Key1", "Value1" }, { "Key2", "Value2" } };
 
     // Send two analytics events to be queued for sending later as a batch
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    // The batch rate has been set to 3 seconds so we need to tick foundation for at least that long to allow the batch to be sent
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    long long TestTime = 0;
+    csp::CSPFoundation::Tick();
 
-    while (TestTime < 4)
-    {
-        std::this_thread::sleep_for(1s);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-
-        csp::CSPFoundation::Tick();
-    }
+    // Wait for the callback to be received
+    ResultFuture.wait();
+    EXPECT_TRUE(ResultFuture.get().GetResultCode() == csp::systems::EResultCode::Success);
 
     // Log out
     LogOut(UserSystem);
 }
 
 /*
- * Test that we can successfully send a batch of analytics events based on batch size
- * The batch rate has been set high enough that it won't trigger the batch to be sent
+ * Test that we can successfully send a queue of analytics events based on queue size
+ * The queue send rate has been set high enough that it won't trigger the queue to be sent
  */
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventBatchSizeTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTest)
 {
     SetRandSeed();
-
-    RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
+    // Reset time of last batch
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    // Reset time of last batch otherwise the analytics event batch will immediately be sent
-    AnalyticsSystem->SetTimeOfLastBatch(CurrentTime);
-    // The default batch rate and size are too large for testing so set them to something more reasonable
-    AnalyticsSystem->SetBatchRateAndSize(std::chrono::seconds(20), 3);
+    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
 
-    String UserId;
+    // The default batch has been reduced to something more reasonable for testing
+    AnalyticsSystem->SetQueueBatchRateAndSize(std::chrono::seconds(60), 3);
 
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
-
-    auto SendBatchStart = std::chrono::steady_clock::now();
-    std::chrono::steady_clock::time_point LogTime;
-    bool BatchSent = false;
-    // We can confirm that the batch has been successfully sent by checking for this success log message
-    // We also check that the batch has been sent as a result of batch size rather than batch rate by checking
-    // the elapsed test time is less than the batch rate of 20 seconds
-    const csp::common::String BatchAnalyticsSuccessMsg = "Batched Analytics Events sent.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(BatchAnalyticsSuccessMsg))
-        .Times(1)
-        .WillOnce(::testing::Invoke(
-            [&](const csp::common::String&)
-            {
-                LogTime = std::chrono::steady_clock::now();
-                long long ElapsedTestTime = std::chrono::duration_cast<std::chrono::seconds>(LogTime - SendBatchStart).count();
-                EXPECT_TRUE(ElapsedTestTime < 20);
-                BatchSent = true;
-            }));
+    // The batch rate has been set to 60 seconds so check the elapsed test time to ensure the batch was sent
+    // as a result of batch size rather than batch rate
+    auto Start = std::chrono::steady_clock::now();
+    std::promise<NullResult> ResultPromise;
+    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+    AnalyticsSystem->SetQueueAnalyticsEventCallback(
+        [&ResultPromise, Start](const NullResult& Result)
+        {
+            EXPECT_TRUE(Result.GetResultCode() == csp::systems::EResultCode::Success);
+            ResultPromise.set_value(Result);
+            auto Current = std::chrono::steady_clock::now();
+            int64_t ElapsedTestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+            EXPECT_TRUE(ElapsedTestTime < 60);
+        });
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -232,37 +215,24 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventBatchSiz
     const Map<String, String> TestMetadata = { { "Key1", "Value1" }, { "Key2", "Value2" } };
 
     // Send three analytics events to be queued for sending later as a batch
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    // The batch rate has been set to 20 seconds so we need to tick foundation for at least that long
-    // We check that the batch is sent as a result of batch size rather than batch rate in the EXPECT_CALL above
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    long long TestTime = 0;
+    csp::CSPFoundation::Tick();
 
-    // Once the batch has been set as a result of the BatchSize having been reached, BatchSent will be set to true
-    // in the EXPECT_CALL above and the while loop will exit before the 20 second batch rate is reached. This is
-    // also validated in the EXPECT_CALL above.
-    while (!BatchSent && TestTime < 21)
-    {
-        std::this_thread::sleep_for(1s);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-
-        csp::CSPFoundation::Tick();
-    }
+    // Wait for the callback to be received
+    ResultFuture.wait();
+    EXPECT_TRUE(ResultFuture.get().GetResultCode() == csp::systems::EResultCode::Success);
 
     // Log out
     LogOut(UserSystem);
 }
 
 /*
- * Test that we get an error when attempting to batch send an analytics event with a required field missing
+ * Test that we get an error when attempting to send a queue of analytics events with a required field missing
  */
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventMissingFieldsTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingFieldsTest)
 {
     SetRandSeed();
 
@@ -272,9 +242,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventMissingF
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    String UserId;
-
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
@@ -292,7 +261,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventMissingF
     const auto TestSubCategory = String("Event_SubCategory");
     const Map<String, String> TestMetadata = { { "Key1", "Value1" }, { "Key2", "Value2" } };
 
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
     // Log out
     LogOut(UserSystem);
@@ -300,51 +269,34 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, BatchSendAnalyticsEventMissingF
 
 /*
  * Test that we can successfully flush a batch of analytics events.
- * The batch rate and size has been set high enough that they won't trigger the batch to be sent.
+ * The batch rate and size have been left at their defaults which means they won't trigger the batch to be sent.
  */
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsBatchTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
 {
     SetRandSeed();
-
-    RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
+    // Reset time of last batch
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    // Reset time of last batch otherwise the analytics event batch will immediately be sent
-    AnalyticsSystem->SetTimeOfLastBatch(CurrentTime);
-    // The default batch rate and size are too large for testing so set them to something more reasonable
-    AnalyticsSystem->SetBatchRateAndSize(std::chrono::seconds(20), 5);
-
-    String UserId;
+    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
 
     // Log in
+    String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
-
-    auto SendBatchStart = std::chrono::steady_clock::now();
-    std::chrono::steady_clock::time_point LogTime;
-    bool BatchFlushed = false;
-    // We can confirm that the batch has been successfully flushed by checking for this success log message
-    // We also check that the batch has been sent as a result of flush rather than batch rate by checking that
-    // the elapsed test time is less than the batch rate of 20 seconds
-    const csp::common::String BatchAnalyticsSuccessMsg = "Batched Analytics Events sent.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(BatchAnalyticsSuccessMsg))
-        .Times(1)
-        .WillOnce(::testing::Invoke(
-            [&](const csp::common::String&)
-            {
-                LogTime = std::chrono::steady_clock::now();
-                long long ElapsedTestTime = std::chrono::duration_cast<std::chrono::seconds>(LogTime - SendBatchStart).count();
-                EXPECT_TRUE(ElapsedTestTime < 20);
-                BatchFlushed = true;
-            }));
+    std::promise<NullResult> ResultPromise;
+    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+    AnalyticsSystem->SetQueueAnalyticsEventCallback(
+        [&ResultPromise](const NullResult& Result)
+        {
+            EXPECT_TRUE(Result.GetResultCode() == csp::systems::EResultCode::Success);
+            ResultPromise.set_value(Result);
+        });
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -354,32 +306,18 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsBatchTest)
     const Map<String, String> TestMetadata = { { "Key1", "Value1" }, { "Key2", "Value2" } };
 
     // Send two analytics events to be queued for sending later as a batch
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->BatchAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    // The batch rate has been set to 20 seconds so we need to tick foundation for at least that long to allow the batch to be sent
-    auto Start = std::chrono::steady_clock::now();
-    auto Current = std::chrono::steady_clock::now();
-    long long TestTime = 0;
+    // The batch rate has been left at its default of 60 seconds.
+    // We will tick only once to ensure the queue is not being sent as a result of the batch rate.
+    csp::CSPFoundation::Tick();
+    ASSERT_NE(ResultFuture.wait_for(0s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+    AnalyticsSystem->FlushAnalyticsEventsQueue();
 
-    // We will make the call to flush the batch after 3 seconds. If successful BatchFlushed will be set to true
-    // in the EXPECT_CALL above and the while loop will exit before the 20 second batch rate is reached. This is
-    // also validated in the EXPECT_CALL above.
-    while (!BatchFlushed && TestTime < 21)
-    {
-        std::this_thread::sleep_for(1s);
-
-        Current = std::chrono::steady_clock::now();
-        TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-
-        if (TestTime == 3)
-        {
-            // Flush the batch of events after 3 seconds
-            AnalyticsSystem->FlushAnalyticsEvents();
-        }
-
-        csp::CSPFoundation::Tick();
-    }
+    // Wait for the callback to be received
+    ResultFuture.wait();
+    EXPECT_TRUE(ResultFuture.get().GetResultCode() == csp::systems::EResultCode::Success);
 
     // Log out
     LogOut(UserSystem);

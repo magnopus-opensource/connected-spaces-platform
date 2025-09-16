@@ -95,60 +95,67 @@ void AnalyticsBatchEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
     if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && _AnalyticsSystem != nullptr)
     {
-        _AnalyticsSystem->ProcessBatchedAnalyticsRecords();
+        const std::chrono::milliseconds CurrentTime
+            = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+        if (CurrentTime - _AnalyticsSystem->GetTimeOfLastBatchSend() >= _AnalyticsSystem->GetQueueSendRate()
+            || _AnalyticsSystem->GetCurrentQueueSize() >= _AnalyticsSystem->GetMaxQueueSize())
+        {
+            _AnalyticsSystem->FlushAnalyticsEventsQueue();
+        }
     }
 }
 
 AnalyticsSystem::AnalyticsSystem()
     : SystemBase(nullptr, nullptr, nullptr)
-    , EventHandler(nullptr)
-    , AnalyticsBatchLock(new std::recursive_mutex)
     , AnalyticsApi(nullptr)
-    , AnalyticsRecordBatch(nullptr)
+    , EventHandler(nullptr)
+    , AnalyticsBatchLock()
+    , AnalyticsRecordBatch()
+    , BatchAnalyticsEventCallback(nullptr)
     , UserAgentInfo(nullptr)
-    , AnalyticsBatchRate(std::chrono::seconds(60))
-    , TimeOfLastBatch(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxBatchSize(25)
-    , IsFlushingAnalyticsEvents(false)
+    , AnalyticsQueueSendRate(std::chrono::seconds(60))
+    , TimeOfLastBatchSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
+    , MaxQueueSize(25)
 {
 }
 
 AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::ClientUserAgent* AgentInfo, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
-    , EventHandler(new AnalyticsBatchEventHandler(this))
-    , AnalyticsBatchLock(new std::recursive_mutex)
-    , AnalyticsRecordBatch(new(std::deque<std::shared_ptr<chs::AnalyticsRecord>>))
+    , AnalyticsApi(std::make_unique<chs::AnalyticsApi>(InWebClient))
+    , EventHandler(std::make_unique<AnalyticsBatchEventHandler>(this))
+    , AnalyticsBatchLock()
+    , AnalyticsRecordBatch()
+    , BatchAnalyticsEventCallback(nullptr)
     , UserAgentInfo(AgentInfo)
-    , AnalyticsBatchRate(std::chrono::seconds(60))
-    , TimeOfLastBatch(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
-    , MaxBatchSize(25)
-    , IsFlushingAnalyticsEvents(false)
+    , AnalyticsQueueSendRate(std::chrono::seconds(60))
+    , TimeOfLastBatchSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
+    , MaxQueueSize(25)
 {
-    AnalyticsApi = std::unique_ptr<csp::services::ApiBase>(new chs::AnalyticsApi(InWebClient));
-
-    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
 }
 
-AnalyticsSystem::~AnalyticsSystem()
-{
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+AnalyticsSystem::~AnalyticsSystem() { csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get()); }
 
-    delete (EventHandler);
-    delete (AnalyticsBatchLock);
-    delete (AnalyticsRecordBatch);
-}
-
-std::chrono::milliseconds AnalyticsSystem::GetTimeOfLastBatch() const { return TimeOfLastBatch; }
-
-void AnalyticsSystem::SetTimeOfLastBatch(std::chrono::milliseconds NewTimeOfLastBatch) { TimeOfLastBatch = NewTimeOfLastBatch; }
+void AnalyticsSystem::SetTimeOfLastBatchSend(std::chrono::milliseconds NewTimeOfLastBatch) { TimeOfLastBatchSend = NewTimeOfLastBatch; }
 
 // This is a utility function to allow us to test the batching functionality in a reasonable time frame.
-void AnalyticsSystem::SetBatchRateAndSize(std::chrono::milliseconds NewBatchRate, size_t NewBatchSize)
+void AnalyticsSystem::SetQueueBatchRateAndSize(std::chrono::milliseconds NewSendRate, size_t NewQueueSize)
 {
-    std::scoped_lock AnalyticsBatchLocker(*AnalyticsBatchLock);
+    std::scoped_lock AnalyticsBatchLocker(AnalyticsBatchLock);
 
-    AnalyticsBatchRate = NewBatchRate;
-    MaxBatchSize = NewBatchSize;
+    AnalyticsQueueSendRate = NewSendRate;
+    MaxQueueSize = NewQueueSize;
+}
+
+void AnalyticsSystem::SetQueueAnalyticsEventCallback(NullResultCallback Callback)
+{
+    if (BatchAnalyticsEventCallback)
+    {
+        LogSystem->LogMsg(common::LogLevel::Warning, "BatchAnalyticsEventCallback has already been set. Previous callback overwritten.");
+    }
+
+    BatchAnalyticsEventCallback = std::move(Callback);
 }
 
 void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
@@ -180,15 +187,9 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());
-
-            NullResult ErrorResult(Result.GetResultCode(), Result.GetHttpResultCode());
-            Callback(ErrorResult);
-
-            return;
         }
 
-        NullResult SuccessResult(Result.GetResultCode(), Result.GetHttpResultCode());
-        Callback(SuccessResult);
+        INVOKE_IF_NOT_NULL(Callback, Result);
     };
 
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -197,7 +198,7 @@ void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, co
     static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost(Records, ResponseHandler);
 }
 
-void AnalyticsSystem::BatchAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
+void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
     const Optional<String>& SubCategory, const Optional<Map<String, String>>& Metadata)
 {
     if (ProductContextSection.IsEmpty() || Category.IsEmpty() || InteractionType.IsEmpty())
@@ -209,15 +210,15 @@ void AnalyticsSystem::BatchAnalyticsEvent(const String& ProductContextSection, c
 
     auto Record = CreateAnalyticsRecord(UserAgentInfo, ProductContextSection, Category, InteractionType, SubCategory, Metadata);
 
-    std::scoped_lock AnalyticsBatchLocker(*AnalyticsBatchLock);
-    AnalyticsRecordBatch->emplace_back(Record);
+    std::scoped_lock AnalyticsBatchLocker(AnalyticsBatchLock);
+    AnalyticsRecordBatch.emplace_back(Record);
 }
 
-void AnalyticsSystem::ProcessBatchedAnalyticsRecords()
+void AnalyticsSystem::FlushAnalyticsEventsQueue()
 {
-    std::scoped_lock AnalyticsBatchLocker(*AnalyticsBatchLock);
+    std::scoped_lock AnalyticsBatchLocker(AnalyticsBatchLock);
 
-    if (AnalyticsRecordBatch->empty())
+    if (AnalyticsRecordBatch.empty())
     {
         return;
     }
@@ -225,64 +226,34 @@ void AnalyticsSystem::ProcessBatchedAnalyticsRecords()
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    if (CurrentTime - GetTimeOfLastBatch() >= AnalyticsBatchRate)
+    SetTimeOfLastBatchSend(CurrentTime);
+
+    NullResultCallback SendBatchAnalyticsCallback
+        = [BatchResultCallback = this->BatchAnalyticsEventCallback, LogSystem = this->LogSystem](const NullResult& Result)
     {
-        FlushAnalyticsEvents();
-        return;
-    }
-
-    if (AnalyticsRecordBatch->size() >= MaxBatchSize)
-    {
-        FlushAnalyticsEvents();
-        return;
-    }
-}
-
-void AnalyticsSystem::FlushAnalyticsEvents()
-{
-    std::scoped_lock AnalyticsBatchLocker(*AnalyticsBatchLock);
-
-    if (AnalyticsRecordBatch->empty())
-    {
-        return;
-    }
-
-    const std::chrono::milliseconds CurrentTime
-        = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-
-    SetTimeOfLastBatch(CurrentTime);
-
-    std::vector<std::shared_ptr<chs::AnalyticsRecord>> Records;
-    Records.reserve(AnalyticsRecordBatch->size());
-
-    while (AnalyticsRecordBatch->empty() == false)
-    {
-        auto Record = AnalyticsRecordBatch->front();
-
-        Records.push_back(Record);
-
-        AnalyticsRecordBatch->pop_front();
-    }
-
-    NullResultCallback SendBatchAnalyticsCallback = [LogSystem = this->LogSystem, BatchSize = Records.size()](const NullResult& Result)
-    {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            LogSystem->LogMsg(common::LogLevel::Verbose, "Batched Analytics Events sent.");
+            return;
         }
-        else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+
+        if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
             LogSystem->LogMsg(common::LogLevel::Error,
-                fmt::format("Failed to send Batch Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
+                fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());
+        }
+
+        if (BatchResultCallback)
+        {
+            INVOKE_IF_NOT_NULL(BatchResultCallback, Result);
         }
     };
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
 
-    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost(Records, ResponseHandler);
+    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost(AnalyticsRecordBatch, ResponseHandler);
 }
 
 } // namespace csp::systems
