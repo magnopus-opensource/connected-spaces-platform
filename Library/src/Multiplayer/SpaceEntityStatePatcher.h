@@ -135,6 +135,8 @@ public:
     {
         std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
 
+        // This erase is useful for a very specific case where a value was changed, and before a patch is sent, the value is set back to its original
+        // value. This will prevent a redundant patch from being sent.
         DirtyProperties.erase(PropertyKey);
 
         if (NewValue != static_cast<U>(PriorValue))
@@ -216,4 +218,5 @@ private:
     csp::multiplayer::SpaceEntity& SpaceEntity;
     PatchSentCallback EntityPatchSentCallback;
 };
+
 } // namespace csp::multiplayer
