@@ -1197,7 +1197,7 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
             }
             else
             {
-                LogSystem->LogMsg(common::LogLevel::Verbose,
+                LogSystem->LogMsg(common::LogLevel::VeryVerbose,
                     "Skipping patch send in ProcessPendingEntityOperations as not enough time has passed since the last patch");
                 ++it;
             }
