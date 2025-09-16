@@ -91,7 +91,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
     EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
 
     // Ensure the required fields error message is logged when we try to send an analytics event with a required field missing
-    const csp::common::String AnalyticsErrorMsg = "Missing the required fields for the Analytics Event.";
+    const csp::common::String AnalyticsErrorMsg
+        = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
@@ -124,14 +125,14 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    // Reset time of last batch
+    // Reset time the last queue was sent
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
+    AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
 
-    // The default batch rate and size are too large for testing so set them to something more reasonable
-    AnalyticsSystem->SetQueueBatchRateAndSize(std::chrono::seconds(3), 5);
+    // The default queue send rate and size are too large for testing so set them to something more reasonable
+    AnalyticsSystem->__SetQueueSendRateAndMaxSize(std::chrono::seconds(3), 5);
 
     // Log in
     String UserId;
@@ -179,21 +180,21 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTes
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    // Reset time of last batch
+    // Reset time the last queue was sent
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
+    AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
 
-    // The default batch has been reduced to something more reasonable for testing
-    AnalyticsSystem->SetQueueBatchRateAndSize(std::chrono::seconds(60), 3);
+    // The default queue size has been reduced to something more reasonable for testing
+    AnalyticsSystem->__SetQueueSendRateAndMaxSize(std::chrono::seconds(60), 3);
 
     // Log in
     String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    // The batch rate has been set to 60 seconds so check the elapsed test time to ensure the batch was sent
-    // as a result of batch size rather than batch rate
+    // The queue send rate has been set to 60 seconds so we check the elapsed test time to ensure the batch was sent
+    // as a result of queue size rather than queue send rate
     auto Start = std::chrono::steady_clock::now();
     std::promise<NullResult> ResultPromise;
     std::future<NullResult> ResultFuture = ResultPromise.get_future();
@@ -249,8 +250,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingField
     // Ensure the MockLogger will ignore all logs except the one we care about
     EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
 
-    // Ensure the required fields error message is logged when we try to batch send an analytics event with a required field missing
-    const csp::common::String AnalyticsErrorMsg = "Missing the required fields for the Analytics Event.";
+    // Ensure the required fields error message is logged when we try to queue an analytics event with a required field missing
+    const csp::common::String AnalyticsErrorMsg
+        = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
@@ -268,8 +270,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingField
 }
 
 /*
- * Test that we can successfully flush a batch of analytics events.
- * The batch rate and size have been left at their defaults which means they won't trigger the batch to be sent.
+ * Test that we can successfully flush a queue of analytics events.
+ * The queue send rate and size have been left at their defaults which means they won't trigger the queue to be sent.
  */
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
 {
@@ -279,11 +281,11 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
-    // Reset time of last batch
+    // Reset time the last queue was sent
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    AnalyticsSystem->SetTimeOfLastBatchSend(CurrentTime);
+    AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
 
     // Log in
     String UserId;
@@ -309,8 +311,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
     AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
     AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    // The batch rate has been left at its default of 60 seconds.
-    // We will tick only once to ensure the queue is not being sent as a result of the batch rate.
+    // The queue send rate has been left at its default of 60 seconds.
+    // We will tick only once to ensure the queue is not being sent as a result of the queue send rate.
     csp::CSPFoundation::Tick();
     ASSERT_NE(ResultFuture.wait_for(0s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
     AnalyticsSystem->FlushAnalyticsEventsQueue();
