@@ -143,6 +143,11 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
         // This is how we branch between doing deferred patch logic or just direct sets. The engine tells us if it uses a patch model or not, by
         // either returning a patcher, or not.
         StatePatcher = std::unique_ptr<SpaceEntityStatePatcher>(EntitySystem->MakeStatePatcher(*this));
+
+        if (StatePatcher)
+        {
+            RegisterReplicatedProperties();
+        }
     }
 }
 
@@ -1082,6 +1087,8 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) con
 
 void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
 
+void SpaceEntity::RegisterReplicatedProperties() { StatePatcher->RegisterProperties(CreateProperties()); }
+
 void SpaceEntity::ResolveParentChildRelationship()
 {
     // Entity has been re-parented
@@ -1254,6 +1261,55 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
     UpdateInfo.ComponentId = ComponentId;
     UpdateInfo.UpdateType = UpdateType;
     return UpdateInfo;
+}
+
+csp::common::Array<EntityProperty> SpaceEntity::CreateProperties()
+{
+    /* clang-format off */
+    return { 
+        { 
+            COMPONENT_KEY_VIEW_ENTITYNAME, UPDATE_FLAGS_NAME, 
+            [&Name = Name]() { return csp::common::ReplicatedValue { Name }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetNameDirect(Value.GetString()); } 
+        },
+        {
+            COMPONENT_KEY_VIEW_POSITION, UPDATE_FLAGS_POSITION,
+            [&Position = Transform.Position]() { return csp::common::ReplicatedValue { Position }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetPositionDirect(Value.GetVector3()); }
+        },
+        { 
+            COMPONENT_KEY_VIEW_ROTATION, UPDATE_FLAGS_ROTATION,
+            [&Rotation = Transform.Rotation]() { return csp::common::ReplicatedValue { Rotation }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetRotationDirect(Value.GetVector4()); }
+        },
+        {
+            COMPONENT_KEY_VIEW_SCALE, UPDATE_FLAGS_SCALE,
+            [&Scale = Transform.Scale]() { return csp::common::ReplicatedValue { Scale }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetScaleDirect(Value.GetVector3()); }
+        },
+        {
+            COMPONENT_KEY_VIEW_SELECTEDCLIENTID, UPDATE_FLAGS_SELECTION_ID,
+            [&SelectedId = SelectedId]() { return csp::common::ReplicatedValue { static_cast<int64_t>(SelectedId) }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetSelectedIdDirect(Value.GetInt()); }
+        },
+        {
+            COMPONENT_KEY_VIEW_THIRDPARTYREF, UPDATE_FLAGS_THIRD_PARTY_REF,
+            [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetThirdPartyRefDirect(Value.GetString()); }
+        },
+        {
+            COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, UPDATE_FLAGS_THIRD_PARTY_PLATFORM,
+            [&ThirdPartyPlatform = ThirdPartyPlatform]() { return csp::common::ReplicatedValue { static_cast<int64_t>(ThirdPartyPlatform) }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetThirdPartyPlatformDirect(static_cast<systems::EThirdPartyPlatform>(Value.GetInt())); }
+        },
+        {
+            COMPONENT_KEY_VIEW_LOCKTYPE, UPDATE_FLAGS_LOCK_TYPE,
+            [&EntityLock = EntityLock]() { return csp::common::ReplicatedValue { static_cast<int64_t>(EntityLock) }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetEntityLockDirect(static_cast<LockType>(Value.GetInt())); }
+        }
+
+    };
+    /* clang-format on */
 }
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface.get(); }

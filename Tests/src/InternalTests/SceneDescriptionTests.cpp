@@ -493,6 +493,8 @@ CSP_INTERNAL_TEST(CSPEngine, SceneDescriptionTests, SceneDescriptionDeserializeB
     // Just do a minimal check, we don't need to fully validate everything here, we're just checking the string concatanation works.
     EXPECT_EQ(SceneData.Space.Id, "68af162f015bb6793cacf4a2");
     EXPECT_EQ(SceneData.Space.Name, "checkpoint-basic");
+
+    csp::CSPFoundation::Shutdown();
 }
 
 // Tests that a material parsed from scene data is valid

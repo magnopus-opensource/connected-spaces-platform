@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/PatchTypes.h"
 #include "MCS/MCSTypes.h"
+#include "Multiplayer/MCSComponentPacker.h"
 
 #include <cstdint>
 #include <mutex>
@@ -40,6 +41,37 @@ namespace csp::multiplayer
 
 class SpaceEntity;
 class ComponentBase;
+
+/*
+    Object used to define information needed for a property to be replicated.
+    This creates a single-point property registration to remove the need to update replication logic in multiple locations.
+*/
+class EntityProperty
+{
+public:
+    EntityProperty() = default;
+
+    EntityProperty(uint16_t Key, SpaceEntityUpdateFlags UpdateFlag, std::function<csp::common::ReplicatedValue()> ToReplicatedValue,
+        std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue)
+        : Key { Key }
+        , UpdateFlag { UpdateFlag }
+        , ToReplicatedValue { ToReplicatedValue }
+        , FromReplicatedValue { FromReplicatedValue }
+    {
+    }
+
+    void Set(const csp::common::ReplicatedValue& RepValue);
+    csp::common::ReplicatedValue Get() const;
+
+    uint16_t GetKey() const { return Key; }
+    SpaceEntityUpdateFlags GetUpdateFlag() const { return UpdateFlag; }
+
+private:
+    uint16_t Key = 0;
+    SpaceEntityUpdateFlags UpdateFlag;
+    std::function<csp::common::ReplicatedValue()> ToReplicatedValue;
+    std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue;
+};
 
 /*
 Object to manage patch based dirty property state management on SpaceEntity
@@ -61,6 +93,7 @@ The way this works is,
 
 The state of the patcher is more-or-less exactly representative of a "Patch".
 */
+
 class SpaceEntityStatePatcher
 {
 public:
@@ -135,6 +168,9 @@ public:
     SpaceEntityStatePatcher::PatchSentCallback GetEntityPatchSentCallback();
     void CallEntityPatchSentCallback(bool Success);
 
+    void RegisterProperty(const EntityProperty& Property);
+    void RegisterProperties(const csp::common::Array<EntityProperty>& Properties);
+
 private:
     CSP_START_IGNORE
     mutable std::mutex DirtyPropertiesLock;
@@ -145,6 +181,8 @@ private:
     std::unordered_map<uint16_t, DirtyComponent> DirtyComponents;
     csp::common::List<uint16_t> TransientDeletionComponentIds;
     std::chrono::milliseconds TimeOfLastPatch;
+
+    std::unordered_map<uint16_t, EntityProperty> RegisteredProperties;
 
     // Weird eh?
     // The deal here is that we need to know :

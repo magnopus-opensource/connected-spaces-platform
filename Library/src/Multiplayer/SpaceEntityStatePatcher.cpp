@@ -18,7 +18,6 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/Convert.h"
-#include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 
 #include <algorithm>
@@ -82,6 +81,27 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
 
     auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
 
+    for (const auto& DirtyProperty : DirtyProperties)
+    {
+        const uint16_t PropertyKey = DirtyProperty.first;
+        auto Prop = RegisteredProperties.find(PropertyKey);
+
+        if (Prop != RegisteredProperties.end())
+        {
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Prop->second.GetUpdateFlag());
+            Prop->second.Set(DirtyProperty.second);
+        }
+        else
+        {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error, "ApplyLocalPatch: No Property with the specified key found!");
+            }
+        }
+    }
+
+    DirtyProperties.clear();
+
     // Allocate a ComponentUpdates array (to pass update info to the client), with
     // sufficient size for all dirty components and scheduled deletions.
     csp::common::Array<ComponentUpdateInfo> ComponentUpdates(DirtyComponents.size() + TransientDeletionComponentIds.Size());
@@ -143,54 +163,6 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
         }
 
         DirtyComponents.clear();
-    }
-
-    if (DirtyProperties.size() > 0)
-    {
-
-        for (const auto& DirtyProperty : DirtyProperties)
-        {
-            uint16_t PropertyKey = DirtyProperty.first;
-            switch (PropertyKey)
-            {
-            case COMPONENT_KEY_VIEW_ENTITYNAME:
-                SpaceEntity.SetNameDirect(DirtyProperties[PropertyKey].GetString());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_NAME);
-                break;
-            case COMPONENT_KEY_VIEW_POSITION:
-                SpaceEntity.SetPositionDirect(DirtyProperties[PropertyKey].GetVector3());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_POSITION);
-                break;
-            case COMPONENT_KEY_VIEW_ROTATION:
-                SpaceEntity.SetRotationDirect(DirtyProperties[PropertyKey].GetVector4());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_ROTATION);
-                break;
-            case COMPONENT_KEY_VIEW_SCALE:
-                SpaceEntity.SetScaleDirect(DirtyProperties[PropertyKey].GetVector3());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_SCALE);
-                break;
-            case COMPONENT_KEY_VIEW_SELECTEDCLIENTID:
-                SpaceEntity.SetSelectedIdDirect(DirtyProperties[PropertyKey].GetInt());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-                break;
-            case COMPONENT_KEY_VIEW_THIRDPARTYREF:
-                SpaceEntity.SetThirdPartyRefDirect(DirtyProperties[PropertyKey].GetString());
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-                break;
-            case COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM:
-                SpaceEntity.SetThirdPartyPlatformDirect(static_cast<csp::systems::EThirdPartyPlatform>(DirtyProperties[PropertyKey].GetInt()));
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-                break;
-            case COMPONENT_KEY_VIEW_LOCKTYPE:
-                SpaceEntity.SetEntityLockDirect(static_cast<LockType>(DirtyProperties[PropertyKey].GetInt()));
-                UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-                break;
-            default:
-                break;
-            }
-        }
-
-        DirtyProperties.clear();
     }
 
     // Parent ID, (this would be a dirty property as above, but the wrapper generator stops us expressing optional values. Very not nice.)
@@ -271,14 +243,11 @@ mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
     // 1. Convert all of our view components to mcs compatible types.
     MCSComponentPacker ComponentPacker;
 
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ENTITYNAME, SpaceEntity.GetName());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_POSITION, SpaceEntity.GetPosition());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_ROTATION, SpaceEntity.GetRotation());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SCALE, SpaceEntity.GetScale());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SpaceEntity.GetSelectingClientID());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, SpaceEntity.GetThirdPartyPlatformType());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, SpaceEntity.GetThirdPartyRef());
-    ComponentPacker.WriteValue(COMPONENT_KEY_VIEW_LOCKTYPE, SpaceEntity.GetLockType());
+    for (const auto& Prop : RegisteredProperties)
+    {
+        csp::common::ReplicatedValue ReplicatedValue = Prop.second.Get();
+        ComponentPacker.WriteValue(Prop.second.GetKey(), ReplicatedValue);
+    }
 
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
 
@@ -356,54 +325,47 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
     const auto OwnerId = Message.GetOwnerId();
     const auto ParentId = common::Convert(Message.GetParentId());
 
-    // This stuff read from the component unpacker.
-    // The above is first-class, mandatory data for MCS objects. All else are optional components, hence the split.
-    csp::common::String Name = "";
-    SpaceTransform Transform {};
-    uint64_t SelectedId = 0;
-    csp::systems::EThirdPartyPlatform ThirdPartyPlatform = csp::systems::EThirdPartyPlatform::NONE;
-    csp::common::String ThirdPartyRef = "";
-    LockType EntityLock = LockType::None;
-
     auto MessageComponents = Message.GetComponents();
 
     std::vector<std::pair<uint16_t, mcs::ItemComponentData>> ComponentsToAdd;
+
+    csp::multiplayer::SpaceEntity* NewEntity = new csp::multiplayer::SpaceEntity(
+        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent);
 
     if (MessageComponents.has_value())
     {
         // Get view components
         MCSComponentUnpacker ComponentUnpacker { *Message.GetComponents() };
 
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
-        ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock);
+        // It's unfortunate we have to break the usual pattern of getting the registered properties from the state patcher here,
+        // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
+        // with the SceneDescription file.
+        auto Properties = NewEntity->CreateProperties();
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {
-            if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
+            if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
-                // This is the end of our components
-                break;
+                ComponentsToAdd.push_back(ComponentDataPair);
             }
+            else
+            {
+                auto Prop = std::find_if(Properties.begin(), Properties.end(),
+                    [Key = ComponentDataPair.first](const EntityProperty& Prop) { return Prop.GetKey() == Key; });
 
-            ComponentsToAdd.push_back(ComponentDataPair);
+                if (Prop != Properties.end())
+                {
+                    csp::common::ReplicatedValue Value;
+                    ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
+                    Prop->Set(Value);
+                }
+                else
+                {
+                    LogSystem.LogMsg(csp::common::LogLevel::Error, "NewFromObjectMessage: No Property with the specified key found!");
+                }
+            }
         }
     }
-
-    csp::multiplayer::SpaceEntity* NewEntity = new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, Name, Transform, OwnerId, ParentId, IsTransferable, IsPersistent);
-
-    // We need a consistent strategy for ensuring fully constructed SpaceEntities. Either they're simple enough data objects that they can just have
-    // public data, or they have preconditions and should have guarded construction ... this mix is dangerous.
-    NewEntity->SetSelectedIdDirect(SelectedId);
-    NewEntity->SetThirdPartyPlatformDirect(ThirdPartyPlatform);
-    NewEntity->SetThirdPartyRefDirect(ThirdPartyRef);
-    NewEntity->SetEntityLockDirect(EntityLock);
 
     for (const auto& Comp : ComponentsToAdd)
     {
@@ -416,7 +378,6 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
 
 void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch)
 {
-
     SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
     csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
@@ -424,77 +385,45 @@ void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& 
 
     if (PatchComponents.has_value())
     {
-        csp::common::String Name;
-        SpaceTransform Transform;
-        uint64_t SelectedId;
-        csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
-        csp::common::String ThirdPartyRef;
-        LockType EntityLock;
-
         MCSComponentUnpacker ComponentUnpacker { *Patch.GetComponents() };
-
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ENTITYNAME, Name))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_NAME);
-            SpaceEntity.SetNameDirect(Name);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_POSITION, Transform.Position))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_POSITION);
-            SpaceEntity.SetPositionDirect(Transform.Position);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_ROTATION, Transform.Rotation))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_ROTATION);
-            SpaceEntity.SetRotationDirect(Transform.Rotation);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SCALE, Transform.Scale))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SCALE);
-            SpaceEntity.SetScaleDirect(Transform.Scale);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_SELECTION_ID);
-            SpaceEntity.SetSelectedIdDirect(SelectedId);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, ThirdPartyPlatform))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_PLATFORM);
-            SpaceEntity.SetThirdPartyPlatformDirect(ThirdPartyPlatform);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_THIRD_PARTY_REF);
-            SpaceEntity.SetThirdPartyRefDirect(ThirdPartyRef);
-        }
-        if (ComponentUnpacker.TryReadValue(COMPONENT_KEY_VIEW_LOCKTYPE, EntityLock))
-        {
-            UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_LOCK_TYPE);
-            SpaceEntity.SetEntityLockDirect(EntityLock);
-        }
-
         uint64_t ComponentCount = ComponentUnpacker.GetRuntimeComponentsCount();
 
         if (ComponentCount > 0)
         {
             UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_COMPONENTS);
+        }
 
-            ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
-            size_t ComponentIndex = 0;
+        ComponentUpdates = csp::common::Array<ComponentUpdateInfo>(ComponentCount);
+        size_t ComponentIndex = 0;
 
-            for (const auto& ComponentDataPair : *PatchComponents)
+        for (const auto& ComponentDataPair : *PatchComponents)
+        {
+            if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
-                if (ComponentDataPair.first >= COMPONENT_KEY_END_COMPONENTS)
-                {
-                    // This is the end of our components
-                    break;
-                }
-
                 ComponentUpdateInfo UpdateInfo
                     = SpaceEntity.AddComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
                 ComponentUpdates[ComponentIndex] = UpdateInfo;
                 ComponentIndex++;
+            }
+            else
+            {
+                auto Prop = RegisteredProperties.find(ComponentDataPair.first);
+
+                if (Prop != RegisteredProperties.end())
+                {
+                    UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | Prop->second.GetUpdateFlag());
+
+                    csp::common::ReplicatedValue Value;
+                    ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
+                    Prop->second.Set(Value);
+                }
+                else
+                {
+                    if (LogSystem)
+                    {
+                        LogSystem->LogMsg(csp::common::LogLevel::Error, "ApplyPatchFromObjectPatch: No Property with the specified key found!");
+                    }
+                }
             }
         }
     }
@@ -519,5 +448,19 @@ void SpaceEntityStatePatcher::SetPatchSentCallback(PatchSentCallback Callback) {
 SpaceEntityStatePatcher::PatchSentCallback SpaceEntityStatePatcher::GetEntityPatchSentCallback() { return EntityPatchSentCallback; }
 
 void SpaceEntityStatePatcher::CallEntityPatchSentCallback(bool Success) { EntityPatchSentCallback(Success); }
+
+void SpaceEntityStatePatcher::RegisterProperty(const EntityProperty& Property) { RegisteredProperties[Property.GetKey()] = Property; }
+
+void SpaceEntityStatePatcher::RegisterProperties(const csp::common::Array<EntityProperty>& Properties)
+{
+    for (const auto& Prop : Properties)
+    {
+        RegisterProperty(Prop);
+    }
+}
+
+void EntityProperty::Set(const csp::common::ReplicatedValue& RepValue) { FromReplicatedValue(RepValue); }
+
+csp::common::ReplicatedValue EntityProperty::Get() const { return ToReplicatedValue(); }
 
 } // namespace csp::multiplayer

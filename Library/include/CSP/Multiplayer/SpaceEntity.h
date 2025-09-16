@@ -50,6 +50,7 @@ namespace csp::multiplayer
 {
 class EntityScriptInterface;
 class SpaceEntityStatePatcher;
+class EntityProperty;
 
 CSP_START_IGNORE
 namespace mcs
@@ -450,11 +451,16 @@ public:
     CSP_NO_EXPORT ComponentUpdateInfo AddComponentFromItemComponentDataPatch(
         uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
 
+    // Creates an array of entity properties which should be replicated
+    CSP_NO_EXPORT csp::common::Array<EntityProperty> CreateProperties();
+
 private:
     uint16_t GenerateComponentId();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
 
     void AddChildEntity(SpaceEntity* ChildEntity);
+
+    void RegisterReplicatedProperties();
 
     csp::common::IRealtimeEngine* EntitySystem;
 
