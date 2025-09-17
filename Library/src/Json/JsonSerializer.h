@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
@@ -103,6 +104,7 @@ private:
 
     template <typename T> void SerializeValue(const csp::common::Array<T>& Value);
     template <typename T> void SerializeValue(const csp::common::List<T>& Value);
+    template <typename T> void SerializeValue(const csp::common::Map<csp::common::String, T>& Value);
 
     template <typename T> void SerializeValue(const std::vector<T>& Value);
     template <typename T> void SerializeValue(const std::map<std::string, T>& Value);
@@ -229,6 +231,21 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
     }
 
     Writer.EndArray();
+}
+
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Map<csp::common::String, T>& Value)
+{
+    Writer.StartObject();
+
+    std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(Value.Keys()));
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        const auto& CurrentKey = (*Keys)[i];
+        SerializeMember(CurrentKey.c_str(), Value[CurrentKey]);
+    }
+
+    Writer.EndObject();
 }
 
 template <typename T> inline void JsonSerializer::SerializeValue(const std::vector<T>& Value)
