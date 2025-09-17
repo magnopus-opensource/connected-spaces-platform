@@ -24,7 +24,7 @@ using namespace csp::multiplayer;
 // Ensures constructor arguments are set correctly.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyConstructorTest)
 {
-    uint16_t TestKey = 10;
+    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
     SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
     std::function<csp::common::ReplicatedValue()> TestToReplicatedValue;
     std::function<void(const csp::common::ReplicatedValue&)> TestFromReplicatedValue;
@@ -38,7 +38,7 @@ CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyConstructorTest)
 // Ensures callbacks are called from Get/Set functions.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyCallbackTest)
 {
-    uint16_t TestKey = 10;
+    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
     SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
 
     ::testing::MockFunction<csp::common::ReplicatedValue()> MockToReplicatedValue;
@@ -59,7 +59,7 @@ CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertyCallbackTest)
 // Ensures the Set function correctly sets the value via the callback and Get returns the updated value.
 CSP_INTERNAL_TEST(CSPEngine, EntityPropertyTests, PropertySetGetTest)
 {
-    uint16_t TestKey = 10;
+    SpaceEntityComponentKey TestKey = SpaceEntityComponentKey::Name;
     SpaceEntityUpdateFlags TestUpdateFlag = SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS;
 
     int64_t TestValue = 0;

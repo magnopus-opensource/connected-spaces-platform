@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/PatchTypes.h"
 #include "MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
+#include "Multiplayer/SpaceEntityKeys.h"
 
 #include <cstdint>
 #include <mutex>
@@ -56,7 +57,7 @@ class EntityProperty
 public:
     EntityProperty() = default;
 
-    EntityProperty(uint16_t Key, SpaceEntityUpdateFlags UpdateFlag, std::function<csp::common::ReplicatedValue()> ToReplicatedValue,
+    EntityProperty(SpaceEntityComponentKey Key, SpaceEntityUpdateFlags UpdateFlag, std::function<csp::common::ReplicatedValue()> ToReplicatedValue,
         std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue)
         : Key { Key }
         , UpdateFlag { UpdateFlag }
@@ -76,14 +77,14 @@ public:
     // Returns the unique identifier defined for this property.
     // This allows us to keep track of the property when it is replicated.
     // These keys are currently defined in SpaceEntityKeys.h
-    uint16_t GetKey() const { return Key; }
+    SpaceEntityComponentKey GetKey() const { return Key; }
 
     // Returns the enum used for specifying which entity property has been updated to callers.
     // These are passed to callers through the SpaceEntity::UpdateCallbacks.
     SpaceEntityUpdateFlags GetUpdateFlag() const { return UpdateFlag; }
 
 private:
-    uint16_t Key = 0;
+    SpaceEntityComponentKey Key;
     SpaceEntityUpdateFlags UpdateFlag;
     std::function<csp::common::ReplicatedValue()> ToReplicatedValue;
     std::function<void(const csp::common::ReplicatedValue&)> FromReplicatedValue;
@@ -130,7 +131,7 @@ public:
 
     // Sometimes, we need to use different types than internal storage ... non-ideal. (Motivating example was selection id's needing to be int64's in
     // patches but are stored as uint64s)
-    template <typename T, typename U> bool SetDirtyProperty(uint16_t PropertyKey, const T& PriorValue, const U& NewValue)
+    template <typename T, typename U> bool SetDirtyProperty(SpaceEntityComponentKey PropertyKey, const T& PriorValue, const U& NewValue)
     {
         std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
 
@@ -155,7 +156,7 @@ public:
     //        Second: Record of all component updates made in the patch application
     [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPatch();
 
-    std::unordered_map<uint16_t, csp::common::ReplicatedValue> GetDirtyProperties() const;
+    std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> GetDirtyProperties() const;
     std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
 
     std::chrono::milliseconds GetTimeOfLastPatch() const;
@@ -195,12 +196,12 @@ private:
     mutable std::mutex DirtyComponentsLock;
     CSP_END_IGNORE
 
-    std::unordered_map<uint16_t, csp::common::ReplicatedValue> DirtyProperties;
+    std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> DirtyProperties;
     std::unordered_map<uint16_t, DirtyComponent> DirtyComponents;
     csp::common::List<uint16_t> TransientDeletionComponentIds;
     std::chrono::milliseconds TimeOfLastPatch;
 
-    std::unordered_map<uint16_t, EntityProperty> RegisteredProperties;
+    std::unordered_map<SpaceEntityComponentKey, EntityProperty> RegisteredProperties;
 
     // Weird eh?
     // The deal here is that we need to know :

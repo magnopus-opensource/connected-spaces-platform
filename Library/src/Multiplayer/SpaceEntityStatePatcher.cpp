@@ -18,7 +18,6 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Common/Convert.h"
-#include "Multiplayer/SpaceEntityKeys.h"
 
 #include <algorithm>
 #include <fmt/format.h>
@@ -84,7 +83,7 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
     for (const auto& DirtyProperty : DirtyProperties)
     {
         // Find our entity property using the dirty property id.
-        const uint16_t PropertyKey = DirtyProperty.first;
+        const SpaceEntityComponentKey PropertyKey = DirtyProperty.first;
         auto PropertyIt = RegisteredProperties.find(PropertyKey);
 
         if (PropertyIt != RegisteredProperties.end())
@@ -204,7 +203,10 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
     return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(UpdateFlags, ComponentUpdates);
 }
 
-std::unordered_map<uint16_t, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const { return DirtyProperties; }
+std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const
+{
+    return DirtyProperties;
+}
 
 std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return DirtyComponents; }
 
@@ -277,7 +279,7 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
     // 1. Convert our modified view components to mcs compatible types.
     {
         // Loop through modfied view components and convert to ItemComponentData.
-        for (const std::pair<const uint16_t, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
+        for (const std::pair<const SpaceEntityComponentKey, csp::common::ReplicatedValue>& DirtyProp : DirtyProperties)
         {
             ComponentPacker.WriteValue(DirtyProp.first, DirtyProp.second);
         }
@@ -357,7 +359,7 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
 
                 // Find the property using our property key.
                 EntityProperty* Property = std::find_if(Properties.begin(), Properties.end(),
-                    [Key = ComponentDataPair.first](const EntityProperty& Prop) { return Prop.GetKey() == Key; });
+                    [Key = ComponentDataPair.first](const EntityProperty& Prop) { return static_cast<uint16_t>(Prop.GetKey()) == Key; });
 
                 if (Property != Properties.end())
                 {
@@ -414,7 +416,7 @@ void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& 
                 // Anything after COMPONENT_KEY_END_COMPONENTS are our CSP entity properties
 
                 // Find the property using our property key.
-                auto PropertyIt = RegisteredProperties.find(ComponentDataPair.first);
+                auto PropertyIt = RegisteredProperties.find(static_cast<SpaceEntityComponentKey>(ComponentDataPair.first));
 
                 if (PropertyIt != RegisteredProperties.end())
                 {

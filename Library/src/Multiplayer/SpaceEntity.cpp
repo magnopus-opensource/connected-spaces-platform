@@ -189,7 +189,7 @@ bool SpaceEntity::SetName(const csp::common::String& Value)
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_ENTITYNAME, GetName(), Value)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::Name, GetName(), Value)
                                    : [this, &Value]()
     {
         SetNameDirect(Value, true);
@@ -243,7 +243,7 @@ bool SpaceEntity::SetPosition(const csp::common::Vector3& Value)
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_POSITION, GetPosition(), Value)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::Position, GetPosition(), Value)
                                    : [this, &Value]()
     {
         SetPositionDirect(Value, true);
@@ -283,7 +283,7 @@ bool SpaceEntity::SetRotation(const csp::common::Vector4& Value)
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_ROTATION, GetRotation(), Value)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::Rotation, GetRotation(), Value)
                                    : [this, &Value]()
     {
         SetRotationDirect(Value, true);
@@ -315,7 +315,7 @@ bool SpaceEntity::SetScale(const csp::common::Vector3& Value)
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SCALE, GetScale(), Value)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::Scale, GetScale(), Value)
                                    : [this, &Value]()
     {
         SetScaleDirect(Value, true);
@@ -342,7 +342,7 @@ bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
         return false;
     }
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_THIRDPARTYREF, GetThirdPartyRef(), InThirdPartyRef)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::ThirdPartyRef, GetThirdPartyRef(), InThirdPartyRef)
                                    : [this, &InThirdPartyRef]()
     {
         SetThirdPartyRefDirect(InThirdPartyRef, true);
@@ -366,7 +366,7 @@ bool SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
     }
 
     return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(
-               COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, GetThirdPartyPlatformType(), static_cast<int64_t>(InThirdPartyPlatformType))
+               SpaceEntityComponentKey::ThirdPartyPlatform, GetThirdPartyPlatformType(), static_cast<int64_t>(InThirdPartyPlatformType))
                                    : [this, &InThirdPartyPlatformType]()
     {
         SetThirdPartyPlatformDirect(InThirdPartyPlatformType, true);
@@ -754,7 +754,7 @@ bool SpaceEntity::IsModifiable() const
     // so we skip the lock check they are about to unlock.
     // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
     // Note : This will stop working if we ever add another lock type
-    const bool AboutToUnlock = StatePatcher->GetDirtyProperties().count(COMPONENT_KEY_VIEW_LOCKTYPE) > 0;
+    const bool AboutToUnlock = StatePatcher->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
     if (EntityLock == LockType::UserAgnostic && !AboutToUnlock)
     {
         return false;
@@ -792,7 +792,7 @@ bool SpaceEntity::Lock()
     const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
     const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, OldLockReplicatedVal, NewLockReplicatedVal)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::LockType, OldLockReplicatedVal, NewLockReplicatedVal)
                                    : [this]()
     {
         SetEntityLockDirect(LockType::UserAgnostic, true);
@@ -816,7 +816,7 @@ bool SpaceEntity::Unlock()
     const auto OldLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::UserAgnostic));
     const auto NewLockReplicatedVal = csp::common::ReplicatedValue(static_cast<int64_t>(LockType::None));
 
-    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_LOCKTYPE, OldLockReplicatedVal, NewLockReplicatedVal)
+    return StatePatcher != nullptr ? StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::LockType, OldLockReplicatedVal, NewLockReplicatedVal)
                                    : [this]()
     {
         SetEntityLockDirect(LockType::None, true);
@@ -853,7 +853,7 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
             if (StatePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId, static_cast<int64_t>(LocalClientId));
+                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(LocalClientId));
             }
 
             bool Added = EntitySystem->AddEntityToSelectedEntities(this);
@@ -874,7 +874,7 @@ bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState)
             if (StatePatcher != nullptr)
             {
                 // Weird! Needs to be an int rather than a uint.
-                StatePatcher->SetDirtyProperty(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, SelectedId, static_cast<int64_t>(0));
+                StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::SelectedClientId, SelectedId, static_cast<int64_t>(0));
             }
 
             bool Removed = EntitySystem->RemoveEntityFromSelectedEntities(this);
@@ -1266,42 +1266,42 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
     /* clang-format off */
     return { 
         { 
-            COMPONENT_KEY_VIEW_ENTITYNAME, UPDATE_FLAGS_NAME, 
+            SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, 
             [&Name = Name]() { return csp::common::ReplicatedValue { Name }; },
             [this](const csp::common::ReplicatedValue& Value) { SetNameDirect(Value.GetString()); } 
         },
         {
-            COMPONENT_KEY_VIEW_POSITION, UPDATE_FLAGS_POSITION,
+            SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION,
             [&Position = Transform.Position]() { return csp::common::ReplicatedValue { Position }; },
             [this](const csp::common::ReplicatedValue& Value) { SetPositionDirect(Value.GetVector3()); }
         },
         { 
-            COMPONENT_KEY_VIEW_ROTATION, UPDATE_FLAGS_ROTATION,
+            SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION,
             [&Rotation = Transform.Rotation]() { return csp::common::ReplicatedValue { Rotation }; },
             [this](const csp::common::ReplicatedValue& Value) { SetRotationDirect(Value.GetVector4()); }
         },
         {
-            COMPONENT_KEY_VIEW_SCALE, UPDATE_FLAGS_SCALE,
+            SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE,
             [&Scale = Transform.Scale]() { return csp::common::ReplicatedValue { Scale }; },
             [this](const csp::common::ReplicatedValue& Value) { SetScaleDirect(Value.GetVector3()); }
         },
         {
-            COMPONENT_KEY_VIEW_SELECTEDCLIENTID, UPDATE_FLAGS_SELECTION_ID,
+            SpaceEntityComponentKey::SelectedClientId, UPDATE_FLAGS_SELECTION_ID,
             [&SelectedId = SelectedId]() { return csp::common::ReplicatedValue { static_cast<int64_t>(SelectedId) }; },
             [this](const csp::common::ReplicatedValue& Value) { SetSelectedIdDirect(Value.GetInt()); }
         },
         {
-            COMPONENT_KEY_VIEW_THIRDPARTYREF, UPDATE_FLAGS_THIRD_PARTY_REF,
+            SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF,
             [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },
             [this](const csp::common::ReplicatedValue& Value) { SetThirdPartyRefDirect(Value.GetString()); }
         },
         {
-            COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, UPDATE_FLAGS_THIRD_PARTY_PLATFORM,
+            SpaceEntityComponentKey::ThirdPartyPlatform, UPDATE_FLAGS_THIRD_PARTY_PLATFORM,
             [&ThirdPartyPlatform = ThirdPartyPlatform]() { return csp::common::ReplicatedValue { static_cast<int64_t>(ThirdPartyPlatform) }; },
             [this](const csp::common::ReplicatedValue& Value) { SetThirdPartyPlatformDirect(static_cast<systems::EThirdPartyPlatform>(Value.GetInt())); }
         },
         {
-            COMPONENT_KEY_VIEW_LOCKTYPE, UPDATE_FLAGS_LOCK_TYPE,
+            SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE,
             [&EntityLock = EntityLock]() { return csp::common::ReplicatedValue { static_cast<int64_t>(EntityLock) }; },
             [this](const csp::common::ReplicatedValue& Value) { SetEntityLockDirect(static_cast<LockType>(Value.GetInt())); }
         }
