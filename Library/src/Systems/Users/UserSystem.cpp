@@ -198,8 +198,6 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Netwo
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState }
 {
-
-    RegisterSystemCallback();
 }
 
 UserSystem::~UserSystem()
@@ -211,6 +209,13 @@ UserSystem::~UserSystem()
     delete (StripeAPI);
 
     DeregisterSystemCallback();
+}
+
+void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus)
+{
+    EventBusPtr = EventBus;
+
+    RegisterSystemCallback();
 }
 
 const csp::common::LoginState& UserSystem::GetLoginState() const { return CurrentLoginState; }

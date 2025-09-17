@@ -33,7 +33,6 @@ SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::Netwo
     , EventBusPtr(InEventBus)
     , LogSystem(LogSystem)
 {
-    RegisterSystemCallback();
 }
 
 SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem)
@@ -41,7 +40,6 @@ SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::commo
     , EventBusPtr(InEventBus)
     , LogSystem(LogSystem)
 {
-    RegisterSystemCallback();
 }
 
 SystemBase::~SystemBase()
