@@ -159,6 +159,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
     csp::CSPFoundation::Tick();
+    // It will not process the queue until at least 3 seconds has elapsed since the last send time
+    ASSERT_NE(ResultFuture.wait_for(4s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+    // Calling tick will check if the queue send rate time has elapsed and send the queued events if it has
+    csp::CSPFoundation::Tick();
 
     // Wait for the callback to be received
     ResultFuture.wait();
