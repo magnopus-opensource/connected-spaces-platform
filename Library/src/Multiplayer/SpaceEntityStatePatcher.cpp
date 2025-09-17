@@ -83,13 +83,16 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
 
     for (const auto& DirtyProperty : DirtyProperties)
     {
+        // Find our entity property using the dirty property id.
         const uint16_t PropertyKey = DirtyProperty.first;
-        auto Prop = RegisteredProperties.find(PropertyKey);
+        auto PropertyIt = RegisteredProperties.find(PropertyKey);
 
-        if (Prop != RegisteredProperties.end())
+        if (PropertyIt != RegisteredProperties.end())
         {
-            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Prop->second.GetUpdateFlag());
-            Prop->second.Set(DirtyProperty.second);
+            // Set our entity property using the dirty property value.
+            EntityProperty& Property = PropertyIt->second;
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Property.GetUpdateFlag());
+            Property.Set(DirtyProperty.second);
         }
         else
         {
@@ -350,14 +353,14 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
             }
             else
             {
-                auto Prop = std::find_if(Properties.begin(), Properties.end(),
+                EntityProperty* Property = std::find_if(Properties.begin(), Properties.end(),
                     [Key = ComponentDataPair.first](const EntityProperty& Prop) { return Prop.GetKey() == Key; });
 
-                if (Prop != Properties.end())
+                if (Property != Properties.end())
                 {
                     csp::common::ReplicatedValue Value;
                     ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
-                    Prop->Set(Value);
+                    Property->Set(Value);
                 }
                 else
                 {
@@ -407,15 +410,16 @@ void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& 
             }
             else
             {
-                auto Prop = RegisteredProperties.find(ComponentDataPair.first);
+                auto PropertyIt = RegisteredProperties.find(ComponentDataPair.first);
 
-                if (Prop != RegisteredProperties.end())
+                if (PropertyIt != RegisteredProperties.end())
                 {
-                    UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | Prop->second.GetUpdateFlag());
+                    EntityProperty& Property = PropertyIt->second;
+                    UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | Property.GetUpdateFlag());
 
                     csp::common::ReplicatedValue Value;
                     ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
-                    Prop->second.Set(Value);
+                    Property.Set(Value);
                 }
                 else
                 {
