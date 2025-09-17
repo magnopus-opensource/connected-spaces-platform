@@ -103,7 +103,7 @@ void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, cons
         = ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet({ SpaceId, CartId }, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->spacesSpaceIdVendorsShopifyCartsCartIdCheckout_infoGet({ SpaceId, CartId }, ResponseHandler);
 }
 
 void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback)

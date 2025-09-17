@@ -861,7 +861,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId, const String
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmailInvitesPost(
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInviteInfo }, ResponseHandler);
 }
 
@@ -876,7 +876,7 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const InviteUserRoleI
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmailInvitesBulkPost(
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesBulkPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites }, ResponseHandler);
 }
 
@@ -894,7 +894,7 @@ async::task<NullResult> SpaceSystem::BulkInviteToSpace(const csp::common::String
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         [](const NullResult&) {}, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmailInvitesBulkPost(
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesBulkPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites }, ResponseHandler);
 
     return OnCompleteTask;
@@ -906,7 +906,7 @@ void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesRes
         = GroupAPI->CreateHandler<PendingInvitesResultCallback, PendingInvitesResult, void, csp::services::DtoArray<chs::GroupInviteDto>>(
             Callback, nullptr);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmailInvitesGet({ SpaceId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesGet({ SpaceId }, ResponseHandler);
 }
 
 void SpaceSystem::GetAcceptedUserInvites(const String& SpaceId, AcceptedInvitesResultCallback Callback)
@@ -915,7 +915,7 @@ void SpaceSystem::GetAcceptedUserInvites(const String& SpaceId, AcceptedInvitesR
         = GroupAPI->CreateHandler<AcceptedInvitesResultCallback, AcceptedInvitesResult, void, csp::services::DtoArray<chs::GroupInviteDto>>(
             Callback, nullptr);
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmailInvitesAcceptedGet({ SpaceId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesAcceptedGet({ SpaceId }, ResponseHandler);
 }
 
 void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId, SpaceResultCallback Callback)
@@ -945,7 +945,7 @@ void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const Strin
             csp::services::ResponseHandlerPtr ResponseHandler
                 = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(Callback, nullptr);
 
-            static_cast<chs::GroupApi*>(GroupAPI)->groupCodesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
+            static_cast<chs::GroupApi*>(GroupAPI)->group_codesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
         });
 }
 
@@ -960,7 +960,7 @@ async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
         [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
-    static_cast<chs::GroupApi*>(GroupAPI)->groupCodesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->group_codesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
 
     return OnCompleteTask;
 }
@@ -1362,14 +1362,14 @@ void SpaceSystem::AddUserToSpaceBanList(const String& SpaceId, const String& Req
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdBannedUsersUserIdPut({ SpaceId, RequestedUserId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdBanned_usersUserIdPut({ SpaceId, RequestedUserId }, ResponseHandler);
 }
 
 void SpaceSystem::DeleteUserFromSpaceBanList(const String& SpaceId, const String& RequestedUserId, NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler
         = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdBannedUsersUserIdDelete({ SpaceId, RequestedUserId }, ResponseHandler);
+    static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdBanned_usersUserIdDelete({ SpaceId, RequestedUserId }, ResponseHandler);
 }
 
 void SpaceSystem::GetMetadataAssetCollection(const String& SpaceId, AssetCollectionResultCallback Callback)

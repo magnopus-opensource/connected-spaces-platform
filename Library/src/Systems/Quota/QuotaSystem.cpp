@@ -54,7 +54,7 @@ void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
     static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuotaProgressGet(
+        ->usersUserIdQuota_progressGet(
             { csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
 }
 
@@ -65,7 +65,7 @@ void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, 
     csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuotaProgressGet({ SpaceId.c_str(), FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId.c_str(), FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
@@ -75,7 +75,7 @@ void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceI
     csp::services::ResponseHandlerPtr ResponseHandler = QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void,
         csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback, nullptr);
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuotaProgressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
@@ -92,7 +92,7 @@ void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFea
     }
 
     static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-        ->usersUserIdQuotaProgressGet(
+        ->usersUserIdQuota_progressGet(
             { csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, FeatureNamesList }, ResponseHandler);
 }
 
@@ -110,7 +110,7 @@ void QuotaSystem::GetTierFeatureProgressForSpace(
         FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
     }
 
-    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuotaProgressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
+    static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->groupsGroupIdQuota_progressGet({ SpaceId, FeatureNamesList }, ResponseHandler);
 }
 
 void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
@@ -119,7 +119,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
         = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
 
     static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)
-        ->usersUserIdTierAssignmentGet({ csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId }, ResponseHandler);
+        ->usersUserIdTier_assignmentGet({ csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId }, ResponseHandler);
 }
 
 void QuotaSystem::GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback)

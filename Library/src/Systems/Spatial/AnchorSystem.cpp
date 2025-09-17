@@ -332,7 +332,7 @@ void AnchorSystem::CreateAnchorResolution(const csp::common::String& AnchorId, b
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<csp::systems::AnchorResolutionResultCallback,
         csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(Callback, nullptr);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorResolutionsPost({ AnchorResolutionInfo }, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchor_resolutionsPost({ AnchorResolutionInfo }, ResponseHandler);
 }
 
 } // namespace csp::systems
