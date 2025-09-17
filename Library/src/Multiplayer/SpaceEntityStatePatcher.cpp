@@ -340,7 +340,7 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
         // It's unfortunate we have to break the usual pattern of getting the registered properties from the state patcher here,
         // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
         // with the SceneDescription file.
-        auto Properties = NewEntity->CreateProperties();
+        auto Properties = NewEntity->CreateReplicatedProperties();
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {

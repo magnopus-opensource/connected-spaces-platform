@@ -451,8 +451,8 @@ public:
     CSP_NO_EXPORT ComponentUpdateInfo AddComponentFromItemComponentDataPatch(
         uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
 
-    // Creates an array of entity properties which should be replicated
-    CSP_NO_EXPORT csp::common::Array<EntityProperty> CreateProperties();
+    // Creates the array of entity properties which should be replicated.
+    CSP_NO_EXPORT csp::common::Array<EntityProperty> CreateReplicatedProperties();
 
 private:
     uint16_t GenerateComponentId();

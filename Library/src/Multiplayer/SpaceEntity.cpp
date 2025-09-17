@@ -1087,7 +1087,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) con
 
 void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
 
-void SpaceEntity::RegisterReplicatedProperties() { StatePatcher->RegisterProperties(CreateProperties()); }
+void SpaceEntity::RegisterReplicatedProperties() { StatePatcher->RegisterProperties(CreateReplicatedProperties()); }
 
 void SpaceEntity::ResolveParentChildRelationship()
 {
@@ -1263,7 +1263,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
     return UpdateInfo;
 }
 
-csp::common::Array<EntityProperty> SpaceEntity::CreateProperties()
+csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
 {
     /* clang-format off */
     return { 
