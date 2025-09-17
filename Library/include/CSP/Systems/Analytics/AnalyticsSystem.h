@@ -188,7 +188,7 @@ private:
     std::unique_ptr<csp::services::ApiBase> AnalyticsApi;
 
     std::unique_ptr<class AnalyticsQueueEventHandler> EventHandler;
-    std::recursive_mutex AnalyticsQueueLock;
+    std::mutex AnalyticsQueueLock;
     std::vector<std::shared_ptr<csp::services::generated::userservice::AnalyticsRecord>> AnalyticsRecordQueue;
 
     NullResultCallback SendAnalyticsEventQueueCallback;
