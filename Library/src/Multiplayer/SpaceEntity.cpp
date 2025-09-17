@@ -146,7 +146,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
 
         if (StatePatcher)
         {
-            RegisterReplicatedProperties();
+            StatePatcher->RegisterProperties(CreateReplicatedProperties());
         }
     }
 }
@@ -1086,8 +1086,6 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType FindType) con
 }
 
 void SpaceEntity::AddChildEntity(SpaceEntity* ChildEntity) { ChildEntities.Append(ChildEntity); }
-
-void SpaceEntity::RegisterReplicatedProperties() { StatePatcher->RegisterProperties(CreateReplicatedProperties()); }
 
 void SpaceEntity::ResolveParentChildRelationship()
 {

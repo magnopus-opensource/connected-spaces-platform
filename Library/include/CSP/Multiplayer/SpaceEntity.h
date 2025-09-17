@@ -460,8 +460,6 @@ private:
 
     void AddChildEntity(SpaceEntity* ChildEntity);
 
-    void RegisterReplicatedProperties();
-
     csp::common::IRealtimeEngine* EntitySystem;
 
     SpaceEntityType Type;
