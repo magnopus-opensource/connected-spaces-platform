@@ -60,10 +60,21 @@ public:
     {
     }
 
+    // Sets this entity property to the given value.
+    // This internally calls the specified FromReplicatedValue function.
     void Set(const csp::common::ReplicatedValue& RepValue);
+
+    // Gets this entity property as a ReplicatedValue.
+    // This internally calls the specified ToReplicatedValue.
     csp::common::ReplicatedValue Get() const;
 
+    // Returns the unique identifier defined for this property.
+    // This allows us to keep track of the property when it is replicated.
+    // These keys are currently defined in SpaceEntityKeys.h
     uint16_t GetKey() const { return Key; }
+
+    // Returns the enum used for specifying which entity property has been updated to callers.
+    // These are passed to callers through the SpaceEntity::UpdateCallbacks.
     SpaceEntityUpdateFlags GetUpdateFlag() const { return UpdateFlag; }
 
 private:
