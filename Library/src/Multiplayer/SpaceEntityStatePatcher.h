@@ -45,6 +45,11 @@ class ComponentBase;
 /*
     Object used to define information needed for a property to be replicated.
     This creates a single-point property registration to remove the need to update replication logic in multiple locations.
+    When creating a new entity variable that should be replicated:
+        - The ToReplicatedValue function should constuct the given ReplicatedValue using the variable.
+        - The FromReplicatedValue function should set the variable using the ReplicatedValue.
+    This allows external code to agnostically set and get these variables through ReplicatedValues.
+    *** Note *** Ensure FromReplicatedValue is thread-safe, as this may be called on a different thread.
 */
 class EntityProperty
 {
