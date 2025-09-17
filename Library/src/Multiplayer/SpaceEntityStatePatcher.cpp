@@ -318,8 +318,8 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
         HasBeenParentUpdate ? Convert(*NewParentId) : Convert(SpaceEntity.GetParentId()), ComponentPacker.GetComponents() };
 }
 
-SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message, csp::common::IRealtimeEngine& RealtimeEngine,
-    csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem)
+std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMessage& Message,
+    csp::common::IRealtimeEngine& RealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem)
 {
     const auto Id = Message.GetId();
     const auto Type = static_cast<SpaceEntityType>(Message.GetType());
@@ -332,8 +332,8 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
 
     std::vector<std::pair<uint16_t, mcs::ItemComponentData>> ComponentsToAdd;
 
-    csp::multiplayer::SpaceEntity* NewEntity = new csp::multiplayer::SpaceEntity(
-        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent);
+    std::unique_ptr<csp::multiplayer::SpaceEntity> Entity(new csp::multiplayer::SpaceEntity(
+        &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
 
     if (MessageComponents.has_value())
     {
@@ -343,7 +343,7 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
         // It's unfortunate we have to break the usual pattern of getting the registered properties from the state patcher here,
         // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
         // with the SceneDescription file.
-        auto Properties = NewEntity->CreateReplicatedProperties();
+        auto Properties = Entity->CreateReplicatedProperties();
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {
@@ -372,11 +372,11 @@ SpaceEntity* SpaceEntityStatePatcher::NewFromObjectMessage(const mcs::ObjectMess
 
     for (const auto& Comp : ComponentsToAdd)
     {
-        NewEntity->AddComponentFromItemComponentData(Comp.first, Comp.second);
+        Entity->AddComponentFromItemComponentData(Comp.first, Comp.second);
     }
 
     // Would much rather return this as a value, requires simplifying SpaceEntity such that it can have copy/move operators.
-    return NewEntity;
+    return Entity;
 }
 
 void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch)

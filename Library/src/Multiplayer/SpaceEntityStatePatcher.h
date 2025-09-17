@@ -173,8 +173,8 @@ public:
     [[nodiscard]] mcs::ObjectMessage CreateObjectMessage() const;
     [[nodiscard]] mcs::ObjectPatch CreateObjectPatch() const;
 
-    [[nodiscard]] static SpaceEntity* NewFromObjectMessage(const mcs::ObjectMessage& Message, csp::common::IRealtimeEngine& RealtimeEngine,
-        csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem);
+    [[nodiscard]] static std::unique_ptr<csp::multiplayer::SpaceEntity> NewFromObjectMessage(const mcs::ObjectMessage& Message,
+        csp::common::IRealtimeEngine& RealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem);
 
     // Apply the data inside the object patch to the space entity this patcher relates to.
     void ApplyPatchFromObjectPatch(const mcs::ObjectPatch& Patch);
