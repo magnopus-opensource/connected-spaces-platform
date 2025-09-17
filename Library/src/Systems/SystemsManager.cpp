@@ -165,7 +165,9 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
 
-    UserSystem = new csp::systems::UserSystem(WebClient, NetworkEventBus, *LogSystem);
+    // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
+    // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
+    UserSystem = new csp::systems::UserSystem(WebClient, nullptr, *LogSystem);
 
     WebClient->SetAuthContext(UserSystem->GetAuthContext());
 
@@ -179,6 +181,10 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 
     NetworkEventBus = MultiplayerConnection->GetEventBusPtr();
+
+    // Set the NetworkEventBus now that it has been initialized.
+    UserSystem->SetNetworkEventBus(NetworkEventBus);
+
     VoipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors

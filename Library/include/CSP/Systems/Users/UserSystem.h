@@ -315,6 +315,11 @@ private:
     UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
     ~UserSystem();
 
+    // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
+    // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call this method to set it after the NetworkEventBus has been
+    // constructed.
+    void SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus);
+
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
