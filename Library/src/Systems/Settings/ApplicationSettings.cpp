@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Systems/Settings/ApplicationSettings.h"
+#include "CSP/Common/fmt_Formatters.h"
 #include "Common/Convert.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -68,3 +69,11 @@ void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase*
 }
 
 } // namespace csp::systems
+
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::ApplicationSettings& Obj)
+{
+    Serializer.SerializeMember("applicationName", Obj.ApplicationName);
+    Serializer.SerializeMember("context", Obj.Context);
+    Serializer.SerializeMember("allowAnonymous", Obj.AllowAnonymous);
+    Serializer.SerializeMember("settings", Obj.Settings);
+}
