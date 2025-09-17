@@ -184,6 +184,8 @@ public:
     SpaceEntityStatePatcher::PatchSentCallback GetEntityPatchSentCallback();
     void CallEntityPatchSentCallback(bool Success);
 
+    // These add entity properties to the patchers map to be able to set and get replicated entity variables for patches,
+    // without having to know about individual entity variables.
     void RegisterProperty(const EntityProperty& Property);
     void RegisterProperties(const csp::common::Array<EntityProperty>& Properties);
 
