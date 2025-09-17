@@ -330,8 +330,6 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
 
     auto MessageComponents = Message.GetComponents();
 
-    std::vector<std::pair<uint16_t, mcs::ItemComponentData>> ComponentsToAdd;
-
     std::unique_ptr<csp::multiplayer::SpaceEntity> Entity(new csp::multiplayer::SpaceEntity(
         &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
 
@@ -347,17 +345,23 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {
+            // All component keys less than COMPONENT_KEY_END_COMPONENTS are our CSP runtime components
             if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
-                ComponentsToAdd.push_back(ComponentDataPair);
+                // Convert the mcs component to a csp component
+                Entity->AddComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
             }
             else
             {
+                // Anything after COMPONENT_KEY_END_COMPONENTS are our CSP entity properties
+
+                // Find the property using our property key.
                 EntityProperty* Property = std::find_if(Properties.begin(), Properties.end(),
                     [Key = ComponentDataPair.first](const EntityProperty& Prop) { return Prop.GetKey() == Key; });
 
                 if (Property != Properties.end())
                 {
+                    // Set our property from the component value.
                     csp::common::ReplicatedValue Value;
                     ComponentUnpacker.TryReadValue(ComponentDataPair.first, Value);
                     Property->Set(Value);
@@ -368,11 +372,6 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
                 }
             }
         }
-    }
-
-    for (const auto& Comp : ComponentsToAdd)
-    {
-        Entity->AddComponentFromItemComponentData(Comp.first, Comp.second);
     }
 
     // Would much rather return this as a value, requires simplifying SpaceEntity such that it can have copy/move operators.
@@ -401,8 +400,10 @@ void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& 
 
         for (const auto& ComponentDataPair : *PatchComponents)
         {
+            // All component keys less than COMPONENT_KEY_END_COMPONENTS are our CSP runtime components
             if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
+                // Add the component to our entity
                 ComponentUpdateInfo UpdateInfo
                     = SpaceEntity.AddComponentFromItemComponentDataPatch(ComponentDataPair.first, ComponentDataPair.second);
                 ComponentUpdates[ComponentIndex] = UpdateInfo;
@@ -410,10 +411,15 @@ void SpaceEntityStatePatcher::ApplyPatchFromObjectPatch(const mcs::ObjectPatch& 
             }
             else
             {
+                // Anything after COMPONENT_KEY_END_COMPONENTS are our CSP entity properties
+
+                // Find the property using our property key.
                 auto PropertyIt = RegisteredProperties.find(ComponentDataPair.first);
 
                 if (PropertyIt != RegisteredProperties.end())
                 {
+
+                    // Set our property from the component value.
                     EntityProperty& Property = PropertyIt->second;
                     UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | Property.GetUpdateFlag());
 
