@@ -198,8 +198,6 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Netwo
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState }
 {
-
-    // RegisterSystemCallback();
 }
 
 UserSystem::~UserSystem()
