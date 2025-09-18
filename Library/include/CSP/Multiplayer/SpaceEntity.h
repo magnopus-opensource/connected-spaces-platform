@@ -429,7 +429,7 @@ public:
     // SetPropertyDirect allows us to set all of our replicated property values, without the need for individual setters.
     // We still have to handle ParentId separately, as this is a required MCS object property, and not an MCS component
     // like the rest of our properties.
-    // We also have to handle CSP components separately, as CSP currently replicates them using a different method.
+    // We also have to handle CSP components separately, as CSP currently replicates them by using the whole component as a data container, preventing us from buffering updated state in a patch as you'd expect, as we can't copy whole components. This manifests especially in `UpdateComponentDirect` where the update sequencing happens too early, and is in many ways a bug.
     CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
