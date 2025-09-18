@@ -201,6 +201,8 @@ private:
     csp::common::List<uint16_t> TransientDeletionComponentIds;
     std::chrono::milliseconds TimeOfLastPatch;
 
+    // Container of EntityProperties, which are proxy types that allow us to get and set specific replicatable
+    // values on a SpaceEntity. Populated via RegisterProperty/RegisterProperties.
     std::unordered_map<SpaceEntityComponentKey, EntityProperty> RegisteredProperties;
 
     // Weird eh?
