@@ -176,7 +176,7 @@ const csp::common::String& SpaceEntity::GetName() const { return Name; }
 
 bool SpaceEntity::SetName(const csp::common::String& Value)
 {
-    return SetProperty(this, Name, Value, SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, LogSystem);
+    return SetProperty(*this, Name, Value, SpaceEntityComponentKey::Name, UPDATE_FLAGS_NAME, LogSystem);
 }
 
 const SpaceTransform& SpaceEntity::GetTransform() const { return Transform; }
@@ -212,7 +212,7 @@ csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
 
 bool SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 {
-    return SetProperty(this, Transform.Position, Value, SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION, LogSystem);
+    return SetProperty(*this, Transform.Position, Value, SpaceEntityComponentKey::Position, UPDATE_FLAGS_POSITION, LogSystem);
 }
 
 const csp::common::Vector4& SpaceEntity::GetRotation() const { return Transform.Rotation; }
@@ -234,7 +234,7 @@ csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
 
 bool SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
-    return SetProperty(this, Transform.Rotation, Value, SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION, LogSystem);
+    return SetProperty(*this, Transform.Rotation, Value, SpaceEntityComponentKey::Rotation, UPDATE_FLAGS_ROTATION, LogSystem);
 }
 
 const csp::common::Vector3& SpaceEntity::GetScale() const { return Transform.Scale; }
@@ -248,7 +248,7 @@ csp::common::Vector3 SpaceEntity::GetGlobalScale() const
 
 bool SpaceEntity::SetScale(const csp::common::Vector3& Value)
 {
-    return SetProperty(this, Transform.Scale, Value, SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE, LogSystem);
+    return SetProperty(*this, Transform.Scale, Value, SpaceEntityComponentKey::Scale, UPDATE_FLAGS_SCALE, LogSystem);
 }
 
 bool SpaceEntity::GetIsTransient() const { return !IsPersistent; }
@@ -257,12 +257,12 @@ const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdP
 
 bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
-    return SetProperty(this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
+    return SetProperty(*this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
 }
 
 bool SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
 {
-    return SetProperty(this, ThirdPartyPlatform, static_cast<int64_t>(InThirdPartyPlatformType), SpaceEntityComponentKey::ThirdPartyPlatform,
+    return SetProperty(*this, ThirdPartyPlatform, static_cast<int64_t>(InThirdPartyPlatformType), SpaceEntityComponentKey::ThirdPartyPlatform,
         UPDATE_FLAGS_THIRD_PARTY_PLATFORM, LogSystem);
 }
 
@@ -667,7 +667,7 @@ bool SpaceEntity::Lock()
     }
 
     return SetProperty(
-        this, EntityLock, static_cast<int64_t>(LockType::UserAgnostic), SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE, LogSystem);
+        *this, EntityLock, static_cast<int64_t>(LockType::UserAgnostic), SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE, LogSystem);
 }
 
 bool SpaceEntity::Unlock()
