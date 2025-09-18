@@ -682,6 +682,8 @@ bool SpaceEntity::Unlock()
     }
 
     // We don't call "SetProperty" here, because the internal IsModifiable check will always fail due to the entity being locked.
+    // We do it this way just so we can reuse the `SetDirtyProperty` function. It dosen't really matter that we're not checking if the "true"
+    // old lock is the same before setting the val again.
     if (StatePatcher)
     {
         return StatePatcher->SetDirtyProperty(SpaceEntityComponentKey::LockType, EntityLock, static_cast<int64_t>(LockType::None));
