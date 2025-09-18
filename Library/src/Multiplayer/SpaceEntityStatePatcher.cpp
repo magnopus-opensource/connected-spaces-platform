@@ -330,7 +330,7 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
     const auto OwnerId = Message.GetOwnerId();
     const auto ParentId = common::Convert(Message.GetParentId());
 
-    auto MessageComponents = Message.GetComponents();
+    const std::optional<std::map<uint16_t, mcs::ItemComponentData>>& MessageComponents = Message.GetComponents();
 
     std::unique_ptr<csp::multiplayer::SpaceEntity> Entity(new csp::multiplayer::SpaceEntity(
         &RealtimeEngine, ScriptRunner, &LogSystem, Type, Id, "", SpaceTransform {}, OwnerId, ParentId, IsTransferable, IsPersistent));
@@ -338,7 +338,7 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
     if (MessageComponents.has_value())
     {
         // Get view components
-        MCSComponentUnpacker ComponentUnpacker { *Message.GetComponents() };
+        MCSComponentUnpacker ComponentUnpacker { *MessageComponents };
 
         // It's unfortunate we have to break the usual pattern of getting the registered properties from the state patcher here,
         // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
