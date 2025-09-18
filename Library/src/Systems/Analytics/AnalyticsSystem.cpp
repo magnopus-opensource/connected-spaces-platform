@@ -101,7 +101,7 @@ void AnalyticsQueueEventHandler::OnEvent(const csp::events::Event& InEvent)
         if (CurrentTime - _AnalyticsSystem->GetTimeSinceLastQueueSend() >= _AnalyticsSystem->GetQueueSendRate()
             || _AnalyticsSystem->GetCurrentQueueSize() >= _AnalyticsSystem->GetMaxQueueSize())
         {
-            _AnalyticsSystem->FlushAnalyticsEventsQueue();
+            _AnalyticsSystem->FlushAnalyticsEventsQueue([](const NullResult& /*Result*/) {});
         }
     }
 }
@@ -112,7 +112,6 @@ AnalyticsSystem::AnalyticsSystem()
     , EventHandler(nullptr)
     , AnalyticsQueueLock()
     , AnalyticsRecordQueue()
-    , SendAnalyticsEventQueueCallback(nullptr)
     , UserAgentInfo(nullptr)
     , AnalyticsQueueSendRate(std::chrono::seconds(60))
     , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
@@ -126,7 +125,6 @@ AnalyticsSystem::AnalyticsSystem(csp::web::WebClient* InWebClient, const csp::Cl
     , EventHandler(std::make_unique<AnalyticsQueueEventHandler>(this))
     , AnalyticsQueueLock()
     , AnalyticsRecordQueue()
-    , SendAnalyticsEventQueueCallback(nullptr)
     , UserAgentInfo(AgentInfo)
     , AnalyticsQueueSendRate(std::chrono::seconds(60))
     , TimeSinceLastQueueSend(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()))
@@ -149,16 +147,6 @@ void AnalyticsSystem::__SetQueueSendRateAndMaxSize(std::chrono::milliseconds New
 
     AnalyticsQueueSendRate = NewSendRate;
     MaxQueueSize = NewQueueSize;
-}
-
-void AnalyticsSystem::SetQueueAnalyticsEventCallback(NullResultCallback Callback)
-{
-    if (SendAnalyticsEventQueueCallback)
-    {
-        LogSystem->LogMsg(common::LogLevel::Warning, "SendAnalyticsEventQueueCallback has already been set. Previous callback overwritten.");
-    }
-
-    SendAnalyticsEventQueueCallback = std::move(Callback);
 }
 
 void AnalyticsSystem::SendAnalyticsEvent(const String& ProductContextSection, const String& Category, const String& InteractionType,
@@ -219,7 +207,7 @@ void AnalyticsSystem::QueueAnalyticsEvent(const String& ProductContextSection, c
     AnalyticsRecordQueue.emplace_back(Record);
 }
 
-void AnalyticsSystem::FlushAnalyticsEventsQueue()
+void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 {
     std::scoped_lock AnalyticsQueueLocker(AnalyticsQueueLock);
 
@@ -233,15 +221,18 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue()
 
     SetTimeSinceLastQueueSend(CurrentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback
-        = [BatchResultCallback = this->SendAnalyticsEventQueueCallback, LogSystem = this->LogSystem](const NullResult& Result)
+    NullResultCallback SendBatchAnalyticsCallback = [Callback, LogSystem = this->LogSystem](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             return;
         }
 
-        if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        {
+            LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
+        }
+        else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
             LogSystem->LogMsg(common::LogLevel::Error,
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
@@ -249,9 +240,9 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue()
                     .c_str());
         }
 
-        if (BatchResultCallback)
+        if (Callback)
         {
-            INVOKE_IF_NOT_NULL(BatchResultCallback, Result);
+            INVOKE_IF_NOT_NULL(Callback, Result);
         }
     };
 

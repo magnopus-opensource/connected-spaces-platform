@@ -75,13 +75,6 @@ class CSP_API AnalyticsSystem : public SystemBase
 
 public:
     /**
-     * @brief Sets a callback to be executed when a queue of Analytics Records has been sent to the backend services.
-     * This callback will be executed in response both to a call to QueueAnalyticsEvent() as well as to FlushAnalyticsEventsQueue().
-     * @param Callback NullResultCallback : the callback to execute.
-     */
-    CSP_EVENT void SetQueueAnalyticsEventCallback(NullResultCallback Callback);
-
-    /**
      * @brief Constructs an Analytics Record which is added to a queue to be sent to the backend services in a single batch.
      * @details The queue will be sent when one of the following conditions are met:
      * 1. The time since the last batch was sent reaches the AnalyticsQueueSendRate (default 60 seconds).
@@ -146,9 +139,10 @@ public:
      * @brief Trigger immediate dispatch of the Analytics Records queue to the backend services.
      * @note This method should be called as part of client log out or shut down procedure to ensure that any queued analytics records are flushed and
      * sent to the backend services before the user is logged out or the application is shut down.
+     * @param Callback NullResultCallback : the callback to execute on completion of the flush operation.
      * @pre The user must be logged in to send an Analytics Record to the backend services.
      */
-    void FlushAnalyticsEventsQueue();
+    CSP_EVENT void FlushAnalyticsEventsQueue(NullResultCallback Callback);
 
     /**
      * @brief Retrieves the time since the queue was last sent.
@@ -190,8 +184,6 @@ private:
     std::unique_ptr<class AnalyticsQueueEventHandler> EventHandler;
     std::mutex AnalyticsQueueLock;
     std::vector<std::shared_ptr<csp::services::generated::userservice::AnalyticsRecord>> AnalyticsRecordQueue;
-
-    NullResultCallback SendAnalyticsEventQueueCallback;
 
     const csp::ClientUserAgent* UserAgentInfo;
     std::chrono::milliseconds AnalyticsQueueSendRate;
