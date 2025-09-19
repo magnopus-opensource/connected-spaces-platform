@@ -27,7 +27,7 @@ jobs:
         # It's crucial to set these as repository secrets in your GitHub repository settings.
         env:
           # A token with permission to access the TeamCity REST API.
-          TEAMCITY_TOKEN: ${{ secrets.eyJ0eXAiOiAiVENWMiJ9.aTFXYktJRmY5aFotNzZpYUdMcm9lVWt1c1B0.NWQ3MWEwM2YtZGJmMC00OGJlLTlhNDUtOGM1MDNlNGJhNGUw }}
+          TEAMCITY_TOKEN: ${{ secrets.TEAMCITY_TOKEN }}
           TEAMCITY_URL: "https://magnopus.teamcity.com"
           # The ID of the TeamCity build configuration for your Doxygen documentation.
           BUILD_TYPE_ID: "Olympus_Foundation_Documentation_GenerateDocumentation"
