@@ -144,6 +144,10 @@ class EntityLockRemoveComponent : public PublicTestBaseWithParam<csp::common::Re
 {
 };
 
+class EntityUpdateCallback : public PublicTestBaseWithParam<csp::common::RealtimeEngineType>
+{
+};
+
 TEST_P(CreateAvatar, CreateAvatarTest)
 {
     SetRandSeed();
@@ -1569,6 +1573,72 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
     LogOut(UserSystem);
 }
 
+TEST_P(EntityUpdateCallback, EntityUpdateCallbackTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
+
+    // Log in
+    bool UseMultiplayerConnection = false;
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        UseMultiplayerConnection = true;
+    }
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform
+        = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+
+    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+
+    bool CallbackCalled = false;
+
+    CreatedObject->SetUpdateCallback(
+        [&CallbackCalled](SpaceEntity*, SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>&) { CallbackCalled = true; });
+
+    // Set the entity name to the same value as it currently is.
+    CreatedObject->SetName(ObjectName);
+
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        CreatedObject->QueueUpdate();
+        ProcessPendingIfOnline(*RealtimeEngine);
+    }
+
+    // Ensure the callback wasn't called.
+    EXPECT_FALSE(CallbackCalled);
+
+    // Cleanup
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    RealtimeEngine.reset();
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     RealtimeEngineEntityTests, CreateAvatar, testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
 INSTANTIATE_TEST_SUITE_P(RealtimeEngineEntityTests, CreateCreatorAvatar,
@@ -1602,6 +1672,8 @@ INSTANTIATE_TEST_SUITE_P(RealtimeEngineEntityTests, CreateObjectParent,
 INSTANTIATE_TEST_SUITE_P(RealtimeEngineEntityTests, EntityLockAddComponent,
     testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
 INSTANTIATE_TEST_SUITE_P(RealtimeEngineEntityTests, EntityLockRemoveComponent,
+    testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
+INSTANTIATE_TEST_SUITE_P(RealtimeEngineEntityTests, EntityUpdateCallback,
     testing::Values(csp::common::RealtimeEngineType::Offline, csp::common::RealtimeEngineType::Online));
 
 // The bool here is "Local". It means for the online engine, do we enable the SetAllowSelfMessagingFlag to test local messaging.
