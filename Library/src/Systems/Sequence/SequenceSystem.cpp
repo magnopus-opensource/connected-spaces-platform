@@ -83,8 +83,11 @@ void SequenceSystem::CreateSequence(const String& SequenceKey, const String& Ref
         = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesPut(std::nullopt, // NewKey
-            SequenceInfo, // Dto
+        ->sequencesPut(
+            {
+                std::nullopt, // NewKey
+                SequenceInfo // Dto
+            },
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
@@ -107,8 +110,11 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
         = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesPut(csp::common::Encode::URI(SequenceKey), // NewKey
-            SequenceInfo, // Dto
+        ->sequencesPut(
+            {
+                csp::common::Encode::URI(SequenceKey), // NewKey
+                SequenceInfo // Dto
+            },
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
@@ -146,8 +152,11 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
         const auto SequenceInfo = CreateSequenceDto(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Sequence.Items, Sequence.MetaData);
 
         static_cast<chs::SequenceApi*>(SequenceAPI)
-            ->sequencesPut(csp::common::Encode::URI(NewSequenceKey), // NewKey
-                SequenceInfo, // Dto
+            ->sequencesPut(
+                {
+                    csp::common::Encode::URI(NewSequenceKey), // NewKey
+                    SequenceInfo // Dto
+                },
                 ResponseHandler, // ResponseHandler
                 CancellationToken::Dummy() // CancellationToken
             );
@@ -198,14 +207,17 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
         = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesGet(SequenceKeys, // Keys
-            KeyRegex, // Regex
-            ReferenceType, // ReferenceType
-            ReferenceIds, // ReferenceIds
-            std::nullopt, // Items
-            std::nullopt, // MetaData
-            std::nullopt, // Skip
-            std::nullopt, // Limit
+        ->sequencesGet(
+            {
+                SequenceKeys, // Keys
+                KeyRegex, // Regex
+                ReferenceType, // ReferenceType
+                ReferenceIds, // ReferenceIds
+                std::nullopt, // Items
+                std::nullopt, // MetaData
+                std::nullopt, // Skip
+                std::nullopt // Limit
+            },
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
@@ -222,14 +234,17 @@ void SequenceSystem::GetAllSequencesContainingItems(
         = SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesGet(std::nullopt, // Keys
-            std::nullopt, // Regex
-            ReferenceType, // ReferenceType
-            ReferenceIds, // ReferenceIds
-            Items, // Items
-            std::nullopt, // MetaData
-            std::nullopt, // Skip
-            std::nullopt, // Limit
+        ->sequencesGet(
+            {
+                std::nullopt, // Keys
+                std::nullopt, // Regex
+                ReferenceType, // ReferenceType
+                ReferenceIds, // ReferenceIds
+                Items, // Items
+                std::nullopt, // MetaData
+                std::nullopt, // Skip
+                std::nullopt // Limit
+            },
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
@@ -248,7 +263,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
         = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesKeysKeyGet(csp::common::Encode::URI(SequenceKey, true), // Key
+        ->sequencesKeysKeyGet({ csp::common::Encode::URI(SequenceKey, true) }, // Key
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
         );
@@ -276,7 +291,7 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 
     std::vector<String> SequenceKeys = Convert(EncodedSequenceKeys);
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->sequencesKeysDelete(SequenceKeys, // Keys
+        ->sequencesKeysDelete({ SequenceKeys }, // Keys
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken)
         );

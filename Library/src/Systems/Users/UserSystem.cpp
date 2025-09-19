@@ -173,7 +173,7 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
             = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
                 LoginStateResCallback, LoginState);
 
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost(Request, ResponseHandler);
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost({ Request }, ResponseHandler);
     }
 }
 
@@ -297,7 +297,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
             = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
                 LoginStateResCallback, &CurrentLoginState);
 
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost(Request, ResponseHandler);
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost({ Request }, ResponseHandler);
     }
     else
     {
@@ -365,7 +365,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
             = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
                 LoginStateResCallback, &CurrentLoginState);
 
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost(Request, ResponseHandler);
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersRefreshPost({ Request }, ResponseHandler);
     }
     else
     {
@@ -431,7 +431,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
                 LoginStateResCallback, &CurrentLoginState);
 
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost(Request, ResponseHandler);
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginPost({ Request }, ResponseHandler);
     }
     else
     {
@@ -491,7 +491,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
         // Despite the naming, "login-guest" is the deferred, optimized, non-standard guest login.
         // The regular login endpoint that "loginAsGuest" uses is the "real" one.
-        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginGuestPost(Request, ResponseHandler);
+        static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogin_guestPost({ Request }, ResponseHandler);
     }
     else
     {
@@ -555,7 +555,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
     CurrentLoginState.State = csp::common::ELoginState::LoginThirdPartyProviderDetailsRequested;
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
-        ->socialProvidersProviderGet(ConvertExternalAuthProvidersToString(AuthProvider), csp::CSPFoundation::GetTenant(), ResponseHandler);
+        ->social_providersProviderGet({ ConvertExternalAuthProvidersToString(AuthProvider), csp::CSPFoundation::GetTenant() }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,
@@ -638,7 +638,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
         = AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, csp::common::LoginState, chs_user::AuthDto>(
             LoginStateResCallback, &CurrentLoginState);
 
-    static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLoginSocialPost(Request, ResponseHandler);
+    static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogin_socialPost({ Request }, ResponseHandler);
 }
 
 void UserSystem::Logout(NullResultCallback Callback)
@@ -663,7 +663,7 @@ void UserSystem::Logout(NullResultCallback Callback)
                 = AuthenticationAPI->CreateHandler<NullResultCallback, LogoutResult, csp::common::LoginState, csp::services::NullDto>(
                     Callback, &CurrentLoginState, csp::web::EResponseCodes::ResponseNoContent);
 
-            static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogoutPost(Request, ResponseHandler);
+            static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->usersLogoutPost({ Request }, ResponseHandler);
         };
 
         auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
@@ -718,7 +718,7 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
         = ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs_user::ProfileDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersPost(Request, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersPost({ Request }, ResponseHandler);
 }
 
 void UserSystem::UpgradeGuestAccount(const csp::common::String& UserName, const csp::common::String& DisplayName, const csp::common::String& Email,
@@ -737,7 +737,7 @@ void UserSystem::UpgradeGuestAccount(const csp::common::String& UserName, const 
     const csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs_user::ProfileDto>(Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdUpgradeGuestPost(UserId, Request, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdUpgrade_guestPost({ UserId, Request }, ResponseHandler);
 }
 
 void UserSystem::ConfirmUserEmail(NullResultCallback Callback)
@@ -747,7 +747,7 @@ void UserSystem::ConfirmUserEmail(NullResultCallback Callback)
     csp::services::ResponseHandlerPtr ResponseHandler = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdConfirmEmailPost(UserId, nullptr, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdConfirm_emailPost({ UserId, nullptr }, ResponseHandler);
 }
 
 void UserSystem::ResetUserPassword(
@@ -762,7 +762,7 @@ void UserSystem::ResetUserPassword(
     csp::services::ResponseHandlerPtr ResponseHandler = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdTokenChangePasswordPost(UserId, Request, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdToken_change_passwordPost({ UserId, Request }, ResponseHandler);
 }
 
 void UserSystem::UpdateUserDisplayName(const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback)
@@ -770,7 +770,7 @@ void UserSystem::UpdateUserDisplayName(const csp::common::String& UserId, const 
     const csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdDisplayNamePut(UserId, NewUserDisplayName, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdDisplay_namePut({ UserId, NewUserDisplayName }, ResponseHandler);
 }
 
 void UserSystem::DeleteUser(const csp::common::String& UserId, NullResultCallback Callback)
@@ -778,7 +778,7 @@ void UserSystem::DeleteUser(const csp::common::String& UserId, NullResultCallbac
     csp::services::ResponseHandlerPtr ResponseHandler = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdDelete(UserId, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdDelete({ UserId }, ResponseHandler);
 }
 
 bool UserSystem::EmailCheck(const std::string& Email) const { return Email.find("@") != std::string::npos; }
@@ -809,7 +809,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email, const csp::com
             Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
         static_cast<chs_user::ProfileApi*>(ProfileAPI)
-            ->usersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, EmailLinkUrlValue, Request, ResponseHandler);
+            ->usersForgot_passwordPost({ RedirectUrlValue, UseTokenChangePasswordUrl, EmailLinkUrlValue, Request }, ResponseHandler);
     }
     else
     {
@@ -824,7 +824,7 @@ void UserSystem::GetProfileByUserId(const csp::common::String& InUserId, Profile
     csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs_user::ProfileDto>(Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdGet(UserId, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersUserIdGet({ UserId }, ResponseHandler);
 }
 
 void UserSystem::GetProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback)
@@ -835,7 +835,7 @@ void UserSystem::GetProfilesByUserId(const csp::common::Array<csp::common::Strin
         = ProfileAPI->CreateHandler<BasicProfilesResultCallback, BasicProfilesResult, void, csp::services::DtoArray<chs_user::ProfileLiteDto>>(
             Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersLiteGet(UserIds, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersLiteGet({ UserIds }, ResponseHandler);
 }
 
 void UserSystem::GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback)
@@ -846,14 +846,14 @@ void UserSystem::GetBasicProfilesByUserId(const csp::common::Array<csp::common::
         = ProfileAPI->CreateHandler<BasicProfilesResultCallback, BasicProfilesResult, void, csp::services::DtoArray<chs_user::ProfileLiteDto>>(
             Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersLiteGet(UserIds, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersLiteGet({ UserIds }, ResponseHandler);
 }
 
 void UserSystem::Ping(NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr PingResponseHandler
         = PingAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs_user::PingApi*>(PingAPI)->pingGet(PingResponseHandler);
+    static_cast<chs_user::PingApi*>(PingAPI)->pingGet({}, PingResponseHandler);
 }
 
 void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback)
@@ -878,7 +878,7 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
     csp::services::ResponseHandlerPtr ResponseHandler
         = ExternalServiceProxyApi->CreateHandler<StringResultCallback, AgoraUserTokenResult, void, chs_aggregation::ServiceResponse>(
             Callback, nullptr);
-    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
 }
 
 void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
@@ -892,7 +892,7 @@ void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCal
     csp::services::ResponseHandlerPtr ResponseHandler
         = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
             Callback, nullptr);
-    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
+    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
 }
 
 void UserSystem::ResendVerificationEmail(
@@ -909,7 +909,7 @@ void UserSystem::ResendVerificationEmail(
     csp::services::ResponseHandlerPtr ResponseHandler
         = ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
 
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersEmailsEmailConfirmEmailReSendPost(InEmail, Tenant, RedirectUrl, ResponseHandler);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersEmailsEmailConfirm_emailRe_sendPost({ InEmail, Tenant, RedirectUrl }, ResponseHandler);
 }
 
 void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, StringResultCallback Callback)
@@ -917,7 +917,7 @@ void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, StringR
     csp::services::ResponseHandlerPtr ResponseHandler
         = StripeAPI->CreateHandler<StringResultCallback, CustomerPortalUrlResult, void, chs_user::StripeCustomerPortalDto>(Callback, nullptr);
 
-    static_cast<chs_user::StripeApi*>(StripeAPI)->vendorsStripeCustomerPortalsUserIdGet(UserId, ResponseHandler);
+    static_cast<chs_user::StripeApi*>(StripeAPI)->vendorsStripeCustomer_portalsUserIdGet({ UserId }, ResponseHandler);
 };
 
 void UserSystem::GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback)
@@ -929,7 +929,7 @@ void UserSystem::GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Call
     csp::services::ResponseHandlerPtr ResponseHandler
         = StripeAPI->CreateHandler<StringResultCallback, CheckoutSessionUrlResult, void, chs_user::StripeCheckoutSessionDto>(Callback, nullptr);
 
-    static_cast<chs_user::StripeApi*>(StripeAPI)->vendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
+    static_cast<chs_user::StripeApi*>(StripeAPI)->vendorsStripeCheckout_sessionsPost({ CheckoutSessionInfo }, ResponseHandler);
 };
 
 void UserSystem::NotifyRefreshTokenHasChanged()

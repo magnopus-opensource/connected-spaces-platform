@@ -111,7 +111,7 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost(AnchorInfo, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
 }
 
 void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAnchorProvider, const csp::common::String& ThirdPartyAnchorId,
@@ -188,7 +188,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<AnchorResultCallback, AnchorResult, void, chs::AnchorDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost(AnchorInfo, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsPost({ AnchorInfo }, ResponseHandler);
 }
 
 void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& AnchorIds, NullResultCallback Callback)
@@ -204,7 +204,7 @@ void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& 
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
         Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsDelete(IdsToBeDeleted, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorsDelete({ IdsToBeDeleted }, ResponseHandler);
 }
 
 void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius,
@@ -275,9 +275,9 @@ void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& OriginLocat
     auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)
-        ->anchorsGet(AnchorSpatialKeys, AnchorSpatialValues, OriginLocation.Longitude, OriginLocation.Latitude, AreaRadius, AnchorTags, AnchorTagsAll,
-            std::nullopt, std::nullopt, ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit, ResponseHandler,
-            csp::common::CancellationToken::Dummy());
+        ->anchorsGet({ AnchorSpatialKeys, AnchorSpatialValues, OriginLocation.Longitude, OriginLocation.Latitude, AreaRadius, AnchorTags,
+                         AnchorTagsAll, std::nullopt, std::nullopt, ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit },
+            ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
 void AnchorSystem::GetAnchorsInSpace(const csp::common::String& SpaceId, const csp::common::Optional<int>& Skip,
@@ -294,8 +294,9 @@ void AnchorSystem::GetAnchorsInSpace(const csp::common::String& SpaceId, const c
     auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)
-        ->anchorsGet(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit, ResponseHandler, csp::common::CancellationToken::Dummy());
+        ->anchorsGet({ std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+                         ReferenceIds, std::nullopt, AnchorSkip, AnchorLimit },
+            ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
 void AnchorSystem::GetAnchorsByAssetCollectionId(const csp::common::String& AssetCollectionId, const csp::common::Optional<int>& Skip,
@@ -312,8 +313,9 @@ void AnchorSystem::GetAnchorsByAssetCollectionId(const csp::common::String& Asse
     auto AnchorSkip = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
 
     static_cast<chs::AnchorsApi*>(AnchorsAPI)
-        ->anchorsGet(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, AssetCollectionIds, AnchorSkip, AnchorLimit, ResponseHandler, csp::common::CancellationToken::Dummy());
+        ->anchorsGet({ std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+                         std::nullopt, AssetCollectionIds, AnchorSkip, AnchorLimit },
+            ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
 void AnchorSystem::CreateAnchorResolution(const csp::common::String& AnchorId, bool SuccessfullyResolved, int ResolveAttempted, double ResolveTime,
@@ -330,7 +332,7 @@ void AnchorSystem::CreateAnchorResolution(const csp::common::String& AnchorId, b
     csp::services::ResponseHandlerPtr ResponseHandler = AnchorsAPI->CreateHandler<csp::systems::AnchorResolutionResultCallback,
         csp::systems::AnchorResolutionResult, void, chs::AnchorResolutionDto>(Callback, nullptr);
 
-    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchorResolutionsPost(AnchorResolutionInfo, ResponseHandler);
+    static_cast<chs::AnchorsApi*>(AnchorsAPI)->anchor_resolutionsPost({ AnchorResolutionInfo }, ResponseHandler);
 }
 
 } // namespace csp::systems

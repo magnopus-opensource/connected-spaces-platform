@@ -21,6 +21,7 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
+#include "Json/JsonSerializer.h"
 
 namespace csp::services
 {
@@ -91,3 +92,5 @@ private:
 typedef std::function<void(const ApplicationSettingsResult& Result)> ApplicationSettingsResultCallback;
 
 } // namespace csp::systems
+
+void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::ApplicationSettings& Obj);

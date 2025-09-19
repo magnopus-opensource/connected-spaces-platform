@@ -19,11 +19,15 @@
 #include "CSP/Systems/Settings/ApplicationSettingsSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/Convert.h"
 #include "RAIIMockLogger.h"
+#include "Services/UserService/UserServiceApiMock.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
+#include "Json/JsonSerializer.h"
 
 #include "gtest/gtest.h"
+#include <future>
 #include <gmock/gmock.h>
 
 using namespace csp::common;
@@ -454,4 +458,285 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSett
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     }
+}
+
+namespace chs = csp::services::generated::userservice;
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsPutResponseCreatedThenRecieveSuccessResponseTests)
+{
+    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+
+    std::promise<ApplicationSettingsResult> ResultPromise;
+    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+
+    // Create default application settings expected data, use to validate and construct the return response for mock.
+    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    ApplicationSettings.ApplicationName = "MockApplicationName";
+    ApplicationSettings.Context = "MockContext";
+    ApplicationSettings.AllowAnonymous = false;
+    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+
+    // Sets the expectation that a specific method on a mock object will be called, and will fail the test if these conditions are not met.
+    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextPut)
+        .WillOnce(
+            [&](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams& Params,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            )
+            {
+                // Basic validation that the information provided matches expectations.
+                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
+                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+
+                // Construct the payload using the ApplicationSettings to populate the request body for the response.
+                csp::web::HttpPayload Payload;
+                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
+                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                Payload.SetContent(json);
+
+                // Construct the response with the expected HTTP response code and payload.
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseCreated);
+                Response.GetMutablePayload() = Payload;
+
+                // Invoke the response on the handler to emulate the RESTful call.
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    // Create a callback to capture the response to fulfill the promise.
+    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+
+    // Create a handler for the current mock function, which will allow emulation of the RESTful response in the EXPECT_CALL.
+    auto ResponseHandler
+        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+
+    auto Request = std::make_shared<chs::ApplicationSettingsDto>();
+    Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
+    Request->SetSettings(Convert(ApplicationSettings.Settings));
+
+    auto Params
+        = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "MockApplicationName", "MockContext", Request };
+
+    // Call the expected mock function to trigger the expected call and fulfill the promise.
+    ApplicationSettingsMock->applicationsApplicationNameSettingsContextPut(Params, ResponseHandler, CancellationToken::Dummy());
+
+    auto Result = ResultFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseCreated));
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
+    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
+    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
+    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
+    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsPutResponseBadRequestThenRecieveFailedResponseTests)
+{
+    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+
+    std::promise<ApplicationSettingsResult> ResultPromise;
+    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+
+    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextPut)
+        .WillOnce(
+            [&](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams& /*Params*/,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            )
+            {
+                csp::web::HttpPayload Payload;
+                Payload.SetContent("}{ Invalid JSON ...");
+
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseBadRequest);
+                Response.GetMutablePayload() = Payload;
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+
+    auto ResponseHandler
+        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+
+    auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextPutParams { "", "", {} };
+
+    ApplicationSettingsMock->applicationsApplicationNameSettingsContextPut(Params, ResponseHandler, CancellationToken::Dummy());
+
+    auto Result = ResultFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsGetResponseOkThenRecieveSuccessResponseTests)
+{
+    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+
+    std::promise<ApplicationSettingsResult> ResultPromise;
+    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+
+    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    ApplicationSettings.ApplicationName = "MockApplicationName";
+    ApplicationSettings.Context = "MockContext";
+    ApplicationSettings.AllowAnonymous = false;
+    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+
+    EXPECT_CALL(*ApplicationSettingsMock, applicationsApplicationNameSettingsContextGet)
+        .WillOnce(
+            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams& Params,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            )
+            {
+                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
+                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+
+                csp::web::HttpPayload Payload;
+                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
+                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                Payload.SetContent(json);
+
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                Response.GetMutablePayload() = Payload;
+
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+
+    auto ResponseHandler
+        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+
+    auto Params = chs::ApplicationSettingsApiMock::applicationsApplicationNameSettingsContextGetParams { ApplicationSettings.ApplicationName,
+        ApplicationSettings.Context, {} };
+
+    ApplicationSettingsMock->applicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+
+    auto Result = ResultFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
+    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
+    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
+    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
+    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsAnonymousGetResponseOkThenRecieveSuccessResponseTests)
+{
+    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+
+    std::promise<ApplicationSettingsResult> ResultPromise;
+    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+
+    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    ApplicationSettings.ApplicationName = "MockApplicationName";
+    ApplicationSettings.Context = "MockContext";
+    ApplicationSettings.AllowAnonymous = true;
+    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+
+    EXPECT_CALL(*ApplicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
+        .WillOnce(
+            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& Params,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            )
+            {
+                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
+                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+
+                csp::web::HttpPayload Payload;
+                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
+                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                Payload.SetContent(json);
+
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                Response.GetMutablePayload() = Payload;
+
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+
+    auto ResponseHandler
+        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
+
+    auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
+        ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };
+
+    ApplicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+
+    auto Result = ResultFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
+    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
+    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
+    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
+    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSettingsAnonymousGetResponseNotFoundThenRecieveNotFoundResponseTests)
+{
+    const auto ApplicationSettingsMock = std::make_unique<chs::ApplicationSettingsApiMock>();
+
+    std::promise<ApplicationSettingsResult> ResultPromise;
+    std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
+
+    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    ApplicationSettings.ApplicationName = "MockApplicationName";
+    ApplicationSettings.Context = "MockContext";
+    ApplicationSettings.AllowAnonymous = true;
+    ApplicationSettings.Settings = { { "MockTestSettings", "MockTestData" } };
+
+    EXPECT_CALL(*ApplicationSettingsMock, tenantsTenantApplicationsApplicationNameSettingsContextGet)
+        .WillOnce(
+            [&ApplicationSettings](const chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams& Params,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
+            )
+            {
+                EXPECT_EQ(ApplicationSettings.ApplicationName, Params.applicationName);
+                EXPECT_EQ(ApplicationSettings.Context, Params.context);
+
+                csp::web::HttpPayload Payload;
+                auto json = csp::json::JsonSerializer::Serialize(ApplicationSettings);
+                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                Payload.SetContent(json);
+
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+                Response.GetMutablePayload() = Payload;
+
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    auto Callback = [&ResultPromise](const ApplicationSettingsResult& Result) { ResultPromise.set_value(Result); };
+
+    auto ResponseHandler
+        = ApplicationSettingsMock->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseNotFound);
+
+    auto Params = chs::ApplicationSettingsApiMock::tenantsTenantApplicationsApplicationNameSettingsContextGetParams { "OKO_TESTS",
+        ApplicationSettings.ApplicationName, ApplicationSettings.Context, {} };
+
+    ApplicationSettingsMock->tenantsTenantApplicationsApplicationNameSettingsContextGet(Params, ResponseHandler, CancellationToken::Dummy());
+
+    auto Result = ResultFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+    const auto ApplicationSettingsResult = Result.GetApplicationSettings();
+    EXPECT_EQ(ApplicationSettingsResult.ApplicationName, ApplicationSettings.ApplicationName);
+    EXPECT_EQ(ApplicationSettingsResult.Context, ApplicationSettings.Context);
+    EXPECT_EQ(ApplicationSettingsResult.AllowAnonymous, ApplicationSettings.AllowAnonymous);
+    EXPECT_EQ(ApplicationSettingsResult.Settings.Size(), ApplicationSettings.Settings.Size());
 }
