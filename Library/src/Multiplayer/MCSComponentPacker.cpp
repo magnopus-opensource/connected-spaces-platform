@@ -174,48 +174,12 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(ComponentBase
     return mcs::ItemComponentData { ComponentPacker.GetComponents() };
 }
 
-// TODO: We can make a safer version of this function when we convert our ReplicatedValue to use a variant,
-// as we can create compile-time checking by using std::visit and function overloads.
-// This will prevent us forgetting to update this when we add new types.
-// https://magnopus.atlassian.net/browse/OF-1511
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::common::ReplicatedValue& Value)
 {
-    if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Boolean)
-    {
-        return CreateItemComponentData(Value.GetBool());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Integer)
-    {
-        return CreateItemComponentData(Value.GetInt());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Float)
-    {
-        return CreateItemComponentData(Value.GetFloat());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
-    {
-        return CreateItemComponentData(Value.GetString());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector3)
-    {
-        return CreateItemComponentData(Value.GetVector3());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector4)
-    {
-        return CreateItemComponentData(Value.GetVector4());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::Vector2)
-    {
-        return CreateItemComponentData(Value.GetVector2());
-    }
-    else if (Value.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
-    {
-        return CreateItemComponentData(Value.GetStringMap());
-    }
-    else
-    {
-        throw std::runtime_error("Invalid ReplicatedValue property");
-    }
+    mcs::ItemComponentData Data;
+    // Extract the internal type from the variant and parse using its corrosponding typed CreateItemComponentData.
+    std::visit([&Data, this](auto&& InternalType) { Data = CreateItemComponentData(InternalType); }, Value.GetValue());
+    return Data;
 }
 
 mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(bool Value) { return mcs::ItemComponentData { Value }; }
