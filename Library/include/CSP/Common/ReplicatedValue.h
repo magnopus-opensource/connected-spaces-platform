@@ -134,7 +134,7 @@ public:
 
     /// @brief Equality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
-    bool operator==(const ReplicatedValue& OtherValue) const;
+    CSP_NO_EXPORT bool operator==(const ReplicatedValue& OtherValue) const;
 
     /// @brief Inequality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
