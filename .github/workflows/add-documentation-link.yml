@@ -41,7 +41,7 @@ jobs:
           echo "Polling TeamCity for a successful build on branch: $PR_BRANCH_NAME"
 
           BUILD_ID=""
-          MAX_POLLS=30
+          MAX_POLLS=90
           POLL_INTERVAL=60 # seconds
 
           for i in $(seq 1 $MAX_POLLS); do
