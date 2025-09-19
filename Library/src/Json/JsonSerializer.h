@@ -237,7 +237,7 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
 {
     Writer.StartObject();
 
-    for (const std::pair<csp::common::String, T> Pair : Value.GetUnderlying())
+    for (const std::pair<csp::common::String, T>& Pair : Value.GetUnderlying())
     {
         SerializeMember(Pair.first.c_str(), Pair.second);
     }
