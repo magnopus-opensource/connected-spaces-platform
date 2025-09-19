@@ -225,3 +225,85 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapAssignmentTest)
     EXPECT_TRUE(MyValue.GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap);
     EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
+
+// Tests move logic with a basic type
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MoveConstructorIntTest)
+{
+    csp::common::ReplicatedValue Value { 10ll };
+    csp::common::ReplicatedValue NewValue { std::move(Value) };
+
+    EXPECT_EQ(NewValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Integer);
+    EXPECT_EQ(NewValue.GetInt(), 10ll);
+
+    EXPECT_EQ(Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::InvalidType);
+}
+
+// Tests move logic with a more complex type
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MoveConstructorStringTest)
+{
+    csp::common::ReplicatedValue Value { "Test" };
+    csp::common::ReplicatedValue NewValue { std::move(Value) };
+
+    EXPECT_EQ(NewValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
+    EXPECT_EQ(NewValue.GetString(), "Test");
+
+    EXPECT_EQ(Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::InvalidType);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MoveAssignmentIntTest)
+{
+    csp::common::ReplicatedValue Value { 10ll };
+    csp::common::ReplicatedValue NewValue { 5ll };
+
+    NewValue = std::move(Value);
+
+    EXPECT_EQ(NewValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::Integer);
+    EXPECT_EQ(NewValue.GetInt(), 10ll);
+
+    EXPECT_EQ(Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::InvalidType);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MoveAssignmentStringTest)
+{
+    csp::common::ReplicatedValue Value { "Test" };
+    csp::common::ReplicatedValue NewValue { "Other" };
+
+    NewValue = std::move(Value);
+
+    EXPECT_EQ(NewValue.GetReplicatedValueType(), csp::common::ReplicatedValueType::String);
+    EXPECT_EQ(NewValue.GetString(), "Test");
+
+    EXPECT_EQ(Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::InvalidType);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, EqualityOperatorTest)
+{
+    csp::common::ReplicatedValue Value { "Test" };
+    csp::common::ReplicatedValue Value2 { "Test" };
+
+    EXPECT_TRUE(Value == Value2);
+
+    Value2.SetString("Test2");
+
+    EXPECT_FALSE(Value == Value2);
+
+    Value2.SetInt(5);
+
+    EXPECT_FALSE(Value == Value2);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, InequalityOperatorTest)
+{
+    csp::common::ReplicatedValue Value { "Test" };
+    csp::common::ReplicatedValue Value2 { "Test" };
+
+    EXPECT_FALSE(Value != Value2);
+
+    Value2.SetString("Test2");
+
+    EXPECT_TRUE(Value != Value2);
+
+    Value2.SetInt(5);
+
+    EXPECT_TRUE(Value != Value2);
+}
