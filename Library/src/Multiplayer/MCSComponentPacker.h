@@ -20,6 +20,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "MCS/MCSTypes.h"
+#include "Multiplayer/SpaceEntityKeys.h"
 
 #include <map>
 
@@ -33,6 +34,7 @@ class MCSComponentPacker
 {
 public:
     template <class T> void WriteValue(uint16_t Key, const T& Value);
+    template <class T> void WriteValue(SpaceEntityComponentKey Key, const T& Value);
 
     const std::map<uint16_t, mcs::ItemComponentData>& GetComponents() const;
 
@@ -98,6 +100,10 @@ private:
 };
 
 template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = CreateItemComponentData(Value); }
+template <class T> inline void MCSComponentPacker::WriteValue(SpaceEntityComponentKey Key, const T& Value)
+{
+    Components[static_cast<uint16_t>(Key)] = CreateItemComponentData(Value);
+}
 
 template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> MCSComponentPacker::CreateItemComponentData(T Value)
 {

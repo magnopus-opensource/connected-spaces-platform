@@ -627,12 +627,10 @@ SpaceEntity* OnlineRealtimeEngine::CreateRemotelyRetrievedEntity(const signalr::
     SignalRDeserializer Deserializer { EntityMessage };
     Deserializer.ReadValue(Message);
 
-    const auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
+    auto NewEntity = SpaceEntityStatePatcher::NewFromObjectMessage(Message, *this, *ScriptRunner, *LogSystem);
 
     std::scoped_lock EntitiesLocker(*EntitiesLock);
-    PendingAdds->emplace_back(NewEntity);
-
-    return NewEntity;
+    return PendingAdds->emplace_back(NewEntity.release());
 }
 
 void OnlineRealtimeEngine::OnObjectMessage(const signalr::value& Params)

@@ -44,9 +44,9 @@ csp::common::Array<csp::multiplayer::SpaceEntity*> CSPSceneDescription::CreateEn
     size_t ObjectsIndex = 0;
     for (const auto& Object : SceneDescription.Objects)
     {
-        auto* Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, RemoteScriptRunner, LogSystem);
+        auto Entity = SpaceEntityStatePatcher::NewFromObjectMessage(Object, RealtimeEngine, RemoteScriptRunner, LogSystem);
 
-        Entities[ObjectsIndex] = Entity;
+        Entities[ObjectsIndex] = Entity.release();
         ObjectsIndex++;
     }
 

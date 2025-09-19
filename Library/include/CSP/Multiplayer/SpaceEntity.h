@@ -50,6 +50,7 @@ namespace csp::multiplayer
 {
 class EntityScriptInterface;
 class SpaceEntityStatePatcher;
+class EntityProperty;
 
 CSP_START_IGNORE
 namespace mcs
@@ -410,7 +411,8 @@ public:
     // The state patcher. This is the object that handles dirty/pending properties,
     // another way of thinking about this is the "network patch manager" or something like that.
     // If this is null, then the space entity does immediate updates without any deferred patching.
-    CSP_NO_EXPORT const std::unique_ptr<SpaceEntityStatePatcher>& GetStatePatcher();
+    CSP_NO_EXPORT const std::unique_ptr<SpaceEntityStatePatcher>& GetStatePatcher() const;
+    CSP_NO_EXPORT std::unique_ptr<SpaceEntityStatePatcher>& GetStatePatcher();
 
     /// @brief Update after the property of a component was changed
     /// @param DirtyComponent ComponentBase* : the dirty component to update
@@ -423,23 +425,23 @@ public:
     /// @brief Sets the internal ParentId to nullptr
     CSP_NO_EXPORT void RemoveParentId();
 
-    // Direct setters that bypass any patching behaviour or conditionals
-    // Non-ideal, here because the responsibility for managing network behaviour is massively munged into SpaceEntity, so it's doing two things at
-    // once. At least with these, we can move the logic out to another type and quarantine the complexity.
-    // These should really be the only things SpaceEntity has. Neither the network management, nor really the locking, should matter to what is
-    // essentially a data-type.
-    CSP_NO_EXPORT void SetNameDirect(const csp::common::String& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetPositionDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetRotationDirect(const csp::common::Vector4& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetScaleDirect(const csp::common::Vector3& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetThirdPartyRefDirect(const csp::common::String& Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetThirdPartyPlatformDirect(const csp::systems::EThirdPartyPlatform Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetEntityLockDirect(LockType Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetSelectedIdDirect(uint64_t Value, bool CallNotifyingCallback = false);
-    CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback);
+    // Direct setters that bypass any patching behaviour or conditionals.
+    // SetPropertyDirect allows us to set all of our replicated property values, without the need for individual setters.
+    // We still have to handle ParentId separately, as this is a required MCS object property, and not an MCS component
+    // like the rest of our properties.
+    // We also have to handle CSP components separately, as CSP currently replicates them by using the whole component as a data container, preventing
+    // us from buffering updated state in a patch as you'd expect, as we can't copy whole components. This manifests especially in
+    // `UpdateComponentDirect` where the update sequencing happens too early, and is in many ways a bug.
+    CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback = false);
+
+    CSP_START_IGNORE
+    template <typename P, typename V>
+    void SetPropertyDirect(P& Property, const V& Value, SpaceEntityUpdateFlags Flag, bool CallNotifyingCallback = false);
+    CSP_END_IGNORE
+
     /// @brief Setter for the owner ID
     /// @param InOwnerId uint64_t : the owner ID to set
     CSP_NO_EXPORT void SetOwnerId(const uint64_t InOwnerId);
@@ -449,6 +451,9 @@ public:
     // Called when we're parsing a component from an mcs::ObjectPatch
     CSP_NO_EXPORT ComponentUpdateInfo AddComponentFromItemComponentDataPatch(
         uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
+
+    // Creates the array of entity properties which should be replicated.
+    CSP_NO_EXPORT csp::common::Array<EntityProperty> CreateReplicatedProperties();
 
 private:
     uint16_t GenerateComponentId();
@@ -511,5 +516,23 @@ private:
     /// @return bool : the selection state of the entity
     bool InternalSetSelectionStateOfEntity(const bool SelectedState);
 };
+
+CSP_START_IGNORE
+template <typename P, typename V>
+void SpaceEntity::SetPropertyDirect(P& Property, const V& Value, SpaceEntityUpdateFlags Flag, bool CallNotifyingCallback)
+{
+    std::scoped_lock PropertiesLocker(PropertiesLock);
+
+    // We cast the value to the property type to get around issues with type <-> ReplicatedValue conversions,
+    // as ReplicatedValues can only hold specific types.
+    // This is quite brittle, so we are finding a better way to handle this.
+    Property = static_cast<P>(Value);
+    if (CallNotifyingCallback && EntityUpdateCallback)
+    {
+        csp::common::Array<ComponentUpdateInfo> Empty;
+        EntityUpdateCallback(this, Flag, Empty);
+    }
+}
+CSP_END_IGNORE
 
 } // namespace csp::multiplayer
