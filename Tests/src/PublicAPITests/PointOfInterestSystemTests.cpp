@@ -189,7 +189,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 }
 
 // This test is to be fixed as part of OF-1649.
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaTest)
 {
     SetRandSeed();
 
@@ -303,7 +303,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 }
 
 // This test is to be fixed as part of OF-1649.
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 {
     SetRandSeed();
 
