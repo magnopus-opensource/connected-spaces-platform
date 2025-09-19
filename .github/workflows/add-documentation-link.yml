@@ -1,0 +1,89 @@
+# This workflow automates adding a comment to a GitHub Pull Request when there has been a change to the public
+# documentation directory. It polls the TeamCity server for a successful 'Generate Documentation' build on the pull
+# request's branch and comments with a link to the TeamCity documentation build artifacts.
+name: TeamCity Documentation Commenter
+
+# The action will run whenever a pull request is opened, synchronized (pushed to), or reopened.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  comment_on_success:
+    # Set the runner environment
+    runs-on: ubuntu-latest
+
+    # Permissions are required to read the PR number and write a comment.
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # Step 1: Poll the TeamCity API for the build status.
+      # This step will wait for the Doxygen build to complete successfully before proceeding.
+      - name: Poll TeamCity for Doxygen Build
+        id: poll-teamcity
+        # Environment variables for this step.
+        # It's crucial to set these as repository secrets in your GitHub repository settings.
+        env:
+          # A token with permission to access the TeamCity REST API.
+          TEAMCITY_TOKEN: ${{ secrets.eyJ0eXAiOiAiVENWMiJ9.aTFXYktJRmY5aFotNzZpYUdMcm9lVWt1c1B0.NWQ3MWEwM2YtZGJmMC00OGJlLTlhNDUtOGM1MDNlNGJhNGUw }}
+          TEAMCITY_URL: "https://magnopus.teamcity.com"
+          # The ID of the TeamCity build configuration for your Doxygen documentation.
+          BUILD_TYPE_ID: "Olympus_Foundation_Documentation_GenerateDocumentation"
+        run: |
+          # Get the branch name from the pull request event.
+          PR_BRANCH_NAME="${{ github.head_ref }}"
+
+          # URL-encode the branch name for use in the API query.
+          PR_BRANCH_ENCODED=$(printf "%s" "$PR_BRANCH_NAME" | jq -sRr @uri)
+
+          echo "Polling TeamCity for a successful build on branch: $PR_BRANCH_NAME"
+
+          BUILD_ID=""
+          MAX_POLLS=30
+          POLL_INTERVAL=60 # seconds
+
+          for i in $(seq 1 $MAX_POLLS); do
+              echo "Polling attempt $i of $MAX_POLLS..."
+              
+              # Use curl to query the TeamCity API for a successful, finished build on the PR's branch.
+              API_RESPONSE=$(curl -s -H "Authorization: Bearer $TEAMCITY_TOKEN" -H "Accept: application/json" \
+                  "$TEAMCITY_URL/app/rest/builds?locator=buildType:$BUILD_TYPE_ID,branch:name:$PR_BRANCH_ENCODED,status:SUCCESS,state:finished,count:1")
+
+              # Parse the JSON response to get the build ID.
+              BUILD_ID=$(echo "$API_RESPONSE" | jq -r '.build[0].id')
+              
+              if [ "$BUILD_ID" != "null" ]; then
+                  echo "Found successful build with ID: $BUILD_ID"
+                  echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+                  exit 0 # Exit the loop successfully
+              fi
+
+              echo "No successful build found yet. Waiting for $POLL_INTERVAL seconds..."
+              sleep $POLL_INTERVAL
+          done
+
+          echo "Timed out waiting for a successful build after $MAX_POLLS attempts."
+          exit 1
+
+      # Step 2: Use a pre-built action to comment on the Pull Request.
+      # This step only runs if the previous step was successful AND documentation changes were detected.
+      - name: Comment on PR with artifact link
+        uses: peter-evans/create-or-update-comment@v3
+        if: steps.poll-teamcity.outputs.build_id != ''
+        with:
+          # The PR number is automatically available from the GitHub context.
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: "doxygen-build-comment" # Unique ID for updating the comment
+          body: |
+            ### Doxygen Documentation Build Succeeded
+
+            🎉 The Doxygen documentation has been successfully generated!
+
+            [Click here to view the documentation directly in TeamCity](${{ env.TEAMCITY_URL }}/buildConfiguration/${{ env.BUILD_TYPE_ID }}/${{ steps.poll-teamcity.outputs.build_id }}?buildTab=artifacts#%2FGenerate%20Documentation%2Fdocs.zip)
+
+            _This link points to the Doxygen output from the most recent successful build on your branch._
+
+          # The GITHUB_TOKEN is automatically provided by GitHub Actions for the repository.
+          token: ${{ secrets.GITHUB_TOKEN }}
