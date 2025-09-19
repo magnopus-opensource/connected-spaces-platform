@@ -237,12 +237,9 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
 {
     Writer.StartObject();
 
-    std::unique_ptr<common::Array<common::String>> Keys(const_cast<common::Array<common::String>*>(Value.Keys()));
-
-    for (size_t i = 0; i < Keys->Size(); ++i)
+    for (const std::pair<csp::common::String, T> Pair : Value.GetUnderlying())
     {
-        const auto& CurrentKey = (*Keys)[i];
-        SerializeMember(CurrentKey.c_str(), Value[CurrentKey]);
+        SerializeMember(Pair.first.c_str(), Pair.second);
     }
 
     Writer.EndObject();
