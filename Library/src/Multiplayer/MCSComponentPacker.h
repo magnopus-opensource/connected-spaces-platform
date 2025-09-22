@@ -39,21 +39,6 @@ public:
     const std::map<uint16_t, mcs::ItemComponentData>& GetComponents() const;
 
 private:
-    mcs::ItemComponentData CreateItemComponentData(ComponentBase* Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::ReplicatedValue& Value);
-    mcs::ItemComponentData CreateItemComponentData(bool Value);
-    mcs::ItemComponentData CreateItemComponentData(uint64_t Value);
-    mcs::ItemComponentData CreateItemComponentData(int64_t Value);
-    mcs::ItemComponentData CreateItemComponentData(float Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::String& Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector3& Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector4& Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::Vector2& Value);
-    mcs::ItemComponentData CreateItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
-
-    // Case for enums
-    template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> CreateItemComponentData(T Value);
-
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
 
@@ -64,75 +49,50 @@ class MCSComponentUnpacker
 public:
     MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& Components);
 
-    template <typename T> bool TryReadValue(uint16_t Key, T& Value) const;
+    bool TryReadValue(uint16_t Key, csp::common::ReplicatedValue& Value) const;
 
     // Gets the count of all csp runtime components, excluding view components.
     uint64_t GetRuntimeComponentsCount() const;
 
-    // Primitive types can be converted without changes
-    template <class T> static void CreateReplicatedValueFromType(const T& Type, csp::common::ReplicatedValue& Value)
-    {
-        Value = csp::common::ReplicatedValue(Type);
-    }
-
-    static void CreateReplicatedValueFromType(const std::vector<float>& Type, csp::common::ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(uint64_t, csp::common::ReplicatedValue&);
-    static void CreateReplicatedValueFromType(double, csp::common::ReplicatedValue&);
-    static void CreateReplicatedValueFromType(const std::string& Type, csp::common::ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(const std::map<uint16_t, mcs::ItemComponentData>&, csp::common::ReplicatedValue&);
-    static void CreateReplicatedValueFromType(const std::map<std::string, mcs::ItemComponentData>& Type, csp::common::ReplicatedValue& Value);
-    static void CreateReplicatedValueFromType(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value);
-
 private:
-    template <typename T> void ReadValue(uint16_t Key, T& Value) const;
-
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, uint64_t& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, int64_t& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector2& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector3& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::Vector4& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::String& Value);
-    static void ReadValue(const mcs::ItemComponentData& ComponentData, csp::common::ReplicatedValue& Value);
-
-    template <typename T> std::enable_if_t<std::is_enum_v<T>> ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const;
-
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
 
-template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = CreateItemComponentData(Value); }
+template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = ToItemComponentData(Value); }
 template <class T> inline void MCSComponentPacker::WriteValue(SpaceEntityComponentKey Key, const T& Value)
 {
-    Components[static_cast<uint16_t>(Key)] = CreateItemComponentData(Value);
+    WriteValue(static_cast<uint16_t>(Key), Value);
 }
 
-template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> MCSComponentPacker::CreateItemComponentData(T Value)
+template <typename T> csp::common::ReplicatedValue ToReplicatedValue(const T& Value) { return csp::common::ReplicatedValue { Value }; }
+
+template <typename T> std::enable_if_t<std::is_enum_v<T>, csp::common::ReplicatedValue> inline ToReplicatedValue(const T& Value)
 {
-    return CreateItemComponentData(static_cast<uint64_t>(Value));
+    return csp::common::ReplicatedValue { static_cast<int64_t>(Value) };
 }
 
-template <typename T> inline bool MCSComponentUnpacker::TryReadValue(uint16_t Key, T& Value) const
+csp::common::ReplicatedValue ToReplicatedValue(double);
+csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Value);
+csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&);
+csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value);
+
+template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T Value)
 {
-    if (Components.find(Key) == Components.end())
-    {
-        return false;
-    }
-
-    ReadValue(Key, Value);
-    return true;
+    return ToItemComponentData(static_cast<uint64_t>(Value));
 }
 
-template <typename T> inline void MCSComponentUnpacker::ReadValue(uint16_t Key, T& Value) const
-{
-    const mcs::ItemComponentData& ComponentData = Components.find(Key)->second;
-    ReadValue(ComponentData, Value);
-}
-
-template <typename T>
-inline std::enable_if_t<std::is_enum_v<T>> MCSComponentUnpacker::ReadValue(const mcs::ItemComponentData& ComponentData, T& Value) const
-{
-    uint64_t RawEnumValue = 0;
-    ReadValue(ComponentData, RawEnumValue);
-    Value = static_cast<T>(RawEnumValue);
-}
-
+mcs::ItemComponentData ToItemComponentData(ComponentBase* Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::ReplicatedValue& Value);
+mcs::ItemComponentData ToItemComponentData(bool Value);
+mcs::ItemComponentData ToItemComponentData(uint64_t Value);
+mcs::ItemComponentData ToItemComponentData(int64_t Value);
+mcs::ItemComponentData ToItemComponentData(float Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& Value);
+mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
 }

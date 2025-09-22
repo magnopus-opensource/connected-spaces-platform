@@ -23,8 +23,7 @@
 
 #include <variant>
 
-namespace csp::common
-{
+namespace csp::common {
 
 CSP_START_IGNORE
 class ReplicatedValue;
@@ -59,30 +58,28 @@ public:
 
     CSP_START_IGNORE
 
-    // Internal templated constructor
-    CSP_NO_EXPORT template <class T>
-    inline ReplicatedValue(const T& InValue)
-        : Value { InValue }
-    {
+    // Internal templated setter.
+        CSP_NO_EXPORT template <class T> inline void Set(const T& InValue) {
+        Value = InValue;
+    }
+// Internal templated setter.
+    CSP_NO_EXPORT template <class T> inline const T& Get() const {
+        return std::get<T>(Value);
     }
 
-    // These are great for certain scenarios such as serialization/deserialization, as we can avoid conditionals.
-    // Internal templated setter.
-    CSP_NO_EXPORT template <class T> inline void Set(const T& InValue) { Value = InValue; }
-    // Internal templated setter.
-    CSP_NO_EXPORT template <class T> inline const T& Get() const { return std::get<T>(Value); }
-
-    // Internal getter for variant.
-    CSP_NO_EXPORT const ReplicatedValueImplType& GetValue() const { return Value; };
+// Internal getter for variant.
+    CSP_NO_EXPORT const ReplicatedValueImplType& GetValue() const {
+        return Value;
+    };
 
     CSP_END_IGNORE
 
     /// @brief Construct a ReplicatedValue based on a bool type.
     /// @param InBoolValue bool : Initial value.
-    ReplicatedValue(bool InBoolValue);
+        ReplicatedValue(bool InBoolValue);
 
-    /// @brief Construct a ReplicatedValue based on a float type.
-    /// @param InFloatValue float : Initial value.
+        /// @brief Construct a ReplicatedValue based on a float type.
+        /// @param InFloatValue float : Initial value.
     ReplicatedValue(float InFloatValue);
 
     /// @brief Construct a ReplicatedValue based on a Long (uint64_t) type.
@@ -142,10 +139,12 @@ public:
 
     /// @brief Gets the type of replicated value.
     /// @return ReplicatedValueType: Enum representing all supported replication base types.
-    ReplicatedValueType GetReplicatedValueType() const { return ReplicatedType; }
+    ReplicatedValueType GetReplicatedValueType() const {
+        return ReplicatedType;
+    }
 
-    /// @brief Sets a bool value for this replicated value, will overwrite any previous value.
-    /// @param InValue
+/// @brief Sets a bool value for this replicated value, will overwrite any previous value.
+/// @param InValue
     void SetBool(bool InValue);
 
     /// @brief Get a bool value from this replicated value, will assert if not a bool type.
@@ -229,10 +228,10 @@ public:
 
 private:
     CSP_START_IGNORE
-    ReplicatedValueImplType Value;
+        ReplicatedValueImplType Value;
     CSP_END_IGNORE
 
-    ReplicatedValueType ReplicatedType;
+        ReplicatedValueType ReplicatedType;
 };
 
 } // namespace csp::common
