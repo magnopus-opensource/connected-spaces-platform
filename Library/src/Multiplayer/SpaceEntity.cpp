@@ -945,8 +945,7 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property;
-                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
                 Component->Properties[PatchComponentPair.first] = Property;
                 Component->OnCreated();
@@ -989,8 +988,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
                 continue;
             }
 
-            csp::common::ReplicatedValue Property;
-            MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+            csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
             // UpdateComponentDirect(false);
             Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
@@ -1012,8 +1010,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property;
-                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
                 // UpdateComponentDirect(false);?
                 Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
