@@ -571,14 +571,15 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
         = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
             Callback, nullptr);
 
-    auto PrototypeFilters = std::shared_ptr<chs::PrototypeFilters>();
+    auto PrototypeFilters = std::shared_ptr<chs::PrototypeFilters>(new chs::PrototypeFilters);
     PrototypeFilters->SetHasGroup(true);
 
-    auto DuplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>();
+    auto DuplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>(new chs::DuplicateGroupPrototypesOptions);
     DuplicateGroupPrototypesOptions->SetOriginalGroupId(SourceSpaceId);
     DuplicateGroupPrototypesOptions->SetNewGroupId(DestSpaceId);
     DuplicateGroupPrototypesOptions->SetAdditionalFilters(PrototypeFilters);
     DuplicateGroupPrototypesOptions->SetAsyncCall(CopyAsync);
+    DuplicateGroupPrototypesOptions->SetIncludeMusubiGeneratedAssets(true);
 
     // Use `GET /api/v1/prototypes` and only pass asset collection IDs
     static_cast<chs::PrototypeApi*>(PrototypeAPI)
