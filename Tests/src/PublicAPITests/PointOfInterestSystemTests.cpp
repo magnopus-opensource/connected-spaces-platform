@@ -454,22 +454,28 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
         const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
         EXPECT_GE(POIs.Size(), 1);
 
-        // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
-        bool FoundSpacePOI = false;
-        bool FoundDefaultPOI = false;
+        // Multiple POIs have been created at the same location, so we need to validate that the expected POIs are found.
+        csp::systems::PointOfInterest POITypeDefault;
+        csp::systems::PointOfInterest POITypeSpace;
+
         for (uint32_t i = 0; i < POIs.Size(); i++)
         {
             if (POIs[i].Id == DefaultPOI.Id)
             {
-                FoundDefaultPOI = true;
+                POITypeDefault = POIs[i];
             }
 
             if (POIs[i].SpaceId == Space.Id)
             {
-                FoundSpacePOI = true;
+                POITypeSpace = POIs[i];
             }
         }
-        EXPECT_TRUE(FoundDefaultPOI && FoundSpacePOI);
+
+        EXPECT_NE(POITypeDefault.Id, "");
+        DeletePointOfInterest(POISystem, POITypeDefault);
+
+        EXPECT_NE(POITypeSpace.Id, "");
+        DeletePointOfInterest(POISystem, POITypeSpace);
     }
 
     DeleteSpace(SpaceSystem, Space.Id);
