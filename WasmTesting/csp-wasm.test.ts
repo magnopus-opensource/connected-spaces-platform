@@ -50,9 +50,7 @@ test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
   console.log(errors);
 
   assert.ok(
-    errors.some(e => e.message.includes('table index is out of bounds')),
-    'Expected cross-thread `table index is out of bounds` error. Message not found, did you fix the bug (OB-3782)? Nice job! ',
-  );
+    !errors.some(e => e.message.includes('table index is out of bounds')));
   
 });
 
