@@ -253,6 +253,42 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIOutsideCircularAreaTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+
+    csp::common::String UserId;
+
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::GeoLocation POILocation;
+    POILocation.Latitude = 45.0;
+    POILocation.Longitude = 160.0;
+
+    csp::systems::PointOfInterest PointOfInterest;
+    CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
+
+    csp::systems::GeoLocation SearchLocationOrigin;
+    SearchLocationOrigin.Latitude = 0;
+    SearchLocationOrigin.Longitude = 0;
+    double SearchRadius = 1000;
+
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+        csp::systems::EPointOfInterestType::DEFAULT)
+                        .Await(RequestPredicate);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetPOIs().Size(), 0);
+
+    DeletePointOfInterest(POISystem, PointOfInterest);
+
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
 {
     SetRandSeed();
