@@ -440,3 +440,29 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
     LogOut(UserSystem);
 }
+
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, DeletePOITest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+
+    csp::common::String UserId;
+
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::GeoLocation POILocation;
+    POILocation.Latitude = 45.0;
+    POILocation.Longitude = 160.0;
+
+    csp::systems::PointOfInterest PointOfInterest;
+    CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
+
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, POISystem, PointOfInterest).Await(RequestPredicate);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    LogOut(UserSystem);
+}
