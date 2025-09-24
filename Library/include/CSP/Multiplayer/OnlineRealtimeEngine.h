@@ -140,8 +140,8 @@ public:
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+        const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.

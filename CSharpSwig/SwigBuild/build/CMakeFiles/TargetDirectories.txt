@@ -1,0 +1,3 @@
+C:/dev/connected-spaces-platform/CSharpSwig/generated/build/CMakeFiles/CspSwigProto.dir
+C:/dev/connected-spaces-platform/CSharpSwig/generated/build/CMakeFiles/ALL_BUILD.dir
+C:/dev/connected-spaces-platform/CSharpSwig/generated/build/CMakeFiles/ZERO_CHECK.dir

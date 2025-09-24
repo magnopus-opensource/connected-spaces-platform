@@ -41,7 +41,8 @@ if not Project then
         end
     
         -- Generate wrapper code
-        return WrapperGenerator.Generate()
+        --return WrapperGenerator.Generate()
+        return true;
     end
     
     function Project.DefineProject()

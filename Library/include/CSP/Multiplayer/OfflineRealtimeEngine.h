@@ -54,6 +54,8 @@ class CSP_API OfflineRealtimeEngine : public csp::common::IRealtimeEngine
     CSP_END_IGNORE
 
 public:
+    OfflineRealtimeEngine();
+
     /// @brief OfflineRealtimeEngine constructor.
     /// Creates a realtime engine pre-populated from a scene description. (Usually parsed from a checkpoint file)
     /// @param SceneDescription CSPSceneDescription : The scene description containing entities within the scene.
@@ -104,8 +106,8 @@ public:
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& Transform,
+        const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.

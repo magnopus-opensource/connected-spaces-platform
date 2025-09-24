@@ -381,10 +381,13 @@ void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const c
             }));
 }
 
-void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+    const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
-    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentID, Callback, &LogSystem = this->LogSystem](
+    csp::common::Optional<uint64_t> ParentIDCommon
+        = ParentID.has_value() ? csp::common::Optional<uint64_t> { ParentID.value() } : csp::common::Optional<uint64_t> {};
+
+    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentIDCommon, Callback, &LogSystem = this->LogSystem](
                                               const signalr::value& Result, const std::exception_ptr& Except)
     {
         try
@@ -401,8 +404,8 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
-        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name, SpaceTransform,
-            MultiplayerConnectionInst->GetClientId(), ParentID, true, true);
+        auto* NewObject = new SpaceEntity(this, *ScriptRunner, LogSystem, SpaceEntityType::Object, ID, Name.c_str(), SpaceTransform,
+            MultiplayerConnectionInst->GetClientId(), ParentIDCommon, true, true);
 
         const mcs::ObjectMessage Message = NewObject->GetStatePatcher()->CreateObjectMessage();
 

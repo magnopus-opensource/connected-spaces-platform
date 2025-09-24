@@ -83,6 +83,8 @@ namespace
 
 }
 
+OfflineRealtimeEngine::OfflineRealtimeEngine() {};
+
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
     : OfflineRealtimeEngine(LogSystem, RemoteScriptRunner)
@@ -142,14 +144,22 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
     Callback(NewAvatar.release());
 }
 
-void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+void OfflineRealtimeEngine::CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& Transform,
+    const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
 {
+    if (Name == "PleaseThrow")
+    {
+        throw std::runtime_error("This should throw because your name was PleaseThrow!");
+    }
+
     // Some of our interfaces use int64_t ... real bugs here.
     uint64_t Id = NextId();
 
-    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
-        OfflineRealtimeEngine::LocalClientId(), ParentID, false, false };
+    csp::common::Optional<uint64_t> ParentIDCommon
+        = ParentID.has_value() ? csp::common::Optional<uint64_t> { ParentID.value() } : csp::common::Optional<uint64_t> {};
+
+    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name.c_str(), Transform,
+        OfflineRealtimeEngine::LocalClientId(), ParentIDCommon, false, false };
 
     std::scoped_lock EntitiesLocker { EntitiesLock };
 

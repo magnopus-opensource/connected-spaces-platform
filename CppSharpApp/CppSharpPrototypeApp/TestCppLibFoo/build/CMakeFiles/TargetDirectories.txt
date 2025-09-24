@@ -1,0 +1,3 @@
+C:/dev/connected-spaces-platform/CppSharpApp/CppSharpPrototypeApp/TestCppLibFoo/build/CMakeFiles/Foo.dir
+C:/dev/connected-spaces-platform/CppSharpApp/CppSharpPrototypeApp/TestCppLibFoo/build/CMakeFiles/ALL_BUILD.dir
+C:/dev/connected-spaces-platform/CppSharpApp/CppSharpPrototypeApp/TestCppLibFoo/build/CMakeFiles/ZERO_CHECK.dir

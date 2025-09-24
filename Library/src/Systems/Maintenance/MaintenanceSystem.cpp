@@ -67,6 +67,7 @@ void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& Maintenanc
 
             INVOKE_IF_NOT_NULL(Callback, Result);
         };
+
         csp::services::ResponseHandlerPtr MaintenanceResponseHandler
             = MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
                 GetMaintenanceInfoCallback, nullptr);
