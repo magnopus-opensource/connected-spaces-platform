@@ -131,7 +131,7 @@ public:
      * relevant device specs.
      * @param Callback NullResultCallback : the callback to execute on completion of the send operation.
      */
-    void SendAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
+    CSP_ASYNC_RESULT void SendAnalyticsEvent(const csp::common::String& ProductContextSection, const csp::common::String& Category,
         const csp::common::String& InteractionType, const csp::common::Optional<csp::common::String>& SubCategory,
         const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& Metadata, NullResultCallback Callback);
 
@@ -142,7 +142,7 @@ public:
      * @param Callback NullResultCallback : the callback to execute on completion of the flush operation.
      * @pre The user must be logged in to send an Analytics Record to the backend services.
      */
-    CSP_EVENT void FlushAnalyticsEventsQueue(NullResultCallback Callback);
+    CSP_ASYNC_RESULT void FlushAnalyticsEventsQueue(NullResultCallback Callback);
 
     /**
      * @brief Retrieves the time since the queue was last sent.
