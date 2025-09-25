@@ -19,6 +19,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
+#include "CSP/Common/Settings.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Variant.h"
@@ -41,18 +42,6 @@ namespace csp::systems
 {
 
 /// @ingroup Settings System
-/// @brief Data representation of a Settings collection which maps to a UserService::Settings.
-class CSP_API SettingsCollection
-{
-public:
-    SettingsCollection() = default;
-
-    csp::common::String UserId;
-    csp::common::String Context;
-    csp::common::Map<csp::common::String, csp::common::String> Settings;
-};
-
-/// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
 class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 {
@@ -65,14 +54,14 @@ class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 public:
     /// @brief Retrieves the settings collection result.
     /// @return SettingsCollection : const ref of settings collection class
-    const SettingsCollection& GetSettingsCollection() const;
+    const csp::common::SettingsCollection& GetSettingsCollection() const;
 
 private:
     SettingsCollectionResult(void*) {};
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    SettingsCollection SettingsCollection;
+    csp::common::SettingsCollection SettingsCollection;
 };
 
 /// @brief Used to specify the type of the user's avatar

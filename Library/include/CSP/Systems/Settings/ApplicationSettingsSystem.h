@@ -17,7 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Systems/Settings/ApplicationSettings.h"
+#include "CSP/Common/Settings.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
@@ -49,6 +49,38 @@ class WebClient;
 
 namespace csp::systems
 {
+
+/// @ingroup Application Settings System
+/// @brief Represents the result of a request for application settings.
+class CSP_API ApplicationSettingsResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    const csp::common::ApplicationSettings& GetApplicationSettings() const;
+
+    CSP_NO_EXPORT ApplicationSettingsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT ApplicationSettingsResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+
+private:
+    ApplicationSettingsResult(void*) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    csp::common::ApplicationSettings ApplicationSettings;
+};
+
+/// @brief Callback containing Application Settings.
+/// @param Result ApplicationSettingsResult : result class
+typedef std::function<void(const ApplicationSettingsResult& Result)> ApplicationSettingsResultCallback;
 
 /// @ingroup Application Settings System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' application settings service.
@@ -101,10 +133,11 @@ private:
     /// necessary roles, the operation will fail with a 403 Forbidden error.
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
+    CSP_NO_EXPORT void CreateSettingsByContext(
+        const csp::common::ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
 
     // Application Settings Continuations
-    async::task<ApplicationSettingsResult> CreateSettingsByContext(const ApplicationSettings& ApplicationSettings);
+    async::task<ApplicationSettingsResult> CreateSettingsByContext(const csp::common::ApplicationSettings& ApplicationSettings);
     async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
     async::task<ApplicationSettingsResult> GetSettingsByContextAnonymous(const csp::common::String& Tenant,

@@ -182,4 +182,45 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
     return OnCompleteTask;
 }
 
+const ApplicationSettings& ApplicationSettingsResult::GetApplicationSettings() const { return ApplicationSettings; }
+
+namespace
+{
+
+    void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& Dto, csp::common::ApplicationSettings& ApplicationSettings)
+    {
+        if (Dto.HasApplicationName())
+            ApplicationSettings.ApplicationName = Dto.GetApplicationName();
+
+        if (Dto.HasContext())
+            ApplicationSettings.Context = Dto.GetContext();
+
+        if (Dto.HasAllowAnonymous())
+            ApplicationSettings.AllowAnonymous = Dto.GetAllowAnonymous();
+
+        if (Dto.HasSettings())
+            ApplicationSettings.Settings = Convert(Dto.GetSettings());
+    }
+
+}
+
+void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto* ApplicationSettingsResponse = static_cast<chs::ApplicationSettingsDto*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        if (Response->GetPayload().GetContent().Length() > 0)
+        {
+            // Build the Dto from the response Json
+            ApplicationSettingsResponse->FromJson(Response->GetPayload().GetContent());
+
+            ApplicationSettingsDtoToApplicationSettings(*ApplicationSettingsResponse, ApplicationSettings);
+        }
+    }
+}
+
 } // namespace csp::systems
