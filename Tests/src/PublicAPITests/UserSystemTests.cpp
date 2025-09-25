@@ -31,6 +31,7 @@
 #include "gtest/gtest.h"
 #include <filesystem>
 #include <fstream>
+#include <future>
 
 using namespace std::chrono_literals;
 
@@ -1354,4 +1355,36 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
     EXPECT_NE(Result.GetValue(), "");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+
+    csp::systems::Profile TestUser = CreateTestUser();
+
+    std::promise<csp::common::LoginState> SettingsPromise;
+    std::future<csp::common::LoginState> SettingsFuture = SettingsPromise.get_future();
+
+    UserSystem->Login("", TestUser.Email, GeneratedTestAccountPassword, false, true, {},
+        [&SettingsPromise](const csp::systems::LoginStateResult& Result) { SettingsPromise.set_value(Result.GetLoginState()); });
+
+    csp::common::LoginState LoginState = SettingsFuture.get();
+
+    // OKO_TESTS Tenant has a default applications settings setup. All these values are arbitrary just for tests
+    ASSERT_EQ(LoginState.DefaultApplicationSettings.Size(), 1);
+    ASSERT_EQ(LoginState.DefaultSettings.Size(), 0);
+
+    csp::common::ApplicationSettings ApplicationSetting = LoginState.DefaultApplicationSettings[0];
+    ASSERT_EQ(ApplicationSetting.AllowAnonymous, false);
+    ASSERT_EQ(ApplicationSetting.Context, "checkpoint");
+    // application name not listed because it uses a project codename which is secret ... it's six characters long though :P Ooooh what could it be?
+    ASSERT_EQ(ApplicationSetting.ApplicationName.Length(), 6);
+
+    ASSERT_EQ(ApplicationSetting.Settings.Size(), 1);
+    ASSERT_TRUE(ApplicationSetting.Settings.HasKey("URL"));
+    ASSERT_EQ(ApplicationSetting.Settings["URL"], "https://www.google.com/search?q=why+google");
 }
