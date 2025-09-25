@@ -300,22 +300,14 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
     auto* POISystem = SystemsManager.GetPointOfInterestSystem();
 
     csp::common::String UserId;
-
     LogInAsNewTestUser(UserSystem, UserId);
 
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     char UniqueAssetCollectionName[256];
+    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     csp::systems::AssetCollection AssetCollection;
     CreateAssetCollection(AssetSystem, Space, UniqueAssetCollectionName, AssetCollection);
@@ -349,18 +341,11 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
-    const char* TestSpaceName = "CSP-TEST-SPACE";
-    const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     // The default POI we will be using during the test.
     csp::systems::PointOfInterest DefaultPOI;
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     csp::systems::GeoLocation SpaceGeolocation;
 
