@@ -49,9 +49,11 @@ void LoginState::CopyStateFrom(const LoginState& OtherState)
     RefreshToken = OtherState.RefreshToken;
     UserId = OtherState.UserId;
     DeviceId = OtherState.DeviceId;
+    DefaultApplicationSettings = OtherState.DefaultApplicationSettings;
+    DefaultSettings = OtherState.DefaultSettings;
 
     // Must reallocate the access token when copying otherwise destructor of
-    // copied state will delete the original memory pointer potentially causing corruption
+    // copied state will delete the original memory pointer potentially causing corruption ... (Have you heard of copy constructors my friend?)
     AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
 }
 
