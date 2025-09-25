@@ -678,13 +678,20 @@ void MultiplayerConnection::BindOnRequestToDisconnect()
     const std::string OnRequestToDisconnect = GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_REQUEST_TO_DISCONNECT);
     GetSignalRConnection()->On(
         OnRequestToDisconnect,
-        [](const signalr::value& Params)
+        [&](const signalr::value& Params)
         {
+            auto Done = false;
             const std::string Reason = Params.as_array()[0].as_string();
+            DisconnectWithReason(Reason.c_str(), [&Done](ErrorCode /*Error*/) { Done = true; });
 
-            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
-            DisconnectEvent->AddString("Reason", Reason.c_str());
-            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
+            int TimeoutCounter = 2000;
+
+            while (!Done && TimeoutCounter > 0)
+            {
+                std::this_thread::sleep_for(1ms);
+
+                --TimeoutCounter;
+            }
         },
         LogSystem);
 }
