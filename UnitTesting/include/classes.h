@@ -24,5 +24,7 @@ class CSP_API SimpleClass
 public:
     SimpleClass();
     ~SimpleClass();
+
+    int GetValue() const;
 };
 }

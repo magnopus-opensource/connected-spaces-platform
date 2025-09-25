@@ -21,4 +21,7 @@ namespace csp::Tests
 SimpleClass::SimpleClass() { }
 
 SimpleClass::~SimpleClass() { }
-}
+
+int SimpleClass::GetValue() const { return 42; }
+
+} // namespace csp::Tests
