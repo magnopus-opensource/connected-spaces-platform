@@ -289,6 +289,81 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIOutsideCircularArea
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaExcludeOtherTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* POISystem = SystemsManager.GetPointOfInterestSystem();
+
+    csp::common::String UserId;
+
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::GeoLocation InsidePOILocation;
+    InsidePOILocation.Latitude = 45.0;
+    InsidePOILocation.Longitude = 160.0;
+
+    csp::systems::PointOfInterest InsidePointOfInterest;
+    CreatePointOfInterest(POISystem, nullptr, InsidePOILocation, nullptr, InsidePointOfInterest);
+
+    csp::systems::GeoLocation OutsidePOILocation;
+    OutsidePOILocation.Latitude = -45.0;
+    OutsidePOILocation.Longitude = -160.0;
+
+    csp::systems::PointOfInterest OutsidePointOfInterest;
+    CreatePointOfInterest(POISystem, nullptr, OutsidePOILocation, nullptr, OutsidePointOfInterest);
+
+    // Search for the newly created POI inside a circular area
+    csp::common::Array<csp::systems::PointOfInterest> POICollection;
+
+    csp::systems::GeoLocation SearchLocationOrigin;
+    SearchLocationOrigin.Latitude = 44.0;
+    SearchLocationOrigin.Longitude = 160.0;
+    double SearchRadius = 130000;
+
+    auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius,
+        csp::systems::EPointOfInterestType::DEFAULT)
+                        .Await(RequestPredicate);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        const auto& ResultPOIs = Result.GetPOIs();
+        POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
+
+        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
+        {
+            POICollection[idx] = ResultPOIs[idx];
+        }
+    }
+
+    bool InsidePointOfInterestFound = false;
+    bool OutsidePointOfInterestFound = false;
+
+    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
+    {
+        if (POICollection[idx].Name == InsidePointOfInterest.Name)
+        {
+            InsidePointOfInterestFound = true;
+        }
+        else if (POICollection[idx].Name == OutsidePointOfInterest.Name)
+        {
+            OutsidePointOfInterestFound = true;
+        }
+    }
+
+    EXPECT_TRUE(InsidePointOfInterestFound);
+    EXPECT_FALSE(OutsidePointOfInterestFound);
+
+    DeletePointOfInterest(POISystem, InsidePointOfInterest);
+    DeletePointOfInterest(POISystem, OutsidePointOfInterest);
+
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
 {
     SetRandSeed();
