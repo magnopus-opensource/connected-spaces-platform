@@ -203,6 +203,7 @@ namespace
         Connection->SetDisconnected(
             [&NetworkInterruptionCallback, &LogSystem](const std::exception_ptr& Except)
             {
+                // We currently detect a connection interrupt if the disconnected callback contains an exception.
                 if (Except)
                 {
                     try
@@ -212,10 +213,9 @@ namespace
                     catch (const std::exception& e)
                     {
                         INVOKE_IF_NOT_NULL(NetworkInterruptionCallback, e.what());
+                        LogSystem.LogMsg(csp::common::LogLevel::Log, "Connection Interrupted.");
                     }
                 }
-
-                LogSystem.LogMsg(csp::common::LogLevel::Log, "Connection Interrupted.");
             });
     }
 }
