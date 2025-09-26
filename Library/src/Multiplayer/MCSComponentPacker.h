@@ -58,7 +58,6 @@ private:
     std::map<uint16_t, mcs::ItemComponentData> Components;
 };
 
-template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = ToItemComponentData(Value); }
 template <class T> inline void MCSComponentPacker::WriteValue(SpaceEntityComponentKey Key, const T& Value)
 {
     WriteValue(static_cast<uint16_t>(Key), Value);
@@ -90,6 +89,8 @@ mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
+
+template <class T> inline void MCSComponentPacker::WriteValue(uint16_t Key, const T& Value) { Components[Key] = ToItemComponentData(Value); }
 
 template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T Value)
 {

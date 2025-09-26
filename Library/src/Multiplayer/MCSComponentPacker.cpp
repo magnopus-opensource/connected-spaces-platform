@@ -2,10 +2,11 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "SpaceEntityKeys.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 MCSComponentUnpacker::MCSComponentUnpacker(const std::map<uint16_t, mcs::ItemComponentData>& Components)
-    : Components{Components}
+    : Components { Components }
 {
 }
 
@@ -39,35 +40,27 @@ uint64_t MCSComponentUnpacker::GetRuntimeComponentsCount() const
     return ComponentCount;
 }
 
-const std::map<uint16_t, mcs::ItemComponentData>& MCSComponentPacker::GetComponents() const {
-    return Components;
-}
+const std::map<uint16_t, mcs::ItemComponentData>& MCSComponentPacker::GetComponents() const { return Components; }
 
-csp::common::ReplicatedValue ToReplicatedValue(double) {
-    throw std::runtime_error("Unsupported");
-}
+csp::common::ReplicatedValue ToReplicatedValue(double) { throw std::runtime_error("Unsupported"); }
 
-csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value) {
-    return csp::common::ReplicatedValue{static_cast<int64_t>(Value)};
-}
+csp::common::ReplicatedValue ToReplicatedValue(uint64_t Value) { return csp::common::ReplicatedValue { static_cast<int64_t>(Value) }; }
 
-csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value) {
-    return csp::common::ReplicatedValue{Value.c_str()};
-}
+csp::common::ReplicatedValue ToReplicatedValue(const std::string& Value) { return csp::common::ReplicatedValue { Value.c_str() }; }
 
 csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value)
 {
     if (Value.size() == 2)
     {
-        return csp::common::ReplicatedValue{csp::common::Vector2{Value[0], Value[1]}};
+        return csp::common::ReplicatedValue { csp::common::Vector2 { Value[0], Value[1] } };
     }
     else if (Value.size() == 3)
     {
-        return csp::common::ReplicatedValue{csp::common::Vector3{Value[0], Value[1], Value[2]}};
+        return csp::common::ReplicatedValue { csp::common::Vector3 { Value[0], Value[1], Value[2] } };
     }
     else if (Value.size() == 4)
     {
-        return csp::common::ReplicatedValue{csp::common::Vector4{Value[0], Value[1], Value[2], Value[3]}};
+        return csp::common::ReplicatedValue { csp::common::Vector4 { Value[0], Value[1], Value[2], Value[3] } };
     }
     else
     {
@@ -80,9 +73,7 @@ csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Val
     return std::visit([](const auto& ValueType) { return ToReplicatedValue(ValueType); }, Value.GetValue());
 }
 
-csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&) {
-    throw std::runtime_error("Not yet implemented");
-}
+csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&) { throw std::runtime_error("Not yet implemented"); }
 
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value)
 {
@@ -94,7 +85,7 @@ csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::
         Map[Pair.first.c_str()] = ToReplicatedValue(Pair.second);
     }
 
-    return csp::common::ReplicatedValue{Map};
+    return csp::common::ReplicatedValue { Map };
 }
 
 mcs::ItemComponentData ToItemComponentData(ComponentBase* Value)
@@ -114,50 +105,40 @@ mcs::ItemComponentData ToItemComponentData(ComponentBase* Value)
         ComponentPacker.WriteValue(static_cast<uint16_t>(Key), (*Value->GetProperties())[static_cast<uint32_t>(Key)]);
     }
 
-    return mcs::ItemComponentData{ComponentPacker.GetComponents()};
+    return mcs::ItemComponentData { ComponentPacker.GetComponents() };
 }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::ReplicatedValue& Value)
 {
     mcs::ItemComponentData Data;
     // Extract the internal type from the variant and parse using its corrosponding typed CreateItemComponentData.
-    std::visit([&Data, this](const auto& InternalType) { Data = CreateItemComponentData(InternalType); }, Value.GetValue());
+    std::visit([&Data](const auto& InternalType) { Data = ToItemComponentData(InternalType); }, Value.GetValue());
     return Data;
 }
 
-mcs::ItemComponentData ToItemComponentData(bool Value) {
-    return mcs::ItemComponentData{Value};
-}
+mcs::ItemComponentData ToItemComponentData(bool Value) { return mcs::ItemComponentData { Value }; }
 
-mcs::ItemComponentData ToItemComponentData(uint64_t Value) {
-    return mcs::ItemComponentData{Value};
-}
+mcs::ItemComponentData ToItemComponentData(uint64_t Value) { return mcs::ItemComponentData { Value }; }
 
-mcs::ItemComponentData ToItemComponentData(int64_t Value) {
-    return mcs::ItemComponentData{Value};
-}
+mcs::ItemComponentData ToItemComponentData(int64_t Value) { return mcs::ItemComponentData { Value }; }
 
-mcs::ItemComponentData ToItemComponentData(float Value) {
-    return mcs::ItemComponentData{Value};
-}
+mcs::ItemComponentData ToItemComponentData(float Value) { return mcs::ItemComponentData { Value }; }
 
-mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value) {
-    return mcs::ItemComponentData{std::string{Value.c_str()}};
-}
+mcs::ItemComponentData ToItemComponentData(const csp::common::String& Value) { return mcs::ItemComponentData { std::string { Value.c_str() } }; }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value)
 {
-    return mcs::ItemComponentData{std::vector<float> { Value.X, Value.Y, Value.Z }};
+    return mcs::ItemComponentData { std::vector<float> { Value.X, Value.Y, Value.Z } };
 }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value)
 {
-    return mcs::ItemComponentData{std::vector<float> { Value.X, Value.Y, Value.Z, Value.W }};
+    return mcs::ItemComponentData { std::vector<float> { Value.X, Value.Y, Value.Z, Value.W } };
 }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& Value)
 {
-    return mcs::ItemComponentData{std::vector<float> { Value.X, Value.Y }};
+    return mcs::ItemComponentData { std::vector<float> { Value.X, Value.Y } };
 }
 
 mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value)
@@ -170,7 +151,7 @@ mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::S
         Map[Key.c_str()] = ToItemComponentData(Value[Key]);
     }
 
-    return mcs::ItemComponentData{Map};
+    return mcs::ItemComponentData { Map };
 }
 
 }
