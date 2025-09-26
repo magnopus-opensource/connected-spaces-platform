@@ -66,6 +66,7 @@ public:
     {
     }
 
+    // These are great for certain scenarios such as serialization/deserialization, as we can avoid conditionals.
     // Internal templated setter.
     CSP_NO_EXPORT template <class T> inline void Set(const T& InValue) { Value = InValue; }
     // Internal templated setter.
