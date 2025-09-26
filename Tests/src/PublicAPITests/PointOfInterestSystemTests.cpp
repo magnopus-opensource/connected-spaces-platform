@@ -208,8 +208,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
     CreatePointOfInterest(POISystem, nullptr, POILocation, nullptr, PointOfInterest);
 
     // Search for the newly created POI inside a circular area
-    csp::common::Array<csp::systems::PointOfInterest> POICollection;
-
     csp::systems::GeoLocation SearchLocationOrigin;
     SearchLocationOrigin.Latitude = 44.0;
     SearchLocationOrigin.Longitude = 160.0;
@@ -221,16 +219,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
-    {
-        const auto& ResultPOIs = Result.GetPOIs();
-        POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
-
-        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
-        {
-            POICollection[idx] = ResultPOIs[idx];
-        }
-    }
+    const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
 
     // we should have at least the POI we've created
     EXPECT_TRUE(POICollection.Size() > 0);
@@ -316,8 +305,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
     CreatePointOfInterest(POISystem, nullptr, OutsidePOILocation, nullptr, OutsidePointOfInterest);
 
     // Search for the newly created POI inside a circular area
-    csp::common::Array<csp::systems::PointOfInterest> POICollection;
-
     csp::systems::GeoLocation SearchLocationOrigin;
     SearchLocationOrigin.Latitude = 44.0;
     SearchLocationOrigin.Longitude = 160.0;
@@ -329,20 +316,10 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
-    {
-        const auto& ResultPOIs = Result.GetPOIs();
-        POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
-
-        for (size_t idx = 0; idx < ResultPOIs.Size(); ++idx)
-        {
-            POICollection[idx] = ResultPOIs[idx];
-        }
-    }
-
     bool InsidePointOfInterestFound = false;
     bool OutsidePointOfInterestFound = false;
 
+    const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
     for (size_t idx = 0; idx < POICollection.Size(); ++idx)
     {
         if (POICollection[idx].Name == InsidePointOfInterest.Name)
