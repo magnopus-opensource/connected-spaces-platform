@@ -21,10 +21,16 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 
-#include <functional>
+#include <variant>
 
 namespace csp::common
 {
+
+CSP_START_IGNORE
+class ReplicatedValue;
+using ReplicatedValueImplType = std::variant<bool, float, int64_t, csp::common::String, csp::common::Vector2, csp::common::Vector3,
+    csp::common::Vector4, csp::common::Map<csp::common::String, ReplicatedValue>>;
+CSP_END_IGNORE
 
 /// @brief Enum representing the type of a replicated value.
 /// These values are serialized and stored as integers.
@@ -48,9 +54,28 @@ class CSP_API ReplicatedValue
 {
 public:
     /// @brief A default ReplicatedValue will not have a valid type ("ReplicatedValueType::InvalidType"), and will have no internal value associated.
-    ///
-    /// Do not use this constructor unless you know what you are doing!
+    /// This constuctor will create the value in an invalid state. Do not use unless you know what you are doing!
     ReplicatedValue();
+
+    CSP_START_IGNORE
+
+    // Internal templated constructor
+    CSP_NO_EXPORT template <class T>
+    inline ReplicatedValue(const T& InValue)
+        : Value { InValue }
+    {
+    }
+
+    // These are great for certain scenarios such as serialization/deserialization, as we can avoid conditionals.
+    // Internal templated setter.
+    CSP_NO_EXPORT template <class T> inline void Set(const T& InValue) { Value = InValue; }
+    // Internal templated setter.
+    CSP_NO_EXPORT template <class T> inline const T& Get() const { return std::get<T>(Value); }
+
+    // Internal getter for variant.
+    CSP_NO_EXPORT const ReplicatedValueImplType& GetValue() const { return Value; };
+
+    CSP_END_IGNORE
 
     /// @brief Construct a ReplicatedValue based on a bool type.
     /// @param InBoolValue bool : Initial value.
@@ -85,35 +110,35 @@ public:
     ReplicatedValue(const csp::common::Vector4& InVector4Value);
 
     /// @brief Construct a ReplicatedValue based on an csp::common::Map type with a string value as the key.
-    /// @param InMapValue csp::common::Map : Initial value.
-    ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue);
-
-    /// @brief Copy constructor
-    /// @param Other csp::multiplayer::ReplicatedValue& : The value to copy.
-    ReplicatedValue(const ReplicatedValue& Other);
+    /// @param InValue csp::common::Map : Initial value.
+    ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue);
 
     /// @brief Destroys the replicated value instance.
     ~ReplicatedValue();
 
-    /// @brief Assignment operator overload.
-    /// @param InValue ReplicatedValue : Other replicated value to set this one to.
-    ReplicatedValue& operator=(const ReplicatedValue& InValue);
+    /// @brief Copy constructor
+    /// @param Other csp::common::ReplicatedValue& : The value to copy.
+    CSP_NO_EXPORT ReplicatedValue(const ReplicatedValue& Other);
+
+    /// @brief Move constructor
+    /// @param Other csp::common::ReplicatedValue& : The value to move.
+    CSP_NO_EXPORT ReplicatedValue(ReplicatedValue&& Other);
+
+    /// @brief Copy assignment operator overload.
+    /// @param InValue ReplicatedValue : Other replicated value to set from.
+    CSP_NO_EXPORT ReplicatedValue& operator=(const ReplicatedValue& Other);
+
+    /// @brief Move assignment operator overload.
+    /// @param InValue ReplicatedValue : Other replicated value to move from.
+    CSP_NO_EXPORT ReplicatedValue& operator=(ReplicatedValue&& Other);
 
     /// @brief Equality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
-    bool operator==(const ReplicatedValue& OtherValue) const;
+    CSP_NO_EXPORT bool operator==(const ReplicatedValue& OtherValue) const;
 
-    /// @brief Non equality operator overload.
+    /// @brief Inequality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
-    bool operator!=(const ReplicatedValue& OtherValue) const;
-
-    /// @brief Less than operator overload.
-    /// @param ReplicatedValue : Other value to compare to.
-    bool operator<(const ReplicatedValue& OtherValue) const;
-
-    /// @brief Greater than operator overload.
-    /// @param ReplicatedValue : Other value to compare to.
-    bool operator>(const ReplicatedValue& OtherValue) const;
+    CSP_NO_EXPORT bool operator!=(const ReplicatedValue& OtherValue) const;
 
     /// @brief Gets the type of replicated value.
     /// @return ReplicatedValueType: Enum representing all supported replication base types.
@@ -124,9 +149,6 @@ public:
     void SetBool(bool InValue);
 
     /// @brief Get a bool value from this replicated value, will assert if not a bool type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return bool
     bool GetBool() const;
 
@@ -135,9 +157,6 @@ public:
     void SetFloat(float InValue);
 
     /// @brief Get a float value from this replicated value, will assert if not a float type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return float value
     float GetFloat() const;
 
@@ -146,9 +165,6 @@ public:
     void SetInt(int64_t InValue);
 
     /// @brief Get a int64 value from this replicated value, will assert if not a int64 type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return int64 value
     int64_t GetInt() const;
 
@@ -159,9 +175,6 @@ public:
     void SetString(const csp::common::String& InValue);
 
     /// @brief Get a csp::common::String& value from this replicated value, will assert if not a csp::common::String type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return csp::common::String&
     const csp::common::String& GetString() const;
 
@@ -173,9 +186,6 @@ public:
     void SetVector2(const csp::common::Vector2& InValue);
 
     /// @brief Get a csp::common::Vector2 value from this replicated value, will assert if not a csp::common::Vector2 type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return csp::common::Vector2
     const csp::common::Vector2& GetVector2() const;
 
@@ -187,9 +197,6 @@ public:
     void SetVector3(const csp::common::Vector3& InValue);
 
     /// @brief Get a csp::common::Vector3 value from this replicated value, will assert if not a csp::common::Vector3 type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return csp::common::Vector3
     const csp::common::Vector3& GetVector3() const;
 
@@ -201,9 +208,6 @@ public:
     void SetVector4(const csp::common::Vector4& InValue);
 
     /// @brief Get a csp::common::Vector4 value from this replicated value, will assert if not a csp::common::Vector4 type.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return csp::common::Vector4
     const csp::common::Vector4& GetVector4() const;
 
@@ -213,9 +217,6 @@ public:
 
     /// @brief Get a csp::common::Map value with a string value as the key.
     /// This will assert if not a csp::common::Map type with a string value as the key.
-    ///
-    /// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
-    ///
     /// @return csp::common::Map
     const csp::common::Map<csp::common::String, ReplicatedValue>& GetStringMap() const;
 
@@ -226,31 +227,12 @@ public:
     /// @return The default StringMap.
     CSP_NO_EXPORT static const csp::common::Map<csp::common::String, ReplicatedValue>& GetDefaultStringMap();
 
-    /// @brief returns the size of the stored internal value.
-    /// @return size_t size of the internal value.
-    CSP_NO_EXPORT static size_t GetSizeOfInternalValue();
-
 private:
-    ReplicatedValueType ReplicatedType;
-
     CSP_START_IGNORE
-    union InternalValue
-    {
-        InternalValue();
-        ~InternalValue();
-
-        bool Bool;
-        float Float;
-        int64_t Int;
-        csp::common::String String;
-        csp::common::Vector2 Vector2;
-        csp::common::Vector3 Vector3;
-        csp::common::Vector4 Vector4;
-        csp::common::Map<csp::common::String, ReplicatedValue> StringMap;
-    };
-
-    InternalValue Value;
+    ReplicatedValueImplType Value;
     CSP_END_IGNORE
+
+    ReplicatedValueType ReplicatedType;
 };
 
-} // namespace csp::multiplayer
+} // namespace csp::common
