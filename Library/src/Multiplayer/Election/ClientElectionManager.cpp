@@ -52,9 +52,6 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
     {
         ElectionManager->Update();
     }
-    else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
-    {
-    }
 }
 
 ClientElectionManager::ClientElectionManager(
@@ -69,7 +66,6 @@ ClientElectionManager::ClientElectionManager(
     , RemoteScriptRunner(JSScriptRunner)
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager Created");
 }
@@ -79,7 +75,6 @@ ClientElectionManager::~ClientElectionManager()
     UnBindNetworkEvents();
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
     delete (EventHandler);
 
     for (const auto& Client : Clients)
