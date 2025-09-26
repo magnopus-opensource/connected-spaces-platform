@@ -217,8 +217,6 @@ const csp::common::Vector4& ReplicatedValue::GetVector4() const
 
 const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return InvalidVector4; }
 
-csp::common::Map<csp::common::String, ReplicatedValue> m;
-
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {
     assert(ReplicatedType == ReplicatedValueType::StringMap);
