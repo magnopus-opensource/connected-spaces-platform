@@ -316,24 +316,10 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaE
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    bool InsidePointOfInterestFound = false;
-    bool OutsidePointOfInterestFound = false;
-
     const csp::common::Array<csp::systems::PointOfInterest>& POICollection = Result.GetPOIs();
-    for (size_t idx = 0; idx < POICollection.Size(); ++idx)
-    {
-        if (POICollection[idx].Name == InsidePointOfInterest.Name)
-        {
-            InsidePointOfInterestFound = true;
-        }
-        else if (POICollection[idx].Name == OutsidePointOfInterest.Name)
-        {
-            OutsidePointOfInterestFound = true;
-        }
-    }
 
-    EXPECT_TRUE(InsidePointOfInterestFound);
-    EXPECT_FALSE(OutsidePointOfInterestFound);
+    EXPECT_EQ(POICollection.Size(), 1);
+    EXPECT_EQ(POICollection[0].Name, InsidePointOfInterest.Name);
 
     DeletePointOfInterest(POISystem, InsidePointOfInterest);
     DeletePointOfInterest(POISystem, OutsidePointOfInterest);
