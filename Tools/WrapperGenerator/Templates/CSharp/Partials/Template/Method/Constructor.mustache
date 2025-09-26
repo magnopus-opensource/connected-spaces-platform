@@ -1,4 +1,4 @@
-public {{ definition.name }}({{# parameters }}{{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
+public {{ definition.name }}({{# parameters }}{{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }}) : base(NativePointer.Zero)
 {
     InitialiseNativeDelegates();
     
