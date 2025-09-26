@@ -79,11 +79,6 @@ csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Val
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&);
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<std::string, mcs::ItemComponentData>& Value);
 
-template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T Value)
-{
-    return ToItemComponentData(static_cast<uint64_t>(Value));
-}
-
 mcs::ItemComponentData ToItemComponentData(ComponentBase* Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::ReplicatedValue& Value);
 mcs::ItemComponentData ToItemComponentData(bool Value);
@@ -95,4 +90,9 @@ mcs::ItemComponentData ToItemComponentData(const csp::common::Vector3& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector4& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Vector2& Value);
 mcs::ItemComponentData ToItemComponentData(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Value);
+
+template <typename T> std::enable_if_t<std::is_enum_v<T>, mcs::ItemComponentData> ToItemComponentData(T Value)
+{
+    return ToItemComponentData(static_cast<uint64_t>(Value));
+}
 }
