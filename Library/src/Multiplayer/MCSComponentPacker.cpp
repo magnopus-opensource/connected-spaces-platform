@@ -178,7 +178,7 @@ mcs::ItemComponentData MCSComponentPacker::CreateItemComponentData(const csp::co
 {
     mcs::ItemComponentData Data;
     // Extract the internal type from the variant and parse using its corrosponding typed CreateItemComponentData.
-    std::visit([&Data, this](auto&& InternalType) { Data = CreateItemComponentData(InternalType); }, Value.GetValue());
+    std::visit([&Data, this](const auto& InternalType) { Data = CreateItemComponentData(InternalType); }, Value.GetValue());
     return Data;
 }
 
