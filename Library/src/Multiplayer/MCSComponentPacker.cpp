@@ -77,9 +77,7 @@ csp::common::ReplicatedValue ToReplicatedValue(const std::vector<float>& Value)
 
 csp::common::ReplicatedValue ToReplicatedValue(const mcs::ItemComponentData& Value)
 {
-    csp::common::ReplicatedValue OutValue;
-    std::visit([&OutValue](auto&& ValueType) { OutValue = ToReplicatedValue(ValueType); }, Value.GetValue());
-    return OutValue;
+    return std::visit([](const auto& ValueType) { return ToReplicatedValue(ValueType); }, Value.GetValue());
 }
 
 csp::common::ReplicatedValue ToReplicatedValue(const std::map<uint16_t, mcs::ItemComponentData>&) {
