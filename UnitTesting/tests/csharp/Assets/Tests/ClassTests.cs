@@ -81,5 +81,15 @@ namespace Csp.Tests
             var ex = Assert.Throws<NullReferenceException>(() => { int value = simpleClass.GetValue(); });
             StringAssert.Contains("Attempting to access a null pointer", ex.Message);
         }
+
+        [Test]
+        public void TestDerivedType()
+        {
+            // Ensure that a derived class can be created and destroyed without issues.
+            using (var derivedClass = new DerivedClass())
+            {
+                Assert.IsTrue(derivedClass.PointerIsValid);
+            }
+        }
     }
 }

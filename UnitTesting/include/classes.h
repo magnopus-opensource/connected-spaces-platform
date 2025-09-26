@@ -19,6 +19,7 @@
 
 namespace csp::Tests
 {
+
 class CSP_API SimpleClass
 {
 public:
@@ -27,4 +28,19 @@ public:
 
     int GetValue() const;
 };
+
+class CSP_API BaseClass
+{
+public:
+    BaseClass();
+    virtual ~BaseClass();
+};
+
+class CSP_API DerivedClass : public BaseClass
+{
+public:
+    DerivedClass();
+    ~DerivedClass();
+};
+
 }
