@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Settings.h"
 #include "CSP/Systems/Settings/ApplicationSettings.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
@@ -101,10 +102,11 @@ private:
     /// necessary roles, the operation will fail with a 403 Forbidden error.
     /// @param ApplicationSettings ApplicationSettings& : The settings object containing application name, context, and key-value pairs to be stored.
     /// @param Callback ApplicationSettingsResultCallback : Callback when asynchronous task finishes.
-    CSP_NO_EXPORT void CreateSettingsByContext(const ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
+    CSP_NO_EXPORT void CreateSettingsByContext(
+        const csp::common::ApplicationSettings& ApplicationSettings, ApplicationSettingsResultCallback Callback);
 
     // Application Settings Continuations
-    async::task<ApplicationSettingsResult> CreateSettingsByContext(const ApplicationSettings& ApplicationSettings);
+    async::task<ApplicationSettingsResult> CreateSettingsByContext(const csp::common::ApplicationSettings& ApplicationSettings);
     async::task<ApplicationSettingsResult> GetSettingsByContext(const csp::common::String& ApplicationName, const csp::common::String& Context,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Keys);
     async::task<ApplicationSettingsResult> GetSettingsByContextAnonymous(const csp::common::String& Tenant,

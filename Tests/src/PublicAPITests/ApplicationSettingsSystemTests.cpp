@@ -470,7 +470,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
     std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
 
     // Create default application settings expected data, use to validate and construct the return response for mock.
-    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    auto ApplicationSettings = csp::common::ApplicationSettings();
     ApplicationSettings.ApplicationName = "MockApplicationName";
     ApplicationSettings.Context = "MockContext";
     ApplicationSettings.AllowAnonymous = false;
@@ -577,7 +577,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
     std::promise<ApplicationSettingsResult> ResultPromise;
     std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
 
-    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    auto ApplicationSettings = csp::common::ApplicationSettings();
     ApplicationSettings.ApplicationName = "MockApplicationName";
     ApplicationSettings.Context = "MockContext";
     ApplicationSettings.AllowAnonymous = false;
@@ -634,7 +634,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
     std::promise<ApplicationSettingsResult> ResultPromise;
     std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
 
-    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    auto ApplicationSettings = csp::common::ApplicationSettings();
     ApplicationSettings.ApplicationName = "MockApplicationName";
     ApplicationSettings.Context = "MockContext";
     ApplicationSettings.AllowAnonymous = true;
@@ -691,7 +691,7 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemMockTests, WhenApplicationSe
     std::promise<ApplicationSettingsResult> ResultPromise;
     std::future<ApplicationSettingsResult> ResultFuture = ResultPromise.get_future();
 
-    auto ApplicationSettings = csp::systems::ApplicationSettings();
+    auto ApplicationSettings = csp::common::ApplicationSettings();
     ApplicationSettings.ApplicationName = "MockApplicationName";
     ApplicationSettings.Context = "MockContext";
     ApplicationSettings.AllowAnonymous = true;
