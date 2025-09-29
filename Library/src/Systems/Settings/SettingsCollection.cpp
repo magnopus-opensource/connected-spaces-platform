@@ -24,7 +24,7 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::systems::SettingsCollection& SettingsCollection)
+void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::common::SettingsCollection& SettingsCollection)
 {
     if (Dto.HasUserId())
     {
@@ -64,7 +64,7 @@ void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue) {
 
 void AvatarInfoResult::SetAvatarVisible(bool InValue) { AvatarVisible = InValue; }
 
-const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return SettingsCollection; }
+const csp::common::SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return SettingsCollection; }
 
 void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
