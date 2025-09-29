@@ -1,6 +1,5 @@
 /*
  * Copyright 2025 Magnopus LLC
-
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +26,7 @@ namespace chs = csp::services::generated::userservice;
 namespace
 {
 
-void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& Dto, csp::systems::ApplicationSettings& ApplicationSettings)
+void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsDto& Dto, csp::common::ApplicationSettings& ApplicationSettings)
 {
     if (Dto.HasApplicationName())
         ApplicationSettings.ApplicationName = Dto.GetApplicationName();
@@ -47,7 +46,7 @@ void ApplicationSettingsDtoToApplicationSettings(const chs::ApplicationSettingsD
 namespace csp::systems
 {
 
-const ApplicationSettings& ApplicationSettingsResult::GetApplicationSettings() const { return ApplicationSettings; }
+const csp::common::ApplicationSettings& ApplicationSettingsResult::GetApplicationSettings() const { return ApplicationSettings; }
 
 void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
@@ -69,11 +68,3 @@ void ApplicationSettingsResult::OnResponse(const csp::services::ApiResponseBase*
 }
 
 } // namespace csp::systems
-
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::ApplicationSettings& Obj)
-{
-    Serializer.SerializeMember("applicationName", Obj.ApplicationName);
-    Serializer.SerializeMember("context", Obj.Context);
-    Serializer.SerializeMember("allowAnonymous", Obj.AllowAnonymous);
-    Serializer.SerializeMember("settings", Obj.Settings);
-}

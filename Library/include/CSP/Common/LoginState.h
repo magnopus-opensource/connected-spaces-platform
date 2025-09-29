@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Settings.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
@@ -44,6 +45,13 @@ public:
     csp::common::String RefreshToken;
     csp::common::String UserId;
     csp::common::String DeviceId;
+
+    /// @Brief Default, tenant-wide settings returned from the service, often used to store universal data such as feature flags.
+    csp::common::List<csp::common::ApplicationSettings> DefaultApplicationSettings;
+
+    /// @Brief Default settings relevant to the specific user returned from the service. Also known as "UserSettings".
+    /// @see csp::systems::SettingsSystem
+    csp::common::List<csp::common::SettingsCollection> DefaultSettings;
 
     CSP_NO_EXPORT void SetAccessTokenRefreshTime(const csp::common::DateTime& NewDateTime);
 
