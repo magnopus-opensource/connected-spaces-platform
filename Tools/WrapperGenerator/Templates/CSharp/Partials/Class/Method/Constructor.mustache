@@ -7,7 +7,7 @@ public
 {{ parent_class.name }}(
 {{# parameters }}
     {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
-{{/ parameters }})
+{{/ parameters }}) : base(NativePointer.Zero)
 {
 {{^ is_private }}
     var np = {{ unique_name }}(

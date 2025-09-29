@@ -18,10 +18,17 @@
 
 namespace csp::Tests
 {
+
+// SimpleClass
 SimpleClass::SimpleClass() { }
-
 SimpleClass::~SimpleClass() { }
-
 int SimpleClass::GetValue() const { return 42; }
+
+// BaseClass / DerivedClass
+BaseClass::BaseClass() { }
+BaseClass::~BaseClass() { }
+
+DerivedClass::DerivedClass() { }
+DerivedClass::~DerivedClass() { }
 
 } // namespace csp::Tests
