@@ -35,7 +35,7 @@ struct LogCallbacks
     }
 
     LogSystem::LogCallbackHandler LogCallback;
-    LogSystem::LogCallbackHandler EventCallback;
+    LogSystem::EventCallbackHandler EventCallback;
     LogSystem::BeginMarkerCallbackHandler BeginMarkerCallback;
     LogSystem::EndMarkerCallbackHandler EndMarkerCallback;
 };
@@ -75,7 +75,7 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
     if (Callbacks->LogCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->LogCallback(InMessage);
+        Callbacks->LogCallback(Level, InMessage);
     }
     else
     {

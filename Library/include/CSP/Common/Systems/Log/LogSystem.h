@@ -45,7 +45,7 @@ public:
     LogSystem();
     ~LogSystem();
 
-    typedef std::function<void(const csp::common::String&)> LogCallbackHandler;
+    typedef std::function<void(LogLevel, const csp::common::String&)> LogCallbackHandler;
     typedef std::function<void(const csp::common::String&)> EventCallbackHandler;
     typedef std::function<void(const csp::common::String&)> BeginMarkerCallbackHandler;
 
