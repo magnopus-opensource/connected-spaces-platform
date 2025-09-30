@@ -233,7 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
               .c_str();
     const csp::common::String Error1
         = fmt::format("Could not find any network event registration with EventReceiverId: {}. No events were deregistered.", ReceiverId).c_str();
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, Error)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, Error)).Times(1);
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, Error1)).Times(1);
 
     NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });

@@ -68,7 +68,6 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
 
     /* Specific values are irrelevent */
     const csp::common::String ErrorMsg = "Mock Error Msg";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
     const EResultCode ResultCode = EResultCode::Failed;
     const csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
     const ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
@@ -76,7 +75,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
     NullResult ExpectedResult(ResultCode, HttpResultCode, FailureReason);
 
     // Expect that we log the error message
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
 
     // This throws a async++::task_cancelled exception, but we don't want to link that lib in the tests, so just expect any exception.
     ASSERT_ANY_THROW(csp::systems::continuations::LogHTTPErrorAndCancelContinuation<NullResult>(ErrorMsg.c_str(), ExpectedResult));
@@ -88,10 +87,9 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     const csp::common::String ErrorMsg = "Mock Error Msg";
     const csp::common::String SuccessMsg = "Mock Success Msg";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
 
     // When we succeed, we should just log, and forward the result
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, SuccessMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, SuccessMsg)).Times(1);
 
     NullResult SuccessResult(EResultCode::Success, 200, ERequestFailureReason::None);
     ASSERT_EQ(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
@@ -107,7 +105,6 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     const csp::common::String ErrorMsg = "Mock Error Msg";
     const csp::common::String SuccessMsg = "Mock Success Msg";
 
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
     const EResultCode ResultCode = EResultCode::Failed;
     const csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
     const ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
@@ -117,7 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     // When the result is a failure, we expect an error message logged and the callback not to be triggered from the intermediate function.
     {
         // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
 
         ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(
             SuccessMsg.c_str(), ErrorMsg.c_str(), {}, {}, {}, csp::common::LogLevel::Log)(ExpectedFailureResult));
@@ -132,7 +129,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         NullResult ExpectedFailureResultExplicit(ResultCodeExplicit, HttpResultCodeExplicit,
             FailureReasonExplicit); // Note not passed to function invocation, to check that the optionals are used.
         // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
         ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(SuccessMsg.c_str(), ErrorMsg.c_str(),
             std::make_optional(ResultCodeExplicit), std::make_optional(HttpResultCodeExplicit), std::make_optional(FailureReasonExplicit),
@@ -144,10 +141,9 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 {
     RAIIMockLogger MockLogger {};
     const csp::common::String SuccessMsg = "Mock Success Msg";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
 
     // When we don't provide an error code, we expect to just log a success message, no return or exception
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, SuccessMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, SuccessMsg)).Times(1);
 
     csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
         SuccessMsg.c_str(), MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)({});
@@ -163,11 +159,10 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     // When we provide an error code, we expect an error message logged and the callback not to be triggered from the intermediate function.
     const csp::multiplayer::ErrorCode ErrorCode = csp::multiplayer::ErrorCode::NotConnected;
     const std::string ExpectedErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode);
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
 
     {
         // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
 
         ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(SuccessMsg.c_str(),
             MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem(), csp::common::LogLevel::Log)(ErrorCode));
