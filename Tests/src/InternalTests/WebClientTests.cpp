@@ -239,23 +239,23 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVery
         // Get logs
         csp::common::String CSPLogMsgGetRequestSubstring = "HTTP Request\nGET https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgGetResponseSubstring = "HTTP Response\nGET https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
         // Put logs
         csp::common::String CSPLogMsgPutRequestSubstring = "HTTP Request\nPUT https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgPutResponseSubstring = "HTTP Response\nPUT https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
         // Post logs
         csp::common::String CSPLogMsgPostRequestSubstring = "HTTP Request\nPOST https://reqres.in/api/login";
         csp::common::String CSPLogMsgPostResponseSubstring = "HTTP Response\nPOST https://reqres.in/api/login";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
         // Delete logs
         csp::common::String CSPLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://reqres.in/api/users/1";
         csp::common::String CSPLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://reqres.in/api/users/1";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
 
         // GET request
         HttpPayload PayloadGet;
