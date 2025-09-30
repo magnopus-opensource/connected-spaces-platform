@@ -31,4 +31,13 @@ BaseClass::~BaseClass() { }
 DerivedClass::DerivedClass() { }
 DerivedClass::~DerivedClass() { }
 
+// TemplateClass
+template <typename T> TemplateClass<T>::TemplateClass() { }
+
+template <typename T> TemplateClass<T>::~TemplateClass() { }
+
+template <typename T> void TemplateClass<T>::SetValue(const T& value) { m_Value = value; }
+
+template <typename T> void TemplateClass<T>::GetValue(T& value) const { value = m_Value; }
+
 } // namespace csp::Tests
