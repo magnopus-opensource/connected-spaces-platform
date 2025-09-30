@@ -3258,9 +3258,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateConvers
     RAIIMockLogger MockLogger {};
     const csp::common::String LockErrorMsg = "Create Conversation: SignalR connection error: NotConnected";
     const csp::common::String DisconnectErrorMsg = "Error disconnecting MultiplayerConnection: NotConnected";
-    const csp::common::LogLevel ErrorLog = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorLog, LockErrorMsg)).Times(1);
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorLog, DisconnectErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, LockErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, DisconnectErrorMsg)).Times(1);
 
     static constexpr const char* TestMessage = "TestConversation";
     auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestMessage);

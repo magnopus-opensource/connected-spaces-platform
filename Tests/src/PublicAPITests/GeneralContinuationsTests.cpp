@@ -88,7 +88,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     const csp::common::String ErrorMsg = "Mock Error Msg";
     const csp::common::String SuccessMsg = "Mock Success Msg";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
 
     // When we succeed, we should just log, and forward the result
     EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, SuccessMsg)).Times(1);
@@ -106,6 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     /* Specific values are irrelevent */
     const csp::common::String ErrorMsg = "Mock Error Msg";
     const csp::common::String SuccessMsg = "Mock Success Msg";
+
     const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
     const EResultCode ResultCode = EResultCode::Failed;
     const csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
@@ -158,11 +159,11 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     /* Specific values are irrelevent */
     const csp::common::String SuccessMsg = "Mock Success Msg";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
 
     // When we provide an error code, we expect an error message logged and the callback not to be triggered from the intermediate function.
-    csp::multiplayer::ErrorCode ErrorCode = csp::multiplayer::ErrorCode::NotConnected;
-    std::string ExpectedErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode);
+    const csp::multiplayer::ErrorCode ErrorCode = csp::multiplayer::ErrorCode::NotConnected;
+    const std::string ExpectedErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode);
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
 
     {
         // Expect that we log the error message

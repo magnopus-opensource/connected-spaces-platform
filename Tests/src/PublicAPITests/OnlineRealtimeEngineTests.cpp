@@ -270,8 +270,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
 
     // Expect that we log the error message
     const csp::common::String ErrorMsg = "Failed to create Avatar. Exception: mock exception";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };

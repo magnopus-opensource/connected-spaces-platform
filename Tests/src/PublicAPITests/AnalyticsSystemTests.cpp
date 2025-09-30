@@ -142,8 +142,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
 
     const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, QueueSentSuccessMsg))
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
         .Times(1)
         .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise.set_value(true); }));
 
@@ -206,8 +205,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTes
     std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
 
     const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, QueueSentSuccessMsg))
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
         .Times(1)
         .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise.set_value(true); }));
 
@@ -262,8 +260,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingField
     // Ensure the required fields error message is logged when we try to queue an analytics event with a required field missing
     const csp::common::String AnalyticsErrorMsg
         = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, AnalyticsErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
     // Passing an empty string for a required field

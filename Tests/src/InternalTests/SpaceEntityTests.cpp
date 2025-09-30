@@ -960,8 +960,7 @@ CSP_PUBLIC_TEST(CSPEngine, LockPrerequisites, LockPrerequisitesTest)
 
     // Ensure the lock error message is called when we try and lock an entity that is already locked
     const csp::common::String LockErrorMsg = "Entity is already locked.";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, LockErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, LockErrorMsg)).Times(1);
 
     // Set the entity as locked first
     Entity.Lock();
@@ -977,8 +976,7 @@ CSP_PUBLIC_TEST(CSPEngine, UnlockPrerequisites, UnlockPrerequisitesTest)
 
     // Ensure the unlock error message is called when we try and unlock an entity that is already unlocked
     const csp::common::String UnlockErrorMsg = "Entity is not currently locked.";
-    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, UnlockErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, UnlockErrorMsg)).Times(1);
 
     Entity.Unlock();
 }

@@ -89,8 +89,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
 
     // Validate that the retired code path has been triggered and populated through the log system
     const String ErrorMsg = fmt::format("Unable to resolve {} in Status Info", Endpoints.UserService.GetURI()).c_str();
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
     // Create a dummy response for ServicesDeploymentStatus containing the invalid information
     auto ServicesDeploymentStatus = CreateServicesDeploymentStatus("", {});
@@ -114,8 +113,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     // Validate that the retired code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 has been retired, the latest version is v2. For more information please visit: "
                             "https://connected-spaces-platform.net/index.html";
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
 
     auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_FALSE(result);
@@ -137,8 +135,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     // Validate that the deprecated code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 will be deprecated as of YYYY-MM-DDThh:mm:ss.sTZD, the latest version is v1. For more information "
                             "please visit: https://connected-spaces-platform.net/index.html";
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, ErrorMsg)).Times(1);
 
     auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_TRUE(result);
@@ -159,8 +156,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveServiceDefinitionW
     // Validate that the latest available version code path has been triggered and populated through the log system
     const String ErrorMsg = "User Service v1 is not the latest available, the latest version is v{Infinity}. For more information please visit: "
                             "https://connected-spaces-platform.net/index.html";
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
 
     auto const result = Endpoints.UserService.CheckPrerequisites(ServicesDeploymentStatus);
     EXPECT_TRUE(result);
@@ -186,8 +182,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
 
     // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: DeleteObjects";
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> {};
@@ -202,8 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
 
     // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
     const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: GenerateObjectIds";
-    const LogLevel LogLevel = csp::common::LogLevel::Error;
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> { "DeleteObjects", "SendEventMessage", "StopListening" };
