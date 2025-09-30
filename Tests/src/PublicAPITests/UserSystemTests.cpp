@@ -351,7 +351,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -378,7 +378,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -405,7 +405,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsRefreshTokenLogi
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -544,8 +544,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
     SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Warning);
 
     RAIIMockLogger MockLogger {};
-    csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(WarningLog)).Times(1);
+    const csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Warning;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, WarningLog)).Times(1);
 
     auto TokenOptions = csp::systems::TokenOptions();
     TokenOptions.ExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
@@ -1154,8 +1155,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     // Set up Log callbacks
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
 
     TestMsg1 = "AgoraUserTokenResult invalid";
     TestMsg2 = "AgoraUserTokenResult doesn't contain expected member: token";
@@ -1221,8 +1222,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     // Set up Log callbacks
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
     TestMsg1 = "PostServiceProxyResult invalid";
     TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
 

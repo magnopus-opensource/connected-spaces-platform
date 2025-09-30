@@ -158,7 +158,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
     auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const csp::common::String Error = "Error: Expected non-null callback.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, Error)).Times(1);
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
@@ -187,16 +188,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     const csp::common::String Success1 = fmt::format("Registering network event. EventReceiverId: {}, Event: {}.", ReceiverId, EventName).c_str();
     const csp::common::String Success2 = fmt::format("Registering network event. EventReceiverId: {}, Event: {}.", ReceiverId2, EventName).c_str();
     const csp::common::String Success3 = fmt::format("Registering network event. EventReceiverId: {}, Event: {}.", ReceiverId, EventName2).c_str();
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Success1)).Times(1);
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Success2)).Times(1);
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Success3)).Times(1);
+    const csp::common::LogLevel LogVerbosity = csp::common::LogLevel::Log;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogVerbosity, Success1)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogVerbosity, Success2)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogVerbosity, Success3)).Times(1);
 
     const csp::common::String Error
         = fmt::format("Attempting to register a duplicate network event receiver with EventReceiverId: {}, Event: {}. Registration "
                       "denied.",
             ReceiverId2, EventName)
               .c_str();
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
+    const csp::common::LogLevel ErrorVerbosity = csp::common::LogLevel::Error;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorVerbosity, Error)).Times(1);
 
     const auto StartSize = NetworkEventBus->AllRegistrations().Size();
 
@@ -233,8 +236,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
               .c_str();
     const csp::common::String Error1
         = fmt::format("Could not find any network event registration with EventReceiverId: {}. No events were deregistered.", ReceiverId).c_str();
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Error)).Times(1);
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(Error1)).Times(1);
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, Error)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, Error1)).Times(1);
 
     NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
     NetworkEventBus->StopListenAllNetworkEvents(ReceiverId);
@@ -399,7 +403,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, TestNoConnectionRegistration)
     RAIIMockLogger MockLogger {};
 
     const csp::common::String NoConnectionError = "Error : Multiplayer connection is unavailable, NetworkEventBus cannot start listening to events.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(NoConnectionError)).Times(1);
+    const csp::common::LogLevel LogLevel = csp::common::LogLevel::Error;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, NoConnectionError)).Times(1);
 
     // Bit of a cheat. The internal logic (at point of writing test), is more interested in whether Connection->SignalRConnection() is null, however
     // we inject the Connection object so we just use the check against that as a proxy for whether the error is emitted. Good enough!

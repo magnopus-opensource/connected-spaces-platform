@@ -81,7 +81,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateSettingsByConte
 
         // Set an expectation that the mock logger will receive message for a successful creation of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
 
@@ -125,7 +126,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, CreateAnonymousSettin
 
         // Set an expectation that the mock logger will receive message for a successful creation of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::CreateSettingsByContext successfully created application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, CreateSettingsByContext, ApplicationSettingsTestData);
 
@@ -183,7 +185,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextT
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, ApplicationSettingsTestData.ApplicationName,
             ApplicationSettingsTestData.Context, nullptr);
@@ -242,7 +245,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextW
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto Keys = csp::common::Array<csp::common::String>(1);
         Keys[0] = "TestSettings_3";
@@ -284,10 +288,12 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 
         // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
         const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+        const csp::common::LogLevel LogVerbosity = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogVerbosity, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
 
         const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
+        const csp::common::LogLevel ErrorVerbosity = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorVerbosity, ErrorMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, GetUniqueString().c_str(), GetUniqueString().c_str(), nullptr);
 
@@ -334,7 +340,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(),
             ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);
@@ -386,7 +393,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetSettingsByContextA
 
         // Set an expectation that the mock logger will receive message for a successful result retrieval of settings by context
         const String GetSettingsByContextMsg = "ApplicationSettingsSystem::GetSettingsByContextAnonymous successfully retrieved application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(GetSettingsByContextMsg)).Times(1);
+        const csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, GetSettingsByContextMsg)).Times(1);
 
         auto Keys = csp::common::Array<csp::common::String>(1);
         Keys[0] = "TestSettings_3";
@@ -420,10 +428,10 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
 
         // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
         const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
 
         const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, csp::CSPFoundation::GetTenant(), GetUniqueString().c_str(),
             GetUniqueString().c_str(), nullptr);
@@ -448,10 +456,10 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSett
 
         // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
         const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(GetRequestErrorMsg))).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
 
         const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContextAnonymous, GetUniqueString().c_str(),
             ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);

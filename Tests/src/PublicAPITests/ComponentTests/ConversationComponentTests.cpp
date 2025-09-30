@@ -406,7 +406,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -428,7 +428,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -449,7 +449,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -469,7 +469,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -489,7 +489,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -509,7 +509,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -529,7 +529,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -549,7 +549,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -569,7 +569,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -595,7 +595,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPrerequisites
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(AlreadyHasConversationErrorLog, Message);
@@ -1474,7 +1474,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             bool CallbackCalled = false;
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-                [&CallbackCalled](const csp::common::String& Message)
+                [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
                 {
                     if (Message == NoConversationPermissionsErrorLog)
                     {
@@ -1496,7 +1496,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             bool CallbackCalled = false;
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-                [&CallbackCalled](const csp::common::String& Message)
+                [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
                 {
                     if (Message == NoMessagePermissionsErrorLog)
                     {
@@ -1517,7 +1517,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentPermissionsTe
             bool CallbackCalled = false;
 
             csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-                [&CallbackCalled](const csp::common::String& Message)
+                [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
                 {
                     if (Message == NoMessagePermissionsErrorLog)
                     {
@@ -1706,7 +1706,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Message asset collection doesn't contain annotation data.")
                 {
@@ -1821,7 +1821,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateAnnotat
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Message asset collection doesn't contain annotation data.")
                 {
@@ -2171,7 +2171,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentOverwriteAnno
         TestAnnotationDataV.push_back('4');
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&AssetOverwriteLogCalled](const csp::common::String& Message)
+            [&AssetOverwriteLogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "ConversationSystemInternal::SetAnnotation, asset already exists, so not creating")
                 {
@@ -2265,7 +2265,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2285,7 +2285,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2305,7 +2305,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2341,7 +2341,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2377,7 +2377,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2397,7 +2397,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2417,7 +2417,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         bool CallbackCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&CallbackCalled](const csp::common::String& Message)
+            [&CallbackCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 CallbackCalled = true;
                 EXPECT_EQ(NoConversationErrorLog, Message);
@@ -2477,7 +2477,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
         bool LogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&LogCalled](const csp::common::String& Message)
+            [&LogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Failed to get message asset collection.")
                 {
@@ -2498,7 +2498,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
         bool LogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&LogCalled](const csp::common::String& Message)
+            [&LogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Failed to get message asset collection.")
                 {
@@ -2600,7 +2600,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         bool LogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&LogCalled](const csp::common::String& Message)
+            [&LogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Given message doesn't exist on the conversation.")
                 {
@@ -2638,7 +2638,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         bool LogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&LogCalled](const csp::common::String& Message)
+            [&LogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Given message doesn't exist on the conversation.")
                 {
@@ -2656,7 +2656,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         bool LogCalled = false;
 
         csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-            [&LogCalled](const csp::common::String& Message)
+            [&LogCalled](csp::common::LogLevel, const csp::common::String& Message)
             {
                 if (Message == "Given message doesn't exist on the conversation.")
                 {
@@ -3258,8 +3258,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentCreateConvers
     RAIIMockLogger MockLogger {};
     const csp::common::String LockErrorMsg = "Create Conversation: SignalR connection error: NotConnected";
     const csp::common::String DisconnectErrorMsg = "Error disconnecting MultiplayerConnection: NotConnected";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(LockErrorMsg)).Times(1);
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(DisconnectErrorMsg)).Times(1);
+    const csp::common::LogLevel ErrorLog = csp::common::LogLevel::Error;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorLog, LockErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorLog, DisconnectErrorMsg)).Times(1);
 
     static constexpr const char* TestMessage = "TestConversation";
     auto [Result] = AWAIT(ConversationComponent, CreateConversation, TestMessage);

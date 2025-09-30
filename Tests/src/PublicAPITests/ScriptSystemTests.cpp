@@ -535,9 +535,10 @@ TEST_P(ScriptLog, ScriptLogTest)
     // The script logger naeively adds spaces to allow lots of arguments to be passed, which is why the test data has a weird trailing space.
     csp::common::String CSPLogMsg = "Testing CSP.Log ";
     csp::common::String OKOLogMsg = "Testing OKO.Log ";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(testing::AnyNumber());
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(CSPLogMsg));
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(OKOLogMsg));
+    csp::common::LogLevel LogLevel = csp::common::LogLevel::Log;
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_, testing::_)).Times(testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, CSPLogMsg));
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(LogLevel, OKOLogMsg));
 
     std::string AvatarCSPLogScriptText = R"xx(
 

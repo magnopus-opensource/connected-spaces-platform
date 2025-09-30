@@ -16,8 +16,8 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Debug/Logging.h"
 #include "PlatformTestUtils.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
@@ -86,12 +86,11 @@ public:
     {
     }
 
-     TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
         : POCOWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
-
 
 void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequestVerb Verb, HttpPayload& Payload, IHttpResponseHandler* Receiver)
 {
@@ -240,23 +239,23 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVery
         // Get logs
         csp::common::String CSPLogMsgGetRequestSubstring = "HTTP Request\nGET https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgGetResponseSubstring = "HTTP Response\nGET https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
         // Put logs
         csp::common::String CSPLogMsgPutRequestSubstring = "HTTP Request\nPUT https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgPutResponseSubstring = "HTTP Response\nPUT https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
         // Post logs
         csp::common::String CSPLogMsgPostRequestSubstring = "HTTP Request\nPOST https://reqres.in/api/login";
         csp::common::String CSPLogMsgPostResponseSubstring = "HTTP Response\nPOST https://reqres.in/api/login";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
         // Delete logs
         csp::common::String CSPLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://reqres.in/api/users/1";
         csp::common::String CSPLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://reqres.in/api/users/1";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
 
         // GET request
         HttpPayload PayloadGet;
@@ -310,7 +309,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseNoLo
         RAIIMockLogger MockLogger {};
 
         // With the log level NOT set to VeryVerbose we expect to receive no logs for the HTTP Requests and Responses
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(0);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_, testing::_)).Times(0);
 
         // GET request
         HttpPayload PayloadGet;
