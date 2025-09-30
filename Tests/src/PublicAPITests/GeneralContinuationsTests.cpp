@@ -129,7 +129,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         NullResult ExpectedFailureResultExplicit(ResultCodeExplicit, HttpResultCodeExplicit,
             FailureReasonExplicit); // Note not passed to function invocation, to check that the optionals are used.
         // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
 
         ASSERT_ANY_THROW(csp::systems::continuations::AssertRequestSuccessOrErrorFromResult<NullResult>(SuccessMsg.c_str(), ErrorMsg.c_str(),
             std::make_optional(ResultCodeExplicit), std::make_optional(HttpResultCodeExplicit), std::make_optional(FailureReasonExplicit),
