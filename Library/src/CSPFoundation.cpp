@@ -52,7 +52,7 @@
 #include <sys/stat.h>
 
 #define LOAD_OWN_MODULE() dlopen(nullptr, RTLD_LAZY)
-#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
+#define GET_FUNCTION_ADDRESS(mod, name) dlsym((RTLD_DEFAULT), name)
 #elif defined(CSP_MACOSX) || defined(CSP_IOS)
 // For dlopen and dlsym
 #include <dlfcn.h>
