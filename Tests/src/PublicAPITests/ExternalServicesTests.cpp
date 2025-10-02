@@ -91,9 +91,17 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, ExternalServiceProxyMockTest)
+class ExternalServicesFailureMock : public PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes>>
+{
+};
+
+TEST_P(ExternalServicesFailureMock, ExternalServicesFailureMockTest)
 {
     const auto ExternalServiceProxyMock = std::make_unique<chs_aggregation::ExternalServiceProxyApiMock>();
+
+    // Expected results
+    const csp::systems::EResultCode ExpectedResultCode = std::get<0>(GetParam());
+    const csp::web::EResponseCodes ExpectedResponseCode = std::get<1>(GetParam());
 
     std::promise<csp::systems::StringResult> ResultPromise;
     std::future<csp::systems::StringResult> ResultFuture = ResultPromise.get_future();
@@ -105,15 +113,12 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, ExternalServiceProx
 
     EXPECT_CALL(*ExternalServiceProxyMock, service_proxyPost)
         .WillOnce(
-            [&ProxyParams](const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
+            [&ProxyParams, ExpectedResponseCode](const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
                 csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
             {
-                // Emulating a failure with nothing in the body of the response.
                 auto Response = csp::web::HttpResponse();
-                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
-                Response.GetMutablePayload() = "";
-
+                Response.SetResponseCode(ExpectedResponseCode);
                 ResponseHandler->OnHttpResponse(Response);
             });
 
@@ -130,10 +135,11 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, ExternalServiceProx
     ExternalServiceProxyMock->service_proxyPost({ TokenInfo }, ResponseHandler, csp::common::CancellationToken::Dummy());
 
     auto Result = ResultFuture.get();
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(ExpectedResponseCode));
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
-
-    const auto StringResult = Result.GetValue();
-    EXPECT_TRUE(StringResult.IsEmpty()); // We assume a non-empty string means we got an Agora token back
 }
+
+INSTANTIATE_TEST_SUITE_P(ExternalServicesProxySystemTests, ExternalServicesFailureMock,
+    testing::Values(std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK),
+        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest)));
