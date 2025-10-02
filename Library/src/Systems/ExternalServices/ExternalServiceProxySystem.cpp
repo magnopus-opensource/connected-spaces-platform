@@ -49,7 +49,7 @@ ExternalServiceProxySystem::ExternalServiceProxySystem(csp::web::WebClient* InWe
 
 ExternalServiceProxySystem::~ExternalServiceProxySystem() { delete (ExternalServiceProxyApi); }
 
-void ExternalServiceProxySystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
+void ExternalServiceProxySystem::InvokeOperation(const ExternalServicesOperationParams& Params, StringResultCallback Callback)
 {
     auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
     TokenInfo->SetServiceName(Params.ServiceName);
@@ -66,7 +66,7 @@ void ExternalServiceProxySystem::PostServiceProxy(const TokenInfoParams& Params,
 void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback)
 {
     // As a specialisation function, we know the service name, operation name, and help params.
-    TokenInfoParams TokenParams;
+    ExternalServicesOperationParams TokenParams;
     TokenParams.ServiceName = "Agora";
     TokenParams.OperationName = "getUserToken";
     TokenParams.SetHelp = false;
@@ -81,7 +81,7 @@ void ExternalServiceProxySystem::GetAgoraUserToken(const AgoraUserTokenParams& P
     TokenParams.Parameters["shareVideo"] = BoolToApiString(Params.ShareVideo);
     TokenParams.Parameters["shareScreen"] = BoolToApiString(Params.ShareScreen);
 
-    PostServiceProxy(TokenParams, Callback);
+    InvokeOperation(TokenParams, Callback);
 }
 
 } // namespace csp::systems

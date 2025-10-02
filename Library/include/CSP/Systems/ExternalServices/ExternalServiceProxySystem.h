@@ -42,25 +42,25 @@ namespace csp::systems
 {
 
 /// *******************************************************************************************************************
-/// @brief Data structure for a custom service proxy posting, giving service name, operation name, set help and parameters.
-class CSP_API TokenInfoParams
+/// @brief Data structure used when making invocations of the external service proxy.
+class CSP_API ExternalServicesOperationParams
 {
 public:
-    /// @brief The service name for the requested token.
+    /// @brief The name of the external service of concern.
     csp::common::String ServiceName;
 
-    /// @brief The operation name for the requested token.
+    /// @brief The operation name that should be performed by the proxy service.
     csp::common::String OperationName;
 
     /// @brief Whether to set help.
     bool SetHelp;
 
-    /// @brief Map of parameters required for the operation on the service
+    /// @brief Map of parameters required in order for the proxy service to complete the operation.
     csp::common::Map<csp::common::String, csp::common::String> Parameters;
 };
 
 /// *******************************************************************************************************************
-/// @brief Data structure for an Agora user token, giving userID, referenceID, channel name and settings regarding sharing of audio/video/screenshare.
+/// @brief Specialised data structure that can be used to retrieve an Agora user token via the proxy service.
 class CSP_API AgoraUserTokenParams
 {
 public:
@@ -112,10 +112,10 @@ public:
     /// service. The nature of the operation and what is returned is entirely dependent on the service and operation name provided.
     /// @param Params const TokenInfoParams& : Params to specify service, operation, set help and parameters.
     /// @param Callback StringResultCallback : Callback to call when a response is received.
-    CSP_ASYNC_RESULT void PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void InvokeOperation(const ExternalServicesOperationParams& Params, StringResultCallback Callback);
 
     /// @brief Specialised utility function which executes a post call to the external services proxy, specifically to retrieve Agora user token
-    /// credentials.
+    /// credentials. A good example for how client applications may wish to use PostServiceProxy.
     /// @param Params const AgoraUserTokenParams& : Params to configure the User token
     /// @param Callback StringResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
