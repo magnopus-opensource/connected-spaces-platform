@@ -21,6 +21,7 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemBase.h"
+#include "CSP/Systems/SystemsResult.h"
 
 namespace csp
 {
@@ -51,7 +52,7 @@ public:
     /// @brief The operation name that should be performed by the proxy service.
     csp::common::String OperationName;
 
-    /// @brief Whether to set help.
+    /// @brief A flag indicating this invocation is actually a request for information about the operation identified by OperationName.
     bool SetHelp;
 
     /// @brief Map of parameters required in order for the proxy service to complete the operation.
