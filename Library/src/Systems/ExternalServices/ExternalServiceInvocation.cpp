@@ -39,14 +39,17 @@ void ExternalServiceInvocationResult::OnResponse(const services::ApiResponseBase
 
         if (!OperationResult)
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Error, "PostServiceProxyResult invalid");
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "The operation result for an external service proxy invocation was invalid. Response: %s",
+                Response->GetPayload().GetContent().c_str());
 
             return;
         }
 
         if (!OperationResult->HasMember("token"))
         {
-            CSP_LOG_MSG(csp::common::LogLevel::Error, "PostServiceProxyResult doesn't contain expected member: token");
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
+                "Whilst the operation result for an external service proxy invocation was valid, there was no 'token' result returned. Response: %s",
+                Response->GetPayload().GetContent().c_str());
 
             return;
         }

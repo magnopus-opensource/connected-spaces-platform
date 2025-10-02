@@ -16,6 +16,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/CancellationToken.h"
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/ExternalServices/ExternalServiceProxySystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/SystemsResult.h"
@@ -91,7 +92,8 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     LogOut(UserSystem);
 }
 
-class ExternalServicesMock : public PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String>>
+class ExternalServicesMock
+    : public PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String, bool>>
 {
 };
 
@@ -99,10 +101,13 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 {
     const auto ExternalServiceProxyMock = std::make_unique<chs_aggregation::ExternalServiceProxyApiMock>();
 
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
+
     // Expected results
     const csp::systems::EResultCode ExpectedResultCode = std::get<0>(GetParam());
     const csp::web::EResponseCodes ExpectedResponseCode = std::get<1>(GetParam());
     const csp::common::String ExpectedTokenValue = std::get<2>(GetParam());
+    const bool IncludeToken = std::get<3>(GetParam());
 
     std::promise<csp::systems::StringResult> ResultPromise;
     std::future<csp::systems::StringResult> ResultFuture = ResultPromise.get_future();
@@ -114,7 +119,7 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 
     EXPECT_CALL(*ExternalServiceProxyMock, service_proxyPost)
         .WillOnce(
-            [&ExpectedTokenValue, ExpectedResponseCode](
+            [ExpectedResponseCode, ExpectedTokenValue, IncludeToken](
                 const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
                 csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
@@ -124,14 +129,27 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 
                 csp::web::HttpPayload Payload;
 
-                csp::common::String RequestBody = R"(
+                csp::common::String RequestBody;
+                if (IncludeToken)
                 {
-	                "operationResult":
-	                {
-		                "token":")"
-                    + ExpectedTokenValue + R"("
-	                }
-                })";
+                    RequestBody = R"(
+                    {
+	                    "operationResult":
+	                    {
+		                    "token":")"
+                        + ExpectedTokenValue + R"("
+	                    }
+                    })";
+                }
+                else
+                {
+                    RequestBody = R"(
+                    {
+	                    "operationResult":
+	                    {
+	                    }
+                    })";
+                }
                 Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
                 Payload.SetContent(RequestBody);
 
@@ -155,9 +173,15 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(ExpectedResponseCode));
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
-    EXPECT_EQ(Result.GetValue(), ExpectedTokenValue);
+
+    if (IncludeToken)
+    {
+        EXPECT_EQ(Result.GetValue(), ExpectedTokenValue);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(ExternalServicesProxySystemTests, ExternalServicesMock,
-    testing::Values(std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "AVeryGoodToken"),
-        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "")));
+    testing::Values(std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "AVeryGoodToken", true),
+        std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "", false),
+        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "", true),
+        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "", false)));
