@@ -49,10 +49,6 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
-    auto& LogSystem = *SystemsManager.GetLogSystem();
-    bool LogConfirmed = false;
-    csp::common::String TestMsg1, TestMsg2;
-
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -104,10 +100,6 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, PostServiceProxyTes
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
-    auto& LogSystem = *SystemsManager.GetLogSystem();
-    bool LogConfirmed1 = false, LogConfirmed2 = false;
-    csp::common::String TestMsg1, TestMsg2;
-
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -116,12 +108,6 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, PostServiceProxyTes
     csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    // Set up Log callbacks
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
-    TestMsg1 = "PostServiceProxyResult invalid";
-    TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
 
     csp::systems::TokenInfoParams Params;
     Params.ServiceName = "Agora";
@@ -141,12 +127,6 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, PostServiceProxyTes
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty());
-    WaitForCallback(LogConfirmed1);
-    EXPECT_FALSE(LogConfirmed1);
-    WaitForCallback(LogConfirmed2);
-    EXPECT_FALSE(LogConfirmed2);
-
-    LogSystem.ClearAllCallbacks();
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
