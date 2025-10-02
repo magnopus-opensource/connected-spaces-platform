@@ -99,54 +99,6 @@ private:
     LoginTokenInfo TokenInfo;
 };
 
-/// @brief Data structure for an Agora user token, giving userID, referenceID, channel name and settings regarding sharing of audio/video/screenshare.
-class CSP_API AgoraUserTokenParams
-{
-public:
-    /// @brief The unique identifer for the user requesting the token.
-    csp::common::String AgoraUserId;
-
-    /// @brief The unique name for the Agora channel being joined. It can be set to any string combination. For group calls all users must reference
-    /// the same channelName.
-    csp::common::String ChannelName;
-
-    /// @brief The unique identfier for the space being joined. Only needs to be set if the channelName is not set to the space ID, so the appropriate
-    /// permissions can be requested. It can be set to an empty string if not required.
-    csp::common::String ReferenceId;
-
-    /// @brief The amount of time the token is valid for in milliseconds.
-    int Lifespan;
-
-    /// @brief If the token is ready only.
-    bool ReadOnly;
-
-    /// @brief If the token is configured for sharing of audio.
-    bool ShareAudio;
-
-    /// @brief If the token is configured for sharing of video.
-    bool ShareVideo;
-
-    /// @brief If the token is configured for sharing of the user's screen.
-    bool ShareScreen;
-};
-
-/// @brief Data structure for a custom service proxy posting, giving service name, operation name, set help and parameters
-class CSP_API TokenInfoParams
-{
-public:
-    /// @brief The service name for the requested token.
-    csp::common::String ServiceName;
-
-    /// @brief The operation name for the requested token.
-    csp::common::String OperationName;
-
-    /// @brief Whether to set help.
-    bool SetHelp;
-
-    /// @brief Map of parameters required for the operation on the service
-    csp::common::Map<csp::common::String, csp::common::String> Parameters;
-};
-
 /// @brief Data structure for overrides to the default token options
 class CSP_API TokenOptions
 {

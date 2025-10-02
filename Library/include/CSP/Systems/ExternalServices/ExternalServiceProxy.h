@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include "CSP/Common/LoginState.h"
-#include "CSP/Systems/Users/Authentication.h"
+#include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::systems
 {
 
-/// @brief Result structure for a logout state request.
-class CSP_API LogoutResult : public NullResult
+/// @brief @brief Data class used to contain information requesting a user token
+class CSP_API AgoraUserTokenResult : public StringResult
 {
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
@@ -33,45 +33,26 @@ class CSP_API LogoutResult : public NullResult
     /** @endcond */
 
 private:
-    LogoutResult();
-    LogoutResult(csp::common::LoginState* InStatePtr);
+    AgoraUserTokenResult() = default;
+    AgoraUserTokenResult(void*) {};
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-    csp::common::LoginState* State;
 };
 
-/// @brief Result url for a tier checkout session request
-class CSP_API CheckoutSessionUrlResult : public StringResult
+/// @brief @brief Data class used to contain information posting a service proxy
+class CSP_API PostServiceProxyResult : public StringResult
 {
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
     friend class UserSystem;
     CSP_END_IGNORE
     /** @endcond */
 
-public:
-    CheckoutSessionUrlResult() = default;
-    CheckoutSessionUrlResult(void*) {};
-
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-};
+    PostServiceProxyResult() = default;
+    PostServiceProxyResult(void*) {};
 
-/// @brief Result url for a user customer portal request
-class CSP_API CustomerPortalUrlResult : public StringResult
-{
-    /** @cond DO_NOT_DOCUMENT */
-    CSP_START_IGNORE
-    friend class UserSystem;
-    CSP_END_IGNORE
-    /** @endcond */
-
-public:
-    CustomerPortalUrlResult() = default;
-    CustomerPortalUrlResult(void*) {};
-
-private:
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
