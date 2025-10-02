@@ -58,8 +58,7 @@ void ExternalServiceProxySystem::InvokeOperation(const ExternalServicesOperation
     TokenInfo->SetParameters(Convert(Params.Parameters));
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
-            Callback, nullptr);
+        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, StringResult, void, chs_aggregation::ServiceResponse>(Callback, nullptr);
     static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
 }
 

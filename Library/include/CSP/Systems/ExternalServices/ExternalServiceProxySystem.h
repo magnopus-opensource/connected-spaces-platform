@@ -20,7 +20,6 @@
 #include "CSP/Common/CancellationToken.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
-#include "CSP/Systems/ExternalServices/ExternalServiceProxy.h"
 #include "CSP/Systems/SystemBase.h"
 
 namespace csp
