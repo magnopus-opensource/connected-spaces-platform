@@ -76,10 +76,10 @@ namespace Csp.Tests
             var simpleClass = new SimpleClass();
             simpleClass.Dispose();
 
-            // Accessing the pointer after Dispose should throw a NullReferenceException rather
+            // Accessing the pointer after Dispose should throw a ObjectDisposedException rather
             // than creating a segfault.
-            var ex = Assert.Throws<NullReferenceException>(() => { int value = simpleClass.GetValue(); });
-            StringAssert.Contains("Attempting to access a null pointer", ex.Message);
+            var ex = Assert.Throws<ObjectDisposedException>(() => { int value = simpleClass.GetValue(); });
+            StringAssert.Contains("Attempting to access a disposed instance", ex.Message);
         }
 
         [Test]
