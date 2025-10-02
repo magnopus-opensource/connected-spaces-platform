@@ -131,4 +131,4 @@ template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineTyp
 template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
-template class PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes>>;
+template class PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String>>;
