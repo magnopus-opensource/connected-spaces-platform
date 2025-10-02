@@ -72,7 +72,8 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     auto [Result] = AWAIT_PRE(ExternlServiceProxySystem, GetAgoraUserToken, RequestPredicate, Params);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_FALSE(Result.GetValue().IsEmpty());
+    EXPECT_FALSE(Result.GetValue().IsEmpty()); // We assume a non-empty string means we got an Agora token back
+    EXPECT_EQ(Result.GetHttpResultCode(), 200);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
