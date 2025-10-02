@@ -91,12 +91,11 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     LogOut(UserSystem);
 }
 
-class ExternalServicesFailureMock
-    : public PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String>>
+class ExternalServicesMock : public PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String>>
 {
 };
 
-TEST_P(ExternalServicesFailureMock, ExternalServicesFailureMockTest)
+TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 {
     const auto ExternalServiceProxyMock = std::make_unique<chs_aggregation::ExternalServiceProxyApiMock>();
 
@@ -159,6 +158,6 @@ TEST_P(ExternalServicesFailureMock, ExternalServicesFailureMockTest)
     EXPECT_EQ(Result.GetValue(), ExpectedTokenValue);
 }
 
-INSTANTIATE_TEST_SUITE_P(ExternalServicesProxySystemTests, ExternalServicesFailureMock,
+INSTANTIATE_TEST_SUITE_P(ExternalServicesProxySystemTests, ExternalServicesMock,
     testing::Values(std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "AVeryGoodToken"),
         std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "")));
