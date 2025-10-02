@@ -162,7 +162,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
 
     {
         // Expect that we log the error message
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, csp::common::String(ExpectedErrorMsg.c_str()))).Times(1);
 
         ASSERT_ANY_THROW(csp::common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             SuccessMsg.c_str(), MakeInvalid<NullResult>(), *csp::systems::SystemsManager::Get().GetLogSystem())(ErrorCode));
