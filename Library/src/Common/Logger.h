@@ -37,8 +37,6 @@
 
 typedef std::chrono::system_clock Clock;
 
-#define RESET "\033[0m"
-
 static std::string LogFilePath = "";
 
 // @brief Sends data to file and console streams.
