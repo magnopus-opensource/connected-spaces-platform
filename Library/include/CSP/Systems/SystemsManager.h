@@ -166,7 +166,7 @@ public:
     AnalyticsSystem* GetAnalyticsSystem();
 
     /// @brief Retrieves external services proxy system.
-    /// @return SpaceSystem : pointer to the user system class
+    /// @return ExternalServiceProxySystem : pointer to the external services proxy system class.
     ExternalServiceProxySystem* GetExternalServicesProxySystem();
 
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();

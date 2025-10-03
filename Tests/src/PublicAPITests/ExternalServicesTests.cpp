@@ -46,18 +46,8 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* ExternlServiceProxySystem = SystemsManager.GetExternalServicesProxySystem();
+    auto* ExternalServiceProxySystem = SystemsManager.GetExternalServicesProxySystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
     // Log in
     csp::common::String UserId;
@@ -65,8 +55,7 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
 
     // Create space
     csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    CreateDefaultTestSpace(SpaceSystem, Space);
 
     csp::systems::AgoraUserTokenParams Params;
     Params.AgoraUserId = UserId;
@@ -79,7 +68,7 @@ CSP_PUBLIC_TEST(CSPEngine, ExternalServicesProxySystemTests, GetAgoraUserTokenTe
     Params.ReadOnly = false;
 
     // Get token
-    auto [Result] = AWAIT_PRE(ExternlServiceProxySystem, GetAgoraUserToken, RequestPredicate, Params);
+    auto [Result] = AWAIT_PRE(ExternalServiceProxySystem, GetAgoraUserToken, RequestPredicate, Params);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_FALSE(Result.GetValue().IsEmpty()); // We assume a non-empty string means we got an Agora token back
@@ -109,9 +98,11 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
     const csp::common::String ExpectedTokenValue = std::get<2>(GetParam());
     const bool IncludeToken = std::get<3>(GetParam());
 
+    // The promise
     std::promise<csp::systems::StringResult> ResultPromise;
     std::future<csp::systems::StringResult> ResultFuture = ResultPromise.get_future();
 
+    // Spoofed parameters
     csp::systems::ExternalServicesOperationParams ProxyParams;
     ProxyParams.OperationName = "MockOperationName";
     ProxyParams.ServiceName = "MockServiceName";
