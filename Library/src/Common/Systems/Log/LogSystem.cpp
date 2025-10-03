@@ -48,13 +48,13 @@ LogSystem::LogSystem()
 
 LogSystem::~LogSystem() { delete Callbacks; }
 
-void LogSystem::SetLogCallback(LogCallbackHandler InLogCallback) { Callbacks->LogCallback = InLogCallback; }
+void LogSystem::SetLogCallback(LogCallbackHandler InLogCallback) { Callbacks->LogCallback = std::move(InLogCallback); }
 
-void LogSystem::SetEventCallback(EventCallbackHandler InEventCallback) { Callbacks->EventCallback = InEventCallback; }
+void LogSystem::SetEventCallback(EventCallbackHandler InEventCallback) { Callbacks->EventCallback = std::move(InEventCallback); }
 
-void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback) { Callbacks->BeginMarkerCallback = InBeginCallback; }
+void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback) { Callbacks->BeginMarkerCallback = std::move(InBeginCallback); }
 
-void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = InEndCallback; }
+void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = std::move(InEndCallback); }
 
 void LogSystem::SetSystemLevel(const csp::common::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
 
