@@ -70,8 +70,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInRe
                 EXPECT_FALSE(Result.get_exception());
                 EXPECT_EQ(Result.get(), uint64_t(55));
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -106,8 +105,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -144,8 +142,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
                 EXPECT_EQ(Result.as_bool(), true);
                 EXPECT_FALSE(Exception);
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -191,8 +188,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(),
-            [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -274,7 +270,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
 
     // Expect that we log the error message
     const csp::common::String ErrorMsg = "Failed to create Avatar. Exception: mock exception";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(ErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
     const SpaceTransform& UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };

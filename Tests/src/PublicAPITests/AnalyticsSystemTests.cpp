@@ -88,12 +88,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     // Ensure the required fields error message is logged when we try to send an analytics event with a required field missing
     const csp::common::String AnalyticsErrorMsg
         = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
     // Passing an empty string for a required field
@@ -135,15 +135,15 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     std::promise<bool> QueueSentPromise;
     std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
 
     const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(QueueSentSuccessMsg))
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
         .Times(1)
-        .WillOnce(::testing::Invoke([&](const csp::common::String&) { QueueSentPromise.set_value(true); }));
+        .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise.set_value(true); }));
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -198,15 +198,15 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTes
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     std::promise<bool> QueueSentPromise;
     std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
 
     const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(QueueSentSuccessMsg))
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
         .Times(1)
-        .WillOnce(::testing::Invoke([&](const csp::common::String&) { QueueSentPromise.set_value(true); }));
+        .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise.set_value(true); }));
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -254,12 +254,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingField
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     // Ensure the required fields error message is logged when we try to queue an analytics event with a required field missing
     const csp::common::String AnalyticsErrorMsg
         = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
     // Passing an empty string for a required field

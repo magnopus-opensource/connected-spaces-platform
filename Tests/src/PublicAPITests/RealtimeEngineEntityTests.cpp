@@ -1479,7 +1479,7 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
             static const csp::common::String AddComponentErrorMsg = "Entity is locked. New components can not be added to a locked Entity.";
 
             RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(AddComponentErrorMsg)).Times(1);
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AddComponentErrorMsg)).Times(1);
 
             // Attempt to add a component to a locked entity
             auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
@@ -1555,7 +1555,7 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
             static const csp::common::String RemoveComponentErrorMsg = "Entity is locked. Components can not be removed from a locked Entity.";
 
             RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(RemoveComponentErrorMsg)).Times(1);
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, RemoveComponentErrorMsg)).Times(1);
 
             // Attempt to remove a component from a locked entity
             CreatedEntity->RemoveComponent(NewComponent->GetId());
