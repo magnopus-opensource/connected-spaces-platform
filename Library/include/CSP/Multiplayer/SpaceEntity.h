@@ -17,6 +17,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Callbacks/Callbacks.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/SharedEnums.h"
@@ -105,9 +106,6 @@ public:
 
     // General callback providing success/fail boolean.
     typedef std::function<void(bool)> CallbackHandler;
-
-    // Callback that will provide a pointer to a SpaceEntity object.
-    typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
     /// @brief Creates a default instance of a SpaceEntity.
     SpaceEntity();
@@ -236,7 +234,7 @@ public:
     /// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT void CreateChildEntity(
-        const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+        const csp::common::String& InName, const SpaceTransform& InSpaceTransform, csp::multiplayer::EntityCreatedCallback Callback);
 
     /// @brief Gets the children of this entity
     /// @return csp::common::List<SpaceEntity>

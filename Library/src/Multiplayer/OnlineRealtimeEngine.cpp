@@ -353,7 +353,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
         {
             ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->NetworkEventBus);
         }
-        Callback(ReleasedAvatar);
+        Callback.Call(ReleasedAvatar);
     };
 }
 
@@ -377,17 +377,17 @@ void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const c
             [Callback, LogSystem = this->LogSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             {
                 LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create Avatar. Exception: {}", exception.what()).c_str());
-                Callback(nullptr);
+                Callback.Call(nullptr);
             }));
 }
 
 void OnlineRealtimeEngine::CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-    const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+    const std::optional<uint64_t>& ParentID, const csp::multiplayer::EntityCreatedCallback& Callback)
 {
     csp::common::Optional<uint64_t> ParentIDCommon
         = ParentID.has_value() ? csp::common::Optional<uint64_t> { ParentID.value() } : csp::common::Optional<uint64_t> {};
 
-    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentIDCommon, Callback, &LogSystem = this->LogSystem](
+    const std::function LocalIDCallback = [this, Name, SpaceTransform, ParentIDCommon, &Callback, &LogSystem = this->LogSystem](
                                               const signalr::value& Result, const std::exception_ptr& Except)
     {
         try
@@ -400,7 +400,7 @@ void OnlineRealtimeEngine::CreateEntity(const std::string& Name, const csp::mult
         catch (const std::exception& e)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
-            Callback(nullptr);
+            Callback.Call(nullptr);
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
@@ -425,7 +425,7 @@ void OnlineRealtimeEngine::CreateEntity(const std::string& Name, const csp::mult
             catch (const std::exception& e)
             {
                 LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
-                Callback(nullptr);
+                Callback.Call(nullptr);
             }
 
             std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -434,7 +434,7 @@ void OnlineRealtimeEngine::CreateEntity(const std::string& Name, const csp::mult
 
             Entities.Append(NewObject);
             Objects.Append(NewObject);
-            Callback(NewObject);
+            Callback.Call(NewObject);
         };
 
         MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
@@ -561,14 +561,16 @@ SpaceEntity* OnlineRealtimeEngine::FindSpaceObject(const csp::common::String& In
     return RealtimeEngineUtils::FindSpaceObject(*this, InName);
 }
 
-void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback Callback)
+void OnlineRealtimeEngine::SetRemoteEntityCreatedCallback(EntityCreatedCallback /* Callback*/)
 {
+    /*
     if (RemoteSpaceEntityCreatedCallback)
     {
         LogSystem->LogMsg(common::LogLevel::Warning, "RemoteSpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
     RemoteSpaceEntityCreatedCallback = std::move(Callback);
+    */
 }
 
 bool OnlineRealtimeEngine::AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity)
@@ -608,9 +610,10 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
 
 namespace
 {
-    void FireRemoteSpaceEntityCreatedCallback(
-        SpaceEntity* SpaceEntity, csp::multiplayer::EntityCreatedCallback RemoteSpaceEntityCreatedCallback, csp::common::LogSystem& LogSystem)
+    void FireRemoteSpaceEntityCreatedCallback(SpaceEntity* /*SpaceEntity*/,
+        csp::multiplayer::EntityCreatedCallback /* RemoteSpaceEntityCreatedCallback*/, csp::common::LogSystem& /* LogSystem*/)
     {
+        /*
         if (RemoteSpaceEntityCreatedCallback)
         {
             RemoteSpaceEntityCreatedCallback(SpaceEntity);
@@ -620,6 +623,7 @@ namespace
             LogSystem.LogMsg(common::LogLevel::Warning,
                 "Called RemoteSpaceEntityCreatedCallback without it being set! Call SetRemoteEntityCreatedCallback first!");
         }
+        */
     }
 }
 

@@ -22,6 +22,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
+#include "CSP/Common/Vector.h"
 
 #include <memory>
 #include <mutex>
@@ -40,6 +41,20 @@ namespace csp::multiplayer
 class CSPSceneDescription;
 class EntityScriptBinding;
 class SpaceEntityStatePatcher;
+
+class TestSharedPtrType
+{
+public:
+    TestSharedPtrType(int init)
+        : value(init)
+    {
+    }
+
+    int GetValue() const { return value; }
+
+private:
+    int value;
+};
 
 /// @brief Class for creating and managing objects in an offline context.
 ///
@@ -75,9 +90,6 @@ public:
     /// Removes entity script bindings and deregisters tick event listeners
     ~OfflineRealtimeEngine();
 
-    // Callback that will provide a pointer to a SpaceEntity object.
-    typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
-
     /********************** REALTIME ENGINE INTERFACE ************************/
     /*************************************************************************/
 
@@ -107,7 +119,7 @@ public:
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT virtual void CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& Transform,
-        const std::optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+        const std::optional<uint64_t>& ParentID, const csp::multiplayer::EntityCreatedCallback& Callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
@@ -181,6 +193,13 @@ public:
     /// @return A non-owning pointer to a List of non-owning pointers to all entities.
     virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const override;
 
+    // For proto
+    std::shared_ptr<TestSharedPtrType> MakeSharedPtrType();
+    std::shared_ptr<TestSharedPtrType> GetSharedPtrType() const;
+    void ReleaseSharedPtrTypeFromCSP();
+    const std::vector<csp::multiplayer::SpaceEntity*>& GetAllEntitiesVec() const;
+    void MakeAnIntOffThreadVerySlowly(int SecondsToTake, const LongRunningOperationToMakeAnIntCallback& Callback);
+
     /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;
@@ -244,6 +263,7 @@ private:
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
 
+    mutable std::vector<SpaceEntity*> EntityVecShim;
     csp::common::List<SpaceEntity*> Entities;
     csp::common::List<SpaceEntity*> Avatars;
     csp::common::List<SpaceEntity*> Objects;
@@ -254,5 +274,7 @@ private:
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;
+
+    std::shared_ptr<TestSharedPtrType> m_SharedPtrTypeForTest;
 };
 }

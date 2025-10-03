@@ -294,9 +294,10 @@ bool SpaceEntity::GetIsPersistent() const { return IsPersistent; }
 
 SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
 
-void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void SpaceEntity::CreateChildEntity(
+    const csp::common::String& /*InName*/, const SpaceTransform& /*InSpaceTransform*/, csp::multiplayer::EntityCreatedCallback /*Callback*/)
 {
-    EntitySystem->CreateEntity(InName.c_str(), InSpaceTransform, GetId(), Callback);
+    // EntitySystem->CreateEntity(InName.c_str(), InSpaceTransform, GetId(), Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const { return &ChildEntities; }
