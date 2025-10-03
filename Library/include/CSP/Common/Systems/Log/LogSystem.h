@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,11 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
-
+#include "CSP/Common/Systems/Log/LogLevels.h"
 #include <functional>
 
 namespace csp::common
 {
-
-enum class LogLevel
-{
-    NoLogging,
-    Fatal,
-    Error,
-    Warning,
-    Display,
-    Log,
-    Verbose,
-    VeryVerbose,
-    All
-};
 
 /// @brief A Connected Spaces Platform level Logger for debugging or printing to console, also handles logging to a file.
 /// Contains a callback system that allows clients to react to specific logs or events.
@@ -98,7 +85,7 @@ public:
 private:
     csp::common::LogLevel SystemLevel = LogLevel::All;
 
-    void LogToFile(const csp::common::String& InMessage);
+    void LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage);
 
     // Allocate internally to avoid warning C4251 'needs to have dll-interface to be used by clients'
     struct LogCallbacks* Callbacks;

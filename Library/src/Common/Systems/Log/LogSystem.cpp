@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
     }
 
     // Log to our Connected Spaces Platform file system.
-    LogToFile(InMessage);
+    LogToFile(Level, InMessage);
 
     if (Callbacks->LogCallback != nullptr)
     {
@@ -116,7 +116,7 @@ void LogSystem::EndMarker()
     }
 }
 
-void LogSystem::LogToFile(const csp::common::String& InMessage) { CSP_LOG(InMessage.c_str()); }
+void LogSystem::LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage) { CSP_LOG(Level, InMessage.c_str()); }
 
 void LogSystem::ClearAllCallbacks() { Callbacks->Clear(); }
 

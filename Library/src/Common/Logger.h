@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include "CSP/Common/Systems/Log/LogLevels.h"
+
 #include <chrono>
 #include <ctime>
 #include <fstream>
@@ -36,17 +38,6 @@
 typedef std::chrono::system_clock Clock;
 
 #define RESET "\033[0m"
-
-namespace csp
-{
-
-constexpr unsigned int Info = 1;
-constexpr unsigned int Warning = 2;
-constexpr unsigned int Error = 3;
-constexpr unsigned int Assert = 4;
-constexpr unsigned int Network = 5;
-
-} // namespace csp
 
 static std::string LogFilePath = "";
 
@@ -92,37 +83,64 @@ public:
     }
 
     /// @brief Writes the given Message to the log (both console and file streams).
-    /// Categories can be the following values: 1 (InfoLog), 2 (WarningLog), 3 (ErrorLog), 4 (AssertLog), 5 (NetworkLog), 6 (GeneralLog)
-    /// These categories are written to the streams to make it easier to find log types.
+    /// Log level is written to the streams to make it easier to find log types.
     /// @param File const char* : Name of the file to log
-    /// @param Line const int : Line number to log
-    /// @param Message const std::string : Message to log
-    /// @param Category const int : Category of the log
-    /// @param ShowLineNumber const bool : Whether to display the line number in the log
-    static void LogOutput(const char* File, const int Line, const std::string Message, const int Category, const bool ShowLineNumber)
+    /// @param Line int : Line number to log
+    /// @param Message const std::string& : Message to log
+    /// @param LogLevel csp::common::LogLevel : Verbosity of the log
+    /// @param ShowLineNumber bool : Whether to display the line number in the log
+    static void LogOutput(const char* File, int Line, const std::string& Message, csp::common::LogLevel LogLevel, bool ShowLineNumber)
     {
         std::string CategoryStr = "";
 
-        switch (Category)
+        switch (LogLevel)
         {
-        case csp::Info:
-            CategoryStr = "InfoLog";
+        case csp::common::LogLevel::NoLogging:
+        {
+            CategoryStr = "NoLogging";
             break;
-        case csp::Warning:
+        }
+        case csp::common::LogLevel::Fatal:
+        {
             CategoryStr = "WarningLog";
             break;
-        case csp::Error:
-            CategoryStr = "ErrorLog";
+        }
+        case csp::common::LogLevel::Error:
+        {
+            CategoryStr = "WarningLog";
             break;
-        case csp::Assert:
-            CategoryStr = "AssertLog";
+        }
+        case csp::common::LogLevel::Warning:
+        {
+            CategoryStr = "Warning";
             break;
-        case csp::Network:
-            CategoryStr = "NetworkLog";
+        }
+        case csp::common::LogLevel::Display:
+        {
+            CategoryStr = "Display";
             break;
+        }
+        case csp::common::LogLevel::Log:
+        {
+            CategoryStr = "Log";
+            break;
+        }
+        case csp::common::LogLevel::Verbose:
+        {
+            CategoryStr = "Verbose";
+            break;
+        }
+        case csp::common::LogLevel::VeryVerbose:
+        {
+            CategoryStr = "VeryVerbose";
+            break;
+        }
         default:
-            CategoryStr = "GeneralLog";
+        case csp::common::LogLevel::All:
+        {
+            CategoryStr = "All";
             break;
+        }
         };
 
         std::string FileName(File);
@@ -147,15 +165,4 @@ public:
     }
 };
 
-#define EXPAND(x) x
-#define GET_MACRO(_1, _2, _3, NAME, ...) NAME
-
-#define CSP_LOG(Message) Logger::LogOutput(__FILE__, __LINE__, Message, csp::Info, false)
-
-#define CSP_FORMATTED_LOG(Format, ...)                                                                                                               \
-    {                                                                                                                                                \
-        char CSPLogBuffer[256];                                                                                                                      \
-        LoggerSprintf(CSPLogBuffer, 255, Format, ##__VA_ARGS__);                                                                                     \
-        const std::string CSPLogFormattedMsg(CSPLogBuffer);                                                                                          \
-        Logger::LogOutput(__FILE__, __LINE__, CSPDLogFormattedMsg, csp::Info, false);                                                                \
-    }
+#define CSP_LOG(Level, Message) Logger::LogOutput(__FILE__, __LINE__, Message, Level, false)
