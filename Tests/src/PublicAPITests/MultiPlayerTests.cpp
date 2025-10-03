@@ -1591,3 +1591,35 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MultiplayerTestsMock, TestNoSignalRCommuni
 
     csp::CSPFoundation::Tick();
 }
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestMultiplayerDisconnectionWhenNewMultiplayerSessionInitiated)
+{
+    csp::common::LogSystem LogSystem;
+    SignalRConnectionMock* SignalRMock = new SignalRConnectionMock();
+    csp::multiplayer::MultiplayerConnection Connection { LogSystem, *SignalRMock };
+    csp::multiplayer::NetworkEventBus NetworkEventBus { &Connection, LogSystem };
+
+    // Intercept the 'OnRequestToDisconnect' event and dummy expected response for new user login on different client
+    ON_CALL(*SignalRMock, On)
+        .WillByDefault(
+            [&Connection](
+                const std::string& EventName, const ISignalRConnection::MethodInvokedHandler& Handler, csp::common::LogSystem& /*LogSystem*/)
+            {
+                if (EventName == "OnRequestToDisconnect")
+                {
+                    Handler(std::vector { signalr::value("New Multiplayer Session Initiated") });
+                }
+
+                return true;
+            });
+
+    // Then the error callback we be called
+    MockMultiplayerErrorCallback MockErrorCallback;
+
+    // And the disconnection callback will be called with a message
+    MockConnectionCallback MockDisconnectionCallback;
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("New Multiplayer Session Initiated")));
+
+    Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
+    Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
+}
