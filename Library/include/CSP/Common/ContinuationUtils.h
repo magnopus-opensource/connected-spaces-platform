@@ -101,10 +101,9 @@ private:
 /*
  * Print an error with provided string, and throw a cancellation error.
  */
-inline void LogErrorAndCancelContinuation(
-    std::string ErrorMsg, common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline void LogErrorAndCancelContinuation(std::string ErrorMsg, common::LogSystem& LogSystem)
 {
-    LogSystem.LogMsg(LogLevel, ErrorMsg.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMsg.c_str());
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
@@ -174,17 +173,16 @@ inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, Expected
  * abstraction, but pragmatically necessary to do the modularization.
  */
 template <typename ErrorResultT>
-inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-    std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem)
 {
-    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem, LogLevel](
+    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
     {
         if (ErrorCode.has_value())
         {
             // Error Case. We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
+            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem);
         }
         else
         {

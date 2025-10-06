@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ struct LogCallbacks
     }
 
     LogSystem::LogCallbackHandler LogCallback;
-    LogSystem::LogCallbackHandler EventCallback;
+    LogSystem::EventCallbackHandler EventCallback;
     LogSystem::BeginMarkerCallbackHandler BeginMarkerCallback;
     LogSystem::EndMarkerCallbackHandler EndMarkerCallback;
 };
@@ -48,13 +48,13 @@ LogSystem::LogSystem()
 
 LogSystem::~LogSystem() { delete Callbacks; }
 
-void LogSystem::SetLogCallback(LogCallbackHandler InLogCallback) { Callbacks->LogCallback = InLogCallback; }
+void LogSystem::SetLogCallback(LogCallbackHandler InLogCallback) { Callbacks->LogCallback = std::move(InLogCallback); }
 
-void LogSystem::SetEventCallback(EventCallbackHandler InEventCallback) { Callbacks->EventCallback = InEventCallback; }
+void LogSystem::SetEventCallback(EventCallbackHandler InEventCallback) { Callbacks->EventCallback = std::move(InEventCallback); }
 
-void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback) { Callbacks->BeginMarkerCallback = InBeginCallback; }
+void LogSystem::SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback) { Callbacks->BeginMarkerCallback = std::move(InBeginCallback); }
 
-void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = InEndCallback; }
+void LogSystem::SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback) { Callbacks->EndMarkerCallback = std::move(InEndCallback); }
 
 void LogSystem::SetSystemLevel(const csp::common::LogLevel InSystemLevel) { SystemLevel = InSystemLevel; }
 
@@ -70,12 +70,12 @@ void LogSystem::LogMsg(const csp::common::LogLevel Level, const csp::common::Str
     }
 
     // Log to our Connected Spaces Platform file system.
-    LogToFile(InMessage);
+    LogToFile(Level, InMessage);
 
     if (Callbacks->LogCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
-        Callbacks->LogCallback(InMessage);
+        Callbacks->LogCallback(Level, InMessage);
     }
     else
     {
@@ -116,7 +116,7 @@ void LogSystem::EndMarker()
     }
 }
 
-void LogSystem::LogToFile(const csp::common::String& InMessage) { CSP_LOG(InMessage.c_str()); }
+void LogSystem::LogToFile(const csp::common::LogLevel Level, const csp::common::String& InMessage) { CSP_LOG(Level, InMessage.c_str()); }
 
 void LogSystem::ClearAllCallbacks() { Callbacks->Clear(); }
 
