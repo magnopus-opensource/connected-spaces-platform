@@ -34,27 +34,68 @@ void ExternalServiceInvocationResult::OnResponse(const services::ApiResponseBase
 
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
     {
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
+        rapidjson::Document JsonPayload;
+        JsonPayload.Parse(Response->GetPayload().GetContent());
 
-        if (!OperationResult)
+        if (JsonPayload.HasParseError() == false)
         {
-            CSP_LOG_FORMAT(csp::common::LogLevel::Error, "The operation result for an external service proxy invocation was invalid. Response: %s",
-                Response->GetPayload().GetContent().c_str());
+            AuthResponse->FromJson(Response->GetPayload().GetContent());
+            const std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
 
-            return;
+            if (OperationResult)
+            {
+                // The external service proxy services endpoint directly routes data back from the external service it is proxying for,
+                // so we do not assume format/content and just return the result directly to the client.
+                rapidjson::StringBuffer Buffer;
+                rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+                OperationResult->Accept(Writer);
+
+                const csp::common::String JsonString = std::string(Buffer.GetString(), Buffer.GetSize()).c_str();
+                SetValue(JsonString);
+            }
+            else
+            {
+                CSP_LOG_FORMAT(csp::common::LogLevel::Error,
+                    "The operation result Json field for an external service proxy invocation was invalid/missing. Response: %s",
+                    Response->GetPayload().GetContent().c_str());
+            }
         }
-
-        if (!OperationResult->HasMember("token"))
+        else
         {
             CSP_LOG_FORMAT(csp::common::LogLevel::Error,
-                "Whilst the operation result for an external service proxy invocation was valid, there was no 'token' result returned. Response: %s",
+                "Encountered a malformed operation result Json string when attempting to process the response from an external service proxy "
+                "invocation result. Payload: %s",
                 Response->GetPayload().GetContent().c_str());
-
-            return;
         }
+    }
+}
 
-        SetValue(OperationResult->operator[]("token").GetString());
+void GetAgoraTokenResult::OnResponse(const services::ApiResponseBase* ApiResponse)
+{
+    // Run generic processing of the response.
+    ExternalServiceInvocationResult::OnResponse(ApiResponse);
+
+    // If the string is not empty, we can assume it contains valid Json as ExternalServiceInvocationResult has already parsed it for the operation
+    // result.
+    const csp::common::String OperationResult(GetValue());
+    if (OperationResult.IsEmpty() == false)
+    {
+        // Extract the Agora token from the observed operation result.
+        rapidjson::Document OperationResultJson;
+        OperationResultJson.Parse(OperationResult);
+
+        // As this is a specialized function for Agora, we know the format to expect.
+        if (OperationResultJson.HasMember("token") && OperationResultJson["token"].IsString())
+        {
+            // For GetAgoraTokeResult, the result value is just the token.
+            SetValue(OperationResultJson["token"].GetString());
+        }
+        else
+        {
+            CSP_LOG_FORMAT(csp::common::LogLevel::Error,
+                "Whilst the operation result for an Agora token request was valid Json, there was no 'token' result returned. Operation result: %s",
+                OperationResult.c_str());
+        }
     }
 }
 

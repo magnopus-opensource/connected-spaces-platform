@@ -117,8 +117,8 @@ public:
 
     /// @brief Specialised utility function which executes a post call to the external services proxy, specifically to retrieve Agora user token
     /// credentials. A good example for how client applications may wish to use PostServiceProxy.
-    /// @param Params const AgoraUserTokenParams& : Params to configure the User token
-    /// @param Callback StringResultCallback : callback to call when a response is received
+    /// @param Params const AgoraUserTokenParams& : Params to configure the User token.
+    /// @param Callback StringResultCallback : callback to call when a response is received.
     CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
 
 private:
