@@ -261,16 +261,6 @@ public:
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void Ping(NullResultCallback Callback);
 
-    /// @brief Retrieve User token from Agora
-    /// @param Params const AgoraUserTokenParams& : Params to configure the User token
-    /// @param Callback StringResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
-
-    /// @brief Post Service Proxy to perform specified operation of specified service
-    /// @param Params const TokenInfoParams& : Params to specify service, operation, set help and parameters
-    /// @param Callback StringResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback);
-
     /// @brief Re-send user verification email
     /// @param InEmail csp::common::String : User's email address
     /// @param InRedirectUrl csp::common::Optional<csp::common::String> : URL to redirect user to after they have registered
@@ -328,7 +318,6 @@ private:
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;
     csp::services::ApiBase* PingAPI;
-    csp::services::ApiBase* ExternalServiceProxyApi;
     csp::services::ApiBase* StripeAPI;
 
     csp::common::LoginState CurrentLoginState;

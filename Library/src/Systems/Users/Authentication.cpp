@@ -226,66 +226,6 @@ void LoginTokenInfoResult::FillLoginTokenInfo(
     TokenInfo.RefreshExpiryTime = RefreshTokenExpiry;
 }
 
-void AgoraUserTokenResult::OnResponse(const services::ApiResponseBase* ApiResponse)
-{
-    ResultBase::OnResponse(ApiResponse);
-
-    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
-
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
-    {
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
-
-        if (!OperationResult)
-        {
-            CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult invalid");
-
-            return;
-        }
-
-        if (!OperationResult->HasMember("token"))
-        {
-            CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
-
-            return;
-        }
-
-        SetValue(OperationResult->operator[]("token").GetString());
-    }
-}
-
-void PostServiceProxyResult::OnResponse(const services::ApiResponseBase* ApiResponse)
-{
-    ResultBase::OnResponse(ApiResponse);
-
-    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
-
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
-    {
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
-
-        if (!OperationResult)
-        {
-            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult invalid");
-
-            return;
-        }
-
-        if (!OperationResult->HasMember("token"))
-        {
-            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult doesn't contain expected member: token");
-
-            return;
-        }
-
-        SetValue(OperationResult->operator[]("token").GetString());
-    }
-}
-
 void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
