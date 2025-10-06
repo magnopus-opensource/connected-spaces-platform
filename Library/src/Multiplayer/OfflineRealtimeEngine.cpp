@@ -95,6 +95,14 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
     {
         AddEntity(DeserializedEntities[i]);
     }
+
+    // Needs to be after all the adds, we normally assume any entity add must parent to an existing entity,
+    // but because we load all at once, not here.
+    // This smells a bit, why must this be different compared to loading Online state?
+    for (SpaceEntity* Entity : *GetAllEntities())
+    {
+        ResolveEntityHierarchy(Entity);
+    }
 }
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
