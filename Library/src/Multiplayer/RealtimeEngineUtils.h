@@ -99,7 +99,7 @@ void DetermineScriptOwners(const csp::common::List<SpaceEntity*>& Entities, uint
 // ClientID is the ID that comes from the multiplayerConnection
 void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId);
 
-// Returns the current time, meant to be set as LastTickTime. If an offline engine, will not bother checking script ownership
+// Returns the current time, meant to be set as LastTickTime. If an offline engine, will not bother checking whether the local client is the leader.
 std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
     const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
     csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager);
