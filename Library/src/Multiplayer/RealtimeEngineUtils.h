@@ -17,6 +17,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
+#include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 
 #include <chrono>
@@ -28,6 +29,11 @@ namespace csp::common
 class IRealtimeEngine;
 class IJSScriptRunner;
 class LogSystem;
+}
+
+namespace csp::multiplayer
+{
+class ClientElectionManager;
 }
 
 /*
@@ -95,6 +101,7 @@ void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId);
 
 // Returns the current time, meant to be set as LastTickTime. If an offline engine, will not bother checking script ownership
 std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
-    uint64_t ClientId, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime);
+    const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
+    csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager);
 
 }

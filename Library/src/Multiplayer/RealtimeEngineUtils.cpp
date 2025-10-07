@@ -19,6 +19,7 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/Election/ClientElectionManager.h"
 #include <fmt/format.h>
 
 namespace
@@ -229,7 +230,8 @@ void ClaimScriptOwnership(SpaceEntity* Entity, uint64_t ClientId)
 }
 
 std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& EntitiesLock, csp::common::RealtimeEngineType RealtimeEngineType,
-    uint64_t ClientId, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime)
+    const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime,
+    csp::common::Optional<csp::multiplayer::ClientElectionManager*> ElectionManager)
 {
     std::scoped_lock EntitiesLocker(EntitiesLock);
 
@@ -241,7 +243,12 @@ std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& En
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
         // Ownership is not a concern for offline realtime engines
-        if ((ClientId == Entities[i]->GetScript().GetOwnerId()) || (RealtimeEngineType != csp::common::RealtimeEngineType::Online))
+        const bool IsNotOnlineEngine = RealtimeEngineType != csp::common::RealtimeEngineType::Online;
+
+        // The script leader is always responsible for running scripts
+        bool IsLocalClientScriptLeader = ElectionManager.HasValue() && (*ElectionManager)->IsLocalClientLeader();
+
+        if (IsNotOnlineEngine || IsLocalClientScriptLeader)
         {
             Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
         }
