@@ -30,7 +30,7 @@ FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEnt
     Properties[static_cast<uint32_t>(FogPropertyKeys::StartDistance)] = 0.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::EndDistance)] = 0.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::Color)] = csp::common::Vector3 { 0.8f, 0.9f, 1.0f };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Density)] = 0.2f;
+    Properties[static_cast<uint32_t>(FogPropertyKeys::Density)] = 0.4f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)] = 0.2f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)] = 1.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)] = false;

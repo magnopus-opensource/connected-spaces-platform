@@ -84,7 +84,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 0.f);
     EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 0.f);
     EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3({ 0.8f, 0.9f, 1.0f }));
-    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.2f);
+    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.4f);
     EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 0.2f);
     EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 1.f);
     EXPECT_FALSE(FogComponent->GetIsVolumetric());
