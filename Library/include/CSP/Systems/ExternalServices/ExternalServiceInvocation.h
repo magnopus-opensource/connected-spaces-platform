@@ -22,7 +22,7 @@
 namespace csp::systems
 {
 
-/// @brief @brief Data class used to contain information relating to invocations via the external service proxy system.
+/// @brief Data class used to contain information relating to invocations via the external service proxy system.
 class CSP_API ExternalServiceInvocationResult : public StringResult
 {
     /** @cond DO_NOT_DOCUMENT */
@@ -32,11 +32,28 @@ class CSP_API ExternalServiceInvocationResult : public StringResult
     CSP_END_IGNORE
     /** @endcond */
 
-private:
+protected:
     ExternalServiceInvocationResult() = default;
     ExternalServiceInvocationResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+};
+
+/// @brief A specialisation of the result data class that handles respnses from the external service proxy system.
+class CSP_API GetAgoraTokenResult : public ExternalServiceInvocationResult
+{
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
+
+protected:
+    GetAgoraTokenResult() = default;
+    GetAgoraTokenResult(void*) {};
+
+    virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 } // namespace csp::systems

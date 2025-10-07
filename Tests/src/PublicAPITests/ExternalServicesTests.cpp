@@ -95,8 +95,8 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
     // Expected results
     const csp::systems::EResultCode ExpectedResultCode = std::get<0>(GetParam());
     const csp::web::EResponseCodes ExpectedResponseCode = std::get<1>(GetParam());
-    const csp::common::String ExpectedTokenValue = std::get<2>(GetParam());
-    const bool IncludeToken = std::get<3>(GetParam());
+    const csp::common::String ExpectedOperationResultJsonString = std::get<2>(GetParam());
+    const bool JsonIsValid = std::get<3>(GetParam());
 
     // The promise
     std::promise<csp::systems::StringResult> ResultPromise;
@@ -110,7 +110,7 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 
     EXPECT_CALL(*ExternalServiceProxyMock, service_proxyPost)
         .WillOnce(
-            [ExpectedResponseCode, ExpectedTokenValue, IncludeToken](
+            [ExpectedResponseCode, ExpectedOperationResultJsonString, JsonIsValid](
                 const chs_aggregation::IExternalServiceProxyApiBase::service_proxyPostParams& /*ServiceParams*/,
                 csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/
             )
@@ -120,27 +120,12 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
 
                 csp::web::HttpPayload Payload;
 
-                csp::common::String RequestBody;
-                if (IncludeToken)
+                const csp::common::String RequestBody = R"(
                 {
-                    RequestBody = R"(
-                    {
-	                    "operationResult":
-	                    {
-		                    "token":")"
-                        + ExpectedTokenValue + R"("
-	                    }
-                    })";
-                }
-                else
-                {
-                    RequestBody = R"(
-                    {
-	                    "operationResult":
-	                    {
-	                    }
-                    })";
-                }
+	                "operationResult":)"
+                    + ExpectedOperationResultJsonString + R"(
+                })";
+
                 Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
                 Payload.SetContent(RequestBody);
 
@@ -165,14 +150,19 @@ TEST_P(ExternalServicesMock, ExternalServicesMockTest)
     EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(ExpectedResponseCode));
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-    if (IncludeToken)
+    if (JsonIsValid)
     {
-        EXPECT_EQ(Result.GetValue(), ExpectedTokenValue);
+        EXPECT_EQ(Result.GetValue(), ExpectedOperationResultJsonString);
+    }
+    else
+    {
+        // If Json is malformed, we expect the string to be empty
+        EXPECT_TRUE(Result.GetValue().IsEmpty());
     }
 }
 
 INSTANTIATE_TEST_SUITE_P(ExternalServicesProxySystemTests, ExternalServicesMock,
-    testing::Values(std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "AVeryGoodToken", true),
-        std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "", false),
-        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "", true),
-        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "", false)));
+    testing::Values(
+        std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, R"({"validJsonProperty":"validJsonValue"})", true),
+        std::make_tuple(csp::systems::EResultCode::Success, csp::web::EResponseCodes::ResponseOK, "ThisIsNotValidJson", false),
+        std::make_tuple(csp::systems::EResultCode::Failed, csp::web::EResponseCodes::ResponseBadRequest, "", true)));
