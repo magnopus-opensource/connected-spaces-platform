@@ -242,13 +242,21 @@ std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& En
 
     for (size_t i = 0; i < Entities.Size(); ++i)
     {
-        // Ownership is not a concern for offline realtime engines
-        const bool IsNotOnlineEngine = RealtimeEngineType != csp::common::RealtimeEngineType::Online;
+        bool CanRunScripts = true;
 
-        // The script leader is always responsible for running scripts
-        bool IsLocalClientScriptLeader = ElectionManager.HasValue() && (*ElectionManager)->IsLocalClientLeader();
+        // Note that offline realtime engines may always run scripts.
+        if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+        {
+            // If this is an online engine with leadership election enabled, then only the script leader may run scripts.
+            // If there is no leadership election, then we assume all clients may run scripts.
+            csp::multiplayer::ClientElectionManager* ElectionManagerPtr = ElectionManager.HasValue() ? *ElectionManager : nullptr;
+            if (ElectionManagerPtr != nullptr)
+            {
+                CanRunScripts = ElectionManagerPtr->IsLocalClientLeader();
+            }
+        }
 
-        if (IsNotOnlineEngine || IsLocalClientScriptLeader)
+        if (CanRunScripts)
         {
             Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
         }
