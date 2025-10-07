@@ -77,7 +77,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     auto* FogComponent = static_cast<FogSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Fog));
 
     // Ensure defaults are set
-    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Linear);
+    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
     EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
     EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3::One());
