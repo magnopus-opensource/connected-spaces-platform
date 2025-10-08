@@ -119,7 +119,7 @@ public:
     const csp::common::Vector3& GetColor() const;
 
     /// @brief Sets fog color.
-    /// @param Value float : Fog color.
+    /// @param Value Vector3 : Fog color.
     void SetColor(const csp::common::Vector3& Value);
 
     /// @brief Gets global density factor.
@@ -155,7 +155,7 @@ public:
     bool GetIsVolumetric() const;
 
     /// @brief Sets IsFogVolumetric.
-    /// @param Value float : Fog Volumetric Flag.
+    /// @param Value boolean : Fog Volumetric Flag.
     void SetIsVolumetric(bool Value);
 
     /// \addtogroup IVisibleComponent
