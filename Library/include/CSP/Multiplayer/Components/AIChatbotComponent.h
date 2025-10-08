@@ -41,7 +41,12 @@ enum class AIChatbotPropertyKeys
 /// @brief Enumerates the list of potential visual states that can be replicated for a AI chatbot component.
 enum class AIChatbotVisualState
 {
-    None
+    Idle = 0,
+    Listening,
+    Thinking,
+    Speaking,
+    Unknown,
+    Num
 };
 
 class CSP_API AIChatbotSpaceComponent : public ComponentBase, public ITransformComponent

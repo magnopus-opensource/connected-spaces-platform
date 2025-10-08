@@ -81,7 +81,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), "");
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "");
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::None);
+    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Idle);
 
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
@@ -97,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     AIChatbotComponent->SetContextAssetId(ContextAssetId);
     AIChatbotComponent->SetGuardrailAssetId(GuardrailAssetId);
 
-    AIChatbotComponent->SetVisualState(AIChatbotVisualState::None);
+    AIChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
 
     // Ensure values are set correctly
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
@@ -107,7 +107,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), ContextAssetId);
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), GuardrailAssetId);
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::None);
+    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -164,7 +164,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
         component.scale = [0, 0, 0];
         component.contextAssetId = "TEST_CONTEXT_ASSET_ID";
         component.guardrailAssetId = "TEST_GUARDRAIL_ASSET_ID";
-        component.visualState = 0;
+        component.visualState = 1;
     )xx";
 
     CreatedObject->GetScript().SetScriptSource(ScreenSharingScriptText.c_str());
@@ -180,7 +180,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
     EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), "TEST_CONTEXT_ASSET_ID");
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "TEST_GUARDRAIL_ASSET_ID");
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::None);
+    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
