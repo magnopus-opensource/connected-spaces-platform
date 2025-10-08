@@ -58,8 +58,8 @@ void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
     if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(),
-            OfflineRealtimeEngine::LocalClientId(), *EntitySystem->GetAllEntities(), LastTickTime);
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
+            EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(), *EntitySystem->GetAllEntities(), LastTickTime, nullptr);
     }
 }
 

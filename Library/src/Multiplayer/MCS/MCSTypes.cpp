@@ -147,6 +147,15 @@ namespace
                 catch (const std::exception&)
                 {
                 }
+                catch(...)
+                {
+                    /* This sort of exception management isn't really advisable, we need to emit a callback when we find old data, 
+                       it's a serious compatibility issue. This catch block is added just to unblock Unity, which has done something
+                       funky with sentry integration making derived exceptions not catch for them on iOS.
+                       Sort of good it happened though, as it revealed the poor error management here:
+                         - This is only one path of potentially many, why is there a special catch here?
+                         - Just swallowing errors and loading the rest of a space is surely a recipe for terrifying bugs. */
+                }
             }
 
             Deserializer.EndReadUintMap();
