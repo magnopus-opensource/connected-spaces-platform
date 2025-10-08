@@ -95,26 +95,22 @@ public:
     /// @}
 
     /// @brief Gets start distance
-    /// Note: Distance from camera that the fog will start.
-    /// Note: 0 = this property has no effect.
+    /// @note Distance from camera that the fog will start. 0 = this property has no effect.
     /// @return Current start distance
     float GetStartDistance() const;
 
     /// @brief Sets start distance
-    /// Note: Distance from camera that the fog will start.
-    /// Note: 0 = this property has no effect.
+    /// @note Distance from camera that the fog will start. 0 = this property has no effect.
     /// @param Value float : Start distance
     void SetStartDistance(float Value);
 
     /// @brief Gets end distance
-    /// Note: objects passed this distance will not be affected by fog.
-    /// Note: 0 = this property has no effect.
+    /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
     /// @return Current end distance
     float GetEndDistance() const;
 
     /// @brief Sets end distance
-    /// Note: objects passed this distance will not be affected by fog.
-    /// Note: 0 = this property has no effect.
+    /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
     /// @param Value float : End distance
     void SetEndDistance(float Value);
 
@@ -135,24 +131,22 @@ public:
     void SetDensity(float Value);
 
     /// @brief Gets Height density factor
-    /// Note: Height density factor, controls how the density increases and height decreases. Smaller values make the visible transition larger.
+    /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
     /// @return Current height density factor
     float GetHeightFalloff() const;
 
     /// @brief Sets Height density factor
-    /// Note: Height density factor, controls how the density increases and height decreases. Smaller values make the visible transition larger.
+    /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
     /// @param Value float : Height density factor
     void SetHeightFalloff(float Value);
 
     /// @brief Gets maximum opacity of the fog.
-    /// Note: 1 = fog becomes fully opaque at a distance and replaces the scene colour completely.
-    /// Note: 0 = fog colour will have no impact.
+    /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
     /// @return Current maximum opacity
     float GetMaxOpacity() const;
 
     /// @brief Sets maximum opacity of the fog.
-    /// Note: 1 = fog becomes fully opaque at a distance and replaces the scene colour completely.
-    /// Note: 0 = fog colour will have no impact.
+    /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
     /// @param Value float : Maximum opacity of the fog.
     void SetMaxOpacity(float Value);
 
