@@ -22,13 +22,13 @@ This can be set via the Options menu here - Text Editor > C/C++ > Code Style > F
 Check the last option for `Use custom path to clang-format.exe` and then click browse to locate the executable in your llvm installation folder.
 
 Additionally, you will also need two specific SDK versions:
-* Windows SDK version 1809 (10.0.17763.0) - Required to build the C++ code.
+* Windows SDK version 2004 (10.0.19041.0) - Required to build the C++ code.
 
 * .Net Developer Pack 4.7.1 - required to load and build the C# tests.
 
-These SDK versions are not available from within VS 2022 and will need to be downloaded directly:
+These SDK versions might not be available from within VS 2022. If so, they will need to be downloaded and installed separately:
 
-Windows SDK: https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/ search the page for "1809"
+Windows SDK: https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/ search the page for "2004"
 
 or use chocolatey: `choco install windows-sdk-10-version-1809-all`
 
