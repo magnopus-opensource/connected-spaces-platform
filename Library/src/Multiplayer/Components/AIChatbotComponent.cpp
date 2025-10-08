@@ -19,6 +19,8 @@
 
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
+#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
+
 namespace csp::multiplayer
 {
 
@@ -31,6 +33,8 @@ csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::ContextAssetId)] = "";
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetId)] = "";
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState)] = static_cast<int64_t>(0);
+
+    SetScriptInterface(new AIChatbotSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& AIChatbotSpaceComponent::GetContextAssetId() const
