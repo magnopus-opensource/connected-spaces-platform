@@ -30,7 +30,6 @@ DEFINE_SCRIPT_PROPERTY_VEC3(AIChatbotSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(AIChatbotSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(AIChatbotSpaceComponent, Rotation);
 
-DEFINE_SCRIPT_PROPERTY_STRING(AIChatbotSpaceComponent, ContextAssetId);
 DEFINE_SCRIPT_PROPERTY_STRING(AIChatbotSpaceComponent, GuardrailAssetId);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(AIChatbotSpaceComponent, csp::multiplayer::AIChatbotVisualState, int32_t, VisualState);

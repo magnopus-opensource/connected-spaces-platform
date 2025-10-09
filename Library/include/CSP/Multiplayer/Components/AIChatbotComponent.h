@@ -32,7 +32,6 @@ enum class AIChatbotPropertyKeys
     Position = 0,
     Rotation,
     Scale,
-    ContextAssetId,
     GuardrailAssetId,
     VisualState,
     Num
@@ -53,14 +52,6 @@ class CSP_API AIChatbotSpaceComponent : public ComponentBase, public ITransformC
 {
 public:
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
-
-    /// @brief Gets the ID of the context asset associated with this AI chatbot.
-    /// @return The ID of the context asset assicuated with this AI chatbot.
-    const csp::common::String& GetContextAssetId() const;
-
-    /// @brief Sets the ID of the context asset associated with this AI chatbot.
-    /// @param Value The ID of the context asset assicuated with this AI chatbot.
-    void SetContextAssetId(const csp::common::String& Value);
 
     /// @brief Gets the ID of the guardrail asset associated with this AI chatbot.
     /// @return The ID of the guardrail asset assicuated with this AI chatbot.
