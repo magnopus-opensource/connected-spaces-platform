@@ -35,6 +35,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
+    DECLARE_SCRIPT_PROPERTY(std::string, Voice);
+
     DECLARE_SCRIPT_PROPERTY(std::string, GuardrailAssetId);
 
     DECLARE_SCRIPT_PROPERTY(int32_t, VisualState);

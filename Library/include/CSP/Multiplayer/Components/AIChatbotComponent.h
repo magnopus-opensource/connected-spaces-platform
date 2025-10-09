@@ -32,6 +32,7 @@ enum class AIChatbotPropertyKeys
     Position = 0,
     Rotation,
     Scale,
+    Voice,
     GuardrailAssetId,
     VisualState,
     Num
@@ -53,12 +54,20 @@ class CSP_API AIChatbotSpaceComponent : public ComponentBase, public ITransformC
 public:
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
+    /// @brief Gets the voice name of the TTS model associated with this AI chatbot.
+    /// @return The The name of the TTS voice associated with this AI chatbot.
+    const csp::common::String& GetVoice() const;
+
+    /// @brief Sets the voice name of the TTS model associated with this AI chatbot.
+    /// @param Value The name of the TTS voice associated with this AI chatbot.
+    void SetVoice(const csp::common::String& Value);
+
     /// @brief Gets the ID of the guardrail asset associated with this AI chatbot.
-    /// @return The ID of the guardrail asset assicuated with this AI chatbot.
+    /// @return The ID of the guardrail asset collection associated with this AI chatbot.
     const csp::common::String& GetGuardrailAssetId() const;
 
     /// @brief Sets the ID of the guardrail asset associated with this AI chatbot.
-    /// @param Value The ID of the guardrail asset assicuated with this AI chatbot.
+    /// @param Value The ID of the guardrail asset collection associated with this AI chatbot.
     void SetGuardrailAssetId(const csp::common::String& Value);
 
     /// @brief Retrieves the visual state of the AI chatbot for this component.
