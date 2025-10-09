@@ -605,9 +605,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     bool Interrupted = false;
     bool Disconnected = false;
 
-    Connection->SetNetworkInterruptionCallback([&Interrupted](csp::common::String Message) { Interrupted = true; });
+    Connection->SetNetworkInterruptionCallback([&Interrupted](csp::common::String /*Message*/) { Interrupted = true; });
 
-    Connection->SetDisconnectionCallback([&Disconnected](csp::common::String Message) { Disconnected = true; });
+    Connection->SetDisconnectionCallback([&Disconnected](csp::common::String /*Message*/) { Disconnected = true; });
 
     csp::common::String UserName = "Player 1";
     SpaceTransform UserTransform
