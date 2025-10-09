@@ -1,6 +1,6 @@
 # Building CSP for C++
 
-This page details how to build foundation locally and build the C++ DLLs.
+This page details how to build CSP and its associated C++ DLLs locally.
 
 ## Prerequisites 
 
@@ -41,7 +41,7 @@ For Windows users: Docker-Desktop is known to have issues with WSL, so some furt
 ***
 
 ## Build Instructions
-Build instructions for the Connected Spaces Platform project are below.
+Build instructions for the Connected Spaces Platform project can be find below. We will be using Visual Studio for this walkthrough:
 
 1. Clone the Connected Spaces Platform Repositiory: `git clone --recurse-submodules https://github.com/magnopus-opensource/connected-spaces-platform.git`.
 
@@ -49,12 +49,12 @@ Build instructions for the Connected Spaces Platform project are below.
 
     > If you would like to run docker-desktop using wsl, please make sure sure you follow **Running docker-desktop with WSL2** above.
 
-3. Open Command Line and run `generate_solution.bat` to generate the Foundation solution.
+3. Open a Command Line Prompt, go to the `connected-spaces-platform` folder, and run `generate_solution.bat` to generate the CSP Solution.
 
     > If you get an error "premake not found", this is the first module built so you'll need to checkout the submodules with `git submodule update --init --recursive`.\
     You may need to build premake manually to get past this step, by opening `"..\modules\premake\build\bootstrap\Premake5.sln"` in Visual Studio and building the solution.
 
-4. Double-click `ConnectedSpacesPlatform.sln` to open up the Foundation Project in your chosen IDE (for this walkthrough, we will be using Rider).
+4. Double-click `ConnectedSpacesPlatform.sln` to open up the CSP Solution.
     
     > This will take some time, but when loaded, it should look like this:\
     ![image info](../../_static/building/cpp_sln.png)
@@ -65,4 +65,4 @@ Build instructions for the Connected Spaces Platform project are below.
 
 ## Where is the file output?
 
-Once Foundation has finished building, you will find the DLL that has been generated in `connected-spaces-platform\Library\Binaries\x64\ReleaseDLL`.
+Once CSP has finished building, you will find the resulting DLL at `connected-spaces-platform\Library\Binaries\x64\ReleaseDLL`.
