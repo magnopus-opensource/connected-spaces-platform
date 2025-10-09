@@ -78,7 +78,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::Identity());
     EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::One());
 
-    EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), "");
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "");
 
     EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Idle);
@@ -87,14 +86,12 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     RealtimeEngine->ProcessPendingEntityOperations();
 
     // Set new values
-    csp::common::String ContextAssetId = "TEST_CONTEXT_ASSET_ID";
     csp::common::String GuardrailAssetId = "TEST_GUARDRAIL_ASSET_ID";
 
     AIChatbotComponent->SetPosition(csp::common::Vector3::One());
     AIChatbotComponent->SetRotation(csp::common::Vector4::One());
     AIChatbotComponent->SetScale(csp::common::Vector3::Zero());
 
-    AIChatbotComponent->SetContextAssetId(ContextAssetId);
     AIChatbotComponent->SetGuardrailAssetId(GuardrailAssetId);
 
     AIChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
@@ -104,7 +101,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), ContextAssetId);
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), GuardrailAssetId);
 
     EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
@@ -162,7 +158,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 		component.position = [1, 1, 1];
 		component.rotation = [1, 1, 1, 1];
         component.scale = [0, 0, 0];
-        component.contextAssetId = "TEST_CONTEXT_ASSET_ID";
         component.guardrailAssetId = "TEST_GUARDRAIL_ASSET_ID";
         component.visualState = 1;
     )xx";
@@ -177,7 +172,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
     EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(AIChatbotComponent->GetContextAssetId(), "TEST_CONTEXT_ASSET_ID");
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "TEST_GUARDRAIL_ASSET_ID");
 
     EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
