@@ -1,4 +1,4 @@
-# Building CSP for C++
+# Building CSP for Windows
 
 This page details how to build CSP and its associated C++ DLLs locally for Windows users. Note that the CSP Solution targets Visual Studio 2022 by default, so we will be using this IDE for this walkthrough.
 
