@@ -61,14 +61,14 @@ Follow the steps below to build the **Connected Spaces Platform** project:
 4. Double-click `ConnectedSpacesPlatform.sln` to open up the CSP Solution.
     
     > This will take some time, but once loaded, it should look like this:\
-    ![image info](../../_static/building/cpp_sln.png)
+    ![image info](../../_static/building/windows_sln.png)
 
 5. Before building the Solution by clicking on the Green Arrow, ensure you have:
     - `ReleaseDLL` option as your Solution Configurations,
     - `x64` as your Solution Platforms.
     - `Tests` project selected as your Startup Project,
     
-    > ![image info](../../_static/building/cpp_cfg.png)
+    > ![image info](../../_static/building/windows_cfg.png)
 
 ***
 
