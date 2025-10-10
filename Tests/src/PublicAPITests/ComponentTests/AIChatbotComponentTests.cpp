@@ -80,7 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), "");
 
-    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Idle);
+    EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Waiting);
 
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();

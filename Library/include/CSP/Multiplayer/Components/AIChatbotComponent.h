@@ -39,7 +39,7 @@ enum class AIChatbotPropertyKeys
 /// @brief Enumerates the list of potential visual states that can be replicated for a AI chatbot component.
 enum class AIChatbotVisualState
 {
-    Idle = 0,
+    Waiting = 0,
     Listening,
     Thinking,
     Speaking,
