@@ -43,4 +43,21 @@ public:
     ~DerivedClass();
 };
 
-}
+template <typename T> class CSP_API TemplateClass
+{
+public:
+    TemplateClass();
+    ~TemplateClass();
+
+    void SetValue(const T& value);
+
+    // Plain return values are not supported by the code generator
+    // T GetValue() const;
+
+    void GetValue(T& outValue) const;
+
+private:
+    T m_Value;
+};
+
+} // namespace csp::Tests
