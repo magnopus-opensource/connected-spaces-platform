@@ -44,8 +44,6 @@ const EventId USERSERVICE_LOGOUT_EVENT_ID = EventId("UserService", "Logout");
 const EventId SPACESYSTEM_ENTER_SPACE_EVENT_ID = EventId("SpaceSystem", "Enter");
 const EventId SPACESYSTEM_EXIT_SPACE_EVENT_ID = EventId("SpaceSystem", "Exit");
 
-const EventId MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID = EventId("MultiplayerSystem", "Disconnect");
-
 const EventId FOUNDATION_TICK_EVENT_ID = EventId("Foundation", "Tick");
 
 const EventId ENTITYSYSTEM_ADD_ENTITY_EVENT_ID = EventId("EntitySystem", "AddEntity");
