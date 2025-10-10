@@ -80,7 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), "");
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "");
+    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), "");
 
     EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Idle);
 
@@ -89,7 +89,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     // Set new values
     csp::common::String Voice = "Zephyr";
-    csp::common::String GuardrailAssetId = "TEST_GUARDRAIL_ASSET_ID";
+    csp::common::String GuardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
 
     AIChatbotComponent->SetPosition(csp::common::Vector3::One());
     AIChatbotComponent->SetRotation(csp::common::Vector4::One());
@@ -97,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     AIChatbotComponent->SetVoice(Voice);
 
-    AIChatbotComponent->SetGuardrailAssetId(GuardrailAssetId);
+    AIChatbotComponent->SetGuardrailAssetCollectionId(GuardrailAssetCollectionId);
 
     AIChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
 
@@ -106,7 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::One());
     EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::Zero());
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), GuardrailAssetId);
+    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), GuardrailAssetCollectionId);
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), Voice);
 
@@ -166,7 +166,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 		component.rotation = [1, 1, 1, 1];
         component.scale = [0, 0, 0];
         component.voice = "Zephyr";
-        component.guardrailAssetId = "TEST_GUARDRAIL_ASSET_ID";
+        component.guardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
         component.visualState = 1;
     )xx";
 
@@ -182,7 +182,7 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), "Zephyr");
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetId(), "TEST_GUARDRAIL_ASSET_ID");
+    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), "TEST_GUARDRAIL_ASSET_COLLECTION_ID");
 
     EXPECT_EQ(AIChatbotComponent->GetVisualState(), AIChatbotVisualState::Listening);
 

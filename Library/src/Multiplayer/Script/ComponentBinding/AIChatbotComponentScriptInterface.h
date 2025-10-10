@@ -37,7 +37,7 @@ public:
 
     DECLARE_SCRIPT_PROPERTY(std::string, Voice);
 
-    DECLARE_SCRIPT_PROPERTY(std::string, GuardrailAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, GuardrailAssetCollectionId);
 
     DECLARE_SCRIPT_PROPERTY(int32_t, VisualState);
 };

@@ -593,7 +593,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, Voice, "voice")
-        .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetId, "guardrailAssetId")
+        .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetCollectionId, "guardrailAssetCollectionId")
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, VisualState, "visualState");
 }
 
