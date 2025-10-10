@@ -320,7 +320,7 @@ if not Project then
             linkoptions {
                 "-gdwarf-5",
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
-                "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
+                "-sSEPARATE_DWARF_URL=../Debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
             }
         filter { "platforms:wasm", "configurations:*Release*" }
             -- We want to reduce the size of Release builds as much as possible
