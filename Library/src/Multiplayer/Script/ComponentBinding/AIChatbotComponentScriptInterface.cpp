@@ -26,9 +26,7 @@ AIChatbotSpaceComponentScriptInterface::AIChatbotSpaceComponentScriptInterface(A
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_VEC3(AIChatbotSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(AIChatbotSpaceComponent, Position);
-DEFINE_SCRIPT_PROPERTY_VEC4(AIChatbotSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_STRING(AIChatbotSpaceComponent, Voice);
 

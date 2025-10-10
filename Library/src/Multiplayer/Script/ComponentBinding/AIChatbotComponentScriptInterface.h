@@ -32,8 +32,6 @@ public:
     AIChatbotSpaceComponentScriptInterface(AIChatbotSpaceComponent* InComponent = nullptr);
 
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
     DECLARE_SCRIPT_PROPERTY(std::string, Voice);
 

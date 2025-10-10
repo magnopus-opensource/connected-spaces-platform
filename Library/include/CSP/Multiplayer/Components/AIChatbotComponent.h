@@ -30,8 +30,6 @@ namespace csp::multiplayer
 enum class AIChatbotPropertyKeys
 {
     Position = 0,
-    Rotation,
-    Scale,
     Voice,
     GuardrailAssetCollectionId,
     VisualState,
@@ -49,7 +47,7 @@ enum class AIChatbotVisualState
     Num
 };
 
-class CSP_API AIChatbotSpaceComponent : public ComponentBase, public ITransformComponent
+class CSP_API AIChatbotSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
@@ -78,24 +76,12 @@ public:
     /// @param Value The visual state of the AI chatbot.
     void SetVisualState(AIChatbotVisualState Value);
 
-    /// \addtogroup ITransformComponent
+    /// \addtogroup IPositionComponent
     /// @{
     /// @copydoc IPositionComponent::GetPosition()
     const csp::common::Vector3& GetPosition() const override;
     /// @copydoc IPositionComponent::SetPosition()
     void SetPosition(const csp::common::Vector3& InValue) override;
-    /// @copydoc IRotationComponent::GetRotation()
-    const csp::common::Vector4& GetRotation() const override;
-    /// @copydoc IRotationComponent::SetRotation()
-    void SetRotation(const csp::common::Vector4& InValue) override;
-    /// @copydoc IScaleComponent::GetScale()
-    const csp::common::Vector3& GetScale() const override;
-    /// @copydoc IScaleComponent::SetScale()
-    void SetScale(const csp::common::Vector3& InValue) override;
-    /// @copydoc ITransformComponent::GetTransform()
-    SpaceTransform GetTransform() const override;
-    /// @copydoc ITransformComonent::SetTransform()
-    void SetTransform(const SpaceTransform& InValue) override;
     /// @}
 };
 
