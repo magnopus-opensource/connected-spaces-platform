@@ -75,8 +75,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     // Ensure defaults are set
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::Zero());
-    EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::Identity());
-    EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::One());
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), "");
 
@@ -92,8 +90,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     csp::common::String GuardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
 
     AIChatbotComponent->SetPosition(csp::common::Vector3::One());
-    AIChatbotComponent->SetRotation(csp::common::Vector4::One());
-    AIChatbotComponent->SetScale(csp::common::Vector3::Zero());
 
     AIChatbotComponent->SetVoice(Voice);
 
@@ -103,8 +99,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     // Ensure values are set correctly
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::Zero());
 
     EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), GuardrailAssetCollectionId);
 
@@ -163,8 +157,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 
 		component.attenuationRadius = 22.0;
 		component.position = [1, 1, 1];
-		component.rotation = [1, 1, 1, 1];
-        component.scale = [0, 0, 0];
         component.voice = "Zephyr";
         component.guardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
         component.visualState = 1;
@@ -177,8 +169,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
 
     // Ensure values are set correctly
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
-    EXPECT_EQ(AIChatbotComponent->GetRotation(), csp::common::Vector4::One());
-    EXPECT_EQ(AIChatbotComponent->GetScale(), csp::common::Vector3::Zero());
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), "Zephyr");
 

@@ -28,8 +28,6 @@ csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::
     : ComponentBase(ComponentType::AIChatbot, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Scale)] = csp::common::Vector3::One();
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Voice)] = "";
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState)] = static_cast<int64_t>(0);
@@ -76,37 +74,4 @@ void AIChatbotSpaceComponent::SetPosition(const csp::common::Vector3& Value)
     SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Position), Value);
 }
 
-const csp::common::Vector4& AIChatbotSpaceComponent::GetRotation() const
-{
-    return GetVector4Property(static_cast<uint32_t>(AIChatbotPropertyKeys::Rotation));
-}
-
-void AIChatbotSpaceComponent::SetRotation(const csp::common::Vector4& Value)
-{
-    SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Rotation), Value);
-}
-
-const csp::common::Vector3& AIChatbotSpaceComponent::GetScale() const
-{
-    return GetVector3Property(static_cast<uint32_t>(AIChatbotPropertyKeys::Scale));
-}
-
-void AIChatbotSpaceComponent::SetScale(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(AIChatbotPropertyKeys::Scale), Value); }
-
-SpaceTransform AIChatbotSpaceComponent::GetTransform() const
-{
-    SpaceTransform Transform;
-    Transform.Position = GetPosition();
-    Transform.Rotation = GetRotation();
-    Transform.Scale = GetScale();
-
-    return Transform;
-}
-
-void AIChatbotSpaceComponent::SetTransform(const SpaceTransform& InValue)
-{
-    SetPosition(InValue.Position);
-    SetRotation(InValue.Rotation);
-    SetScale(InValue.Scale);
-}
 } // namespace csp::multiplayer
