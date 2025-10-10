@@ -33,7 +33,7 @@ enum class AIChatbotPropertyKeys
     Rotation,
     Scale,
     Voice,
-    GuardrailAssetId,
+    GuardrailAssetCollectionId,
     VisualState,
     Num
 };
@@ -64,11 +64,11 @@ public:
 
     /// @brief Gets the ID of the guardrail asset associated with this AI chatbot.
     /// @return The ID of the guardrail asset collection associated with this AI chatbot.
-    const csp::common::String& GetGuardrailAssetId() const;
+    const csp::common::String& GetGuardrailAssetCollectionId() const;
 
     /// @brief Sets the ID of the guardrail asset associated with this AI chatbot.
     /// @param Value The ID of the guardrail asset collection associated with this AI chatbot.
-    void SetGuardrailAssetId(const csp::common::String& Value);
+    void SetGuardrailAssetCollectionId(const csp::common::String& Value);
 
     /// @brief Retrieves the visual state of the AI chatbot for this component.
     /// @return The playback state of the AI chatbot.
