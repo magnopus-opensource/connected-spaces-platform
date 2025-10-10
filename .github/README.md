@@ -57,7 +57,7 @@ For more information about tenants and tenant IDs, visit our [FAQ](https://www.m
 CSP build instructions for each supported language are below.
 
 - [Building for Web](https://connected-spaces-platform.net/manual/building/web.html)
-- [Building for C++](https://connected-spaces-platform.net/manual/building/cpp.html)
+- [Building for Windows](https://connected-spaces-platform.net/manual/building/windows.html)
 - [Building for C#](https://connected-spaces-platform.net/manual/building/csharp.html)
 - [Building for Android](https://connected-spaces-platform.net/manual/building/android.html)
 - [Building for MacOS](https://connected-spaces-platform.net/manual/building/macos.html)
