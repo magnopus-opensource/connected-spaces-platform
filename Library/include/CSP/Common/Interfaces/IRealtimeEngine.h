@@ -23,6 +23,12 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 
+#include "CSP/Common/Callbacks/Callbacks.h"
+
+#include <iostream>
+#include <optional>
+#include <string>
+
 namespace csp::multiplayer
 {
 class SpaceTransform;
@@ -42,7 +48,7 @@ namespace csp::multiplayer
 typedef std::function<void(bool)> CallbackHandler;
 
 // Callback that provides a non-owning pointer to a SpaceEntity object.
-typedef std::function<void(csp::multiplayer::SpaceEntity*)> EntityCreatedCallback;
+// typedef std::function<void(csp::multiplayer::SpaceEntity*)> EntityCreatedCallback;
 }
 
 namespace csp::common
@@ -149,8 +155,8 @@ public:
     /// empty, entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+    CSP_ASYNC_RESULT virtual void CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+        const std::optional<uint64_t>& ParentID, const csp::multiplayer::EntityCreatedCallback& Callback)
     {
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
 

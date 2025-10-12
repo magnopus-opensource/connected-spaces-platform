@@ -26,6 +26,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <vector>
 
 class CSPEngine_OfflineRealtimeEngineTests_SelectEntity_Test;
 
@@ -41,6 +42,20 @@ class CSPSceneDescription;
 class EntityScriptBinding;
 class SpaceEntityStatePatcher;
 
+class TestSharedPtrType
+{
+public:
+    TestSharedPtrType(int init)
+        : value(init)
+    {
+    }
+
+    int GetValue() const { return value; }
+
+private:
+    int value;
+};
+
 /// @brief Class for creating and managing objects in an offline context.
 ///
 /// This provides functionality to create and manage a player avatar and other objects while being offline.
@@ -54,6 +69,8 @@ class CSP_API OfflineRealtimeEngine : public csp::common::IRealtimeEngine
     CSP_END_IGNORE
 
 public:
+    OfflineRealtimeEngine();
+
     /// @brief OfflineRealtimeEngine constructor.
     /// Creates a realtime engine pre-populated from a scene description. (Usually parsed from a checkpoint file)
     /// @param SceneDescription CSPSceneDescription : The scene description containing entities within the scene.
@@ -72,9 +89,6 @@ public:
     /// @brief OfflineRealtimeEngine destructor
     /// Removes entity script bindings and deregisters tick event listeners
     ~OfflineRealtimeEngine();
-
-    // Callback that will provide a pointer to a SpaceEntity object.
-    typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
     /********************** REALTIME ENGINE INTERFACE ************************/
     /*************************************************************************/
@@ -104,8 +118,8 @@ public:
     /// entity is created as a root entity.
     /// @param Callback csp::multiplayer::EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
-    CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+    CSP_ASYNC_RESULT virtual void CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& Transform,
+        const std::optional<uint64_t>& ParentID, const csp::multiplayer::EntityCreatedCallback& Callback) override;
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
@@ -179,6 +193,13 @@ public:
     /// @return A non-owning pointer to a List of non-owning pointers to all entities.
     virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetAllEntities() const override;
 
+    // For proto
+    std::shared_ptr<TestSharedPtrType> MakeSharedPtrType();
+    std::shared_ptr<TestSharedPtrType> GetSharedPtrType() const;
+    void ReleaseSharedPtrTypeFromCSP();
+    const std::vector<csp::multiplayer::SpaceEntity*>& GetAllEntitiesVec() const;
+    void MakeAnIntOffThreadVerySlowly(int SecondsToTake, const LongRunningOperationToMakeAnIntCallback& Callback);
+
     /// @brief Retrieves all entities that exist at the root level (do not have a parent entity).
     /// @return A list of root entities containing non-owning pointers to entities.
     [[nodiscard]] virtual const csp::common::List<csp::multiplayer::SpaceEntity*>* GetRootHierarchyEntities() const override;
@@ -242,6 +263,7 @@ private:
     // May not be null
     csp::common::IJSScriptRunner* ScriptRunner;
 
+    mutable std::vector<SpaceEntity*> EntityVecShim;
     csp::common::List<SpaceEntity*> Entities;
     csp::common::List<SpaceEntity*> Avatars;
     csp::common::List<SpaceEntity*> Objects;
@@ -252,5 +274,7 @@ private:
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;
+
+    std::shared_ptr<TestSharedPtrType> m_SharedPtrTypeForTest;
 };
 }

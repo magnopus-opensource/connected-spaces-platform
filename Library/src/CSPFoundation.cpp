@@ -15,7 +15,7 @@
  */
 #include "CSP/CSPFoundation.h"
 
-#include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
+// #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/ServiceStatus.h"

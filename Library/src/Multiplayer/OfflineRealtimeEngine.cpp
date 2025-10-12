@@ -30,6 +30,7 @@
 #include "CSP/Common/fmt_Formatters.h"
 
 #include <fmt/format.h>
+#include <thread>
 #include <unordered_set>
 
 namespace csp::multiplayer
@@ -82,6 +83,8 @@ namespace
     }
 
 }
+
+OfflineRealtimeEngine::OfflineRealtimeEngine() {};
 
 OfflineRealtimeEngine::OfflineRealtimeEngine(
     const CSPSceneDescription& SceneDescription, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& RemoteScriptRunner)
@@ -139,27 +142,61 @@ void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::St
     Entities.Append(NewAvatar.get());
     Avatars.Append(NewAvatar.get());
 
-    Callback(NewAvatar.release());
+    Callback.Call(NewAvatar.release());
 }
 
-void OfflineRealtimeEngine::CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform,
-    const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback)
+void OfflineRealtimeEngine::CreateEntity(const std::string& Name, const csp::multiplayer::SpaceTransform& Transform,
+    const std::optional<uint64_t>& ParentID, const csp::multiplayer::EntityCreatedCallback& Callback)
 {
+    std::cout << "Six!" << std::endl;
+
+    if (Name == "PleaseThrow")
+    {
+        throw std::runtime_error("This should throw because your name was PleaseThrow!");
+    }
+
+    std::cout << "Seven!" << std::endl;
+
     // Some of our interfaces use int64_t ... real bugs here.
     uint64_t Id = NextId();
 
-    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name, Transform,
-        OfflineRealtimeEngine::LocalClientId(), ParentID, false, false };
+    csp::common::Optional<uint64_t> ParentIDCommon
+        = ParentID.has_value() ? csp::common::Optional<uint64_t> { ParentID.value() } : csp::common::Optional<uint64_t> {};
+
+    std::cout << "Eight!" << std::endl;
+
+    auto* NewEntity = new SpaceEntity { this, *ScriptRunner, LogSystem, SpaceEntityType::Object, Id, Name.c_str(), Transform,
+        OfflineRealtimeEngine::LocalClientId(), ParentIDCommon, false, false };
+
+    std::cout << "Nine!" << std::endl;
 
     std::scoped_lock EntitiesLocker { EntitiesLock };
 
+    std::cout << "Ten!" << std::endl;
+
     ResolveEntityHierarchy(NewEntity);
+
+    std::cout << "Eleven!" << std::endl;
 
     Entities.Append(NewEntity);
     Objects.Append(NewEntity);
 
-    Callback(NewEntity);
+    std::cout << "Twelve!" << std::endl;
+
+    Callback.Call(NewEntity);
+
+    std::cout << "Thirteen!" << std::endl;
 }
+
+std::shared_ptr<TestSharedPtrType> OfflineRealtimeEngine::MakeSharedPtrType()
+{
+    m_SharedPtrTypeForTest = std::make_shared<TestSharedPtrType>(1);
+    return m_SharedPtrTypeForTest;
+}
+
+std::shared_ptr<TestSharedPtrType> OfflineRealtimeEngine::GetSharedPtrType() const { return m_SharedPtrTypeForTest; }
+
+void OfflineRealtimeEngine::ReleaseSharedPtrTypeFromCSP() { m_SharedPtrTypeForTest = nullptr; }
 
 void OfflineRealtimeEngine::DestroyEntity(csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::CallbackHandler Callback)
 {
@@ -275,6 +312,31 @@ csp::multiplayer::SpaceEntity* OfflineRealtimeEngine::GetObjectByIndex(size_t Ob
 
 const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetAllEntities() const { return &Entities; }
 
+const std::vector<csp::multiplayer::SpaceEntity*>& OfflineRealtimeEngine::GetAllEntitiesVec() const
+{
+    EntityVecShim.clear();
+    for (const auto EntityPtr : Entities)
+    {
+        EntityVecShim.push_back(EntityPtr);
+    }
+
+    return EntityVecShim;
+}
+
+void OfflineRealtimeEngine::MakeAnIntOffThreadVerySlowly(int SecondsToTake, const csp::multiplayer::LongRunningOperationToMakeAnIntCallback& Callback)
+{
+
+    std::thread t(
+        [SecondsToTake, &Callback]() mutable
+        {
+            std::cout << "Entered thread" << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(SecondsToTake));
+            std::cout << "Calling back" << std::endl;
+            Callback.Call(12345);
+        });
+    t.detach();
+}
+
 size_t OfflineRealtimeEngine::GetNumEntities() const { return Entities.Size(); }
 
 size_t OfflineRealtimeEngine::GetNumAvatars() const { return Avatars.Size(); }
@@ -283,9 +345,9 @@ size_t OfflineRealtimeEngine::GetNumObjects() const { return Objects.Size(); }
 
 const csp::common::List<csp::multiplayer::SpaceEntity*>* OfflineRealtimeEngine::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
 
-void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity)
+void OfflineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* /*Entity*/)
 {
-    RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
+    // RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
 }
 
 void OfflineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(const csp::common::String&, csp::common::EntityFetchStartedCallback Callback)
