@@ -171,11 +171,11 @@ class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
 public:
     /// @brief Retrieves the asset collection array being stored as a pointer.
     /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-    virtual csp::common::Array<AssetCollection>& GetAssetCollections();
+    csp::common::Array<AssetCollection>& GetAssetCollections();
 
     /// @brief Retrieves the asset collection array being stored as a pointer.
     /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-    virtual const csp::common::Array<AssetCollection>& GetAssetCollections() const;
+    const csp::common::Array<AssetCollection>& GetAssetCollections() const;
 
     /// @brief Retrieves the async operation total number of result asset collections.
     /// If the async operation was using pagination this count number represents the sum of asset collection sizes from every page.
