@@ -155,7 +155,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentScriptTest)
     const std::string ScreenSharingScriptText = R"xx(
 		var component = ThisEntity.getAIChatbotComponents()[0];
 
-		component.attenuationRadius = 22.0;
 		component.position = [1, 1, 1];
         component.voice = "Zephyr";
         component.guardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";

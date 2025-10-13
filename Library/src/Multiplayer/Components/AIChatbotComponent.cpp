@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/// @file AIChatbotComponent.h
-/// @brief Definitions and support for AI chatbot components.
-
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
@@ -30,7 +27,7 @@ csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Voice)] = "";
     Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState)] = static_cast<int64_t>(0);
+    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState)] = static_cast<uint32_t>(0);
 
     SetScriptInterface(new AIChatbotSpaceComponentScriptInterface(this));
 }

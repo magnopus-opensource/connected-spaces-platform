@@ -53,7 +53,7 @@ public:
     AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
     /// @brief Gets the voice name of the TTS model associated with this AI chatbot.
-    /// @return The The name of the TTS voice associated with this AI chatbot.
+    /// @return The name of the TTS voice associated with this AI chatbot.
     const csp::common::String& GetVoice() const;
 
     /// @brief Sets the voice name of the TTS model associated with this AI chatbot.
@@ -69,7 +69,7 @@ public:
     void SetGuardrailAssetCollectionId(const csp::common::String& Value);
 
     /// @brief Retrieves the visual state of the AI chatbot for this component.
-    /// @return The playback state of the AI chatbot.
+    /// @return The visual state of the AI chatbot.
     AIChatbotVisualState GetVisualState() const;
 
     /// @brief Sets the visual state of the AI chatbot for this component.
