@@ -568,10 +568,10 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler
-        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
-            Callback, nullptr);
+        = PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsCopyResult, void, chs::CopyPrototypesResult>(Callback, nullptr);
 
     auto PrototypeFilters = std::shared_ptr<chs::PrototypeFilters>(new chs::PrototypeFilters);
+    PrototypeFilters->SetIds(AssetCollectionIds);
     PrototypeFilters->SetHasGroup(true);
 
     auto DuplicateGroupPrototypesOptions = std::shared_ptr<chs::DuplicateGroupPrototypesOptions>(new chs::DuplicateGroupPrototypesOptions);
