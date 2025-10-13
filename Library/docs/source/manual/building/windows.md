@@ -8,8 +8,7 @@ This section details the step 2 of the [Build Instructions section of this tutor
 
 ### Default Packages
 
-Please run the install script `install_prerequisites.ps1` in PowerShell as administrator.
-This script will install the Windows Package Manager **Chocolatey** as well as the following **packages**:
+Please run the script `install_prerequisites.ps1` in PowerShell as administrator. This script will install the Windows Package Manager **Chocolatey** as well as the following **packages**:
 - git
 - vscode
 - python3
@@ -19,7 +18,7 @@ This script will install the Windows Package Manager **Chocolatey** as well as t
 
 ### Clang
 
-The Clang subproject is part of the LLVM system that have been installed as a package previously. Once the prerequisites above have been installed, please set your custom install path for **clang-format** in Visual Studio. 
+The Clang subproject is part of the LLVM system that has been installed as a package previously. Once the prerequisites above have been installed, please set your custom install path for **clang-format** in Visual Studio. 
 - Go to `Tools > Options > Text Editor > C/C++ > Code Style > Formatting`.
 - Check the last option `Use custom path to clang-format.exe`, then click `Browse` and search for the LLVM executable (should be located at  `C:\Users\username\AppData\Local\Temp\chocolatey\llvm\17.0.1\LLVM-17.0.1-win64.exe` by default).
 
@@ -49,13 +48,13 @@ Follow the steps below to build the **Connected Spaces Platform** project:
 
 1. Clone the `connected-spaces-platform` remote repository by running the Git command `git clone --recurse-submodules https://github.com/magnopus-opensource/connected-spaces-platform.git`.
 
-2. Make sure you have installed all the prerequisites by following [the Prerequisites section of this tutorial](#prerequisites-windows-only), if you haven't already.
+2. Make sure you have installed all the prerequisites by following [the Prerequisites section of this tutorial](#prerequisites), if you haven't already.
 
-    > If you would like to run Docker Desktop using WSL, please make sure sure you followed [this subsection of the tutorial](#running-docker-desktop-with-wsl2).
+    > If you would like to run Docker Desktop using WSL, please make sure to check [this subsection of the tutorial](#running-docker-desktop-with-wsl2).
 
 3. Open a Command Line Prompt from your `connected-spaces-platform` local repository, and run `generate_solution.bat` to generate the CSP Solution.
 
-    > If you get an error "premake not found", this is only the first module built, so you will need to checkout the submodules by running the Git command `git submodule update --init --recursive`.\
+    > If you get the error "premake not found", this probably means the `ThirdParty` Git submodule in which Premake is housed has not been cloned correcly in your local repository. You can check out all the submodules of the project by running the Git command `git submodule update --init --recursive`.\
     You may also need to build premake manually to get past this step, by opening `"..\modules\premake\build\bootstrap\Premake5.sln"` in Visual Studio and building the Solution.
 
 4. Double-click `ConnectedSpacesPlatform.sln` to open up the CSP Solution.
@@ -64,9 +63,9 @@ Follow the steps below to build the **Connected Spaces Platform** project:
     ![image info](../../_static/building/windows_sln.png)
 
 5. Before building the Solution by clicking on the Green Arrow, ensure you have:
-    - `ReleaseDLL` option as your Solution Configurations,
+    - `ReleaseDLL` option as your Solution Configurations.
     - `x64` as your Solution Platforms.
-    - `Tests` project selected as your Startup Project,
+    - `Tests` project selected as your Startup Project.
     
     > ![image info](../../_static/building/windows_cfg.png)
 
