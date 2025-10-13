@@ -118,7 +118,7 @@ public:
 
     /// @brief Copy constructor
     /// @param Other csp::common::ReplicatedValue& : The value to copy.
-    CSP_NO_EXPORT ReplicatedValue(const ReplicatedValue& Other);
+    ReplicatedValue(const ReplicatedValue& Other);
 
     /// @brief Move constructor
     /// @param Other csp::common::ReplicatedValue& : The value to move.
@@ -126,19 +126,19 @@ public:
 
     /// @brief Copy assignment operator overload.
     /// @param InValue ReplicatedValue : Other replicated value to set from.
-    CSP_NO_EXPORT ReplicatedValue& operator=(const ReplicatedValue& Other);
+    ReplicatedValue& operator=(const ReplicatedValue& Other);
 
     /// @brief Move assignment operator overload.
     /// @param InValue ReplicatedValue : Other replicated value to move from.
-    CSP_NO_EXPORT ReplicatedValue& operator=(ReplicatedValue&& Other);
+    ReplicatedValue& operator=(ReplicatedValue&& Other);
 
     /// @brief Equality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
-    CSP_NO_EXPORT bool operator==(const ReplicatedValue& OtherValue) const;
+    bool operator==(const ReplicatedValue& OtherValue) const;
 
     /// @brief Inequality operator overload.
     /// @param ReplicatedValue : Other value to compare to.
-    CSP_NO_EXPORT bool operator!=(const ReplicatedValue& OtherValue) const;
+    bool operator!=(const ReplicatedValue& OtherValue) const;
 
     /// @brief Gets the type of replicated value.
     /// @return ReplicatedValueType: Enum representing all supported replication base types.
