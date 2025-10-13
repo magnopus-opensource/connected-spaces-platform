@@ -52,7 +52,9 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
 namespace csp::systems
 {
 
-void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+// Templated function capable of handling different PrototypeDto types whose schema match.
+// Currently known to be compatible with both chs::PrototypeDto and chs::CopiedPrototypeDto.
+template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
 {
     AssetCollection.Id = Dto.GetId();
     AssetCollection.Name = Dto.GetName();
@@ -113,6 +115,11 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
     {
         AssetCollection.IsUnique = Dto.GetHighlander();
     }
+}
+
+void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
+{
+    AssetCollectionFromDtoOfType<chs::PrototypeDto>(Dto, AssetCollection);
 }
 
 AssetCollection::AssetCollection()
@@ -187,16 +194,16 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
 {
     ResultBase::OnResponse(ApiResponse);
 
-    auto* ProfileDataResponse = static_cast<csp::services::DtoArray<chs::PrototypeDto>*>(ApiResponse->GetDto());
+    auto* PrototypeDto = static_cast<csp::services::DtoArray<chs::PrototypeDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         // Build the Dto from the response Json
-        ProfileDataResponse->FromJson(Response->GetPayload().GetContent());
+        PrototypeDto->FromJson(Response->GetPayload().GetContent());
         FillResultTotalCount(Response->GetPayload().GetContent());
 
-        const std::vector<chs::PrototypeDto>& PrototypeArray = ProfileDataResponse->GetArray();
+        const std::vector<chs::PrototypeDto>& PrototypeArray = PrototypeDto->GetArray();
         AssetCollections = csp::common::Array<csp::systems::AssetCollection>(PrototypeArray.size());
 
         for (size_t i = 0; i < PrototypeArray.size(); ++i)
@@ -247,4 +254,36 @@ void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase
         Count = std::stoull(Response->GetPayload().GetContent().c_str());
     }
 }
+
+void AssetCollectionsCopyResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    // Copy-prototype operation results come back in the form of an array of prototypes.
+    // The payload for this is _nearly_ identical in form to what is returned from a standard
+    // request for an array of prototypes, but it does use different DTO types.
+
+    // So we specialize AssetCollectionsResult::OnResponse, and populate
+    // the array of returned asset collections using this other set of DTO types.
+
+    auto* CopyResultDto = static_cast<chs::CopyPrototypesResult*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        CopyResultDto->FromJson(Response->GetPayload().GetContent());
+
+        const std::vector<std::shared_ptr<chs::CopiedPrototypeDto>>& CopiedPrototypesArray = CopyResultDto->GetPrototypes();
+        AssetCollections = csp::common::Array<csp::systems::AssetCollection>(CopiedPrototypesArray.size());
+
+        // Prototype duplication results aren't paginated, so the total count is just the number of copied prototypes.
+        ResultTotalCount = CopiedPrototypesArray.size();
+
+        for (size_t i = 0; i < CopiedPrototypesArray.size(); ++i)
+        {
+            AssetCollectionFromDtoOfType<chs::CopiedPrototypeDto>(*CopiedPrototypesArray[i], AssetCollections[i]);
+        }
+    }
+}
+
 } // namespace csp::systems

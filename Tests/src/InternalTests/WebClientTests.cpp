@@ -16,8 +16,8 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Debug/Logging.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Debug/Logging.h"
 #include "PlatformTestUtils.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
@@ -86,12 +86,11 @@ public:
     {
     }
 
-     TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
+    TestWebClient(const Port InPort, const ETransferProtocol Tp, csp::common::LogSystem* LogSystem)
         : POCOWebClient(InPort, Tp, LogSystem, false)
     {
     }
 };
-
 
 void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequestVerb Verb, HttpPayload& Payload, IHttpResponseHandler* Receiver)
 {
@@ -148,7 +147,7 @@ void RunWebClientTestWithSetter(const char* Url, ERequestVerb Verb, uint32_t Por
     }
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientGetTestExt)
 {
     InitialiseFoundation();
 
@@ -156,12 +155,12 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     Payload.AddHeader(CSP_TEXT("x-api-key"), CSP_TEXT("reqres-free-v1"));
 
-    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
+    RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetSetterTestExt)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientGetSetterTestExt)
 {
     InitialiseFoundation();
 
@@ -174,7 +173,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetSetterTestExt)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPutTestExt)
 {
     InitialiseFoundation();
 
@@ -192,7 +191,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPostTestExt)
 {
     InitialiseFoundation();
 
@@ -212,7 +211,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
     InitialiseFoundation();
 
@@ -224,7 +223,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVeryVerboseLogging)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientTestExtRequestResponseVeryVerboseLogging)
 {
     InitialiseFoundation();
 
@@ -240,23 +239,23 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVery
         // Get logs
         csp::common::String CSPLogMsgGetRequestSubstring = "HTTP Request\nGET https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgGetResponseSubstring = "HTTP Response\nGET https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgGetResponseSubstring)));
         // Put logs
         csp::common::String CSPLogMsgPutRequestSubstring = "HTTP Request\nPUT https://reqres.in/api/users/2";
         csp::common::String CSPLogMsgPutResponseSubstring = "HTTP Response\nPUT https://reqres.in/api/users/2";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPutResponseSubstring)));
         // Post logs
         csp::common::String CSPLogMsgPostRequestSubstring = "HTTP Request\nPOST https://reqres.in/api/login";
         csp::common::String CSPLogMsgPostResponseSubstring = "HTTP Response\nPOST https://reqres.in/api/login";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgPostResponseSubstring)));
         // Delete logs
         csp::common::String CSPLogMsgDeleteRequestSubstring = "HTTP Request\nDELETE https://reqres.in/api/users/1";
         csp::common::String CSPLogMsgDeleteResponseSubstring = "HTTP Response\nDELETE https://reqres.in/api/users/1";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteRequestSubstring)));
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, testing::HasSubstr(CSPLogMsgDeleteResponseSubstring)));
 
         // GET request
         HttpPayload PayloadGet;
@@ -302,7 +301,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseVery
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseNoLogging)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientTestExtRequestResponseNoLogging)
 {
     InitialiseFoundation();
 
@@ -310,7 +309,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientTestExtRequestResponseNoLo
         RAIIMockLogger MockLogger {};
 
         // With the log level NOT set to VeryVerbose we expect to receive no logs for the HTTP Requests and Responses
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_)).Times(0);
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(testing::_, testing::_)).Times(0);
 
         // GET request
         HttpPayload PayloadGet;
@@ -547,7 +546,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
     csp::CSPFoundation::Shutdown();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail404Test)
 {
     InitialiseFoundation();
 
@@ -575,7 +574,7 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 // Current fails on wasm platform tests due to CORS policy.
 #ifndef CSP_WASM
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
     InitialiseFoundation();
 

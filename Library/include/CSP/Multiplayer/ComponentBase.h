@@ -76,6 +76,7 @@ enum class ComponentType
     Hotspot = 26,
     CinematicCamera = 27,
     ScreenSharing = 28,
+    AIChatbot = 29,
     // spare values
     Delete = 56
 };

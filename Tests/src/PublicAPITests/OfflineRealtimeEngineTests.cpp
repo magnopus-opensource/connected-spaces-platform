@@ -650,10 +650,53 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetObjectByIndex)
 }
 
 /*
+    Test that when we load a scene description with parents, the parents are hooked up automatically
+*/
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentLoadTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    auto FilePath = std::filesystem::absolute("assets/checkpoint-parents.json");
+    std::ifstream Stream { FilePath.u8string().c_str() };
+
+    if (!Stream)
+    {
+        FAIL();
+    }
+
+    std::stringstream SStream;
+    SStream << Stream.rdbuf();
+
+    std::string Json = SStream.str();
+
+    CSPSceneDescription SceneDescription { csp::common::List<csp::common::String> { Json.c_str() } };
+    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+
+    const csp::common::List<csp::multiplayer::SpaceEntity*>* AllEntities = Engine.GetAllEntities();
+
+    // Should be 3 entities
+    ASSERT_EQ(AllEntities->Size(), 3);
+    const csp::multiplayer::SpaceEntity* Entity1 = (*AllEntities)[0]; // id: 1510, parent: 1511
+    const csp::multiplayer::SpaceEntity* Entity2 = (*AllEntities)[1]; // id: 1511, parent: 1512
+    const csp::multiplayer::SpaceEntity* Entity3 = (*AllEntities)[2]; // id: 1512, parent: empty
+
+    ASSERT_EQ(Entity1->GetId(), 1510);
+    ASSERT_EQ((*Entity1->GetParentId()), 1511);
+    ASSERT_EQ(Entity1->GetParentEntity(), Entity2);
+
+    ASSERT_EQ(Entity2->GetId(), 1511);
+    ASSERT_EQ((*Entity2->GetParentId()), 1512);
+    ASSERT_EQ(Entity2->GetParentEntity(), Entity3);
+
+    ASSERT_EQ(Entity3->GetId(), 1512);
+    ASSERT_EQ(Entity3->GetParentId().HasValue(), false);
+    ASSERT_EQ(Entity3->GetParentEntity(), nullptr);
+}
+
+/*
     This tests the behaviour of correctly setting the ParentId and RootHierarchy entities.
     We first test that the constuctor is correctly setting these properties, and then ensure
     the properties are still correrct after additions and deletions.
-
 */
 CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, ParentTest)
 {

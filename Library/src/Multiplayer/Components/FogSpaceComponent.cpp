@@ -23,14 +23,14 @@ namespace csp::multiplayer
 FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(ComponentType::Fog, LogSystem, Parent)
 {
-    Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)] = static_cast<int64_t>(FogMode::Linear);
+    Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)] = static_cast<int64_t>(FogMode::Exponential);
     Properties[static_cast<uint32_t>(FogPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(FogPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
     Properties[static_cast<uint32_t>(FogPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
     Properties[static_cast<uint32_t>(FogPropertyKeys::StartDistance)] = 0.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::EndDistance)] = 0.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::Color)] = csp::common::Vector3 { 0.8f, 0.9f, 1.0f };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Density)] = 0.2f;
+    Properties[static_cast<uint32_t>(FogPropertyKeys::Density)] = 0.4f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)] = 0.2f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)] = 1.f;
     Properties[static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)] = false;

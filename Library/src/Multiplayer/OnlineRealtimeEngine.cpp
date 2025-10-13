@@ -873,8 +873,7 @@ void OnlineRealtimeEngine::TickEntities()
 
     if (EnableEntityTick)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
-            *TickEntitiesLock, GetRealtimeEngineType(), MultiplayerConnectionInst->GetClientId(), Entities, LastTickTime);
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(*TickEntitiesLock, GetRealtimeEngineType(), Entities, LastTickTime, ElectionManager);
     }
 
     {

@@ -244,7 +244,7 @@ class MockScriptRunner : public csp::common::IJSScriptRunner
     void* GetModule(int64_t, const csp::common::String&) override { return nullptr; }
     bool CreateContext(int64_t) override { return false; }
     bool DestroyContext(int64_t) override { return false; }
-    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String) override { }
+    void SetModuleSource(csp::common::String, csp::common::String) override { }
     void ClearModuleSource(csp::common::String) override { }
 };
 

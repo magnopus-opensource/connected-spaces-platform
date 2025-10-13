@@ -87,6 +87,12 @@ namespace Csp
         {
             get
             {
+                // Prevent accessing the pointer if the object has been disposed
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException(_safeTypeName, $"Attempting to access a disposed instance of {_safeTypeName}");
+                }
+
                 // Prevent accessing the pointer if it's null
                 if (_ptrValue == IntPtr.Zero)
                 {

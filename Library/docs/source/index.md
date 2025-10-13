@@ -24,10 +24,10 @@ If you want to build CSP for your own use case follow the instructions below.
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each supported language are below.
+Build instructions for each supported platform are below.
 
 - [Building for Web](manual/building/web)
-- [Building for C++](manual/building/cpp)
+- [Building for Windows](manual/building/windows)
 - [Building for C#](manual/building/csharp)
 - [Building for Android](manual/building/android)
 - [Building for MacOS](manual/building/macos)
@@ -35,21 +35,6 @@ Build instructions for each supported language are below.
 
 ****
 
-## 🖥️ Usage
-Examples for each supported language are below.
-
-- WebAssembly 
-    - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
-    - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/Web)
-- C++
-    - [C++ Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
-    - [C++ Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
-
-- Unity C#
-    - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
-    - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
-
-****
  ## ©️ License
 
  [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/LICENSE)

@@ -28,5 +28,5 @@ struct RAIIMockLogger
 {
     RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(MockLogCallback.AsStdFunction()); }
     ~RAIIMockLogger() { csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(nullptr); }
-    ::testing::MockFunction<void(const csp::common::String&)> MockLogCallback;
+    ::testing::MockFunction<void(csp::common::LogLevel, const csp::common::String&)> MockLogCallback;
 };

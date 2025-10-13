@@ -18,6 +18,7 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
@@ -576,6 +577,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::ScreenSharing:
         Component = new ScreenSharingSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::AIChatbot:
+        Component = new AIChatbotSpaceComponent(LogSystem, this);
         break;
     default:
     {

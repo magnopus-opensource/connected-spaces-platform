@@ -77,14 +77,14 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
     auto* FogComponent = static_cast<FogSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Fog));
 
     // Ensure defaults are set
-    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Linear);
+    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
     EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
     EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3::One());
     EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 0.f);
     EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 0.f);
     EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3({ 0.8f, 0.9f, 1.0f }));
-    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.2f);
+    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.4f);
     EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 0.2f);
     EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 1.f);
     EXPECT_FALSE(FogComponent->GetIsVolumetric());

@@ -1,0 +1,477 @@
+{
+  "checkpointVersion": 1,
+  "checkpointTimestamp": "2025-10-02T08:10:09.1072167+00:00",
+  "spaceId": "68de3196d71222a39de853da",
+  "tenantName": "TEST_01",
+  "exportId": "679aba06b50e18a31a050532",
+  "data": {
+    "group": {
+      "id": "68de3196d71222a39de853da",
+      "createdBy": "689224b1ee4da254b630045b",
+      "createdAt": "2025-10-02T08:02:30.456+00:00",
+      "groupOwnerId": "689224b1ee4da254b630045b",
+      "groupCode": "mojsx1",
+      "groupType": "space",
+      "name": "hierarchy bug",
+      "users": [
+        "689224b1ee4da254b630045b"
+      ],
+      "bannedUsers": [],
+      "moderators": [],
+      "discoverable": false,
+      "autoModerator": false,
+      "requiresInvite": true,
+      "archived": false,
+      "tags": [],
+      "isCurrentUserOwner": true,
+      "isCurrentUserMember": true,
+      "isCurrentUserModerator": true,
+      "isCurrentUserBanned": false
+    },
+    "objectMessages": [
+      {
+        "id": 1510,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "parentId": 1511,
+        "components": {
+          "64511": {
+            "$type": "ComponentData[[String]]",
+            "item": "child2"
+          },
+          "64512": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              0.061146602,
+              0.08967363,
+              -2.9710155
+            ]
+          },
+          "64513": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              0.018750442,
+              1.1096705E-16,
+              -0.19434209,
+              0.9807546
+            ]
+          },
+          "64514": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64517": {
+            "$type": "ComponentData[[String]]"
+          },
+          "64518": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64519": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "0": {
+            "$type": "ComponentData[[Dictionary[[UInt16],[ComponentData]]]]",
+            "item": {
+              "1": {
+                "$type": "ComponentData[[String]]",
+                "item": "68de31bd812274a68c04e5c1"
+              },
+              "2": {
+                "$type": "ComponentData[[String]]",
+                "item": "68de31bc812274a68c04e5c0"
+              },
+              "3": {
+                "$type": "ComponentData[[Single[]]]",
+                "item": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "4": {
+                "$type": "ComponentData[[Single[]]]",
+                "item": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "5": {
+                "$type": "ComponentData[[Single[]]]",
+                "item": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              "6": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": true
+              },
+              "7": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": true
+              },
+              "8": {
+                "$type": "ComponentData[[String]]"
+              },
+              "9": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": true
+              },
+              "10": {
+                "$type": "ComponentData[[Dictionary[[String],[ComponentData]]]]",
+                "item": {}
+              },
+              "11": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": true
+              },
+              "12": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": false
+              },
+              "13": {
+                "$type": "ComponentData[[Boolean]]",
+                "item": false
+              },
+              "64511": {
+                "$type": "ComponentData[[String]]"
+              },
+              "64516": {
+                "$type": "ComponentData[[UInt64]]",
+                "item": 3
+              }
+            }
+          }
+        },
+        "aoiCenter": false
+      },
+      {
+        "id": 1511,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "parentId": 1512,
+        "components": {
+          "64511": {
+            "$type": "ComponentData[[String]]",
+            "item": "child 1"
+          },
+          "64512": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              -8.881784E-16,
+              0.0,
+              -6.5466027
+            ]
+          },
+          "64513": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              -4.16335E-18,
+              -0.6722927,
+              4.16335E-18,
+              0.7402854
+            ]
+          },
+          "64514": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64517": {
+            "$type": "ComponentData[[String]]"
+          },
+          "64518": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64519": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          }
+        },
+        "aoiCenter": false
+      },
+      {
+        "id": 1512,
+        "prefabId": 2,
+        "isTransferable": true,
+        "isPersistent": true,
+        "components": {
+          "64511": {
+            "$type": "ComponentData[[String]]",
+            "item": "top"
+          },
+          "64512": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              1.1723891,
+              1.74,
+              1.0
+            ]
+          },
+          "64513": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              0.0,
+              1.0,
+              0.0,
+              6.123234E-17
+            ]
+          },
+          "64514": {
+            "$type": "ComponentData[[Single[]]]",
+            "item": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "64515": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64517": {
+            "$type": "ComponentData[[String]]"
+          },
+          "64518": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          },
+          "64519": {
+            "$type": "ComponentData[[UInt64]]",
+            "item": 0
+          }
+        },
+        "aoiCenter": false
+      }
+    ],
+    "prototypes": [
+      {
+        "id": "68de31bc812274a68c04e5c0",
+        "name": "c_00.glb_123.56606135545378",
+        "tags": [
+          "origin-68de31bc812274a68c04e5c0"
+        ],
+        "metadata": {
+          "AssetType": "staticmodel"
+        },
+        "uiStrings": {},
+        "state": {},
+        "groupIds": [
+          "68de3196d71222a39de853da"
+        ],
+        "createdBy": "689224b1ee4da254b630045b",
+        "createdAt": "2025-10-02T08:03:08.595+00:00",
+        "updatedBy": "689224b1ee4da254b630045b",
+        "updatedAt": "2025-10-02T08:03:08.595+00:00",
+        "highlander": false,
+        "type": "Default",
+        "systemOwned": false,
+        "readAccess": [],
+        "writeAccess": []
+      },
+      {
+        "id": "68de3196812274a68c04e5bf",
+        "name": "ASSET_COLLECTION_SPACE_METADATA_68de3196d71222a39de853da",
+        "tags": [
+          "origin-68de3196812274a68c04e5bf"
+        ],
+        "metadata": {
+          "arMode": "false",
+          "attributions": "[]",
+          "cameraIMUMode": "false",
+          "eCommerceIconColours": "{\"background\":{\"_r\":1,\"_g\":1,\"_b\":1},\"foreground\":{\"_r\":0,\"_g\":0,\"_b\":0}}",
+          "isECommerceEnabled": "false",
+          "isTicketRequired": "false",
+          "multiplayerVersion": "2",
+          "renderingHints": "{\"commonRenderingHints\":{\"clippingPlanes\":{\"near\":0.15,\"far\":2000}}}",
+          "site": "Empty",
+          "spaceTags": "[]",
+          "useShallowCopy": "false",
+          "vrMode": "false"
+        },
+        "uiStrings": {},
+        "state": {},
+        "groupIds": [
+          "68de3196d71222a39de853da"
+        ],
+        "createdBy": "689224b1ee4da254b630045b",
+        "createdAt": "2025-10-02T08:02:30.956+00:00",
+        "updatedBy": "689224b1ee4da254b630045b",
+        "updatedAt": "2025-10-02T08:02:30.956+00:00",
+        "highlander": false,
+        "type": "FoundationInternal",
+        "systemOwned": false,
+        "readAccess": [],
+        "writeAccess": []
+      }
+    ],
+    "assetDetails": [
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31be812274a68c04e5c4",
+        "fileName": "c_00_thumbnail0.png",
+        "name": "c_00_thumbnail0.glb",
+        "languageCode": "en-us",
+        "assetType": "Thumbnail",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default",
+          "thumbnail:0"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31be812274a68c04e5c4/1/c_00_thumbnail0.png?t=1759392205201",
+        "version": "1",
+        "tags": [
+          "thumbnail:0",
+          "AssetPipelineGenerated",
+          "AssetPipelineSucceeded",
+          "origin-68de31be812274a68c04e5c4"
+        ],
+        "sizeInBytes": 3680
+      },
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31be812274a68c04e5c8",
+        "fileName": "c_00_lod3.glb",
+        "name": "c_00_lod3.glb",
+        "languageCode": "en-us",
+        "assetType": "Model",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default",
+          "lod:3"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31be812274a68c04e5c8/1/c_00_lod3.glb?t=1759392202551",
+        "version": "1",
+        "tags": [
+          "lod:3",
+          "AssetPipelineGenerated",
+          "AssetPipelineSucceeded",
+          "origin-68de31be812274a68c04e5c8"
+        ],
+        "sizeInBytes": 5736
+      },
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31be812274a68c04e5c7",
+        "fileName": "c_00_lod2.glb",
+        "name": "c_00_lod2.glb",
+        "languageCode": "en-us",
+        "assetType": "Model",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default",
+          "lod:2"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31be812274a68c04e5c7/1/c_00_lod2.glb?t=1759392199942",
+        "version": "1",
+        "tags": [
+          "lod:2",
+          "AssetPipelineGenerated",
+          "AssetPipelineSucceeded",
+          "origin-68de31be812274a68c04e5c7"
+        ],
+        "sizeInBytes": 5736
+      },
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31be812274a68c04e5c6",
+        "fileName": "c_00_lod1.glb",
+        "name": "c_00_lod1.glb",
+        "languageCode": "en-us",
+        "assetType": "Model",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default",
+          "lod:1"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31be812274a68c04e5c6/1/c_00_lod1.glb?t=1759392197395",
+        "version": "1",
+        "tags": [
+          "lod:1",
+          "AssetPipelineGenerated",
+          "AssetPipelineSucceeded",
+          "origin-68de31be812274a68c04e5c6"
+        ],
+        "sizeInBytes": 5272
+      },
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31be812274a68c04e5c5",
+        "fileName": "c_00_lod0.glb",
+        "name": "c_00_lod0.glb",
+        "languageCode": "en-us",
+        "assetType": "Model",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default",
+          "lod:0"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31be812274a68c04e5c5/1/c_00_lod0.glb?t=1759392195761",
+        "version": "1",
+        "tags": [
+          "lod:0",
+          "AssetPipelineGenerated",
+          "AssetPipelineSucceeded",
+          "origin-68de31be812274a68c04e5c5"
+        ],
+        "sizeInBytes": 5272
+      },
+      {
+        "prototypeId": "68de31bc812274a68c04e5c0",
+        "id": "68de31bd812274a68c04e5c1",
+        "fileName": "c_00.glb",
+        "name": "c_00.glb",
+        "languageCode": "en-us",
+        "assetType": "Model",
+        "supportedPlatforms": [
+          "Default"
+        ],
+        "style": [
+          "Default"
+        ],
+        "uri": "https://world-streaming.magnopus-stg.cloud/O2Stg/68de31bc812274a68c04e5c0/68de31bd812274a68c04e5c1/1/c_00.glb?t=1759392190191",
+        "version": "1",
+        "mimeType": "model/gltf-binary",
+        "tags": [
+          "origin-68de31bd812274a68c04e5c1"
+        ],
+        "sizeInBytes": 5160
+      }
+    ],
+    "sequences": [],
+    "anchors": []
+  }
+}
