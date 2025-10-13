@@ -171,11 +171,11 @@ class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
 public:
     /// @brief Retrieves the asset collection array being stored as a pointer.
     /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-    csp::common::Array<AssetCollection>& GetAssetCollections();
+    virtual csp::common::Array<AssetCollection>& GetAssetCollections();
 
     /// @brief Retrieves the asset collection array being stored as a pointer.
     /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-    const csp::common::Array<AssetCollection>& GetAssetCollections() const;
+    virtual const csp::common::Array<AssetCollection>& GetAssetCollections() const;
 
     /// @brief Retrieves the async operation total number of result asset collections.
     /// If the async operation was using pagination this count number represents the sum of asset collection sizes from every page.
@@ -190,7 +190,7 @@ public:
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
         : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
-private:
+protected:
     AssetCollectionsResult(void*) {};
 
     void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
@@ -230,6 +230,33 @@ private:
         , Count { 0 } {};
 
     uint64_t Count;
+};
+
+/// @ingroup Asset System
+/// @brief Data class used to process and represent information relating to copied asset collections.
+class CSP_API AssetCollectionsCopyResult : public AssetCollectionsResult
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
+
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    CSP_NO_EXPORT AssetCollectionsCopyResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : AssetCollectionsResult(ResCode, HttpResCode) {};
+
+    CSP_NO_EXPORT AssetCollectionsCopyResult(
+        csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : AssetCollectionsResult(ResCode, HttpResCode, Reason) {};
+
+private:
+    AssetCollectionsCopyResult(void* Ptr)
+        : AssetCollectionsResult(Ptr) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief Callback containing asset collection.
