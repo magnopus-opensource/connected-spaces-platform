@@ -221,7 +221,7 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
     SetTimeSinceLastQueueSend(CurrentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback = [Callback, LogSystem = this->LogSystem](const NullResult& Result)
+    NullResultCallback SendBatchAnalyticsCallback = [this, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -230,15 +230,19 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
         if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
+            this->LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
         }
         else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            LogSystem->LogMsg(common::LogLevel::Error,
+            this->LogSystem->LogMsg(common::LogLevel::Error,
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());
         }
+
+        // Note: We may in the future wish to consider a retry mechanism when there is a failure to send the AnalyticsRecordQueue.
+        // For now we are just clearing the queue in either case.
+        this->AnalyticsRecordQueue.clear();
 
         if (Callback)
         {
