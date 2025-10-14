@@ -680,18 +680,13 @@ void MultiplayerConnection::BindOnRequestToDisconnect()
         OnRequestToDisconnect,
         [&](const signalr::value& Params)
         {
-            auto Done = false;
+            std::promise<bool> Promise;
+            std::future<bool> Future = Promise.get_future();
+
             const std::string Reason = Params.as_array()[0].as_string();
-            DisconnectWithReason(Reason.c_str(), [&Done](ErrorCode /*Error*/) { Done = true; });
+            DisconnectWithReason(Reason.c_str(), [&Promise](ErrorCode /*Error*/) { Promise.set_value(true); });
 
-            int TimeoutCounter = 2000;
-
-            while (!Done && TimeoutCounter > 0)
-            {
-                std::this_thread::sleep_for(1ms);
-
-                --TimeoutCounter;
-            }
+            Future.wait_for(2000ms);
         },
         LogSystem);
 }
