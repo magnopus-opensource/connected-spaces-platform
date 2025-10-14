@@ -117,11 +117,11 @@ namespace Csp
                 throw new NullReferenceException();
         }
 
-        internal static DelegateType GetTemplateDelegate<DelegateType>(string functionName, string typeName) where DelegateType : Delegate
+        internal static DelegateType GetTemplateDelegate<DelegateType>(string functionName) where DelegateType : Delegate
         {
-            IntPtr ptr = Global.GetFunctionAddress($"{functionName}_{typeName}");
+            IntPtr ptr = Global.GetFunctionAddress(functionName);
             if (ptr == IntPtr.Zero)
-                throw new InvalidOperationException($"Failed to find function {functionName}_{typeName} in native library");
+                throw new InvalidOperationException($"Failed to find function {functionName} in native library");
 
             return Marshal.GetDelegateForFunctionPointer<DelegateType>(ptr);
         }
