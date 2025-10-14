@@ -16,7 +16,6 @@
 
 #include "classes.h"
 #include "CSP/Common/String.h"
-#include <stdexcept>
 
 namespace csp::Tests
 {
@@ -49,8 +48,7 @@ template class CSP_API TemplateClass<int>;
 template class CSP_API TemplateClass<csp::common::String>;
 template class CSP_API TemplateClass<SimpleClass*>;
 
-const csp::Tests::TemplateClass<int>& UsesTemplateClass::DummyFunctionInt() const { throw std::exception("Not implemented"); }
-
-const csp::Tests::TemplateClass<csp::common::String>& UsesTemplateClass::DummyFunctionString() const { throw std::exception("Not implemented"); }
+const csp::Tests::TemplateClass<int>& UsesTemplateClass::DummyFunctionInt() const { }
+const csp::Tests::TemplateClass<csp::common::String>& UsesTemplateClass::DummyFunctionString() const { }
 
 } // namespace csp::Tests
