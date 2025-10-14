@@ -428,7 +428,6 @@ TEST_P(ObjectCreate, ObjectCreateTest)
     EXPECT_EQ(CreatedObject->GetRotation(), ObjectTransform.Rotation);
     EXPECT_EQ(CreatedObject->GetScale(), ObjectTransform.Scale);
     EXPECT_EQ(CreatedObject->GetThirdPartyRef(), "");
-    EXPECT_EQ(CreatedObject->GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     RealtimeEngine.reset();

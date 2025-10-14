@@ -204,15 +204,6 @@ public:
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetThirdPartyRef(const csp::common::String& InThirdPartyRef);
 
-    /// @brief Get the third party platform type of this entity.
-    /// @return A string representing third party platform type set for this entity.
-    csp::systems::EThirdPartyPlatform GetThirdPartyPlatformType() const;
-
-    /// @brief Set third party platform type for this entity.
-    /// @param InThirdPartyPlatformType csp::systems::EThirdPartyPlatform : The third party platform type to set.
-    /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
-    bool SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType);
-
     /// @brief Get the type of the Entity.
     /// @return The SpaceEntityType enum value.
     SpaceEntityType GetEntityType() const;
@@ -472,7 +463,6 @@ private:
 
     csp::common::String Name;
     SpaceTransform Transform;
-    csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
     csp::common::String ThirdPartyRef;
     uint64_t SelectedId;
 
