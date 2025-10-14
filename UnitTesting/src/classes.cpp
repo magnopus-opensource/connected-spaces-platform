@@ -16,6 +16,7 @@
 
 #include "classes.h"
 #include "CSP/Common/String.h"
+#include <stdexcept>
 
 namespace csp::Tests
 {
