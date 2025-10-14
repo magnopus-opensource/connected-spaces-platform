@@ -2,20 +2,17 @@
 {{# is_index_operator }}
 {{ unique_name }}_Get = WrapperHelper.GetTemplateDelegate
 <{{ definition.name }}Delegates.{{ unique_name }}_GetDelegate>(
-    "{{ unique_name }}_Get",
-    {{# template_parameters }}{{ name }}TypeName{{/ template_parameters }}
+    $"{{ unique_name }}_Get{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}"
 );
 {{ unique_name }}_Set = WrapperHelper.GetTemplateDelegate
 <{{ definition.name }}Delegates.{{ unique_name }}_SetDelegate>(
-    "{{ unique_name }}_Set",
-    {{# template_parameters }}{{ name }}TypeName{{/ template_parameters }}
+    $"{{ unique_name }}_Set{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}"
 );
 {{/ is_index_operator }}
 {{/ is_operator_overload }}
 {{^ is_operator_overload }}
 {{ unique_name }} = WrapperHelper.GetTemplateDelegate
 <{{ definition.name }}Delegates.{{ unique_name }}Delegate>(
-    "{{ unique_name }}",
-    {{# template_parameters }}{{ name }}TypeName{{/ template_parameters }}
+    $"{{ unique_name }}{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}"
 );
 {{/ is_operator_overload }}
