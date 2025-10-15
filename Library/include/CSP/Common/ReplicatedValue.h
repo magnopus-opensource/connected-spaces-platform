@@ -59,17 +59,10 @@ public:
 
     CSP_START_IGNORE
 
-    // Internal templated constructor
-    CSP_NO_EXPORT template <class T>
-    inline ReplicatedValue(const T& InValue)
-        : Value { InValue }
-    {
-    }
-
     // These are great for certain scenarios such as serialization/deserialization, as we can avoid conditionals.
     // Internal templated setter.
     CSP_NO_EXPORT template <class T> inline void Set(const T& InValue) { Value = InValue; }
-    // Internal templated setter.
+    // Internal templated getter.
     CSP_NO_EXPORT template <class T> inline const T& Get() const { return std::get<T>(Value); }
 
     // Internal getter for variant.
