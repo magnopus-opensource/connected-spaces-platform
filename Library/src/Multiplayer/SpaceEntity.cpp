@@ -99,7 +99,6 @@ SpaceEntity::SpaceEntity()
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
@@ -121,7 +120,6 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
@@ -260,14 +258,6 @@ bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
     return SetProperty(*this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
 }
-
-bool SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
-{
-    return SetProperty(*this, ThirdPartyPlatform, static_cast<int64_t>(InThirdPartyPlatformType), SpaceEntityComponentKey::ThirdPartyPlatform,
-        UPDATE_FLAGS_THIRD_PARTY_PLATFORM, LogSystem);
-}
-
-csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -1081,11 +1071,6 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
             SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF,
             [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },
             [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(ThirdPartyRef, Value.GetString(), UPDATE_FLAGS_THIRD_PARTY_REF); }
-        },
-        {
-            SpaceEntityComponentKey::ThirdPartyPlatform, UPDATE_FLAGS_THIRD_PARTY_PLATFORM,
-            [&ThirdPartyPlatform = ThirdPartyPlatform]() { return csp::common::ReplicatedValue { static_cast<int64_t>(ThirdPartyPlatform) }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(ThirdPartyPlatform, static_cast<systems::EThirdPartyPlatform>(Value.GetInt()), UPDATE_FLAGS_THIRD_PARTY_PLATFORM); }
         },
         {
             SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE,
