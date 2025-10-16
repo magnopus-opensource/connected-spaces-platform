@@ -126,6 +126,74 @@ test('EnterSpaceFromCheckpoint', async() => {
   assert.ok(errors.length == 0); //Should be no errors
 })
 
+test('DisconnectWhenNewMultiplayerSessionInitiatedInSpace', async() => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+  const spaceId = await CreatePublicTestSpace();
+
+  function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Start 2 new signalR connections with the same user without either entering a space.
+  // Delay the second one so we know the first one will be disconnected
+  const [{errors, consoleMessages}] = await Promise.all([
+    LaunchTestPage('http://127.0.0.1:8888/DisconnectWhenNewMultiplayerSessionInitiatedInSpace.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId),
+    (async () => {
+      await delay(3000); // 3 second delay
+      return LaunchTestPage('http://127.0.0.1:8888/DisconnectWhenNewMultiplayerSessionInitiatedInSpace.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId);
+    })()
+  ])
+  .then(values => {
+    // Ensure that all information for each promise is logged to the console.
+    for (const {errors, consoleMessages} of values) {
+      console.log(consoleMessages);
+      console.log(errors);
+    }
+
+    return values;
+  });
+
+  assert.ok(consoleMessages.some(e => e.includes('Disconnected from server! Reason: New Multiplayer Session Initiated')));
+
+  //Cleanup
+  await DeleteSpace(spaceId);
+  await LogoutUser(user);
+})
+
+test('DisconnectWhenNewMultiplayerSessionInitiatedOutOfSpace', async() => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+
+  function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Start 2 new signalR connections with the same user without either entering a space.
+  // Delay the second one so we know the first one will be disconnected
+  const [{errors, consoleMessages}] = await Promise.all([
+    LaunchTestPage('http://127.0.0.1:8888/DisconnectWhenNewMultiplayerSessionInitiatedOutOfSpace.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null),
+    (async () => {
+      await delay(2000); // 2 second delay
+      return LaunchTestPage('http://127.0.0.1:8888/DisconnectWhenNewMultiplayerSessionInitiatedOutOfSpace.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null);
+    })()
+  ])
+  .then(values => {
+    // Ensure that all information for each promise is logged to the console.
+    for (const {errors, consoleMessages} of values) {
+      console.log(consoleMessages);
+      console.log(errors);
+    }
+
+    return values;
+  });
+
+  assert.ok(consoleMessages.some(e => e.includes('Disconnected from server! Reason: New Multiplayer Session Initiated')));
+
+  //Cleanup
+  await LogoutUser(user);
+})
+
 test.run();
 
 /*
