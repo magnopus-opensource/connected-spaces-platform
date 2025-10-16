@@ -262,6 +262,8 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
         return std::make_unique<AccessControlChangedNetworkEventData>(csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem));
     case NetworkEvent::GeneralPurposeEvent:
         return std::make_unique<NetworkEventData>(csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem));
+    case NetworkEvent::AsyncCallCompleted:
+        return std::make_unique<AsyncCallCompletedEventData>(csp::multiplayer::DeserializeAsyncCallCompletedEvent(EventValues, LogSystem));
     default:
         throw std::invalid_argument(
             fmt::format("DeserialiseForEventType: unknown enum value {}", static_cast<std::underlying_type_t<NetworkEvent>>(EventType)));

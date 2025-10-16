@@ -58,6 +58,36 @@ namespace
 
 constexpr const int MAX_SPACES_RESULTS = 100;
 
+// Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
+// The only difference is in the value they pass for the AsyncCall parameter.
+std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(const String& SpaceId, const String& NewName,
+    csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, bool AsyncCall)
+{
+    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
+    Request->SetSpaceId(SpaceId);
+    Request->SetNewGroupOwnerId(csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
+    Request->SetNewUniqueName(NewName);
+    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
+    Request->SetShallowCopy(ShallowCopy);
+    Request->SetAsyncCall(AsyncCall);
+
+    if (MemberGroupIds.HasValue())
+    {
+        std::vector<String> GroupIds;
+        GroupIds.reserve(MemberGroupIds->Size());
+
+        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
+        {
+            GroupIds.push_back(MemberGroupIds->operator[](i));
+        }
+
+        Request->SetMemberGroupIds(GroupIds);
+    }
+
+    return Request;
+}
+
 } // namespace
 
 namespace csp::systems
@@ -70,15 +100,24 @@ SpaceSystem::SpaceSystem()
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(InWebClient, InEventBus, &LogSystem)
     , CurrentSpace()
 {
     GroupAPI = new chs::GroupApi(InWebClient);
     SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
 }
 
-SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
+SpaceSystem::~SpaceSystem()
+{
+    delete (GroupAPI);
+
+    if (EventBusPtr)
+    {
+        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)));
+    }
+}
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
@@ -1925,26 +1964,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
-    Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
-    Request->SetNewUniqueName(NewName);
-    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
-    Request->SetShallowCopy(ShallowCopy);
-
-    if (MemberGroupIds.HasValue())
-    {
-        std::vector<String> GroupIds;
-        GroupIds.reserve(MemberGroupIds->Size());
-
-        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
-        {
-            GroupIds.push_back(MemberGroupIds->operator[](i));
-        }
-
-        Request->SetMemberGroupIds(GroupIds);
-    }
+    auto Request = ConstructDuplicateSpaceOptions(SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -1958,4 +1978,58 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         ResponseHandler // ResponseHandler
     );
 }
+
+void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
+    const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback)
+{
+    auto Request = ConstructDuplicateSpaceOptions(SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = SpaceAPI->CreateHandler<csp::systems::NullResultCallback, csp::systems::NullResult, void, chs::GroupDto>(Callback, nullptr);
+
+    static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->spacesSpaceIdDuplicatePost(
+        {
+            SpaceId, // spaceId
+            true, // asyncCall
+            Request // RequestBody
+        },
+        ResponseHandler // ResponseHandler
+    );
+}
+
+void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback)
+{
+    AsyncCallCompletedCallback = std::move(Callback);
+
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register SpaceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
+    if (!AsyncCallCompletedCallback)
+    {
+        CSP_LOG_ERROR_MSG("Error: AsyncCallCompletedCallback not set. SpaceSystem has not been registered with the AsyncCallCompleted event.");
+        return;
+    }
+
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAsyncCallCompletedEvent(NetworkEventData); });
+}
+
+void SpaceSystem::OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData)
+{
+    if (!AsyncCallCompletedCallback)
+    {
+        return;
+    }
+
+    const csp::common::AsyncCallCompletedEventData& AsyncCallCompletedEventData
+        = static_cast<const csp::common::AsyncCallCompletedEventData&>(NetworkEventData);
+
+    AsyncCallCompletedCallback(AsyncCallCompletedEventData);
+}
+
 } // namespace csp::systems
