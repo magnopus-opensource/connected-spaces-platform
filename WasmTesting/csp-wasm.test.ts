@@ -154,6 +154,7 @@ test('DisconnectWhenNewMultiplayerSessionInitiatedInSpace', async() => {
     return values;
   });
 
+  assert.ok(consoleMessages.some(e => e.includes('Successfully entered space')));
   assert.ok(consoleMessages.some(e => e.includes('Disconnected from server! Reason: New Multiplayer Session Initiated')));
 
   //Cleanup
