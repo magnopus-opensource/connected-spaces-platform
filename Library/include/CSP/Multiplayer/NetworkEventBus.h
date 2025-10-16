@@ -199,8 +199,9 @@ public:
         SequenceChanged, // Unpacks to SequenceChangedNetworkEventData or SequenceHotspotChangedEventData (Better if there was a seperate event for
                          // each.)
         AccessControlChanged, // Unpacks to AccessControlChangedNetworkEventData
-        GeneralPurposeEvent // Unpacks to NetworkEventData (Base type). An external event unknown to us that may have been registered with any string
-                            // value.
+        GeneralPurposeEvent, // Unpacks to NetworkEventData (Base type). An external event unknown to us that may have been registered with any string
+                             // value.
+        AsyncCallCompleted // Unpacks to AsyncCallCompletedEventData
     };
 
     static NetworkEvent NetworkEventFromString(const csp::common::String& EventString);
@@ -223,7 +224,7 @@ private:
         static inline const std::unordered_map<NetworkEvent, csp::common::String>
             CustomDeserializationEventMap { { NetworkEvent::AssetDetailBlobChanged, "AssetDetailBlobChanged" },
                 { NetworkEvent::Conversation, "Conversation" }, { NetworkEvent::SequenceChanged, "SequenceChanged" },
-                { NetworkEvent::AccessControlChanged, "AccessControlChanged" } };
+                { NetworkEvent::AccessControlChanged, "AccessControlChanged" }, { NetworkEvent::AsyncCallCompleted, "AsyncCallCompleted" } };
 
     CSP_END_IGNORE
 

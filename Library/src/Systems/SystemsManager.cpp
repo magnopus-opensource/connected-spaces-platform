@@ -193,7 +193,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(WebClient, *LogSystem);
+    SpaceSystem = new csp::systems::SpaceSystem(WebClient, NetworkEventBus, *LogSystem);
     AssetSystem = new csp::systems::AssetSystem(WebClient, NetworkEventBus, *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);

@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <future>
 #include <tuple>
 #include <uuid_v4.h>
 
@@ -3233,9 +3234,113 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
         EXPECT_EQ(NewSpace.OwnerId, UserId);
         EXPECT_NE(Space.OwnerId, UserId);
 
+        // Ensure we can enter the newly duplicated Space
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, NewSpace.Id, RealtimeEngine.get());
+        ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+
         // Delete duplicated space
         DeleteSpace(SpaceSystem, NewSpace.Id);
     }
+
+    // Log out and log in as default user to clean up original space
+    LogOut(UserSystem);
+    LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "CSP-TEST-SPACE";
+    const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    String UserId;
+
+    // Create default and alt users
+    csp::systems::Profile DefaultUser = CreateTestUser();
+    csp::systems::Profile AlternativeUser = CreateTestUser();
+
+    // Log in
+    LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    Array<InviteUserRoleInfo> UserRoles(1);
+    UserRoles[0].UserEmail = AlternativeUser.Email;
+    UserRoles[0].UserRole = SpaceUserRole::User;
+    InviteUserRoleInfoCollection InviteInfo;
+    InviteInfo.InviteUserRoleInfos = UserRoles;
+
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space);
+
+    // Log out and log in as alt user
+    LogOut(UserSystem);
+    LogIn(UserSystem, UserId, AlternativeUser.Email, GeneratedTestAccountPassword);
+
+    csp::common::String NewSpaceId;
+
+    // Attempt to duplicate space asynchrously
+    {
+        std::promise<bool> AsyncCallCompletedPromise;
+        std::future<bool> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
+
+        auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
+        {
+            EXPECT_EQ(NetworkEventData.OperationName, "DuplicateSpaceAsync");
+            EXPECT_EQ(NetworkEventData.ReferenceType, "GroupId");
+
+            NewSpaceId = NetworkEventData.ReferenceId;
+
+            AsyncCallCompletedPromise.set_value(true);
+        };
+
+        SpaceSystem->SetAsyncCallCompletedCallback(AsyncCallCompletedCallback);
+
+        SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+        auto [Result]
+            = AWAIT_PRE(SpaceSystem, DuplicateSpaceAsync, RequestPredicate, Space.Id, UniqueSpaceName, SpaceAttributes::Private, nullptr, true);
+
+        EXPECT_EQ(Result.GetResultCode(), EResultCode::Success);
+
+        // Wait for the callback to be received
+        AsyncCallCompletedFuture.wait();
+        EXPECT_TRUE(AsyncCallCompletedFuture.get() == true);
+    }
+
+    // Ensure we can enter the newly duplicated Space
+    {
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, NewSpaceId, RealtimeEngine.get());
+        ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+        ASSERT_EQ(ExitSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Delete duplicated space
+    DeleteSpace(SpaceSystem, NewSpaceId);
 
     // Log out and log in as default user to clean up original space
     LogOut(UserSystem);
