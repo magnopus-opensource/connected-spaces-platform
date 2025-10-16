@@ -216,9 +216,6 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
         return;
     }
 
-    // Create a local copy of the queue to be sent so that the original queue can be cleared.
-    std::vector<std::shared_ptr<csp::services::generated::userservice::AnalyticsRecord>> AnalyticsRecordQueueCopy(std::move(AnalyticsRecordQueue));
-
     const std::chrono::milliseconds CurrentTime
         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
@@ -252,7 +249,11 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
     csp::services::ResponseHandlerPtr ResponseHandler
         = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
 
-    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueueCopy }, ResponseHandler);
+    static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueue }, ResponseHandler);
+
+    // Clear the analytics record queue.
+    // The async analyticsBulkPost endpoint serializes the records data to json so it is safe to clear here.
+    AnalyticsRecordQueue.clear();
 }
 
 } // namespace csp::systems
