@@ -37,6 +37,8 @@ constexpr const uint16_t COMPONENT_KEY_COMPONENTTYPE = COMPONENT_KEYS_START_VIEW
 // The reason we handle these differently is because the component key values are dynamic,
 // as they represent the index of our component, and not the type. This is due to being able to have multiple
 // components of the same type on an entity, so we can't use the component type as a unique key.
+
+// ThirdPartyPlatform = COMPONENT_KEYS_START_VIEWS + 7 Removed 14/10/2025, (Can't put this inline cause of the wrapper gen!)
 enum class SpaceEntityComponentKey : uint16_t
 {
     // Property Keys.
@@ -46,7 +48,6 @@ enum class SpaceEntityComponentKey : uint16_t
     Scale = COMPONENT_KEYS_START_VIEWS + 3,
     SelectedClientId = COMPONENT_KEYS_START_VIEWS + 4,
     ThirdPartyRef = COMPONENT_KEYS_START_VIEWS + 6,
-    ThirdPartyPlatform = COMPONENT_KEYS_START_VIEWS + 7,
     LockType = COMPONENT_KEYS_START_VIEWS + 8
 };
 

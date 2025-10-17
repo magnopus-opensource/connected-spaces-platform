@@ -30,9 +30,8 @@ enum SpaceEntityUpdateFlags
     UPDATE_FLAGS_COMPONENTS = 16,
     UPDATE_FLAGS_SELECTION_ID = 32,
     UPDATE_FLAGS_THIRD_PARTY_REF = 64,
-    UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
-    UPDATE_FLAGS_PARENT = 256,
-    UPDATE_FLAGS_LOCK_TYPE = 512,
+    UPDATE_FLAGS_PARENT = 128,
+    UPDATE_FLAGS_LOCK_TYPE = 256,
 };
 
 /// @brief This Enum should be used to determine what kind of operation the component update represents.
