@@ -221,7 +221,7 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
     SetTimeSinceLastQueueSend(CurrentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback = [this, Callback](const NullResult& Result)
+    NullResultCallback SendBatchAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -230,19 +230,15 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
         if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            this->LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
+            LogSystem->LogMsg(common::LogLevel::Verbose, "Successfully sent the Analytics Record queue.");
         }
         else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
         {
-            this->LogSystem->LogMsg(common::LogLevel::Error,
+            LogSystem->LogMsg(common::LogLevel::Error,
                 fmt::format("Failed to send Analytics Event. ResCode: {}, HttpResCode: {}", static_cast<int>(Result.GetResultCode()),
                     Result.GetHttpResultCode())
                     .c_str());
         }
-
-        // Note: We may in the future wish to consider a retry mechanism when there is a failure to send the AnalyticsRecordQueue.
-        // For now we are just clearing the queue in either case.
-        this->AnalyticsRecordQueue.clear();
 
         if (Callback)
         {
@@ -254,6 +250,10 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
         = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
 
     static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueue }, ResponseHandler);
+
+    // Clear the analytics record queue.
+    // The async analyticsBulkPost endpoint serializes the records data to json so it is safe to clear here.
+    AnalyticsRecordQueue.clear();
 }
 
 } // namespace csp::systems
