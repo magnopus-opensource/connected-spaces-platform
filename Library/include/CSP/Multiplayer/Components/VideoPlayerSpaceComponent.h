@@ -58,6 +58,15 @@ enum class VideoPlayerSourceType
     Num
 };
 
+/// @brief Enumerates the type of stereo the video player supports.
+enum StereoVideoType
+{
+    None = 0,
+    SideBySide,
+    TopBottom,
+    Num
+};
+
 /// @brief Enumerates the list of properties that can be replicated for a video player component.
 enum class VideoPlayerPropertyKeys
 {
@@ -82,6 +91,7 @@ enum class VideoPlayerPropertyKeys
     MeshComponentId,
     IsEnabled,
     IsVirtualVisible,
+    StereoVideoType,
     Num
 };
 
@@ -224,6 +234,14 @@ public:
     /// @brief Sets the type of source the video of this component uses.
     /// @param Value The type of video source used by this component.
     void SetVideoPlayerSourceType(VideoPlayerSourceType Value);
+
+    /// @brief Gets the type of stereo the video of this component uses.
+    /// @return The type of video stereo used by this component.
+    StereoVideoType GetStereoVideoType() const;
+
+    /// @brief Sets the type of stereo the video of this component uses.
+    /// @param Value The type of video stereo used by this component.
+    void SetStereoVideoType(StereoVideoType Value);
 
     /// \addtogroup IVisibleComponent
     /// @{
