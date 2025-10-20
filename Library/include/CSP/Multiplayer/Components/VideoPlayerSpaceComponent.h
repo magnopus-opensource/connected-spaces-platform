@@ -236,11 +236,11 @@ public:
     void SetVideoPlayerSourceType(VideoPlayerSourceType Value);
 
     /// @brief Gets the type of stereo the video of this component uses.
-    /// @return The type of video stereo used by this component.
+    /// @return The type of stereo used by this video.
     StereoVideoType GetStereoVideoType() const;
 
     /// @brief Sets the type of stereo the video of this component uses.
-    /// @param Value The type of video stereo used by this component.
+    /// @param Value The type of stereo used by this video.
     void SetStereoVideoType(StereoVideoType Value);
 
     /// \addtogroup IVisibleComponent
