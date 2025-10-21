@@ -2227,7 +2227,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         DestAssetCollections = Result.GetAssetCollections();
     }
 
-    // Validate the copied asset collection and its data
     {
         printf("Validating the copied asset collection and its data...\n");
 
@@ -2263,7 +2262,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         EXPECT_EQ(memcmp(DownloadedAssetData, FileData, FileSize), 0);
     }
 
-    // Validating that we must have at least one asset collection to copy
     {
         printf("Validating that we must have at least one asset collection to copy...\n");
 
@@ -2272,7 +2270,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     }
 
-    // Validating we cannot perform a copy if the asset has no space ID
     {
         printf("Validating we cannot perform a copy if the asset has no space ID...\n");
 
@@ -2283,7 +2280,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     }
 
-    // Validating we cannot perform a copy of assets that belong to different spaces
     {
         printf("Validating we cannot perform a copy of assets that belong to different spaces but still get the async response...\n");
 
@@ -2295,6 +2291,35 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
         const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { FirstSpaceAssetCollection, SecondSpaceAssetCollection };
         auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    }
+
+    {
+        printf("Validating we encounter failures when providing malformed asset collection IDs...\n");
+
+        csp::systems::AssetCollection FirstSpaceAssetCollection;
+        FirstSpaceAssetCollection.SpaceId = SourceSpace.Id;
+        FirstSpaceAssetCollection.Id = "AnInvalidlId";
+
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { FirstSpaceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    }
+
+    {
+        printf("Validating we encounter failures when a malformed destination space ID is provided...\n");
+
+        const csp::common::String InvalidDestSpaceId = "AnInvalidlId";
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { SourceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, InvalidDestSpaceId, false);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    }
+
+    {
+        printf("Validating that we cannot copy an asset to the same space...\n");
+
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { SourceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, SourceSpace.Id, false);
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
     }
 
