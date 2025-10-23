@@ -345,6 +345,8 @@ public:
 
     /// @brief Duplicate an existing space and assign it to the current user
     /// This is a synchronous operation and have a high execution time for complex spaces.
+    /// \deprecated Use DuplicateSpaceAsync() instead. This method performs a synchronous duplication of a Space which can timeout and fail for
+    /// complex Spaces or if the backend services are under excessive load.
     /// @param SpaceId csp::common::String : Id of the space to duplicate.
     /// @param NewName csp::common::String : A unique name for the duplicated space.
     /// @param NewAttributes csp::systems::SpaceAttributes : Attributes to apply to the duplicated space.
@@ -353,10 +355,7 @@ public:
     /// @param ShallowCopy bool : If true, the duplicated space will reference the assets of the original space. Otherwise, all assets will be
     /// duplicated.
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes.
-    [[deprecated(
-        "Use DuplicateSpaceAsync() instead. This method performs a synchronous duplication of a Space which can timeout and fail for complex "
-        "Spaces or if the cloud services are under excessive load.")]] CSP_ASYNC_RESULT void
-    DuplicateSpace(const csp::common::String& SpaceId, const csp::common::String& NewName, SpaceAttributes NewAttributes,
+    CSP_ASYNC_RESULT void DuplicateSpace(const csp::common::String& SpaceId, const csp::common::String& NewName, SpaceAttributes NewAttributes,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback);
 
     /// @brief Duplicate an existing space and assign it to the current user
