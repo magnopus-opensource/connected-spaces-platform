@@ -20,7 +20,9 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
+#include "Systems/ResultHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
@@ -2223,11 +2225,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetHttpResultCode(), 200);
 
         DestAssetCollections = Result.GetAssetCollections();
     }
 
-    // Validate the copied asset collection and its data
     {
         printf("Validating the copied asset collection and its data...\n");
 
@@ -2263,27 +2265,39 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         EXPECT_EQ(memcmp(DownloadedAssetData, FileData, FileSize), 0);
     }
 
-    // Validating that we must have at least one asset collection to copy
     {
         printf("Validating that we must have at least one asset collection to copy...\n");
 
+        RAIIMockLogger MockLogger {};
+        const csp::common::String Error = "No source asset collections were provided whilst attempting to perform a copy to another space.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
+
         const csp::common::Array<csp::systems::AssetCollection> AssetCollections;
         auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        // This response is simulated by CSP prior to making the request to the service. Returns an invalid result.
+        EXPECT_EQ(Result, MakeInvalid<csp::systems::AssetCollectionsResult>());
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
     }
 
-    // Validating we cannot perform a copy if the asset has no space ID
     {
         printf("Validating we cannot perform a copy if the asset has no space ID...\n");
 
         csp::systems::AssetCollection NoSpaceIDAssetCollection;
 
+        RAIIMockLogger MockLogger {};
+        const csp::common::String Error
+            = "An asset with no space ID was provided whilst attempting to perform a copy to another space. All assets must have a valid space ID.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
+
         const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { NoSpaceIDAssetCollection };
         auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        // This response is simulated by CSP prior to making the request to the service. Returns an invalid result.
+        EXPECT_EQ(Result, MakeInvalid<csp::systems::AssetCollectionsResult>());
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
     }
 
-    // Validating we cannot perform a copy of assets that belong to different spaces
     {
         printf("Validating we cannot perform a copy of assets that belong to different spaces but still get the async response...\n");
 
@@ -2293,9 +2307,60 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
         csp::systems::AssetCollection SecondSpaceAssetCollection;
         SecondSpaceAssetCollection.SpaceId = "456789";
 
+        RAIIMockLogger MockLogger {};
+        const csp::common::String Error = "All asset collections must belong to the same space for a copy operation.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
+
         const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { FirstSpaceAssetCollection, SecondSpaceAssetCollection };
         auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        // This response is simulated by CSP prior to making the request to the service. Returns an invalid result.
+        EXPECT_EQ(Result, MakeInvalid<csp::systems::AssetCollectionsResult>());
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
+    }
+
+    {
+        printf("Validating we encounter failures when providing malformed asset collection IDs...\n");
+
+        csp::systems::AssetCollection FirstSpaceAssetCollection;
+        FirstSpaceAssetCollection.SpaceId = SourceSpace.Id;
+        FirstSpaceAssetCollection.Id = "AnInvalidlId";
+
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { FirstSpaceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+        // This response is returned by the service.
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 400);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
+        // The response does not come with an x-errorcode.
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    }
+
+    {
+        printf("Validating we encounter failures when a malformed destination space ID is provided...\n");
+
+        const csp::common::String InvalidDestSpaceId = "AnInvalidlId";
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { SourceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, InvalidDestSpaceId, false);
+        // This response is returned by the service.
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 400);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
+        // The response does not come with an x-errorcode.
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    }
+
+    {
+        printf("Validating that we cannot copy an asset to the same space...\n");
+
+        const csp::common::Array<csp::systems::AssetCollection> AssetCollections = { SourceAssetCollection };
+        auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, SourceSpace.Id, false);
+        // This response is returned by the service.
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), 400);
+        EXPECT_EQ(Result.GetAssetCollections().Size(), 0);
+        // The response does not come with an x-errorcode.
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
     }
 
     // Delete spaces

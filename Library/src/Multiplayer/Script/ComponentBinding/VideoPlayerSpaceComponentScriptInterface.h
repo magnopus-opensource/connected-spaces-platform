@@ -51,6 +51,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
 
     DECLARE_SCRIPT_PROPERTY(int32_t, VideoPlayerSourceType);
+    DECLARE_SCRIPT_PROPERTY(int32_t, StereoVideoType);
 
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
     DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);

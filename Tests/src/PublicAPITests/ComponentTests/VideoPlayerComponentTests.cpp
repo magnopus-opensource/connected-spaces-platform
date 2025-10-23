@@ -87,6 +87,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsAutoResize(), false);
     EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 0.0f);
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
+    EXPECT_EQ(VideoComponent->GetStereoVideoType(), StereoVideoType::None);
     EXPECT_EQ(VideoComponent->GetIsVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsARVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), true);
@@ -111,6 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     VideoComponent->SetIsAutoResize(true);
     VideoComponent->SetCurrentPlayheadPosition(1.0f);
     VideoComponent->SetVideoPlayerSourceType(VideoPlayerSourceType::URLSource);
+    VideoComponent->SetStereoVideoType(StereoVideoType::SideBySide);
     VideoComponent->SetIsVisible(false);
     VideoComponent->SetIsARVisible(false);
     VideoComponent->SetIsVirtualVisible(false);
@@ -129,6 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsAutoResize(), true);
     EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 1.0f);
     EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
+    EXPECT_EQ(VideoComponent->GetStereoVideoType(), StereoVideoType::SideBySide);
     EXPECT_EQ(VideoComponent->GetIsVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsARVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), false);
@@ -195,6 +198,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetCurrentPlayheadPosition(), 0.0f);
     EXPECT_EQ(VideoPlayerComponent->GetTimeSincePlay(), 0.f);
     EXPECT_EQ(VideoPlayerComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
+    EXPECT_EQ(VideoPlayerComponent->GetStereoVideoType(), StereoVideoType::None);
     EXPECT_EQ(VideoPlayerComponent->GetIsVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), true);
@@ -218,6 +222,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.currentPlayheadPosition = 1;
         video.timeSincePlay = 1;
         video.videoPlayerSourceType = 0;
+        video.stereoVideoType = 1;
 		video.isVisible = false;
         video.isARVisible = false;
         video.isVirtualVisible = false;
@@ -246,6 +251,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetCurrentPlayheadPosition(), 1.0f);
     EXPECT_EQ(VideoPlayerComponent->GetTimeSincePlay(), 1.f);
     EXPECT_EQ(VideoPlayerComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
+    EXPECT_EQ(VideoPlayerComponent->GetStereoVideoType(), StereoVideoType::SideBySide);
     EXPECT_EQ(VideoPlayerComponent->GetIsVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), false);
