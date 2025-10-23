@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/String.h"
 
 namespace csp::Tests
 {
@@ -43,4 +44,44 @@ public:
     ~DerivedClass();
 };
 
-}
+template <typename T> class CSP_API TemplateClass
+{
+public:
+    TemplateClass();
+    ~TemplateClass();
+
+    void VoidFunction();
+
+    void SetValue(const T& value);
+
+    // Return type must be const for correct wrapper generation
+
+    // Doesn't work
+    // const T GetValue() const;
+    // void GetValue(T& value) const;
+
+private:
+    T m_Value;
+};
+
+class CSP_API UsesTemplateClass
+{
+public:
+    // Dummy functions to force generation of C wrapper functions for specific template types
+    // Note that the type must be fully qualified here!
+
+    // Doesn't work
+    // void DummyFunctionInt(const csp::Tests::TemplateClass<int>& obj);
+
+    const csp::Tests::TemplateClass<int>& DummyFunctionInt() const;
+    const csp::Tests::TemplateClass<csp::common::String>& DummyFunctionString() const;
+
+    // void DummyFunctionSimpleClass(const csp::Tests::TemplateClass<SimpleClass*>& obj);
+};
+
+// Doing this does NOT generate C wrapper functions
+// CSP_API void DummyFunction(const csp::Tests::TemplateClass<int>& obj);
+// CSP_API void DummyFunction(const csp::Tests::TemplateClass<csp::common::String>& obj);
+// CSP_API void DummyFunction(const csp::Tests::TemplateClass<SimpleClass*>& obj);
+
+} // namespace csp::Tests

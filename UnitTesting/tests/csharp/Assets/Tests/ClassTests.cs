@@ -91,5 +91,35 @@ namespace Csp.Tests
                 Assert.IsTrue(derivedClass.PointerIsValid);
             }
         }
+
+        [Test]
+        public void TestTemplateClassInt()
+        {
+            using (var templateClass = new TemplateClass<int>())
+            {
+                Assert.IsTrue(templateClass.PointerIsValid);
+                templateClass.SetValue(100);
+
+                // Currently the GetValue method does not work correctly for primitive types.
+                // int value;
+                // templateClass.GetValue(out value);
+                // Assert.AreEqual(100, value);
+            }
+        }
+
+        [Test]
+        public void TestTemplateClassString()
+        {
+            using (var templateClass = new TemplateClass<string>())
+            {
+                Assert.IsTrue(templateClass.PointerIsValid);
+                templateClass.SetValue("Hello");
+
+                // Currently the GetValue method does not work correctly for string types.
+                // string value;
+                // templateClass.GetValue(out value);
+                // Assert.AreEqual("Hello", value);
+            }
+        }
     }
 }
