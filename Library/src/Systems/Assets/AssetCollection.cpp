@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "Debug/Logging.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Services/ApiBase/ApiBase.h"
@@ -43,7 +44,8 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
         return csp::systems::EAssetCollectionType::SPACE_THUMBNAIL;
     else
     {
-        assert(false && "Unsupported Prototype Type!");
+        CSP_LOG_FORMAT(csp::common::LogLevel::Error, "Encountered unknown prototype type whilst processing an asset collection DTO: %s",
+            DTOPrototypeType.c_str());
         return csp::systems::EAssetCollectionType::DEFAULT;
     }
 }
