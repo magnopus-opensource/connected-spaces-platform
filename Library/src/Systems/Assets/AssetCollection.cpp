@@ -32,8 +32,6 @@ csp::systems::EAssetCollectionType ConvertDTOPrototypeType(const csp::common::St
 {
     if (DTOPrototypeType == "Default")
         return csp::systems::EAssetCollectionType::DEFAULT;
-    else if (DTOPrototypeType == "Charity")
-        return csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL;
     else if (DTOPrototypeType == "FoundationInternal")
         return csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL;
     else if (DTOPrototypeType == "CommentContainer")
@@ -58,8 +56,15 @@ namespace csp::systems
 // Currently known to be compatible with both chs::PrototypeDto and chs::CopiedPrototypeDto.
 template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeDto& Dto, csp::systems::AssetCollection& AssetCollection)
 {
-    AssetCollection.Id = Dto.GetId();
-    AssetCollection.Name = Dto.GetName();
+    if (Dto.HasId())
+    {
+        AssetCollection.Id = Dto.GetId();
+    }
+
+    if (Dto.HasName())
+    {
+        AssetCollection.Name = Dto.GetName();
+    }
 
     if (Dto.HasType())
     {
@@ -108,10 +113,25 @@ template <class PrototypeDto> void AssetCollectionFromDtoOfType(const PrototypeD
         }
     }
 
-    AssetCollection.CreatedBy = Dto.GetCreatedBy();
-    AssetCollection.CreatedAt = Dto.GetCreatedAt();
-    AssetCollection.UpdatedBy = Dto.GetUpdatedBy();
-    AssetCollection.UpdatedAt = Dto.GetUpdatedAt();
+    if (Dto.HasCreatedBy())
+    {
+        AssetCollection.CreatedBy = Dto.GetCreatedBy();
+    }
+
+    if (Dto.HasCreatedAt())
+    {
+        AssetCollection.CreatedAt = Dto.GetCreatedAt();
+    }
+
+    if (Dto.HasUpdatedBy())
+    {
+        AssetCollection.UpdatedBy = Dto.GetUpdatedBy();
+    }
+
+    if (Dto.HasUpdatedAt())
+    {
+        AssetCollection.UpdatedAt = Dto.GetUpdatedAt();
+    }
 
     if (Dto.HasHighlander())
     {
