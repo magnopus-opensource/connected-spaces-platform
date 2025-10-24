@@ -275,7 +275,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -344,7 +344,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -410,7 +410,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -469,7 +469,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
                 // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
             }
             else
             {
@@ -596,8 +596,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
-            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                ConnectionCallback, LoginStateRes, *LogSystem, CreateMultiplayerConnection);
+            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                CreateMultiplayerConnection);
         }
         else
         {

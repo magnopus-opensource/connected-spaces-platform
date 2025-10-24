@@ -88,6 +88,7 @@ public:
     ServiceDefinition AggregationService;
     ServiceDefinition TrackingService;
     ServiceDefinition MaintenanceWindow;
+    ServiceDefinition MultiplayerConnection;
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.
