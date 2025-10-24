@@ -21,6 +21,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "RAIIMockLogger.h"
+#include "Services/PrototypeService/PrototypeServiceApiMock.h"
 #include "SpaceSystemTestHelpers.h"
 #include "Systems/ResultHelpers.h"
 #include "TestHelpers.h"
@@ -36,8 +37,12 @@
 
 #include "gtest/gtest.h"
 #include <filesystem>
+#include <future>
+#include <gmock/gmock.h>
 
 using namespace csp::multiplayer;
+
+namespace chs_prototype = csp::services::generated::prototypeservice;
 
 namespace
 {
@@ -2481,4 +2486,66 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionCountTest)
     DeleteSpace(SpaceSystem, Space.Id);
 
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionDtoTest)
+{
+    const auto PrototypeServiceMock = std::make_unique<csp::services::generated::prototypeservice::PrototypeApiMock>();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
+
+    const csp::common::String& MockAssetCollectionId = "1234";
+
+    // The promise
+    std::promise<csp::systems::AssetCollectionResult> ResultPromise;
+    std::future<csp::systems::AssetCollectionResult> ResultFuture = ResultPromise.get_future();
+
+    EXPECT_CALL(*PrototypeServiceMock, prototypesIdGet)
+        .WillOnce(
+            [](const chs_prototype::IPrototypeApiBase::prototypesIdGetParams& /*Params*/, csp::services::ApiResponseHandlerBase* ResponseHandler,
+                csp::common::CancellationToken& /*CancellationToken*/)
+            {
+                chs_prototype::PrototypeDto Dto;
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                csp::web::HttpPayload Payload;
+
+                const csp::common::String RequestBody = R"(
+                {
+                  "id": "68fb6eb82b346973405713eb",
+                  "name": "AGreatAssetCollection",
+                  "tags": [],
+                  "uiStrings": {},
+                  "state": {},
+                  "groupIds": [
+                    "123456"
+                  ],
+                  "createdBy": "68fb6eb344223712fb74493d",
+                  "createdAt": "2025-10-24T12:19:04.8763758+00:00",
+                  "updatedBy": "68fb6eb344223712fb74493d",
+                  "updatedAt": "2025-10-24T12:19:04.8763758+00:00",
+                  "highlander": false,
+                  "type": "FoundationInternal"
+                }
+            )";
+
+                Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
+                Payload.SetContent(RequestBody);
+
+                Response.GetMutablePayload() = Payload;
+                ResponseHandler->OnHttpResponse(Response);
+            });
+
+    csp::systems::AssetCollectionResultCallback Callback
+        = [&ResultPromise](const csp::systems::AssetCollectionResult& Result) { ResultPromise.set_value(Result); };
+
+    csp::services::ResponseHandlerPtr ResponseHandler = PrototypeServiceMock->CreateHandler<csp::systems::AssetCollectionResultCallback,
+        csp::systems::AssetCollectionResult, void, csp::services::generated::prototypeservice::PrototypeDto>(Callback, nullptr);
+
+    PrototypeServiceMock->prototypesIdGet({ MockAssetCollectionId }, ResponseHandler, csp::common::CancellationToken::Dummy());
+    auto Result = ResultFuture.get();
+
+    EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
