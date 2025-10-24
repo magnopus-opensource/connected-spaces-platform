@@ -2488,12 +2488,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionCountTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionDtoTest)
+class AssetCollectionTypeDtoMock : public PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType>>
+{
+};
+
+TEST_P(AssetCollectionTypeDtoMock, AssetCollectionTypeDtoMockTest)
 {
     const auto PrototypeServiceMock = std::make_unique<csp::services::generated::prototypeservice::PrototypeApiMock>();
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    SystemsManager.GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Error);
+
+    // Test parameters
+    const csp::common::String& DtoTypeString = std::get<0>(GetParam());
+    const csp::systems::EAssetCollectionType ExpectedAssetCollectionType = std::get<1>(GetParam());
 
     const csp::common::String& MockAssetCollectionId = "1234";
 
@@ -2503,8 +2510,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionDtoTest)
 
     EXPECT_CALL(*PrototypeServiceMock, prototypesIdGet)
         .WillOnce(
-            [](const chs_prototype::IPrototypeApiBase::prototypesIdGetParams& /*Params*/, csp::services::ApiResponseHandlerBase* ResponseHandler,
-                csp::common::CancellationToken& /*CancellationToken*/)
+            [DtoTypeString](const chs_prototype::IPrototypeApiBase::prototypesIdGetParams& /*Params*/,
+                csp::services::ApiResponseHandlerBase* ResponseHandler, csp::common::CancellationToken& /*CancellationToken*/)
             {
                 chs_prototype::PrototypeDto Dto;
                 auto Response = csp::web::HttpResponse();
@@ -2514,20 +2521,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionDtoTest)
 
                 const csp::common::String RequestBody = R"(
                 {
-                  "id": "68fb6eb82b346973405713eb",
-                  "name": "AGreatAssetCollection",
-                  "tags": [],
-                  "uiStrings": {},
-                  "state": {},
-                  "groupIds": [
-                    "123456"
-                  ],
-                  "createdBy": "68fb6eb344223712fb74493d",
-                  "createdAt": "2025-10-24T12:19:04.8763758+00:00",
-                  "updatedBy": "68fb6eb344223712fb74493d",
-                  "updatedAt": "2025-10-24T12:19:04.8763758+00:00",
-                  "highlander": false,
-                  "type": "FoundationInternal"
+                  "type": ")"
+                    + DtoTypeString + R"("
                 }
             )";
 
@@ -2548,4 +2543,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionDtoTest)
     auto Result = ResultFuture.get();
 
     EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    EXPECT_EQ(Result.GetAssetCollection().Type, ExpectedAssetCollectionType);
 }
+
+INSTANTIATE_TEST_SUITE_P(AssetSystemTests, AssetCollectionTypeDtoMock,
+    testing::Values(std::make_tuple("Default", csp::systems::EAssetCollectionType::DEFAULT),
+        std::make_tuple("FoundationInternal", csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL),
+        std::make_tuple("CommentContainer", csp::systems::EAssetCollectionType::COMMENT_CONTAINER),
+        std::make_tuple("Comment", csp::systems::EAssetCollectionType::COMMENT),
+        std::make_tuple("SpaceThumbnail", csp::systems::EAssetCollectionType::SPACE_THUMBNAIL),
+        std::make_tuple("NotARealType", csp::systems::EAssetCollectionType::DEFAULT)));
