@@ -53,6 +53,7 @@ class HotspotSequenceSystem;
 class ConversationSystemInternal;
 class AnalyticsSystem;
 class ExternalServiceProxySystem;
+class MultiplayerSystem;
 
 } // namespace csp::systems
 
@@ -169,6 +170,8 @@ public:
     /// @return ExternalServiceProxySystem : pointer to the external services proxy system class.
     ExternalServiceProxySystem* GetExternalServicesProxySystem();
 
+    MultiplayerSystem* GetMultiplayerSystem();
+
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
@@ -220,6 +223,7 @@ private:
     ConversationSystemInternal* ConversationSystem;
     AnalyticsSystem* AnalyticsSystem;
     ExternalServiceProxySystem* ExternalServiceProxySystem;
+    MultiplayerSystem* MultiplayerSystem;
 };
 
 } // namespace csp::systems
