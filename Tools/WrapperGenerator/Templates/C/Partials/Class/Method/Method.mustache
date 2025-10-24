@@ -239,12 +239,10 @@
             {{/ type.is_string }}
           {{/ parameters }}
 
-          {{ name }}(
-            {{ name }}_StateObject,
-
-            {{# parameters }}
+          CallCallback({{ name }}, {{ name }}_StateObject,
+              {{# parameters }}
               {{# type.is_string }}
-                _{{ name }}
+                (const char*)_{{ name }}
               {{/ type.is_string }}
 
               {{^ type.is_string }}
