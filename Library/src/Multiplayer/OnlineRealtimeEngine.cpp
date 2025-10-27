@@ -195,6 +195,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , EntityPatchRate(90)
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
+    , LeaderElection { std::make_unique<multiplayer::LeaderElection>(InMultiplayerConnection, LogSystem) }
 {
     EnableLeaderElection();
 
@@ -205,7 +206,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
-
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
@@ -324,7 +324,8 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
             Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
-        // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
+        // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
+        // Entities.
         SpaceEntity* ReleasedAvatar = NewAvatar.release();
         Entities.Append(ReleasedAvatar);
         Avatars.Append(ReleasedAvatar);
@@ -665,6 +666,28 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
     }
 }
 
+void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
+{
+    std::string ScopeId = Params.as_array()[0].as_string();
+    std::string UserId = Params.as_array()[1].as_string();
+
+    if (LeaderElection->GetOnElectedScopeLeaderCallback())
+    {
+        LeaderElection->GetOnElectedScopeLeaderCallback()(ScopeId.c_str(), UserId.c_str());
+    }
+}
+
+void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
+{
+    std::string ScopeId = Params.as_array()[0].as_string();
+    std::string UserId = Params.as_array()[1].as_string();
+
+    if (LeaderElection->GetOnVacatedAsScopeLeaderCallback())
+    {
+        LeaderElection->GetOnVacatedAsScopeLeaderCallback()(ScopeId.c_str(), UserId.c_str());
+    }
+}
+
 void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
 {
     std::vector<signalr::value> ParamsVec;
@@ -933,6 +956,8 @@ uint64_t OnlineRealtimeEngine::GetLeaderId() const
         return 0;
     }
 }
+
+LeaderElection& OnlineRealtimeEngine::GetLeaderElection() const { return *LeaderElection; }
 
 bool OnlineRealtimeEngine::GetEntityPatchRateLimitEnabled() const { return EntityPatchRateLimitEnabled; }
 

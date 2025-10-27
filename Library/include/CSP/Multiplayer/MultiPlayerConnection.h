@@ -138,7 +138,8 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -237,6 +238,8 @@ private:
     void BindOnObjectPatch();
     void BindOnRequestToSendObject();
     void BindOnRequestToDisconnect();
+    void BindOnElectedScopeLeaderCallback();
+    void BindOnVacatedScopeLeaderCallback();
 
     // May not be null
     class csp::multiplayer::ISignalRConnection* Connection;
@@ -260,6 +263,10 @@ private:
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
 
+    /*  We currently have a circular dependency between the MultiplayerConnection and OnlineRealtimeEngine.
+        This could easily be resolved by exposing an event registration from the MultiplayerConnection,
+        so the OnlineRealtimeEngine can receieve events agonstically from the MultiplayerConnection (Similar to what we did with the event bus).
+    */
     OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
 };
 

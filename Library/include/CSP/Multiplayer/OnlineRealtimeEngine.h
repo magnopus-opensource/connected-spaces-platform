@@ -25,6 +25,7 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/LeaderElection.h"
 
 #include <chrono>
 #include <deque>
@@ -299,6 +300,10 @@ public:
     /// @return The id of the leader.
     uint64_t GetLeaderId() const;
 
+    /// @brief Gets the object responsible for server-side leader election.
+    /// @return LeaderElection&
+    LeaderElection& GetLeaderElection() const;
+
     /// @brief Retrieve the state of the patch rate limiter. If true, patches are limited for each individual entity to a fixed rate.
     /// @return True if enabled, false otherwise.
     bool GetEntityPatchRateLimitEnabled() const;
@@ -350,6 +355,8 @@ public:
     CSP_NO_EXPORT void OnObjectMessage(const signalr::value& Params);
     CSP_NO_EXPORT void OnObjectPatch(const signalr::value& Params);
     CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
+    CSP_NO_EXPORT void OnElectedScopeLeader(const signalr::value& Params);
+    CSP_NO_EXPORT void OnVacatedAsScopeLeader(const signalr::value& Params);
 
 protected:
     csp::common::List<SpaceEntity*> Entities;
@@ -445,6 +452,10 @@ private:
     csp::common::IJSScriptRunner* ScriptRunner;
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
+
+    CSP_START_IGNORE
+    std::unique_ptr<LeaderElection> LeaderElection;
+    CSP_END_IGNORE
 };
 
 } // namespace csp::multiplayer

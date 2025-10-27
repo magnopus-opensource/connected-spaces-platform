@@ -45,7 +45,11 @@ enum class MultiplayerHubMethod
     ON_OBJECT_MESSAGE,
     ON_OBJECT_PATCH,
     ON_REQUEST_TO_SEND_OBJECT,
-    ON_REQUEST_TO_DISCONNECT
+    ON_REQUEST_TO_DISCONNECT,
+    SEND_SCOPE_LEADER_HEARTBEAT,
+    ASSUME_SCOPE_LEADERSHIP,
+    ON_ELECTED_SCOPE_LEADER,
+    ON_VACATED_AS_SCOPE_LEADER
 };
 
 /// @brief Utility class to map input values from MultiplayerHubMethod to string representations.
@@ -71,6 +75,10 @@ struct MultiplayerHubMethodMap : public std::unordered_map<MultiplayerHubMethod,
         this->insert({ MultiplayerHubMethod::ON_OBJECT_PATCH, "OnObjectPatch" });
         this->insert({ MultiplayerHubMethod::ON_REQUEST_TO_SEND_OBJECT, "OnRequestToSendObject" });
         this->insert({ MultiplayerHubMethod::ON_REQUEST_TO_DISCONNECT, "OnRequestToDisconnect" });
+        this->insert({ MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT, "SendScopeLeaderHeartbeat" });
+        this->insert({ MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP, "AssumeScopeLeadership" });
+        this->insert({ MultiplayerHubMethod::ON_ELECTED_SCOPE_LEADER, "OnElectedScopeLeader" });
+        this->insert({ MultiplayerHubMethod::ON_VACATED_AS_SCOPE_LEADER, "OnVacatedAsScopeLeader" });
     }
 
     ~MultiplayerHubMethodMap() { }
