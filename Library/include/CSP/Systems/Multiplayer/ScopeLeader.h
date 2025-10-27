@@ -46,8 +46,11 @@ namespace csp::systems
 class CSP_API ScopeLeader
 {
 public:
+    /// @brief The scope id the client is leader of.
     csp::common::String ScopeId;
+    /// @brief The client id which is the leader.
     csp::common::String ScopeLeaderUserId;
+    /// @brief Whether there is a server side election currently in progress when this object is received.
     bool ElectionInProgress = false;
 };
 

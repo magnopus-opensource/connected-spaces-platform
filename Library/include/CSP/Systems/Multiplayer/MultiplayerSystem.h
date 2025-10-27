@@ -51,26 +51,30 @@ public:
     ~MultiplayerSystem();
 
     /// @brief Gets all scopes associated with the given space id.
+    /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
     /// @param SpaceId const csp::common::String& : The id of the space we want to get scopes for.
-    /// @param Callback csp::systems::ScopesResultCallback : Callback when asynchronous task finishes.
+    /// @param Callback csp::systems::ScopesResultCallback : Callback when the scopes are retrieved, or on failure.
     /// @pre Must already have entered the space of the SpaceId parameter.
-    CSP_ASYNC_RESULT void GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback);
+    /// If the above precondition fails, the result will be successful, with an empty array of scopes.
+    CSP_NO_EXPORT void GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback);
 
-    /// @brief Updates Data on a scope
+    /// @brief Updates Data on a scope.
+    /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
     /// @param ScopeId const csp::common::String& : The id of the scope we want to update.
     /// @param Scope const csp::systems::Scope& : Scope containing new values for the given id.
     /// @param Callback csp::systems::ScopesResultCallback : Callback when asynchronous task finishes.
-    /// @pre Must already have entered the space of the SpaceId parameter.
-    CSP_ASYNC_RESULT void UpdateScopeById(const csp::common::String& ScopeId, const csp::systems::Scope& Scope, ScopeResultCallback Callback);
+    CSP_NO_EXPORT void UpdateScopeById(const csp::common::String& ScopeId, const csp::systems::Scope& Scope, ScopeResultCallback Callback);
 
     /// @brief Gets details about a scope leader.
+    /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
     /// @param ScopeId const csp::common::String& : The id of the scope we want to get scope leader details about.
     /// @param Callback csp::systems::ScopesResultCallback : Callback when asynchronous task finishes.
     /// @pre "ManagedLeaderElection" should be set to true on the scope, otherwise this function will fail with a EResultCode::Failed response.
     /// @pre Must already have entered the space of the SpaceId parameter.
-    CSP_ASYNC_RESULT void GetScopeLeader(const csp::common::String& ScopeId, ScopeLeaderResultCallback Callback);
+    CSP_NO_EXPORT void GetScopeLeader(const csp::common::String& ScopeId, ScopeLeaderResultCallback Callback);
 
     /// @brief Starts leader election for the given scope.
+    /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
     /// This should not need to be called outside of testing, as leader election is done automatically.
     /// @param ScopeId const csp::common::String& : The id of the scope we want to start leader election for.
     /// @param UserIdsToExclude const csp::common::Optional<csp::common::Array<csp::common::String>>& : A list of user ids we don't want to consider
@@ -78,7 +82,7 @@ public:
     /// @param Callback csp::systems::ScopesResultCallback : Callback when asynchronous task finishes.
     /// @pre "ManagedLeaderElection" should be set to true on the scope, otherwise this function will fail with a EResultCode::Failed response.
     /// @pre Must already have entered the space of the SpaceId parameter.
-    CSP_ASYNC_RESULT void PerformLeaderElectionInScope(const csp::common::String& ScopeId,
+    CSP_NO_EXPORT void PerformLeaderElectionInScope(const csp::common::String& ScopeId,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& UserIdsToExclude, NullResultCallback Callback);
 
 private:

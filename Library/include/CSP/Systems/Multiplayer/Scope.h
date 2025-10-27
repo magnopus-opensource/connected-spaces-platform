@@ -58,12 +58,26 @@ enum class PubSubModelType
 class CSP_API Scope
 {
 public:
+    /// @brief The unique identifier of the scope.
+    /// This is set internally by MCS.
     csp::common::String Id;
+    /// @brief The id of the object this scope relates to.
+    /// This is currently always the space id.
     csp::common::String ReferenceId;
+    /// @brief The type of object this scope relates to.
+    /// This is currently always "GroupId", as it references the space.
     csp::common::String ReferenceType;
+    /// @brief The name of the scope, this should be a human readable string to identify the scope.
     csp::common::String Name;
+    /// @brief The pub/sub model of the scope.
+    /// This allows us define a global scope for the entire space, or a scope with a position and size.
+    /// See csp::systems::PubSubModelType for more details.
     PubSubModelType PubSubType = PubSubModelType::Global;
+    /// @brief Determines the size of the scope using the radius from the object in meters.
+    /// This is only used when PubSubType is set to "Object".
     double SolveRadius = 0.0;
+    /// @brief Determines whether server side leader election is enabled on this scope.
+    /// If this is true, MCS will automatically determine the leader for this scope.
     bool ManagedLeaderElection = false;
 };
 

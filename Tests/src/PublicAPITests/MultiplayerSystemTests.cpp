@@ -273,5 +273,3 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeLeaderNoManagedElecti
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
-
-// TODO: test out of space behaviour
