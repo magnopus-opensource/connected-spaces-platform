@@ -41,9 +41,9 @@ enum class AvatarComponentPropertyKeys
     AvatarId = 0,
     UserId,
     State,
-    AvatarMeshIndex,
+    AvatarMeshIndex_DEPRECATED,
     AgoraUserId,
-    CustomAvatarUrl,
+    CustomAvatarUrl_DEPRECATED,
     IsHandIKEnabled,
     TargetHandIKTargetLocation,
     HandRotation,
@@ -56,6 +56,7 @@ enum class AvatarComponentPropertyKeys
     IsVisible,
     IsARVisible,
     IsVirtualVisible,
+    AvatarUrl,
     Num
 };
 
@@ -105,11 +106,13 @@ public:
     /// @brief Gets the ID of the mesh of the avatar of this component.
     /// @note  Used to establish which mesh this avatar should use among a collection of predefined meshes.
     /// @return The ID of the mesh of the avatar of this component.
+    [[deprecated("With the removal of hard-coded avatars in applications this doesn't service interop anymore")]]
     int64_t GetAvatarMeshIndex() const;
 
     /// @brief Sets the ID of the mesh of the avatar of this component.
     /// @note Used to establish which mesh this avatar should use among a collection of predefined meshes.
     /// @param Value The ID of the mesh of the avatar of this component.
+    [[deprecated("With the removal of hard-coded avatars in applications this doesn't service interop anymore")]]
     void SetAvatarMeshIndex(int64_t Value);
 
     /// @brief Gets the ID of the Agora user bounded to this avatar.
@@ -127,11 +130,13 @@ public:
     /// @brief Gets the URL of a custom mesh for this avatar.
     /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
     /// @return The URL of the custom mesh this avatar component uses for its avatar.
+    [[deprecated("Replaced with a general field for an avatar URL")]]
     const csp::common::String& GetCustomAvatarUrl() const;
 
     /// @brief Sets the URL of a custom mesh for this avatar.
     /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
     /// @param Value The URL of the custom mesh this avatar component uses for its avatar.
+    [[deprecated("Replaced with a general field for an avatar URL")]]
     void SetCustomAvatarUrl(const csp::common::String& Value);
 
     /// @brief Checks if the Hands Inverse Kinematics (IK) are enabled for this avatar.

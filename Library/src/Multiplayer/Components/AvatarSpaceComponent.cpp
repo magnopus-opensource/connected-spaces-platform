@@ -87,12 +87,12 @@ void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
 
 int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
 {
-    return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
+    return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED));
 }
 
 void AvatarSpaceComponent::SetAvatarMeshIndex(const int64_t Value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED), Value);
 }
 
 const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
@@ -107,12 +107,12 @@ void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& Value)
 
 const csp::common::String& AvatarSpaceComponent::GetCustomAvatarUrl() const
 {
-    return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl));
+    return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED));
 }
 
 void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
 {
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl), Value);
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED), Value);
 }
 
 bool AvatarSpaceComponent::GetIsHandIKEnabled() const
