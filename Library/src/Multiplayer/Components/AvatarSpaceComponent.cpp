@@ -210,4 +210,14 @@ void AvatarSpaceComponent::SetIsVirtualVisible(bool InValue)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible), InValue);
 }
 
+const csp::common::String& AvatarSpaceComponent::GetAvatarUrl() const
+{
+    return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl));
+}
+
+void AvatarSpaceComponent::SetAvatarUrl(const csp::common::String& Value)
+{
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl), Value);
+}
+
 } // namespace csp::multiplayer

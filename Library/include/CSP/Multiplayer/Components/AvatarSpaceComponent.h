@@ -266,6 +266,16 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+    /// @brief Gets the URL of a mesh for this avatar.
+    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
+    /// @return The URL of the custom mesh this avatar component uses for its avatar.
+    const csp::common::String& GetAvatarUrl() const;
+
+    /// @brief Sets the URL of a mesh for this avatar.
+    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
+    /// @param Value The URL of the custom mesh this avatar component uses for its avatar.
+    void SetAvatarUrl(const csp::common::String& Value);
 };
 
 } // namespace csp::multiplayer
