@@ -65,51 +65,54 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 
     csp::common::String ScopeId = Result.GetScopes()[0].Id;
 
-    bool FirstClient = true;
     bool ElectedScopeLeaderCallbackCalled = false;
+    std::shared_ptr<bool> First { new bool { true } };
 
     RealtimeEngine.GetLeaderElection().SetOnElectedScopeLeaderCallback(
-        [&ElectedScopeLeaderCallbackCalled, UserId, &FirstClient](const csp::common::String&, const csp::common::String& LeaderUserId)
+        [&ElectedScopeLeaderCallbackCalled, UserId, &MultiplayerSystem, &SpaceSystem, ScopeId, &RealtimeEngine, First](
+            const csp::common::String&, const csp::common::String& LeaderUserId)
         {
+            std::cout << "SetOnElectedScopeLeaderCallback called for client: " << UserId << std::endl;
+
             if (LeaderUserId == UserId)
             {
-                std::cout << "New leader: " << LeaderUserId << std::endl;
+                // std::cout << "New leader: " << LeaderUserId << std::endl;
                 ElectedScopeLeaderCallbackCalled = true;
+
+                // std::this_thread::sleep_for(std::chrono::seconds { 3 });
+
+                // RealtimeEngine.GetLeaderElection().TryHeartbeat(ScopeId);
+
+                std::this_thread::sleep_for(std::chrono::seconds { 5 });
+
+                std::cout << "First = " << *First << std::endl;
+
+                if (*First)
+                {
+
+                    std::cout << "Performing leader election again, excluding the first user and itself: " << UserId << std::endl;
+                    MultiplayerSystem.PerformLeaderElectionInScope(
+                        ScopeId, { { SpaceSystem.GetCurrentSpace().OwnerId, UserId } }, [](const csp::systems::NullResult&) {});
+
+                    std::this_thread::sleep_for(std::chrono::seconds { 1 });
+                }
+                else
+                {
+                    std::cout << "Should be called for second client, exeting space: " << UserId << std::endl;
+                }
+
+                SpaceSystem.ExitSpace(
+                    [](const csp::systems::NullResult&) {
+
+                    });
             }
             else
             {
-                FirstClient = false;
+                // std::cout << "Not leader: " << std::endl;
+                //  FirstClient = false;
             }
+
+            *First = false;
         });
-
-    while (ElectedScopeLeaderCallbackCalled == false)
-    {
-        RealtimeEngine.GetLeaderElection().TryHeartbeat(ScopeId);
-        std::this_thread::sleep_for(std::chrono::milliseconds { 50 });
-    }
-
-    std::cout << "2" << std::endl;
-
-    std::this_thread::sleep_for(std::chrono::seconds { 5 });
-
-    /*
-        This exists to ensure our test assigns the correct leader.
-        The test spawns 2 additional clients, if we are the first to get leadership, we want to manually call PerformLeaderElectionInScope,
-        so we can exclude the main test client, as we want it to go to the second spawned client.
-        When the second client gets leadership, we dont need to call this, as we want to test that when the client stops sending heartbeats,
-        it automatically performs leader election.
-    */
-    if (FirstClient)
-    {
-        // MultiplayerSystem.PerformLeaderElectionInScope(
-        // ScopeId, { { SpaceSystem.GetCurrentSpace().OwnerId } }, [](const csp::systems::NullResult&) {});
-
-        SpaceSystem.ExitSpace(
-            [](const csp::systems::NullResult&)
-            {
-                {
-                }
-            });
-    }
 }
 } // namespace LeaderElection

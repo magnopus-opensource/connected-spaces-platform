@@ -279,6 +279,8 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         ScopeId = DefaultScope.Id;
     }
 
+    // Exit space first, update the scope and then reenter.
+
     // We need to ensure the scope has ManagedLeaderElection enabled.
     {
         DefaultScope.ManagedLeaderElection = true;
@@ -286,17 +288,20 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    // Ensure we send a heartbeat so the leader election knows we are available.
-    RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
-
-    // Next, ensure we are the scope leader
+    // Get leadership
     {
-        auto [GetLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
-        EXPECT_EQ(GetLeaderResult.GetResultCode(), csp::systems::EResultCode::Success);
-        EXPECT_EQ(GetLeaderResult.GetScopeLeader().ScopeLeaderUserId, UserId);
-    }
+        bool ElectedCallbackCalled = false;
+        RealtimeEngine->GetLeaderElection().SetOnElectedScopeLeaderCallback(
+            [&ElectedCallbackCalled, UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+            {
+                EXPECT_EQ(LeaderUserId, UserId);
+                ElectedCallbackCalled = true;
+            });
 
-    RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+        RealtimeEngine->GetLeaderElection().AssumeScopeLeadership(ScopeId, [](bool) {});
+        WaitForCallback(ElectedCallbackCalled);
+        EXPECT_TRUE(ElectedCallbackCalled);
+    }
 
     //  Create 2 additional clients for leader election.
     MultiplayerTestRunnerProcess TestRunner1 = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::LEADER_ELECTION)
@@ -313,6 +318,8 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
                                                    .SetEndpoint(EndpointBaseURI())
                                                    .SetTimeoutInSeconds(60);
 
+    std::cout << "main user id: " << UserId << "----------------" << std::endl;
+
     csp::common::String ElectedUserId;
 
     // Next, we want to remove ourselves as leader and give it to one of the test runners.
@@ -320,10 +327,10 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         // First listen to the vacated callback to ensure we are removed as the leader.
         bool VacatedCallbackCalled = false;
         RealtimeEngine->GetLeaderElection().SetOnVacatedAsScopeLeaderCallback(
-            [&VacatedCallbackCalled, UserId, ScopeId](const csp::common::String& ThisScopeId, const csp::common::String& VacatedUserId)
+            [&VacatedCallbackCalled, UserId, ScopeId](const csp::common::String&, const csp::common::String& VacatedUserId)
             {
-                std::cout << "vacated--------------------------\n";
-                std::cout << ThisScopeId << "ScopeId" << std::endl;
+                std::cout << "OnVacatedAsScopeLeaderCallback--------------------------\n" << std::endl;
+                // std::cout << ThisScopeId << "ScopeId" << std::endl;
                 EXPECT_EQ(UserId, VacatedUserId);
                 VacatedCallbackCalled = true;
             });
@@ -334,6 +341,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
             [&ElectedCallbackCalled, TestRunnerUser1, TestRunnerUser2, &ElectedUserId](
                 const csp::common::String&, const csp::common::String& LeaderUserId)
             {
+                std::cout << "OnElectedScopeLeaderCallback--------------------------\n" << std::endl;
                 EXPECT_TRUE((TestRunnerUser1.UserId == LeaderUserId) || (TestRunnerUser2.UserId == LeaderUserId));
                 ElectedUserId = LeaderUserId;
                 ElectedCallbackCalled = true;
@@ -342,24 +350,26 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         TestRunner1.StartProcess();
         TestRunner2.StartProcess();
 
-        // Wait for runners to start
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+        std::future<void> ReadyForAssertionsFuture1 = TestRunner1.ReadyForAssertionsFuture();
+        std::future<void> ReadyForAssertionsFuture2 = TestRunner2.ReadyForAssertionsFuture();
 
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+        while (ReadyForAssertionsFuture1.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
+        {
+            RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+        }
 
-        printf("About to PerformLeaderElectionInScope\n");
+        while (ReadyForAssertionsFuture2.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
+        {
+            RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+        }
+
+        printf("Starting First Test\n");
+
+        std::this_thread::sleep_for(1000ms);
 
         // Restart leader election, exluding this user.
         auto [LeaderElectionResult] = AWAIT_PRE(MultiplayerSystem, PerformLeaderElectionInScope, RequestPredicate, ScopeId, { { UserId } });
         EXPECT_EQ(LeaderElectionResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-        printf("PerformedLeaderElectionInScope\n");
 
         auto Start = std::chrono::steady_clock::now();
         auto Current = std::chrono::steady_clock::now();
@@ -367,16 +377,24 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         uint64_t MaxTestTimeSeconds = 30;
 
         // Wait for this client to be vacated as leader and a new client to be elected.
-        while ((VacatedCallbackCalled == false || ElectedCallbackCalled == false) || TestTime < MaxTestTimeSeconds)
+        while (((VacatedCallbackCalled && ElectedCallbackCalled) == false) && TestTime < MaxTestTimeSeconds)
         {
             std::this_thread::sleep_for(50ms);
 
-            RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+            if (VacatedCallbackCalled == false)
+            {
+                // RealtimeEngine->GetLeaderElection().TryHeartbeat(ScopeId);
+            }
 
             Current = std::chrono::steady_clock::now();
             TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
         }
+
+        EXPECT_TRUE(VacatedCallbackCalled);
+        EXPECT_TRUE(ElectedCallbackCalled);
     }
+
+    printf("Finished First Test\n");
 
     // The client that becomes the leader will then exit the space, which will cause another election which will exclude this client.
     // We need to ensure that the leadership election is triggered and the remaining client is elected.
@@ -410,11 +428,15 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
                 ElectedCallbackCalled = true;
             });
 
+        printf("Starting Second Test\n");
+
         WaitForCallback(VacatedCallbackCalled);
         EXPECT_TRUE(VacatedCallbackCalled);
 
         WaitForCallback(ElectedCallbackCalled);
         EXPECT_TRUE(ElectedCallbackCalled);
+
+        printf("Finishing Second Test\n");
     }
 
     // The final client will now disconnect and give leadership back to this client
@@ -428,7 +450,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
                 VacatedCallbackCalled = true;
             });
 
-        // Also listen for the elected callback to ensure it goes to the remaining client.
+        // Also listen for the elected callback to ensure it goes to this client.
         bool ElectedCallbackCalled = false;
         RealtimeEngine->GetLeaderElection().SetOnElectedScopeLeaderCallback(
             [&ElectedCallbackCalled, UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
@@ -437,11 +459,15 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
                 ElectedCallbackCalled = true;
             });
 
+        printf("Starting Third Test\n");
+
         WaitForCallback(VacatedCallbackCalled);
         EXPECT_TRUE(VacatedCallbackCalled);
 
         WaitForCallback(ElectedCallbackCalled);
         EXPECT_TRUE(ElectedCallbackCalled);
+
+        printf("Finishing Third Test\n");
     }
 
     // Clean up
