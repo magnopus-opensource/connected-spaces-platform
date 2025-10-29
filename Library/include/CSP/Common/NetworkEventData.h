@@ -159,7 +159,7 @@ public:
     csp::common::String OperationName;
 
     /// @brief An Id related to the async operation that has been completed.
-    /// This could for example be a groud Id, if this were an async duplicate group operation.
+    /// This could for example be a group Id, if this were an async duplicate group operation.
     csp::common::String ReferenceId;
 
     /// @brief The type that the Id represents.

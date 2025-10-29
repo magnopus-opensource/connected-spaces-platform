@@ -2009,7 +2009,8 @@ void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandle
 
     if (!AsyncCallCompletedCallback)
     {
-        CSP_LOG_ERROR_MSG("Error: AsyncCallCompletedCallback not set. SpaceSystem has not been registered with the AsyncCallCompleted event.");
+        CSP_LOG_ERROR_MSG("Error: The AsyncCallCompletedCallback handler has not been set and the SpaceSystem has not been registered with the "
+                          "AsyncCallCompleted event. Please call 'SetAsyncCallCompletedCallback()' with a valid AsyncCallCompletedCallbackHandler.");
         return;
     }
 
