@@ -79,6 +79,38 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
 }
 
 /*
+    Tests that GetScopesBySpace correctly returns 0 elements when out of the space.
+*/
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Create OnlineRealtimeEngine
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    // Get the default scope
+    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+/*
     Tests that trying to get a scope using an invalid space id correctly returns a 400 error.
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeByInvalidSpaceTest)
