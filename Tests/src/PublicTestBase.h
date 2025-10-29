@@ -77,4 +77,4 @@ extern template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String, bool>>;
-extern template class PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType, csp::common::String>>;

@@ -2488,7 +2488,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionCountTest)
     LogOut(UserSystem);
 }
 
-class AssetCollectionTypeDtoMock : public PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType>>
+class AssetCollectionTypeDtoMock
+    : public PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType, csp::common::String>>
 {
 };
 
@@ -2501,6 +2502,7 @@ TEST_P(AssetCollectionTypeDtoMock, AssetCollectionTypeDtoMockTest)
     // Test parameters
     const csp::common::String& DtoTypeString = std::get<0>(GetParam());
     const csp::systems::EAssetCollectionType ExpectedAssetCollectionType = std::get<1>(GetParam());
+    const csp::common::String& ExpectedLogMessage = std::get<2>(GetParam());
 
     const csp::common::String& MockAssetCollectionId = "1234";
 
@@ -2539,6 +2541,12 @@ TEST_P(AssetCollectionTypeDtoMock, AssetCollectionTypeDtoMockTest)
     csp::services::ResponseHandlerPtr ResponseHandler = PrototypeServiceMock->CreateHandler<csp::systems::AssetCollectionResultCallback,
         csp::systems::AssetCollectionResult, void, csp::services::generated::prototypeservice::PrototypeDto>(Callback, nullptr);
 
+    RAIIMockLogger MockLogger {};
+    if (ExpectedLogMessage.IsEmpty() == false)
+    {
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(ExpectedLogMessage))).Times(1);
+    }
+
     PrototypeServiceMock->prototypesIdGet({ MockAssetCollectionId }, ResponseHandler, csp::common::CancellationToken::Dummy());
     auto Result = ResultFuture.get();
 
@@ -2547,9 +2555,10 @@ TEST_P(AssetCollectionTypeDtoMock, AssetCollectionTypeDtoMockTest)
 }
 
 INSTANTIATE_TEST_SUITE_P(AssetSystemTests, AssetCollectionTypeDtoMock,
-    testing::Values(std::make_tuple("Default", csp::systems::EAssetCollectionType::DEFAULT),
-        std::make_tuple("FoundationInternal", csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL),
-        std::make_tuple("CommentContainer", csp::systems::EAssetCollectionType::COMMENT_CONTAINER),
-        std::make_tuple("Comment", csp::systems::EAssetCollectionType::COMMENT),
-        std::make_tuple("SpaceThumbnail", csp::systems::EAssetCollectionType::SPACE_THUMBNAIL),
-        std::make_tuple("NotARealType", csp::systems::EAssetCollectionType::DEFAULT)));
+    testing::Values(std::make_tuple("Default", csp::systems::EAssetCollectionType::DEFAULT, ""),
+        std::make_tuple("FoundationInternal", csp::systems::EAssetCollectionType::FOUNDATION_INTERNAL, ""),
+        std::make_tuple("CommentContainer", csp::systems::EAssetCollectionType::COMMENT_CONTAINER, ""),
+        std::make_tuple("Comment", csp::systems::EAssetCollectionType::COMMENT, ""),
+        std::make_tuple("SpaceThumbnail", csp::systems::EAssetCollectionType::SPACE_THUMBNAIL, ""),
+        std::make_tuple("NotARealType", csp::systems::EAssetCollectionType::DEFAULT,
+            "Encountered unknown prototype type whilst processing an asset collection DTO:")));
