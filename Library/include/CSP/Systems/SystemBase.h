@@ -49,13 +49,17 @@ namespace csp::systems
 {
 /// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or NetworkEventBus instance in the constructor
 /// of each System.
+/// @invariant EventBusPtr can never be null. The NetworkEventBus is owned by the MultiplayerConnection and persists for it's lifetime. It is passed
+/// to each system (which derive from SystemBase) by reference to their ctor. This ref is dereferenced before being passed to the SystemBase ctor.
+/// @invariant LogSystem can never be null. The LogSystem is owned by the SystemsManager and persists for it's lifetime. It is passed to
+/// each system (which derive from SystemBase) by reference to their ctor. This ref is dereferenced before being passed to the SystemBase ctor.
 class CSP_API CSP_NO_DISPOSE SystemBase
 {
     friend class csp::multiplayer::MultiplayerConnection;
 
 protected:
-    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
-    CSP_NO_EXPORT SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem);
+    CSP_NO_EXPORT SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem);
 
     csp::web::WebClient* WebClient;
     csp::multiplayer::NetworkEventBus* EventBusPtr;

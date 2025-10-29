@@ -358,13 +358,13 @@ AssetSystem::AssetSystem()
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, InEventBus, &LogSystem)
+AssetSystem::AssetSystem(web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, common::LogSystem& LogSystem)
+    : SystemBase(WebClient, &EventBus, &LogSystem)
 {
-    PrototypeAPI = new chs::PrototypeApi(InWebClient);
-    AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
+    PrototypeAPI = new chs::PrototypeApi(WebClient);
+    AssetDetailAPI = new chs::AssetDetailApi(WebClient);
 
-    FileManager = new web::RemoteFileManager(InWebClient);
+    FileManager = new web::RemoteFileManager(WebClient);
 
     RegisterSystemCallback();
 }

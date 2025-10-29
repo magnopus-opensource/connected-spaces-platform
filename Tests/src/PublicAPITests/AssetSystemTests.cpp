@@ -2065,7 +2065,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -2115,8 +2114,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     csp::common::ReplicatedValue Param4 = "";
     csp::common::ReplicatedValue Param5 = "";
 
-    NetworkEventBus->SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged),
-        { Param1, Param2, Param3, Param4, Param5 }, Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
+    SystemsManager.GetEventBus().SendNetworkEventToClient(
+        NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged), { Param1, Param2, Param3, Param4, Param5 },
+        Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
 
     // Wait for message
     WaitForCallback(AssetDetailBlobChangedCallbackCalled);

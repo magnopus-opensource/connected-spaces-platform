@@ -50,7 +50,7 @@ public:
     CSP_END_IGNORE
 
     ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
-        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
 
     ~ConversationSystemInternal();
 
@@ -124,8 +124,6 @@ private:
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
     csp::systems::UserSystem* UserSystem;
-
-    csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
     std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
     std::vector<std::unique_ptr<csp::common::ConversationNetworkEventData>> Events;

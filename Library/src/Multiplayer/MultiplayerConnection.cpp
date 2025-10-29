@@ -149,7 +149,7 @@ MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem, 
     , Connected(false)
     , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
-    EventBusPtr = new NetworkEventBus(this, LogSystem);
+    EventBus = new NetworkEventBus(this, LogSystem);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -170,7 +170,7 @@ MultiplayerConnection::~MultiplayerConnection()
         delete (Connection);
         delete (WebSocketClient);
         delete (NetworkEventManager);
-        delete (EventBusPtr);
+        delete (EventBus);
     }
 }
 
@@ -191,7 +191,7 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     DisconnectionCallback = InBoundConnection.DisconnectionCallback;
     ConnectionCallback = InBoundConnection.ConnectionCallback;
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
-    EventBusPtr = InBoundConnection.EventBusPtr;
+    EventBus = InBoundConnection.EventBus;
     Connected = (InBoundConnection.Connected) ? true : false;
 }
 
@@ -373,7 +373,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
     BindOnRequestToSendObject();
     BindOnRequestToDisconnect();
 
-    EventBusPtr->StartEventMessageListening();
+    EventBus->StartEventMessageListening();
 
     // We register the network interruption callback as a wrapper because we want to unwrap any signalR exceptions.
     RegisterNetworkInterruptedCallback(Connection, LogSystem, NetworkInterruptionCallback);

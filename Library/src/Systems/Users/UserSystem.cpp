@@ -203,9 +203,9 @@ UserSystem::~UserSystem()
     DeregisterSystemCallback();
 }
 
-void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus)
+void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus)
 {
-    EventBusPtr = EventBus;
+    EventBusPtr = &EventBus;
 
     RegisterSystemCallback();
 }

@@ -484,21 +484,21 @@ bool ClientElectionManager::IsConnected() const
 
 void ClientElectionManager::BindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
+    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
+    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
-    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
+    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
+    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 }
 
 void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)

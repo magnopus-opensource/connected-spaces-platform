@@ -88,8 +88,8 @@ namespace
 } // namespace
 
 HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
-    csp::multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(NetworkEventBus, &LogSystem)
+    csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(&EventBus, &LogSystem)
 {
     this->SequenceSystem = SequenceSystem;
     this->SpaceSystem = SpaceSystem;

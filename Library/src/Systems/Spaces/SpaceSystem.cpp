@@ -100,23 +100,20 @@ SpaceSystem::SpaceSystem()
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, InEventBus, &LogSystem)
+SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(WebClient, &EventBus, &LogSystem)
     , CurrentSpace()
 {
-    GroupAPI = new chs::GroupApi(InWebClient);
-    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(WebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(WebClient);
 }
 
 SpaceSystem::~SpaceSystem()
 {
     delete (GroupAPI);
 
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)));
-    }
+    EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
+        csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)));
 }
 
 /* CreateSpace Continuations */
@@ -2000,12 +1997,6 @@ void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewNa
 void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback)
 {
     AsyncCallCompletedCallback = std::move(Callback);
-
-    if (!EventBusPtr)
-    {
-        CSP_LOG_ERROR_MSG("Error: Failed to register SpaceSystem. NetworkEventBus must be instantiated in the MultiplayerConnection first.");
-        return;
-    }
 
     if (!AsyncCallCompletedCallback)
     {

@@ -46,7 +46,7 @@ public:
     CSP_END_IGNORE
 
     HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem,
-        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
     /// @brief Create a Hotspot group
     /// @param GroupName csp::common::String : The unique grouping name
     /// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group

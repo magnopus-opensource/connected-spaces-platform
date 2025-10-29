@@ -18,8 +18,8 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -72,7 +72,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     // Log in
     csp::common::String UserId;
@@ -118,7 +117,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 
         bool EventSent = false;
 
-        NetworkEventBus->SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
+        SystemsManager.GetEventBus().SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
             csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
@@ -153,7 +152,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
 
         bool EventSent = false;
 
-        NetworkEventBus->SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
+        SystemsManager.GetEventBus().SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
             csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo),
             Connection->GetClientId(), [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 
@@ -185,7 +184,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     // Log in
     csp::common::String UserId;
@@ -210,7 +208,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
 
     bool EventSent = false;
 
-    NetworkEventBus->SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
+    SystemsManager.GetEventBus().SendNetworkEventToClient(NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::Conversation),
         csp::systems::ConversationSystemHelpers::MessageInfoToReplicatedValueArray(Params.MessageType, Params.MessageInfo), Connection->GetClientId(),
         [&EventSent](csp::multiplayer::ErrorCode) { EventSent = true; });
 

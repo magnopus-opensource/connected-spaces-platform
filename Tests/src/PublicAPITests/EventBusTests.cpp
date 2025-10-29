@@ -68,22 +68,21 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregister)
 {
     using namespace csp::multiplayer;
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
 
-    const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
-    NetworkEventBus->ListenNetworkEvent(
+    const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = SystemsManager.GetEventBus().AllRegistrations();
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
+    const csp::common::Array<NetworkEventRegistration> AddedRegistration = SystemsManager.GetEventBus().AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 1);
     EXPECT_TRUE(AddedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName }));
 
-    NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
+    SystemsManager.GetEventBus().StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
 
-    const csp::common::Array<NetworkEventRegistration> RemovedRegistration = NetworkEventBus->AllRegistrations();
+    const csp::common::Array<NetworkEventRegistration> RemovedRegistration = SystemsManager.GetEventBus().AllRegistrations();
     EXPECT_TRUE(RemovedRegistration.Size() == InitialRegisteredEvents.Size());
     EXPECT_FALSE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName }));
 }
@@ -92,7 +91,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
 {
     using namespace csp::multiplayer;
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
@@ -102,20 +100,20 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
 
     const char* EventName3 = "TestEventName3";
 
-    const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = NetworkEventBus->AllRegistrations();
-    NetworkEventBus->ListenNetworkEvent(
+    const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = SystemsManager.GetEventBus().AllRegistrations();
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId2, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId2, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    const csp::common::Array<NetworkEventRegistration> AddedRegistration = NetworkEventBus->AllRegistrations();
+    const csp::common::Array<NetworkEventRegistration> AddedRegistration = SystemsManager.GetEventBus().AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 6);
     EXPECT_TRUE(AddedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName }));
@@ -125,9 +123,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
     EXPECT_TRUE(AddedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId2, EventName2 }));
     EXPECT_TRUE(AddedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId2, EventName3 }));
 
-    NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
+    SystemsManager.GetEventBus().StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
 
-    const csp::common::Array<NetworkEventRegistration> RemovedRegistration = NetworkEventBus->AllRegistrations();
+    const csp::common::Array<NetworkEventRegistration> RemovedRegistration = SystemsManager.GetEventBus().AllRegistrations();
     EXPECT_TRUE(RemovedRegistration.Size() == InitialRegisteredEvents.Size() + 5);
     EXPECT_FALSE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName }));
     EXPECT_TRUE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName2 }));
@@ -136,9 +134,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
     EXPECT_TRUE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId2, EventName2 }));
     EXPECT_TRUE(RemovedRegistration.ToList().Contains(NetworkEventRegistration { ReceiverId2, EventName3 }));
 
-    NetworkEventBus->StopListenAllNetworkEvents(ReceiverId2);
+    SystemsManager.GetEventBus().StopListenAllNetworkEvents(ReceiverId2);
 
-    const csp::common::Array<NetworkEventRegistration> RemovedAllTestReceivedOneRegistrations = NetworkEventBus->AllRegistrations();
+    const csp::common::Array<NetworkEventRegistration> RemovedAllTestReceivedOneRegistrations = SystemsManager.GetEventBus().AllRegistrations();
     EXPECT_TRUE(RemovedAllTestReceivedOneRegistrations.Size() == InitialRegisteredEvents.Size() + 2);
     EXPECT_FALSE(RemovedAllTestReceivedOneRegistrations.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName }));
     EXPECT_TRUE(RemovedAllTestReceivedOneRegistrations.ToList().Contains(NetworkEventRegistration { ReceiverId, EventName2 }));
@@ -155,7 +153,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
     RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const csp::common::String Error = "Error: Expected non-null callback.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Error)).Times(1);
@@ -163,8 +160,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectNullEvent)
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
 
-    NetworkEventBus->ListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName }, nullptr);
-    auto AllRegistrations = NetworkEventBus->AllRegistrations();
+    SystemsManager.GetEventBus().ListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName }, nullptr);
+    auto AllRegistrations = SystemsManager.GetEventBus().AllRegistrations();
     EXPECT_FALSE(std::any_of(AllRegistrations.begin(), AllRegistrations.end(),
         [ReceiverId](const NetworkEventRegistration& Registration) { return Registration.EventReceiverId == ReceiverId; }));
 }
@@ -176,7 +173,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
@@ -198,22 +194,22 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
               .c_str();
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, Error)).Times(1);
 
-    const auto StartSize = NetworkEventBus->AllRegistrations().Size();
+    const auto StartSize = SystemsManager.GetEventBus().AllRegistrations().Size();
 
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 1);
-    NetworkEventBus->ListenNetworkEvent(
+    EXPECT_EQ(SystemsManager.GetEventBus().AllRegistrations().Size(), StartSize + 1);
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 2);
-    NetworkEventBus->ListenNetworkEvent(
+    EXPECT_EQ(SystemsManager.GetEventBus().AllRegistrations().Size(), StartSize + 2);
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 3);
+    EXPECT_EQ(SystemsManager.GetEventBus().AllRegistrations().Size(), StartSize + 3);
 
     // This one should be rejected
-    NetworkEventBus->ListenNetworkEvent(
+    SystemsManager.GetEventBus().ListenNetworkEvent(
         NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
-    EXPECT_EQ(NetworkEventBus->AllRegistrations().Size(), StartSize + 3);
+    EXPECT_EQ(SystemsManager.GetEventBus().AllRegistrations().Size(), StartSize + 3);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
@@ -223,7 +219,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
     RAIIMockLogger MockLogger {};
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
 
     const char* ReceiverId = "TestReceiverId";
     const char* EventName = "TestEventName";
@@ -236,15 +231,14 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectUnknownDeregistration)
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, Error)).Times(1);
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, Error1)).Times(1);
 
-    NetworkEventBus->StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
-    NetworkEventBus->StopListenAllNetworkEvents(ReceiverId);
+    SystemsManager.GetEventBus().StopListenNetworkEvent(NetworkEventRegistration { ReceiverId, EventName });
+    SystemsManager.GetEventBus().StopListenAllNetworkEvents(ReceiverId);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* ReceiverId = "TestReceiverId";
@@ -268,11 +262,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventSingleReciever)
     const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
         = { csp::common::ReplicatedValue { TestValValue }, csp::common::ReplicatedValue { 1.0f } };
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
         [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
 
-    NetworkEventBus->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
+    SystemsManager.GetEventBus().SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
     const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
     EXPECT_EQ(ReceivedVals.Size(), 2);
@@ -286,7 +280,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiReciever)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* ReceiverId = "TestReceiverId";
@@ -312,18 +305,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, SingleEventMultiReciever)
     const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
         = { csp::common::ReplicatedValue { TestValValue }, csp::common::ReplicatedValue { 1.0f } };
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
         [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
 
     std::promise<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventPromise1;
     std::future<csp::common::Array<csp::common::ReplicatedValue>> NetworkEventFuture1 = NetworkEventPromise1.get_future();
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId2, EventName),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId2, EventName),
         [&NetworkEventPromise1](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
 
-    NetworkEventBus->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
+    SystemsManager.GetEventBus().SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
     // Both recievers should recieve this event
     const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
@@ -339,7 +332,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     const char* ReceiverId = "TestReceiverId";
@@ -368,14 +360,14 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
     const csp::common::Array<csp::common::ReplicatedValue> ValsToSend
         = { csp::common::ReplicatedValue { TestValValue }, csp::common::ReplicatedValue { 1.0f } };
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName),
         [&NetworkEventPromise](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise.set_value(NetworkEventData.EventValues); });
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName2),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, EventName2),
         [&NetworkEventPromise1](const csp::common::NetworkEventData& NetworkEventData)
         { NetworkEventPromise1.set_value(NetworkEventData.EventValues); });
 
-    NetworkEventBus->SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
+    SystemsManager.GetEventBus().SendNetworkEventToClient(EventName, ValsToSend, Connection->GetClientId(), ErrorCallback);
 
     const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals = NetworkEventFuture.get();
     EXPECT_EQ(ReceivedVals.Size(), 2);
@@ -387,7 +379,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, MultiEventSingleReceiver)
     // The other event should not have been recieved as it has not been fired
     EXPECT_TRUE(NetworkEventFuture1.wait_for(std::chrono::milliseconds { 0 }) != std::future_status::ready);
 
-    NetworkEventBus->SendNetworkEventToClient(EventName2, ValsToSend, Connection->GetClientId(), ErrorCallback);
+    SystemsManager.GetEventBus().SendNetworkEventToClient(EventName2, ValsToSend, Connection->GetClientId(), ErrorCallback);
     const csp::common::Array<csp::common::ReplicatedValue> ReceivedVals1 = NetworkEventFuture1.get();
     EXPECT_EQ(ReceivedVals1.Size(), 2);
 }
@@ -412,7 +404,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, TestMulticastEventToAllClient
     // Spin up 2 other clients
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* NetworkEventBus = SystemsManager.GetEventBus();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
@@ -461,7 +452,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, TestMulticastEventToAllClient
     const char* PintRequestEventName = "EventPingRequest";
     const char* PingResponseEventName = "EventPingResponse";
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, PingResponseEventName),
+    SystemsManager.GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ReceiverId, PingResponseEventName),
         [&ReceivedPings, &TwoPingsResponsePromise](const csp::common::NetworkEventData& /*NetworkEventData*/)
         {
             std::cout << "Received Event Bus Ping." << std::endl;
@@ -473,7 +464,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, TestMulticastEventToAllClient
         });
 
     // Send the ping event to all clients
-    NetworkEventBus->SendNetworkEvent(PintRequestEventName, {}, [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
+    SystemsManager.GetEventBus().SendNetworkEvent(PintRequestEventName, {}, [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); });
 
     // Expect to have had two responses
     auto Status = TwoPingsResponseFuture.wait_for(30s);

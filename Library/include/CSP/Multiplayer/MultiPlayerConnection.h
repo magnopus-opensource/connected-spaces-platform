@@ -138,7 +138,8 @@ public:
     /// @brief Start the connection and register to start receiving updates from the server.
     /// Connect should be called after LogIn and before EnterSpace.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri, const csp::common::String& AccessToken, const csp::common::String& DeviceId);
+    CSP_NO_EXPORT void Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
+        const csp::common::String& AccessToken, const csp::common::String& DeviceId);
 
     /// @brief Indicates whether the multiplayer connection is established
     /// @return bool : true if connected, false otherwise
@@ -153,8 +154,8 @@ public:
     CSP_NO_EXPORT csp::multiplayer::NetworkEventManagerImpl* GetNetworkEventManager() { return NetworkEventManager; }
 
     /// @brief Getter for the NetworkEventBus
-    /// @return NetworkEventBus* : pointer to the NetworkEventBus
-    CSP_NO_EXPORT NetworkEventBus* GetEventBusPtr() { return EventBusPtr; }
+    /// @return NetworkEventBus& : reference to the NetworkEventBus
+    CSP_NO_EXPORT NetworkEventBus& GetEventBus() { return *EventBus; }
 
     /// @brief Disconnect the multiplayer and provide a reason
     /// @param Reason csp::common::String& : the reason to disconnect
@@ -243,7 +244,7 @@ private:
 
     class csp::multiplayer::IWebSocketClient* WebSocketClient;
     class NetworkEventManagerImpl* NetworkEventManager;
-    class NetworkEventBus* EventBusPtr;
+    class NetworkEventBus* EventBus;
 
     csp::common::LogSystem& LogSystem;
 
