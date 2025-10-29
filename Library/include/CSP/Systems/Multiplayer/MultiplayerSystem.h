@@ -86,8 +86,10 @@ public:
         const csp::common::Optional<csp::common::Array<csp::common::String>>& UserIdsToExclude, NullResultCallback Callback);
 
 private:
-    csp::services::ApiBase* ScopeLeaderApi;
-    csp::services::ApiBase* ScopesApi;
+    CSP_START_IGNORE
+    std::unique_ptr<csp::services::ApiBase> ScopeLeaderApi;
+    std::unique_ptr<csp::services::ApiBase> ScopesApi;
+    CSP_END_IGNORE
 };
 
 }

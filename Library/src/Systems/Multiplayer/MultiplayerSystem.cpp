@@ -11,8 +11,8 @@ namespace csp::systems
 MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
 {
-    ScopeLeaderApi = new chs::multiplayerservice::ScopeLeaderApi { InWebClient };
-    ScopesApi = new chs::multiplayerservice::ScopesApi { InWebClient };
+    ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient);
+    ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient);
 }
 
 MultiplayerSystem::MultiplayerSystem()
@@ -20,11 +20,7 @@ MultiplayerSystem::MultiplayerSystem()
 {
 }
 
-MultiplayerSystem::~MultiplayerSystem()
-{
-    delete ScopeLeaderApi;
-    delete ScopesApi;
-}
+MultiplayerSystem::~MultiplayerSystem() { }
 
 void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback)
 {
@@ -34,8 +30,8 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
         = ScopeLeaderApi->CreateHandler<ScopesResultCallback, ScopesResult, void, services::DtoArray<chs::multiplayerservice::ScopeDto>>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi)->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet(
-        { ReferenceType, SpaceId }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())
+        ->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet({ ReferenceType, SpaceId }, ResponseHandler);
 }
 
 void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, const csp::systems::Scope& Scope, ScopeResultCallback Callback)
@@ -65,7 +61,7 @@ void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, cons
         = ScopeLeaderApi->CreateHandler<ScopeResultCallback, ScopeResult, void, chs::multiplayerservice::ScopeDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi)->scopesIdPut({ ScopeId, Dto }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopesApi*>(ScopesApi.get())->scopesIdPut({ ScopeId, Dto }, ResponseHandler);
 }
 
 void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, ScopeLeaderResultCallback Callback)
@@ -74,7 +70,7 @@ void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, Scope
         = ScopeLeaderApi->CreateHandler<ScopeLeaderResultCallback, ScopeLeaderResult, void, chs::multiplayerservice::ScopeLeaderDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi)->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
+    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
 }
 
 void MultiplayerSystem::PerformLeaderElectionInScope(const csp::common::String& ScopeId,
@@ -84,7 +80,7 @@ void MultiplayerSystem::PerformLeaderElectionInScope(const csp::common::String& 
         = ScopeLeaderApi->CreateHandler<NullResultCallback, NullResult, void, chs::multiplayerservice::ScopeLeaderDto>(
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi)
+    static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())
         ->scopesScopeIdLeader_electionPost({ ScopeId, csp::common::Convert(UserIdsToExclude) }, ResponseHandler);
 }
 
