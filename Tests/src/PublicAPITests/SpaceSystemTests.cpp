@@ -3223,16 +3223,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
         auto [Result] = AWAIT_PRE(SpaceSystem, DuplicateSpace, RequestPredicate, Space.Id, UniqueSpaceName, SpaceAttributes::Private, nullptr, true);
 
-        EXPECT_EQ(Result.GetResultCode(), EResultCode::Success);
+        ASSERT_EQ(Result.GetResultCode(), EResultCode::Success);
 
         const auto& NewSpace = Result.GetSpace();
 
-        EXPECT_NE(NewSpace.Id, Space.Id);
-        EXPECT_EQ(NewSpace.Name, UniqueSpaceName);
-        EXPECT_EQ(NewSpace.Description, Space.Description);
-        EXPECT_EQ(NewSpace.Attributes, SpaceAttributes::Private);
-        EXPECT_EQ(NewSpace.OwnerId, UserId);
-        EXPECT_NE(Space.OwnerId, UserId);
+        ASSERT_NE(NewSpace.Id, Space.Id);
+        ASSERT_EQ(NewSpace.Name, UniqueSpaceName);
+        ASSERT_EQ(NewSpace.Description, Space.Description);
+        ASSERT_EQ(NewSpace.Attributes, SpaceAttributes::Private);
+        ASSERT_EQ(NewSpace.OwnerId, UserId);
+        ASSERT_NE(Space.OwnerId, UserId);
 
         // Ensure we can enter the newly duplicated Space
         std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
@@ -3296,21 +3296,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
     LogOut(UserSystem);
     LogIn(UserSystem, UserId, AlternativeUser.Email, GeneratedTestAccountPassword);
 
-    csp::common::String NewSpaceId;
+    String NewSpaceId;
 
     // Attempt to duplicate space asynchrously
     {
-        std::promise<bool> AsyncCallCompletedPromise;
-        std::future<bool> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
+        std::promise<std::tuple<String, String, String>> AsyncCallCompletedPromise;
+        std::future<std::tuple<String, String, String>> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
 
-        auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        {
-            EXPECT_EQ(NetworkEventData.OperationName, "DuplicateSpaceAsync");
-            EXPECT_EQ(NetworkEventData.ReferenceType, "GroupId");
-
-            NewSpaceId = NetworkEventData.ReferenceId;
-
-            AsyncCallCompletedPromise.set_value(true);
+        auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData) {
+            AsyncCallCompletedPromise.set_value({ NetworkEventData.OperationName, NetworkEventData.ReferenceId, NetworkEventData.ReferenceType });
         };
 
         SpaceSystem->SetAsyncCallCompletedCallback(AsyncCallCompletedCallback);
@@ -3320,11 +3314,24 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
         auto [Result]
             = AWAIT_PRE(SpaceSystem, DuplicateSpaceAsync, RequestPredicate, Space.Id, UniqueSpaceName, SpaceAttributes::Private, nullptr, true);
 
-        EXPECT_EQ(Result.GetResultCode(), EResultCode::Success);
+        ASSERT_EQ(Result.GetResultCode(), EResultCode::Success);
 
-        // Wait for the callback to be received
-        AsyncCallCompletedFuture.wait();
-        EXPECT_TRUE(AsyncCallCompletedFuture.get() == true);
+        // It is possible for this test to take an extended period of time to complete if the backend services are under load.
+        // We are therefore setting a timeout on waiting for the async callback to be received.
+        const std::chrono::seconds TimeoutDuration(30);
+
+        std::future_status Status = AsyncCallCompletedFuture.wait_for(TimeoutDuration);
+
+        ASSERT_NE(Status, std::future_status::timeout) << "The DuplicateSpaceAsync operation timed out after 30 seconds.";
+
+        std::tuple<String, String, String> AsyncCallResult = AsyncCallCompletedFuture.get();
+
+        String OperationName = std::get<0>(AsyncCallResult);
+        String ReferenceType = std::get<2>(AsyncCallResult);
+        NewSpaceId = std::get<1>(AsyncCallResult);
+
+        ASSERT_TRUE(OperationName == "DuplicateSpaceAsync");
+        ASSERT_TRUE(ReferenceType == "GroupId");
     }
 
     // Ensure we can enter the newly duplicated Space
