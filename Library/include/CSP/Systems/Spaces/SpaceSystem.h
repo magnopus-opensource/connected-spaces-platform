@@ -360,7 +360,11 @@ public:
 
     /// @brief Duplicate an existing space and assign it to the current user.
     /// This is an asynchronous operation. Please subcribe to the AsyncCallCompletedCallback via @ref SpaceSystem::SetAsyncCallCompletedCallback() to
-    /// be notified when the duplication operation is complete.
+    /// be notified when the duplication operation is complete. The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will
+    /// contain the following information:
+    /// - OperationName: "DuplicateSpaceAsync".
+    /// - ReferenceId: Id of the newly duplicated Space.
+    /// - ReferenceType: "GroupId".
     /// @param SpaceId csp::common::String : Id of the space to duplicate.
     /// @param NewName csp::common::String : A unique name for the duplicated space.
     /// @param NewAttributes csp::systems::SpaceAttributes : Attributes to apply to the duplicated space.
@@ -384,8 +388,10 @@ public:
     CSP_EVENT void SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback);
 
     /// @brief Deserialises the AsyncCallCompleted event values.
-    /// The AsyncCallCompletedEventData will contain the name of the operation ("DuplicateSpaceAsync"), the reference Id of the newly created Space as
-    /// well as the reference type ("GroupId").
+    /// The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
+    /// - OperationName: "DuplicateSpaceAsync".
+    /// - ReferenceId: Id of the newly duplicated Space.
+    /// - ReferenceType: "GroupId".
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
     CSP_NO_EXPORT void OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
