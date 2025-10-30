@@ -263,8 +263,6 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
 {
     SpaceSystem = nullptr;
     SequenceSystem = nullptr;
-
-    DeregisterSystemCallback();
 }
 
 void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemID, csp::systems::NullResultCallback /*Callback*/)
@@ -341,15 +339,6 @@ void HotspotSequenceSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
-}
-
-void HotspotSequenceSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::HotspotSequenceSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)));
-    }
 }
 
 void HotspotSequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

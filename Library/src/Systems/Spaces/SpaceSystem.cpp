@@ -108,13 +108,7 @@ SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, multiplayer::NetworkEve
     SpaceAPI = new chsaggregation::SpaceApi(WebClient);
 }
 
-SpaceSystem::~SpaceSystem()
-{
-    delete (GroupAPI);
-
-    EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
-        csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)));
-}
+SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(

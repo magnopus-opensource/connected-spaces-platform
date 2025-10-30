@@ -344,7 +344,7 @@ ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* Ass
     RegisterSystemCallback();
 }
 
-ConversationSystemInternal::~ConversationSystemInternal() { DeregisterSystemCallback(); }
+ConversationSystemInternal::~ConversationSystemInternal() { }
 
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {
@@ -1151,15 +1151,6 @@ void ConversationSystemInternal::RegisterSystemCallback()
                 Events.push_back(std::move(EventDataCopy));
             }
         });
-}
-
-void ConversationSystemInternal::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)));
-    }
 }
 
 void ConversationSystemInternal::FlushEvents()

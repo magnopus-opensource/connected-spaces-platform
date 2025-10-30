@@ -311,12 +311,7 @@ SequenceSystem::SequenceSystem(web::WebClient* WebClient, multiplayer::NetworkEv
     RegisterSystemCallback();
 }
 
-SequenceSystem::~SequenceSystem()
-{
-    delete (SequenceAPI);
-
-    DeregisterSystemCallback();
-}
+SequenceSystem::~SequenceSystem() { delete (SequenceAPI); }
 
 void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
 {
@@ -341,15 +336,6 @@ void SequenceSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnSequenceChangedEvent(NetworkEventData); });
-}
-
-void SequenceSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::SequenceSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::SequenceChanged)));
-    }
 }
 
 void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

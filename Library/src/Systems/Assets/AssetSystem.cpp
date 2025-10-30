@@ -375,8 +375,6 @@ AssetSystem::~AssetSystem()
 
     delete (AssetDetailAPI);
     delete (PrototypeAPI);
-
-    DeregisterSystemCallback();
 }
 
 void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback)
@@ -1799,16 +1797,6 @@ void AssetSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
-}
-
-void AssetSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)));
-    }
 }
 
 void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

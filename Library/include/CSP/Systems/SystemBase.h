@@ -71,9 +71,6 @@ public:
     /// @brief Registers the system to listen for the default event.
     virtual void RegisterSystemCallback();
 
-    /// @brief Deregisters the system from listening for the default event.
-    virtual void DeregisterSystemCallback();
-
 protected:
     // EM, June2025: Having this on system base makes it quite simple to quit using the singleton macros in all the systems if we wanted to.
     // Should NOT be null. The only reason this is a pointer is because we can't get the wrapper gen work required to support reference injections

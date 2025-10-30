@@ -111,8 +111,6 @@ public:
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
-    /// @brief Deregisters the system from listening for the named event.
-    void DeregisterSystemCallback() override;
 
     // Attempt to flush any events that haven't been sent.
     // They may fail to send in situtations where the conversation component hasn't been created before the creation event fires.

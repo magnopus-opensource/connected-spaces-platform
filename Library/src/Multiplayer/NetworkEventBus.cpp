@@ -34,7 +34,16 @@ namespace csp::multiplayer
 
 constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
-NetworkEventBus::~NetworkEventBus() { }
+NetworkEventBus::~NetworkEventBus()
+{
+    // Clean up all registered listeners.
+    // The NetworkEventBus is owned by the MultiplayerConnection which is one of the last systems to be destroyed by the Systems Manager.
+    auto Registrations = AllRegistrations();
+    for (const NetworkEventRegistration& Registration : Registrations)
+    {
+        StopListenNetworkEvent(Registration);
+    }
+}
 
 NetworkEventBus::NetworkEventBus(MultiplayerConnection* InMultiplayerConnection, csp::common::LogSystem& LogSystem)
     : LogSystem(LogSystem)

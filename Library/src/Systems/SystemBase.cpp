@@ -42,18 +42,9 @@ SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common:
 {
 }
 
-SystemBase::~SystemBase()
-{
-    DeregisterSystemCallback();
-    EventBusPtr = nullptr;
-}
+SystemBase::~SystemBase() { EventBusPtr = nullptr; }
 
 void SystemBase::RegisterSystemCallback()
-{
-    // Do nothing.
-}
-
-void SystemBase::DeregisterSystemCallback()
 {
     // Do nothing.
 }
