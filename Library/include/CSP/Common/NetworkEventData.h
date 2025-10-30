@@ -152,6 +152,8 @@ public:
     csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
 };
 
+// @brief Data for an event signalling the completion of an async operation.
+// This is general purpose event data that can be used by any system exposing async operations.
 class CSP_API AsyncCallCompletedEventData : public NetworkEventData
 {
 public:
