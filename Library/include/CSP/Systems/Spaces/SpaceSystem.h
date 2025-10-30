@@ -344,7 +344,8 @@ public:
     CSP_ASYNC_RESULT void DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     /// @brief Duplicate an existing space and assign it to the current user.
-    /// This is a synchronous operation and can have a high execution time for complex spaces.
+    /// This is a synchronous operation and can have a high execution time for complex spaces. If the user disconnects while waiting for the operation
+    /// to complete, the duplicate space request will be cancelled.
     /// \deprecated Use DuplicateSpaceAsync() instead. This method performs a synchronous duplication of a Space which can timeout and fail for
     /// complex Spaces or if the backend services are under excessive load.
     /// @param SpaceId csp::common::String : Id of the space to duplicate.
@@ -359,9 +360,9 @@ public:
         const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback);
 
     /// @brief Duplicate an existing space and assign it to the current user.
-    /// This is an asynchronous operation. Please subcribe to the AsyncCallCompletedCallback via @ref SpaceSystem::SetAsyncCallCompletedCallback() to
-    /// be notified when the duplication operation is complete. The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will
-    /// contain the following information:
+    /// This is an asynchronous operation. If the user disconnects while waiting for the operation to complete it will continue unaffected. Please
+    /// subcribe to the AsyncCallCompletedCallback via @ref SpaceSystem::SetAsyncCallCompletedCallback() to be notified when the duplication operation
+    /// is complete. The AsyncCallCompletedEventData returned by the AsyncCallCompletedCallback will contain the following information:
     /// - OperationName: "DuplicateSpaceAsync".
     /// - ReferenceId: Id of the newly duplicated Space.
     /// - ReferenceType: "GroupId".
