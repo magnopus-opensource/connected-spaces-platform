@@ -55,6 +55,8 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
+class UserSystem;
+
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Group.
 /// Offers methods for creating, deleting and joining spaces.
@@ -398,7 +400,8 @@ public:
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SpaceSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
+    SpaceSystem(
+        csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, UserSystem* UserSystem, csp::common::LogSystem& LogSystem);
     ~SpaceSystem();
 
     // Space Metadata
@@ -440,6 +443,8 @@ private:
     // EnterSpace Continuations
     auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
+
+    UserSystem* UserSystem;
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

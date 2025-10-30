@@ -60,12 +60,13 @@ constexpr const int MAX_SPACES_RESULTS = 100;
 
 // Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
 // The only difference is in the value they pass for the AsyncCall parameter.
-std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(const String& SpaceId, const String& NewName,
-    csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, bool AsyncCall)
+std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(csp::systems::UserSystem* UserSystem, const String& SpaceId,
+    const String& NewName, csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy,
+    bool AsyncCall)
 {
     auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
     Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
+    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().UserId);
     Request->SetNewUniqueName(NewName);
     Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
     Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
@@ -74,15 +75,9 @@ std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOp
 
     if (MemberGroupIds.HasValue())
     {
-        std::vector<String> GroupIds;
-        GroupIds.reserve(MemberGroupIds->Size());
+        auto MemberGroupIdsVec = Convert(MemberGroupIds);
 
-        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
-        {
-            GroupIds.push_back(MemberGroupIds->operator[](i));
-        }
-
-        Request->SetMemberGroupIds(GroupIds);
+        Request->SetMemberGroupIds(*MemberGroupIdsVec);
     }
 
     return Request;
@@ -95,20 +90,27 @@ namespace csp::systems
 
 SpaceSystem::SpaceSystem()
     : SystemBase(nullptr, nullptr, nullptr)
+    , UserSystem(nullptr)
     , GroupAPI(nullptr)
     , SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
+SpaceSystem::SpaceSystem(
+    csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem, csp::common::LogSystem& LogSystem)
     : SystemBase(WebClient, &EventBus, &LogSystem)
+    , UserSystem(UserSystem)
     , CurrentSpace()
 {
     GroupAPI = new chs::GroupApi(WebClient);
     SpaceAPI = new chsaggregation::SpaceApi(WebClient);
 }
 
-SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
+SpaceSystem::~SpaceSystem()
+{
+    delete (GroupAPI);
+    delete (SpaceAPI);
+}
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
@@ -745,7 +747,6 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 {
-    const auto* UserSystem = SystemsManager::Get().GetUserSystem();
     const String InUserId = UserSystem->GetLoginState().UserId;
 
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -1955,7 +1956,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = ConstructDuplicateSpaceOptions(SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -1973,7 +1974,7 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
 void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback)
 {
-    auto Request = ConstructDuplicateSpaceOptions(SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::NullResultCallback, csp::systems::NullResult, void, chs::GroupDto>(Callback, nullptr);
