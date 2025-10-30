@@ -25,6 +25,8 @@ MultiplayerSystem::~MultiplayerSystem() { }
 
 void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback)
 {
+    // This specifies that the scope relates to a group (space) using the ReferenceId. Additional values may be possible in the future.
+    // We can then allow clients to specify this value.
     constexpr const char* ReferenceType = "GroupId";
 
     csp::services::ResponseHandlerPtr ResponseHandler
