@@ -56,6 +56,7 @@ enum class TierFeatures
     OpenAI,
     Shopify,
     TicketedSpace,
+    GoogleGenAI,
     Invalid
 };
 
