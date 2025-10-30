@@ -152,9 +152,9 @@ SystemsManager::SystemsManager()
     , QuotaSystem(nullptr)
     , SequenceSystem(nullptr)
     , HotspotSequenceSystem(nullptr)
+    , ConversationSystem(nullptr)
     , AnalyticsSystem(nullptr)
     , ExternalServiceProxySystem(nullptr)
-    , ConversationSystem(nullptr)
     , MultiplayerSystem(nullptr)
 {
 }
