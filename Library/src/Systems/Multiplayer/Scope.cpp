@@ -55,6 +55,11 @@ void DtoToScope(const chs::multiplayerservice::ScopeDto& Dto, csp::systems::Scop
 
 const Scope& ScopeResult::GetScope() const { return Scope; }
 
+ScopeResult::ScopeResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : ResultBase { ResCode, HttpResCode }
+{
+}
+
 void ScopeResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);

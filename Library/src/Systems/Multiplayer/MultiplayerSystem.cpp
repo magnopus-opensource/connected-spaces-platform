@@ -3,6 +3,7 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/MultiplayerService/Api.h"
 #include "Services/MultiplayerService/Dto.h"
+#include "Systems/ResultHelpers.h"
 
 namespace chs = csp::services::generated;
 
@@ -44,13 +45,18 @@ void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, cons
 
     auto PubSubModelDto = std::make_shared<chs::multiplayerservice::PubSubModel>();
 
-    if (Scope.PubSubType == PubSubModelType::Global)
+    switch (Scope.PubSubType)
     {
+    case PubSubModelType::Global:
         PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::GLOBAL);
-    }
-    else if (Scope.PubSubType == PubSubModelType::Object)
-    {
+        break;
+    case PubSubModelType::Object:
         PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT);
+        break;
+    default:
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "Invalid PubSubModel type specified");
+        Callback(MakeInvalid<ScopeResult>());
+        return;
     }
 
     Dto->SetPubSubModel(PubSubModelDto);

@@ -99,6 +99,8 @@ public:
     /// @return const Scope& : The scope retrieved by this result.
     const Scope& GetScope() const;
 
+    CSP_NO_EXPORT ScopeResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+
 private:
     ScopeResult(void*) {};
 
