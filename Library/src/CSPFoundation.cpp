@@ -238,7 +238,7 @@ csp::common::String* CSPFoundation::Tenant = nullptr;
 namespace
 {
     // Take the input endpoint to the cloud services, and get the multiplayer URIS
-    std::string TranslateEndpointRootURIToMultiplayerServiceUri(const std::string& EndpointRootURI)
+    std::string TranslateEndpointRootURIToMultiplayerRootUri(const std::string& EndpointRootURI)
     {
         /* This is not the best, we've hard encoded how the root uri and the multiplayer uri relate, which is no real guarantee.
          * We should probably take the multiplayer too separately
@@ -250,20 +250,16 @@ namespace
          */
 
         // Check if ogs exists, if so insert "-multiplayer" after it.
-        std::string MultiplayerServiceURI = EndpointRootURI;
+        std::string MultiplayerRootURI = EndpointRootURI;
         const std::string OgsFindTarget = "ogs";
-        const size_t OgsFindPos = MultiplayerServiceURI.find(OgsFindTarget, 0);
+        const size_t OgsFindPos = MultiplayerRootURI.find(OgsFindTarget, 0);
         if (OgsFindPos != std::string::npos)
         {
             const std::string MultiplayerServiceInsert = "-multiplayer";
-            MultiplayerServiceURI.insert(OgsFindPos + OgsFindTarget.length(), MultiplayerServiceInsert);
+            MultiplayerRootURI.insert(OgsFindPos + OgsFindTarget.length(), MultiplayerServiceInsert);
         }
 
-        // Append the hub location
-        const std::string SignalRHubLocation = "/mag-multiplayer/hubs/v1/multiplayer";
-        MultiplayerServiceURI = MultiplayerServiceURI + SignalRHubLocation;
-
-        return MultiplayerServiceURI;
+        return MultiplayerRootURI;
     }
 
     /// @brief Find the Reverse Proxy in service URI from Services Deployment Status.
@@ -385,7 +381,10 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
     const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
     const std::string TrackingServiceURI = RootURI + "/mag-tracking";
 
-    const std::string MultiplayerServiceURI = TranslateEndpointRootURIToMultiplayerServiceUri(RootURI);
+    const std::string MultiplayerRootURI = TranslateEndpointRootURIToMultiplayerRootUri(RootURI);
+
+    const std::string MultiplayerConnectionURI = MultiplayerRootURI + "/mag-multiplayer/hubs/v1/multiplayer";
+    const std::string MultiplayerServiceURI = MultiplayerRootURI + "/mag-multiplayer";
 
     EndpointURIs EndpointsURI;
     EndpointsURI.UserService = ServiceDefinition(CSP_TEXT(UserServiceURI.c_str()), 1U);
@@ -394,6 +393,7 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
     EndpointsURI.AggregationService = ServiceDefinition(CSP_TEXT(AggregationServiceURI.c_str()), 1U);
     EndpointsURI.TrackingService = ServiceDefinition(CSP_TEXT(TrackingServiceURI.c_str()), 1U);
     EndpointsURI.MultiplayerService = ServiceDefinition(CSP_TEXT(MultiplayerServiceURI.c_str()), 1U);
+    EndpointsURI.MultiplayerConnection = ServiceDefinition(CSP_TEXT(MultiplayerConnectionURI.c_str()), 1U);
 
     return EndpointsURI;
 }
