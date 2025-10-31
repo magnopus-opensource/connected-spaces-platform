@@ -102,11 +102,11 @@ ExternalServiceProxySystem* SystemsManager::GetExternalServicesProxySystem() { r
 
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
-csp::multiplayer::NetworkEventBus& SystemsManager::GetEventBus() { return MultiplayerConnection->GetEventBus(); }
+csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
 
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
-    return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), GetEventBus(), *GetScriptSystem() };
+    return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
 }
 
 csp::multiplayer::OfflineRealtimeEngine* SystemsManager::MakeOfflineRealtimeEngine()

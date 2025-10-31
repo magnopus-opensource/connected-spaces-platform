@@ -28,10 +28,10 @@ namespace EventBusPing
 void RunTest()
 {
     // Listen for an event, then ping it back to the client that sent it.
-    csp::systems::SystemsManager::Get().GetEventBus().ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("Receiver", "EventPingRequest"),
+    csp::systems::SystemsManager::Get().GetEventBus()->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("Receiver", "EventPingRequest"),
         [](const csp::common::NetworkEventData& NetworkEventData)
         {
-            csp::systems::SystemsManager::Get().GetEventBus().SendNetworkEventToClient(
+            csp::systems::SystemsManager::Get().GetEventBus()->SendNetworkEventToClient(
                 "EventPingResponse", {}, NetworkEventData.SenderClientId, [](csp::multiplayer::ErrorCode) {});
         });
 }

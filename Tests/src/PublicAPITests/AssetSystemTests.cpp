@@ -2114,7 +2114,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     csp::common::ReplicatedValue Param4 = "";
     csp::common::ReplicatedValue Param5 = "";
 
-    SystemsManager.GetEventBus().SendNetworkEventToClient(
+    SystemsManager.GetEventBus()->SendNetworkEventToClient(
         NetworkEventBus::StringFromNetworkEvent(NetworkEventBus::NetworkEvent::AssetDetailBlobChanged), { Param1, Param2, Param3, Param4, Param5 },
         Connection->GetClientId(), [](ErrorCode Error) { EXPECT_EQ(Error, ErrorCode::None); });
 

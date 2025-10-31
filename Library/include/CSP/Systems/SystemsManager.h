@@ -171,7 +171,7 @@ public:
 
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
-    csp::multiplayer::NetworkEventBus& GetEventBus();
+    csp::multiplayer::NetworkEventBus* GetEventBus();
 
     // Convenience methods for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
     // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
