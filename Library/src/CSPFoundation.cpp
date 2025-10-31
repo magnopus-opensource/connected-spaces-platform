@@ -384,14 +384,14 @@ namespace
             return;
         }
 
-        for (size_t i = 0; i < (*FeatureFlagOverrides).Size(); ++i)
+        for (const auto& OverrideFlag : *FeatureFlagOverrides)
         {
             bool FeatureFlagFound = false;
-            for (size_t j = 0; j < FeatureFlags.Size(); j++)
+            for (auto& Flag : FeatureFlags)
             {
-                if (FeatureFlags[j].Type == (*FeatureFlagOverrides)[i].Type)
+                if (Flag.Type == OverrideFlag.Type)
                 {
-                    FeatureFlags[j].Enabled = (*FeatureFlagOverrides)[i].Enabled;
+                    Flag.Enabled = OverrideFlag.Enabled;
                     FeatureFlagFound = true;
                     break;
                 }
@@ -399,7 +399,7 @@ namespace
             if (!FeatureFlagFound)
             {
                 CSP_LOG_MSG(csp::common::LogLevel::Warning,
-                    fmt::format("Unknown feature flag passed with integer value: {}", static_cast<int>((*FeatureFlagOverrides)[i].Type)).c_str());
+                    fmt::format("Unknown feature flag passed with integer value: {}", static_cast<int>(OverrideFlag.Type)).c_str());
             }
         }
     }
@@ -539,34 +539,38 @@ const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
 bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
 {
-    for (size_t i = 0; i < FeatureFlags.Size(); i++)
-    {
-        if (FeatureFlags[i].Type == Flag)
-        {
-            return FeatureFlags[i].Enabled;
-        }
-    }
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
 
-    CSP_LOG_MSG(csp::common::LogLevel::Warning, fmt::format("Unknown feature flag queried with integer value: {}", static_cast<int>(Flag)).c_str());
-    return false;
+    if (it != FeatureFlags.end())
+    {
+        return it->Enabled;
+    }
+    else
+    {
+        CSP_LOG_MSG(
+            csp::common::LogLevel::Warning, fmt::format("Unknown feature flag queried with integer value: {}", static_cast<int>(Flag)).c_str());
+
+        return false;
+    }
 }
 
 const csp::common::Array<FeatureFlag>& CSPFoundation::GetFeatureFlags() { return FeatureFlags; }
 
 csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag Flag)
 {
-    for (size_t i = 0; i < FeatureFlags.Size(); i++)
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
+
+    if (it != FeatureFlags.end())
     {
-        if (FeatureFlags[i].Type == Flag)
-        {
-            return FeatureFlags[i].GetDescription();
-        }
+        return it->GetDescription();
     }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning,
+            fmt::format("Unknown feature flag description requested with integer value: {}", static_cast<int>(Flag)).c_str());
 
-    CSP_LOG_MSG(csp::common::LogLevel::Warning,
-        fmt::format("Unknown feature flag description requested with integer value: {}", static_cast<int>(Flag)).c_str());
-
-    return "";
+        return "";
+    }
 }
 
 void CSPFoundation::__AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled, const csp::common::String Description)

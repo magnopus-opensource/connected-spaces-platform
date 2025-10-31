@@ -61,7 +61,7 @@ public:
     FeatureFlag() = default;
 
     // Constructor for client usage where no description is needed
-    FeatureFlag(const EFeatureFlag Type, bool IsEnabled)
+    FeatureFlag(EFeatureFlag Type, bool IsEnabled)
         : Type(Type)
         , Enabled(IsEnabled)
         , Description("")
@@ -69,7 +69,7 @@ public:
     }
 
     // Constructor for internal library usage with description
-    CSP_NO_EXPORT FeatureFlag(const EFeatureFlag Type, bool IsEnabled, const csp::common::String& Description)
+    CSP_NO_EXPORT FeatureFlag(EFeatureFlag Type, bool IsEnabled, const csp::common::String& Description)
         : Type(Type)
         , Enabled(IsEnabled)
         , Description(Description)
