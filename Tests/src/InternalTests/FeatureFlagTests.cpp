@@ -33,9 +33,9 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, DefaultFeatureFlagTest)
     csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_B, true, "Description for Test Flag B - initialized: true");
     csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_C, false, "Description for Test Flag C - initialized: false");
 
-    ASSERT_FALSE(csp::CSPFoundation::IsCSPFeatureEnabled(TEST_FLAG_A));
-    ASSERT_TRUE(csp::CSPFoundation::IsCSPFeatureEnabled(TEST_FLAG_B));
-    ASSERT_FALSE(csp::CSPFoundation::IsCSPFeatureEnabled(TEST_FLAG_C));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_A));
+    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_B));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_C));
 
     csp::CSPFoundation::Shutdown();
 }
@@ -57,11 +57,11 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, CreateFeatureFlagTest)
 
     InitialiseFoundationWithUserAgentInfoAndFeatureFlags(EndpointBaseURI(), FeatureFlags);
 
-    ASSERT_TRUE(csp::CSPFoundation::IsCSPFeatureEnabled(TEST_FLAG_A));
-    ASSERT_FALSE(csp::CSPFoundation::IsCSPFeatureEnabled(TEST_FLAG_B));
+    ASSERT_TRUE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_A));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(TEST_FLAG_B));
 
-    ASSERT_EQ(csp::CSPFoundation::GetCSPFeatureFlagDescription(TEST_FLAG_A), FlagDescriptionA);
-    ASSERT_EQ(csp::CSPFoundation::GetCSPFeatureFlagDescription(TEST_FLAG_B), FlagDescriptionB);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_A), FlagDescriptionA);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_B), FlagDescriptionB);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -72,7 +72,7 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, NoFeatureFlagsSpecifiedTest)
 
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    ASSERT_FALSE(csp::CSPFoundation::IsCSPFeatureEnabled(csp::EFeatureFlag::Invalid));
+    ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(csp::EFeatureFlag::Invalid));
 
     csp::CSPFoundation::Shutdown();
 }
@@ -92,7 +92,7 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagIsEnabledTest)
 
         const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
 
-        ASSERT_FALSE(csp::CSPFoundation::IsCSPFeatureEnabled(UNKNOWN_TEST_FLAG));
+        ASSERT_FALSE(csp::CSPFoundation::IsFeatureEnabled(UNKNOWN_TEST_FLAG));
     }
 
     csp::CSPFoundation::Shutdown();
@@ -110,7 +110,7 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, GetFeatureFlagDescriptionTest)
 
     csp::CSPFoundation::__AddFeatureFlagForTesting(TEST_FLAG_A, false, FlagDescription);
 
-    ASSERT_EQ(csp::CSPFoundation::GetCSPFeatureFlagDescription(TEST_FLAG_A), FlagDescription);
+    ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(TEST_FLAG_A), FlagDescription);
 
     csp::CSPFoundation::Shutdown();
 }
@@ -130,7 +130,7 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, UnkownFeatureFlagDescriptionTest)
 
         const csp::EFeatureFlag UNKNOWN_TEST_FLAG = static_cast<csp::EFeatureFlag>(9999);
 
-        ASSERT_EQ(csp::CSPFoundation::GetCSPFeatureFlagDescription(UNKNOWN_TEST_FLAG), "");
+        ASSERT_EQ(csp::CSPFoundation::GetFeatureFlagDescription(UNKNOWN_TEST_FLAG), "");
     }
 
     csp::CSPFoundation::Shutdown();
@@ -164,15 +164,15 @@ CSP_INTERNAL_TEST(CSPEngine, FeatureFlagTests, GetFeatureFlagsTest)
 
     ASSERT_EQ(UpdatedFeatureFlags[0].Type, TEST_FLAG_A);
     ASSERT_EQ(UpdatedFeatureFlags[0].Enabled, false);
-    ASSERT_EQ(UpdatedFeatureFlags[0].Description, FlagDescriptionA);
+    ASSERT_EQ(UpdatedFeatureFlags[0].GetDescription(), FlagDescriptionA);
 
     ASSERT_EQ(UpdatedFeatureFlags[1].Type, TEST_FLAG_B);
     ASSERT_EQ(UpdatedFeatureFlags[1].Enabled, true);
-    ASSERT_EQ(UpdatedFeatureFlags[1].Description, FlagDescriptionB);
+    ASSERT_EQ(UpdatedFeatureFlags[1].GetDescription(), FlagDescriptionB);
 
     ASSERT_EQ(UpdatedFeatureFlags[2].Type, TEST_FLAG_C);
     ASSERT_EQ(UpdatedFeatureFlags[2].Enabled, false);
-    ASSERT_EQ(UpdatedFeatureFlags[2].Description, FlagDescriptionC);
+    ASSERT_EQ(UpdatedFeatureFlags[2].GetDescription(), FlagDescriptionC);
 
     csp::CSPFoundation::Shutdown();
 }

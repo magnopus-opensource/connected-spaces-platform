@@ -434,15 +434,15 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
 }
 
 bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
-    const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& CSPFeatureFlags)
+    const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     // Nullptr means the signalRConnection will be internally instantiated
-    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, CSPFeatureFlags);
+    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, FeatureFlagOverrides);
 }
 
 bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
     const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject,
-    const csp::common::Optional<csp::common::Array<FeatureFlag>>& CSPFeatureFlags)
+    const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
 
@@ -456,7 +456,7 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     SetClientUserAgentInfo(ClientUserAgentHeader);
 
     // Apply feature flag overrides
-    ApplyFeatureFlagOverrides(CSPFeatureFlags, FeatureFlags);
+    ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
 
     csp::systems::SystemsManager::Instantiate(SignalRInject);
 
@@ -537,7 +537,7 @@ const csp::common::String& CSPFoundation::GetClientUserAgentString() { return *C
 
 const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
 
-bool CSPFoundation::IsCSPFeatureEnabled(EFeatureFlag Flag)
+bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
 {
     for (size_t i = 0; i < FeatureFlags.Size(); i++)
     {
@@ -553,13 +553,13 @@ bool CSPFoundation::IsCSPFeatureEnabled(EFeatureFlag Flag)
 
 const csp::common::Array<FeatureFlag>& CSPFoundation::GetFeatureFlags() { return FeatureFlags; }
 
-csp::common::String CSPFoundation::GetCSPFeatureFlagDescription(EFeatureFlag Flag)
+csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag Flag)
 {
     for (size_t i = 0; i < FeatureFlags.Size(); i++)
     {
         if (FeatureFlags[i].Type == Flag)
         {
-            return FeatureFlags[i].Description;
+            return FeatureFlags[i].GetDescription();
         }
     }
 
