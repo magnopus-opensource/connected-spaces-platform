@@ -85,7 +85,7 @@ void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
     ClientHeaderInfo.ClientEnvironment = "ODev";
     ClientHeaderInfo.CHSEnvironment = "oDev";
 
-    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo);
+    csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo, nullptr);
 }
 
 } // namespace Utils

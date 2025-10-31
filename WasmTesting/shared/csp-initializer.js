@@ -23,7 +23,7 @@ export async function initializeCSP(useDebugCSP) {
     userAgent.clientEnvironment = "ODev";
     userAgent.cHSEnvironment = "oDev";
 
-    CSPFoundation.initialise(CHS_ENDPOINT_ROOT, TENANT, userAgent);
+    CSPFoundation.initialise(CHS_ENDPOINT_ROOT, TENANT, userAgent, {});
     if (!CSPFoundation.getIsInitialised()) {
       throw new Error("CSPFoundation failed to initialize");
     }

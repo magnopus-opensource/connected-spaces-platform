@@ -189,17 +189,27 @@ inline void LogFatal(std::string Message)
     exit(1);
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
+inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
 {
-    csp::ClientUserAgent ClientHeaderInfo;
+    static csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();
     ClientHeaderInfo.ClientOS = "CPPTestsOS";
     ClientHeaderInfo.ClientSKU = TESTS_CLIENT_SKU;
     ClientHeaderInfo.ClientVersion = csp::CSPFoundation::GetVersion();
     ClientHeaderInfo.ClientEnvironment = "ODev";
     ClientHeaderInfo.CHSEnvironment = "oDev";
+    return ClientHeaderInfo;
+}
 
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", ClientHeaderInfo, SignalRMock);
+inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
+{
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, nullptr);
+}
+
+inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& EndpointRootURI,
+    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr)
+{
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, FeatureFlags);
 }
 
 inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
