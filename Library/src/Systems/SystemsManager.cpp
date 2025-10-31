@@ -102,7 +102,7 @@ ExternalServiceProxySystem* SystemsManager::GetExternalServicesProxySystem() { r
 
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
-csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return NetworkEventBus; }
+csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
 
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
@@ -130,7 +130,6 @@ csp::common::IRealtimeEngine* SystemsManager::MakeRealtimeEngine(csp::common::Re
 SystemsManager::SystemsManager()
     : WebClient(nullptr)
     , MultiplayerConnection(nullptr)
-    , NetworkEventBus(nullptr)
     , RealtimeEngine(nullptr)
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
@@ -184,17 +183,15 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
 
     MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(*LogSystem, *SignalRConnection);
 
-    NetworkEventBus = MultiplayerConnection->GetEventBusPtr();
-
     // Set the NetworkEventBus now that it has been initialized.
-    UserSystem->SetNetworkEventBus(NetworkEventBus);
+    UserSystem->SetNetworkEventBus(MultiplayerConnection->GetEventBus());
 
     VoipSystem = new csp::systems::VoipSystem();
 
     // SystemBase inheritors
 
-    SpaceSystem = new csp::systems::SpaceSystem(WebClient, *LogSystem);
-    AssetSystem = new csp::systems::AssetSystem(WebClient, NetworkEventBus, *LogSystem);
+    SpaceSystem = new csp::systems::SpaceSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
+    AssetSystem = new csp::systems::AssetSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
     ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, *LogSystem);
@@ -204,9 +201,10 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     EventTicketingSystem = new csp::systems::EventTicketingSystem(WebClient, *LogSystem);
     ECommerceSystem = new csp::systems::ECommerceSystem(WebClient, *LogSystem);
     QuotaSystem = new csp::systems::QuotaSystem(WebClient, *LogSystem);
-    SequenceSystem = new csp::systems::SequenceSystem(WebClient, NetworkEventBus, *LogSystem);
-    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, NetworkEventBus, *LogSystem);
-    ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
+    SequenceSystem = new csp::systems::SequenceSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
+    HotspotSequenceSystem = new csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
+    ConversationSystem
+        = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
 }

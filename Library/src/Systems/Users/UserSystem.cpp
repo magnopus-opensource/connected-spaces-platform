@@ -199,13 +199,11 @@ UserSystem::~UserSystem()
     delete (ProfileAPI);
     delete (AuthenticationAPI);
     delete (StripeAPI);
-
-    DeregisterSystemCallback();
 }
 
-void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus)
+void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus)
 {
-    EventBusPtr = EventBus;
+    EventBusPtr = &EventBus;
 
     RegisterSystemCallback();
 }
@@ -927,15 +925,6 @@ void UserSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
-}
-
-void UserSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)));
-    }
 }
 
 void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

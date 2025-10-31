@@ -28,32 +28,23 @@ SystemBase::SystemBase()
 {
 }
 
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem)
+SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
     : WebClient(InWebClient)
-    , EventBusPtr(InEventBus)
+    , EventBusPtr(EventBus)
     , LogSystem(LogSystem)
 {
 }
 
-SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem* LogSystem)
+SystemBase::SystemBase(csp::multiplayer::NetworkEventBus* EventBus, csp::common::LogSystem* LogSystem)
     : WebClient(nullptr)
-    , EventBusPtr(InEventBus)
+    , EventBusPtr(EventBus)
     , LogSystem(LogSystem)
 {
 }
 
-SystemBase::~SystemBase()
-{
-    DeregisterSystemCallback();
-    EventBusPtr = nullptr;
-}
+SystemBase::~SystemBase() { EventBusPtr = nullptr; }
 
 void SystemBase::RegisterSystemCallback()
-{
-    // Do nothing.
-}
-
-void SystemBase::DeregisterSystemCallback()
 {
     // Do nothing.
 }

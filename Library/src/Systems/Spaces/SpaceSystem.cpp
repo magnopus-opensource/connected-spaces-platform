@@ -58,6 +58,31 @@ namespace
 
 constexpr const int MAX_SPACES_RESULTS = 100;
 
+// Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
+// The only difference is in the value they pass for the AsyncCall parameter.
+std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(csp::systems::UserSystem* UserSystem, const String& SpaceId,
+    const String& NewName, csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy,
+    bool AsyncCall)
+{
+    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
+    Request->SetSpaceId(SpaceId);
+    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().UserId);
+    Request->SetNewUniqueName(NewName);
+    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
+    Request->SetShallowCopy(ShallowCopy);
+    Request->SetAsyncCall(AsyncCall);
+
+    if (MemberGroupIds.HasValue())
+    {
+        auto MemberGroupIdsVec = Convert(MemberGroupIds);
+
+        Request->SetMemberGroupIds(*MemberGroupIdsVec);
+    }
+
+    return Request;
+}
+
 } // namespace
 
 namespace csp::systems
@@ -65,20 +90,27 @@ namespace csp::systems
 
 SpaceSystem::SpaceSystem()
     : SystemBase(nullptr, nullptr, nullptr)
+    , UserSystem(nullptr)
     , GroupAPI(nullptr)
     , SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+SpaceSystem::SpaceSystem(
+    csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem, csp::common::LogSystem& LogSystem)
+    : SystemBase(WebClient, &EventBus, &LogSystem)
+    , UserSystem(UserSystem)
     , CurrentSpace()
 {
-    GroupAPI = new chs::GroupApi(InWebClient);
-    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(WebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(WebClient);
 }
 
-SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
+SpaceSystem::~SpaceSystem()
+{
+    delete (GroupAPI);
+    delete (SpaceAPI);
+}
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
@@ -715,7 +747,6 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 {
-    const auto* UserSystem = SystemsManager::Get().GetUserSystem();
     const String InUserId = UserSystem->GetLoginState().UserId;
 
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -1925,26 +1956,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
-    Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
-    Request->SetNewUniqueName(NewName);
-    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
-    Request->SetShallowCopy(ShallowCopy);
-
-    if (MemberGroupIds.HasValue())
-    {
-        std::vector<String> GroupIds;
-        GroupIds.reserve(MemberGroupIds->Size());
-
-        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
-        {
-            GroupIds.push_back(MemberGroupIds->operator[](i));
-        }
-
-        Request->SetMemberGroupIds(GroupIds);
-    }
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -1958,4 +1970,53 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         ResponseHandler // ResponseHandler
     );
 }
+
+void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
+    const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback)
+{
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = SpaceAPI->CreateHandler<csp::systems::NullResultCallback, csp::systems::NullResult, void, chs::GroupDto>(Callback, nullptr);
+
+    static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->spacesSpaceIdDuplicatePost(
+        {
+            SpaceId, // spaceId
+            true, // asyncCall
+            Request // RequestBody
+        },
+        ResponseHandler // ResponseHandler
+    );
+}
+
+void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback)
+{
+    AsyncCallCompletedCallback = std::move(Callback);
+
+    if (!AsyncCallCompletedCallback)
+    {
+        CSP_LOG_ERROR_MSG("Error: The AsyncCallCompletedCallback handler has not been set and the SpaceSystem has not been registered with the "
+                          "AsyncCallCompleted event. Please call 'SetAsyncCallCompletedCallback()' with a valid AsyncCallCompletedCallbackHandler.");
+        return;
+    }
+
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAsyncCallCompletedEvent(NetworkEventData); });
+}
+
+void SpaceSystem::OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData)
+{
+    if (!AsyncCallCompletedCallback)
+    {
+        return;
+    }
+
+    const csp::common::AsyncCallCompletedEventData& AsyncCallCompletedEventData
+        = static_cast<const csp::common::AsyncCallCompletedEventData&>(NetworkEventData);
+
+    AsyncCallCompletedCallback(AsyncCallCompletedEventData);
+}
+
 } // namespace csp::systems
