@@ -30,6 +30,7 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
 {
     // This specifies that the scope relates to a group (space) using the ReferenceId. Additional values may be possible in the future.
     // We can then allow clients to specify this value.
+    // This is currently populated automatically by chs for the default scope that's created with the space.
     constexpr const char* ReferenceType = "GroupId";
 
     // Ensure we're in the space we want to get scopes for.
