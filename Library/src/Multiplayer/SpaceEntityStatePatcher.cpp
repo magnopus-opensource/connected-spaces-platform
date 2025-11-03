@@ -25,6 +25,17 @@
 namespace csp::multiplayer
 {
 
+namespace
+{
+    // Specifies the start key where multiplayer components start
+    static constexpr size_t ComponentsStartIndex = 0;
+    // Specifies the maximum amount of keys a component can have when serialized.
+    static constexpr size_t ComponentSize = 100;
+    static constexpr size_t MaxComponents = 100;
+    static constexpr size_t ComponentsEndIndex = ComponentsStartIndex + (MaxComponents * ComponentSize);
+
+}
+
 SpaceEntityStatePatcher::SpaceEntityStatePatcher(csp::common::LogSystem* LogSystem, csp::multiplayer::SpaceEntity& SpaceEntity)
     : TimeOfLastPatch(0)
     , LogSystem(LogSystem)
@@ -254,16 +265,32 @@ mcs::ObjectMessage SpaceEntityStatePatcher::CreateObjectMessage() const
         ComponentPacker.WriteValue(Prop.second.GetKey(), ReplicatedValue);
     }
 
+    // Serialize Components
+    std::map<uint16_t, mcs::ItemComponentData> Components;
     std::scoped_lock<std::mutex> ComponentsLocker(DirtyComponentsLock);
 
-    for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& Component : DirtyComponents)
+    // Loop through all components in entity
+    for (const std::pair<const uint16_t, SpaceEntityStatePatcher::DirtyComponent>& ComponentPair : DirtyComponents)
     {
-        assert(Component.second.Component != nullptr && "DirtyComponent given a null component!");
+        ComponentBase* Component = ComponentPair.second.Component;
+        // Get the real component index
+        // by multiplying the index by the size of the amount of reserved items (100)
+        // e.g 0 * 100, 1 * 100, 2 * 100 ...
+        uint16_t ComponentIndex = ComponentPair.first * ComponentSize;
+        // Serialize the type which doesn't exist in the property map.
+        ComponentPacker.WriteValue(ComponentIndex, static_cast<uint64_t>(Component->GetComponentType()));
 
-        if (Component.second.Component != nullptr)
+        std::unique_ptr<common::Array<uint32_t>> Keys(const_cast<common::Array<uint32_t>*>(Component->GetProperties()->Keys()));
+
+        for (uint32_t Key : *Keys)
         {
-            auto* RealComponent = Component.second.Component;
-            ComponentPacker.WriteValue(Component.first, RealComponent);
+            const csp::common::ReplicatedValue& Property = (*Component->GetProperties())[Key];
+
+            // Property index will be the component index + the index of the property
+            // e.g 100 + 1, 100 + 2 ...
+            // First item should always be the type
+            uint16_t PropertyIndex = ComponentIndex + Key;
+            ComponentPacker.WriteValue(PropertyIndex, Property);
         }
     }
 
@@ -344,14 +371,39 @@ std::unique_ptr<csp::multiplayer::SpaceEntity> SpaceEntityStatePatcher::NewFromO
         // but we can't assume that this will be called in an online context, due to this function being used for deserializing entities
         // with the SceneDescription file.
         auto Properties = Entity->CreateReplicatedProperties();
+        std::optional<ComponentBase*> CurrentComponent;
+        std::map<uint32_t, common::ReplicatedValue*> ComponentProperties;
 
         for (const auto& ComponentDataPair : *MessageComponents)
         {
+            uint16_t Index = ComponentDataPair.first;
+            const mcs::ItemComponentData& Value = ComponentDataPair.second;
+
             // All component keys less than COMPONENT_KEY_END_COMPONENTS are our CSP runtime components
             if (ComponentDataPair.first < COMPONENT_KEY_END_COMPONENTS)
             {
-                // Convert the mcs component to a csp component
-                Entity->AddComponentFromItemComponentData(ComponentDataPair.first, ComponentDataPair.second);
+                if (Index == ComponentsStartIndex || Index % ComponentSize == 0)
+                {
+                    // This is the start of a component
+                    if (CurrentComponent)
+                    {
+                        // If we are curtrently parsing a component, finish it
+                        Components[Index] = *CurrentComponent;
+                    }
+
+                    // Type is always the first
+                    // This will be an ItemComponentData that we convert to a uint64
+                    int Type = std::get<uint64_t>(ComponentDataPair.second.Get());
+                    // Creates a component by adding all of the default properties defined in the json
+                    CurrentComponent = CreateComponentOfType(Type);
+                }
+                else
+                {
+                    if (CurrentComponent->SetProperty(ComponentDataPair.first, Value) == false)
+                    {
+                Warning("Attempting to deserialize an unrecognized component property);
+                    }
+                }
             }
             else
             {

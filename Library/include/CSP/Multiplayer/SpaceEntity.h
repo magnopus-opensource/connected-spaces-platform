@@ -438,7 +438,7 @@ public:
     CSP_NO_EXPORT void SetOwnerId(const uint64_t InOwnerId);
 
     // Called when we're parsing a component from an mcs::ObjectMessage
-    CSP_NO_EXPORT void AddComponentFromItemComponentData(uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
+    CSP_NO_EXPORT void AddComponentFromItemComponentData(uint16_t Index, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
     // Called when we're parsing a component from an mcs::ObjectPatch
     CSP_NO_EXPORT ComponentUpdateInfo AddComponentFromItemComponentDataPatch(
         uint16_t ComponentId, const csp::multiplayer::mcs::ItemComponentData& ComponentData);
