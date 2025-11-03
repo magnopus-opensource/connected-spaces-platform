@@ -81,7 +81,7 @@ void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, Scope
     static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
 }
 
-void MultiplayerSystem::PerformLeaderElectionInScope(const csp::common::String& ScopeId,
+void MultiplayerSystem::__PerformLeaderElectionInScope(const csp::common::String& ScopeId,
     const csp::common::Optional<csp::common::Array<csp::common::String>>& UserIdsToExclude, NullResultCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler

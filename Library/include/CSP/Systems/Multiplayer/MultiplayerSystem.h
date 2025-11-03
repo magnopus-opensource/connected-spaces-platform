@@ -82,7 +82,7 @@ public:
     /// @param Callback csp::systems::ScopesResultCallback : Callback when asynchronous task finishes.
     /// @pre "ManagedLeaderElection" should be set to true on the scope, otherwise this function will fail with a EResultCode::Failed response.
     /// @pre Must already have entered the space of the SpaceId parameter.
-    CSP_NO_EXPORT void PerformLeaderElectionInScope(const csp::common::String& ScopeId,
+    CSP_NO_EXPORT void __PerformLeaderElectionInScope(const csp::common::String& ScopeId,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& UserIdsToExclude, NullResultCallback Callback);
 
 private:
