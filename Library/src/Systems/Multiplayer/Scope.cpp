@@ -74,6 +74,11 @@ void ScopeResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
         DtoToScope(*ScopeResponse, Scope);
     }
 }
+ScopesResult::ScopesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+    : ResultBase { ResCode, HttpResCode }
+{
+}
+
 const csp::common::Array<Scope>& ScopesResult::GetScopes() const { return Scopes; }
 
 void ScopesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

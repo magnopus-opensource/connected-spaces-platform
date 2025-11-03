@@ -39,6 +39,7 @@ class WebClient;
 
 namespace csp::systems
 {
+class SpaceSystem;
 
 /// @ingroup Multiplayer System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' multiplayer api.
@@ -46,7 +47,7 @@ namespace csp::systems
 class CSP_API CSP_NO_DISPOSE MultiplayerSystem : public SystemBase
 {
 public:
-    CSP_NO_EXPORT MultiplayerSystem(csp::web::WebClient* WebClient, csp::common::LogSystem& LogSystem);
+    CSP_NO_EXPORT MultiplayerSystem(csp::web::WebClient* WebClient, csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem);
     MultiplayerSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
     ~MultiplayerSystem();
 
@@ -55,7 +56,7 @@ public:
     /// @param SpaceId const csp::common::String& : The id of the space we want to get scopes for.
     /// @param Callback csp::systems::ScopesResultCallback : Callback when the scopes are retrieved, or on failure.
     /// @pre Must already have entered the space of the SpaceId parameter.
-    /// If the above precondition fails, the result will be successful, with an empty array of scopes.
+    /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     CSP_NO_EXPORT void GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback);
 
     /// @brief Updates Data on a scope.
@@ -90,6 +91,8 @@ private:
     std::unique_ptr<csp::services::ApiBase> ScopeLeaderApi;
     std::unique_ptr<csp::services::ApiBase> ScopesApi;
     CSP_END_IGNORE
+
+    csp::systems::SpaceSystem* SpaceSystem;
 };
 
 }

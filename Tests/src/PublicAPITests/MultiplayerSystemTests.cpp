@@ -18,11 +18,10 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 
+#include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
-
-#include "TestHelpers.h"
 #include "gtest/gtest.h"
 
 namespace
@@ -79,7 +78,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
 }
 
 /*
-    Tests that GetScopesBySpace correctly returns 0 elements when out of the space.
+    Tests that GetScopesBySpace correctly returns 0 elements, and an error message when out of the space.
 */
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest)
 {
@@ -100,11 +99,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
-    // Get the default scope
-    auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
-    EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
+    {
+        RAIIMockLogger MockLogger {};
 
-    EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
+        const csp::common::String GetScopesBySpaceErrorMsg = "GetScopesBySpace: You must have entered the space you want to get scopes for";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, GetScopesBySpaceErrorMsg));
+
+        // Get the default scope
+        auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
+    }
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);

@@ -1,4 +1,5 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Common/Convert.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/MultiplayerService/Api.h"
@@ -9,8 +10,9 @@ namespace chs = csp::services::generated;
 
 namespace csp::systems
 {
-MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
+MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::systems::SpaceSystem& SpaceSystem, csp::common::LogSystem& LogSystem)
     : SystemBase(InWebClient, nullptr, &LogSystem)
+    , SpaceSystem { &SpaceSystem }
 {
     ScopeLeaderApi = std::make_unique<chs::multiplayerservice::ScopeLeaderApi>(InWebClient);
     ScopesApi = std::make_unique<chs::multiplayerservice::ScopesApi>(InWebClient);
@@ -18,6 +20,7 @@ MultiplayerSystem::MultiplayerSystem(csp::web::WebClient* InWebClient, csp::comm
 
 MultiplayerSystem::MultiplayerSystem()
     : SystemBase(nullptr, nullptr, nullptr)
+    , SpaceSystem { nullptr }
 {
 }
 
@@ -28,6 +31,14 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
     // This specifies that the scope relates to a group (space) using the ReferenceId. Additional values may be possible in the future.
     // We can then allow clients to specify this value.
     constexpr const char* ReferenceType = "GroupId";
+
+    // Ensure we're in the space we want to get scopes for.
+    if (SpaceSystem->GetCurrentSpace().Id != SpaceId)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "GetScopesBySpace: You must have entered the space you want to get scopes for");
+        Callback(MakeInvalid<ScopesResult>());
+        return;
+    }
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = ScopeLeaderApi->CreateHandler<ScopesResultCallback, ScopesResult, void, services::DtoArray<chs::multiplayerservice::ScopeDto>>(
@@ -56,7 +67,7 @@ void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, cons
         PubSubModelDto->SetValue(chs::multiplayerservice::PubSubModel::ePubSubModel::OBJECT);
         break;
     default:
-        LogSystem->LogMsg(csp::common::LogLevel::Error, "Invalid PubSubModel type specified");
+        LogSystem->LogMsg(csp::common::LogLevel::Error, "UpdateScopeById: Invalid PubSubModel type specified");
         Callback(MakeInvalid<ScopeResult>());
         return;
     }

@@ -214,7 +214,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     ConversationSystem = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, NetworkEventBus, *LogSystem);
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
-    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *LogSystem);
+    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
 }
 
 void SystemsManager::DestroySystems()

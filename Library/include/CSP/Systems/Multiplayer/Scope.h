@@ -127,6 +127,8 @@ public:
     /// @return const csp::common::Array<Scope>& : The array of scopes retrieved by this result.
     const csp::common::Array<Scope>& GetScopes() const;
 
+    CSP_NO_EXPORT ScopesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+
 private:
     ScopesResult(void*) {};
 
