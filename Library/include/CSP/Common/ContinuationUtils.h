@@ -72,7 +72,7 @@ public:
     const csp::systems::ResultBase& GetResult() const { return Result; }
 
 private:
-    const csp::systems::ResultBase& Result;
+    const csp::systems::ResultBase Result;
 };
 
 /**
