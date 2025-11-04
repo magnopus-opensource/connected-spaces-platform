@@ -292,6 +292,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, GetUniqueString().c_str(), GetUniqueString().c_str(), nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
     }
 
     // Log out
@@ -429,6 +431,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
             GetUniqueString().c_str(), nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
     }
 }
 
@@ -457,6 +461,8 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidTentantSett
             ApplicationSettingsTestData.ApplicationName, ApplicationSettingsTestData.Context, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+        EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
     }
 }
 
