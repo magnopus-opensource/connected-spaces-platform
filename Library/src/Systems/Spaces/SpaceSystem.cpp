@@ -616,7 +616,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
 
                 this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-                Callback(MakeInvalid<SpaceResult>());
+                Callback(csp::common::continuations::GetResultExceptionOrInvalid<SpaceResult>(exception));
             },
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const std::exception& exception)
             {
@@ -679,7 +679,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 
                 this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-                Callback(MakeInvalid<SpaceResult>());
+                Callback(csp::common::continuations::GetResultExceptionOrInvalid<SpaceResult>(exception));
             },
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const std::exception& exception)
             {
