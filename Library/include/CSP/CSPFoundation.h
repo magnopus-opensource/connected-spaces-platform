@@ -16,9 +16,22 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Array.h"
+#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
 #include <string>
+
+CSP_START_IGNORE
+#ifdef CSP_TESTS
+class CSPEngine_FeatureFlagTests_DefaultFeatureFlagTest_Test;
+class CSPEngine_FeatureFlagTests_CreateFeatureFlagTest_Test;
+class CSPEngine_FeatureFlagTests_NoFeatureFlagsSpecifiedTest_Test;
+class CSPEngine_FeatureFlagTests_UnkownFeatureFlagIsEnabledTest_Test;
+class CSPEngine_FeatureFlagTests_GetFeatureFlagDescriptionTest_Test;
+class CSPEngine_FeatureFlagTests_UnkownFeatureFlagDescriptionTest_Test;
+#endif
+CSP_END_IGNORE
 
 namespace csp::systems
 {
@@ -28,10 +41,46 @@ class ServicesDeploymentStatus;
 namespace csp::multiplayer
 {
 class ISignalRConnection;
-}
+} // namespace csp::multiplayer
 
 namespace csp
 {
+// New developer feature flags should be added here. Please leave 'Invalid' as the first element.
+enum class EFeatureFlag
+{
+    Invalid = 0
+};
+
+// Represents the enabled state of an individual feature flag.
+class CSP_API FeatureFlag
+{
+public:
+    EFeatureFlag Type;
+    bool Enabled;
+
+    FeatureFlag() = default;
+
+    // Constructor for client usage where no description is needed
+    FeatureFlag(EFeatureFlag Type, bool IsEnabled)
+        : Type(Type)
+        , Enabled(IsEnabled)
+        , Description("")
+    {
+    }
+
+    // Constructor for internal library usage with description
+    CSP_NO_EXPORT FeatureFlag(EFeatureFlag Type, bool IsEnabled, const csp::common::String& Description)
+        : Type(Type)
+        , Enabled(IsEnabled)
+        , Description(Description)
+    {
+    }
+
+    const csp::common::String& GetDescription() { return Description; };
+
+private:
+    csp::common::String Description;
+};
 
 /// @brief Represents definition for identifying and versioning an external service endpoint.
 class CSP_API ServiceDefinition
@@ -117,6 +166,21 @@ public:
 /// Provides functionality for initialising, shutting down and managing essential information for the Foundation instance to run.
 class CSP_API CSPFoundation
 {
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+
+#ifdef CSP_TESTING
+    friend class ::CSPEngine_FeatureFlagTests_DefaultFeatureFlagTest_Test;
+    friend class ::CSPEngine_FeatureFlagTests_CreateFeatureFlagTest_Test;
+    friend class ::CSPEngine_FeatureFlagTests_NoFeatureFlagsSpecifiedTest_Test;
+    friend class ::CSPEngine_FeatureFlagTests_UnkownFeatureFlagIsEnabledTest_Test;
+    friend class ::CSPEngine_FeatureFlagTests_GetFeatureFlagDescriptionTest_Test;
+    friend class ::CSPEngine_FeatureFlagTests_UnkownFeatureFlagDescriptionTest_Test;
+#endif // CSP_TESTING
+
+    /** @endcond */
+    CSP_END_IGNORE
+
 public:
     /// @brief Sets the endpoints for the various services needed for foundation, passes over the client header information and initialises the
     /// systems required for foundation to operate.
@@ -124,15 +188,19 @@ public:
     /// @param Tenant const csp::common::String& : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants
     /// cannot interact with each other.
     /// @param ClientUserAgentHeader const csp::ClientUserAgent& : The Client Info data
+    /// @param FeatureFlagOverrides const csp::common::Optional<csp::common::Array<FeatureFlag>>& : Optional list of feature flags whose default
+    /// enabled state is to be overriden. The FeatureFlag.Description property can be ignored when passing in feature flags here as this is defined by
+    /// the developer who creates the flag.
     /// @return bool : True for successful initialisation.
-    static bool Initialise(
-        const csp::common::String& EndpointRootURI, const csp::common::String& Tenant, const csp::ClientUserAgent& ClientUserAgentHeader);
+    static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
+        const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides);
 
     // Hidden function for testing. Lets us pass in state that would otherwise be injected in a set way in the SystemsManager.
     // In a different, perhaps better api, this wouldn't be necessary as constructors would inject this at client level and the configurability would
     // be there by default
     CSP_NO_EXPORT static bool InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
-        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject);
+        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject,
+        const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides);
 
     /// @brief This should be used at the end of the application lifecycle.
     /// Clears event queues and destroys foundation systems.
@@ -189,6 +257,26 @@ public:
     /// @return const csp::common::String&
     static const csp::common::String& GetTenant();
 
+    /// @brief Checks if a given feature flag is enabled.
+    /// @param Flag EFeatureFlag : The feature flag to check
+    /// @return bool : true if the feature flag is enabled, false otherwise
+    static bool IsFeatureEnabled(EFeatureFlag Flag);
+
+    /// @brief Returns an array of feature flags.
+    /// @return const csp::common::Array<FeatureFlag>& : An array of the defined feature flags
+    static const csp::common::Array<FeatureFlag>& GetFeatureFlags();
+
+    /// @brief Get the description of a feature flag.
+    /// @param Flag EFeatureFlag : The feature flag whose description is to be retrieved
+    /// @return csp::common::String : The description of the feature flag
+    static csp::common::String GetFeatureFlagDescription(EFeatureFlag Flag);
+
+    // This is a utility function that allows flags to be added for testing purposes
+    CSP_NO_EXPORT static void __AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled, const csp::common::String Description);
+
+    // This is a utility function that allows clears the registered feature flags for testing purposes
+    CSP_NO_EXPORT static void __ResetFeatureFlagsForTesting();
+
 private:
     // Populates ClientUserAgentInfo data object with the relevant Client info set during initialisation
     // and generates the ClientUserAgentString which is sent as part of the Http payload.
@@ -200,6 +288,9 @@ private:
     static csp::common::String* DeviceId;
     static csp::common::String* ClientUserAgentString;
     static csp::common::String* Tenant;
+
+    // Developer feature flags should be defined in the cpp
+    static csp::common::Array<FeatureFlag> FeatureFlags;
 };
 
 // Helper function to get function address for templates from wrappers
