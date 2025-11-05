@@ -85,7 +85,7 @@ template <typename T> const inline T GetResultExceptionOrInvalid(const csp::comm
         return T(Result.GetResultCode(), static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()), Result.GetFailureReason());
     }
 
-    return MakeInvalid<T>();
+    return T(csp::systems::EResultCode::Failed, 0);
 }
 
 /**
