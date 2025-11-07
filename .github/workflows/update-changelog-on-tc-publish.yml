@@ -14,8 +14,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name "automaton"
-          git config user.email "automaton@magnopus.com"
+          git config user.name "${{ secrets.GH_AUTOMATON_USERNAME }}"
+          git config user.email "${{ secrets.GH_AUTOMATON_EMAIL }}"
           git pull
 
       - name: Get Release Version and Date from Payload
@@ -43,31 +43,25 @@ jobs:
           echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
           echo "RELEASE_DATE=$RELEASE_DATE" >> $GITHUB_OUTPUT
 
-      - name: Update CHANGELOG.md
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Update CHANGELOG.md using Python
+        # The step Id is used in the next step to reference the python scripts output for 'changelog_updated'
+        id: update_changelog_script
         run: |
-          RELEASE_VERSION="${{ steps.get_release_info.outputs.RELEASE_VERSION }}"
-          RELEASE_DATE="${{ steps.get_release_info.outputs.RELEASE_DATE }}"
-          CHANGELOG_FILE=".github/CHANGELOG.md"
-
-          # Escape special characters for sed (like dots in version numbers)
-          ESCAPED_VERSION=$(echo "$RELEASE_VERSION" | sed 's/\./\\./g')
-
-          # Check if "## [Unreleased]" exists and "## [$RELEASE_VERSION]" does not
-          if grep -q "## \[Unreleased\]" "$CHANGELOG_FILE" && ! grep -q "## \[$ESCAPED_VERSION\]" "$CHANGELOG_FILE"; then
-            echo "Updating CHANGELOG.md for release $RELEASE_VERSION."
-
-            # This `sed` command searches for the line containing "## [Unreleased]".
-            # When it finds it, it performs a 'c\' (change) operation.
-            # It replaces the *entire line* with the following multiline string:
-            # "## [Unreleased]\n\n## [$RELEASE_VERSION] - $RELEASE_DATE"
-            sed -i "/## \[Unreleased\]/c\## \[Unreleased\]\n\n## \[$RELEASE_VERSION\] - $RELEASE_DATE" "$CHANGELOG_FILE"
-
-          else
-            echo "Changelog already contains entry for $RELEASE_VERSION or '## [Unreleased]' not found. No update needed."
-          fi
+          python .github/scripts/update_changelog_release_tag.py \
+            "${{ steps.get_release_info.outputs.RELEASE_VERSION }}" \
+            "${{ steps.get_release_info.outputs.RELEASE_DATE }}" \
+            ".github/CHANGELOG.md"
 
       - name: Commit and Push Changes
+        # Only commit and push if the changelog was updated
+        # The changelog_updated output value is set by the Python script which is executed in the 'update_changelog_script' step
+        if: ${{ steps.update_changelog_script.outputs.changelog_updated == 'true' }}
         run: |
           git add "${CHANGELOG_FILE}"
-          git commit -m "[NT-0] docs: Update CHANGELOG.md for release ${{ steps.get_release_info.outputs.RELEASE_VERSION }}" || echo "No changes to commit."
+          git commit -m "Update CHANGELOG.md for release ${{ steps.get_release_info.outputs.RELEASE_VERSION }}" --no-verify
           git push
