@@ -1,0 +1,73 @@
+name: Update Changelog on TeamCity Publish
+
+on:
+  repository_dispatch:
+    # This workflow listens for a custom event type triggered by TeamCity as part of the 'Publish CSP' build step
+    types: [release-published]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config user.name "automaton"
+          git config user.email "automaton@magnopus.com"
+          git pull
+
+      - name: Get Release Version and Date from Payload
+        id: get_release_info
+        run: |
+          # The client_payload of the TeamCity 'repository_dispatch' event will contain the version and date of the published release
+          RELEASE_VERSION="${{ github.event.client_payload.version }}"
+          RELEASE_DATE="${{ github.event.client_payload.date }}"
+          
+          # Validate that a release version was provided
+          if [ -z "$RELEASE_VERSION" ]; then
+            echo "::error::Release version not provided in repository_dispatch payload."
+            exit 1
+          fi
+
+          # Validate that a release date was provided
+          if [ -z "$RELEASE_DATE" ]; then
+            echo "::error::Release date not provided in repository_dispatch payload."
+            exit 1
+          fi
+
+          echo "Specified Release Version: $RELEASE_VERSION"
+          echo "Specified Release Date: $RELEASE_DATE"
+
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "RELEASE_DATE=$RELEASE_DATE" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          RELEASE_VERSION="${{ steps.get_release_info.outputs.RELEASE_VERSION }}"
+          RELEASE_DATE="${{ steps.get_release_info.outputs.RELEASE_DATE }}"
+          CHANGELOG_FILE=".github/CHANGELOG.md"
+
+          # Escape special characters for sed (like dots in version numbers)
+          ESCAPED_VERSION=$(echo "$RELEASE_VERSION" | sed 's/\./\\./g')
+
+          # Check if "## [Unreleased]" exists and "## [$RELEASE_VERSION]" does not
+          if grep -q "## \[Unreleased\]" "$CHANGELOG_FILE" && ! grep -q "## \[$ESCAPED_VERSION\]" "$CHANGELOG_FILE"; then
+            echo "Updating CHANGELOG.md for release $RELEASE_VERSION."
+
+            # This `sed` command searches for the line containing "## [Unreleased]".
+            # When it finds it, it performs a 'c\' (change) operation.
+            # It replaces the *entire line* with the following multiline string:
+            # "## [Unreleased]\n\n## [$RELEASE_VERSION] - $RELEASE_DATE"
+            sed -i "/## \[Unreleased\]/c\## \[Unreleased\]\n\n## \[$RELEASE_VERSION\] - $RELEASE_DATE" "$CHANGELOG_FILE"
+
+          else
+            echo "Changelog already contains entry for $RELEASE_VERSION or '## [Unreleased]' not found. No update needed."
+          fi
+
+      - name: Commit and Push Changes
+        run: |
+          git add "${CHANGELOG_FILE}"
+          git commit -m "Docs: Update CHANGELOG.md for release ${{ steps.get_release_info.outputs.RELEASE_VERSION }}" || echo "No changes to commit."
+          git push
