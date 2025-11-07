@@ -40,7 +40,8 @@ def main():
         print(f"Error: Source README.md not found at '{source_readme_path}'. Please ensure it exists.", file=sys.stderr)
         sys.exit(1)
 
-    # Clean the output directory if it exists
+    # The destination_directory is used in subsequent build steps to create the package that will be uploaded to npm
+    # We therefore clean the directory if it exists
     if os.path.exists(destination_directory):
         shutil.rmtree(destination_directory)
     
