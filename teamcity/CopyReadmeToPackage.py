@@ -3,16 +3,22 @@
 import argparse
 import os
 import shutil
+import sys
 
 import git
 
 from Config import config
 
 def main():
-    # Ensure our current working directory is the git repository root
-    repo = git.Repo(os.path.abspath(os.path.dirname(__file__)), search_parent_directories=True)
-    root_dir = repo.working_dir
-    os.chdir(root_dir)
+
+    try:
+        # Ensure our current working directory is the git repository root
+        repo = git.Repo(__file__, search_parent_directories=True)
+        root_dir = repo.working_dir
+        os.chdir(root_dir)
+    except git.InvalidGitRepositoryError:
+        print(f"Error: Could not find a Git repository root.", file=sys.stderr)
+        sys.exit(1)
 
     # Define commandline arguments
     arg_parser = argparse.ArgumentParser(description="Copy README.md from .github directory to the output location.")
