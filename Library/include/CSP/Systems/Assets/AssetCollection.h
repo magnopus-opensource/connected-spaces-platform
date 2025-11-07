@@ -151,7 +151,7 @@ public:
 private:
     AssetCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     AssetCollection AssetCollection;
 };
@@ -193,7 +193,7 @@ public:
 protected:
     AssetCollectionsResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     void FillResultTotalCount(const csp::common::String& JsonContent);
 
@@ -223,7 +223,7 @@ protected:
         : Count { 0 } {};
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AssetCollectionCountResult(const csp::systems::ResultBase& InResult)
         : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
@@ -256,7 +256,7 @@ private:
     AssetCollectionsCopyResult(void* Ptr)
         : AssetCollectionsResult(Ptr) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief Callback containing asset collection.

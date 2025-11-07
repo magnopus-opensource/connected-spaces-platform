@@ -268,7 +268,7 @@ private:
     explicit NumberOfRepliesResult(void*) {};
     NumberOfRepliesResult() = default;
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
         : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
@@ -314,7 +314,7 @@ private:
     explicit AnnotationResult(void*) {};
     AnnotationResult() = default;
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& InResult)
         : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
