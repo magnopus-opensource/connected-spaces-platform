@@ -62,6 +62,6 @@ jobs:
         # The changelog_updated output value is set by the Python script which is executed in the 'update_changelog_script' step
         if: ${{ steps.update_changelog_script.outputs.changelog_updated == 'true' }}
         run: |
-          git add "${CHANGELOG_FILE}"
+          git add ".github/CHANGELOG.md"
           git commit -m "Update CHANGELOG.md for release ${{ steps.get_release_info.outputs.RELEASE_VERSION }}" --no-verify
           git push
