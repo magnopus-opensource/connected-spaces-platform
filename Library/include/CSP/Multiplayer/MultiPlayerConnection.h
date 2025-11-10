@@ -73,9 +73,11 @@ enum class ConnectionState
 class CSP_API MultiplayerConnection
 {
 public:
+    CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class ::CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
     /** @endcond */
+    CSP_END_IGNORE
 
     // Simple callback that receives an error code.
     typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;

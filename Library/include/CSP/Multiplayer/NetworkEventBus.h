@@ -229,7 +229,8 @@ private:
     CSP_END_IGNORE
 
     // Map internal event values to the deserializers needed to unpack them
-    std::unique_ptr<csp::common::NetworkEventData> DeserialiseForEventType(NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
+    CSP_NO_EXPORT std::unique_ptr<csp::common::NetworkEventData> DeserialiseForEventType(
+        NetworkEvent EventType, const std::vector<signalr::value>& EventValues);
 
     std::unordered_map<NetworkEventRegistration, NetworkEventCallback> RegisteredEvents = {};
 };
