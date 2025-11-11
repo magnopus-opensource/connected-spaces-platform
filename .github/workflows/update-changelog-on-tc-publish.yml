@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          # This token will be used by subsequent git commands for authentication
+          token: ${{ secrets.MAG_BOT_HOOK_TOKEN }}
 
       - name: Configure Git
         run: |
