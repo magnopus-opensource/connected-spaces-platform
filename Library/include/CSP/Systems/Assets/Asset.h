@@ -67,7 +67,8 @@ enum class EAssetType
     GAUSSIAN_SPLAT,
     MATERIAL,
     ANNOTATION,
-    ANNOTATION_THUMBNAIL
+    ANNOTATION_THUMBNAIL,
+    TEXT
 };
 
 enum class EAssetPlatform

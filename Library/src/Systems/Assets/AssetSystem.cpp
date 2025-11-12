@@ -99,6 +99,8 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
         return "Annotation";
     case systems::EAssetType::ANNOTATION_THUMBNAIL:
         return "AnnotationThumbnail";
+    case systems::EAssetType::TEXT:
+        return "Text";
     default:
         assert(false && "Unsupported Asset Type!");
         return "Image";
