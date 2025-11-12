@@ -8,12 +8,17 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
+
+    # add permissions to allow pushing changes to the repository
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          # This token will be used by subsequent git commands for authentication
-          token: ${{ secrets.MAG_BOT_HOOK_TOKEN }}
+          # This key provides the SSH authentication and authorization to bypass branch protection and execute the final git push.
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Configure Git
         run: |
