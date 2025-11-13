@@ -825,8 +825,8 @@ public:
 
     /// @brief Gets mime type from a file path.
     /// @param FilePath const String&
-    /// @return String&
-    String& GetMimeType(const String& FilePath);
+    /// @return const String&
+    const String& GetMimeType(const String& FilePath);
 
 private:
     /// @brief Private singleton constructor.

@@ -28,7 +28,7 @@ MimeTypeHelper& MimeTypeHelper::Get()
     return Instance;
 }
 
-String& MimeTypeHelper::GetMimeType(const String& FilePath)
+const String& MimeTypeHelper::GetMimeType(const String& FilePath)
 {
     auto Segments = FilePath.Split('.');
     auto Extension = Segments[Segments.Size() - 1].Trim();
