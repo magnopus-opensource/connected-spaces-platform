@@ -75,6 +75,7 @@ class ClientElectionManager;
 class MultiplayerConnection;
 class ISignalRConnection;
 class NetworkEventBus;
+class ScopeLeadershipManager;
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -281,6 +282,15 @@ public:
     /// @param Callback CallbackHandler : the callback to execute.
     CSP_EVENT void SetScriptLeaderReadyCallback(CallbackHandler Callback);
 
+    typedef std::function<void(const csp::common::String& ScopeId, const csp::common::String& UserId)> ScopeLeaderCallback;
+
+    /// @brief Binds the provided callback to receive events when a new scope leader has been elected.
+    /// @param Callback ScopeLeaderCallback : Fired when a new scope leader is elected.
+    CSP_EVENT void SetOnElectedScopeLeaderCallback(ScopeLeaderCallback Callback);
+    /// @brief Binds the provided callback to receive events when a scope leader has been vacated.
+    /// @param Callback ScopeLeaderCallback : Fired when a scope leader is vacated.
+    CSP_EVENT void SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback Callback);
+
     /// @brief Sets the script owner for the given entity to the current client
     /// @param Entity SpaceEntity : A pointer to the entity
     void ClaimScriptOwnership(SpaceEntity* Entity) const;
@@ -296,6 +306,7 @@ public:
     bool IsLeaderElectionEnabled() const;
 
     /// @brief Debug helper to get the id of the currently elected script leader.
+    /// This should be updated when we fully support scopes. We will need to pass in the scopeId we want the leader for.
     /// @return The id of the leader.
     uint64_t GetLeaderId() const;
 
@@ -318,10 +329,12 @@ public:
     /// @brief "Refreshes" (ie, turns on an off again), the multiplayer connection, in order to refresh scopes.
     /// This shouldn't be neccesary, we should devote some effort to checking if it still is at some point
     /// @param SpaceId csp::Common:String& : The Id of the space to refresh
-    /// @param RefreshMultiplayerContinuationEvent : std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> Continuation event
+    /// @return async::task<void> : The async task containing the result which will be passed to the next
+    /// continuation.
     /// that populates an optional error code on failure. Error is empty on success.
-    CSP_NO_EXPORT void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
-        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
+    CSP_START_IGNORE
+    CSP_NO_EXPORT async::task<void> RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId);
+    CSP_END_IGNORE
 
     /// @brief Checks whether we should run scripts locally
     /// @return bool
@@ -344,12 +357,25 @@ public:
     // Will only tick scrips if EnableEntityTick is enabled, which it should be if entity fetch has completed.
     CSP_NO_EXPORT void TickEntities();
 
+    CSP_START_IGNORE
+    CSP_NO_EXPORT void RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId);
+
+    // Updates server-side leader election to make this client the leader of the specified scope.
+    // This should only be used in testing.
+    CSP_NO_EXPORT void __AssumeScopeLeadership(const std::string& ScopeId, std::function<void(bool)> Callback);
+    CSP_END_IGNORE
+
+    // We should remove this in OF-1785
+    CSP_NO_EXPORT void SetServerSideELectionEnabled(bool Value);
+
     /*
      * Called when MultiplayerConnection recieved signalR events.
      */
     CSP_NO_EXPORT void OnObjectMessage(const signalr::value& Params);
     CSP_NO_EXPORT void OnObjectPatch(const signalr::value& Params);
     CSP_NO_EXPORT void OnRequestToSendObject(const signalr::value& Params);
+    CSP_NO_EXPORT void OnElectedScopeLeader(const signalr::value& Params);
+    CSP_NO_EXPORT void OnVacatedAsScopeLeader(const signalr::value& Params);
 
 protected:
     csp::common::List<SpaceEntity*> Entities;
@@ -398,8 +424,16 @@ private:
 
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
+    // Called when another client sends us this event.
+    // This will happen when a client wants to run a script for a scope that this client is the leader of.
+    void OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data);
+    void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
+
     void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 
+    bool IsLocalClientLeader() const;
+
+    // These are used for client-side leader eleciton and can be removed as part of OF-1785.
     void OnAvatarAdd(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
     void OnAvatarRemove(const SpaceEntity* Avatar, const csp::common::List<SpaceEntity*>& Avatars);
     void OnObjectAdd(const SpaceEntity* Object, const csp::common::List<SpaceEntity*>& Entities);
@@ -424,7 +458,24 @@ private:
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
+
+    // Leader election ---------------------------------------------------------
+
+    // Client-side election manager. Should be removed as part of OF-1785.
     class ClientElectionManager* ElectionManager;
+
+    // Server-side election data.
+    CSP_START_IGNORE
+    std::unique_ptr<ScopeLeadershipManager> LeaderElectionManager;
+    CSP_END_IGNORE
+
+    ScopeLeaderCallback OnElectedScopeLeaderCallback;
+    ScopeLeaderCallback OnVacatedAsScopeLeaderCallback;
+
+    csp::common::String DefaultScopeId;
+    // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
+    bool ServerSideELectionEnabled = false;
+    // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;
 

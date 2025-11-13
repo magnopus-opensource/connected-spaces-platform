@@ -347,6 +347,8 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
     BindOnObjectPatch();
     BindOnRequestToSendObject();
     BindOnRequestToDisconnect();
+    BindOnElectedScopeLeaderCallback();
+    BindOnVacatedScopeLeaderCallback();
 
     EventBus->StartEventMessageListening();
 
@@ -620,6 +622,44 @@ void MultiplayerConnection::BindOnRequestToDisconnect()
             DisconnectWithReason(Reason.c_str(), [&Promise](ErrorCode /*Error*/) { Promise.set_value(true); });
 
             Future.wait_for(2000ms);
+        },
+        LogSystem);
+}
+
+void MultiplayerConnection::BindOnElectedScopeLeaderCallback()
+{
+    GetSignalRConnection()->On(
+        GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_ELECTED_SCOPE_LEADER),
+        [this](signalr::value Params)
+        {
+            if (MultiplayerRealtimeEngine != nullptr)
+            {
+                MultiplayerRealtimeEngine->OnElectedScopeLeader(Params);
+            }
+            else
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Verbose, "Received OnElectedScopeLeader without an alive EntitySystem. This is expected if leaving a space.");
+            }
+        },
+        LogSystem);
+}
+
+void MultiplayerConnection::BindOnVacatedScopeLeaderCallback()
+{
+    GetSignalRConnection()->On(
+        GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_VACATED_AS_SCOPE_LEADER),
+        [this](signalr::value Params)
+        {
+            if (MultiplayerRealtimeEngine != nullptr)
+            {
+                MultiplayerRealtimeEngine->OnVacatedAsScopeLeader(Params);
+            }
+            else
+            {
+                LogSystem.LogMsg(
+                    common::LogLevel::Verbose, "Received OnVacatedScopeLeader without an alive EntitySystem. This is expected if leaving a space.");
+            }
         },
         LogSystem);
 }
