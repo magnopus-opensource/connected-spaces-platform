@@ -52,11 +52,13 @@ enum class TestIdentifier
 {
     CREATE_AVATAR, //"CreateAvatar"
     CREATE_CONVERSATION, //"CreateConversation"
-    EVENT_BUS_PING //"EventBusPing"
+    EVENT_BUS_PING, //"EventBusPing"
+    LEADER_ELECTION //"LeaderElection"
 };
 
 inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap { { TestIdentifier::CREATE_AVATAR, "CreateAvatar" },
-    { TestIdentifier::CREATE_CONVERSATION, "CreateConversation" }, { TestIdentifier::EVENT_BUS_PING, "EventBusPing" } };
+    { TestIdentifier::CREATE_CONVERSATION, "CreateConversation" }, { TestIdentifier::EVENT_BUS_PING, "EventBusPing" },
+    { TestIdentifier::LEADER_ELECTION, "LeaderElection" } };
 
 /*
  * Use `TestIdentifierStringMap` to convert a string to a test identifier, if valid.
