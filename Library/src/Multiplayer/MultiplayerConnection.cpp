@@ -44,7 +44,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <exception>
 #include <fmt/format.h>
 #include <future>
 #include <iostream>
@@ -309,46 +308,20 @@ auto MultiplayerConnection::RequestClientId()
     };
 }
 
-std::function<async::task<void>()> MultiplayerConnection::StartListening()
+async::task<std::tuple<signalr::value, std::exception_ptr>> MultiplayerConnection::StartListening()
 {
-    return [this]() -> async::task<void>
+    if (!Connected)
     {
-        // Shared pointer to keep alive in local callback
-        auto StartListeningEvent = std::make_shared<async::event_task<void>>();
-        auto StartListeningContinuation = StartListeningEvent->get_task();
+        throw csp::common::continuations::ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::StartListening, Error not connected.");
+    }
 
-        if (!Connected)
-        {
-            throw csp::common::continuations::ErrorCodeException(
-                ErrorCode::NotConnected, "MultiplayerConnection::StartListening, Error not connected.");
-        }
-
-        std::function<void(signalr::value, std::exception_ptr)> LocalCallback
-            = [StartListeningEvent](signalr::value /*Result*/, std::exception_ptr Except)
-        {
-            if (Except != nullptr)
-            {
-                auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-                StartListeningEvent->set_exception(std::make_exception_ptr(
-                    csp::common::continuations::ErrorCodeException(Error, "MultiplayerConnection::StartListening, Error when starting listening.")));
-                return;
-            }
-
-            StartListeningEvent->set();
-        };
-
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
-        Connection->Invoke(
-            MultiplayerHubMethods.Get(MultiplayerHubMethod::START_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
-
-        return StartListeningContinuation;
-    };
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StartListening");
+    return Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::START_LISTENING), signalr::value(signalr::value_type::array));
 }
 
 void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_unused]] const csp::common::String& MultiplayerUri,
     const csp::common::String& AccessToken, const csp::common::String& DeviceId)
 {
-
     if (Connected)
     {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::AlreadyConnected);
@@ -393,7 +366,8 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
         .then(async::inline_scheduler(), DeleteEntities(ALL_ENTITIES_ID))
         .then(async::inline_scheduler(), RequestClientId())
         .then(async::inline_scheduler(), [this](uint64_t RetrievedClientId) { ClientId = RetrievedClientId; })
-        .then(async::inline_scheduler(), StartListening())
+        .then(async::inline_scheduler(), [this]() { return StartListening(); })
+        .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
         .then(async::inline_scheduler(),
             [this, Callback]()
             {
@@ -488,27 +462,14 @@ CSP_EVENT void MultiplayerConnection::SetNetworkInterruptionCallback(NetworkInte
     NetworkInterruptionCallback = Callback;
 }
 
-void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback)
+async::task<std::tuple<signalr::value, std::exception_ptr>> MultiplayerConnection::SetScopes(csp::common::String InSpaceId)
 {
     if (!Connected)
     {
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
-
-        return;
+        throw csp::common::continuations::ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::SetScopes, Error not connected.");
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
-    {
-        if (Except != nullptr)
-        {
-            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
-
-            return;
-        }
-
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
-    };
+    LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling SetScopes");
 
     std::vector<signalr::value> ScopesVec;
 
@@ -519,61 +480,31 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
     ParamsVec.push_back(ScopesVec);
     signalr::value Params = signalr::value(std::move(ParamsVec));
 
-    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_SCOPES), Params, LocalCallback);
+    return Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::SET_SCOPES), Params);
 }
 
-void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
+async::task<std::tuple<signalr::value, std::exception_ptr>> MultiplayerConnection::ResetScopes()
 {
     if (!Connected)
     {
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
-
-        return;
+        throw csp::common::continuations::ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::ResetScopes, Error not connected.");
     }
-
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
-    {
-        if (Except != nullptr)
-        {
-            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
-
-            return;
-        }
-
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
-    };
 
     std::vector<signalr::value> ParamsVec;
     signalr::value Params = signalr::value(std::move(ParamsVec));
-    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::RESET_SCOPES), Params, LocalCallback);
+    return Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::RESET_SCOPES), Params);
 }
 
-void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
+async::task<std::tuple<signalr::value, std::exception_ptr>> MultiplayerConnection::StopListening()
 {
     if (!Connected)
     {
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
-
-        return;
+        throw csp::common::continuations::ErrorCodeException(ErrorCode::NotConnected, "MultiplayerConnection::StopListening, Error not connected.");
     }
-
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value /*Result*/, std::exception_ptr Except)
-    {
-        if (Except != nullptr)
-        {
-            auto [Error, ExceptionErrorMsg] = ParseMultiplayerErrorFromExceptionPtr(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
-
-            return;
-        }
-
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
-    };
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "Calling StopListening");
 
-    Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::STOP_LISTENING), signalr::value(signalr::value_type::array), LocalCallback);
+    return Connection->Invoke(MultiplayerHubMethods.Get(MultiplayerHubMethod::STOP_LISTENING), signalr::value(signalr::value_type::array));
 }
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
