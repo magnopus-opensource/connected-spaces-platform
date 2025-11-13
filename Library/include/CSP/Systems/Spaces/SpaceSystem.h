@@ -55,6 +55,8 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
+class MultiplayerSystem;
+
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Group.
 /// Offers methods for creating, deleting and joining spaces.
@@ -354,7 +356,9 @@ public:
     CSP_ASYNC_RESULT void DuplicateSpace(const csp::common::String& SpaceId, const csp::common::String& NewName, SpaceAttributes NewAttributes,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback);
 
-    ///@}
+    // This is required due to a circular dependency between SpaceSystem and MultiplayerSystem.
+    // This will be broken when we move enter space logic into RealtimeEngine.
+    CSP_NO_EXPORT void SetMultiplayerSystem(csp::systems::MultiplayerSystem& MultiplayerSystem);
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
@@ -394,6 +398,9 @@ private:
         const std::shared_ptr<SpaceResult>& Space, const csp::systems::BufferAssetDataSource& Data);
     std::function<async::task<NullResult>()> BulkInviteUsersToSpaceIfNeccesary(
         SpaceSystem* SpaceSystem, const std::shared_ptr<SpaceResult>& Space, const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers);
+    // This currently checks if the default scope has leader election enabled, if so will enable server-side leader election in the
+    // OnlineRealtimeEngine and register the scope to keep track of its leader.
+    std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> RegisterScopesInSpace(csp::common::IRealtimeEngine* RealtimeEngine);
 
     // EnterSpace Continuations
     auto AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceSystem& SpaceSystem);
@@ -402,6 +409,8 @@ private:
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;
     Space CurrentSpace;
+
+    csp::systems::MultiplayerSystem* MultiplayerSystem;
 };
 
 } // namespace csp::systems

@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -30,6 +31,7 @@
 #include "Events/EventSystem.h"
 #include "MCS/MCSTypes.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
+#include "Multiplayer/Election/ScopeLeadershipManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
@@ -196,8 +198,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , ScriptRunner(&ScriptRunner)
     , NetworkEventBus(&NetworkEventBus)
 {
-    EnableLeaderElection();
-
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
@@ -205,7 +205,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
 {
-
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
@@ -324,7 +323,8 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
             Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
-        // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by Entities.
+        // Release to vague ownership. True ownership is blurry here. It could be shared between both Entities and Objects, or just owned by
+        // Entities.
         SpaceEntity* ReleasedAvatar = NewAvatar.release();
         Entities.Append(ReleasedAvatar);
         Avatars.Append(ReleasedAvatar);
@@ -334,6 +334,7 @@ std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)>
         {
             ElectionManager->OnLocalClientAdd(ReleasedAvatar, Avatars, *this->NetworkEventBus);
         }
+
         Callback(ReleasedAvatar);
     };
 }
@@ -584,6 +585,10 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
     }
 }
 
+void OnlineRealtimeEngine::SetOnElectedScopeLeaderCallback(ScopeLeaderCallback Callback) { OnElectedScopeLeaderCallback = Callback; }
+
+void OnlineRealtimeEngine::SetOnVacatedAsScopeLeaderCallback(ScopeLeaderCallback Callback) { OnVacatedAsScopeLeaderCallback = Callback; }
+
 namespace
 {
     void FireRemoteSpaceEntityCreatedCallback(
@@ -665,6 +670,66 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
     }
 }
 
+void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
+{
+    if (LeaderElectionManager == false)
+    {
+        return;
+    }
+
+    const std::vector<signalr::value> ParamsV = Params.as_array();
+
+    const std::string ScopeId = ParamsV[0].as_string();
+    const std::string UserId = ParamsV[1].as_string();
+    // std::string ConnectionId = ParamsV[2].as_string();
+    // const uint64_t ClientId = ParamsV.as_uinteger();
+    uint64_t ClientId = GetMultiplayerConnectionInstance()->GetClientId();
+
+    // If the default scope has a leader, we want to let the script system know.
+    if (ScopeId.c_str() == DefaultScopeId && ScriptSystemReadyCallback)
+    {
+        ScriptSystemReadyCallback(true);
+    }
+
+    LeaderElectionManager->OnElectedScopeLeader(ScopeId, ClientId);
+
+    // TODO: if client is this client, do we need to claim ownership?
+
+    if (OnElectedScopeLeaderCallback)
+    {
+        OnElectedScopeLeaderCallback(ScopeId.c_str(), UserId.c_str());
+    }
+}
+
+void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
+{
+    if (LeaderElectionManager == false)
+    {
+        return;
+    }
+
+    const std::vector<signalr::value> ParamsV = Params.as_array();
+
+    const std::string ScopeId = ParamsV[0].as_string();
+    const std::string UserId = ParamsV[1].as_string();
+    // std::string ConnectionId = ParamsV[2].as_string();
+    // const uint64_t ClientId = ParamsV.as_uinteger();
+    uint64_t ClientId = GetMultiplayerConnectionInstance()->GetClientId();
+
+    // If the default scope doesn't have a leader, we want to let the script system know.
+    if (ScopeId.c_str() == DefaultScopeId && ScriptSystemReadyCallback)
+    {
+        ScriptSystemReadyCallback(false);
+    }
+
+    LeaderElectionManager->OnVacatedAsScopeLeader(ScopeId, ClientId);
+
+    if (OnVacatedAsScopeLeaderCallback)
+    {
+        OnVacatedAsScopeLeaderCallback(ScopeId.c_str(), UserId.c_str());
+    }
+}
+
 void OnlineRealtimeEngine::GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback)
 {
     std::vector<signalr::value> ParamsVec;
@@ -710,17 +775,28 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             RealtimeEngineUtils::InitialiseEntityScripts(Entities);
             EnableEntityTick = true;
 
-            // Start leader election
             if (IsLeaderElectionEnabled())
             {
-                // Start listening for election events
-                //
-                // If we are the first client to connect then this
-                // will also set this client as the leader
-                ElectionManager->OnConnect(Avatars, Objects);
+                if (ServerSideELectionEnabled)
+                {
+                    // For server-side leader election, we want to listen for script run requests form other clients.
+                    // We will receive these if we are the leader and another clients modifies a script or sends an event.
+                    this->NetworkEventBus->ListenNetworkEvent(
+                        csp::multiplayer::NetworkEventRegistration { "CSPInternal::ClientElectionManager", RemoteRunScriptMessage },
+                        [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
+                }
+                else
+                {
+                    // Start listening for election events
+                    //
+                    // If we are the first client to connect then this
+                    // will also set this client as the leader
+                    ElectionManager->OnConnect(Avatars, Objects);
+                }
             }
             else
             {
+                // Leader election not enabled, set ourselves as the script owner.
                 RealtimeEngineUtils::DetermineScriptOwners(Entities, GetMultiplayerConnectionInstance()->GetClientId());
             }
 
@@ -735,23 +811,10 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 };
 
 void OnlineRealtimeEngine::FetchAllEntitiesAndPopulateBuffers(
-    const csp::common::String& SpaceId, csp::common::EntityFetchStartedCallback FetchStartedCallback)
+    const csp::common::String&, csp::common::EntityFetchStartedCallback FetchStartedCallback)
 {
-    /* Refresh the multiplayer connection to force the scopes to change
-     * This is wrapping a yet-to-be refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
-    auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
-    auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
-
-    /* Investigate whether this needs to happen at all, it 's overwhelmingly complex... If you' re doing anything AOI,
-     * this probably wants rewritten or removed along with your work. */
-    RefreshMultiplayerConnectionToEnactScopeChange(SpaceId, RefreshMultiplayerConnectionEvent);
-
-    RefreshMultiplayerConnectionContinuation.then(async::inline_scheduler(),
-        [this, FetchStartedCallback]()
-        {
-            this->RetrieveAllEntities(EntityFetchCompleteCallback);
-            FetchStartedCallback();
-        });
+    this->RetrieveAllEntities(EntityFetchCompleteCallback);
+    FetchStartedCallback();
 }
 
 void OnlineRealtimeEngine::LockEntityUpdate() { EntitiesLock->lock(); }
@@ -854,7 +917,24 @@ void OnlineRealtimeEngine::TickEntities()
 
     if (EnableEntityTick)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(*TickEntitiesLock, GetRealtimeEngineType(), Entities, LastTickTime, ElectionManager);
+        // If this is an online engine with leadership election enabled, then only the script leader may run scripts.
+        // If there is no leadership election, then we assume all clients may run scripts.
+        bool CanRunScripts = IsLocalClientLeader();
+
+        if (CanRunScripts)
+        {
+            LastTickTime = RealtimeEngineUtils::TickEntityScripts(*TickEntitiesLock, Entities, LastTickTime);
+        }
+        else
+        {
+            LastTickTime = std::chrono::system_clock::now();
+        }
+
+        if (LeaderElectionManager)
+        {
+            // If we are using server-side leader election, we ned to send heartbeats if we are the leader of any scopes.
+            LeaderElectionManager->Update();
+        }
     }
 
     {
@@ -874,6 +954,53 @@ void OnlineRealtimeEngine::TickEntities()
     }
 }
 
+void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
+{
+    if (IsLeaderElectionEnabled() && ServerSideELectionEnabled)
+    {
+        LeaderElectionManager->RegisterScope(ScopeId, LeaderId);
+        DefaultScopeId = ScopeId.c_str();
+    }
+    else
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "Tried to register scope when server-side leader election was disabled");
+    }
+}
+
+void OnlineRealtimeEngine::__AssumeScopeLeadership(const std::string& ScopeId)
+{
+    auto CB = [this](signalr::value Value, std::exception_ptr E)
+    {
+        if (E)
+        {
+            try
+            {
+                std::rethrow_exception(E);
+            }
+            catch (const std::exception& Exception)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    fmt::format("OnlineRealtimeEngine::__AssumeScopeLeadership Failed to send AssumeScopeLeadership with error: {}", Exception.what(),
+                        Exception.what())
+                        .c_str());
+            }
+            catch (...)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error,
+                    "OnlineRealtimeEngine::__AssumeScopeLeadership Failed to send AssumeScopeLeadership with an unknown error.");
+            }
+        }
+    };
+
+    std::vector<signalr::value> Params;
+    Params.push_back({ ScopeId });
+
+    MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
+        MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP), signalr::value { Params }, CB);
+}
+
+void OnlineRealtimeEngine::SetServerSideELectionEnabled(bool Value) { ServerSideELectionEnabled = Value; }
+
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
     for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
@@ -887,6 +1014,43 @@ bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
     return false;
 }
 
+void OnlineRealtimeEngine::OnRemoteRunScriptEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)
+{
+    // @Note This needs to be kept in sync with any changes to message format
+    const int64_t ContextId = static_cast<int64_t>(Data[0].GetInt());
+    const csp::common::String& ScriptText = Data[1].GetString();
+
+    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("ClientElectionManager::OnRemoteRunScriptEvent called. ContextId={0}, Script={1}", ContextId, ScriptText.c_str()).c_str());
+
+    if (LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str()))
+    {
+        ScriptRunner->RunScript(ContextId, ScriptText);
+    }
+    else
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error,
+            fmt::format("Client {} has received remote script event but is not the Leader", MultiplayerConnectionInst->GetClientId()).c_str());
+    }
+}
+
+void OnlineRealtimeEngine::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
+{
+    const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [&LogSystem = this->LogSystem](ErrorCode Error)
+    {
+        if (Error != ErrorCode::None)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "ClientProxy::SendEvent: SignalR connection: Error");
+        }
+    };
+
+    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+        fmt::format("SendRemoteRunScriptEvent Target={0} ContextId={1} Script='{2}'", TargetClientId, ContextId, ScriptText).c_str());
+
+    NetworkEventBus->SendNetworkEventToClient(RemoteRunScriptMessage,
+        { csp::common::ReplicatedValue(ContextId), csp::common::ReplicatedValue(ScriptText) }, TargetClientId, SignalRCallback);
+}
+
 void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 {
     for (size_t i = 0; i < Entities.Size(); ++i)
@@ -898,6 +1062,23 @@ void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
     }
 }
 
+bool OnlineRealtimeEngine::IsLocalClientLeader() const
+{
+    if (IsLeaderElectionEnabled())
+    {
+        if (ServerSideELectionEnabled)
+        {
+            return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
+        }
+        else
+        {
+            return ElectionManager->IsLocalClientLeader();
+        }
+    }
+
+    return false;
+}
+
 void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 {
     RealtimeEngineUtils::ClaimScriptOwnership(Entity, GetMultiplayerConnectionInstance()->GetClientId());
@@ -905,7 +1086,13 @@ void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
 
 void OnlineRealtimeEngine::EnableLeaderElection()
 {
-    if (ElectionManager == nullptr)
+    DisableLeaderElection();
+
+    if (ServerSideELectionEnabled)
+    {
+        LeaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*MultiplayerConnectionInst, *LogSystem);
+    }
+    else
     {
         ElectionManager = new ClientElectionManager(this, *LogSystem, *ScriptRunner);
     }
@@ -913,6 +1100,10 @@ void OnlineRealtimeEngine::EnableLeaderElection()
 
 void OnlineRealtimeEngine::DisableLeaderElection()
 {
+    if (LeaderElectionManager != nullptr)
+    {
+        LeaderElectionManager.reset(nullptr);
+    }
     if (ElectionManager != nullptr)
     {
         delete (ElectionManager);
@@ -920,16 +1111,25 @@ void OnlineRealtimeEngine::DisableLeaderElection()
     }
 }
 
-bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr); }
+bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr) || (LeaderElectionManager != nullptr); }
 
 uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
-    if (ElectionManager != nullptr && ElectionManager->GetLeader() != nullptr)
+    if (IsLeaderElectionEnabled())
     {
-        return ElectionManager->GetLeader()->GetId();
+        if (ServerSideELectionEnabled)
+        {
+            std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+            return LeaderId.has_value() ? *LeaderId : 0;
+        }
+        else
+        {
+            return ElectionManager->GetLeader()->GetId();
+        }
     }
     else
     {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning, "OnlineRealtimeEngine::GetLeaderId Called when leader election isn't enabled.");
         return 0;
     }
 }
@@ -945,59 +1145,17 @@ void OnlineRealtimeEngine::ResolveEntityHierarchy(csp::multiplayer::SpaceEntity*
     RealtimeEngineUtils::ResolveEntityHierarchy(*this, RootHierarchyEntities, Entity);
 }
 
-void OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(
-    csp::common::String SpaceId, std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent)
+async::task<void> OnlineRealtimeEngine::RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId)
 {
-    // A refactor to a regular continuation would be appreciated ... assuming we need to keep this method at all.
 
     // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
     // This hopefully will change in a future version when CHS support it.
-    MultiplayerConnectionInst->StopListening(
-        [MultiplayerConnection = MultiplayerConnectionInst, &LogSystem = this->LogSystem, SpaceId, RefreshMultiplayerContinuationEvent](
-            csp::multiplayer::ErrorCode Error)
-        {
-            if (Error != csp::multiplayer::ErrorCode::None)
-            {
-                RefreshMultiplayerContinuationEvent->set(Error);
-                return;
-            }
-
-            LogSystem->LogMsg(csp::common::LogLevel::Log, "MultiplayerConnection->StopListening success");
-            MultiplayerConnection->SetScopes(SpaceId,
-                [MultiplayerConnection, RefreshMultiplayerContinuationEvent, &LogSystem](csp::multiplayer::ErrorCode Error)
-                {
-                    LogSystem->LogMsg(csp::common::LogLevel::Verbose, "SetScopes callback");
-                    if (Error != csp::multiplayer::ErrorCode::None)
-                    {
-                        RefreshMultiplayerContinuationEvent->set(Error);
-                        return;
-                    }
-                    else
-                    {
-                        LogSystem->LogMsg(csp::common::LogLevel::Verbose, "SetScopes was called successfully");
-                    }
-
-                    MultiplayerConnection->StartListening()()
-                        .then(async::inline_scheduler(),
-                            [RefreshMultiplayerContinuationEvent, &LogSystem]()
-                            {
-                                LogSystem->LogMsg(csp::common::LogLevel::Log, " MultiplayerConnection->StartListening success");
-
-                                // Success!
-                                RefreshMultiplayerContinuationEvent->set({});
-                            })
-                        .then(async::inline_scheduler(),
-                            csp::common::continuations::InvokeIfExceptionInChain(*LogSystem,
-                                [&RefreshMultiplayerContinuationEvent](
-                                    [[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-                                {
-                                    // Error case
-                                    auto [Error, ExceptionMsg] = csp::multiplayer::MultiplayerConnection::ParseMultiplayerError(exception);
-                                    RefreshMultiplayerContinuationEvent->set(Error);
-                                    return;
-                                }));
-                });
-        });
+    return MultiplayerConnectionInst->StopListening()
+        .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
+        .then(async::inline_scheduler(), [this, SpaceId]() { return MultiplayerConnectionInst->SetScopes(SpaceId); })
+        .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
+        .then(async::inline_scheduler(), [this]() { return MultiplayerConnectionInst->StartListening(); })
+        .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
 }
 
 bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
@@ -1011,20 +1169,44 @@ bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
     else
     {
         // Only run script locally if we are the Leader
-        return ElectionManager->IsLocalClientLeader();
+        if (ServerSideELectionEnabled)
+        {
+            return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
+        }
+        else
+        {
+            return ElectionManager->IsLocalClientLeader();
+        }
     }
 }
 
 void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
 {
     // Run script on a remote leader...
-    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("RunScriptRemotely Script='{}'", ScriptText).c_str());
+    LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnlineRealtimeEngine::RunScriptRemotely Script='{}'", ScriptText).c_str());
 
-    ClientProxy* LeaderProxy = ElectionManager->GetLeader();
-
-    if (LeaderProxy)
+    if (ServerSideELectionEnabled)
     {
-        LeaderProxy->RunScript(ContextId, ScriptText);
+        std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
+
+        if (LeaderId.has_value())
+        {
+            // Note: This is cast to an int64. This is because we only support sending signed integers over the network.
+            SendRemoteRunScriptEvent(static_cast<int64_t>(*LeaderId), ContextId, ScriptText);
+        }
+        else
+        {
+            // TODO: error
+        }
+    }
+    else
+    {
+        ClientProxy* LeaderProxy = ElectionManager->GetLeader();
+        if (LeaderProxy)
+        {
+            // This client is the leader, so run the script.
+            LeaderProxy->RunScript(ContextId, ScriptText);
+        }
     }
 }
 
@@ -1319,9 +1501,13 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
             {
                 if (Entity->GetEntityType() == SpaceEntityType::Avatar)
                 {
-                    // All clients will take ownership of deleted avatars scripts
-                    // Last client which receives patch will end up with ownership
-                    ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
+                    // This can be removed as part of OF-1785.
+                    if (ServerSideELectionEnabled == false)
+                    {
+                        // All clients will take ownership of deleted avatars scripts
+                        // Last client which receives patch will end up with ownership
+                        ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
+                    }
 
                     // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                     // This covers disconnected clients as their avatar gets cleaned up after timing out.

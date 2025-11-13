@@ -248,6 +248,8 @@ private:
     void BindOnObjectPatch();
     void BindOnRequestToSendObject();
     void BindOnRequestToDisconnect();
+    void BindOnElectedScopeLeaderCallback();
+    void BindOnVacatedScopeLeaderCallback();
 
     // May not be null
     class csp::multiplayer::ISignalRConnection* Connection;
