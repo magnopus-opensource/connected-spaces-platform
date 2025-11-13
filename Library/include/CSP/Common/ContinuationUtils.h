@@ -83,7 +83,8 @@ template <typename T> const inline T GetResultExceptionOrInvalid(const csp::comm
     if (Exception.GetExceptionType() == csp::common::continuations::ExceptionType::Result)
     {
         const auto ResultException = static_cast<const csp::common::continuations::ResultException*>(&Exception);
-        return *static_cast<const T*>(&ResultException->GetResult());
+        const auto Result = ResultException->GetResult();
+        return T(Result.GetResultCode(), static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()), Result.GetFailureReason());
     }
 
     return T(csp::systems::EResultCode::Failed, 0);
