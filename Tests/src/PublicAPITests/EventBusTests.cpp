@@ -57,7 +57,14 @@ csp::systems::Space CreateTestSpaceAndEnterScope(csp::systems::SpaceSystem* Spac
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
-    Connection->SetScopes(Space.Id, ErrorCallback);
+    bool CallbackCalled = false;
+    Connection->SetScopes(Space.Id).then(async::inline_scheduler(),
+        [&CallbackCalled](std::tuple<signalr::value, std::exception_ptr> ResultPair)
+        {
+            EXPECT_TRUE(std::get<1>(ResultPair) != nullptr);
+            CallbackCalled = true;
+        });
+    WaitForCallback(CallbackCalled);
 
     return Space;
 }
