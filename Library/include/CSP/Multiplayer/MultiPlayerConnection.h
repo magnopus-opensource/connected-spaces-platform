@@ -27,6 +27,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 CSP_START_IGNORE
@@ -39,6 +40,11 @@ CSP_START_IGNORE
 template <typename T> class task;
 CSP_END_IGNORE
 }
+
+namespace signalr
+{
+class value;
+} // namespace signalr
 
 namespace csp::common
 {
@@ -166,20 +172,24 @@ public:
 
     CSP_START_IGNORE
     // Invoke "StartListening" on already created Connection
-    CSP_NO_EXPORT std::function<async::task<void>()> StartListening();
+    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> StartListening();
     CSP_END_IGNORE
 
     /// @brief Subscribes the connected user to the specified space's scope.
     /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
+    /// @return async::task<std::tuple<signalr::value, std::exception_ptr>> : The async task containing the result which will be passed to the next
+    /// continuation.
+    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> SetScopes(csp::common::String InSpaceId);
 
     /// @brief Stop listening to the multiplayer
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void StopListening(ErrorCodeCallbackHandler Callback);
+    /// @return async::task<std::tuple<signalr::value, std::exception_ptr>> : The async task containing the result which will be passed to the next
+    /// continuation.
+    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> StopListening();
 
     /// @brief Clears the connected user's subscription to their current set of scopes.
-    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    CSP_NO_EXPORT void ResetScopes(ErrorCodeCallbackHandler Callback);
+    /// @return async::task<std::tuple<signalr::value, std::exception_ptr>> : The async task containing the result which will be passed to the next
+    /// continuation.
+    CSP_NO_EXPORT async::task<std::tuple<signalr::value, std::exception_ptr>> ResetScopes();
 
     /// @brief MultiplayerConnection constructor
     /// @param LogSystem csp::common::LogSystem& LogSystem injection.
@@ -268,6 +278,10 @@ private:
 
     MultiplayerHubMethodMap MultiplayerHubMethods;
 
+    /*  We currently have a circular dependency between the MultiplayerConnection and OnlineRealtimeEngine.
+        This could easily be resolved by exposing an event registration from the MultiplayerConnection,
+        so the OnlineRealtimeEngine can receieve events agonstically from the MultiplayerConnection (Similar to what we did with the event bus).
+    */
     OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
 };
 
