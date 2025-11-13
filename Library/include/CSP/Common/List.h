@@ -265,7 +265,7 @@ public:
         std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
         ++CurrentSize;
 
-        T* ObjectPtr = &ObjectArray[0];
+        T* ObjectPtr = &ObjectArray[Index];
         new (ObjectPtr) T;
         ObjectArray[Index] = Item;
     }
