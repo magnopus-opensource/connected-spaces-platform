@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "../AssetSystemTestHelpers.h"
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
@@ -29,7 +28,6 @@
 
 #include "gtest/gtest.h"
 #include <chrono>
-#include <filesystem>
 #include <thread>
 
 using namespace csp::multiplayer;
@@ -49,10 +47,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
-
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    const char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
 
     // Log in
     csp::common::String UserId;
@@ -79,43 +73,6 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
     // Create ai chatbot component
     auto* AIChatbotComponent = static_cast<AIChatbotSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AIChatbot));
 
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    char UniqueAssetName[256];
-    SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
-
-    // Create asset collection
-    csp::systems::AssetCollection AssetCollection;
-    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-    // Create asset
-    csp::systems::Asset Asset;
-    CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-    Asset.FileName = "Guardrails.txt";
-    Asset.Name = "Guardrails";
-    Asset.Type = csp::systems::EAssetType::TEXT;
-
-    auto UploadFilePath = std::filesystem::absolute("assets/Guardrails.txt");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
-
-    csp::systems::BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
-    BufferSource.BufferLength = UploadFileSize;
-
-    BufferSource.SetMimeType("text/plain");
-
-    printf("Uploading asset data...\n");
-
-    // Upload data
-    UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-    delete[] UploadFileData;
-
     // Ensure defaults are set
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::Zero());
 
@@ -130,19 +87,20 @@ CSP_PUBLIC_TEST(CSPEngine, AIChatbotTests, AIChatbotSpaceComponentTest)
 
     // Set new values
     csp::common::String Voice = "Zephyr";
+    csp::common::String GuardrailAssetCollectionId = "TEST_GUARDRAIL_ASSET_COLLECTION_ID";
 
     AIChatbotComponent->SetPosition(csp::common::Vector3::One());
 
     AIChatbotComponent->SetVoice(Voice);
 
-    AIChatbotComponent->SetGuardrailAssetCollectionId(Asset.AssetCollectionId);
+    AIChatbotComponent->SetGuardrailAssetCollectionId(GuardrailAssetCollectionId);
 
     AIChatbotComponent->SetVisualState(AIChatbotVisualState::Listening);
 
     // Ensure values are set correctly
     EXPECT_EQ(AIChatbotComponent->GetPosition(), csp::common::Vector3::One());
 
-    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), Asset.AssetCollectionId);
+    EXPECT_EQ(AIChatbotComponent->GetGuardrailAssetCollectionId(), GuardrailAssetCollectionId);
 
     EXPECT_EQ(AIChatbotComponent->GetVoice(), Voice);
 
