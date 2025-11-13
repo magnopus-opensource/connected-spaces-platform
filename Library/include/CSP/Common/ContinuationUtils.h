@@ -61,18 +61,20 @@ public:
 class ResultException : public ExpectedExceptionBase
 {
 public:
-    ResultException(const std::string& Message, const csp::systems::ResultBase& Result)
+    template <typename T>
+    ResultException(const std::string& Message, const T& Result)
         : ExpectedExceptionBase(Message)
-        , Result(Result)
+        , Result(std::make_shared<T>(Result))
     {
     }
 
     const ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
 
-    const csp::systems::ResultBase& GetResult() const { return Result; }
+    const csp::systems::ResultBase& GetResult() const { return *Result; }
 
 private:
-    const csp::systems::ResultBase Result;
+    // Throwing an exception copy-initializes a temporary object, meaning unique_ptr will fail due to enforcing exclusive ownership.
+    std::shared_ptr<const csp::systems::ResultBase> Result;
 };
 
 template <typename T> const inline T GetResultExceptionOrInvalid(const csp::common::continuations::ExpectedExceptionBase& Exception)
