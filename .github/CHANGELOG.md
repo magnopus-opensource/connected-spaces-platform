@@ -18,6 +18,11 @@ All notable changes to this project will be documented in this file.
 - [NT-0] fix: Use const string ref for return type by MAG-AlessioRegalbuto in https://github.com/magnopus-opensource/connected-spaces-platform/pull/856
   As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
 
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Finish NO_EXPORT heirarchy by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/848
+  Adds NO_EXPORT blocks to symbols that derive from, or are dependent on, base constructs that also have NO_EXPORT. Done in service of the Unity Interop API SWIG initiative.
+
 ## Historical releases
 
 In November 2025 we migrated to continuous nightly deployments. Please see the [releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases) section of the `connected-spaces-platform` repo for changelogs associated with earlier releases.
