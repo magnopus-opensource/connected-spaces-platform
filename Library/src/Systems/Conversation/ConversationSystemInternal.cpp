@@ -289,7 +289,7 @@ namespace
 
             if (ThumbnailIds.size() == 0)
             {
-                throw csp::common::continuations::ResultException("No Thumbnails exist.", Result);
+                throw csp::common::continuations::ResultException("No Thumbnails exist.", MakeInvalid<AssetCollectionsResult>());
             }
 
             return ThumbnailIds;
@@ -826,7 +826,7 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& ConversationId,
@@ -897,7 +897,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
         .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback)
@@ -938,7 +938,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<NullResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotation(
@@ -976,7 +976,7 @@ void ConversationSystemInternal::GetAnnotation(
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
@@ -1048,7 +1048,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(common::continuations::InvokeIfExceptionInChain(
             *LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); },
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
             [Callback]([[maybe_unused]] const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
@@ -1092,7 +1092,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<NullResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
@@ -1116,7 +1116,7 @@ void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));
 }
 
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
