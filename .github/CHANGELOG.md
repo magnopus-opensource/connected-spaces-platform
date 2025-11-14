@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🍰 🙌 New Features
 
+- [OF-1807] feat: support text asset type to support ai chatbot by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/853
+  Introduce a new TEXT EAssetType to support storage of prompt and guardrail assets for the AI chatbot component.
+
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/850
+  Inserting elements into a List was always adding them as the 0th index rather than at the position specified.
+- [OB-4723] fix: exceptions in continuations return incorrect result by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/846
+  In the continuation flow, we would return an invalid result and therefore lose the associated result data. This change ensures the result data from the exception is preserved.
+- [NT-0] fix: Use const string ref for return type by MAG-AlessioRegalbuto in https://github.com/magnopus-opensource/connected-spaces-platform/pull/856
+  As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
 
 ## Historical releases
 
@@ -28,4 +40,4 @@ Changelog categories are listed below. Please use the appropriate unicode symbol
 
 🔨 🔨 Chore
 
-🔩 🔧 Build
+🔩 🔧 Ci
