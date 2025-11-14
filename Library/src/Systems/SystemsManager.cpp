@@ -28,6 +28,7 @@
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
+#include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
@@ -100,6 +101,8 @@ AnalyticsSystem* SystemsManager::GetAnalyticsSystem() { return AnalyticsSystem; 
 
 ExternalServiceProxySystem* SystemsManager::GetExternalServicesProxySystem() { return ExternalServiceProxySystem; }
 
+MultiplayerSystem* SystemsManager::GetMultiplayerSystem() { return MultiplayerSystem; }
+
 csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection() { return MultiplayerConnection; }
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
@@ -148,8 +151,10 @@ SystemsManager::SystemsManager()
     , QuotaSystem(nullptr)
     , SequenceSystem(nullptr)
     , HotspotSequenceSystem(nullptr)
+    , ConversationSystem(nullptr)
     , AnalyticsSystem(nullptr)
     , ExternalServiceProxySystem(nullptr)
+    , MultiplayerSystem(nullptr)
 {
 }
 
@@ -207,6 +212,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
         = new csp::systems::ConversationSystemInternal(AssetSystem, SpaceSystem, UserSystem, MultiplayerConnection->GetEventBus(), *LogSystem);
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
+    MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
 }
 
 void SystemsManager::DestroySystems()
@@ -233,7 +239,7 @@ void SystemsManager::DestroySystems()
     delete VoipSystem;
     delete MultiplayerConnection; // Also deletes NetworkEventBus
     delete ScriptSystem;
-
+    delete MultiplayerSystem;
     delete WebClient;
     delete LogSystem;
 }

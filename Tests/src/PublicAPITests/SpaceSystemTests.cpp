@@ -87,7 +87,7 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem, const String& Name, const
     OutSpace = Result.GetSpace();
 }
 
-void CreateDefaultTestSpace(SpaceSystem* SpaceSystem, Space& OutSpace)
+void CreateDefaultTestSpace(SpaceSystem* SpaceSystem, Space& OutSpace, csp::systems::SpaceAttributes Attributes)
 {
     // Create space
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
@@ -96,7 +96,7 @@ void CreateDefaultTestSpace(SpaceSystem* SpaceSystem, Space& OutSpace)
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, OutSpace);
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, Attributes, nullptr, nullptr, nullptr, nullptr, OutSpace);
 }
 
 void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace)
