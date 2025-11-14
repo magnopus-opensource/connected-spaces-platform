@@ -289,7 +289,7 @@ namespace
 
             if (ThumbnailIds.size() == 0)
             {
-                throw csp::common::continuations::ResultException("No Thumbnails exist.", Result);
+                throw csp::common::continuations::ResultException("No Thumbnails exist.", MakeInvalid<AssetCollectionsResult>());
             }
 
             return ThumbnailIds;
@@ -335,17 +335,16 @@ namespace
 }
 
 ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* AssetSystem, systems::SpaceSystem* SpaceSystem,
-    systems::UserSystem* UserSystem, multiplayer::NetworkEventBus* NetworkEventBus, csp::common::LogSystem& LogSystem)
-    : SystemBase(NetworkEventBus, &LogSystem)
+    systems::UserSystem* UserSystem, multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem)
+    : SystemBase(&EventBus, &LogSystem)
     , AssetSystem { AssetSystem }
     , SpaceSystem { SpaceSystem }
     , UserSystem { UserSystem }
-    , NetworkEventBus { NetworkEventBus }
 {
     RegisterSystemCallback();
 }
 
-ConversationSystemInternal::~ConversationSystemInternal() { DeregisterSystemCallback(); }
+ConversationSystemInternal::~ConversationSystemInternal() { }
 
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {
@@ -384,7 +383,7 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
         multiplayer::MessageInfo MessageInfo
             = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(AddCommentContainerResult.GetAssetCollection());
 
-        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, NetworkEventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::NewConversation, MessageInfo, EventBusPtr, SignalRCallback);
     };
 
     const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
@@ -437,7 +436,7 @@ void ConversationSystemInternal::DeleteConversation(const common::String& Conver
 
         multiplayer::MessageInfo MessageInfo
             = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, NetworkEventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteConversation, MessageInfo, EventBusPtr, SignalRCallback);
     };
 
     AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
@@ -472,7 +471,7 @@ void ConversationSystemInternal::AddMessage(
         };
 
         const multiplayer::MessageInfo& MessageInfo = MessageResultCallbackResult.GetMessageInfo();
-        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, NetworkEventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBusPtr, SignalRCallback);
     };
 
     multiplayer::MessageInfo MessageInfo(ConversationId, false, Message);
@@ -531,7 +530,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
             this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
         };
 
-        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, NetworkEventBus, SignalRCallback);
+        SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, Info, EventBusPtr, SignalRCallback);
     };
 
     AssetSystem->GetAssetCollectionById(MessageId, GetMessageCallback);
@@ -633,7 +632,7 @@ void ConversationSystemInternal::UpdateConversation(
             auto UpdatedInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(
                 GetUpdatedConversationResult.GetAssetCollection());
 
-            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, NetworkEventBus, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::ConversationInformation, UpdatedInfo, EventBusPtr, SignalRCallback);
         };
 
         const AssetCollection& ConversationAssetCollection = GetConversationResult.GetAssetCollection();
@@ -722,7 +721,7 @@ void ConversationSystemInternal::UpdateMessage(const common::String& /*Conversat
                 INVOKE_IF_NOT_NULL(Callback, Result);
             };
 
-            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), NetworkEventBus, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBusPtr, SignalRCallback);
         };
 
         const AssetCollection& MessageAssetCollection = GetMessageResult.GetAssetCollection();
@@ -827,7 +826,7 @@ void ConversationSystemInternal::GetConversationAnnotation(const csp::common::St
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::SetConversationAnnotation(const csp::common::String& ConversationId,
@@ -889,7 +888,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, NetworkEventBus))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::SetConversationAnnotation, ConversationAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetConversationAnnotation, successfully sent multiplayer event",
             MakeInvalid<multiplayer::AnnotationResult>(), *LogSystem))
@@ -898,7 +897,7 @@ void ConversationSystemInternal::SetConversationAnnotation(const csp::common::St
         .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common::String& ConversationId, systems::NullResultCallback Callback)
@@ -916,7 +915,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(ConversationAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, NetworkEventBus))
+        .then(SendConversationEvent(multiplayer::ConversationEventType::DeleteConversationAnnotation, ConversationAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
         // 4. Delete annoation asset
@@ -939,7 +938,7 @@ void ConversationSystemInternal::DeleteConversationAnnotation(const csp::common:
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<NullResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotation(
@@ -977,7 +976,7 @@ void ConversationSystemInternal::GetAnnotation(
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); }));
 }
 
 void ConversationSystemInternal::SetAnnotation(const csp::common::String& ConversationId, const csp::common::String& MessageId,
@@ -1039,7 +1038,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
             "Failed to update message asset collection metadata.", {}, {}, {}))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 7. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, NetworkEventBus))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::SetAnnotation, MessageAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::SetAnnotation, successfully sent multiplayer event", MakeInvalid<multiplayer::AnnotationResult>(),
             *LogSystem))
@@ -1049,7 +1048,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(common::continuations::InvokeIfExceptionInChain(
             *LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationResult>()); },
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
             [Callback]([[maybe_unused]] const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));
 }
 
@@ -1070,7 +1069,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(RemoveAnnotationMetadata(AssetSystem))
         .then(SetMessageAssetCollection(MessageAssetCollection))
         // 3. Send multiplayer event
-        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, NetworkEventBus))
+        .then(SendConversationMessageEvent(multiplayer::ConversationEventType::DeleteAnnotation, MessageAssetCollection, EventBusPtr))
         .then(common::continuations::AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
             "ConversationSystemInternal::DeleteAnnotation, successfully sent multiplayer event", MakeInvalid<systems::NullResult>(), *LogSystem))
         // 4. Delete annoation asset
@@ -1093,7 +1092,7 @@ void ConversationSystemInternal::DeleteAnnotation(
         .then(systems::continuations::ReportSuccess(Callback, "Successfully deleted annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<NullResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<NullResult>(exception)); }));
 }
 
 void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
@@ -1117,7 +1116,7 @@ void ConversationSystemInternal::GetAnnotationThumbnailsForConversation(
         .then(systems::continuations::SendResult(Callback, "Successfully retrieved annotation thumbnails."))
         .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
-            { Callback(MakeInvalid<multiplayer::AnnotationThumbnailCollectionResult>()); }));
+            { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationThumbnailCollectionResult>(exception)); }));
 }
 
 void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
@@ -1152,15 +1151,6 @@ void ConversationSystemInternal::RegisterSystemCallback()
                 Events.push_back(std::move(EventDataCopy));
             }
         });
-}
-
-void ConversationSystemInternal::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ConversationSystemInternal",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::Conversation)));
-    }
 }
 
 void ConversationSystemInternal::FlushEvents()

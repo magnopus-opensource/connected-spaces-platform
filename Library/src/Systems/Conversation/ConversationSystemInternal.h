@@ -50,7 +50,7 @@ public:
     CSP_END_IGNORE
 
     ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
-        csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+        csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
 
     ~ConversationSystemInternal();
 
@@ -111,8 +111,6 @@ public:
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
-    /// @brief Deregisters the system from listening for the named event.
-    void DeregisterSystemCallback() override;
 
     // Attempt to flush any events that haven't been sent.
     // They may fail to send in situtations where the conversation component hasn't been created before the creation event fires.
@@ -124,8 +122,6 @@ private:
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
     csp::systems::UserSystem* UserSystem;
-
-    csp::multiplayer::NetworkEventBus* NetworkEventBus;
 
     std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
     std::vector<std::unique_ptr<csp::common::ConversationNetworkEventData>> Events;

@@ -119,15 +119,13 @@ public:
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
-    /// @brief Deregisters the system from listening for the named event.
-    void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
     CSP_NO_EXPORT void OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    SequenceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, csp::common::LogSystem& LogSystem);
+    SequenceSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, csp::common::LogSystem& LogSystem);
     ~SequenceSystem();
 
     csp::services::ApiBase* SequenceAPI;

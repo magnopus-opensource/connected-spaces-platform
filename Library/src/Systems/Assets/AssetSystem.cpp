@@ -99,6 +99,8 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
         return "Annotation";
     case systems::EAssetType::ANNOTATION_THUMBNAIL:
         return "AnnotationThumbnail";
+    case systems::EAssetType::TEXT:
+        return "Text";
     default:
         assert(false && "Unsupported Asset Type!");
         return "Image";
@@ -358,13 +360,13 @@ AssetSystem::AssetSystem()
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::NetworkEventBus* InEventBus, common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, InEventBus, &LogSystem)
+AssetSystem::AssetSystem(web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, common::LogSystem& LogSystem)
+    : SystemBase(WebClient, &EventBus, &LogSystem)
 {
-    PrototypeAPI = new chs::PrototypeApi(InWebClient);
-    AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
+    PrototypeAPI = new chs::PrototypeApi(WebClient);
+    AssetDetailAPI = new chs::AssetDetailApi(WebClient);
 
-    FileManager = new web::RemoteFileManager(InWebClient);
+    FileManager = new web::RemoteFileManager(WebClient);
 
     RegisterSystemCallback();
 }
@@ -375,8 +377,6 @@ AssetSystem::~AssetSystem()
 
     delete (AssetDetailAPI);
     delete (PrototypeAPI);
-
-    DeregisterSystemCallback();
 }
 
 void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback)
@@ -1799,16 +1799,6 @@ void AssetSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAssetDetailBlobChangedEvent(NetworkEventData); });
-}
-
-void AssetSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::AssetSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged)));
-    }
 }
 
 void AssetSystem::OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

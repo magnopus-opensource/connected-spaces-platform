@@ -67,7 +67,8 @@ enum class EAssetType
     GAUSSIAN_SPLAT,
     MATERIAL,
     ANNOTATION,
-    ANNOTATION_THUMBNAIL
+    ANNOTATION_THUMBNAIL,
+    TEXT
 };
 
 enum class EAssetPlatform
@@ -155,7 +156,8 @@ public:
     void SetMimeType(const csp::common::String& InMimeType) override;
 
 private:
-    void SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
+    CSP_NO_EXPORT void SetUploadContent(
+        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
 
     csp::common::String MimeType = "application/octet-stream";
 };
@@ -183,7 +185,8 @@ public:
     void SetMimeType(const csp::common::String& InMimeType) override;
 
 private:
-    void SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
+    CSP_NO_EXPORT void SetUploadContent(
+        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
     csp::common::String MimeType = "application/octet-stream";
 };
 
@@ -221,7 +224,7 @@ protected:
     AssetResult(void*) {};
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& InResult)
         : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
@@ -259,7 +262,7 @@ protected:
     AssetsResult(void*) {};
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Asset> Assets;
 };
@@ -299,7 +302,7 @@ protected:
 
 private:
     UriResult(const csp::common::String Uri);
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     void SetResponseBody(const csp::common::String& Contents);
 
@@ -331,7 +334,7 @@ protected:
     AssetDataResult(void*);
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief Callback containing asset.

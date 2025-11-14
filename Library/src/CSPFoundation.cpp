@@ -235,6 +235,13 @@ csp::common::String* CSPFoundation::DeviceId = nullptr;
 csp::common::String* CSPFoundation::ClientUserAgentString = nullptr;
 csp::common::String* CSPFoundation::Tenant = nullptr;
 
+// Default Feature Flag values should be defined here. Example shown below:
+csp::common::Array<csp::FeatureFlag> csp::CSPFoundation::FeatureFlags;
+// csp::common::Array<FeatureFlag> CSPFoundation::FeatureFlags = {
+//     { EFeatureFlag::MyFeatureA, false, "Description of MyFeatureA" },
+//     { EFeatureFlag::MyFeatureB, true, "Description of MyFeatureB" }
+// };
+
 namespace
 {
     // Take the input endpoint to the cloud services, and get the multiplayer URIS
@@ -364,6 +371,34 @@ namespace
         }
         return false;
     }
+
+    void ApplyFeatureFlagOverrides(
+        const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides, csp::common::Array<csp::FeatureFlag>& FeatureFlags)
+    {
+        if (!FeatureFlagOverrides.HasValue())
+        {
+            return;
+        }
+
+        for (const auto& OverrideFlag : *FeatureFlagOverrides)
+        {
+            bool FeatureFlagFound = false;
+            for (auto& Flag : FeatureFlags)
+            {
+                if (Flag.Type == OverrideFlag.Type)
+                {
+                    Flag.Enabled = OverrideFlag.Enabled;
+                    FeatureFlagFound = true;
+                    break;
+                }
+            }
+            if (!FeatureFlagFound)
+            {
+                CSP_LOG_MSG(csp::common::LogLevel::Warning,
+                    fmt::format("Unknown feature flag passed with integer value: {}", static_cast<int>(OverrideFlag.Type)).c_str());
+            }
+        }
+    }
 }
 
 EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& EndpointRootURI)
@@ -398,15 +433,16 @@ EndpointURIs CSPFoundation::CreateEndpointsFromRoot(const csp::common::String& E
     return EndpointsURI;
 }
 
-bool CSPFoundation::Initialise(
-    const csp::common::String& EndpointRootURI, const csp::common::String& InTenant, const csp::ClientUserAgent& ClientUserAgentHeader)
+bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
+    const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     // Nullptr means the signalRConnection will be internally instantiated
-    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr);
+    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, FeatureFlagOverrides);
 }
 
 bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
-    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject)
+    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject,
+    const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
 
@@ -418,6 +454,9 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     ClientUserAgentString = new csp::common::String("");
 
     SetClientUserAgentInfo(ClientUserAgentHeader);
+
+    // Apply feature flag overrides
+    ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
 
     csp::systems::SystemsManager::Instantiate(SignalRInject);
 
@@ -497,6 +536,58 @@ const ClientUserAgent& CSPFoundation::GetClientUserAgentInfo() { return *ClientU
 const csp::common::String& CSPFoundation::GetClientUserAgentString() { return *ClientUserAgentString; }
 
 const csp::common::String& CSPFoundation::GetTenant() { return *Tenant; }
+
+bool CSPFoundation::IsFeatureEnabled(EFeatureFlag Flag)
+{
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
+
+    if (it != FeatureFlags.end())
+    {
+        return it->Enabled;
+    }
+    else
+    {
+        CSP_LOG_MSG(
+            csp::common::LogLevel::Warning, fmt::format("Unknown feature flag queried with integer value: {}", static_cast<int>(Flag)).c_str());
+
+        return false;
+    }
+}
+
+const csp::common::Array<FeatureFlag>& CSPFoundation::GetFeatureFlags() { return FeatureFlags; }
+
+csp::common::String CSPFoundation::GetFeatureFlagDescription(EFeatureFlag Flag)
+{
+    auto it = std::find_if(FeatureFlags.begin(), FeatureFlags.end(), [Flag](const FeatureFlag& FeatureFlag) { return FeatureFlag.Type == Flag; });
+
+    if (it != FeatureFlags.end())
+    {
+        return it->GetDescription();
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning,
+            fmt::format("Unknown feature flag description requested with integer value: {}", static_cast<int>(Flag)).c_str());
+
+        return "";
+    }
+}
+
+void CSPFoundation::__AddFeatureFlagForTesting(EFeatureFlag Type, bool IsEnabled, const csp::common::String Description)
+{
+    csp::common::Array<FeatureFlag> NewFeatureFlags(FeatureFlags.Size() + 1);
+
+    for (size_t i = 0; i < FeatureFlags.Size(); i++)
+    {
+        NewFeatureFlags[i] = FeatureFlags[i];
+    }
+
+    NewFeatureFlags[FeatureFlags.Size()] = { Type, IsEnabled, Description };
+
+    FeatureFlags = NewFeatureFlags;
+}
+
+void CSPFoundation::__ResetFeatureFlagsForTesting() { CSPFoundation::FeatureFlags = csp::common::Array<csp::FeatureFlag>(); }
 
 bool ServiceDefinition::CheckPrerequisites(const csp::systems::ServicesDeploymentStatus& ServicesDeploymentStatus) const
 {

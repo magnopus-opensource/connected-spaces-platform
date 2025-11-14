@@ -83,8 +83,6 @@ namespace {{ definition.translated_namespace }}
 
             __safeTypeName = $"{{ definition.full_safe_type_name }}{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}";
 
-            IntPtr ptr;
-
 {{# definition.methods }}
             {{> Template/InitialiseDelegate }}
 
