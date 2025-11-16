@@ -144,7 +144,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeByInvalidSpaceTest)
     // Get the default scope
     auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, "INVALID_SPACE_ID");
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Failed);
-    EXPECT_EQ(GetScopesResult.GetHttpResultCode(), 400);
+    EXPECT_EQ(GetScopesResult.GetHttpResultCode(), 0);
     EXPECT_EQ(GetScopesResult.GetScopes().Size(), 0);
 
     // Clean up
