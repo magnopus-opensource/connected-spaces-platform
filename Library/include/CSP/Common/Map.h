@@ -34,6 +34,8 @@ template <typename TKey, typename TValue> class CSP_API Map
 {
 public:
     using MapType = std::map<TKey, TValue>;
+    using iterator = typename MapType::iterator;
+    using const_iterator = typename MapType::const_iterator;
 
     /// @brief Constructs a map with 0 elements.
     Map() { Container = new MapType(); }
@@ -120,6 +122,19 @@ public:
     /// @param Key const TKey& : key to check if the map contains
     /// @return bool
     bool HasKey(const TKey& Key) const { return Container->count(Key) > 0; }
+
+    // Iterators
+    CSP_NO_EXPORT iterator begin() { return Container->begin(); }
+    CSP_NO_EXPORT const_iterator begin() const { return Container->begin(); }
+    CSP_NO_EXPORT const_iterator cbegin() const { return Container->cbegin(); }
+
+    CSP_NO_EXPORT iterator end() { return Container->end(); }
+    CSP_NO_EXPORT const_iterator end() const { return Container->end(); }
+    CSP_NO_EXPORT const_iterator cend() const { return Container->cend(); }
+
+    // These finds are more efficient than using std::find over the iterators (non-linear container)
+    CSP_NO_EXPORT iterator Find(const TKey& Key) { return Container->find(Key); }
+    CSP_NO_EXPORT const_iterator Find(const TKey& Key) const { return Container->find(Key); }
 
     /// @brief Returns a copy of all keys in this map.
     ///        This copy should be disposed by the caller once it is no longer needed.
