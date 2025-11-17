@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - [OF-1807] feat: support text asset type to support ai chatbot by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/853
   Introduce a new TEXT EAssetType to support storage of prompt and guardrail assets for the AI chatbot component.
+- [OF-1784] feat: Multiplayer System by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/842
+  Part 1 of the server-side leader election work. Addition of a new Multiplayer System which exposes the necessary functionality for leader election from the mcs MultiplayerServices api.
 
 ### 🐛 🔨 Bug Fixes
 
