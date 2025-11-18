@@ -51,7 +51,7 @@ public:
     // Called when we receive a leader vacated event.
     // This will happen if an election is manually triggered for a scope that already has a leader,
     // or the current leader becomes unavailable (heartbeat not sent within a time, or the client disconnects".
-    void OnVacatedAsScopeLeader(const std::string& ScopeId, uint64_t ClientId);
+    void OnVacatedAsScopeLeader(const std::string& ScopeId);
 
     // Loop Scopes and calls SendLeaderHeartbeat if the local client is the leader of the scope
     // and LeaderElectionHeartbeatInterval has passed since the last heartbeat.

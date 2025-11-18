@@ -66,15 +66,15 @@ void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& ScopeId, ui
     Scopes[ScopeId] = { ClientId, std::chrono::steady_clock::time_point {} };
 }
 
-void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId, uint64_t ClientId)
+void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId)
 {
     auto ScopeIt = Scopes.find(ScopeId);
 
     if (ScopeIt == Scopes.end())
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error,
-            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {0} that isn't registered, for vacated leader: {1}.",
-                ScopeId, ClientId)
+            fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {0} that isn't registered.",
+                ScopeId)
                 .c_str());
         return;
     }
@@ -83,16 +83,6 @@ void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId, 
 
     if (Data.has_value())
     {
-        if (Data->LeaderClientId != ClientId)
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Warning,
-                fmt::format(
-                    "ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for the scope: {0}, that doesn't have the expected ClientId: "
-                    "{1}, instead has: {2}.",
-                    ScopeId, ClientId, Data->LeaderClientId)
-                    .c_str());
-        }
-
         // Leader has been vacated, so null the data.
         Data = std::nullopt;
     }
@@ -100,8 +90,8 @@ void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId, 
     {
         LogSystem.LogMsg(csp::common::LogLevel::Warning,
             fmt::format(
-                "ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for the scope: {0} that doesn't have a leader, for new leader: {1}",
-                ScopeId, ClientId)
+                "ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for the scope: {0} that doesn't have a leader.",
+                ScopeId)
                 .c_str());
     }
 
