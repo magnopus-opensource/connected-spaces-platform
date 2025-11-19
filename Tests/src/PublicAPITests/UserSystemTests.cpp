@@ -31,6 +31,7 @@
 #include "gtest/gtest.h"
 #include <filesystem>
 #include <fstream>
+#include <future>
 
 using namespace std::chrono_literals;
 
@@ -350,7 +351,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -377,7 +378,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -404,7 +405,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsRefreshTokenLogi
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-        [&CallbackCalled, &ExpectedErrorLog](const csp::common::String& Message)
+        [&CallbackCalled, &ExpectedErrorLog](csp::common::LogLevel, const csp::common::String& Message)
         {
             CallbackCalled = true;
             EXPECT_EQ(ExpectedErrorLog, Message);
@@ -544,7 +545,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
 
     RAIIMockLogger MockLogger {};
     csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(WarningLog)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(1);
 
     auto TokenOptions = csp::systems::TokenOptions();
     TokenOptions.ExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
@@ -1121,142 +1122,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 }
 #endif
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    auto& LogSystem = *SystemsManager.GetLogSystem();
-    bool LogConfirmed1 = false, LogConfirmed2 = false;
-    csp::common::String TestMsg1, TestMsg2;
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    // Set up Log callbacks
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
-
-    TestMsg1 = "AgoraUserTokenResult invalid";
-    TestMsg2 = "AgoraUserTokenResult doesn't contain expected member: token";
-
-    csp::systems::AgoraUserTokenParams Params;
-    Params.AgoraUserId = UserId;
-    Params.ChannelName = Space.Id;
-    Params.ReferenceId = Space.Id;
-    Params.Lifespan = 10000;
-    Params.ShareAudio = true;
-    Params.ShareScreen = false;
-    Params.ShareVideo = false;
-    Params.ReadOnly = false;
-
-    // Get token
-    auto [Result] = AWAIT_PRE(UserSystem, GetAgoraUserToken, RequestPredicate, Params);
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_FALSE(Result.GetValue().IsEmpty());
-    WaitForCallback(LogConfirmed1);
-    EXPECT_FALSE(LogConfirmed1);
-    WaitForCallback(LogConfirmed2);
-    EXPECT_FALSE(LogConfirmed2);
-
-    LogSystem.ClearAllCallbacks();
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, PostServiceProxyTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-
-    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-
-    char UniqueSpaceName[256];
-    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-    char UniqueAssetCollectionName[256];
-    SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-    auto& LogSystem = *SystemsManager.GetLogSystem();
-    bool LogConfirmed1 = false, LogConfirmed2 = false;
-    csp::common::String TestMsg1, TestMsg2;
-
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
-    CreateSpace(
-        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
-
-    // Set up Log callbacks
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed1 = InMessage == TestMsg1; });
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed2 = InMessage == TestMsg2; });
-    TestMsg1 = "PostServiceProxyResult invalid";
-    TestMsg2 = "PostServiceProxyResult doesn't contain expected member: token";
-
-    csp::systems::TokenInfoParams Params;
-    Params.ServiceName = "Agora";
-    Params.OperationName = "getUserToken";
-    Params.SetHelp = false;
-    Params.Parameters["userId"] = UserId;
-    Params.Parameters["channelName"] = Space.Id;
-    Params.Parameters["referenceId"] = Space.Id;
-    Params.Parameters["lifespan"] = std::to_string(10000).c_str();
-    Params.Parameters["readOnly"] = "true";
-    Params.Parameters["shareAudio"] = "false";
-    Params.Parameters["shareVideo"] = "false";
-    Params.Parameters["shareScreen"] = "false";
-
-    // Get agora token through PostServiceProxy
-    auto [Result] = AWAIT_PRE(UserSystem, PostServiceProxy, RequestPredicate, Params);
-
-    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_FALSE(Result.GetValue().IsEmpty());
-    WaitForCallback(LogConfirmed1);
-    EXPECT_FALSE(LogConfirmed1);
-    WaitForCallback(LogConfirmed2);
-    EXPECT_FALSE(LogConfirmed2);
-
-    LogSystem.ClearAllCallbacks();
-
-    // Delete space
-    DeleteSpace(SpaceSystem, Space.Id);
-
-    // Log out
-    LogOut(UserSystem);
-}
-
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 {
     SetRandSeed();
@@ -1354,4 +1219,43 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
     EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
     EXPECT_NE(Result.GetValue(), "");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
+{
+    if (std::string(EndpointBaseURI()).find(":8081") != std::string::npos)
+    {
+        // Skip if we're running on Local MCS. This is hopefully a temporary hack as CHS do intend that this data be seeded in local MCS, it just
+        // hasn't managed to take quite yet. Doing this to unblock the work.
+        GTEST_SKIP() << "Default application settings not seeded on local MCS";
+    }
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+
+    csp::systems::Profile TestUser = CreateTestUser();
+
+    std::promise<csp::common::LoginState> SettingsPromise;
+    std::future<csp::common::LoginState> SettingsFuture = SettingsPromise.get_future();
+
+    UserSystem->Login("", TestUser.Email, GeneratedTestAccountPassword, false, true, {},
+        [&SettingsPromise](const csp::systems::LoginStateResult& Result) { SettingsPromise.set_value(Result.GetLoginState()); });
+
+    csp::common::LoginState LoginState = SettingsFuture.get();
+
+    // OKO_TESTS Tenant has a default applications settings setup. All these values are arbitrary just for tests
+    ASSERT_EQ(LoginState.DefaultApplicationSettings.Size(), 1);
+    ASSERT_EQ(LoginState.DefaultSettings.Size(), 0);
+
+    csp::common::ApplicationSettings ApplicationSetting = LoginState.DefaultApplicationSettings[0];
+    ASSERT_EQ(ApplicationSetting.AllowAnonymous, false);
+    ASSERT_EQ(ApplicationSetting.Context, "checkpoint");
+    // application name not listed because it uses a project codename which is secret ... it's six characters long though :P Ooooh what could it be?
+    ASSERT_EQ(ApplicationSetting.ApplicationName.Length(), 6);
+
+    ASSERT_EQ(ApplicationSetting.Settings.Size(), 1);
+    ASSERT_TRUE(ApplicationSetting.Settings.HasKey("URL"));
+    ASSERT_EQ(ApplicationSetting.Settings["URL"], "https://www.google.com/search?q=why+google");
 }

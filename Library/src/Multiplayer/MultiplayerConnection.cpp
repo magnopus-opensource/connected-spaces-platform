@@ -136,7 +136,7 @@ namespace
 
 ISignalRConnection* MultiplayerConnection::MakeSignalRConnection(csp::common::IAuthContext& AuthContext)
 {
-    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerService.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
+    return new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI().c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>(), AuthContext);
 }
 
@@ -149,7 +149,7 @@ MultiplayerConnection::MultiplayerConnection(csp::common::LogSystem& LogSystem, 
     , Connected(false)
     , MultiplayerHubMethods(MultiplayerHubMethodMap())
 {
-    EventBusPtr = new NetworkEventBus(this, LogSystem);
+    EventBus = new NetworkEventBus(this, LogSystem);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -170,7 +170,7 @@ MultiplayerConnection::~MultiplayerConnection()
         delete (Connection);
         delete (WebSocketClient);
         delete (NetworkEventManager);
-        delete (EventBusPtr);
+        delete (EventBus);
     }
 }
 
@@ -191,7 +191,7 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     DisconnectionCallback = InBoundConnection.DisconnectionCallback;
     ConnectionCallback = InBoundConnection.ConnectionCallback;
     NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
-    EventBusPtr = InBoundConnection.EventBusPtr;
+    EventBus = InBoundConnection.EventBus;
     Connected = (InBoundConnection.Connected) ? true : false;
 }
 
@@ -373,7 +373,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback, [[maybe_u
     BindOnRequestToSendObject();
     BindOnRequestToDisconnect();
 
-    EventBusPtr->StartEventMessageListening();
+    EventBus->StartEventMessageListening();
 
     // We register the network interruption callback as a wrapper because we want to unwrap any signalR exceptions.
     RegisterNetworkInterruptedCallback(Connection, LogSystem, NetworkInterruptionCallback);
@@ -678,13 +678,15 @@ void MultiplayerConnection::BindOnRequestToDisconnect()
     const std::string OnRequestToDisconnect = GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ON_REQUEST_TO_DISCONNECT);
     GetSignalRConnection()->On(
         OnRequestToDisconnect,
-        [](const signalr::value& Params)
+        [&](const signalr::value& Params)
         {
-            const std::string Reason = Params.as_array()[0].as_string();
+            std::promise<bool> Promise;
+            std::future<bool> Future = Promise.get_future();
 
-            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
-            DisconnectEvent->AddString("Reason", Reason.c_str());
-            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
+            const std::string Reason = Params.as_array()[0].as_string();
+            DisconnectWithReason(Reason.c_str(), [&Promise](ErrorCode /*Error*/) { Promise.set_value(true); });
+
+            Future.wait_for(2000ms);
         },
         LogSystem);
 }

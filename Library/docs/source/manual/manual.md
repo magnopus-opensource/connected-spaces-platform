@@ -63,7 +63,7 @@ If you're forking CSP for your own purposes, or seeking to contribute back, you 
    :titlesonly:
 
    building/web
-   building/cpp
+   building/windows
    building/csharp
    building/android
    building/macos

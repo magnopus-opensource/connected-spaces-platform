@@ -221,7 +221,7 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
     SetTimeSinceLastQueueSend(CurrentTime);
 
-    NullResultCallback SendBatchAnalyticsCallback = [Callback, LogSystem = this->LogSystem](const NullResult& Result)
+    NullResultCallback SendBatchAnalyticsCallback = [LogSystem = this->LogSystem, Callback](const NullResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
@@ -250,6 +250,10 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
         = AnalyticsApi->CreateHandler<NullResultCallback, NullResult, void, chs::AnalyticsRecord>(SendBatchAnalyticsCallback, nullptr);
 
     static_cast<chs::AnalyticsApi*>(AnalyticsApi.get())->analyticsBulkPost({ AnalyticsRecordQueue }, ResponseHandler);
+
+    // Clear the analytics record queue.
+    // The async analyticsBulkPost endpoint serializes the records data to json so it is safe to clear here.
+    AnalyticsRecordQueue.clear();
 }
 
 } // namespace csp::systems

@@ -16,6 +16,8 @@
 #pragma once
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
+#include "CSP/Common/SharedEnums.h"
+#include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Settings/SettingsCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "Mocks/SignalRConnectionMock.h"
@@ -74,3 +76,5 @@ extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEn
 extern template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String, bool>>;
+extern template class PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType, csp::common::String>>;

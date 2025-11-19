@@ -52,9 +52,6 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
     {
         ElectionManager->Update();
     }
-    else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
-    {
-    }
 }
 
 ClientElectionManager::ClientElectionManager(
@@ -69,7 +66,6 @@ ClientElectionManager::ClientElectionManager(
     , RemoteScriptRunner(JSScriptRunner)
 {
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, "ClientElectionManager Created");
 }
@@ -79,7 +75,6 @@ ClientElectionManager::~ClientElectionManager()
     UnBindNetworkEvents();
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
     delete (EventHandler);
 
     for (const auto& Client : Clients)
@@ -489,21 +484,21 @@ bool ClientElectionManager::IsConnected() const
 
 void ClientElectionManager::BindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
+    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnClientElectionEvent(NetworkEventData.EventValues); });
 
-    NetworkEventBus->ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
+    NetworkEventBus.ListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnRemoteRunScriptEvent(NetworkEventData.EventValues); });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-    NetworkEventBus* NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBusPtr();
+    NetworkEventBus& NetworkEventBus = OnlineRealtimeEnginePtr->GetMultiplayerConnectionInstance()->GetEventBus();
 
-    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
-    NetworkEventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
+    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", ClientElectionMessage));
+    NetworkEventBus.StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
 }
 
 void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<csp::common::ReplicatedValue>& Data)

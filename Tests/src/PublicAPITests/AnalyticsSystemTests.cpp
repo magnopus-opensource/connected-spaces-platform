@@ -88,12 +88,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     // Ensure the required fields error message is logged when we try to send an analytics event with a required field missing
     const csp::common::String AnalyticsErrorMsg
         = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
     // Passing an empty string for a required field
@@ -115,7 +115,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, SendAnalyticsEventMissingFields
 
 /*
  * Test that we can successfully send a queue of analytics events based on queue send rate
- * The queue size has been set high enough that it won't trigger the queue to be sent
  */
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRateTest)
 {
@@ -128,22 +127,21 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
 
     // The default queue send rate is too large for testing so set it to something more reasonable
-    AnalyticsSystem->__SetQueueSendRateAndMaxSize(std::chrono::seconds(3), 25);
+    // The max queue size has been set to 3 so that we can validate that the queue is being cleared correctly
+    AnalyticsSystem->__SetQueueSendRateAndMaxSize(std::chrono::seconds(3), 3);
 
     // Log in
     String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
-    std::promise<bool> QueueSentPromise;
-    std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
+    // Reset time the last queue was sent
+    const std::chrono::milliseconds CurrentTime
+        = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-    const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(QueueSentSuccessMsg))
-        .Times(1)
-        .WillOnce(::testing::Invoke([&](const csp::common::String&) { QueueSentPromise.set_value(true); }));
+    AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -152,28 +150,76 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSendRat
     const auto TestSubCategory = String("Event_SubCategory");
     const Map<String, String> TestMetadata = { { "Key1", "Value1" }, { "Key2", "Value2" } };
 
-    // Reset time the last queue was sent
-    const std::chrono::milliseconds CurrentTime
-        = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    // Queue two analytics records to be sent after the queue send rate time has elapsed
+    {
+        std::promise<bool> QueueSentPromise1;
+        std::future<bool> QueueSentFuture1 = QueueSentPromise1.get_future();
 
-    AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
+        const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
+            .Times(1)
+            .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise1.set_value(true); }));
 
-    // Send two analytics events to be queued for sending later as a batch
-    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+        // Send two analytics events to be queued for sending later as a batch
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    csp::CSPFoundation::Tick();
-    // It will not process the queue until at least 3 seconds has elapsed since the last send time
-    ASSERT_NE(QueueSentFuture.wait_for(4s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
-    // Calling tick will check if the queue send rate time has elapsed and send the queued events if it has
-    csp::CSPFoundation::Tick();
+        csp::CSPFoundation::Tick();
 
-    // Wait for the callback to be received
-    QueueSentFuture.wait();
-    EXPECT_TRUE(QueueSentFuture.get() == true);
+        // Validate that we have two queued items
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+        // It will not process the queue until at least 3 seconds has elapsed since the last send time
+        ASSERT_NE(QueueSentFuture1.wait_for(4s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+        // Calling tick will check if the queue send rate time has elapsed and send the queued events if it has
+        csp::CSPFoundation::Tick();
+
+        // Check that the queue has been flushed correctly
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
+
+        // Wait for the callback to be received
+        QueueSentFuture1.wait();
+        EXPECT_TRUE(QueueSentFuture1.get() == true);
+    }
+
+    // Queue two more analytics records to be sent after the queue send rate has elapsed
+    // Validate that the queue was cleared after the first batch was sent and that it is not being sent again prematurely on Tick due to batch size
+    {
+        std::promise<bool> QueueSentPromise2;
+        std::future<bool> QueueSentFuture2 = QueueSentPromise2.get_future();
+
+        const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
+            .Times(1)
+            .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise2.set_value(true); }));
+
+        // Send two more analytics events to be queued for sending later as a batch
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+
+        csp::CSPFoundation::Tick();
+
+        // Check that the queue size is correct.
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() < AnalyticsSystem->GetMaxQueueSize());
+
+        // It will not process the queue until at least 3 seconds has elapsed since the last send time
+        ASSERT_NE(QueueSentFuture2.wait_for(4s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+        // Calling tick will check if the queue send rate time has elapsed and send the queued events if it has
+        csp::CSPFoundation::Tick();
+
+        // Check that the queue has been flushed correctly
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
+
+        // Wait for the callback to be received
+        QueueSentFuture2.wait();
+        EXPECT_TRUE(QueueSentFuture2.get() == true);
+    }
 
     // Log out
     LogOut(UserSystem);
+
+    //
 }
 
 /*
@@ -198,15 +244,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTes
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
-
-    std::promise<bool> QueueSentPromise;
-    std::future<bool> QueueSentFuture = QueueSentPromise.get_future();
-
-    const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(QueueSentSuccessMsg))
-        .Times(1)
-        .WillOnce(::testing::Invoke([&](const csp::common::String&) { QueueSentPromise.set_value(true); }));
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     // Analytics Data
     const auto TestProductContextSection = String("Event_ProductContextSection");
@@ -221,16 +259,85 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventQueueSizeTes
 
     AnalyticsSystem->SetTimeSinceLastQueueSend(CurrentTime);
 
-    // Send two analytics events to be queued for sending later as a batch
-    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
-    AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+    // Queue three analytics records to be sent only when the queue reaches the max size
+    {
+        std::promise<bool> QueueSentPromise1;
+        std::future<bool> QueueSentFuture1 = QueueSentPromise1.get_future();
 
-    csp::CSPFoundation::Tick();
+        const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
+            .Times(1)
+            .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise1.set_value(true); }));
 
-    // Wait for the callback to be received
-    QueueSentFuture.wait();
-    EXPECT_TRUE(QueueSentFuture.get() == true);
+        // Send two analytics events to be queued for sending later as a batch
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+
+        // Validate that we have two queued items
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+        // Ensure that the queue is not sent before the max size is reached
+        csp::CSPFoundation::Tick();
+
+        // Validate that we still have two queued items
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+        // Add a third analytics record to the queue which will trigger the queue to be sent
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+
+        // Validate that we have queued enough analytics records to trigger the queue to be sent on next tick
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == AnalyticsSystem->GetMaxQueueSize());
+
+        // The queue should now be sent
+        csp::CSPFoundation::Tick();
+
+        // Check that the queue has been flushed correctly
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
+
+        // Wait for the callback to be received
+        QueueSentFuture1.wait();
+        EXPECT_TRUE(QueueSentFuture1.get() == true);
+    }
+
+    // Check that the queue is being cleared correctly and queue three analytics records to be sent only when the queue reaches the max size
+    {
+        std::promise<bool> QueueSentPromise2;
+        std::future<bool> QueueSentFuture2 = QueueSentPromise2.get_future();
+
+        const csp::common::String QueueSentSuccessMsg = "Successfully sent the Analytics Record queue.";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Verbose, QueueSentSuccessMsg))
+            .Times(1)
+            .WillOnce(::testing::Invoke([&](csp::common::LogLevel, const csp::common::String&) { QueueSentPromise2.set_value(true); }));
+
+        // Send two analytics events to be queued for sending later as a batch
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+
+        // Validate that we only have the two newly queued items
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+        // Ensure that the queue is not sent before the max size is reached
+        csp::CSPFoundation::Tick();
+
+        // Validate that we still have two queued items
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+        // Add a third analytics record to the queue which will trigger the queue to be sent
+        AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
+
+        // Validate that we have queued enough analytics records to trigger the queue to be sent on next tick
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == AnalyticsSystem->GetMaxQueueSize());
+
+        // The queue will now be sent
+        csp::CSPFoundation::Tick();
+
+        // Check that the queue has been flushed correctly
+        EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
+
+        // Wait for the callback to be received
+        QueueSentFuture2.wait();
+        EXPECT_TRUE(QueueSentFuture2.get() == true);
+    }
 
     // Log out
     LogOut(UserSystem);
@@ -254,12 +361,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, QueueAnalyticsEventMissingField
     LogInAsNewTestUser(UserSystem, UserId);
 
     // Ensure the MockLogger will ignore all logs except the one we care about
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_)).Times(::testing::AnyNumber());
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
 
     // Ensure the required fields error message is logged when we try to queue an analytics event with a required field missing
     const csp::common::String AnalyticsErrorMsg
         = "ProductContextSection, Category and InteractionType are required fields for the Analytics Event and must be provided.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(AnalyticsErrorMsg)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AnalyticsErrorMsg)).Times(1);
 
     // Analytics Data
     // Passing an empty string for a required field
@@ -317,11 +424,22 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
     AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
     AnalyticsSystem->QueueAnalyticsEvent(TestProductContextSection, TestCategory, TestInteractionType, TestSubCategory, TestMetadata);
 
-    // The queue send rate has been left at its default of 60 seconds.
-    // We will tick only once to ensure the queue is not being sent as a result of the queue send rate.
+    // Check that the queue has two analytics records
+    EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
+    // The queue send rate and max size have been left at their default of 60 seconds & 25 analytics records
+    // We will tick to ensure the queue is not sent as a result of the queue send rate
     csp::CSPFoundation::Tick();
-    ASSERT_NE(ResultFuture.wait_for(0s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+    ASSERT_NE(ResultFuture.wait_for(1s), std::future_status::ready) << "Analytics queue should not yet have been sent.";
+    csp::CSPFoundation::Tick();
+
+    // Check that the queue still has two analytics records
+    EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 2);
+
     AnalyticsSystem->FlushAnalyticsEventsQueue(FlushResultCallback);
+
+    // Check that the queue has been flushed correctly
+    EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
 
     // Wait for the callback to be received
     ResultFuture.wait();

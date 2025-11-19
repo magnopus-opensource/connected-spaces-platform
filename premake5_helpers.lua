@@ -59,7 +59,7 @@ if not CSP then
         -- Config for platforms
         filter "platforms:x64"
             system "Windows"
-            systemversion "10.0.17763.0"
+            systemversion "10.0.19041.0"
             architecture "x86_64"
         filter "platforms:Android"
             system "Android"
@@ -150,7 +150,7 @@ if not CSP then
         function CSP.Platforms.AddWindows()
             if not os.istarget("macosx") and not os.istarget("ios") then -- If on windows
                 platforms { "x64" }
-                systemversion "10.0.17763.0"
+                systemversion "10.0.19041.0"
             end
         end
         

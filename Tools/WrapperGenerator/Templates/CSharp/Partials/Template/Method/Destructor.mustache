@@ -8,9 +8,9 @@ void RealDispose() {
     if (_ownsPtr && !_disposed)
     {
         {{ unique_name }}(_ptr);
-        _disposed = true;
     }
 
+    _ptr = IntPtr.Zero;
     _disposed = true;
 }
 

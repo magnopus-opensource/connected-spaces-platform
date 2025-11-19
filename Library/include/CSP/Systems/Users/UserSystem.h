@@ -261,16 +261,6 @@ public:
     /// @param Callback NullResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void Ping(NullResultCallback Callback);
 
-    /// @brief Retrieve User token from Agora
-    /// @param Params const AgoraUserTokenParams& : Params to configure the User token
-    /// @param Callback StringResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback);
-
-    /// @brief Post Service Proxy to perform specified operation of specified service
-    /// @param Params const TokenInfoParams& : Params to specify service, operation, set help and parameters
-    /// @param Callback StringResultCallback : callback to call when a response is received
-    CSP_ASYNC_RESULT void PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback);
-
     /// @brief Re-send user verification email
     /// @param InEmail csp::common::String : User's email address
     /// @param InRedirectUrl csp::common::Optional<csp::common::String> : URL to redirect user to after they have registered
@@ -301,8 +291,6 @@ public:
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
-    /// @brief Deregisters the system from listening for the named event.
-    void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
     CSP_NO_EXPORT void OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
@@ -318,7 +306,7 @@ private:
     // Emergency Fix: We have a circular dependency issue due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr to the UserSystem ctor for the NetworkEventBus, and then call this method to set it after the NetworkEventBus has been
     // constructed.
-    void SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus);
+    void SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus);
 
     [[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
@@ -328,7 +316,6 @@ private:
     csp::services::ApiBase* AuthenticationAPI;
     csp::services::ApiBase* ProfileAPI;
     csp::services::ApiBase* PingAPI;
-    csp::services::ApiBase* ExternalServiceProxyApi;
     csp::services::ApiBase* StripeAPI;
 
     csp::common::LoginState CurrentLoginState;

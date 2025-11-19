@@ -52,6 +52,8 @@ class SequenceSystem;
 class HotspotSequenceSystem;
 class ConversationSystemInternal;
 class AnalyticsSystem;
+class ExternalServiceProxySystem;
+class MultiplayerSystem;
 
 } // namespace csp::systems
 
@@ -164,6 +166,12 @@ public:
     /// @return AnalyticsSystem : pointer to the AnalyticsSystem system class
     AnalyticsSystem* GetAnalyticsSystem();
 
+    /// @brief Retrieves external services proxy system.
+    /// @return ExternalServiceProxySystem : pointer to the external services proxy system class.
+    ExternalServiceProxySystem* GetExternalServicesProxySystem();
+
+    MultiplayerSystem* GetMultiplayerSystem();
+
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
@@ -193,7 +201,6 @@ private:
     csp::web::WebClient* WebClient;
 
     csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
-    csp::multiplayer::NetworkEventBus* NetworkEventBus;
     std::shared_ptr<csp::common::IRealtimeEngine> RealtimeEngine;
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;
@@ -214,6 +221,8 @@ private:
     HotspotSequenceSystem* HotspotSequenceSystem;
     ConversationSystemInternal* ConversationSystem;
     AnalyticsSystem* AnalyticsSystem;
+    ExternalServiceProxySystem* ExternalServiceProxySystem;
+    MultiplayerSystem* MultiplayerSystem;
 };
 
 } // namespace csp::systems

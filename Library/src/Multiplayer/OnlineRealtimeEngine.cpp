@@ -120,23 +120,6 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
     {
         EntitySystem->TickEntities();
     }
-    else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
-    {
-        auto Connection = EntitySystem->GetMultiplayerConnectionInstance();
-        csp::common::String Reason(InEvent.GetString("Reason"));
-
-        auto Done = false;
-        Connection->DisconnectWithReason(Reason, [&Done](ErrorCode /*Error*/) { Done = true; });
-
-        int TimeoutCounter = 2000;
-
-        while (!Done && TimeoutCounter > 0)
-        {
-            std::this_thread::sleep_for(1ms);
-
-            --TimeoutCounter;
-        }
-    }
 }
 
 std::map<uint64_t, signalr::value> GetEntityTransformComponents(const SpaceEntity* InEntity)
@@ -218,7 +201,6 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 }
 
 OnlineRealtimeEngine::~OnlineRealtimeEngine()
@@ -230,7 +212,6 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
     EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-    csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
     delete (EventHandler);
 
@@ -873,8 +854,7 @@ void OnlineRealtimeEngine::TickEntities()
 
     if (EnableEntityTick)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
-            *TickEntitiesLock, GetRealtimeEngineType(), MultiplayerConnectionInst->GetClientId(), Entities, LastTickTime);
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(*TickEntitiesLock, GetRealtimeEngineType(), Entities, LastTickTime, ElectionManager);
     }
 
     {

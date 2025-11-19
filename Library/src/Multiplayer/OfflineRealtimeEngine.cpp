@@ -58,8 +58,8 @@ void OfflineSpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
     if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
     {
-        LastTickTime = RealtimeEngineUtils::TickEntityScripts(EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(),
-            OfflineRealtimeEngine::LocalClientId(), *EntitySystem->GetAllEntities(), LastTickTime);
+        LastTickTime = RealtimeEngineUtils::TickEntityScripts(
+            EntitySystem->GetEntitiesLock(), EntitySystem->GetRealtimeEngineType(), *EntitySystem->GetAllEntities(), LastTickTime, nullptr);
     }
 }
 
@@ -94,6 +94,14 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(
     for (size_t i = 0; i < DeserializedEntities.Size(); ++i)
     {
         AddEntity(DeserializedEntities[i]);
+    }
+
+    // Needs to be after all the adds, we normally assume any entity add must parent to an existing entity,
+    // but because we load all at once, not here.
+    // This smells a bit, why must this be different compared to loading Online state?
+    for (SpaceEntity* Entity : *GetAllEntities())
+    {
+        ResolveEntityHierarchy(Entity);
     }
 }
 

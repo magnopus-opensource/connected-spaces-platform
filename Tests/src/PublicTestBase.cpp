@@ -30,7 +30,7 @@ void PublicTestBase::SetUp()
 
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
     LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
     LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
@@ -65,7 +65,7 @@ void PublicTestBaseWithMocks::SetUp()
 
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
     LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
     LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
@@ -97,7 +97,7 @@ template <typename T> void PublicTestBaseWithParam<T>::SetUp()
 
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
     LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);
-    LogSystem->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
+    LogSystem->SetLogCallback([](csp::common::LogLevel, csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
     LogSystem->LogMsg(csp::common::LogLevel::Verbose, "Foundation initialised!");
 
     auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
@@ -131,3 +131,5 @@ template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineTyp
 template class PublicTestBaseWithParam<csp::common::RealtimeEngineType>;
 template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool>>;
 template class PublicTestBaseWithParam<std::tuple<csp::systems::AvatarType, csp::common::String, bool>>;
+template class PublicTestBaseWithParam<std::tuple<csp::systems::EResultCode, csp::web::EResponseCodes, csp::common::String, bool>>;
+template class PublicTestBaseWithParam<std::tuple<csp::common::String, csp::systems::EAssetCollectionType, csp::common::String>>;

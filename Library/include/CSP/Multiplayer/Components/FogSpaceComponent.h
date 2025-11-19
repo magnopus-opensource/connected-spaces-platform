@@ -70,7 +70,7 @@ public:
     /// @return The modality of fog currently used by this component.
     FogMode GetFogMode() const;
 
-    /// @brief Sets the type of fog currently to be used by this fog component.
+    /// @brief Sets the type of fog to be used by this fog component.
     /// @param Value The modality of fog to be used by this component.
     void SetFogMode(FogMode Value);
 
@@ -94,75 +94,68 @@ public:
     void SetTransform(const SpaceTransform& InValue) override;
     /// @}
 
-    /// @brief Get start sistance
-    /// Note: Distance from camera that the fog will start.
-    /// Note: 0 = this property has no effect.
-    /// @return Current start distance
+    /// @brief Gets start distance.
+    /// @note Distance from camera that the fog will start. 0 = this property has no effect.
+    /// @return Current start distance.
     float GetStartDistance() const;
 
-    /// @brief Set Current start distance
-    /// Note: Distance from camera that the fog will start.
-    /// Note: 0 = this property has no effect.
-    /// @param Value float : Current start distance
+    /// @brief Sets start distance.
+    /// @note Distance from camera that the fog will start. 0 = this property has no effect.
+    /// @param Value float : Start distance.
     void SetStartDistance(float Value);
 
-    /// @brief Get Current end distance
-    /// Note: objects passed this distance will not be affected by fog.
-    /// Note: 0 = this property has no effect.
-    /// @return Current end distance
+    /// @brief Gets end distance.
+    /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
+    /// @return Current end distance.
     float GetEndDistance() const;
 
-    /// @brief Set Current end distance
-    /// Note: objects passed this distance will not be affected by fog.
-    /// Note: 0 = this property has no effect.
-    /// @param Value float : Current end distance
+    /// @brief Sets end distance.
+    /// @note Objects passed this distance will not be affected by fog. 0 = this property has no effect.
+    /// @param Value float : End distance.
     void SetEndDistance(float Value);
 
-    /// @brief Get fog color
-    /// @return Current fog color
+    /// @brief Gets fog color.
+    /// @return Current fog color.
     const csp::common::Vector3& GetColor() const;
 
-    /// @brief Set Current fog color
-    /// @param Value float : Current fog color
+    /// @brief Sets fog color.
+    /// @param Value Vector3 : Fog color.
     void SetColor(const csp::common::Vector3& Value);
 
-    /// @brief Get Global density factor
-    /// Note: Global density factor
-    /// @return Current Global density factor
+    /// @brief Gets global density factor.
+    /// @return Current global density factor.
     float GetDensity() const;
 
-    /// @brief Set Global density factor
-    /// Note: Global density factor
-    /// @param Value float : Global density factor
+    /// @brief Sets global density factor.
+    /// @param Value float : Global density factor.
     void SetDensity(float Value);
 
-    /// @brief Get Height density factor
-    /// Note: Height density factor, controls how the density increases and height decreases. Smaller values make the visible transition larger.
-    /// @return Current Height density factor
+    /// @brief Gets Height density factor.
+    /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
+    /// @return Current height density factor.
     float GetHeightFalloff() const;
 
-    /// @brief Set Height density factor
-    /// Note: Height density factor, controls how the density increases and height decreases. Smaller values make the visible transition larger.
-    /// @param Value float : Height density factor
+    /// @brief Sets Height density factor.
+    /// @note Controls how the density increases and height decreases. Smaller values make the visible transition larger.
+    /// @param Value float : Height density factor.
     void SetHeightFalloff(float Value);
 
-    /// @brief Get Maximum opacity of the Fog.
-    /// Maximum opacity of the Fog.
-    /// Note: 1 = fog becomes fully opaque at a distance and replaces the scene colour completely.
-    /// Note: 0 = fog colour will have no impact.
-    /// @return Current Maximum opacity of the Fog
+    /// @brief Gets maximum opacity of the fog.
+    /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
+    /// @return Current maximum opacity.
     float GetMaxOpacity() const;
 
-    /// @brief Set Maximum opacity of the Fog.
-    /// @param Value float : Maximum opacity of the Fog.
+    /// @brief Sets maximum opacity of the fog.
+    /// @note 1 = fog becomes fully opaque at a distance and replaces the scene colour completely. 0 = fog colour will have no impact.
+    /// @param Value float : Maximum opacity of the fog.
     void SetMaxOpacity(float Value);
 
-    /// @brief Get Is Fog Volumetric.
-    /// @param Value float : Fog Volumetric Flag
+    /// @brief Gets IsFogVolumetric.
+    /// @return Current fog volumetric flag.
     bool GetIsVolumetric() const;
 
-    /// @brief Set Is Fog Volumetric
-    /// @param Value float : Is Fog Volumetric Flag
+    /// @brief Sets IsFogVolumetric.
+    /// @param Value boolean : Fog Volumetric Flag.
     void SetIsVolumetric(bool Value);
 
     /// \addtogroup IVisibleComponent

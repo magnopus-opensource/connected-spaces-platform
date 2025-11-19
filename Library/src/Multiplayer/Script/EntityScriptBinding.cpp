@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
@@ -353,6 +354,7 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, CurrentPlayheadPosition, "currentPlayheadPosition")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, TimeSincePlay, "timeSincePlay")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, VideoPlayerSourceType, "videoPlayerSourceType")
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, StereoVideoType, "stereoVideoType")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVirtualVisible, "isVirtualVisible")
@@ -584,6 +586,14 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(ScreenSharingSpaceComponent, IsShadowCaster, "isShadowCaster");
+
+    Module->class_<AIChatbotSpaceComponentScriptInterface>("AIChatbotSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Position, "position")
+        .PROPERTY_GET_SET(AIChatbotSpaceComponent, Voice, "voice")
+        .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetCollectionId, "guardrailAssetCollectionId")
+        .PROPERTY_GET_SET(AIChatbotSpaceComponent, VisualState, "visualState");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -630,6 +640,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ScreenSharingSpaceComponentScriptInterface, ComponentType::ScreenSharing>>(
             "getScreenSharingComponents")
+        .fun<&EntityScriptInterface::GetComponentsOfType<AIChatbotSpaceComponentScriptInterface, ComponentType::AIChatbot>>("getAIChatbotComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
         .property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")

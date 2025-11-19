@@ -25,8 +25,6 @@
 #include "Common/Convert.h"
 #include "Common/UUIDGenerator.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
-#include "Services/AggregationService/Api.h"
-#include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Systems/Users/Authentication.h"
@@ -35,12 +33,9 @@
 #include <regex>
 
 namespace chs_user = csp::services::generated::userservice;
-namespace chs_aggregation = csp::services::generated::aggregationservice;
 
 namespace
 {
-
-inline const char* BoolToApiString(bool Val) { return Val ? "true" : "false"; }
 
 } // namespace
 
@@ -182,7 +177,6 @@ UserSystem::UserSystem()
     , AuthenticationAPI(nullptr)
     , ProfileAPI(nullptr)
     , PingAPI(nullptr)
-    , ExternalServiceProxyApi(nullptr)
     , StripeAPI { nullptr }
     , Auth { AuthenticationAPI, CurrentLoginState }
 {
@@ -193,7 +187,6 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Netwo
     , AuthenticationAPI { new chs_user::AuthenticationApi(InWebClient) }
     , ProfileAPI { new chs_user::ProfileApi(InWebClient) }
     , PingAPI { new chs_user::PingApi(InWebClient) }
-    , ExternalServiceProxyApi { new chs_aggregation::ExternalServiceProxyApi(InWebClient) }
     , StripeAPI { new chs_user::StripeApi(InWebClient) }
     , RefreshTokenChangedCallback(nullptr)
     , Auth { AuthenticationAPI, CurrentLoginState }
@@ -205,15 +198,12 @@ UserSystem::~UserSystem()
     delete (PingAPI);
     delete (ProfileAPI);
     delete (AuthenticationAPI);
-    delete (ExternalServiceProxyApi);
     delete (StripeAPI);
-
-    DeregisterSystemCallback();
 }
 
-void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus)
+void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus)
 {
-    EventBusPtr = EventBus;
+    EventBusPtr = &EventBus;
 
     RegisterSystemCallback();
 }
@@ -283,7 +273,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -352,7 +342,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -418,7 +408,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -477,7 +467,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
                 // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
             }
             else
             {
@@ -604,8 +594,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
-            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                ConnectionCallback, LoginStateRes, *LogSystem, CreateMultiplayerConnection);
+            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                CreateMultiplayerConnection);
         }
         else
         {
@@ -856,45 +847,6 @@ void UserSystem::Ping(NullResultCallback Callback)
     static_cast<chs_user::PingApi*>(PingAPI)->pingGet({}, PingResponseHandler);
 }
 
-void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringResultCallback Callback)
-{
-    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
-    TokenInfo->SetServiceName("Agora");
-    TokenInfo->SetOperationName("getUserToken");
-    TokenInfo->SetHelp(false);
-
-    std::map<csp::common::String, csp::common::String> Parameters;
-    Parameters["userId"] = Params.AgoraUserId;
-    Parameters["channelName"] = Params.ChannelName;
-    Parameters["referenceId"] = Params.ReferenceId;
-    Parameters["lifespan"] = std::to_string(Params.Lifespan).c_str();
-    Parameters["readOnly"] = BoolToApiString(Params.ReadOnly);
-    Parameters["shareAudio"] = BoolToApiString(Params.ShareAudio);
-    Parameters["shareVideo"] = BoolToApiString(Params.ShareVideo);
-    Parameters["shareScreen"] = BoolToApiString(Params.ShareScreen);
-
-    TokenInfo->SetParameters(Parameters);
-
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, AgoraUserTokenResult, void, chs_aggregation::ServiceResponse>(
-            Callback, nullptr);
-    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
-}
-
-void UserSystem::PostServiceProxy(const TokenInfoParams& Params, StringResultCallback Callback)
-{
-    auto TokenInfo = std::make_shared<chs_aggregation::ServiceRequest>();
-    TokenInfo->SetServiceName(Params.ServiceName);
-    TokenInfo->SetOperationName(Params.OperationName);
-    TokenInfo->SetHelp(Params.SetHelp);
-    TokenInfo->SetParameters(Convert(Params.Parameters));
-
-    csp::services::ResponseHandlerPtr ResponseHandler
-        = ExternalServiceProxyApi->CreateHandler<StringResultCallback, PostServiceProxyResult, void, chs_aggregation::ServiceResponse>(
-            Callback, nullptr);
-    static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->service_proxyPost({ TokenInfo }, ResponseHandler);
-}
-
 void UserSystem::ResendVerificationEmail(
     const csp::common::String& InEmail, const csp::common::Optional<csp::common::String>& InRedirectUrl, NullResultCallback Callback)
 {
@@ -974,15 +926,6 @@ void UserSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
-}
-
-void UserSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)));
-    }
 }
 
 void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

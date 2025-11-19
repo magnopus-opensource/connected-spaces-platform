@@ -60,4 +60,9 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
 csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
+// Specialized deserializataion for events triggered when an async call completes.
+// Some methods take an AsyncCall boolean argument that allows the operation to be completed asyncronously rather than syncronously.
+csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
+
 } // namespace csp::multiplayer

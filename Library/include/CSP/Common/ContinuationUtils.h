@@ -61,19 +61,34 @@ public:
 class ResultException : public ExpectedExceptionBase
 {
 public:
-    ResultException(const std::string& Message, const csp::systems::ResultBase& Result)
+    template <typename T>
+    ResultException(const std::string& Message, const T& Result)
         : ExpectedExceptionBase(Message)
-        , Result(Result)
+        , Result(std::make_shared<T>(Result))
     {
     }
 
     const ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
 
-    const csp::systems::ResultBase& GetResult() const { return Result; }
+    const csp::systems::ResultBase& GetResult() const { return *Result; }
 
 private:
-    const csp::systems::ResultBase& Result;
+    // Throwing an exception copy-initializes a temporary object, meaning unique_ptr will fail due to enforcing exclusive ownership.
+    std::shared_ptr<const csp::systems::ResultBase> Result;
 };
+
+template <typename T> const inline T GetResultExceptionOrInvalid(const csp::common::continuations::ExpectedExceptionBase& Exception)
+{
+    // Check that the exception base is of type result and cast to derived type.
+    if (Exception.GetExceptionType() == csp::common::continuations::ExceptionType::Result)
+    {
+        const auto ResultException = static_cast<const csp::common::continuations::ResultException*>(&Exception);
+        const auto Result = ResultException->GetResult();
+        return T(Result.GetResultCode(), static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()), Result.GetFailureReason());
+    }
+
+    return T(csp::systems::EResultCode::Failed, 0);
+}
 
 /**
  * @brief An exception class for Multiplayer Error code.
@@ -101,10 +116,9 @@ private:
 /*
  * Print an error with provided string, and throw a cancellation error.
  */
-inline void LogErrorAndCancelContinuation(
-    std::string ErrorMsg, common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline void LogErrorAndCancelContinuation(std::string ErrorMsg, common::LogSystem& LogSystem)
 {
-    LogSystem.LogMsg(LogLevel, ErrorMsg.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMsg.c_str());
     throw std::runtime_error("Continuation cancelled"); // Cancels the continuation chain.
 }
 
@@ -174,17 +188,16 @@ inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, Expected
  * abstraction, but pragmatically necessary to do the modularization.
  */
 template <typename ErrorResultT>
-inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(
-    std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem, csp::common::LogLevel LogLevel = csp::common::LogLevel::Log)
+inline auto AssertRequestSuccessOrErrorFromMultiplayerErrorCode(std::string SuccessMsg, ErrorResultT ErrorResult, csp::common::LogSystem& LogSystem)
 {
-    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem, LogLevel](
+    return [SuccessMsg = std::move(SuccessMsg), ErrorResult = std::move(ErrorResult), &LogSystem](
                const std::optional<csp::multiplayer::ErrorCode>& ErrorCode)
     {
         if (ErrorCode.has_value())
         {
             // Error Case. We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
-            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem, LogLevel);
+            csp::common::continuations::LogErrorAndCancelContinuation(std::move(ErrorMsg), LogSystem);
         }
         else
         {

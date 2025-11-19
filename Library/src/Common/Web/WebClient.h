@@ -84,7 +84,7 @@ public:
     /// @param Payload Headers and body content
     /// @param ResponseCallback Pointer to callback for the response
     /// @param AsyncResponse Flag to indicate if the response should be issued asynchronously as soon as it's received
-    void SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
+    virtual void SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* ResponseCallback,
         csp::common::CancellationToken& CancellationToken, bool AsyncResponse = true);
 
 #ifndef CSP_WASM
@@ -107,7 +107,7 @@ public:
     /// @details This setter needs to exist due to order of initialization. At the time of writing, the AuthContext has a WebClient dependency,
     /// and the WebClient has an IAuthContext dependency.
     /// @param AuthContext csp::common::IAuthContext& : The AuthContext for this object.
-    void SetAuthContext(csp::common::IAuthContext& AuthContext);
+    virtual void SetAuthContext(csp::common::IAuthContext& AuthContext);
 
 protected:
     /// @brief Send a http request

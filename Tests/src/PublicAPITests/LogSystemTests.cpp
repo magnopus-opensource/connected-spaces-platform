@@ -63,7 +63,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
     std::atomic_bool LogConfirmed = false;
     const csp::common::String TestMsg = "Log Message";
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test the default
     CSP_LOG_MSG(csp::common::LogLevel::All, TestMsg);
@@ -177,7 +177,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test default
     CSP_LOG_FORMAT(csp::common::LogLevel::Log, TestFormatStr, TestValue);
@@ -288,7 +288,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
     std::atomic_bool LogConfirmed = false;
     const csp::common::String TestMsg = "Log Message";
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test the default
     CSP_LOG_ERROR_MSG(TestMsg);
@@ -363,7 +363,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
     std::atomic_bool LogConfirmed = false;
     const csp::common::String TestMsg = "Log Message";
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test the default
     CSP_LOG_WARN_MSG(TestMsg);
@@ -441,7 +441,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](const csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test default
     CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
@@ -519,7 +519,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback([&](csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
+    LogSystem.SetLogCallback([&](const csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = InMessage == TestMsg; });
 
     // Test default
     CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
@@ -661,7 +661,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback([&LogConfirmed](csp::common::String InMessage) { LogConfirmed = !InMessage.IsEmpty(); });
+    LogSystem.SetLogCallback([&LogConfirmed](const csp::common::LogLevel, csp::common::String InMessage) { LogConfirmed = !InMessage.IsEmpty(); });
 
     csp::common::String UserId;
 

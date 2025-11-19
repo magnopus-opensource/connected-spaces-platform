@@ -16,6 +16,7 @@
 
 #include "CSP/Systems/Users/Authentication.h"
 
+#include "CSP/Common/Settings.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
@@ -50,6 +51,29 @@ LoginStateResult::LoginStateResult(csp::common::LoginState* InStatePtr)
 
 const csp::common::LoginState& LoginStateResult::GetLoginState() const { return *State; }
 
+namespace
+{
+    csp::common::ApplicationSettings MakeApplicationSetting(const csp::services::generated::userservice::ApplicationSettingsDto& Setting)
+    {
+        csp::common::ApplicationSettings ApplicationSetting;
+        ApplicationSetting.ApplicationName = Setting.HasApplicationName() ? Setting.GetApplicationName() : "";
+        ApplicationSetting.Context = Setting.HasContext() ? Setting.GetContext() : "";
+        ApplicationSetting.AllowAnonymous = Setting.HasAllowAnonymous() ? Setting.GetAllowAnonymous() : false;
+        ApplicationSetting.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(ApplicationSetting.Settings) {};
+        return ApplicationSetting;
+    }
+
+    // Otherwise known as a UserSetting
+    csp::common::SettingsCollection MakeSettingsCollection(const csp::services::generated::userservice::SettingsDto& Setting)
+    {
+        csp::common::SettingsCollection SettingsCollection;
+        SettingsCollection.UserId = Setting.HasUserId() ? Setting.GetUserId() : "";
+        SettingsCollection.Context = Setting.HasContext() ? Setting.GetContext() : "";
+        SettingsCollection.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(SettingsCollection.Settings) {};
+        return SettingsCollection;
+    }
+}
+
 void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
@@ -69,6 +93,27 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             State->RefreshToken = AuthResponse->GetRefreshToken();
             State->UserId = AuthResponse->GetUserId();
             State->DeviceId = AuthResponse->GetDeviceId();
+
+            if (AuthResponse->HasDefaultSettings())
+            {
+                const auto& DefaultSettings = AuthResponse->GetDefaultSettings();
+                if (DefaultSettings->HasDefaultUserSettings())
+                {
+                    const auto& UserSettingsDto = DefaultSettings->GetDefaultUserSettings();
+                    for (const auto& SettingDto : UserSettingsDto)
+                    {
+                        State->DefaultSettings.Append(MakeSettingsCollection(*SettingDto));
+                    }
+                }
+                if (DefaultSettings->HasDefaultApplicationSettings())
+                {
+                    const auto& ApplicationSettingsDto = DefaultSettings->GetDefaultApplicationSettings();
+                    for (const auto& SettingDto : ApplicationSettingsDto)
+                    {
+                        State->DefaultApplicationSettings.Append(MakeApplicationSetting(*SettingDto));
+                    }
+                }
+            }
 
             const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
             const DateTime CurrentTime(DateTime::UtcTimeNow());
@@ -179,66 +224,6 @@ void LoginTokenInfoResult::FillLoginTokenInfo(
     TokenInfo.AccessExpiryTime = AccessTokenExpiry;
     TokenInfo.RefreshToken = RefreshToken;
     TokenInfo.RefreshExpiryTime = RefreshTokenExpiry;
-}
-
-void AgoraUserTokenResult::OnResponse(const services::ApiResponseBase* ApiResponse)
-{
-    ResultBase::OnResponse(ApiResponse);
-
-    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
-
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
-    {
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
-
-        if (!OperationResult)
-        {
-            CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult invalid");
-
-            return;
-        }
-
-        if (!OperationResult->HasMember("token"))
-        {
-            CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
-
-            return;
-        }
-
-        SetValue(OperationResult->operator[]("token").GetString());
-    }
-}
-
-void PostServiceProxyResult::OnResponse(const services::ApiResponseBase* ApiResponse)
-{
-    ResultBase::OnResponse(ApiResponse);
-
-    auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
-    const web::HttpResponse* Response = ApiResponse->GetResponse();
-
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
-    {
-        AuthResponse->FromJson(Response->GetPayload().GetContent());
-        std::shared_ptr<rapidjson::Document> OperationResult = AuthResponse->GetOperationResult();
-
-        if (!OperationResult)
-        {
-            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult invalid");
-
-            return;
-        }
-
-        if (!OperationResult->HasMember("token"))
-        {
-            CSP_LOG_MSG(LogLevel::Error, "PostServiceProxyResult doesn't contain expected member: token");
-
-            return;
-        }
-
-        SetValue(OperationResult->operator[]("token").GetString());
-    }
 }
 
 void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiResponse)

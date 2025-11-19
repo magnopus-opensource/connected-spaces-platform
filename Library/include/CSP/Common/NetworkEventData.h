@@ -152,6 +152,23 @@ public:
     csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
 };
 
+// @brief Data for an event signalling the completion of an async operation.
+// This is general purpose event data that can be used by any system exposing async operations.
+class CSP_API AsyncCallCompletedEventData : public NetworkEventData
+{
+public:
+    /// @brief The name of the async operation that has been completed.
+    csp::common::String OperationName;
+
+    /// @brief An Id related to the async operation that has been completed.
+    /// This could for example be a group Id, if this were an async duplicate group operation.
+    csp::common::String ReferenceId;
+
+    /// @brief The type that the Id represents.
+    /// In the previous example this would be "GroupId".
+    csp::common::String ReferenceType;
+};
+
 // TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.
 // The annoyance is that ChangeType is defined for these EventDatas, gotta break that at some point.
 // I don't really know where this should go at the moment.

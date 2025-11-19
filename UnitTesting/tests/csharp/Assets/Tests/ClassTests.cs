@@ -15,6 +15,7 @@
  */
 
 using NUnit.Framework;
+using System;
 
 namespace Csp.Tests
 {
@@ -29,13 +30,13 @@ namespace Csp.Tests
 
             // Verify the internal pointer is set.
             // Note that we have to use reflection here to access the internal field.
-            var ptrField = typeof(SimpleClass).GetField("_ptr", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var ptrValue = ptrField.GetValue(simpleClass);
+            var ptrField = typeof(NativeClassWrapper).GetField("_ptrValue", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            IntPtr ptrValue = (IntPtr)ptrField.GetValue(simpleClass);
             Assert.IsNotNull(ptrValue);
 
             // Verify that the instance owns the native pointer.
             // Note that we have to use reflection here to access the internal field.
-            var ownsPtrField = typeof(SimpleClass).GetField("_ownsPtr", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var ownsPtrField = typeof(NativeClassWrapper).GetField("_ownsPtr", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var ownsPtrValue = ownsPtrField.GetValue(simpleClass);
             Assert.IsTrue((bool)ownsPtrValue);
 
@@ -44,14 +45,19 @@ namespace Csp.Tests
             simpleClass.Dispose();
 
             // Once Dispose is called, the internal pointer is no longer valid.
-            // However, Dispose does not null out the pointer so the class is
-            // left in an indeterminate state.
-            // There is also no way to query whether Dispose has been called.
-            Assert.IsTrue(simpleClass.PointerIsValid);
+            Assert.IsFalse(simpleClass.PointerIsValid);
 
-            // Verify the internal pointer is still set.
-            var ptrValueDisposed = ptrField.GetValue(simpleClass);
-            Assert.IsNotNull(ptrValueDisposed);
+            // Verify the internal pointer has been nulled.
+            IntPtr ptrValueDisposed = (IntPtr)ptrField.GetValue(simpleClass);
+            Assert.AreEqual(IntPtr.Zero, ptrValueDisposed);
+        }
+
+        [Test]
+        public void GetValueReturnsCorrectValue()
+        {
+            var simpleClass = new SimpleClass();
+            int value = simpleClass.GetValue();
+            Assert.AreEqual(42, value);
         }
 
         [Test]
@@ -62,6 +68,58 @@ namespace Csp.Tests
             // Call Dispose multiple times and ensure no errors occur.
             simpleClass.Dispose();
             simpleClass.Dispose();
+        }
+
+        [Test]
+        public void AccessAfterDisposeThrows()
+        {
+            var simpleClass = new SimpleClass();
+            simpleClass.Dispose();
+
+            // Accessing the pointer after Dispose should throw a ObjectDisposedException rather
+            // than creating a segfault.
+            var ex = Assert.Throws<ObjectDisposedException>(() => { int value = simpleClass.GetValue(); });
+            StringAssert.Contains("Attempting to access a disposed instance", ex.Message);
+        }
+
+        [Test]
+        public void TestDerivedType()
+        {
+            // Ensure that a derived class can be created and destroyed without issues.
+            using (var derivedClass = new DerivedClass())
+            {
+                Assert.IsTrue(derivedClass.PointerIsValid);
+            }
+        }
+
+        [Test]
+        public void TestTemplateClassInt()
+        {
+            using (var templateClass = new TemplateClass<int>())
+            {
+                Assert.IsTrue(templateClass.PointerIsValid);
+                templateClass.SetValue(100);
+
+                // Currently the GetValue method does not work correctly for primitive types.
+                // int value;
+                // templateClass.GetValue(out value);
+                // Assert.AreEqual(100, value);
+            }
+        }
+
+        [Test]
+        public void TestTemplateClassString()
+        {
+            using (var templateClass = new TemplateClass<string>())
+            {
+                Assert.IsTrue(templateClass.PointerIsValid);
+                templateClass.SetValue("Hello");
+
+                // Currently the GetValue method does not work correctly for string types.
+                // string value;
+                // templateClass.GetValue(out value);
+                // Assert.AreEqual("Hello", value);
+            }
         }
     }
 }

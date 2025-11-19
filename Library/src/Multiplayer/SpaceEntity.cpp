@@ -18,6 +18,7 @@
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
+#include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
@@ -98,7 +99,6 @@ SpaceEntity::SpaceEntity()
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
@@ -120,7 +120,6 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , ThirdPartyRef("")
     , SelectedId(0)
     , Parent(nullptr)
@@ -259,14 +258,6 @@ bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
     return SetProperty(*this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
 }
-
-bool SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
-{
-    return SetProperty(*this, ThirdPartyPlatform, static_cast<int64_t>(InThirdPartyPlatformType), SpaceEntityComponentKey::ThirdPartyPlatform,
-        UPDATE_FLAGS_THIRD_PARTY_PLATFORM, LogSystem);
-}
-
-csp::systems::EThirdPartyPlatform SpaceEntity::GetThirdPartyPlatformType() const { return ThirdPartyPlatform; }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
 
@@ -576,6 +567,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::ScreenSharing:
         Component = new ScreenSharingSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::AIChatbot:
+        Component = new AIChatbotSpaceComponent(LogSystem, this);
         break;
     default:
     {
@@ -951,8 +945,7 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property;
-                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
                 Component->Properties[PatchComponentPair.first] = Property;
                 Component->OnCreated();
@@ -995,8 +988,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
                 continue;
             }
 
-            csp::common::ReplicatedValue Property;
-            MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+            csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
             // UpdateComponentDirect(false);
             Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
@@ -1018,8 +1010,7 @@ ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t
                     continue;
                 }
 
-                csp::common::ReplicatedValue Property;
-                MCSComponentUnpacker::CreateReplicatedValueFromType(PatchComponentPair.second, Property);
+                csp::common::ReplicatedValue Property = ToReplicatedValue(PatchComponentPair.second);
 
                 // UpdateComponentDirect(false);?
                 Component->SetPropertyFromPatch(PatchComponentPair.first, Property);
@@ -1077,11 +1068,6 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
             SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF,
             [&ThirdPartyRef = ThirdPartyRef]() { return csp::common::ReplicatedValue { ThirdPartyRef }; },
             [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(ThirdPartyRef, Value.GetString(), UPDATE_FLAGS_THIRD_PARTY_REF); }
-        },
-        {
-            SpaceEntityComponentKey::ThirdPartyPlatform, UPDATE_FLAGS_THIRD_PARTY_PLATFORM,
-            [&ThirdPartyPlatform = ThirdPartyPlatform]() { return csp::common::ReplicatedValue { static_cast<int64_t>(ThirdPartyPlatform) }; },
-            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(ThirdPartyPlatform, static_cast<systems::EThirdPartyPlatform>(Value.GetInt()), UPDATE_FLAGS_THIRD_PARTY_PLATFORM); }
         },
         {
             SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE,
