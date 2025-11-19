@@ -1,0 +1,38 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    # In addition to the check being triggered for opened, synchronized (updated) and reopened PR events, it will also run if the PR is labeled or unlabeled
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          # Fetch the base branch to compare against
+          # For labeled/unlabeled events, this needs to check out the latest state of the actual branch that the PR originated from
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: '.github/CHANGELOG.md'
+          # Use the actual base SHA from the pull request event for comparison
+          base_sha: ${{ github.event.pull_request.base.sha }}
+
+      - name: Check if CHANGELOG.md was modified or label applied
+        # This check fails if there is NO update to the changelog file AND the 'skip changelog' label is NOT present
+        if: steps.changed-files.outputs.any_changed == 'false' && !contains(github.event.pull_request.labels.*.name, 'skip changelog')
+        run: |
+          echo "::error file=.github/workflows/check-changelog.yml::Changelog (CHANGELOG.md) must be updated for this PR, or the 'skip changelog' label must be applied."
+          exit 1
+        # This check passes if there IS an update to the changelog file OR the 'skip changelog' label IS present
+      - name: Changelog check passed
+        if: steps.changed-files.outputs.any_changed == 'true' || contains(github.event.pull_request.labels.*.name, 'skip changelog')
+        run: |
+          echo "Changelog check passed: CHANGELOG.md was updated or the 'skip changelog' label was applied."
