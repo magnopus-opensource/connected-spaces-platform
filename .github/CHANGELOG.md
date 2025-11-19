@@ -9,8 +9,6 @@ All notable changes to this project will be documented in this file.
 - [OB-4761] fix: unreal crashes on oko asset drag and drop without internet connection by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/860
   Ensures the correct return path when attempting to create an entity in OnlineRealtimeEngine.
 
-
-
 ## [6.11.0] - 2025-11-18_11-14-15
 
 ### 🍰 🙌 New Features
