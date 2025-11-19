@@ -299,6 +299,7 @@ public:
     void EnableLeaderElection();
 
     /// @brief Disable Leader Election feature.
+    /// @pre SpaceSystem::EnterSpace should be called first for this to take affect.
     void DisableLeaderElection();
 
     /// @brief Check if the Leader Election feature is enabled.
