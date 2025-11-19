@@ -579,7 +579,7 @@ void OnlineRealtimeEngine::SetScriptLeaderReadyCallback(CallbackHandler Callback
         LogSystem->LogMsg(common::LogLevel::Warning, "ScriptLeaderReadyCallback has already been set. Previous callback overwritten.");
     }
 
-    ScriptSystemReadyCallback = std::move(Callback);
+    ScriptSystemReadyCallback = Callback;
 
     if (ElectionManager)
     {
@@ -685,15 +685,7 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
     const std::string UserId = ParamsV[1].as_string();
     const uint64_t ClientId = ParamsV[2].as_uinteger();
 
-    // If the default scope has a leader, we want to let the script system know.
-    if (ScopeId.c_str() == DefaultScopeId && ScriptSystemReadyCallback)
-    {
-        ScriptSystemReadyCallback(true);
-    }
-
     LeaderElectionManager->OnElectedScopeLeader(ScopeId, ClientId);
-
-    // TODO: if client is this client, do we need to claim ownership?
 
     if (OnElectedScopeLeaderCallback)
     {
@@ -712,12 +704,6 @@ void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 
     const std::string ScopeId = ParamsV[0].as_string();
     const std::string UserId = ParamsV[1].as_string();
-
-    // If the default scope doesn't have a leader, we want to let the script system know.
-    if (ScopeId.c_str() == DefaultScopeId && ScriptSystemReadyCallback)
-    {
-        ScriptSystemReadyCallback(false);
-    }
 
     LeaderElectionManager->OnVacatedAsScopeLeader(ScopeId);
 
@@ -781,6 +767,13 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
                     this->NetworkEventBus->ListenNetworkEvent(
                         csp::multiplayer::NetworkEventRegistration { "CSPInternal::ClientElectionManager", RemoteRunScriptMessage },
                         [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
+
+                    // To match the behaviour of the client-side leader election, the ScriptSystemReadyCallback should fire here.
+                    // We may want to move this to earlier in the initialization in the future.
+                    if (ScriptSystemReadyCallback)
+                    {
+                        ScriptSystemReadyCallback(true);
+                    }
                 }
                 else
                 {
@@ -1067,19 +1060,19 @@ void OnlineRealtimeEngine::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 
 bool OnlineRealtimeEngine::IsLocalClientLeader() const
 {
-    if (IsLeaderElectionEnabled())
+    if (IsLeaderElectionEnabled() == false)
     {
-        if (ServerSideELectionEnabled)
-        {
-            return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
-        }
-        else
-        {
-            return ElectionManager->IsLocalClientLeader();
-        }
+        return true;
     }
 
-    return false;
+    if (ServerSideELectionEnabled)
+    {
+        return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
+    }
+    else
+    {
+        return ElectionManager->IsLocalClientLeader();
+    }
 }
 
 void OnlineRealtimeEngine::ClaimScriptOwnership(SpaceEntity* Entity) const
@@ -1114,7 +1107,7 @@ void OnlineRealtimeEngine::DisableLeaderElection()
     }
 }
 
-bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr) || (LeaderElectionManager != nullptr); }
+bool OnlineRealtimeEngine::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr) || (LeaderElectionManager.get() != nullptr); }
 
 uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {

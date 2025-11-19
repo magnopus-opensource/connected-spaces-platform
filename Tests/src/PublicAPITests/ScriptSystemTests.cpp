@@ -819,16 +819,18 @@ TEST_P(AddSecondScript, AddSecondScriptTest)
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(EngineType) };
     RealtimeEngine->SetEntityFetchCompleteCallback([](int) {});
 
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
     if (EngineType == csp::common::RealtimeEngineType::Online)
     {
         // Since we're waiting on patches, the test will often run to fast and hit the patch rate limit.
         static_cast<OnlineRealtimeEngine*>(RealtimeEngine.get())->SetEntityPatchRateLimitEnabled(false);
+
         // Disable leader election, as it's not relevant and it's annoying to wait for the callbacks (which you have to do or the scripts won't run)
+        // This has to happen after EnterSpace, as EnterSpace sets this value on entry.
         static_cast<OnlineRealtimeEngine*>(RealtimeEngine.get())->DisableLeaderElection();
     }
-
-    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-    ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
     // Create object
     const csp::common::String ObjectName = "Object 1";
