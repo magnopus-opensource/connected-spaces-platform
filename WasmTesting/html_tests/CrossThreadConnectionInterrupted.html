@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+  <meta charset="utf-8">
+  <title>CSP WASM Browser Test, CrossThreadCallbacksNetworkInterrupted, OB-1524</title>
+  <script type="module">
+    import { ready, CSPFoundation, Systems, Multiplayer } from '../node_modules/connected-spaces-platform.web/connectedspacesplatform.js';
+    import { initializeCSP } from './shared/csp-initializer.js';
+    (async () => {
+
+      // Get email and password from query parameters
+      const params = new URLSearchParams(window.location.search);
+      const useDebugCSP = params.get('useDebugCsp');
+      const spaceId = params.get(`spaceId`);
+
+      await initializeCSP(useDebugCSP);
+
+      const systemsManager = Systems.SystemsManager.get();
+      const userSystem = systemsManager.getUserSystem();
+
+      //Login as a guest
+      const loginResult = await userSystem.loginAsGuest(true, true);
+      if (loginResult.getResultCode() == Systems.EResultCode.Success) {
+        console.log("Successfully logged in");
+      }
+      else {
+        console.error("Failed to log in");
+      }
+
+      //Create multiplayer realtime engine
+      const realtimeEngine = Multiplayer.OnlineRealtimeEngine
+        .create_multiplayerConnection_logSystem_networkEventBus_remoteScriptRunner(
+          systemsManager.getMultiplayerConnection(),
+          systemsManager.getLogSystem(),
+          systemsManager.getEventBus(),
+          systemsManager.getScriptSystem()
+        );
+
+      realtimeEngine.setEntityFetchCompleteCallback((entitiesFetchedNum) => { })
+
+      //Enter the space
+      const spaceSystem = systemsManager.getSpaceSystem();
+      const enterSpaceResult = await spaceSystem.enterSpace(spaceId, realtimeEngine);
+
+      const authState = loginResult.getLoginState();
+      const playerTransform = Multiplayer.SpaceTransform.create();
+
+      // Try and create the avatar
+      const entity = await realtimeEngine.createAvatar(
+        'Test Player',
+        authState.userId,
+        playerTransform,
+        true,
+        Multiplayer.AvatarState.Idle,
+        authState.userId,
+        Multiplayer.AvatarPlayMode.Default
+      );
+
+      // Set interrupted callback
+      let interrupted = false;
+      const connection = systemsManager.getMultiplayerConnection();
+      connection.setNetworkInterruptionCallback((message) => { console.log("Connection inturrupted: true"); interrupted = true });
+
+      // Cause signalr to fail
+      connection.__CauseFailure();
+
+      while (interrupted == false) {
+
+      }
+
+    })();
+  </script>
+</head>
+
+<body>
+  <h1>Running CSP WASM browser test…</h1>
+</body>
+
+</html>

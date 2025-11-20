@@ -209,6 +209,9 @@ public:
     /// exiting a space.
     csp::multiplayer::OnlineRealtimeEngine* GetOnlineRealtimeEngine() const;
 
+    // Use for testing to send an error back to SignalR.
+    void __CauseFailure();
+
 private:
     MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 

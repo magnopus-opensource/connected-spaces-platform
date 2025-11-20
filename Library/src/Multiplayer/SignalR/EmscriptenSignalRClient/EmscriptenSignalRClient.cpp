@@ -170,6 +170,14 @@ void CSPWebSocketClientEmscripten::Receive(ReceiveHandler Callback)
     ReceiveCallback = Callback;
 }
 
+void CSPWebSocketClientEmscripten::__CauseFailure()
+{
+    if (ReceiveCallback)
+    {
+        ReceiveCallback("", false);
+    }
+}
+
 std::thread& CSPWebSocketClientEmscripten::GetStartCallbackThread() { return StartCallbackThread; }
 
 void CSPWebSocketClientEmscripten::StartCallbackThreadFunc(bool CallbackResult) { StartCallback(CallbackResult); }
