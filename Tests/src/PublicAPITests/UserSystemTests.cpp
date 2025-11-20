@@ -480,7 +480,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     // Log in
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
 
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
@@ -510,7 +510,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
 
     // Ensure that the token expiry time matched the provided token options
     UserSystem->SetNewLoginTokenReceivedCallback(
@@ -548,7 +548,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(1);
 
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
+    TokenOptions.AccessTokenExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
 
     // Log in
     csp::common::String UserId;
@@ -568,7 +568,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
 
     // Ensure MCS clamps the value of expiry length when above bounds
     {
-        TokenOptions.ExpiryLength = "12:00:00";
+        TokenOptions.AccessTokenExpiryLength = "12:00:00";
 
         // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(
@@ -597,7 +597,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
 
     // Ensure MCS clamps the value of expiry length when below bounds
     {
-        TokenOptions.ExpiryLength = "00:00:00";
+        TokenOptions.AccessTokenExpiryLength = "00:00:00";
 
         // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(
