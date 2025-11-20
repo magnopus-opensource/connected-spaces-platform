@@ -35,6 +35,9 @@ public:
     virtual void Stop(CallbackHandler Callback) = 0;
     virtual void Send(const std::string& Message, CallbackHandler Callback) = 0;
     virtual void Receive(ReceiveHandler Callback) = 0;
+
+    // Use for testing to send an error back to SignalR.
+    virtual void __CauseFailure() = 0;
 };
 
 void SetWebSocketClient(IWebSocketClient* CSPWebSocketClientPtr);

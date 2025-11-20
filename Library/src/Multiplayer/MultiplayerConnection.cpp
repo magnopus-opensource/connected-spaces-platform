@@ -181,6 +181,8 @@ void MultiplayerConnection::SetOnlineRealtimeEngine(csp::multiplayer::OnlineReal
 
 csp::multiplayer::OnlineRealtimeEngine* MultiplayerConnection::GetOnlineRealtimeEngine() const { return MultiplayerRealtimeEngine; }
 
+void MultiplayerConnection::__CauseFailure() { WebSocketClient->__CauseFailure(); }
+
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
     : LogSystem(InBoundConnection.LogSystem)
 {
