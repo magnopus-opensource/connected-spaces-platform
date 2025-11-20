@@ -103,10 +103,15 @@ private:
 class CSP_API TokenOptions
 {
 public:
-    /// @brief The length of time for a token to expire formatted as "HH:MM:SS", must be between "00:00:01" and "00:30:00"
+    /// @brief The length of time for the access token to expire formatted as "HH:MM:SS", must be between "00:00:01" and "00:30:00"
     /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
-    csp::common::String ExpiryLength;
+    csp::common::String AccessTokenExpiryLength;
+
+    /// @brief The length of time for the refresh token to expire formatted as "HH:MM:SS", must be between "00:00:01" and "168:00:00"
+    /// The default token expiry length is configured by MCS and defaults to 7 days. Value must be less than the default expiry length, or it will
+    /// be ignored.
+    csp::common::String RefreshTokenExpiryLength;
 };
 
 typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;

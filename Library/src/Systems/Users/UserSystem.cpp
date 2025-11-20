@@ -146,6 +146,11 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
         Request->SetUserId(LoginState->UserId);
         Request->SetRefreshToken(LoginState->RefreshToken);
 
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+        Options->SetExpiryLength(LoginState->AccessTokenExpiryLength);
+        Options->SetRefreshTokenExpiryLength(LoginState->RefreshTokenExpiryLength);
+        Request->SetTokenOptions(Options);
+
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
             if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -245,12 +250,21 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -316,12 +330,21 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         Request->SetUserId(UserId);
         Request->SetRefreshToken(RefreshToken);
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -382,12 +405,21 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -616,12 +648,21 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
         Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
     }
 
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+    auto Options = std::make_shared<chs_user::TokenOptions>();
+
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
     {
-        auto Options = std::make_shared<chs_user::TokenOptions>();
-        Options->SetExpiryLength(TokenOptions->ExpiryLength);
-        Request->SetTokenOptions(Options);
+        Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+        CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
     }
+
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+    {
+        Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+        CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+    }
+
+    Request->SetTokenOptions(Options);
 
     CurrentLoginState.State = csp::common::ELoginState::LoginRequested;
 
