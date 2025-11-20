@@ -214,7 +214,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 
     csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ScopeConcurrentUsers,
         TierFeatures::ObjectCaptureUpload, TierFeatures::AudioVideoUpload, TierFeatures::TotalUploadSizeInKilobytes, TierFeatures::Agora,
-        TierFeatures::OpenAI, TierFeatures::Shopify, TierFeatures::TicketedSpace };
+        TierFeatures::OpenAI, TierFeatures::GoogleGenAI, TierFeatures::Shopify, TierFeatures::TicketedSpace };
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -223,42 +223,10 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    // Please note: In service of OF-1805 a new TierFeature 'GoogleGenAI' was added in CSP to the 'TierFeatures' enum.
-    // However, until this has also been added by the backend services, calls to 'GetTierFeaturesQuota()' will not return this feature.
-    // The following test has been temporaily modified to account for this. Once this work has been completed, and the backend
-    // services have added this tier feature, this test should be reverted to its original form (though with the addition of the new
-    // feature in the 'TierFeaturesArray' array).
-    bool IsGoogleGenAITierFeatureEnabled = false;
+    EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), TierFeaturesArray.Size());
 
     for (size_t i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
     {
-        if (Result.GetFeaturesQuotaInfo()[i].FeatureName == TierFeatures::GoogleGenAI)
-        {
-            IsGoogleGenAITierFeatureEnabled = true;
-            break;
-        }
-    }
-
-    if (IsGoogleGenAITierFeatureEnabled)
-    {
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), TierFeaturesArray.Size() + 1);
-    }
-    else
-    {
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), TierFeaturesArray.Size());
-    }
-
-    // We do not validate the full FeatureQuotaInfo object here as its data is subject to change.
-    for (size_t i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
-    {
-        if (IsGoogleGenAITierFeatureEnabled)
-        {
-            if (i == Result.GetFeaturesQuotaInfo().Size() - 1)
-            {
-                EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, TierFeatures::GoogleGenAI);
-                break;
-            }
-        }
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, TierFeaturesArray[i]);
     }
 }
