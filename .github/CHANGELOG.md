@@ -8,11 +8,16 @@ All notable changes to this project will be documented in this file.
 
 - [NT-0] feat: Add non-exported iterators to Map by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/859
   Add non-exported iterators in support of the SWIG generated interop API work.
-  
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4761] fix: unreal crashes on oko asset drag and drop without internet connection by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/860
   Ensures the correct return path when attempting to create an entity in OnlineRealtimeEngine.
+
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] test: Update QuotaSystem test by MAG-AdamThorn in https://github.com/magnopus-opensource/connected-spaces-platform/pull/862
+  Updated the QuotaSystem `GetTierFeaturesQuota` test to account for the addition of the new `GoogleGenAI` Quota tier feature in MCS.
 
 ## [6.11.0] - 2025-11-18_11-14-15
 
