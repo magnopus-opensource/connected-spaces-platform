@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.12.0] - 2025-11-21_18-23-39
+
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add non-exported iterators to Map by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/859
