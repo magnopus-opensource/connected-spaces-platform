@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 🔥 ❗Breaking Changes
 
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
-  expose RefreshTokenExpiryLength to the token options to support workflows.
+  Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
 
 ## [6.12.0] - 2025-11-21_18-23-39
 
