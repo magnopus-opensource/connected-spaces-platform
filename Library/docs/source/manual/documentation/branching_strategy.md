@@ -17,16 +17,17 @@ Akin to _Feature Branches_ in GitFlow, these cover any change needed to the code
 If the work being done is based on a Jira ticket, the ticket ID should be included in the branch name. If there is no ticket for the work, you may use `NT-0` in place of the ticket ID.
 
 > `<work type>/XX-YY_Title`
-> * work type - A label denoting the commit category. We have adopted the Conventional Commits specification, and so this label should be one of the following: `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `style`, `refac`, `perf` or `test`.
-> * XX-YY - Either a Jira ticket ID (such as `TIC-267`, or `TC-3012`), or `NT-0`.
-> * Title - The title should summarise the work being done in the branch. It should not be overly long or too technical, but it should give the reader a general idea of the branch's purpose. Any spaces that would be in the branch title should be replaced with underscores (_).
+>
+> -   work type - A label denoting the commit category. We have adopted the Conventional Commits specification, and so this label should be one of the following: `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `style`, `refac`, `perf` or `test`.
+> -   XX-YY - Either a Jira ticket ID (such as `TIC-267`, or `TC-3012`), or `NT-0`.
+> -   Title - The title should summarise the work being done in the branch. It should not be overly long or too technical, but it should give the reader a general idea of the branch's purpose. Any spaces that would be in the branch title should be replaced with underscores (\_).
 
 Example branch names:
 
-* `fix/NT-0_Token_refresh_expiry_failure_hotfix`
-* `feature/TIC-456_Add_Geolocation_System`
-* `feature/TIC-5398_Create_new_doxygen_pages`
-* `refac/NT-0_Refac_formatting_in_UserSystem`
+-   `fix/NT-0_Token_refresh_expiry_failure_hotfix`
+-   `feature/TIC-456_Add_Geolocation_System`
+-   `feature/TIC-5398_Create_new_doxygen_pages`
+-   `refac/NT-0_Refac_formatting_in_UserSystem`
 
 ## Branching Workflow
 
@@ -39,10 +40,19 @@ Here is a high-level overview of how a change moves from development through to 
 Developers create branches off the `main` branch for implementing changes. Once complete, they initiate a PR to merge this branch back into `main`. While not currently enforced by rule, we advise and expect that branches have a singular focus.
 This means that fixes should not appear in a feature branch, and should instead exist in a purpose-made branch and merged separately. The same expectation applies to documentation changes or refactors that are unrelated to a feature being developed. It is acceptable and expected to have tests included in branches where features or fixes require them.
 
-*Note that it is possible to work with multiple branches locally if there is a non-merged fix required for an in-development feature.* 
+_Note that it is possible to work with multiple branches locally if there is a non-merged fix required for an in-development feature._
 
 ### Release Deployment
-New CSP packages are published via the `Publish CSP` deploy step on Team City. This will create a new tag for the release on the `main` branch, create a new GitHub release and push build artifacts, and publish new `CSP for Unity` and `CSP for Web` NPM packages to npmjs. 
+
+CSP is published nightly via the automated `Publish CSP` deploy step on Team City. This deploy step will:
+
+-   Create a new tag for the release on the `main` branch.
+-   Create a new GitHub release and push build artifacts.
+-   Publish new `CSP for Unity` and `CSP for Web` NPM packages to npmjs.
+
+Please note that the while CSP releases follow the SemVer versioning format, they do not follow the SemVer versioning rules. Our release versions are structured as follows:
+
+-   [MAJOR].[build_counter].[PATCH]
 
 ### Maintenance and Hotfixes
 

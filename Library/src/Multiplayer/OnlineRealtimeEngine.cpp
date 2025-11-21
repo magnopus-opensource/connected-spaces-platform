@@ -379,6 +379,7 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
             Callback(nullptr);
+            return;
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
@@ -404,6 +405,7 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
             {
                 LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
                 Callback(nullptr);
+                return;
             }
 
             std::scoped_lock EntitiesLocker(*EntitiesLock);

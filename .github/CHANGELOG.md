@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🍰 🙌 New Features
 
+- [NT-0] feat: Add non-exported iterators to Map by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/859
+  Add non-exported iterators in support of the SWIG generated interop API work.
+  
+### 🐛 🔨 Bug Fixes
+
+- [OB-4761] fix: unreal crashes on oko asset drag and drop without internet connection by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/860
+  Ensures the correct return path when attempting to create an entity in OnlineRealtimeEngine.
 
 ## [6.11.0] - 2025-11-18_11-14-15
 
@@ -17,7 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 🔨 Bug Fixes
 
-- [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/850
+- [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/857
   Inserting elements into a List was always adding them as the 0th index rather than at the position specified.
 - [OB-4723] fix: exceptions in continuations return incorrect result by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/846
   In the continuation flow, we would return an invalid result and therefore lose the associated result data. This change ensures the result data from the exception is preserved.
