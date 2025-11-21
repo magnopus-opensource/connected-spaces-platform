@@ -12,10 +12,13 @@
 #include <emscripten/threading.h>
 #include <pthread.h>
 #include <tuple>
+#include <utility>
 
 namespace csp
 {
+// Setup our proxy queue to which sends callbacks to the main thread
 static em_proxying_queue* ProxyQueue = em_proxying_queue_create();
+// Get a reference to the main thread to send callbacks to
 static pthread_t MainThread = emscripten_main_runtime_thread_id();
 
 // Structure to hold the callback and arguments.
@@ -40,12 +43,14 @@ template <typename... T> static void Emscripten_CallbackOnThread(void (*Callback
     if (OnMainThread)
     {
         // We're on the main thread already, just call normally
-        Callback(Args...);
+        Callback(std::forward<T>(Args)...);
     }
     else
     {
         // Pack our data and send to the emscripten queue.
-        CallbackData<T...> Data { Callback, std::make_tuple(Args...) };
+        CallbackData<T...> Data { Callback, std::forward_as_tuple(std::forward<T>(Args)...) };
+
+        // Passing refs is safe here due to emscripten_proxy_sync guaranteeing the callback finishes before Emscripten_CallbackOnThread returns.
         emscripten_proxy_sync(ProxyQueue, MainThread, Emscripten_CallbackWrapper<T...>, static_cast<void*>(&Data));
     }
 }

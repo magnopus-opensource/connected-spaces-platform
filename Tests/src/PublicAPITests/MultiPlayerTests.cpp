@@ -1672,11 +1672,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterrupedTest)
     // Cause signalr to fail
     Connection->__CauseFailure();
 
-    while (Interrupted == false)
-    {
-    }
-
-    EXPECT_TRUE(Interrupted);
+    WaitForCallback(Interrupted);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
