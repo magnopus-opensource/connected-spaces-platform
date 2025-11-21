@@ -73,19 +73,19 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
 
 /* Check if the provided expiry length in token options is formatted as "HH:MM:SS"
  *
- * Return True if expiry length matches format "HH:MM:SS" or empty, false otherwise */
+ * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
+ *
+ * "HHH:MM:SS" is support to allow duration greater than 99:99:99 (eq. < 100 hours) */
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
-    std::regex Regex("^[0-9]{2,3}:[0-9]{2}:[0-9]{2}$");
-    if (ExpiryLength.IsEmpty() || std::regex_search(ExpiryLength.c_str(), Regex))
-    {
-        return true;
-    }
-    else
-    {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
-    }
+    if (ExpiryLength.IsEmpty())
+        return false;
 
+    std::regex Regex("^[0-9]{2,3}:[0-9]{2}:[0-9]{2}$");
+    if (!ExpiryLength.IsEmpty() && std::regex_search(ExpiryLength.c_str(), Regex))
+        return true;
+
+    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
 }
 
