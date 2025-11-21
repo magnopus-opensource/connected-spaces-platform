@@ -54,9 +54,9 @@ enum class TierFeatures
     TotalUploadSizeInKilobytes,
     Agora,
     OpenAI,
+    GoogleGenAI,
     Shopify,
     TicketedSpace,
-    GoogleGenAI,
     Invalid
 };
 
