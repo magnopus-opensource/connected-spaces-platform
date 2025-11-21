@@ -72,7 +72,7 @@ public:
 private:
     SiteResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Site Site;
 };
@@ -99,7 +99,7 @@ public:
 private:
     SitesCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Site> Sites;
 };

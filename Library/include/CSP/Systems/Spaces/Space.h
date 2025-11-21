@@ -195,7 +195,7 @@ private:
 
     void SetSpace(const Space& InSpace);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Space Space;
 
@@ -230,7 +230,7 @@ public:
 private:
     SpacesResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Space> Spaces;
 };
@@ -252,7 +252,7 @@ public:
 private:
     BasicSpaceResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     BasicSpace Space;
 };
@@ -285,7 +285,7 @@ public:
 private:
     BasicSpacesResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     void FillResultTotalCount(const csp::common::String& JsonContent);
 
@@ -373,7 +373,7 @@ public:
 private:
     PendingInvitesResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<csp::common::String> PendingInvitesEmailAddresses;
 };
@@ -400,7 +400,7 @@ public:
 private:
     AcceptedInvitesResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<csp::common::String> AcceptedInvitesUserIds;
 };
@@ -434,7 +434,7 @@ public:
 private:
     SpaceGeoLocationResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     bool HasGeoLocation = false;
     SpaceGeoLocation GeoLocation;
@@ -457,7 +457,7 @@ private:
     SpaceGeoLocationCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<SpaceGeoLocation> GeoLocations;
 };
