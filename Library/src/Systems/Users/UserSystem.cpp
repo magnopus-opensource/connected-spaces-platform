@@ -76,8 +76,8 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
  * Return True if expiry length matches format "HH:MM:SS" or empty, false otherwise */
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
-    std::regex Regex("^[0-9]{2}:[0-9]{2}:[0-9]{2}$");
-    if (!ExpiryLength.IsEmpty() && std::regex_search(ExpiryLength.c_str(), Regex))
+    std::regex Regex("^[0-9]{2,3}:[0-9]{2}:[0-9]{2}$");
+    if (ExpiryLength.IsEmpty() || std::regex_search(ExpiryLength.c_str(), Regex))
     {
         return true;
     }
