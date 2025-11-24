@@ -51,7 +51,7 @@ public:
 private:
     HotspotGroupResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     HotspotGroup Group;
 };
@@ -77,7 +77,7 @@ public:
 private:
     HotspotGroupsResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<HotspotGroup> Groups;
 };

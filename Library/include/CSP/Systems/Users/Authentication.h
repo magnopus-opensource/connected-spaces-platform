@@ -73,7 +73,7 @@ private:
     LoginStateResult();
     LoginStateResult(csp::common::LoginState* InStatePtr);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::LoginState* State;
 };

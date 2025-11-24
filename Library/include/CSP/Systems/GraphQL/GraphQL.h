@@ -51,7 +51,7 @@ public:
     [[nodiscard]] const csp::common::String& GetResponse();
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
     csp::common::String GraphQLResponse;
 };
 // callback signatures

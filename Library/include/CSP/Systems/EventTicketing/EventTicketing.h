@@ -132,7 +132,7 @@ public:
 private:
     TicketedEventResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     TicketedEvent Event;
 };
@@ -159,7 +159,7 @@ public:
 private:
     TicketedEventCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<TicketedEvent> Events;
 };
@@ -186,7 +186,7 @@ public:
 private:
     EventTicketResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     EventTicket Ticket;
 };
@@ -214,7 +214,7 @@ private:
     SpaceIsTicketedResult(void*)
         : SpaceIsTicketed(false) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     bool SpaceIsTicketed;
 };
@@ -235,7 +235,7 @@ public:
 private:
     TicketedEventVendorAuthInfoResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     TicketedEventVendorAuthInfo VendorInfo;
 };
