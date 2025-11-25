@@ -545,10 +545,11 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
 
     RAIIMockLogger MockLogger {};
     csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(2);
 
     auto TokenOptions = csp::systems::TokenOptions();
     TokenOptions.AccessTokenExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
+    TokenOptions.RefreshTokenExpiryLength = "00:60:60";
 
     // Log in
     csp::common::String UserId;
