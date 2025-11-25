@@ -239,7 +239,7 @@
             {{/ type.is_string }}
           {{/ parameters }}
 
-          CallCallback({{ name }}, {{ name }}_StateObject,
+          csp::CallCallback({{ name }}, {{ name }}_StateObject,
               {{# parameters }}
               {{# type.is_string }}
                 (const char*)_{{ name }}
