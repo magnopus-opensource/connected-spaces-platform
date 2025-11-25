@@ -108,8 +108,9 @@ public:
     /// be ignored.
     csp::common::String AccessTokenExpiryLength;
 
-    /// @brief The length of time for the refresh token to expire formatted as "HH:MM:SS" or "HHH:MM:SS", must be between "00:00:01" and "168:00:00"
-    /// (eq. 7 days) The default token expiry length is configured by MCS and defaults to 7 days. Value must be less than the default expiry length,
+    /// @brief The length of time for the refresh token to expire formatted as "HH:MM:SS" or "HHH:MM:SS"
+    /// value must be between "00:00:01" and "168:00:00" (eq. 7 days)
+    /// The default token expiry length is configured by MCS and defaults to 7 days. Value must be less than the default expiry length,
     /// or it will be ignored.
     csp::common::String RefreshTokenExpiryLength;
 };
