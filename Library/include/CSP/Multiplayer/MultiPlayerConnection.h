@@ -209,7 +209,9 @@ public:
     /// exiting a space.
     csp::multiplayer::OnlineRealtimeEngine* GetOnlineRealtimeEngine() const;
 
-    // Use for testing to send an error back to SignalR.
+    // This function is used for testing unexpected connection terminations by causing the internal signalr connection to close.
+    // This uses signalrs callback mechanism to send an exception back to its internal connection, signaling it to shutdown.
+    // Calling this function will cause the NetworkInterruptionCallback to fire.
     void __CauseFailure();
 
 private:
