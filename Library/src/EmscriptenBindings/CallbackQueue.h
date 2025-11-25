@@ -50,10 +50,12 @@ template <typename... T> struct CallbackData
     std::tuple<void*, T...> Args;
 };
 
-// This function is called internally from emscripten_proxy_sync on the main thread.
+// Called internally from emscripten_proxy_sync on the main thread.
+// This function is passed to the emscripten proxy api from Emscripten_CallbackOnThread to be called on the main thread.
 template <typename... T> static void Emscripten_CallbackWrapper(void* InData)
 {
     auto* Data = static_cast<CallbackData<T...>*>(InData);
+    // Unpacks the tuple and passes values as the Data->Callback function arguments.
     std::apply(Data->Callback, Data->Args);
 }
 
