@@ -79,11 +79,15 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
     if (ExpiryLength.IsEmpty())
+    {
         return false;
+    }
 
     std::regex Regex("^[0-9]{2,3}:[0-9]{2}:[0-9]{2}$");
-    if (!ExpiryLength.IsEmpty() && std::regex_search(ExpiryLength.c_str(), Regex))
+    if (std::regex_search(ExpiryLength.c_str(), Regex))
+    {
         return true;
+    }
 
     CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
