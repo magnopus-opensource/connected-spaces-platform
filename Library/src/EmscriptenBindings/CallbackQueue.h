@@ -1,8 +1,29 @@
 /*
     Callback queue designed to push callbacks onto the main thread using the emscripten api.
-    This works because emscriptens threads are just web workers, which allows us to push messages to different workers.
 
-    This is implemented to work around the limitation of callbacks needing to fire on the same thread they were created on.
+    Issue -
+
+    Emscripten/Wasm uses pthreads which run inside their own web worker.
+    CSP receives a lot of its remote events from signalR, which can come back on a different thread from where they were registered.
+    Due to these internal callbacks often invoking a client provided callback that was created on a different thread,
+    this causes a 'table index is out of bounds' error due to the thread not being able to access the function pointer.
+
+    Solution -
+
+    To support this, CSP leverages emscriptens proxying api to push callbacks onto the main thread.
+    This works by first checking if the callback is on the main thread, if so, will fire immediately.
+    Otherwise, the callback arguments will be stored in a buffer and pushed to the main thread using the emscripten_proxy_sync method.
+
+    Limitations -
+
+    This currently only supports callers using the main thread, so if clients want to bind callbacks inside a client worker, this will fail.
+    This behaviour can be implemented with this api by storing the thread the function was originally invoked on. However, due to this currently being
+   used inside generated code, it would be hard to implement.
+
+    Docs-
+
+    Proxy api: https://emscripten.org/docs/api_reference/proxying.h.html
+    Emscripten pthreads: https://emscripten.org/docs/porting/pthreads.html
 */
 
 #ifdef CSP_WASM
