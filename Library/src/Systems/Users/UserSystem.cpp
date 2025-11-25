@@ -71,7 +71,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
     }
 }
 
-/* Check if the provided expiry length in token options is formatted as "HH:MM:SS"
+/* Check if the provided expiry length in token options is formatted as "HH:MM:SS" or "HHH:MM:SS"
  *
  * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
  *
@@ -83,7 +83,7 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
         return false;
     }
 
-    std::regex Regex("^[0-9]{2,3}:[0-9]{2}:[0-9]{2}$");
+    std::regex Regex("^[0-9]{2,3}:[0-5][0-9]:[0-5][0-9]$");
     if (std::regex_search(ExpiryLength.c_str(), Regex))
     {
         return true;
