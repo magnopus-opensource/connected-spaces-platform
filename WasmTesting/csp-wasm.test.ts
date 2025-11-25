@@ -54,7 +54,7 @@ test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
 
 });
 
-test.only('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async () => {
+test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async () => {
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
