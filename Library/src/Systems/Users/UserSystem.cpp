@@ -75,7 +75,7 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
  *
  * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
  *
- * "HHH:MM:SS" is support to allow duration greater than 99:99:99 (eq. < 100 hours) */
+ * "HHH:MM:SS" supports durations greater than 4 days */
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
     if (ExpiryLength.IsEmpty())
