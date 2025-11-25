@@ -36,7 +36,7 @@ public:
     virtual void Send(const std::string& Message, CallbackHandler Callback) = 0;
     virtual void Receive(ReceiveHandler Callback) = 0;
 
-    // Use for testing to send an error back to SignalR.
+    // This function is used for testing unexpected connection terminations by causing the internal signalr connection to close.
     virtual void __CauseFailure() = 0;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Magnopus LLC
+ * Copyright 2025 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@
 
 namespace csp
 {
-// Setup our proxy queue to which sends callbacks to the main thread
+// Setup our proxy queue to send callbacks to the main thread
 static em_proxying_queue* ProxyQueue = em_proxying_queue_create();
 // Get a reference to the main thread to send callbacks to
 static pthread_t MainThread = emscripten_main_runtime_thread_id();

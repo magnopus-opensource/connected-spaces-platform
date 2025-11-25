@@ -66,7 +66,7 @@ test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async (
   assert.ok(
     !errors.some(e => e.message.includes('table index is out of bounds')));
 
-  assert.ok(consoleMessages.some(e => e.includes('Connection inturrupted: true')));
+  assert.ok(consoleMessages.some(e => e.includes('Connection interrupted: true')));
 
 });
 
