@@ -36,7 +36,8 @@ All notable changes to this project will be documented in this file.
   In the continuation flow, we would return an invalid result and therefore lose the associated result data. This change ensures the result data from the exception is preserved.
 - [NT-0] fix: Use const string ref for return type by MAG-AlessioRegalbuto in https://github.com/magnopus-opensource/connected-spaces-platform/pull/856
   As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
-- [OF-1524] fix: Wasm callbacks are now automatically forwarded to the main thread, prevent crashes due to Wasm limitations. This fixes crahes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback.
+- [OF-1524] fix: Wasm callbacks are now automatically forwarded to the main thread by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/806
+  This fixes crashes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback on wasm builds.
 
 ### 🔨 🔨 Chore
 
