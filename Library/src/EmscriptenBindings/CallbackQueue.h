@@ -46,8 +46,8 @@ static pthread_t MainThread = emscripten_main_runtime_thread_id();
 // With the current implementation, the first argument will always be the callback context.
 template <typename... T> struct CallbackData
 {
-    void (*Callback)(T...);
-    std::tuple<T...> Args;
+    void (*Callback)(void*, T...);
+    std::tuple<void*, T...> Args;
 };
 
 // This function is called internally from emscripten_proxy_sync on the main thread.
@@ -58,18 +58,18 @@ template <typename... T> static void Emscripten_CallbackWrapper(void* InData)
 }
 
 // Function that will push the callback to the main thread if we are not on it.
-template <typename... T> static void Emscripten_CallbackOnThread(void (*Callback)(T...), T... Args)
+template <typename... T> static void Emscripten_CallbackOnThread(void (*Callback)(void*, T...), void* Context, T... Args)
 {
     bool OnMainThread = pthread_equal(pthread_self(), emscripten_main_runtime_thread_id());
     if (OnMainThread)
     {
         // We're on the main thread already, just call normally
-        Callback(std::forward<T>(Args)...);
+        Callback(Context, std::forward<T>(Args)...);
     }
     else
     {
         // Pack our data and send to the emscripten queue.
-        CallbackData<T...> Data { Callback, std::forward_as_tuple(std::forward<T>(Args)...) };
+        CallbackData<T...> Data { Callback, std::tuple<void*, T...> { Context, std::forward<T>(Args)... } };
 
         // Passing refs is safe here due to emscripten_proxy_sync guaranteeing the callback finishes before Emscripten_CallbackOnThread returns.
         emscripten_proxy_sync(ProxyQueue, MainThread, Emscripten_CallbackWrapper<T...>, static_cast<void*>(&Data));
