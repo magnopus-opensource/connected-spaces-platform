@@ -61,7 +61,7 @@ public:
     [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     ThirdPartyProviderDetails ProviderDetails;
 };

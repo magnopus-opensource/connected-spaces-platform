@@ -84,7 +84,7 @@ private:
     MaintenanceInfoResult() {};
     MaintenanceInfoResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
     csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;
 };
 

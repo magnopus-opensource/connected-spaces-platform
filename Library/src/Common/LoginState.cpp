@@ -46,7 +46,9 @@ void LoginState::CopyStateFrom(const LoginState& OtherState)
 {
     State = OtherState.State;
     AccessToken = OtherState.AccessToken;
+    AccessTokenExpiryLength = OtherState.AccessTokenExpiryLength;
     RefreshToken = OtherState.RefreshToken;
+    RefreshTokenExpiryLength = OtherState.RefreshTokenExpiryLength;
     UserId = OtherState.UserId;
     DeviceId = OtherState.DeviceId;
     DefaultApplicationSettings = OtherState.DefaultApplicationSettings;

@@ -81,7 +81,7 @@ private:
     void SetLODChain(const LODChain& Chain);
     void SetLODChain(LODChain&& Chain);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     LODChain Chain;
 };

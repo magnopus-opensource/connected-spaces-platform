@@ -178,7 +178,7 @@ private:
     /// The result object is taking ownership of the pointer to the Material.
     void SetMaterial(Material* Material);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Material* Material;
 };
@@ -214,7 +214,7 @@ private:
     /// The result object is taking ownership of the Material pointers in the array.
     void SetMaterials(const csp::common::Array<csp::systems::Material*>& Materials);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Material*> Materials;
 };

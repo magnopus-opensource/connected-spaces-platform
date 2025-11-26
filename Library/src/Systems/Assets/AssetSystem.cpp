@@ -679,6 +679,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
                 std::nullopt, // OrganizationIds (no longer used)
+                std::nullopt, // ExcludedTypes
                 Skip, // Skip
                 Limit, // Limit
                 std::nullopt, // SortBy
@@ -748,6 +749,7 @@ async::task<AssetCollectionsResult> AssetSystem::FindAssetCollections(const csp:
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
                 std::nullopt, // OrganizationIds (no longer used)
+                std::nullopt, // ExcludedTypes
                 Skip, // Skip
                 Limit, // Limit
                 std::nullopt, // SortBy
@@ -838,7 +840,8 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
                 std::nullopt, // PrototypeOwnerIds
                 std::nullopt, // ReadAccessFilters
                 std::nullopt, // WriteAccessFilters
-                std::nullopt // OrganizationIds
+                std::nullopt, // OrganizationIds
+                std::nullopt // ExcludedTypes
             },
             ResponseHandler);
 }

@@ -238,7 +238,7 @@ public:
 private:
     ProductInfoResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     ProductInfo ProductInformation;
 };
@@ -265,7 +265,7 @@ public:
 private:
     ProductInfoCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<ProductInfo> Products;
 };
@@ -295,7 +295,7 @@ public:
 private:
     CheckoutInfoResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CheckoutInfo CheckoutInformation;
 };
@@ -327,7 +327,7 @@ public:
 private:
     CartInfoResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CartInfo Cart;
 };
@@ -348,7 +348,7 @@ public:
 private:
     AddShopifyStoreResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     ShopifyStoreInfo Store;
 };
@@ -373,7 +373,7 @@ public:
 private:
     GetShopifyStoresResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<ShopifyStoreInfo> Stores;
 };
@@ -392,7 +392,7 @@ public:
 private:
     ValidateShopifyStoreResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;

@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🔥 ❗Breaking Changes
+
+- [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
+  Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
+
+## [6.12.0] - 2025-11-21_18-23-39
+
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add non-exported iterators to Map by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/859
   Add non-exported iterators in support of the SWIG generated interop API work.
-
+  
 ### 🐛 🔨 Bug Fixes
 
 - [OB-4761] fix: unreal crashes on oko asset drag and drop without internet connection by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/860

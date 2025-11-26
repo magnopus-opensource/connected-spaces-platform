@@ -107,7 +107,7 @@ public:
 private:
     AnchorResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Anchor Anchor;
 };
@@ -134,7 +134,7 @@ public:
 private:
     AnchorCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Anchor> Anchors;
 };
@@ -182,7 +182,7 @@ public:
 private:
     AnchorResolutionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     AnchorResolution AnchorResolution;
 };
@@ -209,7 +209,7 @@ public:
 private:
     AnchorResolutionCollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<AnchorResolution> AnchorResolutions;
 };
