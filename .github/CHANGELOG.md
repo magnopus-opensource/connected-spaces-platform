@@ -9,6 +9,12 @@ All notable changes to this project will be documented in this file.
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
   Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
 
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] fix: Prevent uvu (wasm test runner) hanging on failed tests, by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/871 
+  Achieves this by appropriately shutting down CSPFoundation at the end of the test suite run,
+  as well as guarding against puppeteer errors via try/finally.
+
 ## [6.12.0] - 2025-11-21_18-23-39
 
 ### 🍰 🙌 New Features
