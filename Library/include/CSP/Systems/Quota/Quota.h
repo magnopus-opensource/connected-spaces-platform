@@ -54,6 +54,7 @@ enum class TierFeatures
     TotalUploadSizeInKilobytes,
     Agora,
     OpenAI,
+    GoogleGenAI,
     Shopify,
     TicketedSpace,
     Invalid
@@ -76,7 +77,7 @@ class CSP_API FeatureLimitInfo
 public:
     FeatureLimitInfo()
         : ActivityCount(0)
-        , Limit(-1) {};
+        , Limit(-1) { };
 
     TierFeatures FeatureName;
     int32_t ActivityCount;
@@ -102,7 +103,7 @@ class CSP_API FeatureQuotaInfo
 {
 public:
     FeatureQuotaInfo()
-        : Limit(-1) {};
+        : Limit(-1) { };
     CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
     TierFeatures FeatureName;
     TierNames TierName;
@@ -126,9 +127,9 @@ public:
     const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
 private:
-    FeaturesLimitResult(void*) {};
+    FeaturesLimitResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<FeatureLimitInfo> FeaturesLimitInfo;
 };
@@ -149,9 +150,9 @@ public:
     const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
 private:
-    FeatureLimitResult(void*) {};
+    FeatureLimitResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     FeatureLimitInfo FeatureLimitInfo;
 };
@@ -172,9 +173,9 @@ public:
     const UserTierInfo& GetUserTierInfo() const;
 
 private:
-    UserTierResult(void*) {};
+    UserTierResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     UserTierInfo UserTierInfo;
 };
@@ -195,9 +196,9 @@ public:
     const FeatureQuotaInfo& GetFeatureQuotaInfo() const;
 
 private:
-    FeatureQuotaResult(void*) {};
+    FeatureQuotaResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     FeatureQuotaInfo FeatureQuotaInfo;
 };
@@ -218,9 +219,9 @@ public:
     const csp::common::Array<FeatureQuotaInfo>& GetFeaturesQuotaInfo() const;
 
 private:
-    FeaturesQuotaResult(void*) {};
+    FeaturesQuotaResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
 };

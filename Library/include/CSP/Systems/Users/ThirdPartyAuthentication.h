@@ -55,13 +55,13 @@ class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
 
 public:
     ProviderDetailsResult() = default;
-    ProviderDetailsResult(void*) {};
+    ProviderDetailsResult(void*) { };
 
     [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
     [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     ThirdPartyProviderDetails ProviderDetails;
 };

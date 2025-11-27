@@ -170,15 +170,15 @@ public:
     Material* GetMaterial();
 
     CSP_NO_EXPORT MaterialResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    MaterialResult(void*) {};
+    MaterialResult(void*) { };
 
     /// The result object is taking ownership of the pointer to the Material.
     void SetMaterial(Material* Material);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Material* Material;
 };
@@ -206,15 +206,15 @@ public:
     csp::common::Array<csp::systems::Material*>* GetMaterials();
 
     CSP_NO_EXPORT MaterialsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    MaterialsResult(void*) {};
+    MaterialsResult(void*) { };
 
     /// The result object is taking ownership of the Material pointers in the array.
     void SetMaterials(const csp::common::Array<csp::systems::Material*>& Materials);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Material*> Materials;
 };

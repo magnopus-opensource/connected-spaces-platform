@@ -44,14 +44,14 @@ public:
     const HotspotGroup& GetHotspotGroup() const;
     CSP_NO_EXPORT HotspotGroupResult(const HotspotGroup& Group, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , Group(Group) {};
+        , Group(Group) { };
     CSP_NO_EXPORT HotspotGroupResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    HotspotGroupResult(void*) {};
+    HotspotGroupResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     HotspotGroup Group;
 };
@@ -70,14 +70,14 @@ public:
     const csp::common::Array<HotspotGroup>& GetHotspotGroups() const;
     CSP_NO_EXPORT HotspotGroupsResult(const csp::common::Array<HotspotGroup>& Groups, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , Groups(Groups) {};
+        , Groups(Groups) { };
     CSP_NO_EXPORT HotspotGroupsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    HotspotGroupsResult(void*) {};
+    HotspotGroupsResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<HotspotGroup> Groups;
 };

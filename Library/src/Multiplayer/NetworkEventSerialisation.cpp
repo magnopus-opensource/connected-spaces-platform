@@ -418,4 +418,17 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEv
 
     return ParsedEvent;
 }
+
+csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
+    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
+{
+    csp::common::AsyncCallCompletedEventData ParsedEvent {};
+    PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
+
+    ParsedEvent.OperationName = ParsedEvent.EventValues[0].GetString();
+    ParsedEvent.ReferenceId = ParsedEvent.EventValues[1].GetString();
+    ParsedEvent.ReferenceType = ParsedEvent.EventValues[2].GetString();
+
+    return ParsedEvent;
+}
 }

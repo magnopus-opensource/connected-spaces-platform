@@ -36,7 +36,7 @@ private:
     LogoutResult();
     LogoutResult(csp::common::LoginState* InStatePtr);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::LoginState* State;
 };
@@ -52,10 +52,10 @@ class CSP_API CheckoutSessionUrlResult : public StringResult
 
 public:
     CheckoutSessionUrlResult() = default;
-    CheckoutSessionUrlResult(void*) {};
+    CheckoutSessionUrlResult(void*) { };
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief Result url for a user customer portal request
@@ -69,10 +69,10 @@ class CSP_API CustomerPortalUrlResult : public StringResult
 
 public:
     CustomerPortalUrlResult() = default;
-    CustomerPortalUrlResult(void*) {};
+    CustomerPortalUrlResult(void*) { };
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 } // namespace csp::systems

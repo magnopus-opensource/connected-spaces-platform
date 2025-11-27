@@ -57,9 +57,9 @@ public:
     const csp::common::SettingsCollection& GetSettingsCollection() const;
 
 private:
-    SettingsCollectionResult(void*) {};
+    SettingsCollectionResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::SettingsCollection SettingsCollection;
 };
@@ -91,15 +91,15 @@ public:
     CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
         , Type(AvatarType::None)
-        , AvatarVisible(true) {};
+        , AvatarVisible(true) { };
 
 private:
     AvatarInfoResult()
         : Type(AvatarType::None)
-        , AvatarVisible(true) {};
+        , AvatarVisible(true) { };
     AvatarInfoResult(void*)
         : Type(AvatarType::None)
-        , AvatarVisible(true) {};
+        , AvatarVisible(true) { };
 
     void SetAvatarType(AvatarType InValue);
     void SetAvatarIdentifier(const csp::common::String& InValue);

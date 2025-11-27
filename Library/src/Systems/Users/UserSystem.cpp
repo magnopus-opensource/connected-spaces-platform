@@ -71,21 +71,25 @@ void StartMultiplayerConnection(csp::multiplayer::MultiplayerConnection& Multipl
     }
 }
 
-/* Check if the provided expiry length in token options is formatted as "HH:MM:SS"
+/* Check if the provided expiry length in token options is formatted as "HH:MM:SS" or "HHH:MM:SS"
  *
- * Return True if expiry length matches format "HH:MM:SS" or empty, false otherwise */
+ * Return True if expiry length matches format "HH:MM:SS" or "HHH:MM:SS", false otherwise
+ *
+ * "HHH:MM:SS" supports durations greater than 4 days */
 bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
 {
-    std::regex Regex("^[0-9]{2}:[0-9]{2}:[0-9]{2}$");
-    if (!ExpiryLength.IsEmpty() && std::regex_search(ExpiryLength.c_str(), Regex))
+    if (ExpiryLength.IsEmpty())
+    {
+        return false;
+    }
+
+    std::regex Regex("^[0-9]{2,3}:[0-5][0-9]:[0-5][0-9]$");
+    if (std::regex_search(ExpiryLength.c_str(), Regex))
     {
         return true;
     }
-    else
-    {
-        CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
-    }
 
+    CSP_LOG_MSG(csp::common::LogLevel::Warning, "Expiry length token option does not match the expected format, and has been ignored.");
     return false;
 }
 
@@ -146,6 +150,11 @@ void AuthContext::RefreshToken(std::function<void(bool)> Callback)
         Request->SetUserId(LoginState->UserId);
         Request->SetRefreshToken(LoginState->RefreshToken);
 
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+        Options->SetExpiryLength(LoginState->AccessTokenExpiryLength);
+        Options->SetRefreshTokenExpiryLength(LoginState->RefreshTokenExpiryLength);
+        Request->SetTokenOptions(Options);
+
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
             if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -199,13 +208,11 @@ UserSystem::~UserSystem()
     delete (ProfileAPI);
     delete (AuthenticationAPI);
     delete (StripeAPI);
-
-    DeregisterSystemCallback();
 }
 
-void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus* EventBus)
+void UserSystem::SetNetworkEventBus(csp::multiplayer::NetworkEventBus& EventBus)
 {
-    EventBusPtr = EventBus;
+    EventBusPtr = &EventBus;
 
     RegisterSystemCallback();
 }
@@ -247,12 +254,21 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -275,7 +291,7 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
@@ -318,12 +334,21 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
         Request->SetUserId(UserId);
         Request->SetRefreshToken(RefreshToken);
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -344,7 +369,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -384,12 +409,21 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
             Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
         }
 
-        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+        auto Options = std::make_shared<chs_user::TokenOptions>();
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
         {
-            auto Options = std::make_shared<chs_user::TokenOptions>();
-            Options->SetExpiryLength(TokenOptions->ExpiryLength);
-            Request->SetTokenOptions(Options);
+            Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+            CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
         }
+
+        if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+        {
+            Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+            CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+        }
+
+        Request->SetTokenOptions(Options);
 
         LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
         {
@@ -410,7 +444,7 @@ void UserSystem::LoginAsGuest(bool CreateMultiplayerConnection, const csp::commo
                 };
 
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
                     CreateMultiplayerConnection);
             }
             else
@@ -469,7 +503,7 @@ void UserSystem::LoginAsGuestWithDeferredProfileCreation(const csp::common::Opti
 
                 // Do not start a multiplayer connection, need to call through this to trigger all the callbacks though.
                 StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                    CSPFoundation::GetEndpoints().MultiplayerService.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
+                    CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem, false);
             }
             else
             {
@@ -596,8 +630,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
                 Callback(LoginStateRes);
             };
 
-            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerService.GetURI(),
-                ConnectionCallback, LoginStateRes, *LogSystem, CreateMultiplayerConnection);
+            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
+                CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
+                CreateMultiplayerConnection);
         }
         else
         {
@@ -617,12 +652,21 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
         Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
     }
 
-    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->ExpiryLength))
+    auto Options = std::make_shared<chs_user::TokenOptions>();
+
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->AccessTokenExpiryLength))
     {
-        auto Options = std::make_shared<chs_user::TokenOptions>();
-        Options->SetExpiryLength(TokenOptions->ExpiryLength);
-        Request->SetTokenOptions(Options);
+        Options->SetExpiryLength(TokenOptions->AccessTokenExpiryLength);
+        CurrentLoginState.AccessTokenExpiryLength = TokenOptions->AccessTokenExpiryLength;
     }
+
+    if (TokenOptions.HasValue() && CheckExpiryLengthFormat(TokenOptions->RefreshTokenExpiryLength))
+    {
+        Options->SetRefreshTokenExpiryLength(TokenOptions->RefreshTokenExpiryLength);
+        CurrentLoginState.RefreshTokenExpiryLength = TokenOptions->RefreshTokenExpiryLength;
+    }
+
+    Request->SetTokenOptions(Options);
 
     CurrentLoginState.State = csp::common::ELoginState::LoginRequested;
 
@@ -927,15 +971,6 @@ void UserSystem::RegisterSystemCallback()
         csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
             csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)),
         [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAccessControlChangedEvent(NetworkEventData); });
-}
-
-void UserSystem::DeregisterSystemCallback()
-{
-    if (EventBusPtr)
-    {
-        EventBusPtr->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration("CSPInternal::UserSystem",
-            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AccessControlChanged)));
-    }
 }
 
 void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData& NetworkEventData)

@@ -15,6 +15,8 @@
  */
 
 #include "classes.h"
+#include "CSP/Common/String.h"
+#include <stdexcept>
 
 namespace csp::Tests
 {
@@ -30,5 +32,27 @@ BaseClass::~BaseClass() { }
 
 DerivedClass::DerivedClass() { }
 DerivedClass::~DerivedClass() { }
+
+// TemplateClass
+template <typename T> TemplateClass<T>::TemplateClass() { }
+
+template <typename T> TemplateClass<T>::~TemplateClass() { }
+
+template <typename T> void TemplateClass<T>::VoidFunction() { }
+
+template <typename T> void TemplateClass<T>::SetValue(const T& value) { m_Value = value; }
+
+// template <typename T> void TemplateClass<T>::GetValue(T& value) const { value = m_Value; }
+
+// Explicit template instantiations
+template class CSP_API TemplateClass<int>;
+template class CSP_API TemplateClass<csp::common::String>;
+template class CSP_API TemplateClass<SimpleClass*>;
+
+const csp::Tests::TemplateClass<int>& UsesTemplateClass::DummyFunctionInt() const { throw std::logic_error("DummyFunctionInt is not implemented."); }
+const csp::Tests::TemplateClass<csp::common::String>& UsesTemplateClass::DummyFunctionString() const
+{
+    throw std::logic_error("DummyFunctionString is not implemented.");
+}
 
 } // namespace csp::Tests

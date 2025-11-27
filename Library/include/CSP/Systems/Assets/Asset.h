@@ -67,7 +67,8 @@ enum class EAssetType
     GAUSSIAN_SPLAT,
     MATERIAL,
     ANNOTATION,
-    ANNOTATION_THUMBNAIL
+    ANNOTATION_THUMBNAIL,
+    TEXT
 };
 
 enum class EAssetPlatform
@@ -155,7 +156,8 @@ public:
     void SetMimeType(const csp::common::String& InMimeType) override;
 
 private:
-    void SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
+    CSP_NO_EXPORT void SetUploadContent(
+        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
 
     csp::common::String MimeType = "application/octet-stream";
 };
@@ -183,7 +185,8 @@ public:
     void SetMimeType(const csp::common::String& InMimeType) override;
 
 private:
-    void SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
+    CSP_NO_EXPORT void SetUploadContent(
+        csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const override;
     csp::common::String MimeType = "application/octet-stream";
 };
 
@@ -211,20 +214,20 @@ public:
     CSP_NO_EXPORT void SetAsset(const csp::systems::Asset& Asset);
 
     CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
     CSP_NO_EXPORT AssetResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
 
 protected:
     AssetResult() = delete;
-    AssetResult(void*) {};
+    AssetResult(void*) { };
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) { };
 
     Asset Asset;
 };
@@ -249,17 +252,17 @@ public:
     const csp::common::Array<Asset>& GetAssets() const;
 
     CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
     CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
 
 protected:
     AssetsResult() = delete;
-    AssetsResult(void*) {};
+    AssetsResult(void*) { };
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Asset> Assets;
 };
@@ -288,18 +291,18 @@ public:
     void SetUri(const csp::common::String& Value);
 
     CSP_NO_EXPORT UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
     CSP_NO_EXPORT UriResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
 
 protected:
     UriResult() = delete;
-    UriResult(void*) {};
+    UriResult(void*) { };
 
 private:
     UriResult(const csp::common::String Uri);
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     void SetResponseBody(const csp::common::String& Contents);
 
@@ -331,7 +334,7 @@ protected:
     AssetDataResult(void*);
 
 private:
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief Callback containing asset.

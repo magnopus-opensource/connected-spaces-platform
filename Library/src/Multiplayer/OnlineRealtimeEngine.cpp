@@ -379,6 +379,7 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to generate object ID. Exception: {}", e.what()).c_str());
             Callback(nullptr);
+            return;
         }
 
         auto ID = ParseGenerateObjectIDsResult(Result, *LogSystem);
@@ -404,6 +405,7 @@ void OnlineRealtimeEngine::CreateEntity(const csp::common::String& Name, const c
             {
                 LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to create object. Exception: {}", e.what()).c_str());
                 Callback(nullptr);
+                return;
             }
 
             std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -790,7 +792,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) {});
+            DestroyEntity(Entity, [](bool /*Ok*/) { });
         }
         // Otherwise we clear up all all locally represented entities
         else

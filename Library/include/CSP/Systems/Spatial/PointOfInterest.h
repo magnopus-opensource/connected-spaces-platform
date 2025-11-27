@@ -81,9 +81,9 @@ public:
     const PointOfInterest& GetPointOfInterest() const;
 
 private:
-    POIResult(void*) {};
+    POIResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     PointOfInterest POI;
 };
@@ -108,9 +108,9 @@ public:
     const csp::common::Array<PointOfInterest>& GetPOIs() const;
 
 private:
-    POICollectionResult(void*) {};
+    POICollectionResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<PointOfInterest> POIs;
 };

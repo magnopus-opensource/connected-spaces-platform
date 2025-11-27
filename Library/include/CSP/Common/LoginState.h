@@ -42,7 +42,9 @@ public:
 
     ELoginState State;
     csp::common::String AccessToken;
+    csp::common::String AccessTokenExpiryLength;
     csp::common::String RefreshToken;
+    csp::common::String RefreshTokenExpiryLength;
     csp::common::String UserId;
     csp::common::String DeviceId;
 

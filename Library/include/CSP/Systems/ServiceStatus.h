@@ -95,10 +95,10 @@ public:
     [[nodiscard]] const ServicesDeploymentStatus& GetLatestServicesDeploymentStatus() const;
 
 private:
-    ServicesDeploymentStatusResult() {};
-    ServicesDeploymentStatusResult(void*) {};
+    ServicesDeploymentStatusResult() { };
+    ServicesDeploymentStatusResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
     ServicesDeploymentStatus ServicesDeploymentStatusResponse;
 };
 

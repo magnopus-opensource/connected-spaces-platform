@@ -34,9 +34,9 @@ class CSP_API ExternalServiceInvocationResult : public StringResult
 
 protected:
     ExternalServiceInvocationResult() = default;
-    ExternalServiceInvocationResult(void*) {};
+    ExternalServiceInvocationResult(void*) { };
 
-    virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 /// @brief A specialisation of the result data class that handles respnses from the external service proxy system.
@@ -51,9 +51,9 @@ class CSP_API GetAgoraTokenResult : public ExternalServiceInvocationResult
 
 protected:
     GetAgoraTokenResult() = default;
-    GetAgoraTokenResult(void*) {};
+    GetAgoraTokenResult(void*) { };
 
-    virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 } // namespace csp::systems

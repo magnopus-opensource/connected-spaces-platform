@@ -28,7 +28,7 @@ FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNam
     : FeatureName(FeatureNameIn)
     , TierName(TierNameIn)
     , Limit(LimitIn)
-    , Period(PeriodIn) {};
+    , Period(PeriodIn) { };
 
 const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimitInfo() const { return FeaturesLimitInfo; }
 
@@ -256,6 +256,8 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
         return "TotalUploadSizeInKilobytes";
     case TierFeatures::SpaceOwner:
         return "SpaceOwner";
+    case TierFeatures::GoogleGenAI:
+        return "GoogleGenAI";
     case TierFeatures::Invalid:
         return "Invalid";
     default:
@@ -341,6 +343,11 @@ TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
     if (Value == "SpaceOwner")
     {
         return TierFeatures::SpaceOwner;
+    }
+
+    if (Value == "GoogleGenAI")
+    {
+        return TierFeatures::GoogleGenAI;
     }
 
     CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to Invalid", Value.c_str());

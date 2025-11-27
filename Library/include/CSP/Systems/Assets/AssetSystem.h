@@ -354,15 +354,13 @@ public:
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
-    /// @brief Deregisters the system from listening for the named event.
-    void DeregisterSystemCallback() override;
     /// @brief Deserialises the event values of the system.
     /// @param EventValues std::vector<signalr::value> : event values to deserialise
     CSP_NO_EXPORT void OnAssetDetailBlobChangedEvent(const csp::common::NetworkEventData& NetworkEventData);
 
 private:
     AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::NetworkEventBus* InEventBus, common::LogSystem& LogSystem);
+    CSP_NO_EXPORT AssetSystem(csp::web::WebClient* WebClient, csp::multiplayer::NetworkEventBus& EventBus, common::LogSystem& LogSystem);
     ~AssetSystem();
 
     CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);

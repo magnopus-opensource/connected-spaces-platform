@@ -39,7 +39,7 @@ namespace csp::systems
 class CSP_API Site
 {
 public:
-    Site() {};
+    Site() { };
 
     /** @name Data Values
      *   A Site contains some basic information that define it
@@ -70,9 +70,9 @@ public:
     const Site& GetSite() const;
 
 private:
-    SiteResult(void*) {};
+    SiteResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Site Site;
 };
@@ -97,9 +97,9 @@ public:
     const csp::common::Array<Site>& GetSites() const;
 
 private:
-    SitesCollectionResult(void*) {};
+    SitesCollectionResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Site> Sites;
 };

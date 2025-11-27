@@ -102,7 +102,7 @@ class CSP_API BasicSpace
 {
 public:
     BasicSpace()
-        : Attributes(SpaceAttributes::None) {};
+        : Attributes(SpaceAttributes::None) { };
 
     csp::common::String Id;
     csp::common::String Name;
@@ -183,19 +183,19 @@ public:
     const csp::common::String& GetSpaceCode() const;
 
     CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
     CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
 
     SpaceResult() = default;
 
 private:
-    SpaceResult(void*) {};
+    SpaceResult(void*) { };
 
     void SetSpace(const Space& InSpace);
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Space Space;
 
@@ -225,12 +225,12 @@ public:
     const csp::common::Array<Space>& GetSpaces() const;
 
     CSP_NO_EXPORT SpacesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    SpacesResult(void*) {};
+    SpacesResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<Space> Spaces;
 };
@@ -250,9 +250,9 @@ public:
     const BasicSpace& GetSpace() const;
 
 private:
-    BasicSpaceResult(void*) {};
+    BasicSpaceResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     BasicSpace Space;
 };
@@ -283,9 +283,9 @@ public:
     uint64_t GetTotalCount() const;
 
 private:
-    BasicSpacesResult(void*) {};
+    BasicSpacesResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     void FillResultTotalCount(const csp::common::String& JsonContent);
 
@@ -310,12 +310,12 @@ public:
 
     CSP_NO_EXPORT
     SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    SpaceMetadataResult(void*) {};
+    SpaceMetadataResult(void*) { };
 
-    SpaceMetadataResult() {};
+    SpaceMetadataResult() { };
 
     void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& MetadataAssetCollection);
 
@@ -339,10 +339,10 @@ public:
     const csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>>& GetTags() const;
 
 private:
-    SpacesMetadataResult(void*) {};
+    SpacesMetadataResult(void*) { };
     SpacesMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
-    SpacesMetadataResult() {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+    SpacesMetadataResult() { };
 
     void SetMetadata(const csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>& InMetadata);
     void SetTags(const csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>>& InTags);
@@ -371,9 +371,9 @@ public:
     const csp::common::Array<csp::common::String>& GetPendingInvitesEmails() const;
 
 private:
-    PendingInvitesResult(void*) {};
+    PendingInvitesResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<csp::common::String> PendingInvitesEmailAddresses;
 };
@@ -398,9 +398,9 @@ public:
     const csp::common::Array<csp::common::String>& GetAcceptedInvitesUserIds() const;
 
 private:
-    AcceptedInvitesResult(void*) {};
+    AcceptedInvitesResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<csp::common::String> AcceptedInvitesUserIds;
 };
@@ -429,12 +429,12 @@ public:
     const SpaceGeoLocation& GetSpaceGeoLocation() const;
 
     CSP_NO_EXPORT SpaceGeoLocationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
 private:
-    SpaceGeoLocationResult(void*) {};
+    SpaceGeoLocationResult(void*) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     bool HasGeoLocation = false;
     SpaceGeoLocation GeoLocation;
@@ -453,11 +453,11 @@ class SpaceGeoLocationCollectionResult : public csp::systems::ResultBase
     /** @endcond */
 
 private:
-    SpaceGeoLocationCollectionResult(void*) {};
+    SpaceGeoLocationCollectionResult(void*) { };
     SpaceGeoLocationCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+        : csp::systems::ResultBase(ResCode, HttpResCode) { };
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<SpaceGeoLocation> GeoLocations;
 };

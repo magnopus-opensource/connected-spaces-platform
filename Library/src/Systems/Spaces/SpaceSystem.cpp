@@ -58,6 +58,31 @@ namespace
 
 constexpr const int MAX_SPACES_RESULTS = 100;
 
+// Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
+// The only difference is in the value they pass for the AsyncCall parameter.
+std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(csp::systems::UserSystem* UserSystem, const String& SpaceId,
+    const String& NewName, csp::systems::SpaceAttributes NewAttributes, const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy,
+    bool AsyncCall)
+{
+    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
+    Request->SetSpaceId(SpaceId);
+    Request->SetNewGroupOwnerId(UserSystem->GetLoginState().UserId);
+    Request->SetNewUniqueName(NewName);
+    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
+    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
+    Request->SetShallowCopy(ShallowCopy);
+    Request->SetAsyncCall(AsyncCall);
+
+    if (MemberGroupIds.HasValue())
+    {
+        auto MemberGroupIdsVec = Convert(MemberGroupIds);
+
+        Request->SetMemberGroupIds(*MemberGroupIdsVec);
+    }
+
+    return Request;
+}
+
 } // namespace
 
 namespace csp::systems
@@ -65,20 +90,27 @@ namespace csp::systems
 
 SpaceSystem::SpaceSystem()
     : SystemBase(nullptr, nullptr, nullptr)
+    , UserSystem(nullptr)
     , GroupAPI(nullptr)
     , SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::common::LogSystem& LogSystem)
-    : SystemBase(InWebClient, nullptr, &LogSystem)
+SpaceSystem::SpaceSystem(
+    csp::web::WebClient* WebClient, multiplayer::NetworkEventBus& EventBus, csp::systems::UserSystem* UserSystem, csp::common::LogSystem& LogSystem)
+    : SystemBase(WebClient, &EventBus, &LogSystem)
+    , UserSystem(UserSystem)
     , CurrentSpace()
 {
-    GroupAPI = new chs::GroupApi(InWebClient);
-    SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
+    GroupAPI = new chs::GroupApi(WebClient);
+    SpaceAPI = new chsaggregation::SpaceApi(WebClient);
 }
 
-SpaceSystem::~SpaceSystem() { delete (GroupAPI); }
+SpaceSystem::~SpaceSystem()
+{
+    delete (GroupAPI);
+    delete (SpaceAPI);
+}
 
 /* CreateSpace Continuations */
 async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
@@ -100,7 +132,7 @@ async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsPost({ GroupInfo }, ResponseHandler);
 
@@ -293,8 +325,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
             SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
-                .then(async::inline_scheduler(),
-                    [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
+                .then(async::inline_scheduler(), [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
                     { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
         }
         else
@@ -390,34 +421,34 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                       "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                       "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
         : async::spawn(async::inline_scheduler(),
-            [SpaceId]()
-            {
-                // Offline, build a local space result
-                CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
+              [SpaceId]()
+              {
+                  // Offline, build a local space result
+                  CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
 
-                Space LocalSpace {};
+                  Space LocalSpace {};
 
-                /* Depending on how you think about this, you might think this is a bit of a bug.
-                   Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
-                   One might think we should be using that. The reason we don't is simply because we don't
-                   store that ID in the system currently, and it dosen't really matter currently.
-                   However this may be an improvement we want to make, although consider that it would get in the way
-                   of any fully-offline flows we might to add. */
-                csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
+                  /* Depending on how you think about this, you might think this is a bit of a bug.
+                     Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
+                     One might think we should be using that. The reason we don't is simply because we don't
+                     store that ID in the system currently, and it dosen't really matter currently.
+                     However this may be an improvement we want to make, although consider that it would get in the way
+                     of any fully-offline flows we might to add. */
+                  csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
 
-                LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
-                LocalSpace.Name = "Offline Space";
-                LocalSpace.Id = SpaceId;
-                LocalSpace.CreatedBy = LocalUser;
-                LocalSpace.OwnerId = LocalUser;
-                LocalSpace.UserIds = { LocalUser };
-                LocalSpace.ModeratorIds = { LocalUser };
+                  LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
+                  LocalSpace.Name = "Offline Space";
+                  LocalSpace.Id = SpaceId;
+                  LocalSpace.CreatedBy = LocalUser;
+                  LocalSpace.OwnerId = LocalUser;
+                  LocalSpace.UserIds = { LocalUser };
+                  LocalSpace.ModeratorIds = { LocalUser };
 
-                SpaceResult LocalSpaceResult {};
-                LocalSpaceResult.SetSpace(LocalSpace);
-                LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-                return LocalSpaceResult;
-            });
+                  SpaceResult LocalSpaceResult {};
+                  LocalSpaceResult.SetSpace(LocalSpace);
+                  LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                  return LocalSpaceResult;
+              });
 
     // Whether we've done an upstream online connection or just a local one, finish entering the space
     UpstreamConnectionTask
@@ -584,7 +615,7 @@ void SpaceSystem::CreateSpace(const String& Name, const String& Description, Spa
 
                 this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-                Callback(MakeInvalid<SpaceResult>());
+                Callback(csp::common::continuations::GetResultExceptionOrInvalid<SpaceResult>(exception));
             },
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const std::exception& exception)
             {
@@ -647,7 +678,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name, const String& Descri
 
                 this->DeleteSpace(CurrentSpaceResult->GetSpace().Id, NullResultCallback);
 
-                Callback(MakeInvalid<SpaceResult>());
+                Callback(csp::common::continuations::GetResultExceptionOrInvalid<SpaceResult>(exception));
             },
             [this, CurrentSpaceResult, Callback]([[maybe_unused]] const std::exception& exception)
             {
@@ -715,7 +746,6 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 {
-    const auto* UserSystem = SystemsManager::Get().GetUserSystem();
     const String InUserId = UserSystem->GetLoginState().UserId;
 
     csp::services::ResponseHandlerPtr ResponseHandler
@@ -837,7 +867,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdGet({ SpaceId }, ResponseHandler);
 
@@ -892,7 +922,7 @@ async::task<NullResult> SpaceSystem::BulkInviteToSpace(const csp::common::String
     auto SignupUrlParam = !InviteUsers.SignupUrl.IsEmpty() ? (InviteUsers.SignupUrl) : std::optional<String>(std::nullopt);
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        [](const NullResult&) {}, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+        [](const NullResult&) { }, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesBulkPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites }, ResponseHandler);
@@ -958,7 +988,7 @@ async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, 
     const csp::common::String& SpaceCode = Result.GetSpaceCode();
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->group_codesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
 
@@ -1925,26 +1955,7 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
     const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, SpaceResultCallback Callback)
 {
-    auto Request = std::make_shared<chsaggregation::DuplicateSpaceOptions>();
-    Request->SetSpaceId(SpaceId);
-    Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
-    Request->SetNewUniqueName(NewName);
-    Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
-    Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
-    Request->SetShallowCopy(ShallowCopy);
-
-    if (MemberGroupIds.HasValue())
-    {
-        std::vector<String> GroupIds;
-        GroupIds.reserve(MemberGroupIds->Size());
-
-        for (size_t i = 0; i < MemberGroupIds->Size(); ++i)
-        {
-            GroupIds.push_back(MemberGroupIds->operator[](i));
-        }
-
-        Request->SetMemberGroupIds(GroupIds);
-    }
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, false);
 
     csp::services::ResponseHandlerPtr ResponseHandler
         = SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -1958,4 +1969,53 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId, const String& NewName, S
         ResponseHandler // ResponseHandler
     );
 }
+
+void SpaceSystem::DuplicateSpaceAsync(const String& SpaceId, const String& NewName, SpaceAttributes NewAttributes,
+    const Optional<Array<String>>& MemberGroupIds, bool ShallowCopy, NullResultCallback Callback)
+{
+    auto Request = ConstructDuplicateSpaceOptions(UserSystem, SpaceId, NewName, NewAttributes, MemberGroupIds, ShallowCopy, true);
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = SpaceAPI->CreateHandler<csp::systems::NullResultCallback, csp::systems::NullResult, void, chs::GroupDto>(Callback, nullptr);
+
+    static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->spacesSpaceIdDuplicatePost(
+        {
+            SpaceId, // spaceId
+            true, // asyncCall
+            Request // RequestBody
+        },
+        ResponseHandler // ResponseHandler
+    );
+}
+
+void SpaceSystem::SetAsyncCallCompletedCallback(AsyncCallCompletedCallbackHandler Callback)
+{
+    AsyncCallCompletedCallback = std::move(Callback);
+
+    if (!AsyncCallCompletedCallback)
+    {
+        CSP_LOG_ERROR_MSG("Error: The AsyncCallCompletedCallback handler has not been set and the SpaceSystem has not been registered with the "
+                          "AsyncCallCompleted event. Please call 'SetAsyncCallCompletedCallback()' with a valid AsyncCallCompletedCallbackHandler.");
+        return;
+    }
+
+    EventBusPtr->ListenNetworkEvent(
+        csp::multiplayer::NetworkEventRegistration("CSPInternal::SpaceSystem",
+            csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AsyncCallCompleted)),
+        [this](const csp::common::NetworkEventData& NetworkEventData) { this->OnAsyncCallCompletedEvent(NetworkEventData); });
+}
+
+void SpaceSystem::OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData)
+{
+    if (!AsyncCallCompletedCallback)
+    {
+        return;
+    }
+
+    const csp::common::AsyncCallCompletedEventData& AsyncCallCompletedEventData
+        = static_cast<const csp::common::AsyncCallCompletedEventData&>(NetworkEventData);
+
+    AsyncCallCompletedCallback(AsyncCallCompletedEventData);
+}
+
 } // namespace csp::systems

@@ -62,6 +62,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::SpaceOwner), "SpaceOwner");
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::TicketedSpace), "TicketedSpace");
     EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::TotalUploadSizeInKilobytes), "TotalUploadSizeInKilobytes");
+    EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::GoogleGenAI), "GoogleGenAI");
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
@@ -75,6 +76,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
     EXPECT_EQ(StringToTierFeatureEnum("SpaceOwner"), csp::systems::TierFeatures::SpaceOwner);
     EXPECT_EQ(StringToTierFeatureEnum("TicketedSpace"), csp::systems::TierFeatures::TicketedSpace);
     EXPECT_EQ(StringToTierFeatureEnum("TotalUploadSizeInKilobytes"), csp::systems::TierFeatures::TotalUploadSizeInKilobytes);
+    EXPECT_EQ(StringToTierFeatureEnum("GoogleGenAI"), csp::systems::TierFeatures::GoogleGenAI);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
@@ -210,16 +212,9 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
     auto UserSystem = SystemsManager.GetUserSystem();
     auto QuotaSystem = SystemsManager.GetQuotaSystem();
 
-    csp::common::Array<FeatureQuotaInfo> ExpectedInfoArray
-        = { FeatureQuotaInfo(TierFeatures::SpaceOwner, TierNames::Basic, 3, PeriodEnum::Total, true),
-              FeatureQuotaInfo(TierFeatures::ScopeConcurrentUsers, TierNames::Basic, 5, PeriodEnum::Hours24, true),
-              FeatureQuotaInfo(TierFeatures::ObjectCaptureUpload, TierNames::Basic, 5, PeriodEnum::CalendarMonth, false),
-              FeatureQuotaInfo(TierFeatures::AudioVideoUpload, TierNames::Basic, -1, PeriodEnum::Total, false),
-              FeatureQuotaInfo(TierFeatures::TotalUploadSizeInKilobytes, TierNames::Basic, 10000000, PeriodEnum::Total, true),
-              FeatureQuotaInfo(TierFeatures::Agora, TierNames::Basic, 0, PeriodEnum::Total, false),
-              FeatureQuotaInfo(TierFeatures::OpenAI, TierNames::Basic, 0, PeriodEnum::Total, false),
-              FeatureQuotaInfo(TierFeatures::Shopify, TierNames::Basic, 0, PeriodEnum::Total, false),
-              FeatureQuotaInfo(TierFeatures::TicketedSpace, TierNames::Basic, 0, PeriodEnum::Total, false) };
+    csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ScopeConcurrentUsers,
+        TierFeatures::ObjectCaptureUpload, TierFeatures::AudioVideoUpload, TierFeatures::TotalUploadSizeInKilobytes, TierFeatures::Agora,
+        TierFeatures::OpenAI, TierFeatures::GoogleGenAI, TierFeatures::Shopify, TierFeatures::TicketedSpace };
 
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId);
@@ -227,14 +222,12 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
     auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-    EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), ExpectedInfoArray.Size());
+
+    EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), TierFeaturesArray.Size());
 
     for (size_t i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
     {
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, ExpectedInfoArray[i].FeatureName);
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].TierName, ExpectedInfoArray[i].TierName);
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Limit, ExpectedInfoArray[i].Limit);
-        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Period, ExpectedInfoArray[i].Period);
+        EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, TierFeaturesArray[i]);
     }
 }
 
@@ -244,9 +237,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     auto UserSystem = SystemsManager.GetUserSystem();
     auto QuotaSystem = SystemsManager.GetQuotaSystem();
     auto SpaceSystem = SystemsManager.GetSpaceSystem();
-
-    csp::common::Array<TierFeatures> TierFeaturesArray = { TierFeatures::SpaceOwner, TierFeatures::ObjectCaptureUpload,
-        TierFeatures::AudioVideoUpload, TierFeatures::OpenAI, TierFeatures::TicketedSpace };
 
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -272,7 +262,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 50);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

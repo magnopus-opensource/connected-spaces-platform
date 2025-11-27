@@ -121,6 +121,19 @@ public:
     /// @return bool
     bool HasKey(const TKey& Key) const { return Container->count(Key) > 0; }
 
+    // Iterators
+    CSP_NO_EXPORT typename MapType::iterator begin() { return Container->begin(); }
+    CSP_NO_EXPORT typename MapType::const_iterator begin() const { return Container->begin(); }
+    CSP_NO_EXPORT typename MapType::const_iterator cbegin() const { return Container->cbegin(); }
+
+    CSP_NO_EXPORT typename MapType::iterator end() { return Container->end(); }
+    CSP_NO_EXPORT typename MapType::const_iterator end() const { return Container->end(); }
+    CSP_NO_EXPORT typename MapType::const_iterator cend() const { return Container->cend(); }
+
+    // These finds are more efficient than using std::find over the iterators (non-linear container)
+    CSP_NO_EXPORT typename MapType::iterator Find(const TKey& Key) { return Container->find(Key); }
+    CSP_NO_EXPORT typename MapType::const_iterator Find(const TKey& Key) const { return Container->find(Key); }
+
     /// @brief Returns a copy of all keys in this map.
     ///        This copy should be disposed by the caller once it is no longer needed.
     /// @return const csp::common::Array<TKey>* : Array of keys

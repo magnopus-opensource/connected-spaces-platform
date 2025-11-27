@@ -61,19 +61,34 @@ public:
 class ResultException : public ExpectedExceptionBase
 {
 public:
-    ResultException(const std::string& Message, const csp::systems::ResultBase& Result)
+    template <typename T>
+    ResultException(const std::string& Message, const T& Result)
         : ExpectedExceptionBase(Message)
-        , Result(Result)
+        , Result(std::make_shared<T>(Result))
     {
     }
 
     const ExceptionType GetExceptionType() const override { return ExceptionType::Result; }
 
-    const csp::systems::ResultBase& GetResult() const { return Result; }
+    const csp::systems::ResultBase& GetResult() const { return *Result; }
 
 private:
-    const csp::systems::ResultBase& Result;
+    // Throwing an exception copy-initializes a temporary object, meaning unique_ptr will fail due to enforcing exclusive ownership.
+    std::shared_ptr<const csp::systems::ResultBase> Result;
 };
+
+template <typename T> const inline T GetResultExceptionOrInvalid(const csp::common::continuations::ExpectedExceptionBase& Exception)
+{
+    // Check that the exception base is of type result and cast to derived type.
+    if (Exception.GetExceptionType() == csp::common::continuations::ExceptionType::Result)
+    {
+        const auto ResultException = static_cast<const csp::common::continuations::ResultException*>(&Exception);
+        const auto Result = ResultException->GetResult();
+        return T(Result.GetResultCode(), static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()), Result.GetFailureReason());
+    }
+
+    return T(csp::systems::EResultCode::Failed, 0);
+}
 
 /**
  * @brief An exception class for Multiplayer Error code.
@@ -158,7 +173,7 @@ template <typename ExpectedCallable>
 inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, ExpectedCallable&& InvokeIfExpectedErrorCallable)
 {
     return InvokeIfExceptionInChain(
-        LogSystem, std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) {});
+        LogSystem, std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) { });
 }
 
 /*
