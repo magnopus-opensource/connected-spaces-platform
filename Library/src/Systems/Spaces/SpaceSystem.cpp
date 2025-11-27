@@ -320,7 +320,8 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
 
                     const bool ManagedLeaderElection = DefaultScopeIt->ManagedLeaderElection;
 
-                    // Enable server-side election or client election based on the scope.
+                    // This will set server-side election to true if the scope has ManagedLeaderElection enabled. Otherwise it will default to client
+                    // election.
                     static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->SetServerSideELectionEnabled(ManagedLeaderElection);
                     // Start leader election
                     static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)->EnableLeaderElection();
