@@ -475,7 +475,7 @@ private:
 
     csp::common::String DefaultScopeId;
     // This gets set in the space entry flow if ManagedLeaderELeciton is set for the spaces default scope.
-    bool ServerSideELectionEnabled = false;
+    bool ServerSideElectionEnabled = false;
     // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;

@@ -760,10 +760,10 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
 
             if (IsLeaderElectionEnabled())
             {
-                if (ServerSideELectionEnabled)
+                if (ServerSideElectionEnabled)
                 {
-                    // For server-side leader election, we want to listen for script run requests form other clients.
-                    // We will receive these if we are the leader and another clients modifies a script or sends an event.
+                    // For server-side leader election, we want to listen for script run requests from other clients.
+                    // We will receive these if we are the leader and another client modifies a script or sends an event.
                     this->NetworkEventBus->ListenNetworkEvent(
                         csp::multiplayer::NetworkEventRegistration { "CSPInternal::ClientElectionManager", RemoteRunScriptMessage },
                         [this](const csp::common::NetworkEventData& EventData) { this->OnRemoteRunScriptEvent(EventData.EventValues); });
@@ -922,7 +922,7 @@ void OnlineRealtimeEngine::TickEntities()
 
         if (LeaderElectionManager)
         {
-            // If we are using server-side leader election, we ned to send heartbeats if we are the leader of any scopes.
+            // If we are using server-side leader election, we need to send heartbeats if we are the leader of any scopes.
             LeaderElectionManager->SendHeartbeatIfElectedScopeLeader();
         }
     }
@@ -946,7 +946,7 @@ void OnlineRealtimeEngine::TickEntities()
 
 void OnlineRealtimeEngine::RegisterDefaultScope(const std::string& ScopeId, const std::optional<uint64_t>& LeaderId)
 {
-    if (IsLeaderElectionEnabled() && ServerSideELectionEnabled)
+    if (IsLeaderElectionEnabled() && ServerSideElectionEnabled)
     {
         LeaderElectionManager->RegisterScope(ScopeId, LeaderId);
         DefaultScopeId = ScopeId.c_str();
@@ -995,7 +995,7 @@ void OnlineRealtimeEngine::__AssumeScopeLeadership(const std::string& ScopeId, s
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP), signalr::value { Params }, CB);
 }
 
-void OnlineRealtimeEngine::SetServerSideELectionEnabled(bool Value) { ServerSideELectionEnabled = Value; }
+void OnlineRealtimeEngine::SetServerSideELectionEnabled(bool Value) { ServerSideElectionEnabled = Value; }
 
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
@@ -1065,7 +1065,7 @@ bool OnlineRealtimeEngine::IsLocalClientLeader() const
         return true;
     }
 
-    if (ServerSideELectionEnabled)
+    if (ServerSideElectionEnabled)
     {
         return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
     }
@@ -1084,7 +1084,7 @@ void OnlineRealtimeEngine::EnableLeaderElection()
 {
     DisableLeaderElection();
 
-    if (ServerSideELectionEnabled)
+    if (ServerSideElectionEnabled)
     {
         LeaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*MultiplayerConnectionInst, *LogSystem);
     }
@@ -1114,7 +1114,7 @@ uint64_t OnlineRealtimeEngine::GetLeaderId() const
 {
     if (IsLeaderElectionEnabled())
     {
-        if (ServerSideELectionEnabled)
+        if (ServerSideElectionEnabled)
         {
             std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
             return LeaderId.has_value() ? *LeaderId : 0;
@@ -1166,7 +1166,7 @@ bool OnlineRealtimeEngine::CheckIfWeShouldRunScriptsLocally() const
     else
     {
         // Only run script locally if we are the Leader
-        if (ServerSideELectionEnabled)
+        if (ServerSideElectionEnabled)
         {
             return LeaderElectionManager->IsLocalClientLeader(DefaultScopeId.c_str());
         }
@@ -1182,7 +1182,7 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
     // Run script on a remote leader...
     LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose, fmt::format("OnlineRealtimeEngine::RunScriptRemotely Script='{}'", ScriptText).c_str());
 
-    if (ServerSideELectionEnabled)
+    if (ServerSideElectionEnabled)
     {
         std::optional<uint64_t> LeaderId = LeaderElectionManager->GetLeaderClientId(DefaultScopeId.c_str());
 
@@ -1499,7 +1499,7 @@ void OnlineRealtimeEngine::ApplyIncomingPatch(const signalr::value* EntityMessag
                 if (Entity->GetEntityType() == SpaceEntityType::Avatar)
                 {
                     // This can be removed as part of OF-1785.
-                    if (ServerSideELectionEnabled == false)
+                    if (ServerSideElectionEnabled == false)
                     {
                         // All clients will take ownership of deleted avatars scripts
                         // Last client which receives patch will end up with ownership
