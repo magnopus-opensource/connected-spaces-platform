@@ -49,7 +49,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeTest)
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -97,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetDefaultScopeOutOfSpaceTest
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     {
         RAIIMockLogger MockLogger {};
@@ -135,7 +135,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeByInvalidSpaceTest)
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -173,7 +173,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateScopeByIdTest)
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -238,7 +238,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, UpdateInvalidScopeTest)
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -283,7 +283,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeLeaderNoManagedElecti
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

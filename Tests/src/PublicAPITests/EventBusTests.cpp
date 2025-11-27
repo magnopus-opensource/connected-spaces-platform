@@ -74,7 +74,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregister)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = SystemsManager.GetEventBus()->AllRegistrations();
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = SystemsManager.GetEventBus()->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 1);
@@ -102,17 +102,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RegisterDeregisterMulti)
 
     const csp::common::Array<NetworkEventRegistration> InitialRegisteredEvents = SystemsManager.GetEventBus()->AllRegistrations();
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId2, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId2, EventName3 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     const csp::common::Array<NetworkEventRegistration> AddedRegistration = SystemsManager.GetEventBus()->AllRegistrations();
 
     EXPECT_TRUE(AddedRegistration.Size() == InitialRegisteredEvents.Size() + 6);
@@ -197,18 +197,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, RejectDuplicateRegistration)
     const auto StartSize = SystemsManager.GetEventBus()->AllRegistrations().Size();
 
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 1);
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 2);
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId, EventName2 }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 3);
 
     // This one should be rejected
     SystemsManager.GetEventBus()->ListenNetworkEvent(
-        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) { });
+        NetworkEventRegistration { ReceiverId2, EventName }, [](const csp::common::NetworkEventData& /*NetworkEventData*/) {});
     EXPECT_EQ(SystemsManager.GetEventBus()->AllRegistrations().Size(), StartSize + 3);
 }
 

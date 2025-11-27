@@ -73,7 +73,7 @@ public:
     const ScopeLeader& GetScopeLeader() const;
 
 private:
-    ScopeLeaderResult(void*) { };
+    ScopeLeaderResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

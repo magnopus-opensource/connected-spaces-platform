@@ -34,7 +34,7 @@ class CSP_API ExternalServiceInvocationResult : public StringResult
 
 protected:
     ExternalServiceInvocationResult() = default;
-    ExternalServiceInvocationResult(void*) { };
+    ExternalServiceInvocationResult(void*) {};
 
     CSP_NO_EXPORT virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
@@ -51,7 +51,7 @@ class CSP_API GetAgoraTokenResult : public ExternalServiceInvocationResult
 
 protected:
     GetAgoraTokenResult() = default;
-    GetAgoraTokenResult(void*) { };
+    GetAgoraTokenResult(void*) {};
 
     CSP_NO_EXPORT virtual void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };

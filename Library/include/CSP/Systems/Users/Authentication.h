@@ -67,7 +67,7 @@ public:
     [[nodiscard]] const csp::common::LoginState& GetLoginState() const;
     CSP_NO_EXPORT LoginStateResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
         : csp::systems::ResultBase(ResCode, HttpResCode)
-        , State(nullptr) { };
+        , State(nullptr) {};
 
 private:
     LoginStateResult();
@@ -91,7 +91,7 @@ public:
 
 private:
     LoginTokenInfoResult() = default;
-    LoginTokenInfoResult(void*) { };
+    LoginTokenInfoResult(void*) {};
 
     void FillLoginTokenInfo(const csp::common::String& AccessToken, const csp::common::String& AuthTokenExpiry,
         const csp::common::String& RefreshToken, const csp::common::String& RefreshTokenExpiry);

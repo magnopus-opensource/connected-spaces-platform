@@ -77,7 +77,7 @@ class CSP_API FeatureLimitInfo
 public:
     FeatureLimitInfo()
         : ActivityCount(0)
-        , Limit(-1) { };
+        , Limit(-1) {};
 
     TierFeatures FeatureName;
     int32_t ActivityCount;
@@ -103,7 +103,7 @@ class CSP_API FeatureQuotaInfo
 {
 public:
     FeatureQuotaInfo()
-        : Limit(-1) { };
+        : Limit(-1) {};
     CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
     TierFeatures FeatureName;
     TierNames TierName;
@@ -127,7 +127,7 @@ public:
     const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
 private:
-    FeaturesLimitResult(void*) { };
+    FeaturesLimitResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -150,7 +150,7 @@ public:
     const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
 private:
-    FeatureLimitResult(void*) { };
+    FeatureLimitResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -173,7 +173,7 @@ public:
     const UserTierInfo& GetUserTierInfo() const;
 
 private:
-    UserTierResult(void*) { };
+    UserTierResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -196,7 +196,7 @@ public:
     const FeatureQuotaInfo& GetFeatureQuotaInfo() const;
 
 private:
-    FeatureQuotaResult(void*) { };
+    FeatureQuotaResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -219,7 +219,7 @@ public:
     const csp::common::Array<FeatureQuotaInfo>& GetFeaturesQuotaInfo() const;
 
 private:
-    FeaturesQuotaResult(void*) { };
+    FeaturesQuotaResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

@@ -72,7 +72,7 @@ public:
     const Profile& GetProfile() const;
 
 private:
-    ProfileResult(void*) { };
+    ProfileResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -93,7 +93,7 @@ public:
     const csp::common::Array<BasicProfile>& GetProfiles() const;
 
 private:
-    BasicProfilesResult(void*) { };
+    BasicProfilesResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

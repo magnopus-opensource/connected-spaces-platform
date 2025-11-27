@@ -102,7 +102,7 @@ public:
     CSP_NO_EXPORT ScopeResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
 private:
-    ScopeResult(void*) { };
+    ScopeResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -130,7 +130,7 @@ public:
     CSP_NO_EXPORT ScopesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
 private:
-    ScopesResult(void*) { };
+    ScopesResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

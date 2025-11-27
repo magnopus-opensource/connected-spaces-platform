@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -194,7 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationSystemEventDelay
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

@@ -236,7 +236,7 @@ public:
     ProductInfo& GetProductInfo();
 
 private:
-    ProductInfoResult(void*) { };
+    ProductInfoResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -263,7 +263,7 @@ public:
     csp::common::Array<ProductInfo>& GetProducts();
 
 private:
-    ProductInfoCollectionResult(void*) { };
+    ProductInfoCollectionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -290,10 +290,10 @@ public:
     CheckoutInfo& GetCheckoutInfo();
 
     CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    CheckoutInfoResult(void*) { };
+    CheckoutInfoResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -322,10 +322,10 @@ public:
     CartInfo& GetCartInfo();
 
     CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    CartInfoResult(void*) { };
+    CartInfoResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -346,7 +346,7 @@ public:
     ShopifyStoreInfo& GetShopifyStoreInfo();
 
 private:
-    AddShopifyStoreResult(void*) { };
+    AddShopifyStoreResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -371,7 +371,7 @@ public:
     csp::common::Array<ShopifyStoreInfo>& GetShopifyStores();
 
 private:
-    GetShopifyStoresResult(void*) { };
+    GetShopifyStoresResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -390,7 +390,7 @@ public:
     bool ValidateResult;
 
 private:
-    ValidateShopifyStoreResult(void*) { };
+    ValidateShopifyStoreResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };

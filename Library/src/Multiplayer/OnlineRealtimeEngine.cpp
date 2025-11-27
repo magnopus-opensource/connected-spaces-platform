@@ -792,7 +792,7 @@ void OnlineRealtimeEngine::LocalDestroyAllEntities()
         // as these are only ever valid for a single connected session
         if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetMultiplayerConnectionInstance()->GetClientId())
         {
-            DestroyEntity(Entity, [](bool /*Ok*/) { });
+            DestroyEntity(Entity, [](bool /*Ok*/) {});
         }
         // Otherwise we clear up all all locally represented entities
         else

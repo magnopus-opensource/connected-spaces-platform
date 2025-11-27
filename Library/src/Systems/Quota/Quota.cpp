@@ -28,7 +28,7 @@ FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNam
     : FeatureName(FeatureNameIn)
     , TierName(TierNameIn)
     , Limit(LimitIn)
-    , Period(PeriodIn) { };
+    , Period(PeriodIn) {};
 
 const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimitInfo() const { return FeaturesLimitInfo; }
 

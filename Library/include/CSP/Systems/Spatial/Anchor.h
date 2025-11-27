@@ -54,7 +54,7 @@ public:
     OlyAnchorPosition(double InX, double InY, double InZ)
         : X(InX)
         , Y(InY)
-        , Z(InZ) { };
+        , Z(InZ) {};
 
     double X;
     double Y;
@@ -68,7 +68,7 @@ void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::Ancho
 class CSP_API Anchor
 {
 public:
-    Anchor() { };
+    Anchor() {};
 
     /** @name Data Values
      *   An Anchor contains some basic information that define it
@@ -105,7 +105,7 @@ public:
     const Anchor& GetAnchor() const;
 
 private:
-    AnchorResult(void*) { };
+    AnchorResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -132,7 +132,7 @@ public:
     const csp::common::Array<Anchor>& GetAnchors() const;
 
 private:
-    AnchorCollectionResult(void*) { };
+    AnchorCollectionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -180,7 +180,7 @@ public:
     const AnchorResolution& GetAnchorResolution() const;
 
 private:
-    AnchorResolutionResult(void*) { };
+    AnchorResolutionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -207,7 +207,7 @@ public:
     const csp::common::Array<AnchorResolution>& GetAnchorResolutions() const;
 
 private:
-    AnchorResolutionCollectionResult(void*) { };
+    AnchorResolutionCollectionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

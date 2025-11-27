@@ -51,14 +51,14 @@ public:
     const csp::common::ApplicationSettings& GetApplicationSettings() const;
 
     CSP_NO_EXPORT ApplicationSettingsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT ApplicationSettingsResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
 private:
-    ApplicationSettingsResult(void*) { };
+    ApplicationSettingsResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

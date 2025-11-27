@@ -344,7 +344,7 @@ ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* Ass
     RegisterSystemCallback();
 }
 
-ConversationSystemInternal::~ConversationSystemInternal() { }
+ConversationSystemInternal::~ConversationSystemInternal() {}
 
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {

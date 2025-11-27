@@ -43,8 +43,8 @@ class CSP_API GraphQLResult : public csp::systems::ResultBase
     CSP_END_IGNORE
     /** @endcond */
 public:
-    GraphQLResult() { };
-    GraphQLResult(void*) { };
+    GraphQLResult() {};
+    GraphQLResult(void*) {};
 
     /// @brief Retrieves response data from the GraphQL Server
     /// @return String : Data String as described above

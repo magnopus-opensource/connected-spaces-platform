@@ -78,11 +78,11 @@ public:
     [[nodiscard]] const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
 
     CSP_NO_EXPORT MaintenanceInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    MaintenanceInfoResult() { };
-    MaintenanceInfoResult(void*) { };
+    MaintenanceInfoResult() {};
+    MaintenanceInfoResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
     csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;

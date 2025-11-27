@@ -106,7 +106,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::CreateSettings
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) { }, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     auto Request = std::make_shared<chs::ApplicationSettingsDto>();
     Request->SetAllowAnonymous(ApplicationSettings.AllowAnonymous);
@@ -142,7 +142,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) { }, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->applicationsApplicationNameSettingsContextGet({ ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);
@@ -174,7 +174,7 @@ async::task<ApplicationSettingsResult> ApplicationSettingsSystem::GetSettingsByC
 
     services::ResponseHandlerPtr SettingsResponseHandler
         = ApplicationSettingsAPI->CreateHandler<ApplicationSettingsResultCallback, ApplicationSettingsResult, void, chs::ApplicationSettingsDto>(
-            [](const ApplicationSettingsResult&) { }, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+            [](const ApplicationSettingsResult&) {}, nullptr, web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::ApplicationSettingsApi*>(ApplicationSettingsAPI)
         ->tenantsTenantApplicationsApplicationNameSettingsContextGet({ Tenant, ApplicationName, Context, Convert(Keys) }, SettingsResponseHandler);

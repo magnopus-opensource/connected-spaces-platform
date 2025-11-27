@@ -73,10 +73,10 @@ public:
     const LODChain& GetLODChain() const;
 
     CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    LODChainResult(void*) { };
+    LODChainResult(void*) {};
 
     void SetLODChain(const LODChain& Chain);
     void SetLODChain(LODChain&& Chain);

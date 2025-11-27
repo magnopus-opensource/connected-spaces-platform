@@ -140,16 +140,16 @@ public:
     CSP_NO_EXPORT void SetAssetCollection(const csp::systems::AssetCollection& Collection);
 
     CSP_NO_EXPORT AssetCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
     AssetCollectionResult() = default;
 
 private:
-    AssetCollectionResult(void*) { };
+    AssetCollectionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -184,14 +184,14 @@ public:
     uint64_t GetTotalCount() const;
 
     CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionsResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
 protected:
-    AssetCollectionsResult(void*) { };
+    AssetCollectionsResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -220,14 +220,14 @@ public:
 protected:
     AssetCollectionCountResult() = delete;
     AssetCollectionCountResult(void*)
-        : Count { 0 } { };
+        : Count { 0 } {};
 
 private:
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AssetCollectionCountResult(const csp::systems::ResultBase& InResult)
         : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
-        , Count { 0 } { };
+        , Count { 0 } {};
 
     uint64_t Count;
 };
@@ -246,15 +246,15 @@ class CSP_API AssetCollectionsCopyResult : public AssetCollectionsResult
 
 public:
     CSP_NO_EXPORT AssetCollectionsCopyResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : AssetCollectionsResult(ResCode, HttpResCode) { };
+        : AssetCollectionsResult(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT AssetCollectionsCopyResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : AssetCollectionsResult(ResCode, HttpResCode, Reason) { };
+        : AssetCollectionsResult(ResCode, HttpResCode, Reason) {};
 
 private:
     AssetCollectionsCopyResult(void* Ptr)
-        : AssetCollectionsResult(Ptr) { };
+        : AssetCollectionsResult(Ptr) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };

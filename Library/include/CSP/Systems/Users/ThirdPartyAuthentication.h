@@ -55,7 +55,7 @@ class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
 
 public:
     ProviderDetailsResult() = default;
-    ProviderDetailsResult(void*) { };
+    ProviderDetailsResult(void*) {};
 
     [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
     [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
