@@ -30,7 +30,7 @@ void DtoToScopeLeader(const csp::services::generated::multiplayerservice::ScopeL
     }
     if (Dto.HasLeaderClientId())
     {
-        ScopeLeader.ScopeClientId = 1;
+        ScopeLeader.ScopeClientId = Dto.GetLeaderClientId();
     }
     if (Dto.HasLeaderUserId())
     {
