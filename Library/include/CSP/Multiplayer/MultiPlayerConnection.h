@@ -282,7 +282,7 @@ private:
 
     /*  We currently have a circular dependency between the MultiplayerConnection and OnlineRealtimeEngine.
         This could easily be resolved by exposing an event registration from the MultiplayerConnection,
-        so the OnlineRealtimeEngine can receieve events agonstically from the MultiplayerConnection (Similar to what we did with the event bus).
+        so the OnlineRealtimeEngine can receieve events agnostically from the MultiplayerConnection (Similar to what we did with the event bus).
     */
     OnlineRealtimeEngine* MultiplayerRealtimeEngine = nullptr;
 };
