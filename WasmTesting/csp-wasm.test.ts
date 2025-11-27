@@ -143,6 +143,11 @@ test('EnterSpaceFromCheckpoint', async () => {
   assert.ok(errors.length == 0); //Should be no errors
 })
 
+test.after(async () => {
+  CSPFoundation.shutdown();
+});
+
+
 test.run();
 
 /*

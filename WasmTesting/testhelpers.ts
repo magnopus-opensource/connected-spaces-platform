@@ -128,33 +128,36 @@ export async function LaunchTestPage(
     const errors: Error[] = [];
     const consoleMessages: string[] = [];
   
-    page.on('pageerror', e => errors.push(e));
-    page.on('console', msg => consoleMessages.push(msg.text()));
+    try{
+      page.on('pageerror', e => errors.push(e));
+      page.on('console', msg => consoleMessages.push(msg.text()));
 
-    //Build a URL argument list.
-    //This is a bit rough and ready, since credentials and spaceID are both optional and we need to handle the formatting
-    //There's almost certainly a better way to do this, probably even a native JS way specifically for URL arguments.
-    var args = `?useDebugCsp=${encodeURIComponent(useDebugCSP)}`;
+      //Build a URL argument list.
+      //This is a bit rough and ready, since credentials and spaceID are both optional and we need to handle the formatting
+      //There's almost certainly a better way to do this, probably even a native JS way specifically for URL arguments.
+      var args = `?useDebugCsp=${encodeURIComponent(useDebugCSP)}`;
 
-    if (userCredentials !== null && userCredentials.email && userCredentials.password) {
-      args = `${args}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
+      if (userCredentials !== null && userCredentials.email && userCredentials.password) {
+        args = `${args}&email=${encodeURIComponent(userCredentials.email)}&password=${encodeURIComponent(userCredentials.password)}`;
+      }
+
+      if (spaceId != null) {
+        args = `${args}&spaceId=${encodeURIComponent(spaceId)}`;
+      }
+
+      // Append the arguments to the HTML file path
+      htmlPath = `${htmlPath}${args}`;
+  
+      console.log('Loading test page: ', htmlPath)
+      
+      await page.goto(htmlPath, { waitUntil });
+
+      // Annoyingly, networkidle0 doesn't account for everything (I suspect it doesn't know how to validate connections originating from WASM, so give ourselves 5 seconds extra here).
+      await new Promise(resolve => setTimeout(resolve, 1));
     }
-
-    if (spaceId != null) {
-      args = `${args}&spaceId=${encodeURIComponent(spaceId)}`;
+    finally {
+      await page.close();
+      await browser.close();
     }
-
-    // Append the arguments to the HTML file path
-    htmlPath = `${htmlPath}${args}`;
- 
-    console.log('Loading test page: ', htmlPath)
-    
-    await page.goto(htmlPath, { waitUntil });
-
-    // Annoyingly, networkidle0 doesn't account for everything (I suspect it doesn't know how to validate connections originating from WASM, so give ourselves 5 seconds extra here).
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    await page.close();
-    await browser.close();
     return { errors, consoleMessages };
 }
