@@ -27,4 +27,4 @@ namespace LeaderElection
  * Test that waits to be made the leader of a scope, and then disconnects, re-triggering leadership election.
  */
 void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine);
-} // namespace ReceiveEventBusevent
+} // namespace LeaderElection
