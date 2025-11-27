@@ -46,7 +46,7 @@ class CSP_API TicketedEvent
 public:
     TicketedEvent()
         : Vendor(EventTicketingVendor::Unknown)
-        , IsTicketingActive(false) { };
+        , IsTicketingActive(false) {};
 
     /// @brief CHS ID of the event resource.
     csp::common::String Id;
@@ -69,7 +69,7 @@ class CSP_API EventTicket
 public:
     EventTicket()
         : Vendor(EventTicketingVendor::Unknown)
-        , Status(TicketStatus::Unknown) { };
+        , Status(TicketStatus::Unknown) {};
 
     /// @brief CHS ID of the ticket resource.
     csp::common::String Id;
@@ -130,7 +130,7 @@ public:
     const TicketedEvent& GetTicketedEvent() const;
 
 private:
-    TicketedEventResult(void*) { };
+    TicketedEventResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -157,7 +157,7 @@ public:
     const csp::common::Array<TicketedEvent>& GetTicketedEvents() const;
 
 private:
-    TicketedEventCollectionResult(void*) { };
+    TicketedEventCollectionResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -184,7 +184,7 @@ public:
     const EventTicket& GetEventTicket() const;
 
 private:
-    EventTicketResult(void*) { };
+    EventTicketResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -212,7 +212,7 @@ public:
 
 private:
     SpaceIsTicketedResult(void*)
-        : SpaceIsTicketed(false) { };
+        : SpaceIsTicketed(false) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -233,7 +233,7 @@ public:
     TicketedEventVendorAuthInfo GetVendorAuthInfo() const { return VendorInfo; }
 
 private:
-    TicketedEventVendorAuthInfoResult(void*) { };
+    TicketedEventVendorAuthInfoResult(void*) {};
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

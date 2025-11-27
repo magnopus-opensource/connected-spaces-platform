@@ -132,7 +132,7 @@ async::task<SpaceResult> SpaceSystem::CreateSpaceGroupInfo(
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsPost({ GroupInfo }, ResponseHandler);
 
@@ -325,7 +325,8 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
             SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
-                .then(async::inline_scheduler(), [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
+                .then(async::inline_scheduler(), 
+                    [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
                     { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
         }
         else
@@ -867,7 +868,7 @@ async::task<SpaceResult> SpaceSystem::GetSpace(const String& SpaceId)
     }
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdGet({ SpaceId }, ResponseHandler);
 
@@ -922,7 +923,7 @@ async::task<NullResult> SpaceSystem::BulkInviteToSpace(const csp::common::String
     auto SignupUrlParam = !InviteUsers.SignupUrl.IsEmpty() ? (InviteUsers.SignupUrl) : std::optional<String>(std::nullopt);
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-        [](const NullResult&) { }, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
+        [](const NullResult&) {}, nullptr, csp::web::EResponseCodes::ResponseNoContent, std::move(OnCompleteEvent));
 
     static_cast<chs::GroupApi*>(GroupAPI)->groupsGroupIdEmail_invitesBulkPost(
         { SpaceId, std::nullopt, EmailLinkUrlParam, SignupUrlParam, GroupInvites }, ResponseHandler);
@@ -988,7 +989,7 @@ async::task<SpaceResult> SpaceSystem::AddUserToSpace(const SpaceResult& Result, 
     const csp::common::String& SpaceCode = Result.GetSpaceCode();
 
     csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<SpaceResultCallback, SpaceResult, void, chs::GroupDto>(
-        [](const SpaceResult&) { }, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
+        [](const SpaceResult&) {}, nullptr, csp::web::EResponseCodes::ResponseOK, std::move(*OnCompleteEvent.get()));
 
     static_cast<chs::GroupApi*>(GroupAPI)->group_codesGroupCodeUsersUserIdPut({ SpaceCode, UserId }, ResponseHandler);
 

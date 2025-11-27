@@ -52,7 +52,7 @@ class CSP_API CheckoutSessionUrlResult : public StringResult
 
 public:
     CheckoutSessionUrlResult() = default;
-    CheckoutSessionUrlResult(void*) { };
+    CheckoutSessionUrlResult(void*) {};
 
 private:
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
@@ -69,7 +69,7 @@ class CSP_API CustomerPortalUrlResult : public StringResult
 
 public:
     CustomerPortalUrlResult() = default;
-    CustomerPortalUrlResult(void*) { };
+    CustomerPortalUrlResult(void*) {};
 
 private:
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
