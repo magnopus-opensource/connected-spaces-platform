@@ -54,8 +54,8 @@ void ScopeLeadershipManager::OnElectedScopeLeader(const std::string& ScopeId, ui
     if (Data.has_value())
     {
         LogSystem.LogMsg(csp::common::LogLevel::Warning,
-            fmt::format(
-                "ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has the leader: {1}, for new leader: {2}.",
+            fmt::format("ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has the leader: {1}, for new leader: "
+                        "{2}. Overwriting old value.",
                 ScopeId, Data->LeaderClientId, ClientId)
                 .c_str());
     }
@@ -95,7 +95,7 @@ void ScopeLeadershipManager::OnVacatedAsScopeLeader(const std::string& ScopeId)
         csp::common::LogLevel::Log, fmt::format("ScopeLeadershipManager::OnVacatedAsScopeLeader Event called for scope: {}.", ScopeId).c_str());
 }
 
-void ScopeLeadershipManager::Update()
+void ScopeLeadershipManager::SendHeartbeatIfElectedScopeLeader()
 {
     const auto CurrentTime = std::chrono::steady_clock::now();
 
@@ -131,7 +131,7 @@ std::optional<uint64_t> ScopeLeadershipManager::GetLeaderClientId(const std::str
 
     const std::optional<ScopeLeaderData>& LeaderData = ScopeIt->second;
 
-    if (ScopeIt->second.has_value() == false)
+    if (LeaderData.has_value() == false)
     {
         // Scope doesn't have a leader.
         return std::nullopt;
