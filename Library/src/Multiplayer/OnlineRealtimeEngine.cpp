@@ -1200,7 +1200,8 @@ void OnlineRealtimeEngine::RunScriptRemotely(int64_t ContextId, const csp::commo
         }
         else
         {
-            // TODO: error
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                "OnlineRealtimeEngine::RunScriptRemotely failed due to receiving a script run event for a scope it is not the leader of.");
         }
     }
     else
