@@ -173,7 +173,7 @@ template <typename ExpectedCallable>
 inline auto InvokeIfExceptionInChain(csp::common::LogSystem& LogSystem, ExpectedCallable&& InvokeIfExpectedErrorCallable)
 {
     return InvokeIfExceptionInChain(
-        LogSystem, std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) { });
+        LogSystem, std::forward<ExpectedCallable>(InvokeIfExpectedErrorCallable), []([[maybe_unused]] const std::exception& exception) {});
 }
 
 /*

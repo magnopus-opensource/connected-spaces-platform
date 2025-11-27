@@ -153,10 +153,10 @@ public:
     [[nodiscard]] const MessageInfo& GetMessageInfo() const;
 
     CSP_NO_EXPORT MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    explicit MessageResult(void*) { };
+    explicit MessageResult(void*) {};
     MessageResult() = default;
 
     void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
@@ -198,12 +198,12 @@ public:
     CSP_NO_EXPORT void SetTotalCount(uint64_t Value);
 
     CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    explicit MessageCollectionResult(void*) { };
+    explicit MessageCollectionResult(void*) {};
     explicit MessageCollectionResult(uint64_t ResultTotalCount)
-        : ResultTotalCount(ResultTotalCount) { };
+        : ResultTotalCount(ResultTotalCount) {};
 
     void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
 
@@ -233,10 +233,10 @@ public:
     [[nodiscard]] const MessageInfo& GetConversationInfo() const;
 
     CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    explicit ConversationResult(void*) { };
+    explicit ConversationResult(void*) {};
     ConversationResult() = default;
 
     void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
@@ -262,16 +262,16 @@ public:
     uint64_t GetCount() const;
 
     CSP_NO_EXPORT NumberOfRepliesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-    explicit NumberOfRepliesResult(void*) { };
+    explicit NumberOfRepliesResult(void*) {};
     NumberOfRepliesResult() = default;
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) { };
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
     uint64_t Count;
 };
@@ -288,11 +288,11 @@ class CSP_API AnnotationResult : public csp::systems::ResultBase
 
 public:
     CSP_NO_EXPORT AnnotationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT AnnotationResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
     CSP_NO_EXPORT void ParseAnnotationAssetData(const csp::systems::AssetCollection& AssetCollection);
     CSP_NO_EXPORT void SetAnnotationAsset(const csp::systems::Asset& Asset) { AnnotationAsset = Asset; }
@@ -311,13 +311,13 @@ public:
     const csp::systems::Asset& GetAnnotationThumbnailAsset() const;
 
 private:
-    explicit AnnotationResult(void*) { };
+    explicit AnnotationResult(void*) {};
     AnnotationResult() = default;
 
     CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     CSP_NO_EXPORT AnnotationResult(const csp::systems::ResultBase& InResult)
-        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) { };
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
     AnnotationData Data;
     systems::Asset AnnotationAsset;
@@ -336,11 +336,11 @@ class CSP_API AnnotationThumbnailCollectionResult : public csp::systems::ResultB
 
 public:
     CSP_NO_EXPORT AnnotationThumbnailCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-        : csp::systems::ResultBase(ResCode, HttpResCode) { };
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
     CSP_NO_EXPORT AnnotationThumbnailCollectionResult(
         csp::systems::EResultCode ResCode, csp::web::EResponseCodes HttpResCode, csp::systems::ERequestFailureReason Reason)
-        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) { };
+        : csp::systems::ResultBase(ResCode, static_cast<std::underlying_type<csp::web::EResponseCodes>::type>(HttpResCode), Reason) {};
 
     /// @brief gets the annotation thumbnails that exist within the conversation.
     /// @return const csp::common::Map<csp::common::String, csp::systems::Asset>&
@@ -353,7 +353,7 @@ public:
     CSP_NO_EXPORT void ParseAssets(const systems::AssetsResult& Result);
 
 private:
-    explicit AnnotationThumbnailCollectionResult(void*) { };
+    explicit AnnotationThumbnailCollectionResult(void*) {};
     AnnotationThumbnailCollectionResult() = default;
 
     csp::common::Map<csp::common::String, csp::systems::Asset> AnnotationThumbnailAssetsMap;
