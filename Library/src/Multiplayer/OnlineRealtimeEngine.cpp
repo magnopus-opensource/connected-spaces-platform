@@ -674,7 +674,7 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 {
-    if (LeaderElectionManager == false)
+    if (LeaderElectionManager == nullptr)
     {
         return;
     }
@@ -695,7 +695,7 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 {
-    if (LeaderElectionManager == false)
+    if (LeaderElectionManager == nullptr)
     {
         return;
     }
