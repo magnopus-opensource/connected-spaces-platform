@@ -26,9 +26,9 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::State)] = static_cast<int64_t>(AvatarState::Idle);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex)] = static_cast<int64_t>(-1);
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED)] = static_cast<int64_t>(-1);
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl)] = "";
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled)] = false;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -41,6 +41,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl)] = "";
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
