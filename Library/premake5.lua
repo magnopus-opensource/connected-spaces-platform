@@ -186,8 +186,12 @@ if not Project then
 				"-Wno-error=format-security" --In logging, __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str()) is unnaceptable for some reason.
             }
 
-            linkoptions { "-lm" } -- For gcc's math lib
-
+            linkoptions { 
+            "-lm", -- For gcc's math lib
+            "-Wl,-z,max-page-size=16384",
+            "-Wl,-z,common-page-size=16384"
+            } 
+        
             externalincludedirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/android"
             }
