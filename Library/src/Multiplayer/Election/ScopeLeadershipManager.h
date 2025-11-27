@@ -33,7 +33,11 @@ namespace csp::multiplayer
 {
 class MultiplayerConnection;
 
-// TODO:
+// Object which manages the state of the server-side leader election.
+// It manages the leader for each scope in a space by storing a map of scope leaders,
+// with the scopeId as the key, and optional scope leader data as the value.
+// This map gets updated through the OnElectedScopeLeader and OnVacatedAsScopeLeader callbacks.
+// This also sends heartbeats to the server to notify chs that the current leader is still active.
 class ScopeLeadershipManager
 {
 public:
@@ -51,14 +55,14 @@ public:
     void OnElectedScopeLeader(const std::string& ScopeId, uint64_t ClientId);
     // Called when we receive a leader vacated event.
     // This will happen if an election is manually triggered for a scope that already has a leader,
-    // or the current leader becomes unavailable (heartbeat not sent within a time, or the client disconnects".
+    // or the current leader becomes unavailable (heartbeat not sent within a time, or the client disconnects).
     void OnVacatedAsScopeLeader(const std::string& ScopeId);
 
     // Loop Scopes and calls SendLeaderHeartbeat if the local client is the leader of the scope
     // and LeaderElectionHeartbeatInterval has passed since the last heartbeat.
-    void Update();
+    void SendHeartbeatIfElectedScopeLeader();
 
-    // Returns 0 if not valid
+    // Returns std::nullopt if not valid
     std::optional<uint64_t> GetLeaderClientId(const std::string& ScopeId) const;
     bool IsLocalClientLeader(const std::string& ScopeId) const;
 

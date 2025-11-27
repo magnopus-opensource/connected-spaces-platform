@@ -200,7 +200,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, UpdateTest)
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, Log)).Times(1);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 
     // We haven't waited long enough, so the callback shouldnt be called if we call Update again.
@@ -211,7 +211,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, UpdateTest)
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, Log)).Times(0);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 
     // Wait for the heartbeat interval before calling again. This should successfully call the callback again.
@@ -224,7 +224,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, UpdateTest)
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, Log)).Times(1);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 }
 
@@ -267,7 +267,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, NonLeaderUpdateTe
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::VeryVerbose, Log)).Times(0);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 }
 
@@ -311,7 +311,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, HeartbeatStdExcep
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Log)).Times(1);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 }
 
@@ -356,7 +356,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, HeartbeatNonStdEx
 
         EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, Log)).Times(1);
 
-        Manager.Update();
+        Manager.SendHeartbeatIfElectedScopeLeader();
     }
 }
 
@@ -381,8 +381,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, InvalidEventTest)
     // Test OnElectedScopeLeader throws a warning and log when the election event is called for a scope that already has a leader.
     {
         RAIIMockLogger MockLogger {};
-        const csp::common::String Error = fmt::format(
-            "ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has the leader: {1}, for new leader: {2}.",
+        const csp::common::String Error = fmt::format("ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has "
+                                                      "the leader: {1}, for new leader: {2}. Overwriting old value",
             TestScopeId, Connection.GetClientId(), TestClientId2)
                                               .c_str();
 
@@ -907,11 +907,11 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
     //  Create another client for leader election
     MultiplayerTestRunnerProcess TestRunner1
         = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::LEADER_ELECTION_TICK)
-                                                   .SetSpaceId(Space.Id.c_str())
-                                                   .SetLoginEmail(TestRunnerUser1.Email.c_str())
-                                                   .SetPassword(GeneratedTestAccountPassword)
-                                                   .SetEndpoint(EndpointBaseURI())
-                                                   .SetTimeoutInSeconds(60);
+              .SetSpaceId(Space.Id.c_str())
+              .SetLoginEmail(TestRunnerUser1.Email.c_str())
+              .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
+              .SetTimeoutInSeconds(60);
 
     std::future<void> ReadyForAssertionsFuture = TestRunner1.ReadyForAssertionsFuture();
 

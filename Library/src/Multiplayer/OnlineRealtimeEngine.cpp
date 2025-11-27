@@ -923,7 +923,7 @@ void OnlineRealtimeEngine::TickEntities()
         if (LeaderElectionManager)
         {
             // If we are using server-side leader election, we ned to send heartbeats if we are the leader of any scopes.
-            LeaderElectionManager->Update();
+            LeaderElectionManager->SendHeartbeatIfElectedScopeLeader();
         }
     }
 
