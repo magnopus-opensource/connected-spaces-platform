@@ -314,7 +314,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                         this->LogSystem->LogMsg(
                             csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space does not have a default scope!");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
-                            "You have to provide at least one AssetCollectionId", MakeInvalid<csp::systems::SpaceResult>())));
+                            "SpaceSystem::RegisterScopesInSpace: Space does not have a default scope!", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
                     }
 
