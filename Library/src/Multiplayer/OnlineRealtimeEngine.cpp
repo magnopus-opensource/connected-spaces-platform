@@ -1091,6 +1091,7 @@ void OnlineRealtimeEngine::EnableLeaderElection()
     else
     {
         ElectionManager = new ClientElectionManager(this, *LogSystem, *ScriptRunner);
+        ElectionManager->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
     }
 }
 

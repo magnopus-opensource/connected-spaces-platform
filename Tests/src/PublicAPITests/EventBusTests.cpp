@@ -61,7 +61,7 @@ csp::systems::Space CreateTestSpaceAndEnterScope(csp::systems::SpaceSystem* Spac
     Connection->SetScopes(Space.Id).then(async::inline_scheduler(),
         [&CallbackCalled](std::tuple<signalr::value, std::exception_ptr> ResultPair)
         {
-            EXPECT_TRUE(std::get<1>(ResultPair) != nullptr);
+            EXPECT_TRUE(std::get<1>(ResultPair) == nullptr);
             CallbackCalled = true;
         });
     WaitForCallback(CallbackCalled);
