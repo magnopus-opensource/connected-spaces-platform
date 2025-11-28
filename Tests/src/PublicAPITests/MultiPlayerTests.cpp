@@ -1649,13 +1649,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestAvatarSpaceComponentCreation)
 
     RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
 
-    // Create parent entity
-    csp::common::String ObjectName = "Object 1";
-    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
-    auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    // Create object to hold component
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(RealtimeEngine.get());
 
     // Create avatar component
-    auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AvatarData));
+    auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(Object->AddComponent(ComponentType::AvatarData));
 
     // Ensure defaults are set
     EXPECT_EQ(AvatarComponent->GetAvatarId(), "");
