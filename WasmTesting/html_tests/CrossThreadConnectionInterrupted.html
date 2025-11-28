@@ -62,7 +62,7 @@
       // Set interrupted callback
       let interrupted = false;
       const connection = systemsManager.getMultiplayerConnection();
-      connection.setNetworkInterruptionCallback((message) => { console.log("Connection inturrupted: true"); interrupted = true });
+      connection.setNetworkInterruptionCallback((message) => { console.log("Connection interrupted: true"); interrupted = true });
 
       // Cause signalr to fail
       connection.__CauseFailure();
