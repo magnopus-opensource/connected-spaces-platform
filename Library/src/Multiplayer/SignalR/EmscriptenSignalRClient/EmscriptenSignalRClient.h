@@ -35,6 +35,8 @@ public:
     void Send(const std::string& Message, CallbackHandler Callback) override;
     void Receive(ReceiveHandler Callback) override;
 
+    void __CauseFailure() override;
+
     std::thread& GetStartCallbackThread();
     void StartCallbackThreadFunc(bool CallbackResult);
 

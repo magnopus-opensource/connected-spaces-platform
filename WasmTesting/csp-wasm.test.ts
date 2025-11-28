@@ -1,5 +1,5 @@
 import './pretend-to-be-a-browser'
-import  {CreatePublicTestSpace, CreateTestUser, LoginAsUser, LaunchTestPage, DeleteSpace, LogoutUser, TEST_ACCOUNT_PASSWORD} from './testhelpers'
+import { CreatePublicTestSpace, CreateTestUser, LoginAsUser, LaunchTestPage, DeleteSpace, LogoutUser, TEST_ACCOUNT_PASSWORD } from './testhelpers'
 
 import { test } from 'uvu';
 import * as assert from 'uvu/assert';
@@ -14,9 +14,9 @@ test.before(async () => {
   return initializeCSP(USE_DEBUG_CSP); //gotta return the promise or tests wont automatically await
 });
 
-test('Login', async() => {
+test('Login', async () => {
   const user = await CreateTestUser();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -25,11 +25,11 @@ test('Login', async() => {
   assert.ok(errors.length == 0); //Should be no errors
 })
 
-test('EnterSpace', async() => {
+test('EnterSpace', async () => {
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/EnterSpace.html', USE_DEBUG_CSP, null, spaceId)
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/EnterSpace.html', USE_DEBUG_CSP, null, spaceId)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -44,19 +44,36 @@ test('EnterSpace', async() => {
 
 test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
   const user = await CreateTestUser();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadLogCallbackLogin.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadLogCallbackLogin.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
   console.log(errors);
 
   assert.ok(
-    errors.some(e => e.message.includes('table index is out of bounds')),
-    'Expected cross-thread `table index is out of bounds` error. Message not found, did you fix the bug (OB-3782)? Nice job! ',
-  );
-  
+    !errors.some(e => e.message.includes('table index is out of bounds')));
+
 });
 
-test('SendReceiveNetworkEvent', async() => {
+test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async () => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+  const spaceId = await CreatePublicTestSpace();
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadConnectionInterrupted.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId)
+
+  console.log(consoleMessages);
+  console.log(errors);
+
+  assert.ok(
+    !errors.some(e => e.message.includes('table index is out of bounds')));
+
+  assert.ok(consoleMessages.some(e => e.includes('Connection interrupted: true')));
+
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+  await userSystem.logout();
+});
+
+
+test('SendReceiveNetworkEvent', async () => {
   // This test was added as a regression test against `RuntimeError: null function or function signature mismatch`
   // Caused by a wrapper gen bug when you make a return type of an enclosing function different for the return type of the callback
   // We didn't actually fix it at time of writing, change `ListenNetworkEvent` to return a bool and you'll see what I mean.
@@ -64,7 +81,7 @@ test('SendReceiveNetworkEvent', async() => {
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
 
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/SendReceiveNetworkEvent.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId);
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/SendReceiveNetworkEvent.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId);
 
   console.log(consoleMessages);
   console.log(errors);
@@ -77,11 +94,11 @@ test('SendReceiveNetworkEvent', async() => {
   await LogoutUser(user);
 })
 
-test('CreateAvatar', async() => {
+test('CreateAvatar', async () => {
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/CreateAvatar.html', USE_DEBUG_CSP, null, spaceId)
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CreateAvatar.html', USE_DEBUG_CSP, null, spaceId)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -94,8 +111,8 @@ test('CreateAvatar', async() => {
   await LogoutUser(user);
 })
 
-test('Offline', async() => {
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/Offline.html', USE_DEBUG_CSP, null, null)
+test('Offline', async () => {
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/Offline.html', USE_DEBUG_CSP, null, null)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -109,10 +126,10 @@ test('Offline', async() => {
   assert.ok(errors.length == 0); //Should be no errors
 })
 
-test('EnterSpaceFromCheckpoint', async() => {
+test('EnterSpaceFromCheckpoint', async () => {
   // This test specifically also checks a stack overflow that occurred passing large data (the checkpoint json) over the ABI boundary.
   // The JSON in question is an anonymized, in-progress test one, so all the asset paths are nonsense. What matters here is that it's largish.
-  const {errors, consoleMessages} = await LaunchTestPage('http://127.0.0.1:8888/EnterSpaceFromCheckpoint.html', USE_DEBUG_CSP, null, null)
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/EnterSpaceFromCheckpoint.html', USE_DEBUG_CSP, null, null)
 
   console.log(consoleMessages);
   console.log(errors);

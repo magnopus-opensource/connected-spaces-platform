@@ -222,6 +222,8 @@ void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
     }
 }
 
+void CSPWebSocketClientPOCO::__CauseFailure() { HandleReceiveError("__CauseFailure"); }
+
 void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 {
     bool HandshakeReceived = false;

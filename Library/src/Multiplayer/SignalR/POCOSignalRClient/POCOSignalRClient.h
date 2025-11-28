@@ -44,6 +44,8 @@ public:
     void Send(const std::string& Message, CallbackHandler Callback) override;
     void Receive(ReceiveHandler Callback) override;
 
+    void __CauseFailure() override;
+
     struct ParsedURIInfo
     {
         std::string Endpoint;
