@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.13.0] - 2025-11-28_20-11-35
+
 🔥 ❗Breaking Changes
 
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
