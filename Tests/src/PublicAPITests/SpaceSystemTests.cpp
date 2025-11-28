@@ -3303,8 +3303,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceAsyncTest)
         std::promise<std::tuple<String, String, String>> AsyncCallCompletedPromise;
         std::future<std::tuple<String, String, String>> AsyncCallCompletedFuture = AsyncCallCompletedPromise.get_future();
 
-        auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData)
-        { AsyncCallCompletedPromise.set_value({ NetworkEventData.OperationName, NetworkEventData.ReferenceId, NetworkEventData.ReferenceType }); };
+        auto AsyncCallCompletedCallback = [&](const csp::common::AsyncCallCompletedEventData& NetworkEventData) {
+            AsyncCallCompletedPromise.set_value({ NetworkEventData.OperationName, NetworkEventData.ReferenceId, NetworkEventData.ReferenceType });
+        };
 
         SpaceSystem->SetAsyncCallCompletedCallback(AsyncCallCompletedCallback);
 

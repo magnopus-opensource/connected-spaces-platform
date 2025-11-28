@@ -70,7 +70,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInRe
                 EXPECT_FALSE(Result.get_exception());
                 EXPECT_EQ(Result.get(), uint64_t(55));
             })
-        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(),
+            [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -86,8 +87,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
     EXPECT_CALL(
         *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), ::testing::_, ::testing::_))
         .WillOnce(
-            [](const std::string& /**/, const signalr::value& /**/, std::function<void(const signalr::value&, std::exception_ptr)> /**/)
-            {
+            [](const std::string& /**/, const signalr::value& /**/, std::function<void(const signalr::value&, std::exception_ptr)> /**/) {
                 return async::make_task(
                     std::make_tuple(signalr::value("Irrelevant value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
@@ -106,7 +106,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(),
+            [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -143,7 +144,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
                 EXPECT_EQ(Result.as_bool(), true);
                 EXPECT_FALSE(Exception);
             })
-        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(),
+            [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
@@ -160,8 +162,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
         *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), ::testing::_, ::testing::_))
         .WillOnce(
             [](const std::string& /**/, const signalr::value& /**/,
-                std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>>
-            {
+                std::function<void(const signalr::value&, std::exception_ptr)> /**/) -> async::task<std::tuple<signalr::value, std::exception_ptr>> {
                 return async::make_task(
                     std::make_tuple(signalr::value("Irrelevent Value"), std::make_exception_ptr(std::runtime_error("mock exception"))));
             });
@@ -190,7 +191,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
                     EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
                 }
             })
-        .then(async::inline_scheduler(), [](async::task<void> CheckForErrorsTask)
+        .then(async::inline_scheduler(),
+            [](async::task<void> CheckForErrorsTask)
             { EXPECT_FALSE(CheckForErrorsTask.get_exception()); }); // This is to be paranoid and guard against errors in writing the test, as async++
                                                                     // will catch exceptions and convert to a friendly cancel if they occur.
 }
