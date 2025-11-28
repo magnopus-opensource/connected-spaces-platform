@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file.
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
   Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
 
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Change 'Dirty components map already contains key' log to very verbose by MAG-ThomasGreenhalgh in https://github.com/magnopus-opensource/connected-spaces-platform/pull/874
+  Changed the log level of the _'Dirty components map already contains key'_ message emitted from `SpaceEntityStatePatcher::SetDirtyComponent` to `VeryVerbose`.
+
 ## [6.12.0] - 2025-11-21_18-23-39
 
 ### 🍰 🙌 New Features
