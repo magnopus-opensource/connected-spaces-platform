@@ -26,9 +26,9 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::State)] = static_cast<int64_t>(AvatarState::Idle);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex)] = static_cast<int64_t>(-1);
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED)] = static_cast<int64_t>(-1);
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl)] = "";
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled)] = false;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -41,6 +41,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible)] = true;
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl)] = "";
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
@@ -85,16 +86,6 @@ void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode), static_cast<int64_t>(Value));
 }
 
-int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
-{
-    return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
-}
-
-void AvatarSpaceComponent::SetAvatarMeshIndex(const int64_t Value)
-{
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex), Value);
-}
-
 const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
 {
     return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId));
@@ -103,16 +94,6 @@ const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
 void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& Value)
 {
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId), Value);
-}
-
-const csp::common::String& AvatarSpaceComponent::GetCustomAvatarUrl() const
-{
-    return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl));
-}
-
-void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
-{
-    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl), Value);
 }
 
 bool AvatarSpaceComponent::GetIsHandIKEnabled() const
@@ -208,6 +189,16 @@ bool AvatarSpaceComponent::GetIsVirtualVisible() const
 void AvatarSpaceComponent::SetIsVirtualVisible(bool InValue)
 {
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible), InValue);
+}
+
+const csp::common::String& AvatarSpaceComponent::GetAvatarUrl() const
+{
+    return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl));
+}
+
+void AvatarSpaceComponent::SetAvatarUrl(const csp::common::String& Value)
+{
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl), Value);
 }
 
 } // namespace csp::multiplayer
