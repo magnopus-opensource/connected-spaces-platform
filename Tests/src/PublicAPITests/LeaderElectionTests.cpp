@@ -382,7 +382,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, InvalidEventTest)
     {
         RAIIMockLogger MockLogger {};
         const csp::common::String Error = fmt::format("ScopeLeadershipManager::OnElectedScopeLeader Event called for scope: {0}, that already has "
-                                                      "the leader: {1}, for new leader: {2}. Overwriting old value",
+                                                      "the leader: {1}, for new leader: {2}. Overwriting old value.",
             TestScopeId, Connection.GetClientId(), TestClientId2)
                                               .c_str();
 
