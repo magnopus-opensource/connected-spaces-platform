@@ -602,6 +602,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
             .then(async::inline_scheduler(), [MultiplayerConnection]() { return MultiplayerConnection->ResetScopes(); })
             .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>())
+            .then(async::inline_scheduler(), [MultiplayerConnection]() { MultiplayerConnection->SetOnlineRealtimeEngine(nullptr); })
             .then(systems::continuations::ReportSuccess(Callback, "Successfully exited space."))
             .then(common::continuations::InvokeIfExceptionInChain(*LogSystem,
                 [Callback, MultiplayerConnection]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
