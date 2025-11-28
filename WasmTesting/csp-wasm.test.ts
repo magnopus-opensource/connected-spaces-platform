@@ -68,6 +68,8 @@ test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async (
 
   assert.ok(consoleMessages.some(e => e.includes('Connection interrupted: true')));
 
+  const userSystem = Systems.SystemsManager.get().getUserSystem();
+  await userSystem.logout();
 });
 
 
