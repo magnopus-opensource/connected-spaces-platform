@@ -344,7 +344,7 @@ ConversationSystemInternal::ConversationSystemInternal(systems::AssetSystem* Ass
     RegisterSystemCallback();
 }
 
-ConversationSystemInternal::~ConversationSystemInternal() {}
+ConversationSystemInternal::~ConversationSystemInternal() { }
 
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {
@@ -1046,7 +1046,7 @@ void ConversationSystemInternal::SetAnnotation(const csp::common::String& Conver
         .then(CreateAnnotationResult(MessageAssetCollection, AnnotationAsset, AnnotationThumbnailAsset))
         .then(systems::continuations::SendResult(Callback, "Successfully set annotation."))
         .then(common::continuations::InvokeIfExceptionInChain(
-            *LogSystem, 
+            *LogSystem,
             [Callback]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
             { Callback(csp::common::continuations::GetResultExceptionOrInvalid<multiplayer::AnnotationResult>(exception)); },
             [Callback]([[maybe_unused]] const std::exception& exception) { Callback(MakeInvalid<multiplayer::AnnotationResult>()); }));

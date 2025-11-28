@@ -325,7 +325,7 @@ auto SpaceSystem::AddUserToSpaceIfNecessary(SpaceResultCallback Callback, SpaceS
 
             // Use the request continuation to set the event ... to fire another continuation to allow continued chaining.
             SpaceSystem.AddUserToSpace(GetSpaceResult, UserId)
-                .then(async::inline_scheduler(), 
+                .then(async::inline_scheduler(),
                     [UserAddedToSpaceChainStartEvent](const SpaceResult& AddedToSpaceResult)
                     { UserAddedToSpaceChainStartEvent->set(AddedToSpaceResult); });
         }
@@ -422,34 +422,34 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                       "SpaceSystem::EnterSpace, successfully added user to space (if not already added).",
                       "Failed to Enter Space. AddUserToSpace returned unexpected failure.", {}, {}, {}))
         : async::spawn(async::inline_scheduler(),
-              [SpaceId]()
-              {
-                  // Offline, build a local space result
-                  CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
+            [SpaceId]()
+            {
+                // Offline, build a local space result
+                CSP_LOG_MSG(csp::common::LogLevel::Log, "Entering Offline Space");
 
-                  Space LocalSpace {};
+                Space LocalSpace {};
 
-                  /* Depending on how you think about this, you might think this is a bit of a bug.
-                     Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
-                     One might think we should be using that. The reason we don't is simply because we don't
-                     store that ID in the system currently, and it dosen't really matter currently.
-                     However this may be an improvement we want to make, although consider that it would get in the way
-                     of any fully-offline flows we might to add. */
-                  csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
+                /* Depending on how you think about this, you might think this is a bit of a bug.
+                   Consider, you still need to login to use the API, and logging in generates you a user-id from MCS.
+                   One might think we should be using that. The reason we don't is simply because we don't
+                   store that ID in the system currently, and it dosen't really matter currently.
+                   However this may be an improvement we want to make, although consider that it would get in the way
+                   of any fully-offline flows we might to add. */
+                csp::common::String LocalUser = std::to_string(csp::common::LocalClientID).c_str();
 
-                  LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
-                  LocalSpace.Name = "Offline Space";
-                  LocalSpace.Id = SpaceId;
-                  LocalSpace.CreatedBy = LocalUser;
-                  LocalSpace.OwnerId = LocalUser;
-                  LocalSpace.UserIds = { LocalUser };
-                  LocalSpace.ModeratorIds = { LocalUser };
+                LocalSpace.CreatedAt = DateTime::TimeNow().GetUtcString();
+                LocalSpace.Name = "Offline Space";
+                LocalSpace.Id = SpaceId;
+                LocalSpace.CreatedBy = LocalUser;
+                LocalSpace.OwnerId = LocalUser;
+                LocalSpace.UserIds = { LocalUser };
+                LocalSpace.ModeratorIds = { LocalUser };
 
-                  SpaceResult LocalSpaceResult {};
-                  LocalSpaceResult.SetSpace(LocalSpace);
-                  LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-                  return LocalSpaceResult;
-              });
+                SpaceResult LocalSpaceResult {};
+                LocalSpaceResult.SetSpace(LocalSpace);
+                LocalSpaceResult.SetResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                return LocalSpaceResult;
+            });
 
     // Whether we've done an upstream online connection or just a local one, finish entering the space
     UpstreamConnectionTask
