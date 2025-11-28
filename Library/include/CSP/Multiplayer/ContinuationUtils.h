@@ -23,7 +23,10 @@ CSP_START_IGNORE
 #include "CSP/Common/ContinuationUtils.h"
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "MultiPlayerConnection.h"
 #include <signalrclient/signalr_value.h>
+
+#include <string>
 
 namespace csp::multiplayer::continuations
 {
@@ -38,9 +41,13 @@ auto UnwrapSignalRResultOrThrow()
     return [](std::tuple<const signalr::value&, std::exception_ptr> Results)
     {
         auto [Result, Exception] = Results;
-        if (Exception)
+
+        if (Exception != nullptr)
         {
-            std::rethrow_exception(Exception);
+            auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(Exception);
+
+            // Throw an ErrorException using the parsed data instead of the original
+            throw csp::common::continuations::ErrorCodeException(Error, "Multiplayer error. " + ExceptionErrorMsg);
         }
 
         if constexpr (ForwardResult)

@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
+#include "Multiplayer/Election/ScopeLeadershipManager.h"
 #include <fmt/format.h>
 
 namespace
@@ -260,6 +261,24 @@ std::chrono::system_clock::time_point TickEntityScripts(std::recursive_mutex& En
         {
             Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
         }
+    }
+
+    return CurrentTime;
+}
+
+std::chrono::system_clock::time_point TickEntityScripts(
+    std::recursive_mutex& EntitiesLock, const csp::common::List<SpaceEntity*>& Entities, std::chrono::system_clock::time_point LastTickTime)
+{
+    std::scoped_lock EntitiesLocker(EntitiesLock);
+
+    const auto CurrentTime = std::chrono::system_clock::now();
+    const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
+
+    const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
+
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        Entities[i]->GetScript().PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
     }
 
     return CurrentTime;

@@ -1381,7 +1381,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
 
     // And the disconnection callback will be called with a message
     MockConnectionCallback MockDisconnectionCallback;
-    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("Multiplayer error. mock exception")));
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
     Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");

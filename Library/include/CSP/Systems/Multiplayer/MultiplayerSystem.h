@@ -37,6 +37,14 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
+
 namespace csp::systems
 {
 class SpaceSystem;
@@ -58,6 +66,7 @@ public:
     /// @pre Must already have entered the space of the SpaceId parameter.
     /// A CSP error will be sent to the LogSystem if this condition is not met, with a EResultCode::Failed response.
     CSP_NO_EXPORT void GetScopesBySpace(const csp::common::String& SpaceId, ScopesResultCallback Callback);
+    CSP_NO_EXPORT async::task<ScopesResult> GetScopesBySpace(const csp::common::String& SpaceId);
 
     /// @brief Updates Data on a scope.
     /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
@@ -73,6 +82,7 @@ public:
     /// @pre "ManagedLeaderElection" should be set to true on the scope, otherwise this function will fail with a EResultCode::Failed response.
     /// @pre Must already have entered the space of the SpaceId parameter.
     CSP_NO_EXPORT void GetScopeLeader(const csp::common::String& ScopeId, ScopeLeaderResultCallback Callback);
+    CSP_NO_EXPORT async::task<ScopeLeaderResult> GetScopeLeader(const csp::common::String& ScopeId);
 
     /// @brief Starts leader election for the given scope.
     /// Note: These functions are currently not exported, as they are only used for testing, as we haven't fully implemented scopes within csp.
