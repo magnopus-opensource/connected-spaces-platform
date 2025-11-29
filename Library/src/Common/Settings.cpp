@@ -20,20 +20,20 @@
 
 namespace csp::common
 {
-bool ApplicationSettings::operator==(const ApplicationSettings& Other)
+bool ApplicationSettings::operator==(const ApplicationSettings& Other) const
 {
     return (ApplicationName == Other.ApplicationName) && (Context == Other.Context) && (AllowAnonymous == Other.AllowAnonymous)
         && (Settings == Other.Settings);
 }
 
-bool ApplicationSettings::operator!=(const ApplicationSettings& Other) { return !(*this == Other); }
+bool ApplicationSettings::operator!=(const ApplicationSettings& Other) const { return !(*this == Other); }
 
-bool SettingsCollection::operator==(const SettingsCollection& Other)
+bool SettingsCollection::operator==(const SettingsCollection& Other) const
 {
     return (UserId == Other.UserId) && (Context == Other.Context) && (Settings == Other.Settings);
 }
 
-bool SettingsCollection::operator!=(const SettingsCollection& Other) { return !(*this == Other); }
+bool SettingsCollection::operator!=(const SettingsCollection& Other) const { return !(*this == Other); }
 } // namespace csp::systems
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::ApplicationSettings& Obj)
