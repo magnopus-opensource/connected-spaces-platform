@@ -504,6 +504,30 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTokenFailedTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    auto TokenOptions = csp::systems::TokenOptions();
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
+    TokenOptions.RefreshTokenExpiryLength = "00:00:05";
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    RAIIMockLogger MockLogger {};
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Fatal);
+    csp::common::String Msg = "User authentication token refresh failed!";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, Msg)).Times(1);
+
+    std::this_thread::sleep_for(120s);
+
+    // We expect this call to fail as we no longer have a valid connection, hence we do not need to logout
+    AWAIT_PRE(UserSystem, GetProfileByUserId, RequestPredicate, UserId);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();

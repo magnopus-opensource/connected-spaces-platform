@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include "WebClient.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
-#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "Json.h"
 #include "Services/ApiBase/ApiBase.h"
 
@@ -28,7 +28,8 @@ using namespace std::chrono_literals;
 namespace csp::web
 {
 
-WebClient::WebClient(const Port InPort, const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
+WebClient::WebClient(
+    const Port InPort, const ETransferProtocol /*Tp*/, csp::common::IAuthContext& AuthContext, csp::common::LogSystem* LogSystem, bool AutoRefresh)
     : RootPort(InPort)
     , AuthContext { &AuthContext }
     , LogSystem(LogSystem)
@@ -161,7 +162,11 @@ void WebClient::RefreshIfExpired()
                 }
                 else
                 {
-                    assert(false && "User authentication token refresh failed!");
+                    CSP_LOG_MSG(csp::common::LogLevel::Fatal, "User authentication token refresh failed!");
+
+                    // reset the state of the web client to prevent indefinite freeze when enqueuing a request
+                    RefreshNeeded = true;
+                    RefreshStarted = false;
                 }
             });
     }
