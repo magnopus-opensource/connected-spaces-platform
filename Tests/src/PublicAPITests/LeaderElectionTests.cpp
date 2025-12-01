@@ -38,7 +38,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 }
 
 /*
-    This tests that scope registratioon and deregistration work correctly
+    This tests that scope registration and deregistration work correctly
 */
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, RegisterScopeTest)
 {
@@ -330,7 +330,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, HeartbeatNonStdEx
 
     Manager.RegisterScope(TestScopeId, Connection.GetClientId());
 
-    // Mock the heartbeat function to return a non st::exception
+    // Mock the heartbeat function to return a non std::exception
     {
         EXPECT_CALL(*SignalRMock,
             Invoke(Connection.GetMultiplayerHubMethods().Get(csp::multiplayer::MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT), ::testing::_,
@@ -508,7 +508,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
     - Sets up a space with managed leader election
     - Sets the client to the leader
     - Spawns 2 more clients
-    - Performs leader eleciton excluding the current user, so one of the other 2 clients gets it
+    - Performs leader election excluding the current user, so one of the other 2 clients gets it
     - When the first MultiplayerTestRunner client gets leadership, they well perform another leader election, excluding themselves and the main client
     - This will give leadership to the other MultiplayerTestRunner client, which will then disconnect
     - This will finally trigger another leader election, giving leadership back to the main client.
@@ -744,16 +744,16 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
 }
 
 /*
-    This test uses the MultiplayerTestRunner to spawn 1 additional clientsto test that the tick event is sent to scripts for the elected client
+    This test uses the MultiplayerTestRunner to spawn 1 additional client to test that the tick event is sent to scripts for the elected client
     The test does the following steps:
     - Sets up a space with managed leader election
     - Sets the client to the leader
     - Create a script which increases an entities model z position by 1 on tick
     - Call tick to ensure the x position increases by 1
     - Spawns 1 more client
-    - Performs leader eleciton excluding the current user, so one of the other 2 clients gets it
+    - Performs leader election excluding the current user, so one of the other 2 clients gets it
     - Calls tick when the client is vacated as leader, showing the script event isnt triggered.
-    - Calls tick when the second client is elected as leader, showing the script even isnt triggered.
+    - Calls tick when the second client is elected as leader, showing the script event isnt triggered.
     - This will finally trigger another leader election, giving leadership back to the main client.
     - The main client calls tick again, ensuring the x position increases by 1
 */
@@ -798,7 +798,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
+        std::cout << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
