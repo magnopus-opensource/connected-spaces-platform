@@ -40,7 +40,7 @@ bool SpaceEntityStatePatcher::SetDirtyComponent(uint16_t ComponentKey, DirtyComp
     {
         if (LogSystem)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Verbose,
+            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
                 fmt::format(
                     "SpaceEntityStatePatcher::SetDirtyComponent. Dirty components map already contains key : {}. Performing no action", ComponentKey)
                     .c_str());

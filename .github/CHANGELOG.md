@@ -6,10 +6,20 @@ All notable changes to this project will be documented in this file.
 
 🔥 ❗Breaking Changes
 
-- [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
-  Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
 - [OF-1806] refac!: Add a new URL property and deprecate others in the AvatarSpaceComponent in https://github.com/magnopus-opensource/connected-spaces-platform/pull/872
   Simplify the setting and getting of the mesh URL for the avatar component. This is a breaking change due to the removal of the getters and setters for CustomAvatarUrl and AvatarMeshIndex.
+
+## [6.13.0] - 2025-11-28_20-11-35
+
+🔥 ❗Breaking Changes
+
+- [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
+  Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
+
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Change 'Dirty components map already contains key' log to very verbose by MAG-ThomasGreenhalgh in https://github.com/magnopus-opensource/connected-spaces-platform/pull/874
+  Changed the log level of the _'Dirty components map already contains key'_ message emitted from `SpaceEntityStatePatcher::SetDirtyComponent` to `VeryVerbose`.
 
 ## [6.12.0] - 2025-11-21_18-23-39
 
