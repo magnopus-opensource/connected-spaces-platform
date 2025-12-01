@@ -76,12 +76,6 @@
 
       //Delete the realtime engine now that we've exited the space
       realtimeEngine.delete();
-
-      // connection interruption puts csp into an unrecoverable state,
-      // reinitialize so we don't break later tests!
-      CSPFoundation.shutdown();
-      await initializeCSP(useDebugCSP);
-
     })();
   </script>
 </head>
