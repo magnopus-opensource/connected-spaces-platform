@@ -152,7 +152,7 @@ export async function LaunchTestPage(
     await page.goto(htmlPath, { waitUntil });
 
     // Annoyingly, networkidle0 doesn't account for everything (I suspect it doesn't know how to validate connections originating from WASM, so give ourselves 5 seconds extra here).
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     await page.close();
     await browser.close();
