@@ -275,7 +275,7 @@ TEST_P(RunScript, RunScriptTest)
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
+        std::cout << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
@@ -1053,7 +1053,7 @@ TEST_P(CustomComponentScriptInterfaceSubscription, CustomComponentScriptInterfac
     auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
     {
         EXPECT_EQ(Ok, true);
-        std::cerr << "ScriptLeaderReadyCallback called" << std::endl;
+        std::cout << "ScriptLeaderReadyCallback called" << std::endl;
         ScriptSystemReady = true;
     };
 
