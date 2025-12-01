@@ -253,6 +253,5 @@ public:
     /// @param Value The URL of the mesh this avatar component uses for its avatar.
     void SetAvatarUrl(const csp::common::String& Value);
 };
-`
 
 } // namespace csp::multiplayer
