@@ -450,6 +450,7 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to destroy entity. Exception: {}", e.what()).c_str());
             Callback(false);
+            return;
         }
 
         Callback(true);
