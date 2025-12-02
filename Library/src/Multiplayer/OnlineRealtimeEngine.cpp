@@ -674,7 +674,7 @@ void OnlineRealtimeEngine::OnRequestToSendObject(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election if enabled for the scope within chs, but turned off client-side by calling
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
     // DisableLeadershipElection. These checks could be removed if the election events were bound inside the ScopeLeadershipManager. However, I
     // decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
     if (LeaderElectionManager == nullptr)
@@ -698,7 +698,7 @@ void OnlineRealtimeEngine::OnElectedScopeLeader(const signalr::value& Params)
 
 void OnlineRealtimeEngine::OnVacatedAsScopeLeader(const signalr::value& Params)
 {
-    // This could be nullptr if server-side leader election if enabled for the scope within chs, but turned off client-side by calling
+    // This could be nullptr if server-side leader election is enabled for the scope within the backend services, but turned off client-side by calling
     // DisableLeadershipElection.
     // These checks could be removed if the election events were bound inside the ScopeLeadershipManager.
     // However, I decided to follow our standard pattern of binding to events once, inside the MultiplayerConnection initialization.
