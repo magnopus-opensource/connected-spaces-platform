@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.14.0] - 2025-12-02_17-43-07
+
 🔥 ❗Breaking Changes
 
 - [OF-1806] refac!: Add a new URL property and deprecate others in the AvatarSpaceComponent in https://github.com/magnopus-opensource/connected-spaces-platform/pull/872
