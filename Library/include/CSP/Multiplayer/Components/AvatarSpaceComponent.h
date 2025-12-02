@@ -41,9 +41,9 @@ enum class AvatarComponentPropertyKeys
     AvatarId = 0,
     UserId,
     State,
-    AvatarMeshIndex,
+    AvatarMeshIndex_DEPRECATED,
     AgoraUserId,
-    CustomAvatarUrl,
+    CustomAvatarUrl_DEPRECATED,
     IsHandIKEnabled,
     TargetHandIKTargetLocation,
     HandRotation,
@@ -56,6 +56,7 @@ enum class AvatarComponentPropertyKeys
     IsVisible,
     IsARVisible,
     IsVirtualVisible,
+    AvatarUrl,
     Num
 };
 
@@ -102,16 +103,6 @@ public:
     /// @param Value The play mode used by this avatar.
     void SetAvatarPlayMode(AvatarPlayMode Value);
 
-    /// @brief Gets the ID of the mesh of the avatar of this component.
-    /// @note  Used to establish which mesh this avatar should use among a collection of predefined meshes.
-    /// @return The ID of the mesh of the avatar of this component.
-    int64_t GetAvatarMeshIndex() const;
-
-    /// @brief Sets the ID of the mesh of the avatar of this component.
-    /// @note Used to establish which mesh this avatar should use among a collection of predefined meshes.
-    /// @param Value The ID of the mesh of the avatar of this component.
-    void SetAvatarMeshIndex(int64_t Value);
-
     /// @brief Gets the ID of the Agora user bounded to this avatar.
     /// @note When using voice chat, an Agora user is associated with a specific avatar component, so that
     ///       it is possible to associate the person speaking via the Agora voice chat through the relative avatar.
@@ -123,16 +114,6 @@ public:
     ///       it is possible to associate the person speaking via the Agora voice chat through the relative avatar.
     /// @param Value The ID of the Agora user associated with this avatar component.
     void SetAgoraUserId(const csp::common::String& Value);
-
-    /// @brief Gets the URL of a custom mesh for this avatar.
-    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
-    /// @return The URL of the custom mesh this avatar component uses for its avatar.
-    const csp::common::String& GetCustomAvatarUrl() const;
-
-    /// @brief Sets the URL of a custom mesh for this avatar.
-    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
-    /// @param Value The URL of the custom mesh this avatar component uses for its avatar.
-    void SetCustomAvatarUrl(const csp::common::String& Value);
 
     /// @brief Checks if the Hands Inverse Kinematics (IK) are enabled for this avatar.
     /// @note Intended for use in VR or with virtual hands controllers.
@@ -261,6 +242,16 @@ public:
     /// @copydoc IVisibleComponent::SetIsVirtualVisible()
     void SetIsVirtualVisible(bool InValue) override;
     /// @}
+
+    /// @brief Gets the URL of a mesh for this avatar.
+    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
+    /// @return The URL of the mesh this avatar component uses for its avatar.
+    const csp::common::String& GetAvatarUrl() const;
+
+    /// @brief Sets the URL of a mesh for this avatar.
+    /// @note This is intended for use with external avatar managers, such as ReadyPlayerMe.
+    /// @param Value The URL of the mesh this avatar component uses for its avatar.
+    void SetAvatarUrl(const csp::common::String& Value);
 };
 
 } // namespace csp::multiplayer

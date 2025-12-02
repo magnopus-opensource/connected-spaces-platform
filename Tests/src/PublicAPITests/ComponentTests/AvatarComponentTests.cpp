@@ -106,9 +106,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
     EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), -1);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
-    EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), "");
+    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "");
     EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), false);
     EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
     EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
@@ -125,9 +124,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     const bool NewIsVisible = true;
     const bool NewIsARVisible = false;
     const bool NewIsVirtualVisible = false;
-    const int64_t NewAvatarMeshIndex = 42;
     const csp::common::String NewAgoraUserId = "AgoraUser123";
-    const csp::common::String NewCustomAvatarUrl = "https://example.com/avatar.png";
+    const csp::common::String NewAvatarUrl = "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb";
     const bool NewIsHandIKEnabled = true;
     const csp::common::Vector3 NewTargetHandIKTargetLocation = { 0.1f, 0.2f, 0.3f };
     const csp::common::Vector4 NewHandRotation = { 0.1f, 0.2f, 0.3f, 1.0f };
@@ -143,9 +141,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     AvatarComponent->SetIsVisible(NewIsVisible);
     AvatarComponent->SetIsARVisible(NewIsARVisible);
     AvatarComponent->SetIsVirtualVisible(NewIsVirtualVisible);
-    AvatarComponent->SetAvatarMeshIndex(NewAvatarMeshIndex);
     AvatarComponent->SetAgoraUserId(NewAgoraUserId);
-    AvatarComponent->SetCustomAvatarUrl(NewCustomAvatarUrl);
+    AvatarComponent->SetAvatarUrl(NewAvatarUrl);
     AvatarComponent->SetIsHandIKEnabled(NewIsHandIKEnabled);
     AvatarComponent->SetTargetHandIKTargetLocation(NewTargetHandIKTargetLocation);
     AvatarComponent->SetHandRotation(NewHandRotation);
@@ -162,9 +159,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), NewIsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), NewIsARVisible);
     EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), NewIsVirtualVisible);
-    EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), NewAvatarMeshIndex);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), NewAgoraUserId);
-    EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), NewCustomAvatarUrl);
+    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), NewAvatarUrl);
     EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), NewIsHandIKEnabled);
     EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), NewTargetHandIKTargetLocation);
     EXPECT_EQ(AvatarComponent->GetHandRotation(), NewHandRotation);
@@ -247,9 +243,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
     EXPECT_EQ(AvatarComponent->GetIsARVisible(), true);
     EXPECT_EQ(AvatarComponent->GetIsVirtualVisible(), true);
-    EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), -1);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "");
-    EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), "");
+    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "");
     EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), false);
     EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3::Zero());
     EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4::Identity());
@@ -270,7 +265,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
             avatar.locomotionModel = 1; // FreeCamera
             avatar.avatarMeshIndex = 42;
             avatar.agoraUserId = "AgoraUser123";
-            avatar.customAvatarUrl = "https://example.com/avatar.png";
+            avatar.avatarUrl = "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb";
             avatar.isHandIKEnabled = true;
             avatar.targetHandIKTargetLocation = [0.1, 0.2, 0.3];
             avatar.handRotation = [0.1, 0.2, 0.3, 1.0];
@@ -292,9 +287,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
     EXPECT_EQ(AvatarComponent->GetState(), AvatarState::Flying);
     EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::VR);
     EXPECT_EQ(AvatarComponent->GetLocomotionModel(), LocomotionModel::FreeCamera);
-    EXPECT_EQ(AvatarComponent->GetAvatarMeshIndex(), 42);
     EXPECT_EQ(AvatarComponent->GetAgoraUserId(), "AgoraUser123");
-    EXPECT_EQ(AvatarComponent->GetCustomAvatarUrl(), "https://example.com/avatar.png");
+    EXPECT_EQ(AvatarComponent->GetAvatarUrl(), "https://models.readyplayer.me/64ff48b0b9f61ba631e47537.glb");
     EXPECT_EQ(AvatarComponent->GetIsHandIKEnabled(), true);
     EXPECT_EQ(AvatarComponent->GetTargetHandIKTargetLocation(), csp::common::Vector3(0.1f, 0.2f, 0.3f));
     EXPECT_EQ(AvatarComponent->GetHandRotation(), csp::common::Vector4(0.1f, 0.2f, 0.3f, 1.0f));
