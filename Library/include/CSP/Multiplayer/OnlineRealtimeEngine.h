@@ -367,7 +367,7 @@ public:
     CSP_END_IGNORE
 
     // We should remove this in OF-1785
-    CSP_NO_EXPORT void SetServerSideELectionEnabled(bool Value);
+    CSP_NO_EXPORT void SetServerSideElectionEnabled(bool Value);
 
     /*
      * Called when MultiplayerConnection recieved signalR events.

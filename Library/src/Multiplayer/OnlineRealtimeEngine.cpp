@@ -1002,7 +1002,7 @@ void OnlineRealtimeEngine::__AssumeScopeLeadership(const std::string& ScopeId, s
         MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::ASSUME_SCOPE_LEADERSHIP), signalr::value { Params }, CB);
 }
 
-void OnlineRealtimeEngine::SetServerSideELectionEnabled(bool Value) { ServerSideElectionEnabled = Value; }
+void OnlineRealtimeEngine::SetServerSideElectionEnabled(bool Value) { ServerSideElectionEnabled = Value; }
 
 bool OnlineRealtimeEngine::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
