@@ -90,6 +90,7 @@ private:
 };
 
 CSP_START_IGNORE
+// This is how often the scope leader should send a heartbeat. The time is defined by the backend services.
 constexpr const std::chrono::seconds LeaderElectionHeartbeatInterval { 3 };
 CSP_END_IGNORE
 }
