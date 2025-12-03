@@ -30,9 +30,9 @@
 #include <fmt/format.h>
 
 #if defined(DEBUG)
-#define LIB_NAME "ConnectedSpacesPlatform_D"
+#define LIB_NAME "libConnectedSpacesPlatform_D.so"
 #else
-#define LIB_NAME "ConnectedSpacesPlatform"
+#define LIB_NAME "libConnectedSpacesPlatform.so"
 #endif
 
 #if defined(CSP_WINDOWS)
