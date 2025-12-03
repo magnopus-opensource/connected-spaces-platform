@@ -80,7 +80,7 @@
             );
 
             // Send the event, promise won't resolve until it is received.
-            eventBus.sendNetworkEvent(eventName, replicatedValues);
+            eventBus.sendNetworkEventToClient(eventName, replicatedValues, Systems.SystemsManager.get().getMultiplayerConnection().getClientId());
 
           });
         }
