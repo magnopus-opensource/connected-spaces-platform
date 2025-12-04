@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 🔨 Bug Fixes
 
-- [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file. 
+- [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file.  This PR changes the LIB_NAME from ConnectedSpacesPlatform_D to libConnectedSpacesPlatform_D.so and ConnectedSpacesPlatform to libConnectedSpacesPlatform.so for Android in CSPFoundation.cpp.     
 
 ## [6.14.0] - 2025-12-02_17-43-07
 
