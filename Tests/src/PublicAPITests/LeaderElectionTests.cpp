@@ -658,7 +658,10 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         auto [LeaderElectionResult] = AWAIT_PRE(MultiplayerSystem, __PerformLeaderElectionInScope, RequestPredicate, ScopeId, { { UserId } });
         EXPECT_EQ(LeaderElectionResult.GetResultCode(), csp::systems::EResultCode::Success);
 
+        WaitForCallback(VacatedCallbackCalled);
         EXPECT_TRUE(VacatedCallbackCalled);
+
+        WaitForCallback(ElectedCallbackCalled);
         EXPECT_TRUE(ElectedCallbackCalled);
     }
 
