@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🐛 🔨 Bug Fixes
 
+- [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file. 
 
 ## [6.14.0] - 2025-12-02_17-43-07
 
