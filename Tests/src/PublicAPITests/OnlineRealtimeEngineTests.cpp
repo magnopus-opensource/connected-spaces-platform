@@ -103,7 +103,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                 }
                 catch (std::runtime_error error)
                 {
-                    EXPECT_EQ(std::string(error.what()), std::string("mock exception"));
+                    EXPECT_EQ(std::string(error.what()), std::string("Multiplayer error. mock exception"));
                 }
             })
         .then(async::inline_scheduler(),
@@ -273,7 +273,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
     EXPECT_CALL(MockCallback, Call(nullptr));
 
     // Expect that we log the error message
-    const csp::common::String ErrorMsg = "Failed to create Avatar. Exception: mock exception";
+    const csp::common::String ErrorMsg = "Failed to create Avatar. Exception: Multiplayer error. mock exception";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, ErrorMsg)).Times(1);
 
     const SpaceTransform& UserTransform

@@ -57,6 +57,10 @@ All notable changes to this project will be documented in this file.
 - [OF-1784] feat: Multiplayer System by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/842
   Part 1 of the server-side leader election work. Addition of a new Multiplayer System which exposes the necessary functionality for leader election from the mcs MultiplayerServices api.
 
+- [OF-1784] feat: Added server-side leader election by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/869
+  This adds support for server-side leader election that replaces the current internal client side election. 
+  The availability of this feature is determined by MCS, and at the time this is merged it will not be turned on.
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/857
