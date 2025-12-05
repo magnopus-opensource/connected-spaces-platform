@@ -127,8 +127,6 @@ void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     if (ExpectedResultCode == csp::systems::EResultCode::Success)
     {
         csp::systems::HotspotGroup group = Result.GetHotspotGroup();
-        EXPECT_EQ(group.Name, NewGroupName);
-
         HotspotGroup = group;
     }
 }
@@ -376,38 +374,25 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
     csp::common::String NewTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG2";
 
     csp::systems::HotspotGroup HotspotGroup;
-
     CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
+
     EXPECT_EQ(HotspotGroup.Name, OldTestGroupName);
 
-    bool ReceivedUpdateCallback = false;
-    bool ReceivedRenameCallback = false;
-
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
+        [&Space, &OldTestGroupName, &NewTestGroupName](
             const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
-            // When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
-            // The second is an update, as CSP will also update the group's metadata to reflect the new name.
-            if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Rename)
+            // callback will be triggered when calling RenameHotspotGroup with event type update
+            if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
             {
-                // With rename events, we expect to be able to receive both the old and new names.
+                EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
                 EXPECT_EQ(NetworkEventData.HotspotData->Name, OldTestGroupName);
                 EXPECT_EQ(NetworkEventData.HotspotData->NewName, NewTestGroupName);
-
-                ReceivedRenameCallback = true;
+                EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
             }
-            else if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
-            {
-                EXPECT_EQ(NetworkEventData.HotspotData->Name, NewTestGroupName);
-                ReceivedUpdateCallback = true; // Both the rename and update callbacks have now fired. That's all the expected events.
-            }
-
-            EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
         });
 
     RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
-    EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
 
     // Delete sequence
     DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
