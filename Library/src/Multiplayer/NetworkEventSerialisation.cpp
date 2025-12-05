@@ -47,7 +47,7 @@ csp::common::ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateT
     }
     case 2:
     {
-        SequenceUpdateType = ESequenceUpdateType::Rename;
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "SequenceChangedEvent - Rename is no longer a supported update type.");
         break;
     }
     case 3:
@@ -400,21 +400,7 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEv
 
     ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
     ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);
-
-    if (ParsedEvent.UpdateType == csp::common::ESequenceUpdateType::Rename)
-    {
-        // When a key is changed (renamed) then we get an additional parameter describing the new key.
-        // The usual event data describing the name in this instance will describe the _old_ key.
-        if (ParsedEvent.EventValues[2].GetReplicatedValueType() == csp::common::ReplicatedValueType::String)
-        {
-            ParsedEvent.HotspotData->NewName = GetSequenceKeyIndex(ParsedEvent.NewKey, 2);
-        }
-        else
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error,
-                "SequenceHotspotChangedEvent - The expected new name of the hotspot sequence was not found in the event payload.");
-        }
-    }
+    ParsedEvent.HotspotData->NewName = GetSequenceKeyIndex(ParsedEvent.NewKey, 2);
 
     return ParsedEvent;
 }
