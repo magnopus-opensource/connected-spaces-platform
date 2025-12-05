@@ -104,9 +104,6 @@ void HotspotSequenceSystem::CreateHotspotGroup(
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
             return;
         }
 
@@ -138,9 +135,6 @@ void HotspotSequenceSystem::RenameHotspotGroup(
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
             return;
         }
 
@@ -163,9 +157,6 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
             return;
         }
         auto Data = Result.GetSequence();
@@ -190,9 +181,6 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
             return;
         }
         auto Data = Result.GetSequence();
@@ -214,9 +202,6 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            HotspotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
             return;
         }
         auto Data = Result.GetSequences();
