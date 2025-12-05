@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🔥 ❗Breaking Changes
 
+- [OB-4579] fix!: Issues around renaming hotspot groups by MAG-ChristopherAtkinson
+  Rename event has been deprecated and removed at the services level. This is a breaking change due to the removal of the csp::common::ESequenceUpdateType::Rename.
 
 ## [6.14.0] - 2025-12-02_17-43-07
 
