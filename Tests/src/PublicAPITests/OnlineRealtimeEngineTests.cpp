@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Multiplayer/ContinuationUtils.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -82,7 +83,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInRe
 
     RealtimeEngine->RemoteGenerateNewAvatarId()
         .then(async::inline_scheduler(),
-            [](async::shared_task<uint64_t> Result)
+            [](async::task<uint64_t> Result)
             {
                 EXPECT_FALSE(Result.get_exception());
                 EXPECT_EQ(Result.get(), uint64_t(55));
@@ -111,7 +112,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
 
     RealtimeEngine->RemoteGenerateNewAvatarId()
         .then(
-            [](async::shared_task<uint64_t> Result)
+            [](async::task<uint64_t> Result)
             {
                 EXPECT_TRUE(Result.get_exception());
                 try
@@ -155,11 +156,10 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
             RealtimeEngine->SendNewAvatarObjectMessage(
                 "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
-            [](std::tuple<const signalr::value&, std::exception_ptr> Results)
+            [](async::task<uint64_t> Id)
             {
-                auto [Result, Exception] = Results;
-                EXPECT_EQ(Result.as_bool(), true);
-                EXPECT_FALSE(Exception);
+                EXPECT_EQ(Id.get(), 55);
+                EXPECT_FALSE(Id.get_exception());
             })
         .then(async::inline_scheduler(),
             [](async::task<void> CheckForErrorsTask)
@@ -195,13 +195,12 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
             RealtimeEngine->SendNewAvatarObjectMessage(
                 "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
         .then(async::inline_scheduler(),
-            [](std::tuple<const signalr::value&, std::exception_ptr> Results)
+            [](async::task<uint64_t> Id)
             {
-                auto [Result, Exception] = Results;
-                EXPECT_TRUE(Exception);
+                EXPECT_TRUE(Id.get_exception());
                 try
                 {
-                    std::rethrow_exception(Exception);
+                    std::rethrow_exception(Id.get_exception());
                 }
                 catch (std::runtime_error error)
                 {
@@ -257,9 +256,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
 
     async::spawn(async::inline_scheduler(),
         []()
-        {
-            return std::make_tuple(async::make_task(uint64_t { 55 }).share(), async::make_task());
-        }) // This continuation takes the ID (and another void return from a when_all branch) as its input
+        { return async::make_task(uint64_t { 55 }); }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
             RealtimeEngine->CreateNewLocalAvatar(
                 Username, LoginState.UserId, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
@@ -525,7 +522,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarGen
                 {
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr
+                        = std::make_exception_ptr(csp::common::continuations::ErrorCodeException { csp::multiplayer::ErrorCode::Unknown, "fail" });
 
                     Callback(Value, ExceptionPtr);
                     return async::make_task(std::make_tuple(Value, ExceptionPtr));
@@ -544,7 +542,71 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarGen
     EXPECT_CALL(MockCallback, Call(nullptr)).Times(1);
 
     // Expect that we log the error message once and only once
-    const csp::common::String ErrorMsg = "Failed to generate object ID.";
+    const csp::common::String ErrorMsg = "fail";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(ErrorMsg))).Times(1);
+
+    const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+    const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
+
+    RealtimeEngine->CreateAvatar(
+        "Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSendObjectMessageFailureTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Log);
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    bool SendObjectMessageCalled = false;
+
+    // SignalR populates an exception
+    EXPECT_CALL(*SignalRMock, Invoke)
+        .WillRepeatedly(
+            [&SendObjectMessageCalled](
+                const std::string& Method, const signalr::value& /**/, std::function<void(const signalr::value&, std::exception_ptr)> Callback)
+            {
+                // Create a method map to get the correct hub method string value
+                csp::multiplayer::MultiplayerHubMethodMap HubMethods;
+
+                if (Method == HubMethods.Get(csp::multiplayer::MultiplayerHubMethod::SEND_OBJECT_MESSAGE))
+                {
+                    SendObjectMessageCalled = true;
+
+                    // Fail this method by returning an exception
+                    signalr::value Value {};
+                    const auto ExceptionPtr
+                        = std::make_exception_ptr(csp::common::continuations::ErrorCodeException { csp::multiplayer::ErrorCode::Unknown, "fail" });
+
+                    Callback(Value, ExceptionPtr);
+                    return async::make_task(std::make_tuple(Value, ExceptionPtr));
+                }
+                else
+                {
+                    // Don't return an exception, as we want this call to succeed
+                    const auto ExceptionPtr = std::exception_ptr { nullptr };
+
+                    // Return a valid object id
+                    std::vector<signalr::value> ParamsV { signalr::value { 1ull } };
+                    signalr::value Params { ParamsV };
+
+                    Callback(Params, ExceptionPtr);
+
+                    return async::make_task(std::make_tuple(Params, ExceptionPtr));
+                }
+            });
+
+    using MockEntityCreatedCallback = testing::MockFunction<void(SpaceEntity*)>;
+    MockEntityCreatedCallback MockCallback;
+
+    // Expect the callback is called only once, returning nullptr (not the greatest error return...)
+    EXPECT_CALL(MockCallback, Call(nullptr)).Times(1);
+
+    // Expect that we log the error message once and only once
+    const csp::common::String ErrorMsg = "fail";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(ErrorMsg))).Times(1);
 
     const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };

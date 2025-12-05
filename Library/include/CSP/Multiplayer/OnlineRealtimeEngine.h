@@ -413,13 +413,12 @@ private:
 
     // CreateAvatar Continuations
     CSP_START_IGNORE
-    async::shared_task<uint64_t> RemoteGenerateNewAvatarId();
-    std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name,
-        const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
-        AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
-    std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> CreateNewLocalAvatar(const csp::common::String& Name,
-        const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId,
-        AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback);
+    async::task<uint64_t> RemoteGenerateNewAvatarId();
+    std::function<async::task<uint64_t>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name, const csp::common::String& UserId,
+        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
+    std::function<void(uint64_t)> CreateNewLocalAvatar(const csp::common::String& Name, const csp::common::String& UserId,
+        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
+        EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
     class EntityScriptBinding* ScriptBinding;
