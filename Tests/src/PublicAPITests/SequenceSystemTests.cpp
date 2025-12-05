@@ -953,7 +953,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
         = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
     {
         EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
-        EXPECT_EQ(NetworkEventData.Key, std::string(UniqueUpdatedSequenceName).c_str());
+        EXPECT_EQ(NetworkEventData.NewKey, std::string(UniqueUpdatedSequenceName).c_str());
 
         CallbackCalled = true;
     };
