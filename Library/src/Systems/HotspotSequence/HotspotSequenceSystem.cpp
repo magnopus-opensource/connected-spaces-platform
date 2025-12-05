@@ -133,9 +133,8 @@ void HotspotSequenceSystem::RenameHotspotGroup(
     auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
     auto Key = CreateKey(GroupName, SpaceId);
     auto NewKey = CreateKey(NewGroupName, SpaceId);
-    auto SQ = this->SequenceSystem;
 
-    auto CB = [Callback, SQ, NewGroupName](const SequenceResult& Result)
+    auto CB = [Callback, NewGroupName](const SequenceResult& Result)
     {
         if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
