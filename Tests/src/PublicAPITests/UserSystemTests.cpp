@@ -504,7 +504,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTokenFailedTest)
+// Currently disabled pending investigation from MCS related to intermittent failures at short duration for refresh token expiry.
+// Refer to CHS-5441 Investigate why refresh tokens with 5 second expiry only consistently fail after 120 seconds for more information.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTokenFailedTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
