@@ -135,9 +135,9 @@ void HotspotSequenceSystem::RenameHotspotGroup(
     auto NewKey = CreateKey(NewGroupName, SpaceId);
     auto SQ = this->SequenceSystem;
 
-    auto CB = [Callback, SQ, NewKey, NewGroupName, SpaceId](const SequenceResult& Result)
+    auto CB = [Callback, SQ, NewGroupName](const SequenceResult& Result)
     {
-        if (Result.GetResultCode() != csp::systems::EResultCode::Success)
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
             HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
@@ -145,26 +145,13 @@ void HotspotSequenceSystem::RenameHotspotGroup(
             return;
         }
 
-        auto UpdateCB = [Callback](const SequenceResult& Result)
-        {
-            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
-            {
-                HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-                // convert SequenceResult To HotspotGroupResultCallback
-                Callback(ReturnValue);
-                return;
-            }
-            auto Data = Result.GetSequence();
-            HotspotGroup Group;
-            Group.Items = Data.Items;
-            Group.Name = Data.MetaData["Name"];
-            HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-            // convert SequenceResult To HotspotGroupResultCallback
-            Callback(ReturnValue);
-        };
-        auto MetaData = Result.GetSequence().MetaData;
-        MetaData["Name"] = NewGroupName;
-        SQ->UpdateSequence(NewKey, "GroupId", SpaceId, Result.GetSequence().Items, MetaData, UpdateCB);
+        auto Data = Result.GetSequence();
+        HotspotGroup Group;
+        Group.Items = Data.Items;
+        Group.Name = Data.MetaData["Name"];
+        HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+        // convert SequenceResult To HotspotGroupResultCallback
+        Callback(ReturnValue);
     };
 
     SequenceSystem->RenameSequence(Key, NewKey, CB);
