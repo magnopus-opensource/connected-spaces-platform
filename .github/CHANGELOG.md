@@ -9,6 +9,11 @@ All notable changes to this project will be documented in this file.
 - [OB-4579] fix!: Issues around renaming hotspot groups by MAG-ChristopherAtkinson
   Rename event has been deprecated and removed at the services level. This is a breaking change due to the removal of the csp::common::ESequenceUpdateType::Rename.
 
+🍰 🙌 New Features
+
+  [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
+  RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
+
 ## [6.14.0] - 2025-12-02_17-43-07
 
 🔥 ❗Breaking Changes
