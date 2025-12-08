@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.15.0] - 2025-12-08_20-00-56
+
 🔥 ❗Breaking Changes
 
 - [OB-4579] fix!: Issues around renaming hotspot groups by MAG-ChristopherAtkinson
