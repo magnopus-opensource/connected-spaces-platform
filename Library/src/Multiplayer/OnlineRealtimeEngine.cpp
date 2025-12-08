@@ -249,7 +249,6 @@ namespace
 
         return NewAvatar;
     }
-
 }
 
 async::task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
@@ -261,7 +260,8 @@ async::task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
     const signalr::value Params(Arr);
 
     return MultiplayerConnectionInst->GetSignalRConnection()
-        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, [](auto&&, auto&&) {})
+        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params,
+            [](const signalr::value&, std::exception_ptr) {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
@@ -287,7 +287,9 @@ std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvat
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
         return MultiplayerConnectionInst->GetSignalRConnection()
-            ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get())
+            ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+                [](const signalr::value&, std::exception_ptr) {})
+            .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
             .then([NetworkId]() { return NetworkId; });
     };
 }
