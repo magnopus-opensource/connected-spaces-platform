@@ -158,8 +158,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
         .then(async::inline_scheduler(),
             [](async::task<uint64_t> Id)
             {
-                EXPECT_EQ(Id.get(), 55);
                 EXPECT_FALSE(Id.get_exception());
+                EXPECT_EQ(Id.get(), 55);
             })
         .then(async::inline_scheduler(),
             [](async::task<void> CheckForErrorsTask)
