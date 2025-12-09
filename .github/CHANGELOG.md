@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [6.16.0] - 2025-12-09_19-48-30
+
+
+
 ## [6.15.0] - 2025-12-08_20-00-56
 
 🔥 ❗Breaking Changes
