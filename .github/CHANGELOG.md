@@ -83,6 +83,8 @@ All notable changes to this project will be documented in this file.
   As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
 - [OF-1524] fix: Wasm callbacks are now automatically forwarded to the main thread by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/806
   This fixes crashes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback on wasm builds.
+- [OF-1542] fix: Prevent OnlineRealtimeEngine::DestroyEntity callback from firing twice on failure by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/880
+  Return has been added to prevent further execution on failure.
 
 ### 🔨 🔨 Chore
 
