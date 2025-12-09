@@ -1,4 +1,5 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
+#include "CSP/Systems/ContinuationUtils.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Common/Convert.h"
 #include "Services/ApiBase/ApiBase.h"
@@ -49,6 +50,23 @@ void MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId, Sco
         ->scopesReferenceTypeReferenceTypeReferenceIdReferenceIdGet({ ReferenceType, SpaceId }, ResponseHandler);
 }
 
+async::task<ScopesResult> MultiplayerSystem::GetScopesBySpace(const csp::common::String& SpaceId)
+{
+    auto Event = std::make_shared<async::event_task<csp::systems::ScopesResult>>();
+    auto Task = Event->get_task();
+
+    GetScopesBySpace(SpaceId,
+        [Event](const ScopesResult& Result)
+        {
+            if (Result.GetResultCode() != EResultCode::InProgress)
+            {
+                Event->set(Result);
+            }
+        });
+
+    return Task;
+}
+
 void MultiplayerSystem::UpdateScopeById(const csp::common::String& ScopeId, const csp::systems::Scope& Scope, ScopeResultCallback Callback)
 {
     auto Dto = std::make_shared<chs::multiplayerservice::ScopeDto>();
@@ -91,6 +109,23 @@ void MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId, Scope
             Callback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs::multiplayerservice::ScopeLeaderApi*>(ScopeLeaderApi.get())->scopesScopeIdLeaderGet({ ScopeId }, ResponseHandler);
+}
+
+async::task<ScopeLeaderResult> MultiplayerSystem::GetScopeLeader(const csp::common::String& ScopeId)
+{
+    auto Event = std::make_shared<async::event_task<csp::systems::ScopeLeaderResult>>();
+    auto Task = Event->get_task();
+
+    GetScopeLeader(ScopeId,
+        [Event](const ScopeLeaderResult& Result)
+        {
+            if (Result.GetResultCode() != EResultCode::InProgress)
+            {
+                Event->set(Result);
+            }
+        });
+
+    return Task;
 }
 
 void MultiplayerSystem::__PerformLeaderElectionInScope(const csp::common::String& ScopeId,

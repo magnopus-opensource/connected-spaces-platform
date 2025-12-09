@@ -129,7 +129,7 @@ public:
 private:
     FeaturesLimitResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<FeatureLimitInfo> FeaturesLimitInfo;
 };
@@ -152,7 +152,7 @@ public:
 private:
     FeatureLimitResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     FeatureLimitInfo FeatureLimitInfo;
 };
@@ -175,7 +175,7 @@ public:
 private:
     UserTierResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     UserTierInfo UserTierInfo;
 };
@@ -198,7 +198,7 @@ public:
 private:
     FeatureQuotaResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     FeatureQuotaInfo FeatureQuotaInfo;
 };
@@ -221,7 +221,7 @@ public:
 private:
     FeaturesQuotaResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
 };

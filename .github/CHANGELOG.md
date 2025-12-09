@@ -6,6 +6,43 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [6.15.0] - 2025-12-08_20-00-56
+
+🔥 ❗Breaking Changes
+
+- [OB-4579] fix!: Issues around renaming hotspot groups by MAG-ChristopherAtkinson
+  Rename event has been deprecated and removed at the services level. This is a breaking change due to the removal of the csp::common::ESequenceUpdateType::Rename.
+
+🍰 🙌 New Features
+
+  [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
+  RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
+
+## [6.14.0] - 2025-12-02_17-43-07
+
+🔥 ❗Breaking Changes
+
+- [OF-1806] refac!: Add a new URL property and deprecate others in the AvatarSpaceComponent in https://github.com/magnopus-opensource/connected-spaces-platform/pull/872
+  Simplify the setting and getting of the mesh URL for the avatar component. This is a breaking change due to the removal of the getters and setters for CustomAvatarUrl and AvatarMeshIndex.
+
+## [6.13.0] - 2025-11-28_20-11-35
+
+🔥 ❗Breaking Changes
+
+- [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
+  Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
+
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] fix: Prevent uvu (wasm test runner) hanging on failed tests, by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/871 
+  Achieves this by appropriately shutting down CSPFoundation at the end of the test suite run,
+  as well as guarding against puppeteer errors via try/finally.
+
+### 🔨 🔨 Chore
+
+- [NT-0] chore: Change 'Dirty components map already contains key' log to very verbose by MAG-ThomasGreenhalgh in https://github.com/magnopus-opensource/connected-spaces-platform/pull/874
+  Changed the log level of the _'Dirty components map already contains key'_ message emitted from `SpaceEntityStatePatcher::SetDirtyComponent` to `VeryVerbose`.
+
 ## [6.12.0] - 2025-11-21_18-23-39
 
 ### 🍰 🙌 New Features
@@ -32,6 +69,10 @@ All notable changes to this project will be documented in this file.
 - [OF-1784] feat: Multiplayer System by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/842
   Part 1 of the server-side leader election work. Addition of a new Multiplayer System which exposes the necessary functionality for leader election from the mcs MultiplayerServices api.
 
+- [OF-1784] feat: Added server-side leader election by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/869
+  This adds support for server-side leader election that replaces the current internal client side election. 
+  The availability of this feature is determined by MCS, and at the time this is merged it will not be turned on.
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/857
@@ -40,6 +81,8 @@ All notable changes to this project will be documented in this file.
   In the continuation flow, we would return an invalid result and therefore lose the associated result data. This change ensures the result data from the exception is preserved.
 - [NT-0] fix: Use const string ref for return type by MAG-AlessioRegalbuto in https://github.com/magnopus-opensource/connected-spaces-platform/pull/856
   As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
+- [OF-1524] fix: Wasm callbacks are now automatically forwarded to the main thread by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/806
+  This fixes crashes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback on wasm builds.
 
 ### 🔨 🔨 Chore
 

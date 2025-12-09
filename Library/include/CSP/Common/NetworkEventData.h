@@ -110,11 +110,10 @@ public:
 
 enum class ESequenceUpdateType
 {
-    Create,
-    Update,
-    Rename,
-    Delete,
-    Invalid
+    Create = 0,
+    Update = 1,
+    Delete = 3,
+    Invalid = 4
 };
 
 // Additional data needed for the case where the sequence event is a hotspot sequence event.

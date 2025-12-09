@@ -33,9 +33,10 @@ public:
     DECLARE_SCRIPT_PROPERTY(std::string, AvatarId);
     DECLARE_SCRIPT_PROPERTY(std::string, UserId);
     DECLARE_SCRIPT_PROPERTY(int32_t, State);
-    DECLARE_SCRIPT_PROPERTY(int32_t, AvatarMeshIndex);
+    DECLARE_SCRIPT_PROPERTY(int32_t, AvatarMeshIndex_DEPRECATED);
     DECLARE_SCRIPT_PROPERTY(std::string, AgoraUserId);
-    DECLARE_SCRIPT_PROPERTY(std::string, CustomAvatarUrl);
+    DECLARE_SCRIPT_PROPERTY(std::string, CustomAvatarUrl_DEPRECATED);
+    DECLARE_SCRIPT_PROPERTY(std::string, AvatarUrl);
     DECLARE_SCRIPT_PROPERTY(bool, IsHandIKEnabled);
     DECLARE_SCRIPT_PROPERTY(Vector3, TargetHandIKTargetLocation);
     DECLARE_SCRIPT_PROPERTY(Vector4, HandRotation);

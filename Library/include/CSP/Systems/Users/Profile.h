@@ -74,7 +74,7 @@ public:
 private:
     ProfileResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     Profile Profile;
 };
@@ -95,7 +95,7 @@ public:
 private:
     BasicProfilesResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<BasicProfile> Profiles;
 };

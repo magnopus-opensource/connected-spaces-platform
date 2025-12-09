@@ -83,7 +83,7 @@ public:
 private:
     POIResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     PointOfInterest POI;
 };
@@ -110,7 +110,7 @@ public:
 private:
     POICollectionResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<PointOfInterest> POIs;
 };

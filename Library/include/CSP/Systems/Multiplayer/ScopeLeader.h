@@ -48,8 +48,10 @@ class CSP_API ScopeLeader
 public:
     /// @brief The scope id the client is leader of.
     csp::common::String ScopeId;
-    /// @brief The client id which is the leader.
+    /// @brief The user id which is the leader.
     csp::common::String ScopeLeaderUserId;
+    /// @brief The client id which is the leader.
+    uint64_t ScopeClientId;
     /// @brief Whether there is a server side election currently in progress when this object is received.
     bool ElectionInProgress = false;
 };
@@ -75,7 +77,7 @@ public:
 private:
     ScopeLeaderResult(void*) {};
 
-    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     ScopeLeader Leader;
 };

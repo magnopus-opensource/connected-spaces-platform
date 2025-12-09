@@ -480,7 +480,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
     // Log in
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
 
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
 
@@ -504,13 +504,39 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
     LogOut(UserSystem);
 }
 
+// Currently disabled pending investigation from MCS related to intermittent failures at short duration for refresh token expiry.
+// Refer to CHS-5441 Investigate why refresh tokens with 5 second expiry only consistently fail after 120 seconds for more information.
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTokenFailedTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    auto TokenOptions = csp::systems::TokenOptions();
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
+    TokenOptions.RefreshTokenExpiryLength = "00:00:05";
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    RAIIMockLogger MockLogger {};
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::common::LogLevel::Fatal);
+    csp::common::String Msg = "User authentication token refresh failed!";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, Msg)).Times(1);
+
+    std::this_thread::sleep_for(120s);
+
+    // We expect this call to fail as we no longer have a valid connection, hence we do not need to logout
+    AWAIT_PRE(UserSystem, GetProfileByUserId, RequestPredicate, UserId);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:05";
 
     // Ensure that the token expiry time matched the provided token options
     UserSystem->SetNewLoginTokenReceivedCallback(
@@ -545,10 +571,11 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, InvalidExpiryLengthInTokenOptionsTes
 
     RAIIMockLogger MockLogger {};
     csp::common::String WarningLog = "Expiry length token option does not match the expected format, and has been ignored.";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(1);
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, WarningLog)).Times(2);
 
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.ExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
+    TokenOptions.AccessTokenExpiryLength = "INVALID_EXPIRATION_DURATION_STRING";
+    TokenOptions.RefreshTokenExpiryLength = "00:60:60";
 
     // Log in
     csp::common::String UserId;
@@ -568,7 +595,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
 
     // Ensure MCS clamps the value of expiry length when above bounds
     {
-        TokenOptions.ExpiryLength = "12:00:00";
+        TokenOptions.AccessTokenExpiryLength = "12:00:00";
 
         // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(
@@ -597,7 +624,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExpiryLengthInTokenOptionsOutOfRange
 
     // Ensure MCS clamps the value of expiry length when below bounds
     {
-        TokenOptions.ExpiryLength = "00:00:00";
+        TokenOptions.AccessTokenExpiryLength = "00:00:00";
 
         // Ensure that the token expiry time matched the default token options
         UserSystem->SetNewLoginTokenReceivedCallback(

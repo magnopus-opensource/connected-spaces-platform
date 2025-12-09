@@ -1381,7 +1381,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, WhenSignalRInvokeStartListeningErro
 
     // And the disconnection callback will be called with a message
     MockConnectionCallback MockDisconnectionCallback;
-    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("MultiplayerConnection::StartListening, Error when starting listening.")));
+    EXPECT_CALL(MockDisconnectionCallback, Call(csp::common::String("Multiplayer error. mock exception")));
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
     Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
@@ -1622,4 +1622,61 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, TestMultiplayerDisconnectionWhenNew
 
     Connection.SetDisconnectionCallback(std::bind(&MockConnectionCallback::Call, &MockDisconnectionCallback, std::placeholders::_1));
     Connection.Connect(std::bind(&MockMultiplayerErrorCallback::Call, &MockErrorCallback, std::placeholders::_1), "", "", "");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptedTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // Create avatar
+    csp::common::String UserName = "Player 1";
+    SpaceTransform UserTransform
+        = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    bool IsVisible = true;
+    AvatarState UserAvatarState = AvatarState::Idle;
+    csp::common::String UserAvatarId = "MyCoolAvatar";
+    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](SpaceEntity* /*Entity*/) {});
+
+    const auto LoginState = UserSystem->GetLoginState();
+
+    auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.UserId, UserTransform, IsVisible,
+        UserAvatarState, UserAvatarId, UserAvatarPlayMode)
+                        .Await();
+
+    // Set network interrupted callback
+    bool Interrupted = false;
+    Connection->SetNetworkInterruptionCallback([&Interrupted](csp::common::String /*Message*/) { Interrupted = true; });
+
+    // Cause signalr to fail
+    Connection->__CauseFailure();
+
+    WaitForCallback(Interrupted);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
 }

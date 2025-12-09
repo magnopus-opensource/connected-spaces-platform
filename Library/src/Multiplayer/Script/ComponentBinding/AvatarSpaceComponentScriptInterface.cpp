@@ -31,9 +31,8 @@ AvatarSpaceComponentScriptInterface::AvatarSpaceComponentScriptInterface(AvatarS
 DEFINE_SCRIPT_PROPERTY_STRING(AvatarSpaceComponent, AvatarId);
 DEFINE_SCRIPT_PROPERTY_STRING(AvatarSpaceComponent, UserId);
 DEFINE_SCRIPT_PROPERTY_STRING(AvatarSpaceComponent, AgoraUserId);
-DEFINE_SCRIPT_PROPERTY_STRING(AvatarSpaceComponent, CustomAvatarUrl);
+DEFINE_SCRIPT_PROPERTY_STRING(AvatarSpaceComponent, AvatarUrl);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::AvatarState, int32_t, State);
-DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, int64_t, int32_t, AvatarMeshIndex);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsHandIKEnabled);
 DEFINE_SCRIPT_PROPERTY_VEC3(AvatarSpaceComponent, TargetHandIKTargetLocation);
 DEFINE_SCRIPT_PROPERTY_VEC4(AvatarSpaceComponent, HandRotation);
