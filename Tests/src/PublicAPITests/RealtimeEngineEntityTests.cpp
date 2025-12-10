@@ -1074,7 +1074,7 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     // When performing quaternion operations, W can be negative, so no point checking
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     RealtimeEngine.reset();
 
     // Delete space
@@ -1170,7 +1170,7 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     RealtimeEngine.reset();
 
     // Delete space
@@ -1269,7 +1269,7 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     RealtimeEngine.reset();
 
     // Delete space
@@ -1360,7 +1360,7 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     EXPECT_EQ(ObjectTransformExpected.Rotation.Z == ObjectTransformActual.Rotation.Z, true);
     EXPECT_EQ(ObjectTransformExpected.Scale == ObjectTransformActual.Scale, true);
 
-    SpaceSystem->ExitSpace([](const csp::systems::NullResult& /*Result*/) {});
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     RealtimeEngine.reset();
 
     // Delete space
