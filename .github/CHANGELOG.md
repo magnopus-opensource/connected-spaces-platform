@@ -19,8 +19,13 @@ All notable changes to this project will be documented in this file.
 
 🍰 🙌 New Features
 
-  [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
+- [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
   RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
+  
+🙈 🙉 🙊 Test Changes
+
+- [NT-0] test: Await exiting spaces in certain realtime engine tests by MAG-ElliotMorris.
+  Correct usage of the realtime engine requires that the exit space call returns fully before deleting the memory, these tests did not do that.
 
 ## [6.14.0] - 2025-12-02_17-43-07
 
