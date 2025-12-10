@@ -47,7 +47,7 @@ auto UnwrapSignalRResultOrThrow()
             auto [Error, ExceptionErrorMsg] = MultiplayerConnection::ParseMultiplayerErrorFromExceptionPtr(Exception);
 
             // Throw an ErrorException using the parsed data instead of the original
-            throw csp::common::continuations::ErrorCodeException(Error, "Multiplayer error. " + ExceptionErrorMsg);
+            throw csp::common::continuations::ErrorCodeException(Error, "Multiplayer Error. " + ExceptionErrorMsg);
         }
 
         if constexpr (ForwardResult)

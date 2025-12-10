@@ -249,10 +249,9 @@ namespace
 
         return NewAvatar;
     }
-
 }
 
-async::shared_task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
+async::task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
 {
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
     // I suspect literally no one knows if this is still neccesary.
@@ -261,20 +260,20 @@ async::shared_task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
     const signalr::value Params(Arr);
 
     return MultiplayerConnectionInst->GetSignalRConnection()
-        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params, {})
+        ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), Params,
+            [](const signalr::value&, std::exception_ptr) {})
         .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
         .then(
             [LogSystem = this->LogSystem](const signalr::value& Result) // Parse the ID from the server and pass it along the chain
             {
                 const auto NetworkId = ParseGenerateObjectIDsResult(Result, *LogSystem);
                 return NetworkId;
-            })
-        .share();
+            });
 }
 
-std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(
-    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
-    const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode)
+std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvatarObjectMessage(const csp::common::String& Name,
+    const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState,
+    AvatarPlayMode AvatarPlayMode)
 {
     return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
@@ -287,20 +286,20 @@ std::function<async::task<std::tuple<signalr::value, std::exception_ptr>>(uint64
         Serializer.WriteValue(std::vector<mcs::ObjectMessage> { Message });
 
         // Explicitly specify types when dealing with signalr values, initializer list schenanigans abound.
-        return MultiplayerConnectionInst->GetSignalRConnection()->Invoke(
-            MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get());
+        return MultiplayerConnectionInst->GetSignalRConnection()
+            ->Invoke(MultiplayerConnectionInst->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), Serializer.Get(),
+                [](const signalr::value&, std::exception_ptr) {})
+            .then(multiplayer::continuations::UnwrapSignalRResultOrThrow())
+            .then([NetworkId]() { return NetworkId; });
     };
 }
 
-std::function<void(std::tuple<async::shared_task<uint64_t>, async::task<void>>)> OnlineRealtimeEngine::CreateNewLocalAvatar(
-    const csp::common::String& Name, const csp::common::String& UserId, const SpaceTransform& Transform, bool IsVisible,
-    const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode, EntityCreatedCallback Callback)
+std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const csp::common::String& Name, const csp::common::String& UserId,
+    const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
+    EntityCreatedCallback Callback)
 {
-    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](
-               std::tuple<async::shared_task<uint64_t>, async::task<void>> NetworkIdFromChain)
+    return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this, Callback](uint64_t NetworkId)
     {
-        uint64_t NetworkId = std::get<0>(NetworkIdFromChain).get();
-
         /* Note we're constructing the avatar redundantly, both here and in the serialization.
          * The reasons for this are because the gap between where we would first need to construct the avatar prior to serialization and here
          * is too large and has a network call in between it. We don't want the possibility for a leak.
@@ -344,16 +343,8 @@ void OnlineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const c
     const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
 {
     // Ask the server for an avatar Id via "GenerateObjectIds"
-    async::shared_task<uint64_t> GetAvatarNetworkIdChain = RemoteGenerateNewAvatarId();
-
-    // Use the object ID to construct a serialized avatar and send it to the server, "SendObjectMessage"
-    async::task<void> SerializeAndSendChain
-        = GetAvatarNetworkIdChain.then(SendNewAvatarObjectMessage(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
-              .then(multiplayer::continuations::UnwrapSignalRResultOrThrow<false>());
-
-    // Once the server has acknowledged our new avatar, add it to local state and give it to the client.
-    // Note: The when_all is so we can reuse the remote avatar ID without having to refetch it
-    async::when_all(GetAvatarNetworkIdChain, SerializeAndSendChain)
+    RemoteGenerateNewAvatarId()
+        .then(SendNewAvatarObjectMessage(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode))
         .then(CreateNewLocalAvatar(Name, UserId, SpaceTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, Callback))
         .then(csp::common::continuations::InvokeIfExceptionInChain(*LogSystem,
             [Callback, LogSystem = this->LogSystem]([[maybe_unused]] const csp::common::continuations::ExpectedExceptionBase& exception)
@@ -450,6 +441,7 @@ void OnlineRealtimeEngine::DestroyEntity(SpaceEntity* Entity, CallbackHandler Ca
         {
             LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Failed to destroy entity. Exception: {}", e.what()).c_str());
             Callback(false);
+            return;
         }
 
         Callback(true);
