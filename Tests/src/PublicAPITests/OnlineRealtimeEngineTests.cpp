@@ -121,7 +121,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
                 }
                 catch (std::runtime_error error)
                 {
-                    EXPECT_EQ(std::string(error.what()), std::string("Multiplayer error. mock exception"));
+                    EXPECT_EQ(std::string(error.what()), std::string("Multiplayer Error. mock exception"));
                 }
             })
         .then(async::inline_scheduler(),
