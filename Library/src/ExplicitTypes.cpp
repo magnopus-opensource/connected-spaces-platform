@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/LoginState.h"
@@ -64,10 +66,13 @@ template class CSP_API csp::common::Array<csp::systems::Space>;
 template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
 template class CSP_API csp::common::Array<csp::systems::Material*>;
 template class CSP_API csp::common::Array<csp::systems::Scope>;
+template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
 
 // csp::common::List
 template class CSP_API csp::common::List<csp::common::String>;
 template class CSP_API csp::common::List<csp::common::Vector3>;
+template class CSP_API csp::common::List<csp::common::ApplicationSettings>;
+template class CSP_API csp::common::List<csp::common::SettingsCollection>;
 
 // csp::common::Map
 template class CSP_API csp::common::Map<uint16_t, csp::multiplayer::ComponentBase*>;
@@ -90,3 +95,5 @@ template class CSP_API csp::common::Optional<csp::systems::FileAssetDataSource>;
 template class CSP_API csp::common::Optional<csp::systems::Space>;
 template class CSP_API csp::common::Optional<csp::systems::SpaceAttributes>;
 template class CSP_API csp::common::Optional<csp::common::LoginState>;
+template class CSP_API csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData>;
+template class CSP_API csp::common::Optional<csp::common::Array<csp::FeatureFlag>>;
