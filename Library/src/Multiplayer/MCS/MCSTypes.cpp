@@ -121,6 +121,8 @@ namespace
                 DeserializeComponentDataInternal<std::map<std::string, ItemComponentData>>(Deserializer, OutVal);
             }
             break;
+        case ItemComponentDataType::DELETE_COMPONENT:
+            throw std::invalid_argument("Trying to deserialize already deleted ItemComponentDataType");
         default:
             throw std::invalid_argument("Trying to deserialize unsupported ItemComponentDataType");
         }
