@@ -554,7 +554,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
             const auto AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
 
             auto AuthoriseURL = csp::common::StringFormat(
-                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=none&response_mode=form_post", AuthoriseUrl.c_str(),
+                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post", AuthoriseUrl.c_str(),
                 ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(), RedirectURL.c_str());
 
             StringResult SuccessResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());

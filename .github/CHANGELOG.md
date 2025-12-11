@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🐛 🔨 Bug Fixes
 
+- [OW-2312] fix: Add select_account for authorise URL prompt parameter.
+  Google made changes to the way the oauth URL works, so we need to set prompt to select_account rather than none to restore the functionality. This change updates that parameter in the GetThirdPartyProviderAuthoriseURL function.
 
 ## [6.16.0] - 2025-12-09_19-48-30
 
