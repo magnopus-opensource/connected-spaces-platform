@@ -554,6 +554,7 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     csp::common::RealtimeEngineType RealtimeEngineType = GetParam();
 
@@ -567,6 +568,12 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, UseMultiplayerConnection);
 
+    if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
+    {
+        auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+        EXPECT_EQ(FlagSetResult, ErrorCode::None);
+    }
+    
     // Create space
     csp::systems::Space Space;
     CreateDefaultTestSpace(SpaceSystem, Space);
@@ -585,7 +592,7 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     bool PatchPending = true;
-    Object->SetPatchSentCallback([&PatchPending](bool /*ok*/) { PatchPending = false; });
+    Object->SetUpdateCallback([&PatchPending](auto&&, auto&&, auto&&) { PatchPending = false; });
 
     const csp::common::String ModelAssetId = "NotARealId";
 
