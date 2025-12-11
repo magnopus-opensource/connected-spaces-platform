@@ -958,6 +958,19 @@ void SpaceEntity::AddComponentFromItemComponentData(uint16_t ComponentId, const 
 
 ComponentUpdateInfo SpaceEntity::AddComponentFromItemComponentDataPatch(uint16_t ComponentId, const mcs::ItemComponentData& ComponentData)
 {
+    // TODO: [OF-1191] This implementation is a hack, this on serves to demonstrate that the remaining changes are effective 
+    // Following updates from CHS this should be reverted and the default expectations of resolving a map<int, component_type>
+
+    if (std::holds_alternative<uint64_t>(ComponentData.GetValue()))
+    {
+        RemoveComponentDirect(ComponentId);
+
+        ComponentUpdateInfo UpdateInfo;
+        UpdateInfo.ComponentId = ComponentId;
+        UpdateInfo.UpdateType = ComponentUpdateType::Delete;
+        return UpdateInfo;
+    }
+
     auto ComponentDataMap = std::get<std::map<uint16_t, mcs::ItemComponentData>>(ComponentData.GetValue());
     ComponentType PatchComponentType = static_cast<ComponentType>(std::get<uint64_t>(ComponentDataMap[COMPONENT_KEY_COMPONENTTYPE].GetValue()));
 
