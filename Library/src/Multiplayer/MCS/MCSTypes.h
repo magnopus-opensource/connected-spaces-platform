@@ -104,7 +104,8 @@ enum class ItemComponentDataType : uint64_t
     // UINT16_ARRAY = 52,
     // NULLABLE_UINT16_ARRAY = 53,
     UINT16_DICTIONARY = 54,
-    STRING_DICTIONARY = 55
+    STRING_DICTIONARY = 55,
+    DELETE_COMPONENT = 56
 };
 
 class ItemComponentData;

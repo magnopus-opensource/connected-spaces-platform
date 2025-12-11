@@ -304,12 +304,10 @@ mcs::ObjectPatch SpaceEntityStatePatcher::CreateObjectPatch() const
 
     // 3. Handle any component deletions (The fact this has to take a non-const pointer to SpaceEntity is deceptive, ruins the function signature
     // here.)
-    ComponentBase DeletionComponent(ComponentType::Delete, LogSystem, &SpaceEntity);
 
     for (size_t i = 0; i < TransientDeletionComponentIds.Size(); ++i)
     {
-        DeletionComponent.SetId(TransientDeletionComponentIds[i]);
-        ComponentPacker.WriteValue(DeletionComponent.GetId(), &DeletionComponent);
+        ComponentPacker.WriteValue(TransientDeletionComponentIds[i], csp::multiplayer::mcs::ItemComponentDataType::DELETE_COMPONENT);
     }
 
     // 4. Create the object patch using the required properties and our created components.

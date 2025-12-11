@@ -77,8 +77,7 @@ enum class ComponentType
     CinematicCamera = 27,
     ScreenSharing = 28,
     AIChatbot = 29,
-    // spare values
-    Delete = 56
+    // spare values 
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
