@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-
+[OW-2312] fix: Add select_account for authorise URL prompt parameter
 
 ## [6.16.0] - 2025-12-09_19-48-30
 
