@@ -757,6 +757,14 @@ std::function<void(const signalr::value&, std::exception_ptr)> OnlineRealtimeEng
             RealtimeEngineUtils::InitialiseEntityScripts(Entities);
             EnableEntityTick = true;
 
+            // This is a suboptimal fix. We shouldn't be doing much of the things we do here. Remember this is the
+            // "Space has finished hydrating" call, when all the assets have been fetched. You can be in a space
+            // and moving around before this.
+            // Without this lock, calling "DisableLeadershipElection" after entering a space creates a race condition.
+            // As this function can be called at any point after entering a space.
+
+            std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+
             if (IsLeaderElectionEnabled())
             {
                 if (ServerSideElectionEnabled)
@@ -1083,6 +1091,8 @@ void OnlineRealtimeEngine::EnableLeaderElection()
 {
     DisableLeaderElection();
 
+    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+
     if (ServerSideElectionEnabled)
     {
         LeaderElectionManager = std::make_unique<multiplayer::ScopeLeadershipManager>(*MultiplayerConnectionInst, *LogSystem);
@@ -1096,6 +1106,8 @@ void OnlineRealtimeEngine::EnableLeaderElection()
 
 void OnlineRealtimeEngine::DisableLeaderElection()
 {
+    std::scoped_lock LeaderElectionLocker(LeadershipElectionLock);
+
     if (LeaderElectionManager != nullptr)
     {
         LeaderElectionManager.reset(nullptr);
