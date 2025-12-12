@@ -478,6 +478,7 @@ private:
     // --------------------------------------------------------------------------
 
     std::recursive_mutex* TickEntitiesLock;
+    std::mutex LeadershipElectionLock;
 
     std::deque<csp::multiplayer::SpaceEntity*>* PendingAdds;
     std::deque<csp::multiplayer::SpaceEntity*>* PendingRemoves;
