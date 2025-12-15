@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.17.0] - 2025-12-15_14-00-12
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: Address rare race condition in legacy leadership election by MAG-ElliotMorris
