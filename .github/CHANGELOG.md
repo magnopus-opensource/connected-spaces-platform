@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-🐛 🔨 Bug Fixes
+### 🐛 🔨 Bug Fixes
 
 - [OW-2312] fix: Add select_account for authorise URL prompt parameter.
   Google made changes to the way the oauth URL works, so we need to set prompt to select_account rather than none to restore the functionality. This change updates that parameter in the GetThirdPartyProviderAuthoriseURL function.
+- [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file.
 
 ## [6.16.0] - 2025-12-09_19-48-30
 
@@ -44,12 +45,6 @@ All notable changes to this project will be documented in this file.
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
   Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
 
-### 🙈 🙉 🙊 Test Changes
-
-- [NT-0] fix: Prevent uvu (wasm test runner) hanging on failed tests, by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/871 
-  Achieves this by appropriately shutting down CSPFoundation at the end of the test suite run,
-  as well as guarding against puppeteer errors via try/finally.
-
 ### 🔨 🔨 Chore
 
 - [NT-0] chore: Change 'Dirty components map already contains key' log to very verbose by MAG-ThomasGreenhalgh in https://github.com/magnopus-opensource/connected-spaces-platform/pull/874
@@ -81,10 +76,6 @@ All notable changes to this project will be documented in this file.
 - [OF-1784] feat: Multiplayer System by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/842
   Part 1 of the server-side leader election work. Addition of a new Multiplayer System which exposes the necessary functionality for leader election from the mcs MultiplayerServices api.
 
-- [OF-1784] feat: Added server-side leader election by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/869
-  This adds support for server-side leader election that replaces the current internal client side election. 
-  The availability of this feature is determined by MCS, and at the time this is merged it will not be turned on.
-
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: List::Insert erasing 0th element by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/857
@@ -95,8 +86,6 @@ All notable changes to this project will be documented in this file.
   As part of ongoing Unity interop API work, we updated the 'MimeTypeHelper' to return a const ref string for the mime type to ensure correct SWIG code generation.
 - [OF-1524] fix: Wasm callbacks are now automatically forwarded to the main thread by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/806
   This fixes crashes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback on wasm builds.
-- [OF-1542] fix: Prevent OnlineRealtimeEngine::DestroyEntity callback from firing twice on failure by MAG-mv
-  Return has been added to prevent further execution on failure.
 
 ### 🔨 🔨 Chore
 

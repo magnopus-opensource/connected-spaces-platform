@@ -28,11 +28,20 @@
 
 #include <cstdio>
 #include <fmt/format.h>
-
+#if defined(CSP_ANDROID)
+// Android specific LIB_NAME definition.
+#if defined(DEBUG)
+#define LIB_NAME "libConnectedSpacesPlatform_D.so"
+#else
+#define LIB_NAME "libConnectedSpacesPlatform.so"
+#endif
+#else
+// All other platforms LIB_NAME definition.
 #if defined(DEBUG)
 #define LIB_NAME "ConnectedSpacesPlatform_D"
 #else
 #define LIB_NAME "ConnectedSpacesPlatform"
+#endif
 #endif
 
 #if defined(CSP_WINDOWS)
