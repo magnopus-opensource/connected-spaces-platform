@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 🔨 Bug Fixes
 
+- [NT-0] fix: Address rare race condition in legacy leadership election by MAG-ElliotMorris
+  It was possible to trigger a memory race using `EnableLeaderElection` or `DisableLeaderElection` after having returned from `EnterSpace` in the OnlineRealtimeEngine.
+  This is due to the leader election being performed in the all entities retreived function, which can come back asyncronously to enable asset streaming, giving a chance for threading syncronisation error.
+  Solved with a mutex for now, although the best solve is to move leader election elsewhere.
+
 - [OW-2312] fix: Add select_account for authorise URL prompt parameter.
   Google made changes to the way the oauth URL works, so we need to set prompt to select_account rather than none to restore the functionality. This change updates that parameter in the GetThirdPartyProviderAuthoriseURL function.
 - [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file.
