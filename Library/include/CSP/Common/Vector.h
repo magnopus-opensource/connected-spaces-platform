@@ -69,10 +69,8 @@ public:
     /// @param float Scalar
     Vector2 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
     bool operator==(Vector2 Other) const;
     bool operator!=(Vector2 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;
@@ -129,10 +127,8 @@ public:
     /// @param float Scalar
     Vector3 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
     bool operator==(Vector3 Other) const;
     bool operator!=(Vector3 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;
@@ -196,10 +192,8 @@ public:
     /// @param float Scalar
     Vector4 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
     bool operator==(Vector4 Other) const;
     bool operator!=(Vector4 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;
