@@ -9,6 +9,8 @@
  * inside hashing containers.
  */
 
+#pragma once
+
 #include "CSP/CSPCommon.h"
 #include <CSP/Common/Vector.h>
 
