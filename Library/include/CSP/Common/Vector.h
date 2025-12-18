@@ -69,10 +69,13 @@ public:
     /// @param float Scalar
     Vector2 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
+    /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator==(Vector2 Other) const;
+
+    /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator!=(Vector2 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;
@@ -129,10 +132,13 @@ public:
     /// @param float Scalar
     Vector3 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
+    /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator==(Vector3 Other) const;
+
+    /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator!=(Vector3 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;
@@ -196,10 +202,13 @@ public:
     /// @param float Scalar
     Vector4 operator*(float Scalar) const;
 
-    CSP_START_IGNORE
+    /// @brief Whether two vectors are equal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator==(Vector4 Other) const;
+
+    /// @brief Whether two vectors are inequal to one another. Has a .001f accuracy.
+    /// @param Vector3 Vector to compare
     bool operator!=(Vector4 Other) const;
-    CSP_END_IGNORE
 
     float X;
     float Y;

@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🍰 🙌 New Features
 
+- [NT-0] feat: Exposed equality and inequality operators for `Vector2`, `Vector3`, `Vector4` and `Map` by MAG-ElliotMorris.
+  Also added hash functions in the `std` namespace for the Vector types.
 
 ## [6.17.0] - 2025-12-15_14-00-12
 
