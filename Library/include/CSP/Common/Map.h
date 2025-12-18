@@ -108,8 +108,12 @@ public:
         return *this;
     }
 
+    /// @brief Whether two maps are equal to each other. Defers to std::maps equality operator
+    /// @param OtherValue const Map<TKey, TValue>& : Map to compare
     bool operator==(const Map<TKey, TValue>& OtherValue) const { return *Container == *OtherValue.Container; }
 
+    /// @brief Whether two maps are inequal to each other. Defers to std::maps equality operator
+    /// @param OtherValue const Map<TKey, TValue>& : Map to compare
     bool operator!=(const Map<TKey, TValue>& OtherValue) const { return *Container != *OtherValue.Container; }
 
     /// @brief Returns the number of elements in this map.
