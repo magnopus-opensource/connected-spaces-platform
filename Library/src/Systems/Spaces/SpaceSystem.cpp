@@ -315,7 +315,7 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                     if (GlobalScopeCount < 1)
                     {
                         this->LogSystem->LogMsg(
-                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a global scope");
+                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a required global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space doesn't have a global scope", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
@@ -324,24 +324,16 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                     if (GlobalScopeCount > 1)
                     {
                         this->LogSystem->LogMsg(
-                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space has multiple global scopes");
+                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Multiple global scopes found. This version of CSP only supports spaces that have only a single global scope.");
                         FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
                             "SpaceSystem::RegisterScopesInSpace: Space has multiple global scopes", MakeInvalid<csp::systems::SpaceResult>())));
                         return;
                     }
 
+                    // No need to check validity as the above conditions guarantee a valid iterator.
                     auto DefaultScopeIt
                         = std::find_if(Scopes.begin(), Scopes.end(),
                         [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
-
-                    if (DefaultScopeIt == Scopes.end())
-                    {
-                        this->LogSystem->LogMsg(
-                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space does not have a default scope!");
-                        FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
-                            "SpaceSystem::RegisterScopesInSpace: Space does not have a default scope!", MakeInvalid<csp::systems::SpaceResult>())));
-                        return;
-                    }
 
                     const bool ManagedLeaderElection = DefaultScopeIt->ManagedLeaderElection;
 
