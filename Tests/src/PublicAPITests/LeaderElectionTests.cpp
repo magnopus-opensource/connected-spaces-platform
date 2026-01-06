@@ -468,6 +468,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
     auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
+    // Ensure we only have 1 scope
     if (GetScopesResult.GetScopes().Size() != 1)
     {
         FAIL();
@@ -475,6 +476,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
 
     csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
     ScopeId = DefaultScope.Id;
+
+    // Ensure the scope is global
+    EXPECT_EQ(DefaultScope.PubSubType, csp::systems::PubSubModelType::Global);
 
     // Update the scope to enable managed leader election.
     DefaultScope.ManagedLeaderElection = true;

@@ -306,12 +306,35 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                 [this, FinishedGetScopeEvent, SpaceResult, RealtimeEngine](const csp::systems::ScopesResult& ScopesResult)
                 {
                     // 2. Ensure we have the default, auto-generated scope.
-                    // This is done by checking for the global scope in the space.
-                    // Right now, clients can't create scopes, so there is 0 chance of other scopes conflicting with this.
-                    auto DefaultScopeIt = std::find_if(ScopesResult.GetScopes().begin(), ScopesResult.GetScopes().end(),
+                    // This is done by checking for the global scope in the space, and that we only have 1 of these global scopes.
+                    // Right now, clients can't create scopes, so there should be a 0 chance of the above conditions failing.
+                    const auto& Scopes = ScopesResult.GetScopes();
+                    const auto GlobalScopeCount
+                        = std::count_if(Scopes.begin(), Scopes.end(), [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
+
+                    if (GlobalScopeCount < 1)
+                    {
+                        this->LogSystem->LogMsg(
+                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space doesn't have a global scope");
+                        FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
+                            "SpaceSystem::RegisterScopesInSpace: Space doesn't have a global scope", MakeInvalid<csp::systems::SpaceResult>())));
+                        return;
+                    }
+
+                    if (GlobalScopeCount > 1)
+                    {
+                        this->LogSystem->LogMsg(
+                            csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space has multiple global scopes");
+                        FinishedGetScopeEvent->set_exception(std::make_exception_ptr(csp::common::continuations::ResultException(
+                            "SpaceSystem::RegisterScopesInSpace: Space has multiple global scopes", MakeInvalid<csp::systems::SpaceResult>())));
+                        return;
+                    }
+
+                    auto DefaultScopeIt
+                        = std::find_if(Scopes.begin(), Scopes.end(),
                         [](const Scope& Scope) { return Scope.PubSubType == PubSubModelType::Global; });
 
-                    if (DefaultScopeIt == ScopesResult.GetScopes().end())
+                    if (DefaultScopeIt == Scopes.end())
                     {
                         this->LogSystem->LogMsg(
                             csp::common::LogLevel::Error, "SpaceSystem::RegisterScopesInSpace: Space does not have a default scope!");
