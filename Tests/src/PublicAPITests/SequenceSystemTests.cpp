@@ -932,6 +932,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     {
         EXPECT_EQ(NetworkEventData.Key, UniqueSequenceName);
         EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Create);
+        EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Default);
 
         CallbackCalled = true;
     };
@@ -954,6 +955,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     {
         EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
         EXPECT_EQ(NetworkEventData.NewKey, std::string(UniqueUpdatedSequenceName).c_str());
+        EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Default);
 
         CallbackCalled = true;
     };
@@ -972,6 +974,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     {
         EXPECT_EQ(NetworkEventData.Key, UniqueUpdatedSequenceName);
         EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Delete);
+        EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Default);
 
         CallbackCalled = true;
     };

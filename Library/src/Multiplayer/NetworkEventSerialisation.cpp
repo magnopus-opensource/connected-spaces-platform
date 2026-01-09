@@ -391,20 +391,6 @@ csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
     return ParsedEvent;
 }
 
-csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
-{
-    csp::common::SequenceChangedNetworkEventData ParsedEvent = DeserializeSequenceChangedEvent(EventValues, LogSystem);
-
-    ParsedEvent.HotspotData = csp::common::Optional(new csp::common::HotspotSequenceChangedNetworkEventData());
-
-    ParsedEvent.HotspotData->SpaceId = GetSequenceKeyIndex(ParsedEvent.Key, 1);
-    ParsedEvent.HotspotData->Name = GetSequenceKeyIndex(ParsedEvent.Key, 2);
-    ParsedEvent.HotspotData->NewName = GetSequenceKeyIndex(ParsedEvent.NewKey, 2);
-
-    return ParsedEvent;
-}
-
 csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem)
 {

@@ -95,5 +95,4 @@ template class CSP_API csp::common::Optional<csp::systems::FileAssetDataSource>;
 template class CSP_API csp::common::Optional<csp::systems::Space>;
 template class CSP_API csp::common::Optional<csp::systems::SpaceAttributes>;
 template class CSP_API csp::common::Optional<csp::common::LoginState>;
-template class CSP_API csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData>;
 template class CSP_API csp::common::Optional<csp::common::Array<csp::FeatureFlag>>;

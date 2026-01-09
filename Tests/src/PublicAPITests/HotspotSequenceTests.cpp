@@ -195,8 +195,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
         [&CallbackCalled, &Space, &TestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
             EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Create);
-            EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
-            EXPECT_EQ(NetworkEventData.HotspotData->Name, TestGroupName);
+            EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Hotspot);
+            EXPECT_EQ(NetworkEventData.SpaceId, Space.Id);
+            EXPECT_EQ(NetworkEventData.Key, TestGroupName);
             CallbackCalled = true;
         });
 
@@ -211,8 +212,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
         [&CallbackCalled, &Space, &TestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
             EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Delete);
-            EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
-            EXPECT_EQ(NetworkEventData.HotspotData->Name, TestGroupName);
+            EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Hotspot);
+            EXPECT_EQ(NetworkEventData.SpaceId, Space.Id);
+            EXPECT_EQ(NetworkEventData.Key, TestGroupName);
             CallbackCalled = true;
         });
 
@@ -386,9 +388,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
             if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
             {
                 EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
-                EXPECT_EQ(NetworkEventData.HotspotData->Name, OldTestGroupName);
-                EXPECT_EQ(NetworkEventData.HotspotData->NewName, NewTestGroupName);
-                EXPECT_EQ(NetworkEventData.HotspotData->SpaceId, Space.Id);
+                EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Hotspot);
+                EXPECT_EQ(NetworkEventData.Key, OldTestGroupName);
+                EXPECT_EQ(NetworkEventData.NewKey, NewTestGroupName);
+                EXPECT_EQ(NetworkEventData.SpaceId, Space.Id);
             }
         });
 
@@ -756,12 +759,12 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
                       const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
-            if (NetworkEventData.HotspotData->Name == TestGroupName1 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Delete)
+            if (NetworkEventData.Key == TestGroupName1 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Delete)
             {
                 // Ensure we delete the group which only has one item
                 SequenceDeleted = true;
             }
-            else if (NetworkEventData.HotspotData->Name == TestGroupName2 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
+            else if (NetworkEventData.Key == TestGroupName2 && NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
             {
                 // Ensure we update the sequence that has multiple items
                 SequenceUpdate = true;
