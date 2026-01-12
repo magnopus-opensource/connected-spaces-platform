@@ -340,15 +340,10 @@ void SequenceSystem::RegisterSystemCallback()
 
 void SequenceSystem::OnSequenceChangedEvent(const csp::common::NetworkEventData& NetworkEventData)
 {
-    // This may be either a hotspot sequence event or a regular sequence event.. we're only interested in non-hotspot.
-    // The event will have a a populated "HotspotData" member if it is a hotspot sequence event..
-    // This is hacky, see Eventbus deserialisation for more.
-
+    // This event may either represent a default sequence or a hotspot sequence. Here we are only concerned with default sequences.
     const auto& SequenceEvent = static_cast<const csp::common::SequenceChangedNetworkEventData&>(NetworkEventData);
 
-    const bool IsHotspotEvent = SequenceEvent.HotspotData.HasValue();
-
-    if (!IsHotspotEvent && SequenceChangedCallback)
+    if (SequenceEvent.SequenceType == csp::common::ESequenceType::Default && SequenceChangedCallback)
     {
         // We can cast directly, we're sure we're the correct type.
         SequenceChangedCallback(SequenceEvent);

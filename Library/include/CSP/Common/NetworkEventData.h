@@ -116,23 +116,13 @@ enum class ESequenceUpdateType
     Invalid = 4
 };
 
-// Additional data needed for the case where the sequence event is a hotspot sequence event.
-// Not great, symptom of the fact that these should be seperate events, + the fact that we cant (or don't want to) use RTTI on WASM.
-// This is used only inside SequenceChangedNetworkEventData
-class CSP_API HotspotSequenceChangedNetworkEventData
+/// @brief The SequenceSystem allows ordered sequences of items to be created and managed in a space.
+/// The HotspotSequenceSystem is a wrapper around the SequenceSystem that makes it easier to manage sequences of Hotspots.
+/// Sequences can therefore represent either default sequences, or hotspot sequences. This enum is used to differentiate the two types.
+enum class ESequenceType
 {
-public:
-    HotspotSequenceChangedNetworkEventData() = default;
-    ~HotspotSequenceChangedNetworkEventData() = default;
-
-    /// @brief The unique identifier of the space that this hotspot sequence belongs to.
-    csp::common::String SpaceId;
-
-    /// @brief The name of the hotspot group that has been changed.
-    csp::common::String Name;
-
-    /// @brief If a hotspot sequence is renamed, this will be the new name.
-    csp::common::String NewName;
+    Default = 0,
+    Hotspot = 1
 };
 
 class CSP_API SequenceChangedNetworkEventData : public NetworkEventData
@@ -141,14 +131,17 @@ public:
     /// @brief The type of update to the sequence.
     ESequenceUpdateType UpdateType;
 
+    /// @brief The type of sequence this data represents.
+    ESequenceType SequenceType;
+
     /// @brief The key of the sequence which was updated.
     csp::common::String Key;
 
     /// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
     csp::common::String NewKey;
 
-    /// @brief Additional data if this sequence event is a hotspot sequence event. Will be non-empty in that case only.
-    csp::common::Optional<csp::common::HotspotSequenceChangedNetworkEventData> HotspotData = nullptr;
+    /// @brief The Id of the Space this sequence is associated with. This will only be set if the SequenceType is Hotspot.
+    csp::common::String SpaceId;
 };
 
 // @brief Data for an event signalling the completion of an async operation.

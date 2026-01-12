@@ -252,19 +252,27 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
         return std::make_unique<ConversationNetworkEventData>(csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem));
     case NetworkEvent::SequenceChanged:
     {
-        // This is a massive hack, why is it like this? We shouldn't have a SequenceSystem and a HotspotSequenceSystem if they're so similar that they
-        // share event types. That or they're dissimilar enough to justify seperate events.
         std::unique_ptr<SequenceChangedNetworkEventData> SequenceEventData
             = std::make_unique<SequenceChangedNetworkEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
+
         const csp::common::String Key = SequenceEventData->Key;
         const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
+
         if (SequenceType == "Hotspots")
         {
-            // If we're a hotspot sequence, send that deserialization packet along.
-            return std::make_unique<SequenceChangedNetworkEventData>(
-                csp::multiplayer::DeserializeSequenceHotspotChangedEvent(EventValues, LogSystem));
+            SequenceEventData->SequenceType = ESequenceType::Hotspot;
+
+            // If it is a hotspot, the 'key' will contain the following information [SequenceType]:[SpaceId]:[SequenceName]
+            // eg: Hotspots:abc123456:My-Hotspot-Sequence
+            String OldHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 2);
+            // NewKey will be structured in the same way, eg: Hotspots:abc123456:My-New-Hotspot-Sequence
+            String NewHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->NewKey, 2);
+            
+            SequenceEventData->SpaceId = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 1);
+            SequenceEventData->Key = OldHotspotSequenceName;
+            SequenceEventData->NewKey = NewHotspotSequenceName;
         }
-        // Otherwise, behave normaly
+        
         return SequenceEventData;
     }
     case NetworkEvent::AccessControlChanged:
