@@ -13,7 +13,7 @@ IF NOT EXIST "../../modules/premake/README.md" (
 
 IF NOT EXIST "../../modules/premake/bin/release/premake5.exe" (
 	cd ..\..\modules\premake
-	call Bootstrap.bat
+	call ..\..\teamcity\BootstrapPremake.bat 2022
 	cd ..\..\Tools\Emscripten
 )
 
