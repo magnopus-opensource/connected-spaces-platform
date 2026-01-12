@@ -55,11 +55,6 @@ csp::common::AccessControlChangedNetworkEventData DeserializeAccessControlChange
 csp::common::SequenceChangedNetworkEventData DeserializeSequenceChangedEvent(
     const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
 
-// Specialized deserializataion for events triggered when a hotspot sequence in the space changes. Hacky because we cant use RTTI on WASM and the
-// Hotspot event uses the same event type as regular sequences
-csp::common::SequenceChangedNetworkEventData DeserializeSequenceHotspotChangedEvent(
-    const std::vector<signalr::value>& EventValues, csp::common::LogSystem& LogSystem);
-
 // Specialized deserializataion for events triggered when an async call completes.
 // Some methods take an AsyncCall boolean argument that allows the operation to be completed asyncronously rather than syncronously.
 csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
