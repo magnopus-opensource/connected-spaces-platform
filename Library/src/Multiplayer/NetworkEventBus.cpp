@@ -262,8 +262,10 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
         {
             SequenceEventData->SequenceType = ESequenceType::Hotspot;
 
-            // If it is a hotspot, the 'key' will contain both the SpaceId and the original hotspot sequence key (name), separated by a colon.
+            // If it is a hotspot, the 'key' will contain the following information [SequenceType]:[SpaceId]:[SequenceName]
+            // eg: Hotspots:abc123456:My-Hotspot-Sequence
             String OldHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 2);
+            // NewKey will be structured in the same way, eg: Hotspots:abc123456:My-New-Hotspot-Sequence
             String NewHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->NewKey, 2);
             
             SequenceEventData->SpaceId = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 1);

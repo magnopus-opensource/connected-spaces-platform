@@ -116,6 +116,9 @@ enum class ESequenceUpdateType
     Invalid = 4
 };
 
+/// @brief The SequenceSystem allows ordered sequences of items to be created and managed in a space.
+/// The HotspotSequenceSystem is a wrapper around the SequenceSystem that makes it easier to manage sequences of Hotspots.
+/// Sequences can therefore represent either default sequences, or hotspot sequences. This enum is used to differentiate the two types.
 enum class ESequenceType
 {
     Default = 0,
