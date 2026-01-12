@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### 🐛 🔨 Bug Fixes
+### 🔥 ❗ Breaking Changes
 
 - [OB-4154] fix!: Improve how Hotspot sequence event data is handled by MAG-AdamThorn
   The existing implementation of `HotspotSequenceChangedNetworkEventData` was unnecessarily complex and confusing to developers. This event type has now been removed and new `SpaceId` and `SequenceType` properties have been added to the `SequenceChangedNetworkEventData`.
