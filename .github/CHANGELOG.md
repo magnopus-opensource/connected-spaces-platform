@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.20.0] - 2026-01-13_17-38-31
+
 ### 🔥 ❗ Breaking Changes
 
 - [OB-4154] fix!: Improve how Hotspot sequence event data is handled by MAG-AdamThorn
