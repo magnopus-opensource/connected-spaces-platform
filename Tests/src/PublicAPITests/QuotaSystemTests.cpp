@@ -211,6 +211,11 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWhenNotAdminTest)
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWithInvalidUserTest)
 {
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto UserSystem = SystemsManager.GetUserSystem();
     auto QuotaSystem = SystemsManager.GetQuotaSystem();
