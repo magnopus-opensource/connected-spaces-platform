@@ -191,6 +191,19 @@ inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
     return ErrorCodeString;
 }
 
+/// @brief Enum representing the failure reason of an entity modification operation returned from IRealtimeEngine::IsEntityModifiable.
+enum class ModifiableFailure
+{
+    /// The operation succeeded.
+    None,
+    /// The entity is locked (LockType is not None).
+    EntityLocked,
+    /// Entity doesn't belong to this client and is not transferable.
+    EntityNotOwnedAnUntransferable,
+    /// Entity doesn't have a state patcher in an online context (unexpected).
+    NoStatePatcher
+};
+
 } // namespace csp::multiplayer
 
 namespace csp::systems

@@ -320,9 +320,14 @@ public:
     bool Deselect();
 
     /// @brief Checks if the entity can be modified.
-    /// Specifically whether the local client already owns the entity or can take ownership of the entity.
+    /// Use IsModifiableWithReason if you need the specific reason an entity isn't modifiable.
     /// @return True if the entity can be modified, False if not.
     bool IsModifiable() const;
+
+    /// Checks if the entity can be modified, with a failure reason if the entity isn't modifiable.
+    /// The criteria for failures can be found on specific RealtimeEngine IsEntityModifiable overridden functions.
+    /// @return csp::multiplayer::ModifiableFailure : ModifiableFailure::None on success.
+    ModifiableFailure IsModifiableWithReason() const;
 
     /// @brief Locks the entity if it hasn't been locked already.
     /// @pre The entity must not already be locked.

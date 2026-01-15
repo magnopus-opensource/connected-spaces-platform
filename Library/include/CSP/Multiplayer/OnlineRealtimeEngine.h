@@ -260,6 +260,15 @@ public:
     /// @return A pointer to a new statepatcher. Pointer ownership is transferred to the caller.
     CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
 
+    /// @brief Returns true if the entity can be modified.
+    /// @detail This will be false under the following circumstances:
+    /// - The given entities LockType is equal to UserAgnostic, and we dont have an unprocessed patch updating the lock type.
+    /// - The entities owner id doesn't match this clients id.
+    /// - An internal state patcher was never created by the owning realtime engine (unexpected).
+    /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
+    /// @return ModifiableFailure : This will contain a failure reason if the entity isn't modifiable.
+    ModifiableFailure IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     /// @brief Adds an entity to a list of entities to be updated when ProcessPendingEntityOperations is called.

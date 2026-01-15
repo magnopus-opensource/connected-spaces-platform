@@ -825,6 +825,33 @@ csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatche
     return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
 }
 
+ModifiableFailure OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+{
+    // This should definately be true at this point, but be defensive
+    if (SpaceEntity->GetStatePatcher() == nullptr)
+    {
+        return ModifiableFailure::NoStatePatcher;
+    }
+
+    // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
+    // so we skip the lock check they are about to unlock.
+    // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
+    // Note : This will stop working if we ever add another lock type
+    const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
+    if (SpaceEntity->GetLockType() == LockType::UserAgnostic && !AboutToUnlock)
+    {
+        return ModifiableFailure::EntityLocked;
+    }
+
+    // If the entity isn't owned by this client, and ownership cannot be transfered, then we cannot modify this entity.
+    if (SpaceEntity->GetOwnerId() != GetMultiplayerConnectionInstance()->GetClientId() && SpaceEntity->GetIsTransferable() == false)
+    {
+        return ModifiableFailure::EntityNotOwnedAnUntransferable;
+    }
+
+    return ModifiableFailure::None;
+}
+
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
     if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))
@@ -884,13 +911,19 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
         return;
     }
 
-    // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-    if (!EntityToUpdate->IsModifiable())
+    // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+    ModifiableFailure Modifiable = EntityToUpdate->IsModifiableWithReason();
+    if (Modifiable != ModifiableFailure::None)
     {
-        LogSystem->LogMsg(common::LogLevel::Error,
-            fmt::format("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
-                EntityToUpdate->GetName())
-                .c_str());
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to queue entity update: {0}. Entity name: {1}",
+                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable),
+                    EntityToUpdate->GetName())
+                    .c_str());
+        }
+
         return;
     }
 
@@ -1337,14 +1370,17 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
 
             if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
             {
-                // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-                if (!PendingEntity->IsModifiable())
+                // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+                ModifiableFailure Modifiable = PendingEntity->IsModifiableWithReason();
+                if (Modifiable != ModifiableFailure::None)
                 {
-                    LogSystem->LogMsg(common::LogLevel::Error,
-                        fmt::format(
-                            "Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
-                            PendingEntity->GetName())
-                            .c_str());
+                    if (LogSystem != nullptr)
+                    {
+                        LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                            fmt::format("Failed to send patch for entity: {0}. Entity name: {1}",
+                                RealtimeEngineUtils::ModifiableFailureToString(Modifiable), PendingEntity->GetName())
+                                .c_str());
+                    }
 
                     it = PendingOutgoingUpdateUniqueSet->erase(it);
                     continue;

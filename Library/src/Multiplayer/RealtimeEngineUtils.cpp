@@ -30,6 +30,18 @@ csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::form
 
 namespace csp::multiplayer::RealtimeEngineUtils
 {
+csp::common::String ModifiableFailureToString(ModifiableFailure Failure)
+{
+    auto ModifiableFailureIt = ModifiableFailureErrors.find(Failure);
+
+    if (ModifiableFailureIt != ModifiableFailureErrors.end())
+    {
+        return ModifiableFailureIt->second;
+    }
+
+    return "";
+}
+
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
 {
     for (size_t i = 0; i < RealtimeEngine.GetNumEntities(); ++i)

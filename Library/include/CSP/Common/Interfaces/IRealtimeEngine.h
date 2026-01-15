@@ -374,6 +374,24 @@ public:
         (void)SpaceEntity;
     }
 
+    /// @brief Checks if the given entity can be modified by this client.
+    /// @details Modification in this context can mean any of the following:
+    /// - Updating an entity property
+    /// - Sending an entity patch
+    /// - Creating a component
+    /// - Deleting a component
+    /// - Updating a component property
+    /// @param SpaceEntity const csp::multiplayer::SpaceEntity* : The entity we are checking can be modified.
+    /// @return csp::common::ModifiableFailure : The result of this operation which includes a boolean signifying if the entity can be modified,
+    /// and a string which will be populated with the reason the entity cannot be modified.
+    virtual csp::multiplayer::ModifiableFailure IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+    {
+        throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)SpaceEntity;
+    }
+
 protected:
     // We want copies and moves and such to be possible for derived types, but they need to be sure to explicitly implement the behaviour.
     // Protect these operations by default to prevent accidental slicing.

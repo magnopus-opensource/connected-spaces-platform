@@ -23,6 +23,7 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 namespace csp::common
 {
@@ -53,6 +54,15 @@ enum class AvatarPlayMode;
 
 namespace csp::multiplayer::RealtimeEngineUtils
 {
+
+static const std::unordered_map<ModifiableFailure, csp::common::String> ModifiableFailureErrors {
+    { ModifiableFailure::None, "" },
+    { ModifiableFailure::EntityLocked, "Entity is locked" },
+    { ModifiableFailure::EntityNotOwnedAnUntransferable, "Entity is not owned by this client and isn't transferable" },
+    { ModifiableFailure::NoStatePatcher, "Unexpected lack of StatePatcher in online context" },
+};
+
+csp::common::String ModifiableFailureToString(ModifiableFailure Failure);
 
 // Finds a space entity in the Entities container. Returns nullptr if the entity is not found.
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);
