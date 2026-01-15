@@ -2,6 +2,7 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "SpaceEntityStatePatcher.h"
 
 namespace csp::multiplayer
