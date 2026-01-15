@@ -78,6 +78,7 @@ public:
     /// @param UserId csp::common::String : Id of the user to set the tier for.
     /// @param Callback UserTierCallback : callback when asynchronous task finishes.
     /// @pre This method should only be called when logged in as an administrator tier account.
+    ///      If called when not an administrator, you will receive a 403 error (Forbidden)
     CSP_ASYNC_RESULT void SetUserTier(TierNames Tier, const csp::common::String& UserId, UserTierCallback Callback);
 
     /// @brief Get current users tier information
