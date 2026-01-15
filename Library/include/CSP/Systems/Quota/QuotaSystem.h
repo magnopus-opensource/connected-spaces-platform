@@ -74,8 +74,8 @@ public:
         const csp::common::String& SpaceId, const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback);
 
     /// @brief Set the tier of the user. Tiers effect things such as limits of users inside spaces, among other quota restrictions
-    /// @param TierName Tier : Tier to set.
-    /// @param TierName UserId : Id of the user to set the tier for.
+    /// @param Tier TierNames : Tier to set.
+    /// @param UserId csp::common::String : Id of the user to set the tier for.
     /// @param Callback UserTierCallback : callback when asynchronous task finishes.
     /// @pre This method should only be called when logged in as an administrator tier account.
     CSP_ASYNC_RESULT void SetUserTier(TierNames Tier, const csp::common::String& UserId, UserTierCallback Callback);
