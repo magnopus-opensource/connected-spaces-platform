@@ -1,4 +1,4 @@
-﻿/*
+/*
 * Copyright 2023 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -25,7 +26,9 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <cstdint>
 #include <filesystem>
+#include <future>
 using namespace csp::systems;
 
 namespace
@@ -94,6 +97,146 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
     EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
     EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
     EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, csp::systems::TierFeatures::SpaceOwner);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierTest)
+{
+    if (std::string(AdminAccountEmail()).empty())
+    {
+        GTEST_SKIP() << "Admin account email not set. This test cannot be run.";
+    }
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto UserSystem = SystemsManager.GetUserSystem();
+    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+
+    csp::common::String BasicUserId;
+    const auto BasicUser = CreateTestUser();
+    LogIn(UserSystem, BasicUserId, BasicUser.Email, GeneratedTestAccountPassword);
+
+    // All users on the test tenant are pro
+    {
+        std::promise<TierNames> UserTierCheckPromise;
+        std::future<TierNames> UserTierCheckFuture = UserTierCheckPromise.get_future();
+        QuotaSystem->GetCurrentUserTier(
+            [&UserTierCheckPromise](const UserTierResult& Result)
+            {
+                if (Result.GetResultCode() == EResultCode::Success)
+                {
+                    UserTierCheckPromise.set_value(Result.GetUserTierInfo().TierName);
+                }
+            });
+
+        ASSERT_EQ(UserTierCheckFuture.get(), TierNames::Pro);
+    }
+
+    LogOut(UserSystem);
+
+    // Login to an admin user to change the user type to basic. Only admin users can do this.
+    csp::common::String AdminUserId;
+    // Have to be an admin use to change user tier
+    LogInAsAdminUser(UserSystem, AdminUserId);
+
+    {
+        std::promise<csp::systems::UserTierInfo> UserTierChangePromise;
+        std::future<csp::systems::UserTierInfo> UserTierChangeFuture = UserTierChangePromise.get_future();
+
+        QuotaSystem->SetUserTier(TierNames::Basic, BasicUserId,
+            [&UserTierChangePromise](const UserTierResult& Result)
+            {
+                if (Result.GetResultCode() == EResultCode::Success)
+                {
+                    UserTierChangePromise.set_value(Result.GetUserTierInfo());
+                }
+            });
+
+        ASSERT_EQ(UserTierChangeFuture.get().TierName, TierNames::Basic);
+    }
+
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWhenNotAdminTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto UserSystem = SystemsManager.GetUserSystem();
+    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+
+    csp::common::String BasicUserId;
+    const auto BasicUser = CreateTestUser();
+    LogIn(UserSystem, BasicUserId, BasicUser.Email, GeneratedTestAccountPassword);
+
+    // All users on the test tenant are pro
+    {
+        std::promise<TierNames> UserTierCheckPromise;
+        std::future<TierNames> UserTierCheckFuture = UserTierCheckPromise.get_future();
+        QuotaSystem->GetCurrentUserTier(
+            [&UserTierCheckPromise](const UserTierResult& Result)
+            {
+                if (Result.GetResultCode() == EResultCode::Success)
+                {
+                    UserTierCheckPromise.set_value(Result.GetUserTierInfo().TierName);
+                }
+            });
+
+        ASSERT_EQ(UserTierCheckFuture.get(), TierNames::Pro);
+    }
+
+    LogOut(UserSystem);
+
+    // Non admin users should not be able to change tier assignments
+    csp::common::String OtherUserId;
+    LogInAsNewTestUser(UserSystem, OtherUserId);
+
+    {
+        std::promise<std::pair<EResultCode, uint16_t>> UserTierChangePromise;
+        std::future<std::pair<EResultCode, uint16_t>> UserTierChangeFuture = UserTierChangePromise.get_future();
+
+        QuotaSystem->SetUserTier(TierNames::Basic, BasicUserId,
+            [&UserTierChangePromise](const UserTierResult& Result)
+            {
+                if (Result.GetResultCode() != EResultCode::InProgress)
+                {
+                    UserTierChangePromise.set_value({ Result.GetResultCode(), Result.GetHttpResultCode() });
+                }
+            });
+
+        const auto UserTierChangeResult = UserTierChangeFuture.get();
+        ASSERT_EQ(UserTierChangeResult.first, EResultCode::Failed);
+        ASSERT_EQ(UserTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
+    }
+
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, SetUserTierWithInvalidUserTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto UserSystem = SystemsManager.GetUserSystem();
+    auto QuotaSystem = SystemsManager.GetQuotaSystem();
+
+    // Login to an admin user to change the user type to basic. Only admin users can do this.
+    csp::common::String AdminUserId;
+    // Have to be an admin use to change user tier
+    LogInAsAdminUser(UserSystem, AdminUserId);
+
+    std::promise<std::pair<EResultCode, uint16_t>> UserTierChangePromise;
+    std::future<std::pair<EResultCode, uint16_t>> UserTierChangeFuture = UserTierChangePromise.get_future();
+
+    QuotaSystem->SetUserTier(TierNames::Basic, "InvalidUserId",
+        [&UserTierChangePromise](const UserTierResult& Result)
+        {
+            if (Result.GetResultCode() != EResultCode::InProgress)
+            {
+                UserTierChangePromise.set_value({ Result.GetResultCode(), Result.GetHttpResultCode() });
+            }
+        });
+
+    const auto UserTierChangeResult = UserTierChangeFuture.get();
+    ASSERT_EQ(UserTierChangeResult.first, EResultCode::Failed);
+    ASSERT_EQ(UserTierChangeResult.second, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+
+    LogOut(UserSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
