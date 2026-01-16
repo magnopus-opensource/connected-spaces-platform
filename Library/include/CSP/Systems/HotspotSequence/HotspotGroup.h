@@ -22,7 +22,7 @@
 namespace csp::systems
 {
 /// @ingroup HotspotSequence System
-/// @brief A basic class abstraction for a Hot Spot Group, including name, and items within the group.
+/// @brief A basic class abstraction for a Hotspot Group, including the Name and Items within the group.
 class CSP_API HotspotGroup
 {
 public:
