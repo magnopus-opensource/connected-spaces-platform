@@ -73,6 +73,14 @@ public:
     CSP_ASYNC_RESULT void GetTierFeatureProgressForSpace(
         const csp::common::String& SpaceId, const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback);
 
+    /// @brief Set the tier of the user. Tiers effect things such as limits of users inside spaces, among other quota restrictions
+    /// @param Tier TierNames : Tier to set.
+    /// @param UserId csp::common::String : Id of the user to set the tier for.
+    /// @param Callback UserTierCallback : callback when asynchronous task finishes.
+    /// @pre This method should only be called when logged in as an administrator tier account.
+    ///      If called when not an administrator, you will receive a 403 error (Forbidden)
+    CSP_ASYNC_RESULT void SetUserTier(TierNames Tier, const csp::common::String& UserId, UserTierCallback Callback);
+
     /// @brief Get current users tier information
     /// @param Callback UserTierCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetCurrentUserTier(UserTierCallback Callback);

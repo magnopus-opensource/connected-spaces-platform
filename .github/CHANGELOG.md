@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🍰 🙌 New Features
 
+- [NT-0] feat: Add `SetUserTier` method to `QuotaSystem` by MAG-ElliotMorris
+  This method provides a means of changing a users tier (basic, pro, enterprise, etc)
+  through the api. This method will only succeed when logged in as an admin user.
+  This method is mostly for internal testing, but there is no harm allowing public use.
 
 ## [6.20.0] - 2026-01-13_17-38-31
 

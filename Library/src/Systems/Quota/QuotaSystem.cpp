@@ -122,6 +122,21 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
         ->usersUserIdTier_assignmentGet({ csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId }, ResponseHandler);
 }
 
+void QuotaSystem::SetUserTier(TierNames TierName, const csp::common::String& UserId, UserTierCallback Callback)
+{
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = QuotaTierAssignmentAPI->CreateHandler<UserTierCallback, UserTierResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
+
+    auto RequestBody = std::make_shared<chs::QuotaTierAssignmentDto>();
+    RequestBody->SetTierName(TierNameEnumToString(TierName));
+    RequestBody->SetTenantName(CSPFoundation::GetTenant());
+
+    // There is an expiry timestamp in the DTO, but it isn't documented, and from experimenting
+    // I could not get it to return a non rejected code, so omitting it.
+
+    static_cast<chs::QuotaTierAssignmentApi*>(QuotaTierAssignmentAPI)->usersUserIdTier_assignmentPut({ UserId, RequestBody }, ResponseHandler);
+}
+
 void QuotaSystem::GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback)
 {
     csp::services::ResponseHandlerPtr ResponseHandler
