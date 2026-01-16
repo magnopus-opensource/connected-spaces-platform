@@ -131,19 +131,6 @@ void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     }
 }
 
-void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem, const csp::common::Array<csp::common::String>& /*GroupNames*/,
-    csp::common::Array<csp::systems::HotspotGroup>& Groups, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
-    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
-{
-    auto [Result] = Awaitable(&csp::systems::HotspotSequenceSystem::GetHotspotGroups, HotspotSequenceSystem).Await(RequestPredicate);
-
-    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
-    EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
-
-    csp::common::Array<csp::systems::HotspotGroup> HotspotGroups = Result.GetHotspotGroups();
-    Groups = HotspotGroups;
-}
-
 void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::HotspotGroup& S2)
 {
     EXPECT_EQ(S1.Name, S2.Name);
@@ -155,6 +142,30 @@ void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::Hot
             EXPECT_EQ(S1.Items[i], S2.Items[i]);
         }
     }
+}
+
+void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
+    const csp::common::Optional<csp::common::Array<csp::systems::HotspotGroup>>& ExpectedGroups,
+    csp::common::Array<csp::systems::HotspotGroup>& Groups, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success,
+    csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+    auto [Result] = Awaitable(&csp::systems::HotspotSequenceSystem::GetHotspotGroups, HotspotSequenceSystem).Await(RequestPredicate);
+
+    EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+    EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+
+    csp::common::Array<csp::systems::HotspotGroup> HotspotGroups = Result.GetHotspotGroups();
+
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success && ExpectedGroups.HasValue())
+    {
+        EXPECT_EQ(HotspotGroups.Size(), (*ExpectedGroups).Size());
+        for (size_t i = 0; i < (*ExpectedGroups).Size(); i++)
+        {
+            CompareGroups(HotspotGroups[i], (*ExpectedGroups)[i]);
+        }
+    }
+
+    Groups = HotspotGroups;
 }
 
 CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
@@ -182,7 +193,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     // Create hot spot group
@@ -258,7 +269,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -310,7 +321,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -366,7 +377,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -381,8 +392,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
     EXPECT_EQ(HotspotGroup.Name, OldTestGroupName);
 
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&Space, &OldTestGroupName, &NewTestGroupName](
-            const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
+        [&Space, &OldTestGroupName, &NewTestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
         {
             // callback will be triggered when calling RenameHotspotGroup with event type update
             if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
@@ -397,9 +407,106 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
     RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
 
+    EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
+
     // Delete sequence
     DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupPersistantTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* HotspotSystem = SystemsManager.GetHotspotSequenceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Create hotspot group
+    csp::systems::HotspotGroup HotspotGroup;
+    csp::common::Array<csp::common::String> SequenceItems { "Hotspot1", "Hotspot2" };
+    csp::common::String OldTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG1";
+    csp::common::String NewTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG2";
+
+    {
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
+
+        EXPECT_EQ(HotspotGroup.Name, OldTestGroupName);
+
+        HotspotSystem->SetHotspotSequenceChangedCallback(
+            [&Space, &OldTestGroupName, &NewTestGroupName](const csp::common::SequenceChangedNetworkEventData& NetworkEventData)
+            {
+                // callback will be triggered when calling RenameHotspotGroup with event type update
+                if (NetworkEventData.UpdateType == csp::common::ESequenceUpdateType::Update)
+                {
+                    EXPECT_EQ(NetworkEventData.UpdateType, csp::common::ESequenceUpdateType::Update);
+                    EXPECT_EQ(NetworkEventData.SequenceType, csp::common::ESequenceType::Hotspot);
+                    EXPECT_EQ(NetworkEventData.Key, OldTestGroupName);
+                    EXPECT_EQ(NetworkEventData.NewKey, NewTestGroupName);
+                    EXPECT_EQ(NetworkEventData.SpaceId, Space.Id);
+                }
+            });
+
+        RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
+
+        EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
+
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    // Renter the Space and get all hotspot groups to ensure the change to the HotspotGroup name persists
+    {
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+        auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, RealtimeEngine.get());
+
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+        csp::common::Array<csp::systems::HotspotGroup> RetrievedGroups;
+        csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = { HotspotGroup };
+
+        // Get all hotspot sequences in the Space
+        GetHotspotGroups(HotspotSystem, ExpectedGroups, RetrievedGroups);
+
+        // Ensure the group we previously created has the correct (new) name
+        EXPECT_EQ(RetrievedGroups[0].Name, NewTestGroupName);
+
+        // Delete sequence
+        DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        EXPECT_FALSE(SpaceSystem->IsInSpace());
+    }
+
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
 
@@ -432,7 +539,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
@@ -482,7 +589,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     // Create hotspot group
@@ -528,7 +635,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     csp::common::String spaceID = { UniqueSpaceName };
@@ -551,15 +658,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
     csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = { HotspotGroup1, HotspotGroup2, HotspotGroup3 };
     csp::common::Array<csp::systems::HotspotGroup> RetrievedGroups;
     csp::common::Array<csp::common::String> SearchGroupNames = { TestGroupName1, TestGroupName2, TestGroupName3 };
-    csp::common::Array<csp::common::String> ExpectedGroupNames
-        = { spaceID + ":" + TestGroupName1, spaceID + ":" + TestGroupName2, spaceID + ":" + TestGroupName3 };
+
     // Get the sequence we just created
-    GetHotspotGroups(HotspotSystem, ExpectedGroupNames, RetrievedGroups);
-    EXPECT_EQ(RetrievedGroups.Size(), RetrievedGroups.Size());
-    for (size_t i = 0; i < ExpectedGroups.Size(); i++)
-    {
-        CompareGroups(RetrievedGroups[i], ExpectedGroups[i]);
-    }
+    GetHotspotGroups(HotspotSystem, ExpectedGroups, RetrievedGroups);
 
     // Delete sequence
     DeleteHotspotGroup(HotspotSystem, HotspotGroup1.Name);
@@ -598,7 +699,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotNoGroupTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     // Create hotspot group
@@ -639,7 +740,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     // Create hotspot group
@@ -687,13 +788,13 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -732,22 +833,23 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
     csp::common::String TestGroupName2 = "CSP-UNITTEST-SEQUENCE-MAG2";
     csp::common::String TestItemName = "AnotherItem";
 
+    csp::systems::HotspotGroup HotspotGroup1;
+    csp::systems::HotspotGroup HotspotGroup2;
+
     {
         // Create 2 groups that contains the component
 
         // Create one with only a single item to test deletion functionality
-        csp::systems::HotspotGroup HotspotGroup1;
         CreateHotspotgroup(HotspotSystem, TestGroupName1, { HotspotComponent->GetUniqueComponentId() }, HotspotGroup1);
 
         // Create one with an additional item to test update functionality
-        csp::systems::HotspotGroup HotspotGroup2;
         CreateHotspotgroup(HotspotSystem, TestGroupName2, { HotspotComponent->GetUniqueComponentId(), TestItemName }, HotspotGroup2);
 
         // Ensure the 2 groups are created correctly
         csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-        GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2 }, FoundGroups);
+        csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = { HotspotGroup1, HotspotGroup2 };
 
-        EXPECT_EQ(FoundGroups.Size(), 2);
+        GetHotspotGroups(HotspotSystem, ExpectedGroups, FoundGroups);
     }
 
     // Remove component
@@ -778,7 +880,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         CreatedObject->RemoveComponent(HotspotComponent->GetId());
 
         // Delete the hotspot from the sequence, has to be done explicitly
-        HotspotSystem->RemoveItemFromGroups(HotspotComponent->GetUniqueComponentId(), [](const csp::systems::NullResult /*Result*/) {});
+        HotspotSystem->RemoveItemFromGroups(HotspotComponent->GetUniqueComponentId(), [](const csp::systems::NullResult /*Result*/) { });
 
         CreatedObject->QueueUpdate();
 
@@ -790,7 +892,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
     // 1 group should be deleted, and one should have its key removed
     {
         csp::common::Array<csp::systems::HotspotGroup> RemainingGroups;
-        GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2 }, RemainingGroups);
+        GetHotspotGroups(HotspotSystem, nullptr, RemainingGroups);
 
         EXPECT_EQ(RemainingGroups.Size(), 1);
         EXPECT_EQ(RemainingGroups[0].Items.Size(), 1);
@@ -836,13 +938,13 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
 
     // Create object to represent the hotspot
     csp::common::String ObjectName = "Object 1";
@@ -881,23 +983,23 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
     csp::common::String TestGroupName2 = "CSP-UNITTEST-SEQUENCE-MAG2";
     csp::common::String TestGroupName3 = "CSP-UNITTEST-SEQUENCE-MAG3";
 
+    csp::systems::HotspotGroup HotspotGroup1;
+    csp::systems::HotspotGroup HotspotGroup2;
+    csp::systems::HotspotGroup HotspotGroup3;
+
     {
         // Create 2 groups that contains the component
-        csp::systems::HotspotGroup HotspotGroup1;
         CreateHotspotgroup(HotspotSystem, TestGroupName1, { HotspotComponent->GetUniqueComponentId() }, HotspotGroup1);
-
-        csp::systems::HotspotGroup HotspotGroup2;
         CreateHotspotgroup(HotspotSystem, TestGroupName2, { HotspotComponent->GetUniqueComponentId() }, HotspotGroup2);
 
         // Create another group that doesnt contain the component
-        csp::systems::HotspotGroup HotspotGroup3;
         CreateHotspotgroup(HotspotSystem, TestGroupName3, { "TestName" }, HotspotGroup3);
 
         // Ensure the 3 groups are created correctly
         csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-        GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2, TestGroupName3 }, FoundGroups);
+        csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = { HotspotGroup1, HotspotGroup2, HotspotGroup3 };
 
-        EXPECT_EQ(FoundGroups.Size(), 3);
+        GetHotspotGroups(HotspotSystem, ExpectedGroups, FoundGroups);
     }
 
     // Exit the space
@@ -912,7 +1014,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 
     // Ensure the 3 groups still exist
     csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-    GetHotspotGroups(HotspotSystem, { TestGroupName1, TestGroupName2, TestGroupName3 }, FoundGroups);
+    csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = { HotspotGroup1, HotspotGroup2, HotspotGroup3 };
+
+    GetHotspotGroups(HotspotSystem, ExpectedGroups, FoundGroups);
 
     EXPECT_EQ(FoundGroups.Size(), 3);
 

@@ -149,6 +149,7 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
             = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
         const auto Sequence = Result.GetSequence();
+
         const auto SequenceInfo = CreateSequenceDto(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Sequence.Items, Sequence.MetaData);
 
         static_cast<chs::SequenceApi*>(SequenceAPI)
