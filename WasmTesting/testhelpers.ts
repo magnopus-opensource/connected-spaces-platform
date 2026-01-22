@@ -122,6 +122,7 @@ export async function LaunchTestPage(
       ],
     },
     waitUntil: Array<'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2'> = ['load', 'networkidle0'], //Default will almost always be fine
+    postNetworkIdleWaitMs: number = 10000, // Extra wait time after networkidle for async test logic to complete
   ): Promise<PageTestResult> {
     const browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
@@ -152,8 +153,8 @@ export async function LaunchTestPage(
       
       await page.goto(htmlPath, { waitUntil });
 
-      // Annoyingly, networkidle0 doesn't account for everything (I suspect it doesn't know how to validate connections originating from WASM, so give ourselves 5 seconds extra here).
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      // Annoyingly, networkidle0 doesn't account for everything (I suspect it doesn't know how to validate connections originating from WASM, so give ourselves extra time here).
+      await new Promise(resolve => setTimeout(resolve, postNetworkIdleWaitMs));
     }
     finally {
       await page.close();
