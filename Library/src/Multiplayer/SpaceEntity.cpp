@@ -57,6 +57,8 @@
 #include "RealtimeEngineUtils.h"
 #include "signalrclient/signalr_value.h"
 
+#include "CSP/Multiplayer/Component/ComponentBuilder.h"
+
 #include <chrono>
 #include <glm/gtc/quaternion.hpp>
 #include <thread>
@@ -322,12 +324,27 @@ void SpaceEntity::SetPatchSentCallback(CallbackHandler Callback)
 
 const csp::common::Map<uint16_t, ComponentBase*>* SpaceEntity::GetComponents() const { return &Components; }
 
+const csp::common::Map<uint16_t, Component>* SpaceEntity::GetComponents2() const { return &Components2; }
+
 ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 {
     std::scoped_lock ScopedComponentsLock { ComponentsLock };
     if (Components.HasKey(Key))
     {
         return Components[Key];
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+Component* SpaceEntity::GetComponent2(uint16_t Key) 
+{
+    std::scoped_lock ScopedComponentsLock { ComponentsLock };
+    if (Components2.HasKey(Key))
+    {
+        return &Components2[Key];
     }
     else
     {
@@ -384,6 +401,17 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     return Component;
 }
 
+Component* SpaceEntity::AddComponent2(const csp::common::String& ComponentType) 
+{
+    const uint16_t ComponentId = GenerateComponentId2();
+
+    Component Component
+        = csp::multiplayer::CreateComponent(EntitySystem->GetComponentRegistry(), ComponentType.c_str(), ComponentId, this, LogSystem);
+
+    Components2[ComponentId] = Component;
+    return &Components2[ComponentId];
+}
+
 bool SpaceEntity::UpdateComponent(ComponentBase* Component)
 {
     // You'd think there would be an IsModifiable check here, but component property updates are notification only as far as SpaceEntity is concerned,
@@ -392,6 +420,13 @@ bool SpaceEntity::UpdateComponent(ComponentBase* Component)
     return StatePatcher != nullptr
         ? StatePatcher->SetDirtyComponent(Component->GetId(), SpaceEntityStatePatcher::DirtyComponent { Component, ComponentUpdateType::Update })
         : UpdateComponentDirect(Component->GetId(), Component, true);
+}
+
+bool SpaceEntity::UpdateComponent2(Component* Component) 
+{
+    return StatePatcher != nullptr
+        ? StatePatcher->SetDirtyComponent2(Component->GetId(), SpaceEntityStatePatcher::DirtyComponent2 { Component, ComponentUpdateType::Update })
+        : UpdateComponentDirect2(Component->GetId(), Component, true);
 }
 
 bool SpaceEntity::RemoveComponent(uint16_t Key)
@@ -407,6 +442,21 @@ bool SpaceEntity::RemoveComponent(uint16_t Key)
     }
 
     return StatePatcher != nullptr ? StatePatcher->RemoveDirtyComponent(Key, *GetComponents()) : RemoveComponentDirect(Key, true);
+}
+
+bool SpaceEntity::RemoveComponent2(uint16_t Key)
+{
+    if (!IsModifiable())
+    {
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. Components can not be removed from a locked Entity.");
+        }
+
+        return false;
+    }
+
+    return StatePatcher != nullptr ? StatePatcher->RemoveDirtyComponent2(Key, *GetComponents2()) : RemoveComponentDirect(Key, true);
 }
 
 void SpaceEntity::RemoveAsChildFromParent()
@@ -475,6 +525,33 @@ uint16_t SpaceEntity::GenerateComponentId()
     for (;;)
     {
         if (!Components.HasKey(NextId) && !(DirtyComponents.count(NextId) > 0))
+        {
+            NextComponentId = NextId + 1;
+
+            return NextId;
+        }
+
+        ++NextId;
+
+        if (NextId == COMPONENT_KEY_END_COMPONENTS)
+        {
+            NextId = COMPONENT_KEY_START_COMPONENTS;
+        }
+    }
+}
+
+uint16_t SpaceEntity::GenerateComponentId2() 
+{
+    auto NextId = NextComponentId;
+
+    // We want to also account for dirty components. If we're in a context that has them (online, patching), account for them, otherwise we can just
+    // use an empty container (ie, ignore it)
+    const auto& DirtyComponents
+        = StatePatcher != nullptr ? StatePatcher->GetDirtyComponents2() : std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent2> {};
+
+    for (;;)
+    {
+        if (!Components2.HasKey(NextId) && !(DirtyComponents.count(NextId) > 0))
         {
             NextComponentId = NextId + 1;
 
@@ -809,6 +886,25 @@ bool SpaceEntity::UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Co
     return true;
 }
 
+bool SpaceEntity::UpdateComponentDirect2(uint16_t ComponentKey, Component*, bool CallNotifyingCallback) 
+{
+    std::scoped_lock ComponentsLocker(ComponentsLock); // Still lock, friendly to the pattern, and to scripting updates
+
+    // You're probably wondering why this sets no data? It's a bit of an unfortunate break from the pattern this one. Think of this more as a
+    // "NotifySomethingAboutComponentHasChanged", as the actual property updates happen on the component itself.
+    if (CallNotifyingCallback)
+    {
+        if (EntityUpdateCallback)
+        {
+            csp::common::Array<ComponentUpdateInfo> UpdateInfo(1);
+            UpdateInfo[0] = ComponentUpdateInfo { ComponentKey, ComponentUpdateType::Update };
+            EntityUpdateCallback(this, UPDATE_FLAGS_COMPONENTS, UpdateInfo);
+        }
+    }
+
+    return true;
+}
+
 bool SpaceEntity::RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback)
 {
     std::scoped_lock ComponentsLocker(ComponentsLock);
@@ -1093,6 +1189,10 @@ void SpaceEntity::ClaimScriptOwnership()
 void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
 {
     Script.OnPropertyChanged(DirtyComponent->GetId(), PropertyKey);
+}
+
+void SpaceEntity::OnPropertyChanged2(Component*, const std::string&) {
+    
 }
 
 } // namespace csp::multiplayer

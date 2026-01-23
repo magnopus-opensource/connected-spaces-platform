@@ -307,6 +307,10 @@ void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
 SpaceEntityStatePatcher* OfflineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& /*SpaceEntity*/) const { return nullptr; }
 
+void OfflineRealtimeEngine::RegisterComponents(const csp::common::String& Json) { Registry.RegisterComponents(Json); }
+
+const ComponentRegistry& OfflineRealtimeEngine::GetComponentRegistry() const { return Registry; }
+
 std::recursive_mutex& OfflineRealtimeEngine::GetEntitiesLock() { return EntitiesLock; }
 
 uint64_t OfflineRealtimeEngine::LocalClientId() { return csp::common::LocalClientID; }

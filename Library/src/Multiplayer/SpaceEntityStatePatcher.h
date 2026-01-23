@@ -19,6 +19,7 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Multiplayer/Component/Component.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/PatchTypes.h"
 #include "MCS/MCSTypes.h"
@@ -126,8 +127,18 @@ public:
         ComponentUpdateType UpdateType;
     };
 
+    class DirtyComponent2
+    {
+    public:
+        Component* Component;
+        ComponentUpdateType UpdateType;
+    };
+
     bool SetDirtyComponent(uint16_t ComponentKey, DirtyComponent DirtyComponent);
     bool RemoveDirtyComponent(uint16_t ComponentKey, const csp::common::Map<uint16_t, ComponentBase*>& CurrentComponents);
+
+    bool SetDirtyComponent2(uint16_t ComponentKey, DirtyComponent2 DirtyComponent);
+    bool RemoveDirtyComponent2(uint16_t ComponentKey, const csp::common::Map<uint16_t, Component>& CurrentComponents);
 
     // Sometimes, we need to use different types than internal storage ... non-ideal. (Motivating example was selection id's needing to be int64's in
     // patches but are stored as uint64s)
@@ -162,6 +173,7 @@ public:
 
     std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> GetDirtyProperties() const;
     std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
+    std::unordered_map<uint16_t, DirtyComponent2> GetDirtyComponents2() const;
 
     std::chrono::milliseconds GetTimeOfLastPatch() const;
     void SetTimeOfLastPatch(std::chrono::milliseconds NewTimeOfLastPatch);
@@ -202,7 +214,9 @@ private:
 
     std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> DirtyProperties;
     std::unordered_map<uint16_t, DirtyComponent> DirtyComponents;
+    std::unordered_map<uint16_t, DirtyComponent2> DirtyComponents2;
     csp::common::List<uint16_t> TransientDeletionComponentIds;
+    csp::common::List<uint16_t> TransientDeletionComponentIds2;
     std::chrono::milliseconds TimeOfLastPatch;
 
     // Container of EntityProperties, which are proxy types that allow us to get and set specific replicatable

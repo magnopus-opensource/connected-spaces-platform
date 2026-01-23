@@ -22,6 +22,7 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Component/Component.h"
 #include "CSP/Multiplayer/PatchTypes.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
@@ -265,15 +266,21 @@ public:
     /// @return A map of components indexed with the component ID.
     const csp::common::Map<uint16_t, ComponentBase*>* GetComponents() const;
 
+    const csp::common::Map<uint16_t, Component>* GetComponents2() const;
+
     /// @brief Get a component on this SpaceEntity by the specified key.
     /// @param Key uint16_t : The component ID for the desired component.
     /// @return The component if found or nullptr if not found.
     ComponentBase* GetComponent(uint16_t Key);
 
+    Component* GetComponent2(uint16_t Key);
+
     /// @brief Add a component of the given type.
     /// @param Type ComponentType : The type of component to add.
     /// @return The newly created component.
     ComponentBase* AddComponent(ComponentType Type);
+
+    Component* AddComponent2(const csp::common::String& Type);
 
     /// @brief Mark that a component has just been updated, ie, that a property on it has been modified.
     /// @param Component ComponentBase : The component that has just updated
@@ -282,6 +289,8 @@ public:
     ///          This is why this is CSP_NO_EXPORT, we'd like external users to be able to call this directly, but they probably shouldn't right now.
     /// @return Always returns true
     CSP_NO_EXPORT bool UpdateComponent(ComponentBase* Component);
+
+    CSP_NO_EXPORT bool UpdateComponent2(Component* Component);
 
     /// @brief Remove a component of the given key.
     ///
@@ -293,6 +302,8 @@ public:
     /// @return Whether a component was removed, may fail if not modifiable, there is no component of provided key, or if a dirty component is
     /// already set to this deletion.
     bool RemoveComponent(uint16_t Key);
+
+    bool RemoveComponent2(uint16_t Key);
 
     /// @brief Gets the script associated with the space entity.
     /// @return The EntityScript instance set on the entity.
@@ -409,6 +420,7 @@ public:
     /// @param DirtyComponent ComponentBase* : the dirty component to update
     /// @param PropertyKey int32_t : the key of the property to update
     CSP_NO_EXPORT void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
+    CSP_NO_EXPORT void OnPropertyChanged2(Component* DirtyComponent, const std::string& PropertyKey);
 
     /// @brief Remove child entities from parent.
     CSP_NO_EXPORT void RemoveAsChildFromParent();
@@ -426,6 +438,7 @@ public:
     CSP_NO_EXPORT void SetParentIdDirect(csp::common::Optional<uint64_t> Value, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool AddComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool UpdateComponentDirect(uint16_t ComponentKey, ComponentBase* Component, bool CallNotifyingCallback = false);
+    CSP_NO_EXPORT bool UpdateComponentDirect2(uint16_t ComponentKey, Component* Component, bool CallNotifyingCallback = false);
     CSP_NO_EXPORT bool RemoveComponentDirect(uint16_t ComponentKey, bool CallNotifyingCallback = false);
 
     CSP_START_IGNORE
@@ -448,6 +461,7 @@ public:
 
 private:
     uint16_t GenerateComponentId();
+    uint16_t GenerateComponentId2();
     ComponentBase* InstantiateComponent(uint16_t Id, ComponentType Type);
 
     void AddChildEntity(SpaceEntity* ChildEntity);
@@ -475,7 +489,9 @@ private:
     DestroyCallback EntityDestroyCallback;
 
     csp::common::Map<uint16_t, ComponentBase*> Components;
+    csp::common::Map<uint16_t, Component> Components2;
     uint16_t NextComponentId;
+    uint16_t NextComponentId2;
 
     EntityScript Script;
     std::unique_ptr<EntityScriptInterface> ScriptInterface;

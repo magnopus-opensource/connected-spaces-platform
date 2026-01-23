@@ -25,6 +25,7 @@
 #include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Multiplayer/Component/ComponentRegistry.h"
 
 #include <chrono>
 #include <deque>
@@ -259,6 +260,10 @@ public:
     /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
     /// @return A pointer to a new statepatcher. Pointer ownership is transferred to the caller.
     CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+
+    void RegisterComponents(const csp::common::String& Json) override;
+
+    CSP_NO_EXPORT const ComponentRegistry& GetComponentRegistry() const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
@@ -497,6 +502,8 @@ private:
     csp::common::IJSScriptRunner* ScriptRunner;
     // May not be null
     csp::multiplayer::NetworkEventBus* NetworkEventBus;
+
+    ComponentRegistry Registry;
 };
 
 } // namespace csp::multiplayer

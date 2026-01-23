@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
+#include "CSP/Multiplayer/Component/ComponentRegistry.h"
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
@@ -221,6 +222,10 @@ public:
     /// @return nullptr
     CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
 
+    void RegisterComponents(const csp::common::String& Json) override;
+
+    CSP_NO_EXPORT const ComponentRegistry& GetComponentRegistry() const override;
+
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 
     CSP_NO_EXPORT std::recursive_mutex& GetEntitiesLock();
@@ -252,5 +257,7 @@ private:
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
     EntityScriptBinding* ScriptBinding;
+
+    ComponentRegistry Registry;
 };
 }

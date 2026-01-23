@@ -825,6 +825,10 @@ csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatche
     return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
 }
 
+void OnlineRealtimeEngine::RegisterComponents(const csp::common::String& Json) { Registry.RegisterComponents(Json); }
+
+const ComponentRegistry& OnlineRealtimeEngine::GetComponentRegistry() const { return Registry; }
+
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
 {
     if ((MultiplayerConnectionInst == nullptr) || (MultiplayerConnectionInst->GetSignalRConnection() == nullptr))

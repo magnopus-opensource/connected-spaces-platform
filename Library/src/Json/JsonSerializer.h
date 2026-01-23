@@ -199,11 +199,11 @@ private:
     void DeserializeValue(float& Value) const;
     void DeserializeValue(double& Value) const;
     void DeserializeValue(csp::common::String& Value) const;
-
     void DeserializeValue(std::string& Value) const;
 
     template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
     template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
+    template <typename T> void DeserializeValue(csp::common::Map<csp::common::String, T>& Value) const;
 
     template <typename T> void DeserializeValue(std::vector<T>& Value) const;
     template <typename T> void DeserializeValue(std::map<std::string, T>& Value) const;
@@ -306,6 +306,23 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
         Values.Append(NewVal);
 
         // Pop the element as we are finished reading.
+        ValueStack.pop();
+    }
+}
+
+template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::Map<csp::common::String, T>& Values) const 
+{
+    for (auto Itr = ValueStack.top()->MemberBegin(); Itr != ValueStack.top()->MemberEnd(); ++Itr)
+    {
+        const char* Key = Itr->name.GetString();
+
+        ValueStack.push(&Itr->value);
+
+        T NewVal;
+        DeserializeValue(NewVal);
+
+        Values[Key] = NewVal;
+
         ValueStack.pop();
     }
 }

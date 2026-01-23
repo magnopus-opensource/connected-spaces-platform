@@ -73,6 +73,47 @@ bool SpaceEntityStatePatcher::RemoveDirtyComponent(uint16_t ComponentKey, const 
     }
 }
 
+bool SpaceEntityStatePatcher::SetDirtyComponent2(uint16_t ComponentKey, DirtyComponent2 DirtyComponent)
+{
+    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+
+    if (DirtyComponents2.count(ComponentKey) > 0)
+    {
+        if (LogSystem)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::VeryVerbose,
+                fmt::format(
+                    "SpaceEntityStatePatcher::SetDirtyComponent. Dirty components map already contains key : {}. Performing no action", ComponentKey)
+                    .c_str());
+        }
+        return false;
+    }
+
+    DirtyComponents2[ComponentKey] = DirtyComponent;
+    return true;
+}
+
+bool SpaceEntityStatePatcher::RemoveDirtyComponent2(uint16_t ComponentKey, const csp::common::Map<uint16_t, Component>& CurrentComponents)
+{
+    std::scoped_lock ComponentsLocker(DirtyComponentsLock);
+
+    if (!TransientDeletionComponentIds2.Contains(ComponentKey) || CurrentComponents.HasKey(ComponentKey))
+    {
+
+        DirtyComponents2.erase(ComponentKey);
+        TransientDeletionComponentIds2.Append(ComponentKey);
+        return true;
+    }
+    else
+    {
+        if (LogSystem)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, "RemoveComponent: No Component with the specified key found!");
+        }
+        return false;
+    }
+}
+
 std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> SpaceEntityStatePatcher::ApplyLocalPatch()
 {
     std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
@@ -209,6 +250,11 @@ std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> SpaceE
 }
 
 std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent> SpaceEntityStatePatcher::GetDirtyComponents() const { return DirtyComponents; }
+
+std::unordered_map<uint16_t, SpaceEntityStatePatcher::DirtyComponent2> SpaceEntityStatePatcher::GetDirtyComponents2() const
+{
+    return DirtyComponents2;
+}
 
 std::chrono::milliseconds SpaceEntityStatePatcher::GetTimeOfLastPatch() const { return TimeOfLastPatch; }
 

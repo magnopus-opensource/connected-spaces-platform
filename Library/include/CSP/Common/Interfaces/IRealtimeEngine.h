@@ -43,6 +43,8 @@ typedef std::function<void(bool)> CallbackHandler;
 
 // Callback that provides a non-owning pointer to a SpaceEntity object.
 typedef std::function<void(csp::multiplayer::SpaceEntity*)> EntityCreatedCallback;
+
+class ComponentRegistry;
 }
 
 namespace csp::common
@@ -372,6 +374,19 @@ public:
 
         // Avoiding unused params, see comment in top method
         (void)SpaceEntity;
+    }
+
+    virtual void RegisterComponents(const csp::common::String& Json)
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
+
+        // Avoiding unused params, see comment in top method
+        (void)Json;
+    }
+
+    CSP_NO_EXPORT virtual const csp::multiplayer::ComponentRegistry& GetComponentRegistry() const
+    {
+        throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");
     }
 
 protected:

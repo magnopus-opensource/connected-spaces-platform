@@ -28,6 +28,7 @@ Component CreateComponent(
     if (TemplateIt == Registry.GetTemplates().end())
     {
         // TODO: throw
+        return Component {};
     }
 
     csp::common::Map<csp::common::String, csp::common::ReplicatedValue> Properties;
