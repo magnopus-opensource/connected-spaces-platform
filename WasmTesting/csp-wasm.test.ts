@@ -58,7 +58,8 @@ test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async (
   const user = await CreateTestUser();
   await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
-  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadConnectionInterrupted.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId)
+  // This test relies on a 10s timeout for a C++ thread. Add that time to the default timeout.
+  const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadConnectionInterrupted.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId, undefined, undefined, 15000)
 
   console.log(consoleMessages);
   console.log(errors);
@@ -71,7 +72,6 @@ test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async (
   const userSystem = Systems.SystemsManager.get().getUserSystem();
   await userSystem.logout();
 });
-
 
 test('SendReceiveNetworkEvent', async () => {
   // This test was added as a regression test against `RuntimeError: null function or function signature mismatch`
