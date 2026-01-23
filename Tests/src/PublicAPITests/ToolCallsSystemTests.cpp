@@ -35,6 +35,28 @@
 #include <fstream>
 #include <rapidjson/document.h>
 
+#include "CSP/Common/CSPAsyncScheduler.h"
+#include "CSP/Common/ContinuationUtils.h"
+#include "CSP/Common/Optional.h"
+#include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Systems/Spaces/Space.h"
+#include "CSP/Systems/Users/UserSystem.h"
+#include "Multiplayer/SignalR/SignalRConnection.h"
+#include "Multiplayer/SpaceEntityKeys.h"
+#include "MultiplayerTestRunnerProcess.h"
+#include "SpaceSystemTestHelpers.h"
+#include "UserSystemTestHelpers.h"
+
+#include "signalrclient/signalr_value.h"
+#include <array>
+#include <chrono>
+#include <thread>
+
 namespace
 {
 
@@ -109,8 +131,31 @@ CSP_PUBLIC_TEST(CSPEngine, ToolCallsSystemTests, GetConfigTest)
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* ToolCallsSystem = SystemsManager.GetToolCallsSystem();
 
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
+
+    ToolCallsSystem->SetRealtimeEngine(RealtimeEngine.get());
+
+    // TOOL CALL STUFF BELOW
     const char* userProfile = std::getenv("USERPROFILE");
     if (!userProfile)
     {
@@ -185,6 +230,16 @@ CSP_PUBLIC_TEST(CSPEngine, ToolCallsSystemTests, GetConfigTest)
     //csp::systems::ToolCallExecutor* Executor = ToolCallsSystem->GetToolCallExecutor();
     //
     //Executor->InvokeToolCalls(RequestedToolCallInfos);
+
+    //
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ToolCallsSystemTests, GetConfigTest2)

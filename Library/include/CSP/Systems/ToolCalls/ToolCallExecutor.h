@@ -22,6 +22,11 @@
 #include "CSP/Systems/SystemsResult.h"
 #include <future>
 
+namespace csp::common
+{
+class IRealtimeEngine;
+} // namespace csp::common
+
 namespace csp::systems
 {
 
@@ -42,6 +47,8 @@ class CSP_API ToolCallExecutor
 public:
     ToolCallExecutor();
     ToolCallExecutor(ToolCallsSystem* InToolCallsSystem);
+
+    void SetRealtimeEngine(csp::common::IRealtimeEngine* InRealtimeEngine);
 
     CSP_EVENT void SetToolCallsCompletedResponseCallback(ToolResponseCallbackHandler ResponseCallback);
 
@@ -88,6 +95,7 @@ private:
     ToolCallsSystem* ToolCallsSystem;
     ToolResponseCallbackHandler ToolResponseCallback;
     csp::common::Map<csp::common::String, csp::systems::InvokeRegisteredToolCallback> RegisteredTools;
+    csp::common::IRealtimeEngine* RealtimeEngine;
 };
 
 } // namespace csp::systems

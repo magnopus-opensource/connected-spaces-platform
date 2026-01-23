@@ -136,7 +136,10 @@ GeminiRequestInfo ToolCallsSystem::ConstructGeminiRequestInfo(const csp::common:
     return GeminiRequest;
 }
 
-
+void ToolCallsSystem::SetRealtimeEngine(csp::common::IRealtimeEngine* InRealtimeEngine)
+{
+   ToolCallExecutor->SetRealtimeEngine(InRealtimeEngine);
+}
 
 void ToolCallsSystem::SendRequest(const csp::common::String& RequestURL, const csp::common::String& RequestBody, ToolCallInfoCallback Callback)
 {

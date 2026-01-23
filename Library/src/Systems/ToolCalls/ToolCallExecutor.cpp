@@ -92,6 +92,8 @@ ToolCallExecutor::ToolCallExecutor(csp::systems::ToolCallsSystem* InToolCallsSys
     //RegisterTool("get_meeting_info", Invoke_GetMeetingInfo_Callback);
 }
 
+void ToolCallExecutor::SetRealtimeEngine(csp::common::IRealtimeEngine* InRealtimeEngine) { RealtimeEngine = InRealtimeEngine; }
+
 void ToolCallExecutor::SetToolCallsCompletedResponseCallback(ToolResponseCallbackHandler ResponseCallback)
 {
     ToolResponseCallback = std::move(ResponseCallback);

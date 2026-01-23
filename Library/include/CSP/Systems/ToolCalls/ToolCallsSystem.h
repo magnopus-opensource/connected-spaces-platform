@@ -37,6 +37,11 @@ class WebClient;
 
 } // namespace csp::web
 
+namespace csp::common
+{
+class IRealtimeEngine;
+} // namespace csp::common
+
 namespace csp::systems
 {
 
@@ -55,7 +60,8 @@ class CSP_API ToolCallsSystem : public SystemBase
     CSP_END_IGNORE
 
 public:
-    //void RegisterTool(const csp::common::String& ToolName, csp::systems::InvokeRegisteredToolCallback InvokeToolCallback);
+    // void RegisterTool(const csp::common::String& ToolName, csp::systems::InvokeRegisteredToolCallback InvokeToolCallback);
+    void SetRealtimeEngine(csp::common::IRealtimeEngine* InRealtimeEngine);
 
     CSP_ASYNC_RESULT void SendRequest(const csp::common::String& RequestURL, const csp::common::String& RequestBody, ToolCallInfoCallback Callback);
 
@@ -77,7 +83,7 @@ private:
     ~ToolCallsSystem();
 
     ToolCallExecutor* ToolCallExecutor;
-    //csp::common::Map<csp::common::String, csp::systems::InvokeRegisteredToolCallback> RegisteredTools;
+    // csp::common::Map<csp::common::String, csp::systems::InvokeRegisteredToolCallback> RegisteredTools;
 };
 
 } // namespace csp::systems
