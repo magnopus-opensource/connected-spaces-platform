@@ -266,21 +266,22 @@ public:
     /// @return A map of components indexed with the component ID.
     const csp::common::Map<uint16_t, ComponentBase*>* GetComponents() const;
 
-    const csp::common::Map<uint16_t, Component>* GetComponents2() const;
+    CSP_NO_EXPORT const csp::common::Map<uint16_t, Component>* GetComponents2() const;
 
     /// @brief Get a component on this SpaceEntity by the specified key.
     /// @param Key uint16_t : The component ID for the desired component.
     /// @return The component if found or nullptr if not found.
     ComponentBase* GetComponent(uint16_t Key);
 
-    Component* GetComponent2(uint16_t Key);
+    CSP_NO_EXPORT Component* GetComponent2(uint16_t Key);
 
     /// @brief Add a component of the given type.
     /// @param Type ComponentType : The type of component to add.
     /// @return The newly created component.
     ComponentBase* AddComponent(ComponentType Type);
 
-    Component* AddComponent2(const csp::common::String& Type);
+
+    CSP_NO_EXPORT Component* AddComponent2(const csp::common::String& Type);
 
     /// @brief Mark that a component has just been updated, ie, that a property on it has been modified.
     /// @param Component ComponentBase : The component that has just updated
@@ -291,6 +292,7 @@ public:
     CSP_NO_EXPORT bool UpdateComponent(ComponentBase* Component);
 
     CSP_NO_EXPORT bool UpdateComponent2(Component* Component);
+
 
     /// @brief Remove a component of the given key.
     ///
@@ -303,7 +305,7 @@ public:
     /// already set to this deletion.
     bool RemoveComponent(uint16_t Key);
 
-    bool RemoveComponent2(uint16_t Key);
+    CSP_NO_EXPORT bool RemoveComponent2(uint16_t Key);
 
     /// @brief Gets the script associated with the space entity.
     /// @return The EntityScript instance set on the entity.
