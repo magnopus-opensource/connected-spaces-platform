@@ -1,0 +1,72 @@
+{
+  "components":
+  [
+    {
+      "type": "TestComponent1",
+      "name": "Test1",
+      "id": "1",
+      "category": "Category1",
+      "description": "Description1",
+      "properties": [
+        {
+          "name": "boolProperty",
+          "type": "bool",
+          "value": false
+        },
+        {
+          "name": "intProperty",
+          "type": "int",
+          "value": 0
+        },
+        {
+          "name": "floatProperty",
+          "type": "float",
+          "value": 0.0
+        },
+        {
+          "name": "stringProperty",
+          "type": "string",
+          "value": ""
+        },
+        {
+          "name": "vec2Property",
+          "type": "vec2",
+          "value": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "vec3Property",
+          "type": "vec3",
+          "value": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "vec4Property",
+          "type": "vec4",
+          "value": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "stringMapProperty",
+          "type": "stringMap",
+          "value": {
+              "key1": {
+                "name": "intProperty",
+                "type": "int",
+                "value": 0
+              }
+            }
+        }
+      ]
+    }
+  ]
+}
