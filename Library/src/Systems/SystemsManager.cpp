@@ -43,6 +43,7 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
+#include "CSP/Systems/ToolCalls/ToolCallsSystem.h"
 #include "signalrclient/signalr_value.h"
 
 #ifdef CSP_WASM
@@ -107,6 +108,8 @@ csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnectio
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
 
+ToolCallsSystem* SystemsManager::GetToolCallsSystem() { return ToolCallsSystem; }
+
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
     return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
@@ -155,6 +158,7 @@ SystemsManager::SystemsManager()
     , AnalyticsSystem(nullptr)
     , ExternalServiceProxySystem(nullptr)
     , MultiplayerSystem(nullptr)
+    , ToolCallsSystem(nullptr)
 {
 }
 
@@ -214,6 +218,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
     MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
     SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
+    ToolCallsSystem = new csp::systems::ToolCallsSystem(WebClient, *LogSystem);
 }
 
 void SystemsManager::DestroySystems()
@@ -243,6 +248,7 @@ void SystemsManager::DestroySystems()
     delete MultiplayerSystem;
     delete WebClient;
     delete LogSystem;
+    delete ToolCallsSystem;
 }
 
 void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject)

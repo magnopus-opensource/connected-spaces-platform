@@ -54,6 +54,7 @@ class ConversationSystemInternal;
 class AnalyticsSystem;
 class ExternalServiceProxySystem;
 class MultiplayerSystem;
+class ToolCallsSystem;
 
 } // namespace csp::systems
 
@@ -176,6 +177,10 @@ public:
 
     csp::multiplayer::NetworkEventBus* GetEventBus();
 
+    /// @brief Retrieves the ToolCallsSystem.
+    /// @return ToolCallsSystem : pointer to the ToolCallsSystem class.
+    ToolCallsSystem* GetToolCallsSystem();
+
     // Convenience methods for the moment. This will need to be broken at formal modularization, but the standard pattern it creates throughout
     // integrations/tests will no doubt be helpful in doing that anyhow, rather than having big constructors everywhere.
     CSP_NO_EXPORT csp::multiplayer::OnlineRealtimeEngine* MakeOnlineRealtimeEngine();
@@ -223,6 +228,7 @@ private:
     AnalyticsSystem* AnalyticsSystem;
     ExternalServiceProxySystem* ExternalServiceProxySystem;
     MultiplayerSystem* MultiplayerSystem;
+    ToolCallsSystem* ToolCallsSystem;
 };
 
 } // namespace csp::systems
