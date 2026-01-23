@@ -46,13 +46,50 @@ ToolCallExecutor::ToolCallExecutor()
 ToolCallExecutor::ToolCallExecutor(csp::systems::ToolCallsSystem* InToolCallsSystem)
     : ToolCallsSystem(InToolCallsSystem)
 {
-    const csp::systems::InvokeRegisteredToolCallback Invoke_GetMeetingInfo_Callback
+    // CreateEntity Tool
+    const csp::systems::InvokeRegisteredToolCallback Invoke_CreateEntity_Callback
         = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
-    {
-        return GetMeetingInfo(ToolCallChainId, ToolArguments);
-    };
-    
-    RegisterTool("get_meeting_info", Invoke_GetMeetingInfo_Callback);
+    { return CreateEntity(ToolCallChainId, ToolArguments); };
+
+    RegisterTool("create_entity", Invoke_CreateEntity_Callback);
+
+    // UpdateEntity Tool
+    const csp::systems::InvokeRegisteredToolCallback Invoke_UpdateEntity_Callback
+        = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
+    { return UpdateEntity(ToolCallChainId, ToolArguments); };
+
+    RegisterTool("update_entity", Invoke_UpdateEntity_Callback);
+
+    // AddComponentToEntity Tool
+    const csp::systems::InvokeRegisteredToolCallback Invoke_AddComponentToEntity_Callback
+        = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
+    { return AddComponentToEntity(ToolCallChainId, ToolArguments); };
+
+    RegisterTool("add_component_to_entity", Invoke_AddComponentToEntity_Callback);
+
+    // RegisterComponentType Tool
+    const csp::systems::InvokeRegisteredToolCallback Invoke_RegisterComponent_Callback
+        = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
+    { return RegisterComponent(ToolCallChainId, ToolArguments); };
+
+    RegisterTool("register_component", Invoke_RegisterComponent_Callback);
+
+    // UpdateComponent Tool
+    const csp::systems::InvokeRegisteredToolCallback Invoke_UpdateComponent_Callback
+        = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
+    { return UpdateComponent(ToolCallChainId, ToolArguments); };
+
+    RegisterTool("update_component", Invoke_UpdateComponent_Callback);
+
+
+    // Used for the initial hackathon testing.
+    //const csp::systems::InvokeRegisteredToolCallback Invoke_GetMeetingInfo_Callback
+    //    = [this](const csp::common::String& ToolCallChainId, const csp::common::String& ToolArguments)
+    //{
+    //    return GetMeetingInfo(ToolCallChainId, ToolArguments);
+    //};
+    //
+    //RegisterTool("get_meeting_info", Invoke_GetMeetingInfo_Callback);
 }
 
 void ToolCallExecutor::SetToolCallsCompletedResponseCallback(ToolResponseCallbackHandler ResponseCallback)
@@ -113,39 +150,87 @@ void ToolCallExecutor::InvokeToolCalls(const csp::systems::RequestedToolCalls& R
 
 // EntitySchema will contain all the information needed to create the entity [name, transform, parentId]
 // return the created EntityId and Status
-std::future<csp::common::String> ToolCallExecutor::CreateEntity(const csp::common::String& EntitySchema)
+std::future<csp::common::String> ToolCallExecutor::CreateEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "CreateEntity called with schema: %s", EntitySchema.c_str());
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "CreateEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+
+    auto Promise = std::make_shared<std::promise<csp::common::String>>();
+
+    csp::common::String ResponseJson = "CreateEntity: " + ArgumentsJson;
+
+    Promise->set_value(ResponseJson);
+
+    return Promise->get_future();
 }
 
 // EntitySchema will contain all the information needed to update an Entity - may only expose the transform for now
 // return the Status
-std::future<csp::common::String> ToolCallExecutor::UpdateEntity(const csp::common::String& EntitySchema)
+std::future<csp::common::String> ToolCallExecutor::UpdateEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "UpdateEntity called with schema: %s", EntitySchema.c_str());
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "UpdateEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+
+    auto Promise = std::make_shared<std::promise<csp::common::String>>();
+
+    csp::common::String ResponseJson = "UpdateEntity: " + ArgumentsJson;
+
+    Promise->set_value(ResponseJson);
+
+    return Promise->get_future();
 }
 
 // ComponentSchema will contain all the information needed to create the component [EntityId, CompnonentType, InitialPropertyValues]
 // return the created ComponentId and Status
-std::future<csp::common::String> ToolCallExecutor::AddComponentToEntity(const csp::common::String& ComponentSchema)
+std::future<csp::common::String> ToolCallExecutor::AddComponentToEntity(
+    const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AddComponentToEntity called with schema: %s", ComponentSchema.c_str());
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "AddComponentToEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+
+    auto Promise = std::make_shared<std::promise<csp::common::String>>();
+
+    csp::common::String ResponseJson = "AddComponentToEntity: " + ArgumentsJson;
+
+    Promise->set_value(ResponseJson);
+
+    return Promise->get_future();
 }
 
 // ComponentSchema will contain all the information needed to register a new component [CompnonentType, InitialPropertyValues]
 // ComponentSchema can be array of components
 // return the Status
-std::future<csp::common::String> ToolCallExecutor::RegisterComponentType(const csp::common::String& ComponentSchema)
+std::future<csp::common::String> ToolCallExecutor::RegisterComponent(
+    const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "RegisterComponentType called with schema: %s", ComponentSchema.c_str());
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "RegisterComponentType called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+
+    auto Promise = std::make_shared<std::promise<csp::common::String>>();
+
+    csp::common::String ResponseJson = "RegisterComponent: " + ArgumentsJson;
+
+    Promise->set_value(ResponseJson);
+
+    return Promise->get_future();
 }
 
 // ComponentSchema will contain all the information needed to register a new component [CompnonentType, InitialPropertyValues]
 // ComponentSchema can be array of components to update
 // return the Status
-std::future<csp::common::String> ToolCallExecutor::UpdateComponent(const csp::common::String& ComponentSchema)
+std::future<csp::common::String> ToolCallExecutor::UpdateComponent(
+    const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "UpdateComponent called with schema: %s", ComponentSchema.c_str());
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "UpdateComponent called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+
+    auto Promise = std::make_shared<std::promise<csp::common::String>>();
+
+    csp::common::String ResponseJson = "UpdateComponent: " + ArgumentsJson;
+
+    Promise->set_value(ResponseJson);
+
+    return Promise->get_future();
 }
 
 /*

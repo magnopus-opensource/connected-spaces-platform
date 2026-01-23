@@ -65,25 +65,25 @@ private:
 
     // EntitySchema will contain all the information needed to create the entity [name, transform, parentId]
     // return the created EntityId and Status
-    std::future<csp::common::String> CreateEntity(const csp::common::String& EntitySchema);
+    std::future<csp::common::String> CreateEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson);
 
     // EntitySchema will contain all the information needed to update an Entity - may only expose the transform for now
     // return the Status
-    std::future<csp::common::String> UpdateEntity(const csp::common::String& EntitySchema);
+    std::future<csp::common::String> UpdateEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson);
 
     // ComponentSchema will contain all the information needed to create the component [EntityId, CompnonentType, InitialPropertyValues]
     // return the created ComponentId and Status
-    std::future<csp::common::String> AddComponentToEntity(const csp::common::String& ComponentSchema);
+    std::future<csp::common::String> AddComponentToEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson);
 
     // ComponentSchema will contain all the information needed to register a new component [CompnonentType, InitialPropertyValues]
     // ComponentSchema can be array of components
     // return the Status
-    std::future<csp::common::String> RegisterComponentType(const csp::common::String& ComponentSchema);
+    std::future<csp::common::String> RegisterComponent(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson);
 
     // ComponentSchema will contain all the information needed to register a new component [CompnonentType, InitialPropertyValues]
     // ComponentSchema can be array of components to update
     // return the Status
-    std::future<csp::common::String> UpdateComponent(const csp::common::String& ComponentSchema);
+    std::future<csp::common::String> UpdateComponent(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson);
 
     ToolCallsSystem* ToolCallsSystem;
     ToolResponseCallbackHandler ToolResponseCallback;
