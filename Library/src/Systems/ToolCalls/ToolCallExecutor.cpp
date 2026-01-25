@@ -169,8 +169,8 @@ std::future<csp::common::String> ToolCallExecutor::CreateEntity(const csp::commo
     {
         CSP_LOG_ERROR_FORMAT("Failed to parse JSON arguments for CreateEntity Tool Call. ToolCallChainId: %s", ToolCallChainId.c_str());
 
-        Promise->set_value("Error: Failed to parse JSON arguments.");
-        return;
+        Promise->set_value("{\"result\":\"Failed\", \"response\":\"Failed to parse JSON arguments for CreateEntity Tool Call.\"}");
+        return Promise->get_future();
     }
 
     csp::common::String Name;
@@ -234,14 +234,16 @@ std::future<csp::common::String> ToolCallExecutor::CreateEntity(const csp::commo
         [&Promise](csp::multiplayer::SpaceEntity* CreatedEntity)
         {
             csp::common::String Result = "Success";
+            csp::common::String Response = "Successfully created Entity.";
             csp::common::String EntityId = std::to_string(CreatedEntity->GetId()).c_str();
 
             rapidjson::Document doc;
             doc.SetObject();
             rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
 
-            doc.AddMember("Result", rapidjson::Value(Result, allocator).Move(), allocator);
-            doc.AddMember("EntityId", rapidjson::Value(EntityId, allocator).Move(), allocator);
+            doc.AddMember("result", rapidjson::Value(Result, allocator).Move(), allocator);
+            doc.AddMember("response", rapidjson::Value(Response, allocator).Move(), allocator);
+            doc.AddMember("entityId", rapidjson::Value(EntityId, allocator).Move(), allocator);
 
             rapidjson::StringBuffer buffer;
             rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -259,18 +261,91 @@ std::future<csp::common::String> ToolCallExecutor::CreateEntity(const csp::commo
 // return the Status
 std::future<csp::common::String> ToolCallExecutor::UpdateEntity(const csp::common::String& ToolCallChainId, const csp::common::String& ArgumentsJson)
 {
-    CSP_LOG_FORMAT(
-        csp::common::LogLevel::Log, "UpdateEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
-
-    auto* ParentEntity = RealtimeEngine->FindSpaceEntity("NameFromArgs");
-    ParentEntity->SetName("NewNameFromArgs");
-    // etc
-
     auto Promise = std::make_shared<std::promise<csp::common::String>>();
 
-    csp::common::String ResponseJson = "UpdateEntity: " + ArgumentsJson;
+    CSP_LOG_FORMAT(
+        csp::common::LogLevel::Log, "UpdateEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
+    
+    rapidjson::Document doc;
 
-    Promise->set_value(ResponseJson);
+    // 1. Parse the string
+    if (doc.Parse(ArgumentsJson.c_str()).HasParseError())
+    {
+        CSP_LOG_ERROR_FORMAT("Failed to parse JSON arguments for UpdateEntity Tool Call. ToolCallChainId: %s", ToolCallChainId.c_str());
+
+        Promise->set_value("{\"result\":\"Failed\", \"response\":\"Failed to parse JSON arguments for CreateEntity Tool Call.\"}");
+        return Promise->get_future();
+    }
+
+    csp::multiplayer::SpaceEntity* Entity;
+
+    // 2. Read 'name' (String)
+    if (doc.HasMember("name") && doc["name"].IsString())
+    {
+        Entity = RealtimeEngine->FindSpaceEntity(doc["name"].GetString());
+    }
+
+    if (!Entity)
+    {
+        CSP_LOG_ERROR_FORMAT("Failed to find Entity for UpdateEntity Tool Call. EntityName: %s", doc["name"].GetString());
+        Promise->set_value("{\"result\":\"Failed\", \"response\":\"Failed to find Entity for UpdateEntity Tool Call.\"}");
+        return Promise->get_future();
+    }
+
+    if (doc.HasMember("position") && doc["position"].IsArray())
+    {
+        const rapidjson::Value& posArray = doc["position"];
+
+        csp::common::Vector3 Position;
+        Position.X = posArray[0].GetFloat();
+        Position.Y = posArray[1].GetFloat();
+        Position.Z = posArray[2].GetFloat();
+
+        Entity->SetPosition(Position);
+    }
+
+    if (doc.HasMember("rotation") && doc["rotation"].IsArray())
+    {
+        const rapidjson::Value& rotArray = doc["rotation"];
+
+        csp::common::Vector4 Rotation;
+        Rotation.X = rotArray[0].GetFloat();
+        Rotation.Y = rotArray[1].GetFloat();
+        Rotation.Z = rotArray[2].GetFloat();
+        Rotation.W = rotArray[3].GetFloat();
+
+        Entity->SetRotation(Rotation);
+    }
+
+    // 3. Read 'position' (Array of Numbers)
+    if (doc.HasMember("scale") && doc["scale"].IsArray())
+    {
+        const rapidjson::Value& scaleArray = doc["scale"];
+
+        csp::common::Vector3 Scale;
+        Scale.X = scaleArray[0].GetFloat();
+        Scale.Y = scaleArray[1].GetFloat();
+        Scale.Z = scaleArray[2].GetFloat();
+
+        Entity->SetScale(Scale);
+    }
+
+    // 2. Read 'parentId' (String)
+    if (doc.HasMember("parentId") && doc["parentId"].IsString())
+    {
+        auto* ParentEntity = RealtimeEngine->FindSpaceEntity(doc["parentId"].GetString());
+
+        if (ParentEntity)
+        {
+            Entity->SetOwnerId(ParentEntity->GetId());
+        }
+        else
+        {
+            CSP_LOG_FORMAT(csp::common::LogLevel::Warning, "Failed to find parent Entity for UpdateEntity Tool Call. EntityName: %s", doc["parentId"].GetString());
+        }
+    }
+
+    Promise->set_value("{\"result\":\"Success\", \"response\":\"Successfully updated Entity.\"}");
 
     return Promise->get_future();
 }
