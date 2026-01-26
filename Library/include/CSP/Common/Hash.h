@@ -128,39 +128,8 @@ template <> struct hash<csp::common::ReplicatedValue>
     size_t operator()(const csp::common::ReplicatedValue& v) const noexcept
     {
         size_t TypeHash = std::hash<int> {}(static_cast<int>(v.GetReplicatedValueType()));
-        size_t ValueHash = 0;
-
-        // Could make this smaller with std::visit, but that's quite "clever" and I don't like it.
-        switch (v.GetReplicatedValueType())
-        {
-        case csp::common::ReplicatedValueType::Boolean:
-            ValueHash = std::hash<bool> {}(v.GetBool());
-            break;
-        case csp::common::ReplicatedValueType::Integer:
-            ValueHash = std::hash<int64_t> {}(v.GetInt());
-            break;
-        case csp::common::ReplicatedValueType::Float:
-            ValueHash = std::hash<float> {}(v.GetFloat());
-            break;
-        case csp::common::ReplicatedValueType::String:
-            ValueHash = std::hash<csp::common::String> {}(v.GetString());
-            break;
-        case csp::common::ReplicatedValueType::Vector2:
-            ValueHash = std::hash<csp::common::Vector2> {}(v.GetVector2());
-            break;
-        case csp::common::ReplicatedValueType::Vector3:
-            ValueHash = std::hash<csp::common::Vector3> {}(v.GetVector3());
-            break;
-        case csp::common::ReplicatedValueType::Vector4:
-            ValueHash = std::hash<csp::common::Vector4> {}(v.GetVector4());
-            break;
-        case csp::common::ReplicatedValueType::StringMap:
-            ValueHash = std::hash<csp::common::Map<csp::common::String, csp::common::ReplicatedValue>> {}(v.GetStringMap());
-            break;
-        case csp::common::ReplicatedValueType::InvalidType:
-        default:
-            break;
-        }
+        size_t ValueHash = std::visit(
+            [](const auto& val) -> size_t { return std::hash<std::decay_t<decltype(val)>> {}(val); }, v.GetValue());
 
         return TypeHash ^ (ValueHash << 1);
     }
