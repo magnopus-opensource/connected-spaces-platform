@@ -21,9 +21,10 @@ namespace csp::multiplayer
 {
 static const csp::common::ReplicatedValue NullValue;
 
-Component::Component(const csp::common::String& Type, SpaceEntity* Entity,
+Component::Component(const csp::common::String& Type, const csp::common::String& Name, SpaceEntity* Entity,
     const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Properties, uint16_t Id, csp::common::LogSystem* LogSystem)
     : Type { Type }
+    , Name { Name }
     , Entity { Entity }
     , Properties { Properties }
     , Id { Id }
@@ -31,15 +32,19 @@ Component::Component(const csp::common::String& Type, SpaceEntity* Entity,
 {
 }
 
-void Component::SetProperty(const csp::common::String& Name, const csp::common::ReplicatedValue& Value)
+const csp::common::String& Component::GetType() const { return Type; }
+
+const csp::common::String& Component::GetName() const { return Name; }
+
+void Component::SetProperty(const csp::common::String& PropName, const csp::common::ReplicatedValue& Value)
 {
-    if (Properties.HasKey(Name) == false)
+    if (Properties.HasKey(PropName) == false)
     {
         // TODO: log
         return;
     }
 
-    const auto& Prop = Properties[Name];
+    const auto& Prop = Properties[PropName];
 
     if (Value.GetReplicatedValueType() != Prop.GetReplicatedValueType())
     {
@@ -47,18 +52,18 @@ void Component::SetProperty(const csp::common::String& Name, const csp::common::
         return;
     }
 
-    Properties[Name] = Value;
+    Properties[PropName] = Value;
 }
 
-const csp::common::ReplicatedValue& Component::GetProperty(const csp::common::String& Name) const
+const csp::common::ReplicatedValue& Component::GetProperty(const csp::common::String& PropName) const
 {
-    if (Properties.HasKey(Name) == false)
+    if (Properties.HasKey(PropName) == false)
     {
         // TODO: log
         return NullValue;
     }
 
-    return Properties[Name];
+    return Properties[PropName];
 }
 
 const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>* Component::GetProperties() const { return &Properties; }

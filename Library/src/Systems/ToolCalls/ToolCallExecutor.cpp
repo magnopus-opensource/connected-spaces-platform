@@ -277,7 +277,7 @@ std::future<csp::common::String> ToolCallExecutor::UpdateEntity(const csp::commo
         return Promise->get_future();
     }
 
-    csp::multiplayer::SpaceEntity* Entity;
+    csp::multiplayer::SpaceEntity* Entity = nullptr;
 
     // 2. Read 'name' (String)
     if (doc.HasMember("name") && doc["name"].IsString())
@@ -359,7 +359,7 @@ std::future<csp::common::String> ToolCallExecutor::AddComponentToEntity(
         csp::common::LogLevel::Log, "AddComponentToEntity called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
 
     auto* ParentEntity = RealtimeEngine->FindSpaceEntity("NameFromArgs");
-    auto* Component = ParentEntity->AddComponent2("ComponentTypeFromArgs");
+    [[maybe_unused]] auto* Component = ParentEntity->AddComponent2("ComponentTypeFromArgs", "ComponentNameFromArgs");
     
 
     auto Promise = std::make_shared<std::promise<csp::common::String>>();
@@ -400,7 +400,7 @@ std::future<csp::common::String> ToolCallExecutor::UpdateComponent(
     CSP_LOG_FORMAT(
         csp::common::LogLevel::Log, "UpdateComponent called. ToolCallChainId: %s - Schema: %s", ToolCallChainId.c_str(), ArgumentsJson.c_str());
 
-    auto* ParentEntity = RealtimeEngine->FindSpaceEntity("NameFromArgs");
+    [[maybe_unused]] auto* ParentEntity = RealtimeEngine->FindSpaceEntity("NameFromArgs");
     // loop through all components to find one with the matching name
     //FoundComponent->SetProperty("NameOfProperty", ReplicatedValue_from_json);
 

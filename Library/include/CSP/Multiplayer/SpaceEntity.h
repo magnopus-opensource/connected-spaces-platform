@@ -281,7 +281,7 @@ public:
     ComponentBase* AddComponent(ComponentType Type);
 
 
-    CSP_NO_EXPORT Component* AddComponent2(const csp::common::String& Type);
+    CSP_NO_EXPORT Component* AddComponent2(const csp::common::String& Type, const csp::common::String& Name);
 
     /// @brief Mark that a component has just been updated, ie, that a property on it has been modified.
     /// @param Component ComponentBase : The component that has just updated

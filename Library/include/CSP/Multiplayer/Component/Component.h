@@ -36,8 +36,12 @@ class Component
 public:
 
     Component() = default;
-    Component(const csp::common::String& Type, SpaceEntity* Entity,
+    Component(const csp::common::String& Type, const csp::common::String& Name, SpaceEntity* Entity,
         const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& Properties, uint16_t Id, csp::common::LogSystem* LogSystem);
+
+    const csp::common::String& GetType() const;
+
+    const csp::common::String& GetName() const;
 
     void SetProperty(const csp::common::String& Name, const csp::common::ReplicatedValue& Value);
     const csp::common::ReplicatedValue& GetProperty(const csp::common::String& Name) const;
@@ -46,9 +50,11 @@ public:
 
     uint16_t GetId() const;
 
+
 private:
 
     csp::common::String Type;
+    csp::common::String Name;
     SpaceEntity* Entity;
     csp::common::LogSystem* LogSystem = nullptr;
 

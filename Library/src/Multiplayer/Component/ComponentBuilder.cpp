@@ -19,8 +19,8 @@
 
 namespace csp::multiplayer
 {
-Component CreateComponent(
-    const ComponentRegistry& Registry, std::string_view ComponentType, uint16_t ComponentId, SpaceEntity* Entity, csp::common::LogSystem* LogSystem)
+Component CreateComponent(const ComponentRegistry& Registry, std::string_view ComponentType, std::string_view ComponentName, uint16_t ComponentId,
+    SpaceEntity* Entity, csp::common::LogSystem* LogSystem)
 {
     auto TemplateIt = std::find_if(Registry.GetTemplates().begin(), Registry.GetTemplates().end(),
         [ComponentType](const ComponentTemplate& Template) { return Template.Type == ComponentType.data(); });
@@ -38,7 +38,7 @@ Component CreateComponent(
         Properties[Prop.Name] = Prop.Value;
     }
 
-    Component NewComponent { ComponentType.data(), Entity, Properties, ComponentId, LogSystem };
+    Component NewComponent { ComponentType.data(), ComponentName.data(), Entity, Properties, ComponentId, LogSystem };
     return NewComponent;
 }
 }

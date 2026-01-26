@@ -133,8 +133,7 @@ CSP_PUBLIC_TEST(CSPEngine, ToolCallsSystemTests, GetConfigTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-    auto* ToolCallsSystem = SystemsManager.GetToolCallsSystem();
+    [[maybe_unused]] auto* ToolCallsSystem = SystemsManager.GetToolCallsSystem();
 
     // Log in
     csp::common::String UserId;

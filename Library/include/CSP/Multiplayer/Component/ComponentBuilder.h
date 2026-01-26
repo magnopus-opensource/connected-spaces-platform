@@ -30,6 +30,7 @@ namespace csp::multiplayer
 class ComponentRegistry;
 class SpaceEntity;
 
-Component CreateComponent(const ComponentRegistry& Registry, std::string_view ComponentType, uint16_t ComponentId, SpaceEntity* Entity, csp::common::LogSystem* LogSystem);
+Component CreateComponent(const ComponentRegistry& Registry, std::string_view ComponentType, std::string_view ComponentName, uint16_t ComponentId,
+    SpaceEntity* Entity, csp::common::LogSystem* LogSystem);
 
 }

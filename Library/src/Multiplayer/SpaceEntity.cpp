@@ -401,12 +401,12 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
     return Component;
 }
 
-Component* SpaceEntity::AddComponent2(const csp::common::String& ComponentType) 
+Component* SpaceEntity::AddComponent2(const csp::common::String& ComponentType, const csp::common::String& ComponentName)
 {
     const uint16_t ComponentId = GenerateComponentId2();
 
     Component Component
-        = csp::multiplayer::CreateComponent(EntitySystem->GetComponentRegistry(), ComponentType.c_str(), ComponentId, this, LogSystem);
+        = csp::multiplayer::CreateComponent(EntitySystem->GetComponentRegistry(), ComponentType.c_str(), ComponentName.c_str(), ComponentId, this, LogSystem);
 
     Components2[ComponentId] = Component;
     return &Components2[ComponentId];

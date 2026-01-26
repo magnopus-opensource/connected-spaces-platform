@@ -116,7 +116,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBuilderTest)
     csp::multiplayer::ComponentRegistry Regstry;
     Regstry.RegisterComponents(Json.c_str());
 
-    csp::multiplayer::Component Component = csp::multiplayer::CreateComponent(Regstry, "TestComponent1", 0, nullptr, nullptr);
+    csp::multiplayer::Component Component = csp::multiplayer::CreateComponent(Regstry, "TestComponent1", "TestName", 0, nullptr, nullptr);
 
     const auto& Properties = *Component.GetProperties();
 
@@ -199,11 +199,13 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, EntityComponentTest)
     RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
 
     auto Entity = CreateTestObject(RealtimeEngine.get());
-    Entity->AddComponent2("TestComponent1");
+    Entity->AddComponent2("TestComponent1", "TestName");
 
     auto Component = Entity->GetComponent2(0);
 
     const auto& Properties = *Component->GetProperties();
+
+    EXPECT_EQ(Component->GetName(), "TestName");
 
     EXPECT_EQ(Properties["boolProperty"].GetReplicatedValueType(), csp::common::ReplicatedValueType::Boolean);
     EXPECT_EQ(Properties["boolProperty"].GetBool(), false);
