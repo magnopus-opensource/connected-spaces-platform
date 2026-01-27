@@ -27,9 +27,9 @@
 
 #include "CSP/Common/Hash.h"
 
-#include <CSP/Common/ReplicatedValue.h>
-#include <CSP/Common/Settings.h>
-#include <CSP/Common/Vector.h>
+#include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Common/Settings.h"
+#include "CSP/Common/Vector.h"
 
 #include <string_view>
 
@@ -57,10 +57,7 @@ size_t std::hash<csp::common::Vector4>::operator()(const csp::common::Vector4& v
     return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3);
 }
 
-size_t std::hash<csp::common::String>::operator()(const csp::common::String& s) const noexcept
-{
-    return std::hash<std::string_view> {}(s.c_str());
-}
+size_t std::hash<csp::common::String>::operator()(const csp::common::String& s) const noexcept { return std::hash<std::string_view> {}(s.c_str()); }
 
 size_t std::hash<csp::common::ReplicatedValue>::operator()(const csp::common::ReplicatedValue& v) const noexcept
 {
