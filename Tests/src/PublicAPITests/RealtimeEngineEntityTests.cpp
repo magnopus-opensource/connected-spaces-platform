@@ -173,7 +173,7 @@ TEST_P(CreateAvatar, CreateAvatarTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -252,7 +252,7 @@ TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -331,7 +331,7 @@ TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -410,7 +410,7 @@ TEST_P(ObjectCreate, ObjectCreateTest)
     InitialiseTestingConnection();
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -464,7 +464,7 @@ TEST_P(ObjectAddComponent, ObjectAddComponentTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -572,7 +572,7 @@ TEST_P(ObjectRemoveComponent, ObjectRemoveComponentTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -817,7 +817,7 @@ TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -845,9 +845,9 @@ TEST_P(DeleteMultipleEntities, DeleteMultipleEntitiesTest)
     CreatedObject3->QueueUpdate();
 
     // Destroy Entites
-    RealtimeEngine->DestroyEntity(CreatedObject, [](bool) {});
-    RealtimeEngine->DestroyEntity(CreatedObject2, [](bool) {});
-    RealtimeEngine->DestroyEntity(CreatedObject3, [](bool) {});
+    RealtimeEngine->DestroyEntity(CreatedObject, [](bool) { });
+    RealtimeEngine->DestroyEntity(CreatedObject2, [](bool) { });
+    RealtimeEngine->DestroyEntity(CreatedObject3, [](bool) { });
 
     csp::CSPFoundation::Tick();
 
@@ -886,7 +886,7 @@ TEST_P(EntitySelection, EntitySelectionTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -956,7 +956,7 @@ TEST_P(InvalidComponentFields, InvalidComponentFieldsTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1015,7 +1015,7 @@ TEST_P(EntityGlobalPosition, EntityGlobalPositionTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1111,7 +1111,7 @@ TEST_P(EntityGlobalRotation, EntityGlobalRotationTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1207,7 +1207,7 @@ TEST_P(EntityGlobalScale, EntityGlobalScaleTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1306,7 +1306,7 @@ TEST_P(EntityGlobalTransform, EntityGlobalTransformTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1395,7 +1395,7 @@ TEST_P(CreateObjectParent, CreateObjectParentTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1454,7 +1454,7 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
     // Enter a space and lock an entity
     {
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
         // Enter space
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1475,10 +1475,11 @@ TEST_P(EntityLockAddComponent, EntityLockAddComponentTest)
 
         {
             // Ensure the add component error message is logged when we try to add a component to a locked entity.
-            static const csp::common::String AddComponentErrorMsg = "Entity is locked. New components can not be added to a locked Entity.";
+            static const csp::common::String AddComponentErrorMsg
+                = "Failed to add component: Entity is locked, skipping update. Entity name: Object";
 
             RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, AddComponentErrorMsg)).Times(1);
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, AddComponentErrorMsg)).Times(1);
 
             // Attempt to add a component to a locked entity
             auto NewComponent = CreatedEntity->AddComponent(ComponentType::StaticModel);
@@ -1526,7 +1527,7 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
     // Enter a space and lock an entity
     {
         std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
         // Enter space
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1551,10 +1552,11 @@ TEST_P(EntityLockRemoveComponent, EntityLockRemoveComponentTest)
 
         {
             // Ensure the remove component error message is logged when we try to remove a component from a locked entity.
-            static const csp::common::String RemoveComponentErrorMsg = "Entity is locked. Components can not be removed from a locked Entity.";
+            static const csp::common::String RemoveComponentErrorMsg
+                = "Failed to remove component: Entity is locked, skipping update. Entity name: Object";
 
             RAIIMockLogger MockLogger {};
-            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, RemoveComponentErrorMsg)).Times(1);
+            EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, RemoveComponentErrorMsg)).Times(1);
 
             // Attempt to remove a component from a locked entity
             CreatedEntity->RemoveComponent(NewComponent->GetId());
@@ -1597,7 +1599,7 @@ TEST_P(EntityUpdateCallback, EntityUpdateCallbackTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -1716,7 +1718,7 @@ TEST_P(EntityLock, EntityLockTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     if (RealtimeEngineType == csp::common::RealtimeEngineType::Online)
     {
@@ -2106,7 +2108,7 @@ TEST_P(ParentChildDeletion, ParentChildDeletionTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     std::unique_ptr<csp::common::IRealtimeEngine> RealtimeEngine { SystemsManager.MakeRealtimeEngine(RealtimeEngineType) };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());

@@ -38,6 +38,7 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 class CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
 class CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
+class CSPEngine_MultiplayerTests_IsModifiableTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -92,6 +93,7 @@ class CSP_API SpaceEntity
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
     friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
     friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
+    friend class ::CSPEngine_MultiplayerTests_IsModifiableTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
