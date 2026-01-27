@@ -182,6 +182,23 @@ public:
     ///  @return bool : Returns true if the substring is found. Always returns false if the substring is empty.
     bool Contains(const String& Substring) const;
 
+    ///  @brief Checks if the string starts with a given substring prefix.
+    ///  @param Prefix const String& : Prefix substring to search for.
+    ///  @return bool : Returns true if string starts with the specified prefix substring. Always returns false if the substring is empty.
+    bool StartsWith(const String& Prefix) const;
+
+    ///  @brief Checks if the string ends with a given substring postfix.
+    ///  @param Postfix const String& : Postfix substring to search for.
+    ///  @return bool : Returns true if string ends with the specified postfix substring. Always returns false if the substring is empty.
+    bool EndsWith(const String& Postfix) const;
+
+    ///  @brief Returns a substring starting at the specified offset of the given length.
+    ///  If no length is specified, the substring will extend to the end of the string.
+    ///  @param Offset size_t : Offset that the required substring should start at.
+    ///  @param Length size_t : Length of the required substring.
+    ///  @return String : The substring.
+    String SubString(size_t Offset, Optional<size_t> Length = nullptr);
+
 private:
     /// @brief Returns internal buffer.
     /// @return const char*

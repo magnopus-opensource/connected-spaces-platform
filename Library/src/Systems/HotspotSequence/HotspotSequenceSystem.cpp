@@ -22,6 +22,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/NetworkEventSerialisation.h"
+#include "Systems/ResultHelpers.h"
 
 #include <regex>
 #include <string>
@@ -33,13 +34,13 @@ namespace
 {
     csp::common::String CreateKey(const csp::common::String& Key, const csp::common::String& SpaceId) { return "Hotspots:" + SpaceId + ":" + Key; }
 
-    csp::common::String DeconstructKey(const csp::common::String& Key, const csp::common::String& SpaceId)
+    csp::common::Optional<csp::common::String> DeconstructKey(const csp::common::String& Key, const csp::common::String& SpaceId)
     {
         csp::common::String ExpectedPrefix = "Hotspots:" + SpaceId + ":";
 
-        if (Key.Length() <= ExpectedPrefix.Length() && !Key.Contains(ExpectedPrefix))
+        if (Key.Length() <= ExpectedPrefix.Length() || !Key.StartsWith(ExpectedPrefix))
         {
-            return "";
+            return nullptr;
         }
 
         return csp::common::String(Key.c_str() + ExpectedPrefix.Length(), Key.Length() - ExpectedPrefix.Length());
@@ -121,10 +122,30 @@ void HotspotSequenceSystem::CreateHotspotGroup(
             return;
         }
 
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
+            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+            Callback(ReturnValue);
+
+            return;
+        }
+
         auto Data = Result.GetSequence();
         HotspotGroup Group;
         Group.Items = Data.Items;
-        Group.Name = DeconstructKey(Data.Key, SpaceId);
+
+        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        {
+            Group.Name = *DeconstructedKey;
+        }
+        else
+        {
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::CreateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+
+            Callback(MakeInvalid<HotspotGroupResult>());
+
+            return;
+        }
 
         HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
@@ -149,10 +170,31 @@ void HotspotSequenceSystem::RenameHotspotGroup(
             return;
         }
 
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
+            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+            Callback(ReturnValue);
+
+            return;
+        }
+
         auto Data = Result.GetSequence();
         HotspotGroup Group;
         Group.Items = Data.Items;
-        Group.Name = DeconstructKey(Data.Key, SpaceId);
+
+        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        {
+            Group.Name = *DeconstructedKey;
+        }
+        else
+        {
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::RenameHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+
+            Callback(MakeInvalid<HotspotGroupResult>());
+
+            return;
+        }
+
         HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
         Callback(ReturnValue);
@@ -172,10 +214,32 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
         {
             return;
         }
+
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
+            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+            Callback(ReturnValue);
+
+            return;
+        }
+
         auto Data = Result.GetSequence();
         HotspotGroup Group;
         Group.Items = Data.Items;
-        Group.Name = DeconstructKey(Data.Key, SpaceId);
+
+        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        {
+            Group.Name = *DeconstructedKey;
+        }
+        else
+        {
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::UpdateHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+
+            Callback(MakeInvalid<HotspotGroupResult>());
+
+            return;
+        }
+
         HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
         Callback(ReturnValue);
@@ -195,10 +259,32 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
         {
             return;
         }
+
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
+            HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+            Callback(ReturnValue);
+
+            return;
+        }
+
         auto Data = Result.GetSequence();
         HotspotGroup Group;
         Group.Items = Data.Items;
-        Group.Name = DeconstructKey(Data.Key, SpaceId);
+
+        if (auto DeconstructedKey = DeconstructKey(Data.Key, SpaceId); DeconstructedKey.HasValue())
+        {
+            Group.Name = *DeconstructedKey;
+        }
+        else
+        {
+            CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroup - Failed to deconstruct key: %s", Data.Key.c_str());
+
+            Callback(MakeInvalid<HotspotGroupResult>());
+
+            return;
+        }
+
         HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
         Callback(ReturnValue);
@@ -217,6 +303,15 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
         {
             return;
         }
+
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
+            HotspotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+            Callback(ReturnValue);
+
+            return;
+        }
+
         auto Data = Result.GetSequences();
 
         csp::common::Array<HotspotGroup> Groups(Data.Size());
@@ -224,8 +319,17 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
         for (size_t i = 0; i < Data.Size(); i++)
         {
             Groups[i].Items = Data[i].Items;
-            Groups[i].Name = DeconstructKey(Data[i].Key, SpaceId);
+
+            if (auto DeconstructedKey = DeconstructKey(Data[i].Key, SpaceId); DeconstructedKey.HasValue())
+            {
+                Groups[i].Name = *DeconstructedKey;
+            }
+            else
+            {
+                CSP_LOG_ERROR_FORMAT("HotspotSequenceSystem::GetHotspotGroups - Failed to deconstruct key: %s", Data[i].Key.c_str());
+            }
         }
+
         HotspotGroupsResult ReturnValue(Groups, Result.GetResultCode(), Result.GetHttpResultCode());
         // convert SequenceResult To HotspotGroupResultCallback
         Callback(ReturnValue);

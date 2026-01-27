@@ -668,3 +668,215 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTes
         FAIL();
     }
 }
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsTest)
+{
+    try
+    {
+        String Instance = "abc_def_ghi_jkl";
+        String Substring = "def_g";
+
+        EXPECT_TRUE(Instance.Contains(Substring));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringNotFoundTest)
+{
+    try
+    {
+        String Instance = "abc_def_ghi_jkl";
+        String Substring = "xyz";
+
+        EXPECT_FALSE(Instance.Contains(Substring));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringEmptyTest)
+{
+    try
+    {
+        String Instance = "abc_def_ghi_jkl";
+        String Substring = "";
+
+        EXPECT_FALSE(Instance.Contains(Substring));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringContainsSubstringTooLongTest)
+{
+    try
+    {
+        String Instance = "abc_def_ghi_jkl";
+        String Substring = "abc_def_ghi_jkl_mno";
+
+        EXPECT_FALSE(Instance.StartsWith(Substring));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Prefix = "Hello";
+
+        EXPECT_TRUE(Instance.StartsWith(Prefix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithEmptyPrefixTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Prefix = "";
+
+        EXPECT_FALSE(Instance.StartsWith(Prefix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringStartsWithPrefixTooLongTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Prefix = "Hello_Worldy";
+
+        EXPECT_FALSE(Instance.StartsWith(Prefix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Postfix = "World";
+
+        EXPECT_TRUE(Instance.EndsWith(Postfix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithEmptyPostfixTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Postfix = "";
+
+        EXPECT_FALSE(Instance.EndsWith(Postfix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEndsWithPostfixTooLongTest)
+{
+    try
+    {
+        String Instance = "Hello_World";
+        String Postfix = "Hello_Worldy";
+
+        EXPECT_FALSE(Instance.EndsWith(Postfix));
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringTest)
+{
+    try
+    {
+        String Instance = "Believe you can and you're halfway there.";
+        size_t Offset = 8;
+        size_t Length = 7;
+
+        EXPECT_EQ(Instance.SubString(Offset, Length), "you can");
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringInvalidOffsetTest)
+{
+    try
+    {
+        String Instance = "Believe you can and you're halfway there.";
+        size_t Offset = Instance.Length() + 1;
+
+        EXPECT_EQ(Instance.SubString(Offset), "");
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringNoLengthTest)
+{
+    try
+    {
+        String Instance = "Believe you can and you're halfway there.";
+        size_t Offset = 8;
+
+        EXPECT_EQ(Instance.SubString(Offset), "you can and you're halfway there.");
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSubStringInvalidLengthTest)
+{
+    try
+    {
+        String Instance = "Believe you can and you're halfway there.";
+        size_t Offset = 8;
+        size_t Length = Instance.Length() + 1;
+
+        EXPECT_EQ(Instance.SubString(Offset, Length), "you can and you're halfway there.");
+    }
+    catch (...)
+    {
+        FAIL();
+    }
+}
