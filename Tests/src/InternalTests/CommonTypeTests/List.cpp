@@ -126,3 +126,59 @@ CSP_INTERNAL_TEST(CSPEngine, CommonListTests, ListInsertMiddleTests)
     ASSERT_EQ(TestList[2].str, "Three");
     ASSERT_EQ(TestList[3].str, "Four");
 }
+
+CSP_INTERNAL_TEST(CSPEngine, CommonListTests, ListReverseIteratorTest)
+{
+    csp::common::List<TestStruct> TestList;
+
+    TestStruct One;
+    One.str = "One";
+    TestStruct Two;
+    Two.str = "Two";
+    TestStruct Three;
+    Three.str = "Three";
+
+    TestList.Append(One);
+    TestList.Append(Two);
+    TestList.Append(Three);
+
+    ASSERT_EQ(std::distance(TestList.rbegin(), TestList.rend()), 3);
+
+    auto RIt = TestList.rbegin();
+    ASSERT_EQ(RIt->str, "Three");
+    ++RIt;
+    ASSERT_EQ(RIt->str, "Two");
+    ++RIt;
+    ASSERT_EQ(RIt->str, "One");
+    ++RIt;
+    ASSERT_EQ(RIt, TestList.rend());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonListTests, ListConstReverseIteratorTest)
+{
+    csp::common::List<TestStruct> TestList;
+
+    TestStruct One;
+    One.str = "One";
+    TestStruct Two;
+    Two.str = "Two";
+    TestStruct Three;
+    Three.str = "Three";
+
+    TestList.Append(One);
+    TestList.Append(Two);
+    TestList.Append(Three);
+
+    const auto& ConstList = TestList;
+
+    ASSERT_EQ(std::distance(ConstList.crbegin(), ConstList.crend()), 3);
+
+    auto CRIt = ConstList.crbegin();
+    ASSERT_EQ(CRIt->str, "Three");
+    ++CRIt;
+    ASSERT_EQ(CRIt->str, "Two");
+    ++CRIt;
+    ASSERT_EQ(CRIt->str, "One");
+    ++CRIt;
+    ASSERT_EQ(CRIt, ConstList.crend());
+}

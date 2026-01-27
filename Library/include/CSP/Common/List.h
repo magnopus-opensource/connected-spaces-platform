@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
+#include <iterator>
 #include <utility>
 
 namespace csp::common
@@ -56,6 +57,11 @@ inline size_t next_pow2(size_t val)
 template <typename T> class CSP_API List
 {
 public:
+    using iterator = T*;
+    using const_iterator = const T*;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
     /// @brief Constructs a list with 0 elements.
     List()
         : CurrentSize(0)
@@ -166,6 +172,14 @@ public:
     CSP_NO_EXPORT T* end() { return Data() + Size(); }
     CSP_NO_EXPORT const T* end() const { return Data() + Size(); }
     CSP_NO_EXPORT const T* cend() const { return Data() + Size(); }
+
+    CSP_NO_EXPORT reverse_iterator rbegin() { return reverse_iterator(end()); }
+    CSP_NO_EXPORT const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    CSP_NO_EXPORT const_reverse_iterator crbegin() const { return const_reverse_iterator(cend()); }
+
+    CSP_NO_EXPORT reverse_iterator rend() { return reverse_iterator(begin()); }
+    CSP_NO_EXPORT const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+    CSP_NO_EXPORT const_reverse_iterator crend() const { return const_reverse_iterator(cbegin()); }
 
     /// @brief Copy assignment.
     /// @param Other const List<T>&

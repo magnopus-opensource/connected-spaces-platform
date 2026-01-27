@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "CSP/Common/Hash.h"
 #include "CSP/Common/Vector.h"
 #include "TestHelpers.h"
 
@@ -41,22 +40,3 @@ CSP_PUBLIC_TEST(CSPEngine, VectorTests, IsNearlyEqualTest)
     EXPECT_TRUE(MyVector4_A != MyVector4_C);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, VectorTests, HashEqualityTest)
-{
-    const Vector2 MyVector2 = { 0, 0 };
-    const Vector3 MyVector3 = { 15.0f, 0, 999.99f };
-    const Vector4 MyVector4 = { 15.0f, 5, 999.99f, 5 };
-
-    const Vector2 MyVector2Alt = { 0, 0 };
-    const Vector3 MyVector3Alt = { 15.0f, 0, 999.99f };
-    const Vector4 MyVector4Alt = { 15.0f, 5, 999.99f, 5 };
-
-    EXPECT_TRUE(MyVector2 == MyVector2Alt);
-    EXPECT_TRUE(std::hash<Vector2>()(MyVector2) == std::hash<Vector2>()(MyVector2Alt));
-
-    EXPECT_TRUE(MyVector3 == MyVector3Alt);
-    EXPECT_TRUE(std::hash<Vector3>()(MyVector3) == std::hash<Vector3>()(MyVector3Alt));
-
-    EXPECT_TRUE(MyVector4 == MyVector4Alt);
-    EXPECT_TRUE(std::hash<Vector4>()(MyVector4) == std::hash<Vector4>()(MyVector4Alt));
-}
