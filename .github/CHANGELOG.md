@@ -11,6 +11,13 @@ All notable changes to this project will be documented in this file.
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
 
+- ### 🐛 🔨 Bug Fixes
+
+- [OB-4350] fix: Improved log output for unmodifiable entities by MAG-mav
+This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
+Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
+Also adds SpaceEntity::IsModifiableWithReason which cts as a wrapper around the above functions.
+
 ## [6.20.0] - 2026-01-13_17-38-31
 
 ### 🔥 ❗ Breaking Changes
