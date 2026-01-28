@@ -28,45 +28,102 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include <CSP/Common/Vector.h>
+#include "CSP/Common/Array.h"
+#include "CSP/Common/List.h"
+#include "CSP/Common/Map.h"
+#include "CSP/Common/String.h"
 
 #include <functional>
+
+namespace csp::common
+{
+class Vector2;
+class Vector3;
+class Vector4;
+class ReplicatedValue;
+class ApplicationSettings;
+class SettingsCollection;
+}
 
 CSP_START_IGNORE
 namespace std
 {
 
-template <> struct hash<csp::common::Vector2>
+template <> struct CSP_API hash<csp::common::Vector2>
 {
-    size_t operator()(const csp::common::Vector2& v) const noexcept
+    size_t operator()(const csp::common::Vector2& v) const noexcept;
+};
+
+template <> struct CSP_API hash<csp::common::Vector3>
+{
+    size_t operator()(const csp::common::Vector3& v) const noexcept;
+};
+
+template <> struct CSP_API hash<csp::common::Vector4>
+{
+    size_t operator()(const csp::common::Vector4& v) const noexcept;
+};
+
+template <> struct CSP_API hash<csp::common::String>
+{
+    size_t operator()(const csp::common::String& s) const noexcept;
+};
+
+// These hashes aren't ideal. Even without getting super fancy you could vary the shift by element
+// to reduce collisions a lot, but then you'd need to handle wraparound.
+// Remember shifting by more than 64 (on x64 systems) is undefined behavior.
+template <typename T> struct hash<csp::common::Array<T>>
+{
+    size_t operator()(const csp::common::Array<T>& a) const noexcept
     {
-        size_t h1 = std::hash<float> {}(v.X);
-        size_t h2 = std::hash<float> {}(v.Y);
-        return h1 ^ (h2 << 1);
+        size_t h = 0;
+        for (size_t i = 0; i < a.Size(); ++i)
+        {
+            h ^= std::hash<T> {}(a[i]) << 1;
+        }
+        return h;
     }
 };
 
-template <> struct hash<csp::common::Vector3>
+template <typename T> struct hash<csp::common::List<T>>
 {
-    size_t operator()(const csp::common::Vector3& v) const noexcept
+    size_t operator()(const csp::common::List<T>& l) const noexcept
     {
-        size_t h1 = std::hash<float> {}(v.X);
-        size_t h2 = std::hash<float> {}(v.Y);
-        size_t h3 = std::hash<float> {}(v.Z);
-        return h1 ^ (h2 << 1) ^ (h3 << 2);
+        size_t h = 0;
+        for (size_t i = 0; i < l.Size(); ++i)
+        {
+            h ^= std::hash<T> {}(l[i]) << 1;
+        }
+        return h;
     }
 };
 
-template <> struct hash<csp::common::Vector4>
+template <typename TKey, typename TValue> struct hash<csp::common::Map<TKey, TValue>>
 {
-    size_t operator()(const csp::common::Vector4& v) const noexcept
+    size_t operator()(const csp::common::Map<TKey, TValue>& m) const noexcept
     {
-        size_t h1 = std::hash<float> {}(v.X);
-        size_t h2 = std::hash<float> {}(v.Y);
-        size_t h3 = std::hash<float> {}(v.Z);
-        size_t h4 = std::hash<float> {}(v.W);
-        return h1 ^ (h2 << 1) ^ (h3 << 2) ^ (h4 << 3);
+        size_t h = 0;
+        for (const auto& pair : m)
+        {
+            h ^= std::hash<TKey> {}(pair.first) ^ (std::hash<TValue> {}(pair.second) << 1);
+        }
+        return h;
     }
+};
+
+template <> struct CSP_API hash<csp::common::ReplicatedValue>
+{
+    size_t operator()(const csp::common::ReplicatedValue& v) const noexcept;
+};
+
+template <> struct CSP_API hash<csp::common::ApplicationSettings>
+{
+    size_t operator()(const csp::common::ApplicationSettings& s) const noexcept;
+};
+
+template <> struct CSP_API hash<csp::common::SettingsCollection>
+{
+    size_t operator()(const csp::common::SettingsCollection& s) const noexcept;
 };
 
 } // namespace std

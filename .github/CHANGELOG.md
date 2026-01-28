@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-🍰 🙌 New Features
+### 🍰 🙌 New Features
 
 - [NT-0] feat: Add `SetUserTier` method to `QuotaSystem` by MAG-ElliotMorris
   This method provides a means of changing a users tier (basic, pro, enterprise, etc)
@@ -17,6 +17,14 @@ All notable changes to this project will be documented in this file.
 This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
 Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
 Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
+### 🔨 🔨 Chore
+
+- [OPE-3056] chore: Add exported symbols, equality operators, and hash implementation
+  for types required for the common modules in the C# SWIG wrapper. This will be a 
+  common theme going forward.
+    - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
+    - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
+    - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
 
 ## [6.20.0] - 2026-01-13_17-38-31
 

@@ -78,12 +78,21 @@ template class CSP_API csp::common::List<csp::common::SettingsCollection>;
 template class CSP_API csp::common::Map<uint16_t, csp::multiplayer::ComponentBase*>;
 template class CSP_API csp::common::Map<uint32_t, csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>;
+template class CSP_API csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::String>;
 
 // csp::common::Optional
 template class CSP_API csp::common::Optional<bool>;
+template class CSP_API csp::common::Optional<int8_t>;
+template class CSP_API csp::common::Optional<int16_t>;
+template class CSP_API csp::common::Optional<int32_t>;
+template class CSP_API csp::common::Optional<int64_t>;
+template class CSP_API csp::common::Optional<uint8_t>;
+template class CSP_API csp::common::Optional<uint16_t>;
+template class CSP_API csp::common::Optional<uint32_t>;
+template class CSP_API csp::common::Optional<uint64_t>;
 template class CSP_API csp::common::Optional<float>;
-template class CSP_API csp::common::Optional<int>;
+template class CSP_API csp::common::Optional<double>;
 template class CSP_API csp::common::Optional<csp::common::Array<csp::common::String>>;
 template class CSP_API csp::common::Optional<csp::common::Array<csp::systems::EAssetType>>;
 template class CSP_API csp::common::Optional<csp::common::Array<csp::systems::GeoLocation>>;
