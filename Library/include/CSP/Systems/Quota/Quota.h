@@ -45,7 +45,7 @@ enum class PeriodEnum
     Invalid
 };
 
-enum class TierFeatures
+CSP_API enum class TierFeatures
 {
     SpaceOwner = 0,
     ScopeConcurrentUsers,
@@ -60,7 +60,7 @@ enum class TierFeatures
     Invalid
 };
 
-enum class TierNames
+CSP_API enum class TierNames
 {
     Basic = 0,
     Premium,
