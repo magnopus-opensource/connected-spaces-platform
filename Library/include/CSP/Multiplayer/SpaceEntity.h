@@ -328,8 +328,8 @@ public:
 
     /// Checks if the entity can be modified, with a failure reason if the entity isn't modifiable.
     /// The criteria for failures can be found on specific RealtimeEngine IsEntityModifiable overridden functions.
-    /// @return csp::multiplayer::ModifiableFailure : ModifiableFailure::None on success.
-    ModifiableFailure IsModifiableWithReason() const;
+    /// @return csp::multiplayer::ModifiableStatus : ModifiableStatus::Modifiable on success.
+    ModifiableStatus IsModifiableWithReason() const;
 
     /// @brief Locks the entity if it hasn't been locked already.
     /// @pre The entity must not already be locked.

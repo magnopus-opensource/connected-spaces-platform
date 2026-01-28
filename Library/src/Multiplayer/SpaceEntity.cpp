@@ -339,14 +339,14 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableFailure Modifiable = IsModifiableWithReason();
-    if (Modifiable != ModifiableFailure::None)
+    ModifiableStatus Modifiable = IsModifiableWithReason();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to add component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable), GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
                     .c_str());
         }
 
@@ -403,14 +403,14 @@ bool SpaceEntity::UpdateComponent(ComponentBase* Component)
 bool SpaceEntity::RemoveComponent(uint16_t Key)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableFailure Modifiable = IsModifiableWithReason();
-    if (Modifiable != ModifiableFailure::None)
+    ModifiableStatus Modifiable = IsModifiableWithReason();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to remove component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable), GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
                     .c_str());
         }
 
@@ -616,15 +616,15 @@ bool SpaceEntity::Deselect()
     return InternalSetSelectionStateOfEntity(false);
 }
 
-bool SpaceEntity::IsModifiable() const { return IsModifiableWithReason() == ModifiableFailure::None; }
+bool SpaceEntity::IsModifiable() const { return IsModifiableWithReason() == ModifiableStatus::Modifiable; }
 
-ModifiableFailure SpaceEntity::IsModifiableWithReason() const
+ModifiableStatus SpaceEntity::IsModifiableWithReason() const
 {
     if (EntitySystem == nullptr)
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
-        return ModifiableFailure::None;
+        return ModifiableStatus::Modifiable;
     }
 
     return EntitySystem->IsEntityModifiable(this);

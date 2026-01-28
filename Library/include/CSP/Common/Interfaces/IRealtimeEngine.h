@@ -382,9 +382,9 @@ public:
     /// - Deleting a component
     /// - Updating a component property
     /// @param SpaceEntity const csp::multiplayer::SpaceEntity* : The entity we are checking can be modified.
-    /// @return csp::common::ModifiableFailure : The result of this operation signifying if the entity can be modified.
-    /// Will return ModifiableFailure::None if the entity can be modified.
-    virtual csp::multiplayer::ModifiableFailure IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+    /// @return csp::common::ModifiableStatus : The result of this operation signifying if the entity can be modified.
+    /// Will return ModifiableStatus::Modifiable if the entity can be modified.
+    virtual csp::multiplayer::ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
     {
         throw InvalidInterfaceUseError("Illegal user of \"abstract\" type.");
 

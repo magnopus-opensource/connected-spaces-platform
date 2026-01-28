@@ -221,11 +221,11 @@ public:
     /// @return nullptr
     CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
 
-    /// @brief Returns a ModifiableFailure enum containing ModifiableFailure::None if the entity can be modified.
-    /// @details This result will contain ModifiableFailure::EntityLocked if the given entities LockType is equal to UserAgnostic.
+    /// @brief Returns a ModifiableStatus enum containing ModifiableStatus::Modifiable if the entity can be modified.
+    /// @details This result will contain ModifiableStatus::EntityLocked if the given entities LockType is equal to UserAgnostic.
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
-    /// @return ModifiableFailure : This will contain a failure reason if the entity isn't modifiable.
-    ModifiableFailure IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
+    /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
+    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 

@@ -30,13 +30,13 @@ csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::form
 
 namespace csp::multiplayer::RealtimeEngineUtils
 {
-csp::common::String ModifiableFailureToString(ModifiableFailure Failure)
+csp::common::String ModifiableStatusToString(ModifiableStatus Failure)
 {
-    auto ModifiableFailureIt = ModifiableFailureErrors.find(Failure);
+    auto ModifiableStatusIt = ModifiableStatusErrors.find(Failure);
 
-    if (ModifiableFailureIt != ModifiableFailureErrors.end())
+    if (ModifiableStatusIt != ModifiableStatusErrors.end())
     {
-        return ModifiableFailureIt->second;
+        return ModifiableStatusIt->second;
     }
 
     return "";

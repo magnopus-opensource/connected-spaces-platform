@@ -307,15 +307,15 @@ void OfflineRealtimeEngine::UnlockEntityUpdate() { EntitiesLock.unlock(); }
 
 SpaceEntityStatePatcher* OfflineRealtimeEngine::MakeStatePatcher(csp::multiplayer::SpaceEntity& /*SpaceEntity*/) const { return nullptr; }
 
-ModifiableFailure OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+ModifiableStatus OfflineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
 {
     if (SpaceEntity->GetLockType() == LockType::UserAgnostic)
     {
-        return ModifiableFailure::EntityLocked;
+        return ModifiableStatus::EntityLocked;
     }
     else
     {
-        return ModifiableFailure::None;
+        return ModifiableStatus::Modifiable;
     }
 }
 

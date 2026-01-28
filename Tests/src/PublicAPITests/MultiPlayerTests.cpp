@@ -1713,27 +1713,27 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, IsModifiableTest)
     SpaceEntity* Entity = CreateTestObject(RealtimeEngine.get());
 
     // Entity should be modifiable when first created as it is not locked by default.
-    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableFailure::None);
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
 
     Entity->Lock();
     Entity->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
     // Entity should not be modifiable now it is locked.
-    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableFailure::EntityLocked);
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityLocked);
 
     Entity->Unlock();
     Entity->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
     // Entity should be modifiable again.
-    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableFailure::None);
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
 
     // Make the entity non-transferable, and not owned by this client.
     Entity->IsTransferable = false;
     Entity->OwnerId = 0;
 
-    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableFailure::EntityNotOwnedAnUntransferable);
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityNotOwnedAnUntransferable);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

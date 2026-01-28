@@ -825,12 +825,12 @@ csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatche
     return new SpaceEntityStatePatcher(LogSystem, SpaceEntity);
 }
 
-ModifiableFailure OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
+ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
 {
     // This should definately be true at this point, but be defensive
     if (SpaceEntity->GetStatePatcher() == nullptr)
     {
-        return ModifiableFailure::NoStatePatcher;
+        return ModifiableStatus::NoStatePatcher;
     }
 
     // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
@@ -840,16 +840,16 @@ ModifiableFailure OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplaye
     const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
     if (SpaceEntity->GetLockType() == LockType::UserAgnostic && !AboutToUnlock)
     {
-        return ModifiableFailure::EntityLocked;
+        return ModifiableStatus::EntityLocked;
     }
 
     // If the entity isn't owned by this client, and ownership cannot be transfered, then we cannot modify this entity.
     if (SpaceEntity->GetOwnerId() != GetMultiplayerConnectionInstance()->GetClientId() && SpaceEntity->GetIsTransferable() == false)
     {
-        return ModifiableFailure::EntityNotOwnedAnUntransferable;
+        return ModifiableStatus::EntityNotOwnedAnUntransferable;
     }
 
-    return ModifiableFailure::None;
+    return ModifiableStatus::Modifiable;
 }
 
 void OnlineRealtimeEngine::RetrieveAllEntities(csp::common::EntityFetchCompleteCallback FetchCompleteCallback)
@@ -912,14 +912,14 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableFailure Modifiable = EntityToUpdate->IsModifiableWithReason();
-    if (Modifiable != ModifiableFailure::None)
+    ModifiableStatus Modifiable = EntityToUpdate->IsModifiableWithReason();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to queue entity update: {0}. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable),
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable),
                     EntityToUpdate->GetName())
                     .c_str());
         }
@@ -1371,14 +1371,14 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
             if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
             {
                 // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-                ModifiableFailure Modifiable = PendingEntity->IsModifiableWithReason();
-                if (Modifiable != ModifiableFailure::None)
+                ModifiableStatus Modifiable = PendingEntity->IsModifiableWithReason();
+                if (Modifiable != ModifiableStatus::Modifiable)
                 {
                     if (LogSystem != nullptr)
                     {
                         LogSystem->LogMsg(csp::common::LogLevel::Warning,
                             fmt::format("Failed to send patch for entity: {0}. Entity name: {1}",
-                                RealtimeEngineUtils::ModifiableFailureToString(Modifiable), PendingEntity->GetName())
+                                RealtimeEngineUtils::ModifiableStatusToString(Modifiable), PendingEntity->GetName())
                                 .c_str());
                     }
 

@@ -14,14 +14,14 @@ static bool SetProperty(
     SpaceEntity& Entity, P& Property, const V& Value, SpaceEntityComponentKey Key, SpaceEntityUpdateFlags Flag, csp::common::LogSystem* LogSystem)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableFailure Modifiable = Entity.IsModifiableWithReason();
-    if (Modifiable != ModifiableFailure::None)
+    ModifiableStatus Modifiable = Entity.IsModifiableWithReason();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to set propery on entity: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable), Entity.GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), Entity.GetName())
                     .c_str());
         }
 

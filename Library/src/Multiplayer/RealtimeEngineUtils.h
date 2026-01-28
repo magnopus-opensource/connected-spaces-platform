@@ -55,14 +55,14 @@ enum class AvatarPlayMode;
 namespace csp::multiplayer::RealtimeEngineUtils
 {
 
-static const std::unordered_map<ModifiableFailure, csp::common::String> ModifiableFailureErrors {
-    { ModifiableFailure::None, "" },
-    { ModifiableFailure::EntityLocked, "Entity is locked" },
-    { ModifiableFailure::EntityNotOwnedAnUntransferable, "Entity is not owned by this client and isn't transferable" },
-    { ModifiableFailure::NoStatePatcher, "Unexpected lack of StatePatcher in online context" },
+static const std::unordered_map<ModifiableStatus, csp::common::String> ModifiableStatusErrors {
+    { ModifiableStatus::Modifiable, "" },
+    { ModifiableStatus::EntityLocked, "Entity is locked" },
+    { ModifiableStatus::EntityNotOwnedAnUntransferable, "Entity is not owned by this client and isn't transferable" },
+    { ModifiableStatus::NoStatePatcher, "Unexpected lack of StatePatcher in online context" },
 };
 
-csp::common::String ModifiableFailureToString(ModifiableFailure Failure);
+csp::common::String ModifiableStatusToString(ModifiableStatus Failure);
 
 // Finds a space entity in the Entities container. Returns nullptr if the entity is not found.
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name);

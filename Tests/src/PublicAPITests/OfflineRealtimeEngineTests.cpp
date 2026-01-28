@@ -935,15 +935,15 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, IsModifiableTest)
     Engine.CreateEntity(EntityName, SpaceTransform {}, nullptr, [&Entity](SpaceEntity* NewEntity) { Entity = NewEntity; });
 
     // Entity should be modifiable when first created as it is not locked by default.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableFailure::None);
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
 
     Entity->Lock();
 
     // Entity should not be modifiable now it is locked.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableFailure::EntityLocked);
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::EntityLocked);
 
     Entity->Unlock();
 
     // Entity should be modifiable again.
-    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableFailure::None);
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
 }

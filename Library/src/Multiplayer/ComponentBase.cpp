@@ -232,14 +232,14 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableFailure Modifiable = GetParent()->IsModifiableWithReason();
-    if (Modifiable != ModifiableFailure::None)
+    ModifiableStatus Modifiable = GetParent()->IsModifiableWithReason();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
                 fmt::format("Failed to set property on component: {0}, skipping update. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableFailureToString(Modifiable), GetParent()->GetName())
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetParent()->GetName())
                     .c_str());
         }
 
