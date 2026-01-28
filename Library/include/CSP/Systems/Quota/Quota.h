@@ -229,22 +229,22 @@ private:
 /// @brief Retrieves an array of feature quota results.
 /// @param Value TierNames : enum value to be converted to string
 /// @csp::common::String : Const enum Value as a string
-const csp::common::String TierNameEnumToString(const TierNames& Value);
+CSP_API const csp::common::String TierNameEnumToString(const TierNames& Value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value TierFeatures : enum value to be converted to string
 /// @csp::common::String : Const enum Value as a string
-const csp::common::String TierFeatureEnumToString(const TierFeatures& Value);
+CSP_API const csp::common::String TierFeatureEnumToString(const TierFeatures& Value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierNames : Const string as an enum value
-TierNames StringToTierNameEnum(const csp::common::String& Value);
+CSP_API TierNames StringToTierNameEnum(const csp::common::String& Value);
 
 /// @brief Retrieves an array of feature quota results.
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierFeatures : Const string as an enum value
-TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
+CSP_API TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
