@@ -45,8 +45,8 @@ public:
     /// The keys and values are both strings and represent additional configurable options.
     csp::common::Map<csp::common::String, csp::common::String> Settings;
 
-    bool operator==(const csp::common::ApplicationSettings& Other);
-    bool operator!=(const csp::common::ApplicationSettings& Other);
+    bool operator==(const csp::common::ApplicationSettings& Other) const;
+    bool operator!=(const csp::common::ApplicationSettings& Other) const;
 };
 
 /// @brief Represents configuration settings related to a user in a specific context
@@ -65,8 +65,8 @@ public:
     /// @brief A key-value store of arbitrary user settings.
     csp::common::Map<csp::common::String, csp::common::String> Settings;
 
-    bool operator==(const csp::common::SettingsCollection& Other);
-    bool operator!=(const csp::common::SettingsCollection& Other);
+    bool operator==(const csp::common::SettingsCollection& Other) const;
+    bool operator!=(const csp::common::SettingsCollection& Other) const;
 };
 } // namespace csp::systems
 
