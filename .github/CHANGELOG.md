@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.21.0] - 2026-01-28_11-22-27
+
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add `SetUserTier` method to `QuotaSystem` by MAG-ElliotMorris
