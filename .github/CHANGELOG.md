@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🔨 🔨 Chore
+
+[OPE-3004] fix: Add `CSP_API` to functions in `Quota.h` by MAG-AlessioRegalbuto
+These functions need to be exported for use in the C# SWIG wrapper.
 
 
 ## [6.21.0] - 2026-01-28_11-22-27
