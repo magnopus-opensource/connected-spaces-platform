@@ -1138,6 +1138,9 @@ void OnlineRealtimeEngine::DisableLeaderElection()
 
     if (LeaderElectionManager != nullptr)
     {
+        NetworkEventBus->StopListenNetworkEvent(
+            csp::multiplayer::NetworkEventRegistration("CSPInternal::ClientElectionManager", RemoteRunScriptMessage));
+
         LeaderElectionManager.reset(nullptr);
     }
     if (ElectionManager != nullptr)
