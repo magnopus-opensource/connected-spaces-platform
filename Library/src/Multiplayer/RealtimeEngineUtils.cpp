@@ -32,14 +32,11 @@ namespace csp::multiplayer::RealtimeEngineUtils
 {
 csp::common::String ModifiableStatusToString(ModifiableStatus Failure)
 {
-    auto ModifiableStatusIt = ModifiableStatusErrors.find(Failure);
-
-    if (ModifiableStatusIt != ModifiableStatusErrors.end())
+    if (auto it = ModifiableStatusErrors.find(Failure); it != ModifiableStatusErrors.end())
     {
-        return ModifiableStatusIt->second;
+        return it->second;
     }
-
-    return "";
+    return "No log specified for modifiable status";
 }
 
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
