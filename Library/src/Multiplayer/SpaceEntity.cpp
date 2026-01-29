@@ -339,7 +339,7 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = IsModifiableWithReason();
+    ModifiableStatus Modifiable = IsModifiable();
     if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
@@ -403,7 +403,7 @@ bool SpaceEntity::UpdateComponent(ComponentBase* Component)
 bool SpaceEntity::RemoveComponent(uint16_t Key)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = IsModifiableWithReason();
+    ModifiableStatus Modifiable = IsModifiable();
     if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
@@ -616,9 +616,7 @@ bool SpaceEntity::Deselect()
     return InternalSetSelectionStateOfEntity(false);
 }
 
-bool SpaceEntity::IsModifiable() const { return IsModifiableWithReason() == ModifiableStatus::Modifiable; }
-
-ModifiableStatus SpaceEntity::IsModifiableWithReason() const
+ModifiableStatus SpaceEntity::IsModifiable() const
 {
     if (EntitySystem == nullptr)
     {

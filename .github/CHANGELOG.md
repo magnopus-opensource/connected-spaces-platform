@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🔥 ❗ Breaking Changes
+
+- [OB-4350] fix!: Improved log output for unmodifiable entities by MAG-mav
+  This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
+  SpaceEntity::IsModifiable now returns an enum, specifying the reason.
+  Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
+  Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
 
 
 ## [6.21.0] - 2026-01-28_11-22-27
@@ -14,13 +21,6 @@ All notable changes to this project will be documented in this file.
   This method provides a means of changing a users tier (basic, pro, enterprise, etc)
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
-
-### 🐛 🔨 Bug Fixes
-
-- [OB-4350] fix: Improved log output for unmodifiable entities by MAG-mav
-  This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
-  Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
-  Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
   
 ### 🔨 🔨 Chore
 

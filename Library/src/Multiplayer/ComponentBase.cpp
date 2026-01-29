@@ -232,7 +232,7 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = GetParent()->IsModifiableWithReason();
+    ModifiableStatus Modifiable = GetParent()->IsModifiable();
     if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)

@@ -14,7 +14,7 @@ static bool SetProperty(
     SpaceEntity& Entity, P& Property, const V& Value, SpaceEntityComponentKey Key, SpaceEntityUpdateFlags Flag, csp::common::LogSystem* LogSystem)
 {
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = Entity.IsModifiableWithReason();
+    ModifiableStatus Modifiable = Entity.IsModifiable();
     if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)

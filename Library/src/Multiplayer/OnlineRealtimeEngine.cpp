@@ -909,7 +909,7 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
     }
 
     // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-    ModifiableStatus Modifiable = EntityToUpdate->IsModifiableWithReason();
+    ModifiableStatus Modifiable = EntityToUpdate->IsModifiable();
     if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
@@ -1367,7 +1367,7 @@ void OnlineRealtimeEngine::ProcessPendingEntityOperations()
             if (CurrentTime - PendingEntity->GetTimeOfLastPatch() >= EntityPatchRate || !EntityPatchRateLimitEnabled)
             {
                 // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
-                ModifiableStatus Modifiable = PendingEntity->IsModifiableWithReason();
+                ModifiableStatus Modifiable = PendingEntity->IsModifiable();
                 if (Modifiable != ModifiableStatus::Modifiable)
                 {
                     if (LogSystem != nullptr)
