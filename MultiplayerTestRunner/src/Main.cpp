@@ -23,6 +23,7 @@
 #include "RunnableTests/EventBusPing.h"
 #include "RunnableTests/LeaderElection.h"
 #include "RunnableTests/LeaderElectionTick.h"
+#include "RunnableTests/LeaderElectionEvent.h"
 #include "SpaceRAII.h"
 #include "Utils.h"
 
@@ -75,6 +76,9 @@ void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_p
         break;
     case TestIdentifier::LEADER_ELECTION_TICK:
         LeaderElectionTick::RunTest(SpaceRAII.GetRealtimeEngine());
+        break;
+    case TestIdentifier::LEADER_ELECTION_EVENT:
+        LeaderElectionEvent::RunTest(SpaceRAII.GetRealtimeEngine());
         break;
     default:
         throw Utils::ExceptionWithCode(
