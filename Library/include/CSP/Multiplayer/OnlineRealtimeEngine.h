@@ -264,7 +264,6 @@ public:
     /// @detail This entity is considered non-modifiable in the following circumstances:
     /// - The given entities LockType is equal to UserAgnostic, and we dont have an unprocessed patch updating the lock type.
     /// - The entities owner id doesn't match this clients id, and the entity is not transferable.
-    /// - An internal state patcher was never created by the owning realtime engine (unexpected).
     /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
     /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
     ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;

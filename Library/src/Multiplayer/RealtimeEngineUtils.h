@@ -59,7 +59,6 @@ static const std::unordered_map<ModifiableStatus, csp::common::String> Modifiabl
     { ModifiableStatus::Modifiable, "" },
     { ModifiableStatus::EntityLocked, "Entity is locked" },
     { ModifiableStatus::EntityNotOwnedAnUntransferable, "Entity is not owned by this client and isn't transferable" },
-    { ModifiableStatus::NoStatePatcher, "Unexpected lack of StatePatcher in online context" },
 };
 
 csp::common::String ModifiableStatusToString(ModifiableStatus Failure);

@@ -827,11 +827,8 @@ csp::multiplayer::SpaceEntityStatePatcher* OnlineRealtimeEngine::MakeStatePatche
 
 ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const
 {
-    // This should definately be true at this point, but be defensive
-    if (SpaceEntity->GetStatePatcher() == nullptr)
-    {
-        return ModifiableStatus::NoStatePatcher;
-    }
+    // This should definitely be true at this point, but be defensive.
+    assert(SpaceEntity->GetStatePatcher() != nullptr);
 
     // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
     // so we skip the lock check they are about to unlock.
@@ -918,8 +915,7 @@ void OnlineRealtimeEngine::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
         if (LogSystem != nullptr)
         {
             LogSystem->LogMsg(csp::common::LogLevel::Warning,
-                fmt::format("Failed to queue entity update: {0}. Entity name: {1}",
-                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable),
+                fmt::format("Failed to queue entity update: {0}. Entity name: {1}", RealtimeEngineUtils::ModifiableStatusToString(Modifiable),
                     EntityToUpdate->GetName())
                     .c_str());
         }

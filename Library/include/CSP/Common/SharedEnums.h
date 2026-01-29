@@ -199,9 +199,7 @@ enum class ModifiableStatus
     /// The entity is locked (LockType is not None).
     EntityLocked,
     /// Entity doesn't belong to this client and is not transferable.
-    EntityNotOwnedAnUntransferable,
-    /// Entity doesn't have a state patcher in an online context (unexpected).
-    NoStatePatcher
+    EntityNotOwnedAnUntransferable
 };
 
 } // namespace csp::multiplayer
