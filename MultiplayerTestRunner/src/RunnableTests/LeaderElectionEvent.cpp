@@ -32,10 +32,13 @@ namespace LeaderElectionEvent
 
 void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
 {
+    std::cout << "Multiplayer test runner process starting test" << std::endl;
+
     csp::multiplayer::SpaceEntity* Entity = RealtimeEngine.GetEntityByIndex(0);
 
     if (Entity == nullptr)
     {
+        std::cout << "Script entity doesn't exist" << std::endl;
         throw std::runtime_error("Script entity doesn't exist");
     }
 
