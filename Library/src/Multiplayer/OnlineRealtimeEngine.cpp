@@ -830,9 +830,8 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     // This should definitely be true at this point, but be defensive.
     assert(SpaceEntity->GetStatePatcher() != nullptr);
 
-    // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
-    // so we skip the lock check they are about to unlock.
-    // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
+    // In order to unlock an entity, we need to modify it. 
+    // So we need to check if we are about to unlock the entity, and treat it as modifiabe if so, otherwise we cannot unlock a locked entity.
     // Note : This will stop working if we ever add another lock type
     const bool AboutToUnlock = SpaceEntity->GetStatePatcher()->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
     if (SpaceEntity->GetLockType() == LockType::UserAgnostic && !AboutToUnlock)
@@ -843,7 +842,7 @@ ModifiableStatus OnlineRealtimeEngine::IsEntityModifiable(const csp::multiplayer
     // If the entity isn't owned by this client, and ownership cannot be transfered, then we cannot modify this entity.
     if (SpaceEntity->GetOwnerId() != GetMultiplayerConnectionInstance()->GetClientId() && SpaceEntity->GetIsTransferable() == false)
     {
-        return ModifiableStatus::EntityNotOwnedAnUntransferable;
+        return ModifiableStatus::EntityNotOwnedAndUntransferable;
     }
 
     return ModifiableStatus::Modifiable;

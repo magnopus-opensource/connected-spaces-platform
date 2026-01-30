@@ -1733,7 +1733,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, IsModifiableTest)
     Entity->IsTransferable = false;
     Entity->OwnerId = 0;
 
-    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityNotOwnedAnUntransferable);
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityNotOwnedAndUntransferable);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
