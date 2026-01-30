@@ -428,6 +428,40 @@ bool String::Contains(const String& Substring) const
     return strstr(Get(), Substring.Get()) != nullptr;
 }
 
+bool String::StartsWith(const String& Prefix) const
+{
+    if (Prefix.Length() == 0 || Prefix.Length() > ImplPtr->Length)
+    {
+        return false;
+    }
+
+    return std::memcmp(Get(), Prefix.Get(), Prefix.Length()) == 0;
+}
+
+bool String::EndsWith(const String& Postfix) const
+{
+    if (Postfix.Length() == 0 || Postfix.Length() > ImplPtr->Length)
+    {
+        return false;
+    }
+
+    return std::memcmp(Get() + (ImplPtr->Length - Postfix.Length()), Postfix.Get(), Postfix.Length()) == 0;
+}
+
+String String::SubString(size_t Offset, Optional<size_t> Length)
+{
+    if (Offset >= ImplPtr->Length)
+    {
+        return "";
+    }
+
+    size_t MaxSubStringLength = ImplPtr->Length - Offset;
+
+    size_t SubstringLength = Length.HasValue() ? std::min(*Length, MaxSubStringLength) : MaxSubStringLength;
+
+    return String(ImplPtr->Text + Offset, SubstringLength);
+}
+
 String String::Join(const std::initializer_list<String>& Parts, Optional<char> Separator)
 {
     if (Parts.size() == 0)

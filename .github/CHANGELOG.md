@@ -4,16 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 💫 💥 Code Refactors
 
+- [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
+  When creating a new HotspotGroup, the name property has the sequence type ("Hotspots") and SpaceId appended. The original name was also being stored in the sequence metadata. This was causing issues with renaming Hotspot sequences or when retrieving on Space entry. This change removes use of metadata. As part of this change `StartsWith`, `EndsWith` and `SubString` String utility methods have also be added.
 
 ## [6.21.0] - 2026-01-28_11-22-27
 
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add `SetUserTier` method to `QuotaSystem` by MAG-ElliotMorris
-  This method provides a means of changing a users tier (basic, pro, enterprise, etc)
-  through the api. This method will only succeed when logged in as an admin user.
-  This method is mostly for internal testing, but there is no harm allowing public use.
+  This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore
 
