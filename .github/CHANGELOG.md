@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.22.0] - 2026-01-30_19-53-59
+
 ### 🔥 ❗ Breaking Changes
 
 - [OB-4350] fix!: Improved log output for unmodifiable entities by MAG-mav
