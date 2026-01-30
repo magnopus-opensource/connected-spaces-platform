@@ -39,6 +39,13 @@ All notable changes to this project will be documented in this file.
     - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
     - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
     - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+### 🐛 🔨 Bug Fixes
+
+- [OB-5015] fix: Fixed crash with server-side leader election after exiting space by MAG-MV
+  Internal CSP event was not being deregistered when exiting a space, sometimes causing a crash.
+
+- [OB-5019] fix: Fixed server-side leader election leader change when a new client enters space by MAG-mv
+  An incorrect client id was being used internally, causing the new client to always think it is leader.
 
 ## [6.20.0] - 2026-01-13_17-38-31
 
