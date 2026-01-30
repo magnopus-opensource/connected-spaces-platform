@@ -917,3 +917,33 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, BasicSceneDescriptionTest
 
     LogOut(UserSystem);
 }
+
+/*
+    Ensures IsEntityModifiable works under the correct conditions.
+    Check OfflineRealtimeEngine::IsEntityModifiable docs for details.
+*/
+CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, IsModifiableTest) 
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+
+    CSPSceneDescription SceneDescription;
+    OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
+
+    const csp::common::String EntityName = "Entity1";
+
+    SpaceEntity* Entity = nullptr;
+    Engine.CreateEntity(EntityName, SpaceTransform {}, nullptr, [&Entity](SpaceEntity* NewEntity) { Entity = NewEntity; });
+
+    // Entity should be modifiable when first created as it is not locked by default.
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+
+    Entity->Lock();
+
+    // Entity should not be modifiable now it is locked.
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::EntityLocked);
+
+    Entity->Unlock();
+
+    // Entity should be modifiable again.
+    EXPECT_EQ(Engine.IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+}

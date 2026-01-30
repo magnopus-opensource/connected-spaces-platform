@@ -2,6 +2,7 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "SpaceEntityStatePatcher.h"
 
 namespace csp::multiplayer
@@ -12,14 +13,15 @@ template <typename P, typename V>
 static bool SetProperty(
     SpaceEntity& Entity, P& Property, const V& Value, SpaceEntityComponentKey Key, SpaceEntityUpdateFlags Flag, csp::common::LogSystem* LogSystem)
 {
-    if (!Entity.IsModifiable())
+    // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+    ModifiableStatus Modifiable = Entity.IsModifiable();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
-        if (LogSystem)
+        if (LogSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-                            "owner of. Entity name: {}",
-                    Entity.GetName())
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to set propery on entity: {0}, skipping update. Entity name: {1}",
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), Entity.GetName())
                     .c_str());
         }
 

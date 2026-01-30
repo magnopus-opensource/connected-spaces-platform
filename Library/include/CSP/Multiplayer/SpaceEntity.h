@@ -38,6 +38,7 @@ CSP_START_IGNORE
 class CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
 class CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
 class CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
+class CSPEngine_MultiplayerTests_IsModifiableTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -92,6 +93,7 @@ class CSP_API SpaceEntity
     friend class ::CSPEngine_MultiplayerTests_LockPrerequisitesTest_Test;
     friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionDeserializeTest_Test;
     friend class ::CSPEngine_SceneDescriptionTests_SceneDescriptionMinimalDeserializeTest_Test;
+    friend class ::CSPEngine_MultiplayerTests_IsModifiableTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
@@ -319,10 +321,10 @@ public:
     /// @return True if deselection occurred. False if not.
     bool Deselect();
 
-    /// @brief Checks if the entity can be modified.
-    /// Specifically whether the local client already owns the entity or can take ownership of the entity.
-    /// @return True if the entity can be modified, False if not.
-    bool IsModifiable() const;
+    /// Checks if the entity can be modified, with a failure reason if the entity isn't modifiable.
+    /// The criteria for failures can be found on specific RealtimeEngine IsEntityModifiable overridden functions.
+    /// @return csp::multiplayer::ModifiableStatus : ModifiableStatus::Modifiable on success.
+    ModifiableStatus IsModifiable() const;
 
     /// @brief Locks the entity if it hasn't been locked already.
     /// @pre The entity must not already be locked.

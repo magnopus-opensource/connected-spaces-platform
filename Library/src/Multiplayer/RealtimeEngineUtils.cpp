@@ -30,6 +30,15 @@ csp::common::String JSONStringFromDeltaTime(double DeltaTime) { return fmt::form
 
 namespace csp::multiplayer::RealtimeEngineUtils
 {
+csp::common::String ModifiableStatusToString(ModifiableStatus Failure)
+{
+    if (auto it = ModifiableStatusErrors.find(Failure); it != ModifiableStatusErrors.end())
+    {
+        return it->second;
+    }
+    return "No log specified for modifiable status";
+}
+
 csp::multiplayer::SpaceEntity* FindSpaceEntity(csp::common::IRealtimeEngine& RealtimeEngine, const csp::common::String& Name)
 {
     for (size_t i = 0; i < RealtimeEngine.GetNumEntities(); ++i)

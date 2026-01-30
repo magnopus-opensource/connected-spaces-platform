@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🔥 ❗ Breaking Changes
+
+- [OB-4350] fix!: Improved log output for unmodifiable entities by MAG-mav
+  This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
+  SpaceEntity::IsModifiable now returns an enum, specifying the reason.
+  Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
+  Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
@@ -14,6 +21,10 @@ All notable changes to this project will be documented in this file.
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add `SetUserTier` method to `QuotaSystem` by MAG-ElliotMorris
+  This method provides a means of changing a users tier (basic, pro, enterprise, etc)
+  through the api. This method will only succeed when logged in as an admin user.
+  This method is mostly for internal testing, but there is no harm allowing public use.
+  
   This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore

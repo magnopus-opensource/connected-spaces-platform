@@ -20,6 +20,7 @@
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "ComponentBaseKeys.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
@@ -230,14 +231,15 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
         }
     }
 
-    // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-    if (!GetParent()->IsModifiable())
+    // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+    ModifiableStatus Modifiable = GetParent()->IsModifiable();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error,
-                fmt::format("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: {}",
-                    GetParent()->GetName())
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to set property on component: {0}, skipping update. Entity name: {1}",
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetParent()->GetName())
                     .c_str());
         }
 
