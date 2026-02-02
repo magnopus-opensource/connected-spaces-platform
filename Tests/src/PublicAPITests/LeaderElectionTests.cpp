@@ -1126,6 +1126,8 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
+    RealtimeEngine->SetEntityPatchRateLimitEnabled(false);
+
     // Wait for the script system to be ready
     {
         auto ScriptSystemIsReady = [&ScriptSystemReady]()
@@ -1185,6 +1187,14 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
 
         // Ensure the entity has been updated
         EXPECT_EQ(ModelComponent->GetPosition().X, 1);
+    }
+
+    // Ensure data has been written to database before we spawn the client.
+    // This fixes an issue where the script source was sometimes empty on the spawned client.
+    for (int i = 0; i < 7; i++)
+    {
+        csp::CSPFoundation::Tick();
+        std::this_thread::sleep_for(std::chrono::seconds { 1 });
     }
 
     // Send script event from another client
