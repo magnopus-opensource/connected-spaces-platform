@@ -29,9 +29,24 @@ CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
     const int TestLength = 10000;
     std::string UniqueHexStrings[TestLength];
 
+    static thread_local bool once = []
+    {
+        std::random_device rd;
+        auto s = rd();
+        std::cout << "seed=" << s << " entropy=" << rd.entropy() << " thread=" << std::this_thread::get_id() << "\n";
+        return true;
+    }();
+
     for (int i = 0; i < TestLength; i++)
     {
         std::string HexValue = GetUniqueString();
+
+        auto Found = std::find(std::begin(UniqueHexStrings), std::end(UniqueHexStrings), HexValue);
+
+        if (Found != std::end(UniqueHexStrings))
+        {
+            std::cout << "Value: " << *Found << std::endl;
+        }
 
         EXPECT_FALSE((std::find(std::begin(UniqueHexStrings), std::end(UniqueHexStrings), HexValue) != std::end(UniqueHexStrings)));
 
