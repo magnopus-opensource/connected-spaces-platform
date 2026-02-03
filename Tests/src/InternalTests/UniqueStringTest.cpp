@@ -29,13 +29,13 @@ CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
     const int TestLength = 10000;
     std::string UniqueHexStrings[TestLength];
 
-    static thread_local bool once = []
-    {
-        std::random_device rd;
-        auto s = rd();
-        std::cout << "seed=" << s << " entropy=" << rd.entropy() << " thread=" << std::this_thread::get_id() << "\n";
-        return true;
-    }();
+    //static thread_local bool once = []
+    //{
+    //    std::random_device rd;
+    //    auto s = rd();
+    //    std::cout << "seed=" << s << " entropy=" << rd.entropy() << " thread=" << std::this_thread::get_id() << "\n";
+    //    return true;
+    //}();
 
     for (int i = 0; i < TestLength; i++)
     {
