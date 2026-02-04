@@ -37,3 +37,4 @@ CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
         bool IsDuplicate = !UniqueHexStrings.insert(HexValue).second;
         EXPECT_FALSE(IsDuplicate);
     }
+}
