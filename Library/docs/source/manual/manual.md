@@ -1,6 +1,6 @@
 # MANUAL
 
-This manual serves as a central hub for documentation, guides, and resources related to the working with CSP.
+This manual serves as a central hub for documentation, guides, and resources related to working with CSP.
 
 Whether you're a developer, contributor, or simply curious about the platform, this wiki is here to help you get started either using or contributing to CSP.
 
@@ -21,7 +21,7 @@ For a quick guide on getting started with Connected Spaces Platform, follow the 
 
 ## Tutorials
 
-Use these tutorials to help you get yor CSP-enabled application running as fast as possible.
+Use these tutorials to help you get your CSP-enabled application running as fast as possible.
 
 ```eval_rst
 .. toctree::
@@ -72,7 +72,7 @@ If you're forking CSP for your own purposes, or seeking to contribute back, you 
 
 ## Tests
 
-CSP's functionality is validated via an ever-growing suite of tests, and any chance introducing new functionality is expected to also include test coverage.
+CSP's functionality is validated via an ever-growing suite of tests, and any change introducing new functionality is expected to also include test coverage.
 In this section, you can find out how the tests work, testing best practices, and how to run them.
 
 ```eval_rst
@@ -82,7 +82,6 @@ In this section, you can find out how the tests work, testing best practices, an
 
    tests/best_practices
    tests/test_locations
-   tests/test_account_credentials
 ```
 
 ## Debugging
