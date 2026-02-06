@@ -49,7 +49,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, CurrentPlay
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, TimeSincePlay);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerSourceType, int32_t, VideoPlayerSourceType);
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::StereoVideoType, int32_t, StereoVideoType);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, EStereoVideoType, int32_t, StereoVideoType);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsStereoFlipped);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsARVisible);
