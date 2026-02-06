@@ -26,6 +26,9 @@
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
+#include "CSP/Common/SharedEnums.h"
+
+using namespace csp::systems;
 
 namespace csp::multiplayer
 {
@@ -58,15 +61,6 @@ enum class VideoPlayerSourceType
     Num
 };
 
-/// @brief Enumerates the type of stereo the video player supports.
-enum StereoVideoType
-{
-    None = 0,
-    SideBySide,
-    TopBottom,
-    Num
-};
-
 /// @brief Enumerates the list of properties that can be replicated for a video player component.
 enum class VideoPlayerPropertyKeys
 {
@@ -92,6 +86,7 @@ enum class VideoPlayerPropertyKeys
     IsEnabled,
     IsVirtualVisible,
     StereoVideoType,
+    IsStereoFlipped,
     Num
 };
 
@@ -237,11 +232,19 @@ public:
 
     /// @brief Gets the type of stereo the video of this component uses.
     /// @return The type of stereo used by this video.
-    StereoVideoType GetStereoVideoType() const;
+    EStereoVideoType GetStereoVideoType() const;
 
     /// @brief Sets the type of stereo the video of this component uses.
     /// @param Value The type of stereo used by this video.
-    void SetStereoVideoType(StereoVideoType Value);
+    void SetStereoVideoType(EStereoVideoType Value);
+
+    /// @brief Gets whether the stereo video left and right are flipped.
+    /// @return True if the stereo frames are flipped, false for default.
+    bool GetIsStereoFlipped() const;
+
+    /// @brief Sets whether the stereo video left and right are flipped.
+    /// @param Value True if the stereo frames are flipped, false for default.
+    void SetIsStereoFlipped(bool Value);
 
     /// \addtogroup IVisibleComponent
     /// @{

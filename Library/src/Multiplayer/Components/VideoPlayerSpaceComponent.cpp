@@ -46,7 +46,8 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay)] = 0.0f;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)] = static_cast<int64_t>(VideoPlayerSourceType::AssetSource);
-    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)] = static_cast<int64_t>(StereoVideoType::None);
+    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)] = static_cast<int64_t>(csp::systems::EStereoVideoType::None);
+    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)] = false;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)] = static_cast<int64_t>(0);
@@ -208,15 +209,19 @@ void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType V
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(Value));
 }
 
-StereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
+EStereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
 {
-    return static_cast<StereoVideoType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)));
+    return static_cast<EStereoVideoType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)));
 }
 
-void VideoPlayerSpaceComponent::SetStereoVideoType(StereoVideoType Value)
+void VideoPlayerSpaceComponent::SetStereoVideoType(csp::systems::EStereoVideoType Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType), static_cast<int64_t>(Value));
 }
+
+bool VideoPlayerSpaceComponent::GetIsStereoFlipped() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)); }
+
+void VideoPlayerSpaceComponent::SetIsStereoFlipped(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped), Value); }
 
 /* IVisibleComponent */
 

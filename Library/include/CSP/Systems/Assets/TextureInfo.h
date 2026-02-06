@@ -18,6 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
+#include "CSP/Common/SharedEnums.h"
 
 namespace csp::systems
 {
@@ -133,16 +134,35 @@ public:
     /// @param Value bool
     void SetTexture(bool Value);
 
+    /// @brief Gets the type of stereo the texture uses.
+    /// @return The type of stereo used by this texture.
+    EStereoVideoType GetStereoVideoType() const;
+
+    /// @brief Sets the type of stereo the texture uses.
+    /// @param Value The type of stereo used by this texture.
+    void SetStereoVideoType(EStereoVideoType Value);
+
+    /// @brief Gets whether the stereo video left and right are flipped.
+    /// @return True if the stereo frames are flipped, false for default.
+    bool GetIsStereoFlipped() const;
+
+    /// @brief Sets whether the stereo video left and right are flipped.
+    /// @param Value True if the stereo frames are flipped, false for default.
+    void SetIsStereoFlipped(bool Value);
+
 private:
     csp::common::String AssetCollectionId;
     csp::common::String AssetId;
     csp::common::String EntityComponentId;
 
     ETextureResourceType SourceType;
-
+    
     csp::common::Vector2 UVOffset;
     float UVRotation;
     csp::common::Vector2 UVScale;
+
+    EStereoVideoType StereoVideoType;
+    bool IsStereoFlipped;
 
     int TexCoord;
 
