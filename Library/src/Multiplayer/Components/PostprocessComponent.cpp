@@ -22,7 +22,7 @@ namespace csp::multiplayer
 {
 
 PostprocessSpaceComponent::PostprocessSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Reflection, LogSystem, Parent)
+    : ComponentBase(ComponentType::Postprocess, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Rotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };

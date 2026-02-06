@@ -43,6 +43,7 @@
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/PostprocessComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
@@ -593,6 +594,15 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, Voice, "voice")
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, GuardrailAssetCollectionId, "guardrailAssetCollectionId")
         .PROPERTY_GET_SET(AIChatbotSpaceComponent, VisualState, "visualState");
+
+    Module->class_<PostprocessSpaceComponentScriptInterface>("PostprocessSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, Position, "position")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, Scale, "scale")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, Exposure, "exposure")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, IsUnbound, "isUnbound");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -640,6 +650,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::GetComponentsOfType<ScreenSharingSpaceComponentScriptInterface, ComponentType::ScreenSharing>>(
             "getScreenSharingComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AIChatbotSpaceComponentScriptInterface, ComponentType::AIChatbot>>("getAIChatbotComponents")
+        .fun<&EntityScriptInterface::GetComponentsOfType<PostprocessSpaceComponentScriptInterface, ComponentType::Postprocess>>(
+            "getPostprocessComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
         .property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")

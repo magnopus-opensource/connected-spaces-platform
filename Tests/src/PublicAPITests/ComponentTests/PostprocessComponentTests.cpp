@@ -21,6 +21,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/Components/PostprocessComponent.h"
+#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -71,16 +72,16 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     const csp::common::String EntityName = "Postprocess Entity";
     SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    auto [Object] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
+    auto [Entity] = AWAIT(RealtimeEngine.get(), CreateEntity, EntityName, ObjectTransform, csp::common::Optional<uint64_t> {});
 
     // Process component creation
-    auto* PostprocessComponent = (PostprocessSpaceComponent*)Object->AddComponent(ComponentType::Postprocess);
+    auto* PostprocessComponent = (PostprocessSpaceComponent*)Entity->AddComponent(ComponentType::Postprocess);
 
-    Object->QueueUpdate();
+    Entity->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
 
     // Check component was created
-    auto& Components = *Object->GetComponents();
+    auto& Components = *Entity->GetComponents();
     EXPECT_EQ(Components.Size(), 1);
 
     // Validate default properties
@@ -104,7 +105,7 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     PostprocessComponent->SetIsUnbound(NewIsUnbound);
 
     auto PostprocessComponentKey = PostprocessComponent->GetId();
-    auto* FoundComponent = (PostprocessSpaceComponent*)Object->GetComponent(PostprocessComponentKey);
+    auto* FoundComponent = (PostprocessSpaceComponent*)Entity->GetComponent(PostprocessComponentKey);
 
     EXPECT_EQ(PostprocessComponent, FoundComponent);
 
@@ -113,6 +114,82 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     EXPECT_EQ(FoundComponent->GetScale(), NewScale);
     EXPECT_EQ(FoundComponent->GetExposure(), NewExposure);
     EXPECT_EQ(FoundComponent->GetIsUnbound(), NewIsUnbound);
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessSpaceComponentScriptInterfaceTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) { });
+
+    // Entity creation
+    csp::common::String ObjectName = "Postprocess Entity";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [Entity] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+
+    // Component creation
+    auto* PostprocessComponent = (PostprocessSpaceComponent*)Entity->AddComponent(ComponentType::Postprocess);
+    auto* ScriptComponent = (ScriptSpaceComponent*)Entity->AddComponent(ComponentType::ScriptData);
+    Entity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    // Script mutating properties
+    std::string ScriptString = R"xx(
+	
+		var postprocess = ThisEntity.getPostprocessComponents()[0];
+		postprocess.position = [100.0,200.0,300.0];
+        postprocess.rotation = [0.0, 0.707, 0.0, 0.707];        
+        postprocess.scale = [2.0, 2.0, 2.0];
+		postprocess.exposure = 50.0;
+		postprocess.isUnbound = false;
+    )xx";
+
+    // Invoking the script
+    ScriptComponent->SetScriptSource(ScriptString.c_str());
+    Entity->GetScript().Invoke();
+    const bool ScriptHasErrors = Entity->GetScript().HasError();
+    EXPECT_FALSE(ScriptHasErrors);
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    // Validating value application
+    const csp::common::Vector3 NewPosition(100.0f, 200.0f, 300.0f);
+    const csp::common::Vector4 NewRotation(0.0f, 0.707f, 0.0f, 0.707f);
+    const csp::common::Vector3 NewScale(2.0f, 2.0f, 2.0f);
+    const float NewExposure = 50.0f;
+    const bool NewIsUnbound = false;
+
+    EXPECT_EQ(PostprocessComponent->GetPosition(), NewPosition);
+    EXPECT_EQ(PostprocessComponent->GetRotation(), NewRotation);
+    EXPECT_EQ(PostprocessComponent->GetScale(), NewScale);
+    EXPECT_EQ(PostprocessComponent->GetExposure(), NewExposure);
+    EXPECT_EQ(PostprocessComponent->GetIsUnbound(), NewIsUnbound);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

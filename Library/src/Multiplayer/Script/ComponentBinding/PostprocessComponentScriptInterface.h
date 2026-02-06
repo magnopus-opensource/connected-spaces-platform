@@ -34,7 +34,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
     DECLARE_SCRIPT_PROPERTY(float, Exposure);
-    DECLARE_SCRIPT_PROPERTY(bool, IsUnbound);;
+    DECLARE_SCRIPT_PROPERTY(bool, IsUnbound);
 };
 
 } // namespace csp::multiplayer
