@@ -266,4 +266,12 @@ enum class ERequestFailureReason
     UserTokenRefreshFailed,
     InvalidSequenceKey,
 };
+
+/// @brief Enumerates the type of stereo the video player and texture material supports.
+enum class EStereoVideoType
+{
+    None = 0,
+    SideBySide,
+    TopBottom
+};
 } // namespace csp::systems
