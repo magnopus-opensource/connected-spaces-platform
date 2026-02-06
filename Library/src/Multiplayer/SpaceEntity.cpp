@@ -43,6 +43,7 @@
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
+#include "CSP/Multiplayer/Components/PostprocessComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/OfflineRealtimeEngine.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
@@ -570,6 +571,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::AIChatbot:
         Component = new AIChatbotSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::Postprocess:
+        Component = new PostprocessSpaceComponent(LogSystem, this);
         break;
     default:
     {
