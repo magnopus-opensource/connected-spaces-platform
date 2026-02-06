@@ -233,7 +233,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
 
     EXPECT_CALL(MockCallback, Call(::testing::_))
         .WillOnce(::testing::Invoke(
-            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, &UserTransform, IsVisible](SpaceEntity* CreatedSpaceEntity)
+            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, IsVisible](SpaceEntity* CreatedSpaceEntity)
             {
                 ASSERT_NE(CreatedSpaceEntity, nullptr);
                 ASSERT_EQ(CreatedSpaceEntity->GetId(), Id);
