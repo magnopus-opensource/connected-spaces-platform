@@ -27,7 +27,7 @@ PostprocessSpaceComponent::PostprocessSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Rotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Exposure)] = 100.0f;
+    Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Exposure)] = 0.0f;
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::IsUnbound)] = true;
 
     SetScriptInterface(new PostprocessSpaceComponentScriptInterface(this));
