@@ -229,28 +229,6 @@ MultiplayerConnection* OnlineRealtimeEngine::GetMultiplayerConnectionInstance() 
 
 csp::common::RealtimeEngineType OnlineRealtimeEngine::GetRealtimeEngineType() const { return csp::common::RealtimeEngineType::Online; }
 
-namespace
-{
-    std::unique_ptr<csp::multiplayer::SpaceEntity> BuildNewAvatar(const csp::common::String& UserId,
-        csp::multiplayer::OnlineRealtimeEngine& OnlineRealtimeEngine, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem& LogSystem,
-        uint64_t NetworkId, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, uint64_t OwnerId,
-        bool IsTransferable, bool IsPersistent, const csp::common::String& AvatarId, csp::multiplayer::AvatarState AvatarState,
-        csp::multiplayer::AvatarPlayMode AvatarPlayMode)
-    {
-        auto NewAvatar = std::unique_ptr<csp::multiplayer::SpaceEntity>(new csp::multiplayer::SpaceEntity(&OnlineRealtimeEngine, ScriptRunner,
-            &LogSystem, SpaceEntityType::Avatar, NetworkId, Name, Transform, OwnerId, {}, IsTransferable, IsPersistent));
-
-        auto* AvatarComponent = static_cast<AvatarSpaceComponent*>(NewAvatar->AddComponent(ComponentType::AvatarData));
-        AvatarComponent->SetAvatarId(AvatarId);
-        AvatarComponent->SetState(AvatarState);
-        AvatarComponent->SetAvatarPlayMode(AvatarPlayMode);
-        AvatarComponent->SetUserId(UserId);
-        AvatarComponent->SetIsVisible(IsVisible);
-
-        return NewAvatar;
-    }
-}
-
 async::task<uint64_t> OnlineRealtimeEngine::RemoteGenerateNewAvatarId()
 {
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
@@ -277,7 +255,7 @@ std::function<async::task<uint64_t>(uint64_t)> OnlineRealtimeEngine::SendNewAvat
 {
     return [Name, UserId, Transform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, this](uint64_t NetworkId) // Serialize Avatar
     {
-        auto NewAvatar = BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *this->ScriptRunner, *LogSystem, NetworkId, Name, Transform, IsVisible,
             MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         const mcs::ObjectMessage Message = NewAvatar->GetStatePatcher()->CreateObjectMessage();
@@ -318,7 +296,7 @@ std::function<void(uint64_t)> OnlineRealtimeEngine::CreateNewLocalAvatar(const c
          * Note also however, that we don't double fetch the network ID, which is the main cost of constructing these things anyhow.
          * (Stricter interface segregation for our serializers would also have solved this problem, but only in the local sense)
          */
-        std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
+        auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(UserId, *this, *ScriptRunner, *LogSystem, NetworkId, Name,
             Transform, IsVisible, MultiplayerConnectionInst->GetClientId(), false, false, AvatarId, AvatarState, AvatarPlayMode);
 
         std::scoped_lock EntitiesLocker(*EntitiesLock);
