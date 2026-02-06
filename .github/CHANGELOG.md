@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🍰 🙌 New Features
 
+- [NT-0] feat: A postprocess component for interoperably expressing postprocessing settings.
+  The initial set of component values is limited to one; exposure, as differences in
+  exposure is most frequently cited by client application developers as a key contributor 
+  towards visual differences.
 
 ## [6.21.0] - 2026-01-28_11-22-27
 
