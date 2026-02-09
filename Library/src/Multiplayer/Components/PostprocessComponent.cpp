@@ -32,6 +32,13 @@ PostprocessSpaceComponent::PostprocessSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::IsUnbound)] = true;
 
     SetScriptInterface(new PostprocessSpaceComponentScriptInterface(this));
+
+    Extensions = ComponentExtensions(this);
+}
+
+ComponentExtensions& PostprocessSpaceComponent::GetExtensions()
+{
+    return Extensions;
 }
 
 /* IPositionComponent */

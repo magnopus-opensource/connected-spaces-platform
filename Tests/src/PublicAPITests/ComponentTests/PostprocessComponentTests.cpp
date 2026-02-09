@@ -107,6 +107,12 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     PostprocessComponent->SetExposureMax(NewExposureMax);
     PostprocessComponent->SetIsUnbound(NewIsUnbound);
 
+    // Postprocess component extensions
+    EXPECT_EQ(PostprocessComponent->GetNumProperties(), 7);
+    PostprocessComponent->GetExtensions().SetProperty("MyCustomFloat", 5.0f);
+    PostprocessComponent->GetExtensions().SetProperty("MyCustomBool", true);
+    EXPECT_EQ(PostprocessComponent->GetNumProperties(), 9);
+
     auto PostprocessComponentKey = PostprocessComponent->GetId();
     auto* FoundComponent = (PostprocessSpaceComponent*)Entity->GetComponent(PostprocessComponentKey);
 
@@ -117,7 +123,8 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     EXPECT_EQ(FoundComponent->GetScale(), NewScale);
     EXPECT_EQ(FoundComponent->GetExposureMin(), NewExposureMin);
     EXPECT_EQ(FoundComponent->GetExposureMax(), NewExposureMax);
-    EXPECT_EQ(FoundComponent->GetIsUnbound(), NewIsUnbound);
+    EXPECT_EQ(FoundComponent->GetExtensions().GetProperty("MyCustomFloat"), 5.0f);
+    EXPECT_EQ(FoundComponent->GetExtensions().GetProperty("MyCustomBool"), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

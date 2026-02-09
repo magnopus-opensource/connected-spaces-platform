@@ -168,10 +168,24 @@ public:
     // Used for handling behavior when a client first deletes the component.
     CSP_NO_EXPORT virtual void OnLocalDelete();
 
+    /// @brief Gets the replicated value representing the property for the given key.
+    /// @param Key uint32_t : The unique key representing the property, intended to be defined in the inherited component as an enum of available
+    /// properties keys.
+    /// @return The replicated value representing the property for the given key. Will return an invalid ReplicatedValue if the key does not exist.
+    const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
+
+    /// @brief Sets a replicated value property for the given key.
+    /// @param Key uint32_t : The unique key representing the property, intended to be defined in the inherited component as an enum of available
+    /// properties keys.
+    /// @param Value csp::common::ReplicatedValue : The value to set for the property. This will be replicated to other clients.
+    void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
+
+    /// @brief Gets the number of properties currently associated with this component.
+    size_t GetNumProperties() const;
+
 protected:
     ComponentBase();
 
-    const csp::common::ReplicatedValue& GetProperty(uint32_t Key) const;
     bool GetBooleanProperty(uint32_t Key) const;
     int64_t GetIntegerProperty(uint32_t Key) const;
     float GetFloatProperty(uint32_t Key) const;
@@ -181,7 +195,6 @@ protected:
     const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
     const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& GetStringMapProperty(uint32_t Key) const;
 
-    void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
     void RemoveProperty(uint32_t Key);
     void SetProperties(const csp::common::Map<uint32_t, csp::common::ReplicatedValue>& Value);
 

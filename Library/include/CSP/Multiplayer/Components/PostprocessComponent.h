@@ -22,6 +22,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/ComponentExtensions.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IScaleComponent.h"
@@ -51,12 +52,16 @@ enum class PostprocessPropertyKeys
 /// The component describes exposure settings using ISO 100 units. The component does not define how these values should be applied to the final
 /// rendered image, but it is expected that client applications convert these values to their own exposure units and apply them as a range of minimum
 /// and maximum exposure levels as part of eye adapatation during tonemapping.
+/// If no eye adaptation is desired, the min and max exposure levels should be set to the same value.
 class CSP_API PostprocessSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent, public IScaleComponent
 {
 public:
     /// @brief Constructs the postprocess component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     PostprocessSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
+
+    /// @brief Retrieves the interface for extending the postprocess component with additional properties.
+    ComponentExtensions& GetExtensions();
 
     /// \addtogroup IPositionComponent
     /// @{
@@ -115,6 +120,9 @@ public:
     /// By default, this is set to true.
     /// @param InValue true to make the postprocess volume unbound, false to bind it to its position, rotation and scale.
     void SetIsUnbound(bool InValue);
+
+private:
+    ComponentExtensions Extensions;
 };
 
 } // namespace csp::multiplayer
