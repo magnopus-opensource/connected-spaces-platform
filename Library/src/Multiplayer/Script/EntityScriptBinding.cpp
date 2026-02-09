@@ -601,7 +601,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(PostprocessSpaceComponent, Position, "position")
         .PROPERTY_GET_SET(PostprocessSpaceComponent, Rotation, "rotation")
         .PROPERTY_GET_SET(PostprocessSpaceComponent, Scale, "scale")
-        .PROPERTY_GET_SET(PostprocessSpaceComponent, Exposure, "exposure")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, ExposureMin, "exposureMin")
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, ExposureMax, "exposureMax")
         .PROPERTY_GET_SET(PostprocessSpaceComponent, IsUnbound, "isUnbound");
 }
 

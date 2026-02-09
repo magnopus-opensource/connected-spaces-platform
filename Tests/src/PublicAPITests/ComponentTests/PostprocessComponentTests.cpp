@@ -88,20 +88,23 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     EXPECT_EQ(PostprocessComponent->GetPosition(), csp::common::Vector3::Zero());
     EXPECT_EQ(PostprocessComponent->GetRotation(), csp::common::Vector4(0.0f, 0.0f, 0.0f, 1.0f));
     EXPECT_EQ(PostprocessComponent->GetScale(), csp::common::Vector3::One());
-    EXPECT_EQ(PostprocessComponent->GetExposure(), 100.0f);
+    EXPECT_EQ(PostprocessComponent->GetExposureMin(), 0.0f);
+    EXPECT_EQ(PostprocessComponent->GetExposureMax(), 0.0f);
     EXPECT_EQ(PostprocessComponent->GetIsUnbound(), true);
 
     // Validate application of properties - set position, rotation, scale, exposure and unbound, then check values are replicated back correctly.
     const csp::common::Vector3 NewPosition(100.0f, 200.0f, 300.0f);
     const csp::common::Vector4 NewRotation(0.0f, 0.707f, 0.0f, 0.707f);
     const csp::common::Vector3 NewScale(2.0f, 2.0f, 2.0f);
-    const float NewExposure = 50.0f;
+    const float NewExposureMin = 1.0f;
+    const float NewExposureMax = 10.0f;
     const bool NewIsUnbound = false;
 
     PostprocessComponent->SetPosition(NewPosition);
     PostprocessComponent->SetRotation(NewRotation);
     PostprocessComponent->SetScale(NewScale);
-    PostprocessComponent->SetExposure(NewExposure);
+    PostprocessComponent->SetExposureMin(NewExposureMin);
+    PostprocessComponent->SetExposureMax(NewExposureMax);
     PostprocessComponent->SetIsUnbound(NewIsUnbound);
 
     auto PostprocessComponentKey = PostprocessComponent->GetId();
@@ -112,7 +115,8 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     EXPECT_EQ(FoundComponent->GetPosition(), NewPosition);
     EXPECT_EQ(FoundComponent->GetRotation(), NewRotation);
     EXPECT_EQ(FoundComponent->GetScale(), NewScale);
-    EXPECT_EQ(FoundComponent->GetExposure(), NewExposure);
+    EXPECT_EQ(FoundComponent->GetExposureMin(), NewExposureMin);
+    EXPECT_EQ(FoundComponent->GetExposureMax(), NewExposureMax);
     EXPECT_EQ(FoundComponent->GetIsUnbound(), NewIsUnbound);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -167,7 +171,8 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessSpaceComponentScriptInte
 		postprocess.position = [100.0,200.0,300.0];
         postprocess.rotation = [0.0, 0.707, 0.0, 0.707];        
         postprocess.scale = [2.0, 2.0, 2.0];
-		postprocess.exposure = 50.0;
+		postprocess.exposureMin = 1.0;
+        postprocess.exposureMax = 10.0;
 		postprocess.isUnbound = false;
     )xx";
 
@@ -182,13 +187,15 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessSpaceComponentScriptInte
     const csp::common::Vector3 NewPosition(100.0f, 200.0f, 300.0f);
     const csp::common::Vector4 NewRotation(0.0f, 0.707f, 0.0f, 0.707f);
     const csp::common::Vector3 NewScale(2.0f, 2.0f, 2.0f);
-    const float NewExposure = 50.0f;
+    const float NewExposureMin = 1.0f;
+    const float NewExposureMax = 10.0f;
     const bool NewIsUnbound = false;
 
     EXPECT_EQ(PostprocessComponent->GetPosition(), NewPosition);
     EXPECT_EQ(PostprocessComponent->GetRotation(), NewRotation);
     EXPECT_EQ(PostprocessComponent->GetScale(), NewScale);
-    EXPECT_EQ(PostprocessComponent->GetExposure(), NewExposure);
+    EXPECT_EQ(PostprocessComponent->GetExposureMin(), NewExposureMin);
+    EXPECT_EQ(PostprocessComponent->GetExposureMax(), NewExposureMax);
     EXPECT_EQ(PostprocessComponent->GetIsUnbound(), NewIsUnbound);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

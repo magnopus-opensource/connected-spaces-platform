@@ -35,18 +35,26 @@ enum class PostprocessPropertyKeys
     Position,
     Rotation,
     Scale,
-    Exposure,
+    ExposureMin,
+    ExposureMax,
     IsUnbound,
     Num
 };
 
 /// @ingroup PostprocessSpaceComponent
-/// @brief Defines postprocess settings which should be applied to users within a space. Optionally, the postprocess settings can be applied only
-/// within a defined volume, by setting the position, rotation and scale of the component and setting IsUnbound to false.
+/// @brief Defines postprocess settings which should be applied when rendering a frame to the display for users within a space. 
+/// 
+/// Optionally, the component can express a bound volume (using the position, rotation and scale of the component) by setting IsUnbound to false.
+/// In this scenario, it is expected that client applications treat the component as a transformed unit cube, whose extends define the volume within which these postprocess settings should be applied.
+/// By default, the component is unbound, meaning it applies its postprocess settings to the entire space regardless of its position, rotation and scale.
+/// 
+/// The component describes exposure settings using ISO 100 units. The component does not define how these values should be applied to the final
+/// rendered image, but it is expected that client applications convert these values to their own exposure units and apply them as a range of minimum
+/// and maximum exposure levels as part of eye adapatation during tonemapping.
 class CSP_API PostprocessSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent, public IScaleComponent
 {
 public:
-    /// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
+    /// @brief Constructs the postprocess component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     PostprocessSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
 
@@ -74,15 +82,29 @@ public:
     void SetScale(const csp::common::Vector3& InValue) override;
     /// @}
 
-    /// @brief Gets the exposure level of the postprocess volume. Values are relative to ISO 100, with a default value of 100. 
+    /// @brief Gets the minimum exposure level of the postprocess volume. Units are expected to be ISO 100.
+    /// Defines the darkest exposure level that tonemapping can reach.
     /// Higher values result in a brighter image, while lower values result in a darker image.
     /// @return the ISO 100 exposure value.
-    const float GetExposure() const;
+    const float GetExposureMin() const;
 
-    /// @brief Sets the exposure level of the postprocess volume. Values are relative to ISO 100, with a default value of 100. 
+    /// @brief Sets the minimum exposure level of the postprocess volume. Units are expected to be ISO 100.
+    /// Defines the darkest exposure level that tonemapping can reach.
     /// Higher values result in a brighter image, while lower values result in a darker image.
     /// @param InValue the ISO 100 exposure value.
-    void SetExposure(float InValue);
+    void SetExposureMin(float InValue);
+
+    /// @brief Gets the maximum exposure level of the postprocess volume. Units are expected to be ISO 100.
+    /// Defines the lightest exposure level that tonemapping can reach.
+    /// Higher values result in a brighter image, while lower values result in a darker image.
+    /// @return the ISO 100 exposure value.
+    const float GetExposureMax() const;
+
+    /// @brief Sets the maximum exposure level of the postprocess volume. Units are expected to be ISO 100.
+    /// Defines the lightest exposure level that tonemapping can reach.
+    /// Higher values result in a brighter image, while lower values result in a darker image.
+    /// @param InValue the ISO 100 exposure value.
+    void SetExposureMax(float InValue);
 
     /// @brief Gets whether the postprocess volume is unbound, meaning it applies its effects to the entire space regardless of its position or scale.
     /// By default, this is set to true.

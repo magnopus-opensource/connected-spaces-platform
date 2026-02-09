@@ -27,7 +27,8 @@ PostprocessSpaceComponent::PostprocessSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Position)] = csp::common::Vector3::Zero();
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Rotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(PostprocessPropertyKeys::Exposure)] = 0.0f;
+    Properties[static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMin)] = 0.0f;
+    Properties[static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMax)] = 0.0f;
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::IsUnbound)] = true;
 
     SetScriptInterface(new PostprocessSpaceComponentScriptInterface(this));
@@ -69,14 +70,24 @@ void PostprocessSpaceComponent::SetScale(const csp::common::Vector3& Value)
     SetProperty(static_cast<uint32_t>(PostprocessPropertyKeys::Scale), Value);
 }
 
-const float PostprocessSpaceComponent::GetExposure() const
+const float PostprocessSpaceComponent::GetExposureMin() const
 {
-    return GetFloatProperty(static_cast<uint32_t>(PostprocessPropertyKeys::Exposure));
+    return GetFloatProperty(static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMin));
 }
 
-void PostprocessSpaceComponent::SetExposure(float Value)
+void PostprocessSpaceComponent::SetExposureMin(float Value)
 {
-    SetProperty(static_cast<uint32_t>(PostprocessPropertyKeys::Exposure), Value);
+    SetProperty(static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMin), Value);
+}
+
+const float PostprocessSpaceComponent::GetExposureMax() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMax));
+}
+
+void PostprocessSpaceComponent::SetExposureMax(float Value)
+{
+    SetProperty(static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMax), Value);
 }
 
 bool PostprocessSpaceComponent::GetIsUnbound() const

@@ -33,7 +33,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-    DECLARE_SCRIPT_PROPERTY(float, Exposure);
+    DECLARE_SCRIPT_PROPERTY(float, ExposureMin);
+    DECLARE_SCRIPT_PROPERTY(float, ExposureMax);
     DECLARE_SCRIPT_PROPERTY(bool, IsUnbound);
 };
 

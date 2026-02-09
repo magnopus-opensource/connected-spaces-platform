@@ -31,7 +31,8 @@ PostprocessSpaceComponentScriptInterface::PostprocessSpaceComponentScriptInterfa
 DEFINE_SCRIPT_PROPERTY_VEC3(PostprocessSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(PostprocessSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_VEC3(PostprocessSpaceComponent, Scale);
-DEFINE_SCRIPT_PROPERTY_TYPE(PostprocessSpaceComponent, float, float, Exposure);
+DEFINE_SCRIPT_PROPERTY_TYPE(PostprocessSpaceComponent, float, float, ExposureMin);
+DEFINE_SCRIPT_PROPERTY_TYPE(PostprocessSpaceComponent, float, float, ExposureMax);
 DEFINE_SCRIPT_PROPERTY_TYPE(PostprocessSpaceComponent, bool, bool, IsUnbound);
 
 } // namespace csp::multiplayer
