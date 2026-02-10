@@ -180,6 +180,27 @@ public:
         return ObjectArray[Index];
     }
 
+    /// @brief Compares two arrays for equality.
+    /// @param Other const Array<T>& : Array to compare against
+    /// @return bool
+    bool operator==(const Array<T>& Other) const
+    {
+        if (ArraySize != Other.ArraySize)
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < ArraySize; ++i)
+        {
+            if (!(ObjectArray[i] == Other.ObjectArray[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
     const size_t Size() const { return ArraySize; }
