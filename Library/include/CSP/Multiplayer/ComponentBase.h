@@ -180,9 +180,6 @@ public:
     /// @param Value csp::common::ReplicatedValue : The value to set for the property. This will be replicated to other clients.
     void SetProperty(uint32_t Key, const csp::common::ReplicatedValue& Value);
 
-    /// @brief Gets the number of properties currently associated with this component.
-    size_t GetNumProperties() const;
-
 protected:
     ComponentBase();
 

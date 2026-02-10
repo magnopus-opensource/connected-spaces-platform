@@ -106,11 +106,9 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessComponentTest)
     PostprocessComponent->SetIsUnbound(NewIsUnbound);
 
     // Postprocess component extensions
-    EXPECT_EQ(PostprocessComponent->GetNumProperties(), 7);
     PostprocessComponent->GetExtensions().SetProperty("MyCustomFloat", 5.0f);
     PostprocessComponent->GetExtensions().SetProperty("MyCustomBool", true);
-    EXPECT_EQ(PostprocessComponent->GetNumProperties(), 9);
-
+    
     auto PostprocessComponentKey = PostprocessComponent->GetId();
     auto* FoundComponent = (PostprocessSpaceComponent*)Entity->GetComponent(PostprocessComponentKey);
 

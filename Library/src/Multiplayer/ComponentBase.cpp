@@ -262,11 +262,6 @@ void ComponentBase::SetProperty(uint32_t Key, const csp::common::ReplicatedValue
     }
 }
 
-size_t ComponentBase::GetNumProperties() const
-{
-    return Properties.Size();
-}
-
 void ComponentBase::RemoveProperty(uint32_t Key)
 {
     // Weird that this is instant and dosen't go through the regular lock/patch flow
