@@ -127,11 +127,12 @@ public:
     /// @param State csp::multiplayer::AvatarState : The initial Avatar State to set.
     /// @param AvatarId csp::common::String : The ID to be set on the AvatarSpaceComponent
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
+    /// @param LocomotionModel csp::multiplayer::LocomotionModel : The Initial LocomotionModel to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState State,
-        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode,
+        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
         csp::multiplayer::EntityCreatedCallback Callback) override;
 
     /// @brief Create and add a SpaceEntity, with relevant default values.
@@ -458,10 +459,11 @@ private:
     CSP_START_IGNORE
     async::task<uint64_t> RemoteGenerateNewAvatarId();
     std::function<async::task<uint64_t>(uint64_t)> SendNewAvatarObjectMessage(const csp::common::String& Name, const csp::common::String& UserId,
-        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode);
+        const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
+        LocomotionModel LocomotionModel);
     std::function<void(uint64_t)> CreateNewLocalAvatar(const csp::common::String& Name, const csp::common::String& UserId,
         const SpaceTransform& Transform, bool IsVisible, const csp::common::String& AvatarId, AvatarState AvatarState, AvatarPlayMode AvatarPlayMode,
-        EntityCreatedCallback Callback);
+        LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
     class EntityScriptBinding* ScriptBinding;

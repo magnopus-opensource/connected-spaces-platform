@@ -121,11 +121,13 @@ public:
     /// @param AvatarState csp::multiplayer::AvatarState : The initial Avatar State to set.
     /// @param AvatarId csp::common::String : The ID to be set on the AvatarSpaceComponent
     /// @param AvatarPlayMode csp::multiplayer::AvatarPlayMode : The Initial AvatarPlayMode to set.
+    /// @param LocomotionModel csp::multiplayer::LocomotionModel : The Initial LocomotionModel to set.
     /// @param Callback csp::multiplayer::EntityCreatedCallback A callback that executes when the creation is complete,
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT virtual void CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
         const csp::multiplayer::SpaceTransform& SpaceTransform, bool IsVisible, csp::multiplayer::AvatarState AvatarState,
-        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
+        const csp::common::String& AvatarId, csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
+        csp::multiplayer::EntityCreatedCallback Callback)
     {
         // Marking parameters as unused by casting them to void to suppress warnings.
         // however this method is exported and the wrapper generator does not support that approach.
@@ -137,6 +139,7 @@ public:
         (void)AvatarState;
         (void)AvatarId;
         (void)AvatarPlayMode;
+        (void)LocomotionModel;
         (void)Callback;
 
         throw InvalidInterfaceUseError("Illegal use of \"abstract\" type.");

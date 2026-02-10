@@ -132,6 +132,7 @@ void OnConnect(OnlineRealtimeEngine* RealtimeEngine)
     const auto LoginState = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
 
     RealtimeEngine->CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserState, UserAvatarId, UserAvatarPlayMode,
+        LocomotionModel::Grounded,
         [RealtimeEngine](SpaceEntity* NewAvatar)
         {
             EXPECT_NE(NewAvatar, nullptr);
@@ -624,7 +625,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     const auto LoginState = UserSystem->GetLoginState();
 
     auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.UserId, UserTransform, IsVisible,
-        UserAvatarState, UserAvatarId, UserAvatarPlayMode)
+        UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
 
     auto Start = std::chrono::steady_clock::now();
@@ -1662,7 +1663,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptedTest)
     const auto LoginState = UserSystem->GetLoginState();
 
     auto [Avatar] = Awaitable(&OnlineRealtimeEngine::CreateAvatar, RealtimeEngine.get(), UserName, LoginState.UserId, UserTransform, IsVisible,
-        UserAvatarState, UserAvatarId, UserAvatarPlayMode)
+        UserAvatarState, UserAvatarId, UserAvatarPlayMode, LocomotionModel::Grounded)
                         .Await();
 
     // Set network interrupted callback

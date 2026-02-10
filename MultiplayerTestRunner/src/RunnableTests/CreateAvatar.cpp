@@ -56,7 +56,7 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     const auto LoginState = UserSystem.GetLoginState();
 
     RealtimeEngine.CreateAvatar(UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
-        [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
+        LocomotionModel::Grounded, [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
     csp::multiplayer::SpaceEntity* CreatedAvatar = ResultFuture.get();
     if (CreatedAvatar == nullptr)
