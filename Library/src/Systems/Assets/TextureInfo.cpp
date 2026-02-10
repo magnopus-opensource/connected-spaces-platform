@@ -98,9 +98,9 @@ TextureInfo::TextureInfo()
     , UVOffset(0.f, 0.f)
     , UVRotation(0.f)
     , UVScale(1.f, 1.f)
-    , TexCoord(0)
     , StereoVideoType(csp::multiplayer::StereoVideoType::None)
     , IsStereoFlipped(false)
+    , TexCoord(0)
     , Set(true)
 {
 }
