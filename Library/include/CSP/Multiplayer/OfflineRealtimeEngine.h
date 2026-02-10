@@ -217,9 +217,15 @@ public:
 
     /// @brief Creates the state patcher to use for space entities created with this engine
     /// Offline realtime engine syncronously sets data, rather than use a patch flow, so this returns null.
-    /// @param SpaceEntity cs::multiplayer::SpaceEntity The SpaceEntity to create the patcher for.
+    /// @param SpaceEntity csp::multiplayer::SpaceEntity& : The SpaceEntity to create the patcher for.
     /// @return nullptr
     CSP_NO_EXPORT virtual csp::multiplayer::SpaceEntityStatePatcher* MakeStatePatcher(csp::multiplayer::SpaceEntity& SpaceEntity) const override;
+
+    /// @brief Returns a ModifiableStatus enum containing ModifiableStatus::Modifiable if the entity can be modified.
+    /// @details This result will contain ModifiableStatus::EntityLocked if the given entities LockType is equal to UserAgnostic.
+    /// @param SpaceEntity csp::multiplayer::SpaceEntity* : The space entity to check its modfiable state.
+    /// @return ModifiableStatus : This will contain a failure reason if the entity isn't modifiable.
+    ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity* SpaceEntity) const override;
 
     /***** IREALTIMEENGINE INTERFACE IMPLEMENTAITON END *************************************************/
 

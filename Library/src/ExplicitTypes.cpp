@@ -22,6 +22,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
+#include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/Asset.h"
@@ -48,6 +49,7 @@ template class CSP_API csp::common::Array<csp::common::String>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentBase*>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::MessageInfo>;
+template class CSP_API csp::common::Array<csp::multiplayer::NetworkEventRegistration>;
 template class CSP_API csp::common::Array<csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Array<csp::systems::Anchor>;
 template class CSP_API csp::common::Array<csp::systems::AnchorResolution>;

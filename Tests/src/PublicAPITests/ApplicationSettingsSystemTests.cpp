@@ -282,17 +282,13 @@ CSP_PUBLIC_TEST(CSPEngine, ApplicationSettingsSystemTests, GetInvalidSettingsByC
         RAIIMockLogger MockLogger {};
         csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Log);
 
-        // Set an expectation that the mock logger will receive message for a failed result 404 no payload/error message.
-        const String GetRequestErrorMsg = "has returned a failed response (404) but with no payload/error message.";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(GetRequestErrorMsg))).Times(1);
-
-        const String ErrorMsg = "Failed to get application settings";
-        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ErrorMsg)).Times(1);
+        const String ResponseMsg = "ApplicationSettingsSystem::GetSettingsByContext successfully retrieved application settings";
+        EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Log, ResponseMsg)).Times(1);
 
         auto [Result] = AWAIT(ApplicationSettingsSystem, GetSettingsByContext, GetUniqueString().c_str(), GetUniqueString().c_str(), nullptr);
 
-        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNoContent));
         EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
     }
 

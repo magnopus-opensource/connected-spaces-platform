@@ -51,6 +51,7 @@
 #include "Multiplayer/MCS/MCSTypes.h"
 #include "Multiplayer/MCSComponentPacker.h"
 #include "Multiplayer/PatchUtils.h"
+#include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SpaceEntityKeys.h"
@@ -338,11 +339,16 @@ ComponentBase* SpaceEntity::GetComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::AddComponent(ComponentType AddType)
 {
-    if (!IsModifiable())
+    // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+    ModifiableStatus Modifiable = IsModifiable();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. New components can not be added to a locked Entity.");
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to add component: {0}, skipping update. Entity name: {1}",
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
+                    .c_str());
         }
 
         return nullptr;
@@ -397,11 +403,16 @@ bool SpaceEntity::UpdateComponent(ComponentBase* Component)
 
 bool SpaceEntity::RemoveComponent(uint16_t Key)
 {
-    if (!IsModifiable())
+    // Ensure we can modify the entity. The criteria for this can be found on the specific RealtimeEngine::IsEntityModifiable overloads.
+    ModifiableStatus Modifiable = IsModifiable();
+    if (Modifiable != ModifiableStatus::Modifiable)
     {
         if (LogSystem != nullptr)
         {
-            LogSystem->LogMsg(csp::common::LogLevel::Error, "Entity is locked. Components can not be removed from a locked Entity.");
+            LogSystem->LogMsg(csp::common::LogLevel::Warning,
+                fmt::format("Failed to remove component: {0}, skipping update. Entity name: {1}",
+                    RealtimeEngineUtils::ModifiableStatusToString(Modifiable), GetName())
+                    .c_str());
         }
 
         return false;
@@ -609,48 +620,16 @@ bool SpaceEntity::Deselect()
     return InternalSetSelectionStateOfEntity(false);
 }
 
-bool SpaceEntity::IsModifiable() const
+ModifiableStatus SpaceEntity::IsModifiable() const
 {
     if (EntitySystem == nullptr)
     {
         // Return true here so entities that arent attached to the entity system can be modified.
         // This is currently used for testing.
-        return true;
+        return ModifiableStatus::Modifiable;
     }
 
-    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Offline)
-    {
-        if (EntityLock == LockType::UserAgnostic)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    auto* OnlineRealtimeEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
-
-    // This should definately be true at this point, but be defensive
-    if (StatePatcher == nullptr)
-    {
-        if (LogSystem)
-        {
-            LogSystem->LogMsg(csp::common::LogLevel::Fatal, "Unexpected lack of StatePatcher in online context, SpaceEntity::IsModifiable()");
-        }
-        return false;
-    }
-
-    // In the case where we are about to unlock a locked entity we want to treat it as if it's unlocked so we can modify it,
-    // so we skip the lock check they are about to unlock.
-    // We know they are going to unlock if EntityLock is set and they have COMPONENT_KEY_VIEW_LOCKTYPE in DirtyProperties
-    // Note : This will stop working if we ever add another lock type
-    const bool AboutToUnlock = StatePatcher->GetDirtyProperties().count(SpaceEntityComponentKey::LockType) > 0;
-    if (EntityLock == LockType::UserAgnostic && !AboutToUnlock)
-    {
-        return false;
-    }
-
-    return (OwnerId == OnlineRealtimeEngine->GetMultiplayerConnectionInstance()->GetClientId() || IsTransferable);
+    return EntitySystem->IsEntityModifiable(this);
 }
 
 bool SpaceEntity::Lock()

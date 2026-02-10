@@ -367,14 +367,13 @@ std::function<async::task<SpaceResult>(const SpaceResult& SpaceResult)> SpaceSys
                                 return;
                             }
 
-                            auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
+                             const ScopeLeader& Leader = LeaderResult.GetScopeLeader();
 
-                            std::optional<uint64_t> LeaderUserId = (LeaderResult.GetScopeLeader().ScopeClientId != 0)
-                                ? std::make_optional<uint64_t>(MultiplayerConnection->GetClientId())
-                                : std::nullopt;
+                            std::optional<uint64_t> LeaderUserId
+                                = (Leader.ScopeClientId != 0) ? std::make_optional<uint64_t>(Leader.ScopeClientId) : std::nullopt;
 
                             static_cast<csp::multiplayer::OnlineRealtimeEngine*>(RealtimeEngine)
-                                ->RegisterDefaultScope(LeaderResult.GetScopeLeader().ScopeId.c_str(), LeaderUserId);
+                                ->RegisterDefaultScope(Leader.ScopeId.c_str(), LeaderUserId);
 
                             FinishedGetScopeEvent->set(SpaceResult);
                         });

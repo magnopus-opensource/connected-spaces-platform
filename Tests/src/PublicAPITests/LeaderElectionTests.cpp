@@ -446,7 +446,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
 
     // Create OnlineRealtimeEngine
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
@@ -559,7 +559,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, InviteUsers, nullptr, nullptr, Space);
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     {
@@ -591,7 +591,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
         EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    // Reenter space to stop leader election
+    // Reenter space to start leader election
     {
         auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -810,7 +810,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
     };
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
-    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
 
     // Enter space
     {
@@ -842,7 +842,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
         EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
-    // Reenter space to stop leader election
+    // Reenter space to start leader election
     {
         auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -886,7 +886,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
             = static_cast<csp::multiplayer::ScriptSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::ScriptData));
 
         Entity->QueueUpdate();
-        RealtimeEngine->QueueEntityUpdate(Entity);
+        RealtimeEngine->ProcessPendingEntityOperations();
 
         ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
         Entity->GetScript().Invoke();
@@ -1019,6 +1019,214 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
 
     RealtimeEngine->SetOnVacatedAsScopeLeaderCallback(nullptr);
     RealtimeEngine->SetOnElectedScopeLeaderCallback(nullptr);
+
+    // Clean up
+    auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
+/*
+    This test uses the MultiplayerTestRunner to spawn 1 additional client to test that events that are sent are always fowarded to the leader to run.
+    The test does the following steps:
+    - Sets up a space with managed leader election
+    - Sets the client to the leader
+    - Create a script which increases an entities model z position by 1 on event
+    - Fires the event to ensure the event works for the current leader
+    - Spawns 1 more client
+    - The second client fires the script event, causing the remote script event path to be triggered
+    - Ensures the first client updates the entity from its script
+*/
+CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* MultiplayerSystem = SystemsManager.GetMultiplayerSystem();
+
+    // Log in
+    csp::systems::Profile NewTestUser = CreateTestUser();
+
+    csp::common::String UserId;
+    LogIn(UserSystem, UserId, NewTestUser.Email, GeneratedTestAccountPassword);
+
+    // Create users for test runner
+    auto TestRunnerUser1 = CreateTestUser();
+
+    csp::systems::InviteUserRoleInfo InviteUser1;
+    InviteUser1.UserEmail = TestRunnerUser1.Email;
+    InviteUser1.UserRole = csp::systems::SpaceUserRole::Moderator;
+
+    csp::systems::InviteUserRoleInfoCollection InviteUsers;
+    InviteUsers.InviteUserRoleInfos = { InviteUser1 };
+
+    // Create space
+    csp::systems::Space Space;
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, InviteUsers, nullptr, nullptr, Space);
+
+    bool ScriptSystemReady = false;
+
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
+        EXPECT_EQ(Ok, true);
+        std::cout << "ScriptLeaderReadyCallback called" << std::endl;
+        ScriptSystemReady = true;
+    };
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    // Enter space
+    {
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // First, we need to get the default scope
+    csp::systems::Scope DefaultScope;
+    csp::common::String ScopeId;
+
+    {
+        auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        if (GetScopesResult.GetScopes().Size() != 1)
+        {
+            FAIL();
+        }
+
+        DefaultScope = GetScopesResult.GetScopes()[0];
+        ScopeId = DefaultScope.Id;
+    }
+
+    // We need to ensure the scope has ManagedLeaderElection enabled.
+    {
+        DefaultScope.ManagedLeaderElection = true;
+        auto [UpdateScopeResult] = AWAIT_PRE(MultiplayerSystem, UpdateScopeById, RequestPredicate, ScopeId, DefaultScope);
+        EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    // Reenter space to start leader election
+    {
+        auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        RealtimeEngine.get()->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
+
+        // Enter space
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
+
+    RealtimeEngine->SetEntityPatchRateLimitEnabled(false);
+
+    // Wait for the script system to be ready
+    {
+        auto ScriptSystemIsReady = [&ScriptSystemReady]()
+        {
+            std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+            return (ScriptSystemReady == true);
+        };
+
+        ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
+    }
+
+    csp::multiplayer::SpaceEntity* Entity = nullptr;
+    csp::multiplayer::AnimatedModelSpaceComponent* ModelComponent = nullptr;
+
+    // Create an entity with a script that increases the models x position by 1 on each tick
+    {
+        const std::string ScriptText = R"xx(
+		globalThis.onEvent = () => {
+			var model = ThisEntity.getAnimatedModelComponents()[0];
+			model.position = [model.position[0] + 1, model.position.y, model.position.z];
+		}
+
+		ThisEntity.subscribeToMessage("customEvent", "onEvent");
+		  
+    )xx";
+
+        Entity = CreateTestObject(RealtimeEngine.get());
+        ModelComponent
+            = static_cast<csp::multiplayer::AnimatedModelSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::AnimatedModel));
+        csp::multiplayer::ScriptSpaceComponent* ScriptComponent
+            = static_cast<csp::multiplayer::ScriptSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::ScriptData));
+
+        Entity->QueueUpdate();
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+        Entity->GetScript().Invoke();
+
+        const bool ScriptHasErrors = Entity->GetScript().HasError();
+        EXPECT_FALSE(ScriptHasErrors);
+    }
+
+    // Fire an event from this client to ensure events work locally
+    {
+        // Ensure the a position starts at 0.
+        EXPECT_EQ(ModelComponent->GetPosition().X, 0);
+
+        // Call tick to update the script
+        Entity->GetScript().PostMessageToScript("customEvent");
+
+        // Events happen on a different thread so we need to wait a moment.
+        std::this_thread::sleep_for(std::chrono::milliseconds { 1000 });
+
+        // Update the entities values
+        RealtimeEngine->QueueEntityUpdate(Entity);
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        // Ensure the entity has been updated
+        EXPECT_EQ(ModelComponent->GetPosition().X, 1);
+    }
+
+    // Ensure data has been written to database before we spawn the client.
+    // This fixes an issue where the script source was sometimes empty on the spawned client.
+    for (int i = 0; i < 7; i++)
+    {
+        csp::CSPFoundation::Tick();
+        std::this_thread::sleep_for(std::chrono::seconds { 1 });
+    }
+
+    // Send script event from another client
+    {
+        //  Create another client for leader election
+        MultiplayerTestRunnerProcess TestRunner1
+            = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::LEADER_ELECTION_EVENT)
+                  .SetSpaceId(Space.Id.c_str())
+                  .SetLoginEmail(TestRunnerUser1.Email.c_str())
+                  .SetPassword(GeneratedTestAccountPassword)
+                  .SetEndpoint(EndpointBaseURI())
+                  .SetTimeoutInSeconds(60);
+
+        std::future<void> ReadyForAssertionsFuture = TestRunner1.ReadyForAssertionsFuture();
+
+        bool Updated = false;
+        Entity->SetUpdateCallback([&Updated](auto&&, auto&&, auto&&) { Updated = true; });
+
+        TestRunner1.StartProcess();
+
+        // Wait for other client to run
+        while (ReadyForAssertionsFuture.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
+        {
+            csp::CSPFoundation::Tick();
+        }
+
+        WaitForCallbackWithUpdate(Updated, RealtimeEngine.get());
+        EXPECT_TRUE(Updated);
+
+        // Ensure we have updated the entity form the remote script event
+        EXPECT_EQ(ModelComponent->GetPosition().X, 2);
+    }
 
     // Clean up
     auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

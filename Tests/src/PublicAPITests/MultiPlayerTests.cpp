@@ -1680,3 +1680,66 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptedTest)
     // Log out
     LogOut(UserSystem);
 }
+
+/*
+    Ensures IsEntityModifiable works under the correct conditions.
+    Check OnlineRealtimeEngine::IsEntityModifiable docs for details.
+*/
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, IsModifiableTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    // Log in
+    csp::common::String UserId;
+    const csp::systems::Profile TestUser = CreateTestUser();
+
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+    RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) { });
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const csp::common::String EntityName = "Entity1";
+
+    SpaceEntity* Entity = CreateTestObject(RealtimeEngine.get());
+
+    // Entity should be modifiable when first created as it is not locked by default.
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+
+    Entity->Lock();
+    Entity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    // Entity should not be modifiable now it is locked.
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityLocked);
+
+    Entity->Unlock();
+    Entity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    // Entity should be modifiable again.
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::Modifiable);
+
+    // Make the entity non-transferable, and not owned by this client.
+    Entity->IsTransferable = false;
+    Entity->OwnerId = 0;
+
+    EXPECT_EQ(RealtimeEngine->IsEntityModifiable(Entity), ModifiableStatus::EntityNotOwnedAndUntransferable);
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}

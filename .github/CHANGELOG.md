@@ -11,6 +11,24 @@ All notable changes to this project will be documented in this file.
   exposure is most frequently cited by client application developers as a key contributor 
   towards visual differences.
 
+## [6.23.0] - 2026-02-04_17-54-18
+
+
+
+## [6.22.0] - 2026-01-30_19-53-59
+
+### 🔥 ❗ Breaking Changes
+
+- [OB-4350] fix!: Improved log output for unmodifiable entities by MAG-mav
+  This improves the clarity of logs that are output when an unmodifiable entity is attempted to be modified.
+  SpaceEntity::IsModifiable now returns an enum, specifying the reason.
+  Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
+  Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
+### 💫 💥 Code Refactors
+
+- [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
+  When creating a new HotspotGroup, the name property has the sequence type ("Hotspots") and SpaceId appended. The original name was also being stored in the sequence metadata. This was causing issues with renaming Hotspot sequences or when retrieving on Space entry. This change removes use of metadata. As part of this change `StartsWith`, `EndsWith` and `SubString` String utility methods have also be added.
+
 ## [6.21.0] - 2026-01-28_11-22-27
 
 ### 🍰 🙌 New Features
@@ -19,6 +37,8 @@ All notable changes to this project will be documented in this file.
   This method provides a means of changing a users tier (basic, pro, enterprise, etc)
   through the api. This method will only succeed when logged in as an admin user.
   This method is mostly for internal testing, but there is no harm allowing public use.
+  
+  This method provides a means of changing a users tier (basic, pro, enterprise, etc) through the api. This method will only succeed when logged in as an admin user. This method is mostly for internal testing, but there is no harm allowing public use.
 
 ### 🔨 🔨 Chore
 
@@ -28,6 +48,13 @@ All notable changes to this project will be documented in this file.
     - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
     - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
     - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+### 🐛 🔨 Bug Fixes
+
+- [OB-5015] fix: Fixed crash with server-side leader election after exiting space by MAG-MV
+  Internal CSP event was not being deregistered when exiting a space, sometimes causing a crash.
+
+- [OB-5019] fix: Fixed server-side leader election leader change when a new client enters space by MAG-mv
+  An incorrect client id was being used internally, causing the new client to always think it is leader.
 
 ## [6.20.0] - 2026-01-13_17-38-31
 
