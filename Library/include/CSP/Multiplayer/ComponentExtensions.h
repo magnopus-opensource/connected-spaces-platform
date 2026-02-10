@@ -54,8 +54,11 @@ private:
     class ComponentBase* ExtendedComponent;
 
     // Components have a set of property keys that are used for the core properties of the component, which are defined in the component's
-    // class. These keys are reserved and should avoided when adding new properties through this extension mechanism. 
+    // class. The uint32_t span these properties are expected to grow within is reserved from the key hashing algorith,
     size_t ReservedPropertyRange;
+
+    // Arbitrary jkys that should also be avoided when generating hashes for property keys, to prevent collisions with existing properties.
+    std::vector<uint32_t> ForbiddenKeys;
 
     ComponentExtensionsScriptInterface* ScriptInterface;
 };
