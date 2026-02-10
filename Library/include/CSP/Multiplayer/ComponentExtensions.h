@@ -40,12 +40,21 @@ public:
 
     virtual ~ComponentExtensions();
 
+    // @brief Gets the value of a property with the given key. If the key does not exist, an invalid ReplicatedValue will be returned.
     const csp::common::ReplicatedValue& GetProperty(const csp::common::String& Key) const;
+
+    // @brief Sets the value of a property with the given key. If the property does not exist, it will be created. 
+    // If the property already exists, its value will be overwritten.
     void SetProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value);
+
+    // @brief Checks if a property with the given key exists.
     bool HasProperty(const csp::common::String& Key) const;
 
+    // @brief Gets a pointer to the component being extended by this extension class. This may return null if the extension was default constructed.
     ComponentBase* GetExtendedComponent() const;
 
+    // @brief Gets a pointer to the script interface for this component extension, which can be used to expose the extension's properties to scripts.
+    // This may return null if the extension was default constructed.
     ComponentExtensionsScriptInterface* GetScriptInterface() const;
 
 private:
@@ -54,12 +63,14 @@ private:
     class ComponentBase* ExtendedComponent;
 
     // Components have a set of property keys that are used for the core properties of the component, which are defined in the component's
-    // class. The uint32_t span these properties are expected to grow within is reserved from the key hashing algorith,
+    // class. The uint32_t span these properties are expected to grow within is reserved from the key hashing algorithm.
     size_t ReservedPropertyRange;
 
-    // Arbitrary jkys that should also be avoided when generating hashes for property keys, to prevent collisions with existing properties.
+    // Arbitrary keys that should also be avoided when generating hashes for property keys, to prevent collisions with existing properties.
     std::vector<uint32_t> ForbiddenKeys;
 
+    // A script interface for this component extension, which can be used to expose the extension's properties to scripts. This is owned by the
+    // ComponentExtensions class.
     ComponentExtensionsScriptInterface* ScriptInterface;
 };
 
