@@ -28,7 +28,13 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
+#include "CSP/Systems/ECommerce/ECommerce.h"
+#include "CSP/Systems/EventTicketing/EventTicketing.h"
+#include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Multiplayer/Scope.h"
+#include "CSP/Systems/Quota/Quota.h"
+#include "CSP/Systems/Sequence/Sequence.h"
+#include "CSP/Systems/ServiceStatus.h"
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
@@ -69,6 +75,20 @@ template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
 template class CSP_API csp::common::Array<csp::systems::Material*>;
 template class CSP_API csp::common::Array<csp::systems::Scope>;
 template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
+template class CSP_API csp::common::Array<csp::systems::CartLine>;
+template class CSP_API csp::common::Array<csp::systems::FeatureLimitInfo>;
+template class CSP_API csp::common::Array<csp::systems::FeatureQuotaInfo>;
+template class CSP_API csp::common::Array<csp::systems::HotspotGroup>;
+template class CSP_API csp::common::Array<csp::systems::ProductInfo>;
+template class CSP_API csp::common::Array<csp::systems::ProductMediaInfo>;
+template class CSP_API csp::common::Array<csp::systems::ProductVariantInfo>;
+template class CSP_API csp::common::Array<csp::systems::Sequence>;
+template class CSP_API csp::common::Array<csp::systems::ServiceStatus>;
+template class CSP_API csp::common::Array<csp::systems::ShopifyStoreInfo>;
+template class CSP_API csp::common::Array<csp::systems::TicketedEvent>;
+template class CSP_API csp::common::Array<csp::systems::TierFeatures>;
+template class CSP_API csp::common::Array<csp::systems::VariantOptionInfo>;
+template class CSP_API csp::common::Array<csp::systems::VersionMetadata>;
 
 // csp::common::List
 template class CSP_API csp::common::List<csp::common::String>;
@@ -82,6 +102,8 @@ template class CSP_API csp::common::Map<uint32_t, csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::String>;
+template class CSP_API csp::common::Map<csp::common::String, csp::common::Array<csp::common::String>>;
+template class CSP_API csp::common::Map<csp::common::String, csp::systems::Asset>;
 
 // csp::common::Optional
 template class CSP_API csp::common::Optional<bool>;
