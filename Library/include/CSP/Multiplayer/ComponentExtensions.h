@@ -18,6 +18,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
+#include <vector>
+
 namespace csp::multiplayer
 {
 
@@ -55,7 +57,7 @@ public:
 
     // @brief Gets a pointer to the script interface for this component extension, which can be used to expose the extension's properties to scripts.
     // This may return null if the extension was default constructed.
-    ComponentExtensionsScriptInterface* GetScriptInterface() const;
+    CSP_NO_EXPORT ComponentExtensionsScriptInterface* GetScriptInterface() const;
 
 private:
     // The component being extended by this extension class. This is not owned by the ComponentExtensions class, and should be valid for the lifetime
