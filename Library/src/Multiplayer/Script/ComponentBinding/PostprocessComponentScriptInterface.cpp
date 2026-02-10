@@ -28,6 +28,11 @@ PostprocessSpaceComponentScriptInterface::PostprocessSpaceComponentScriptInterfa
 {
 }
 
+ComponentExtensionsScriptInterface* PostprocessSpaceComponentScriptInterface::GetExtensions() const
+{
+    return static_cast<PostprocessSpaceComponent*>(Component)->GetExtensions().GetScriptInterface();
+}
+
 DEFINE_SCRIPT_PROPERTY_VEC3(PostprocessSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(PostprocessSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_VEC3(PostprocessSpaceComponent, Scale);

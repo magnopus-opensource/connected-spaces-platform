@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Magnopus LLC
+ * Copyright 2023 Magnopus LLC
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,25 @@
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace csp::multiplayer
 {
 
-class PostprocessSpaceComponent;
-class ComponentExtensionsScriptInterface;
+class ComponentExtensions;
 
-class PostprocessSpaceComponentScriptInterface : public ComponentScriptInterface
+class ComponentExtensionsScriptInterface
 {
 public:
-    PostprocessSpaceComponentScriptInterface(PostprocessSpaceComponent* InComponent = nullptr);
+    ComponentExtensionsScriptInterface(ComponentExtensions* InExtensions = nullptr);
 
-    ComponentExtensionsScriptInterface* GetExtensions() const;
+    const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetProperty(const std::string& Key);
+    void SetProperty(const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value);
+    bool HasProperty(const std::string& Key) const;
 
-    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-    DECLARE_SCRIPT_PROPERTY(float, ExposureMin);
-    DECLARE_SCRIPT_PROPERTY(float, ExposureMax);
-    DECLARE_SCRIPT_PROPERTY(bool, IsUnbound);
+private:
+    ComponentExtensions* Extensions;
 };
 
 } // namespace csp::multiplayer

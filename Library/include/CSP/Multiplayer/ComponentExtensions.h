@@ -21,6 +21,8 @@
 namespace csp::multiplayer
 {
 
+class ComponentExtensionsScriptInterface;
+
 /// @ingroup ComponentExtensions
 /// @brief A mechanism by which a component can be extended to reason about new properties, following a key/value pattern.
 /// The key is a string-based identifier for the property, and the value is a ReplicatedValue which can represent a variety of primitive types.
@@ -32,11 +34,19 @@ class CSP_API ComponentExtensions
 public:
     ComponentExtensions();
     ComponentExtensions(ComponentBase* InComponentToExtend);
+
+    ComponentExtensions(const ComponentExtensions& Other);
+    ComponentExtensions& operator=(const ComponentExtensions& Other);
+
     virtual ~ComponentExtensions();
 
     const csp::common::ReplicatedValue& GetProperty(const csp::common::String& Key) const;
     void SetProperty(const csp::common::String& Key, const csp::common::ReplicatedValue& Value);
     bool HasProperty(const csp::common::String& Key) const;
+
+    ComponentBase* GetExtendedComponent() const;
+
+    ComponentExtensionsScriptInterface* GetScriptInterface() const;
 
 private:
     // The component being extended by this extension class. This is not owned by the ComponentExtensions class, and should be valid for the lifetime
@@ -46,6 +56,8 @@ private:
     // Components have a set of property keys that are used for the core properties of the component, which are defined in the component's
     // class. These keys are reserved and should avoided when adding new properties through this extension mechanism. 
     size_t ReservedPropertyRange;
+
+    ComponentExtensionsScriptInterface* ScriptInterface;
 };
 
 } // namespace csp::multiplayer

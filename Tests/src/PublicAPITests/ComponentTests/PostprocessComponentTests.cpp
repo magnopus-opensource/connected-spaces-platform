@@ -179,6 +179,13 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessSpaceComponentScriptInte
 		postprocess.exposureMin = 1.0;
         postprocess.exposureMax = 10.0;
 		postprocess.isUnbound = false;
+
+        postprocess.getExtensions().setProperty("MyCustomFloat", 123.45);
+        postprocess.getExtensions().setProperty("MyCustomBool", true);
+
+        var myCustomFloat = postprocess.getExtensions().getProperty("MyCustomFloat");
+        myCustomFloat *= 10.0;
+        postprocess.getExtensions().setProperty("MyCustomFloat", myCustomFloat);
     )xx";
 
     // Invoking the script
@@ -202,6 +209,10 @@ CSP_PUBLIC_TEST(CSPEngine, PostprocessTests, PostprocessSpaceComponentScriptInte
     EXPECT_EQ(PostprocessComponent->GetExposureMin(), NewExposureMin);
     EXPECT_EQ(PostprocessComponent->GetExposureMax(), NewExposureMax);
     EXPECT_EQ(PostprocessComponent->GetIsUnbound(), NewIsUnbound);
+
+    // Testing postprocess component extensions
+    EXPECT_EQ(PostprocessComponent->GetExtensions().GetProperty("MyCustomFloat"), 1234.5f);
+    EXPECT_EQ(PostprocessComponent->GetExtensions().GetProperty("MyCustomBool"), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

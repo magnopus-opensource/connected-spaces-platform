@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/ComponentExtensions.h"
+#include "Multiplayer/Script/ComponentBinding/ComponentExtensionsScriptInterface.h"
 #include "Debug/Logging.h"
 
 namespace csp::multiplayer
@@ -52,17 +54,19 @@ uint32_t HashPropertyKey(const csp::common::String& PropertyKey, size_t Reserved
 ComponentExtensions::ComponentExtensions()
     : ExtendedComponent(nullptr)
     , ReservedPropertyRange(0)
+    , ScriptInterface(nullptr)
 {
-    
 }
 
 ComponentExtensions::ComponentExtensions(ComponentBase* InComponentToExtend)
     : ExtendedComponent(InComponentToExtend)
     , ReservedPropertyRange(0)
+    , ScriptInterface(nullptr)
 {
     if (ExtendedComponent != nullptr)
     {
         ReservedPropertyRange = ExtendedComponent->GetNumProperties();
+        ScriptInterface = new ComponentExtensionsScriptInterface(this);
     }
     else
     {
@@ -70,9 +74,32 @@ ComponentExtensions::ComponentExtensions(ComponentBase* InComponentToExtend)
     }
 }
 
+ComponentExtensions::ComponentExtensions(const ComponentExtensions& Other)
+    : ExtendedComponent(Other.ExtendedComponent)
+    , ReservedPropertyRange(Other.ReservedPropertyRange)
+    , ScriptInterface(nullptr)
+{
+    *this = Other;
+}
+
+ComponentExtensions& ComponentExtensions::operator=(const ComponentExtensions& Other)
+{
+    ExtendedComponent = Other.ExtendedComponent;
+    ReservedPropertyRange = Other.ReservedPropertyRange;
+
+    // Since script interface memory is freed on destructor, we need to make a new one here, to avoid multiple instances
+    // pointing to the same script interface memory.
+    if (Other.ScriptInterface != nullptr)
+    {
+        ScriptInterface = new ComponentExtensionsScriptInterface(this);
+    }
+
+    return *this;
+}
+
 ComponentExtensions::~ComponentExtensions()
 {
-
+    delete ScriptInterface;
 }
 
 const csp::common::ReplicatedValue& ComponentExtensions::GetProperty(const csp::common::String& Key) const
@@ -110,6 +137,16 @@ void ComponentExtensions::SetProperty(const csp::common::String& Key, const csp:
 bool ComponentExtensions::HasProperty(const csp::common::String& Key) const
 {
     return ExtendedComponent != nullptr && GetProperty(Key) != InvalidProperty;
+}
+
+ComponentBase* ComponentExtensions::GetExtendedComponent() const
+{
+    return ExtendedComponent;
+}
+
+ComponentExtensionsScriptInterface* ComponentExtensions::GetScriptInterface() const
+{
+    return ScriptInterface;
 }
 
 } // namespace csp::multiplayer 

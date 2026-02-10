@@ -45,6 +45,7 @@
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PostprocessComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/ComponentExtensionsScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
@@ -603,7 +604,8 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(PostprocessSpaceComponent, Scale, "scale")
         .PROPERTY_GET_SET(PostprocessSpaceComponent, ExposureMin, "exposureMin")
         .PROPERTY_GET_SET(PostprocessSpaceComponent, ExposureMax, "exposureMax")
-        .PROPERTY_GET_SET(PostprocessSpaceComponent, IsUnbound, "isUnbound");
+        .PROPERTY_GET_SET(PostprocessSpaceComponent, IsUnbound, "isUnbound")
+        .fun<&PostprocessSpaceComponentScriptInterface::GetExtensions>("getExtensions");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner)
@@ -664,6 +666,12 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&EntityScriptInterface::GetId>("id")
         .property<&EntityScriptInterface::GetName>("name")
         .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
+
+    Module->class_<ComponentExtensionsScriptInterface>("ComponentExtensions")
+        .constructor<>()
+        .fun<&ComponentExtensionsScriptInterface::HasProperty>("hasProperty")
+        .fun<&ComponentExtensionsScriptInterface::GetProperty>("getProperty")
+        .fun<&ComponentExtensionsScriptInterface::SetProperty>("setProperty");
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()

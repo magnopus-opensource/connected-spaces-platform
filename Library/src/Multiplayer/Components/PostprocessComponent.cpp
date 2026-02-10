@@ -31,9 +31,9 @@ PostprocessSpaceComponent::PostprocessSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::ExposureMax)] = 0.0f;
     Properties[static_cast<uint32_t>(PostprocessPropertyKeys::IsUnbound)] = true;
 
-    SetScriptInterface(new PostprocessSpaceComponentScriptInterface(this));
-
     Extensions = ComponentExtensions(this);
+
+    SetScriptInterface(new PostprocessSpaceComponentScriptInterface(this));
 }
 
 ComponentExtensions& PostprocessSpaceComponent::GetExtensions()
