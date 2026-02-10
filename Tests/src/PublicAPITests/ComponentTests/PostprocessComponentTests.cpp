@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "../AssetSystemTestHelpers.h"
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
@@ -34,7 +33,6 @@
 #include <thread>
 
 using namespace csp::multiplayer;
-using namespace std::chrono_literals;
 
 namespace
 {

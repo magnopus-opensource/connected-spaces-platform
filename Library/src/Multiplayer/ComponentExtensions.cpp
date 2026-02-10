@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/ComponentExtensions.h"
+#include "Debug/Logging.h"
 
 namespace csp::multiplayer
 {
@@ -63,6 +64,10 @@ ComponentExtensions::ComponentExtensions(ComponentBase* InComponentToExtend)
     {
         ReservedPropertyRange = ExtendedComponent->GetNumProperties();
     }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Error, "A component extension was initialized with a null ExtendedComponent. This indicates a logical error during component initialization.");
+    }
 }
 
 ComponentExtensions::~ComponentExtensions()
@@ -77,6 +82,12 @@ const csp::common::ReplicatedValue& ComponentExtensions::GetProperty(const csp::
         const uint32_t HashedKey = HashPropertyKey(Key, ReservedPropertyRange);
         return ExtendedComponent->GetProperty(HashedKey);
     }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Error,
+            "Attempted to get a property from a component extension that has a null ExtendedComponent. This indicates a logical error during "
+            "component initialization.");
+    }
 
     return InvalidProperty;
 }
@@ -87,6 +98,12 @@ void ComponentExtensions::SetProperty(const csp::common::String& Key, const csp:
     {
         const uint32_t HashedKey = HashPropertyKey(Key, ReservedPropertyRange);
         ExtendedComponent->SetProperty(HashedKey, Value);
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Error,
+            "Attempted to set a property from a component extension that has a null ExtendedComponent. This indicates a logical error during "
+            "component initialization.");
     }
 }
 

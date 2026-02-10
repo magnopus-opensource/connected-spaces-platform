@@ -188,8 +188,11 @@ uint64_t EntityScript::GetOwnerId() const
 
 void EntityScript::Shutdown()
 {
-    ScriptRunner->ClearModuleSource(Entity->GetName());
-    ScriptRunner->DestroyContext(Entity->GetId());
+    if (ScriptRunner != nullptr)
+    {
+        ScriptRunner->ClearModuleSource(Entity->GetName());
+        ScriptRunner->DestroyContext(Entity->GetId());
+    }
 }
 
 void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
