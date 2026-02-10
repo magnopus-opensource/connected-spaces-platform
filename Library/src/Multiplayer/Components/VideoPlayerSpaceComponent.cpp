@@ -46,7 +46,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay)] = 0.0f;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)] = static_cast<int64_t>(VideoPlayerSourceType::AssetSource);
-    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)] = static_cast<int64_t>(csp::systems::EStereoVideoType::None);
+    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)] = static_cast<int64_t>(StereoVideoType::None);
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)] = false;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)] = true;
@@ -209,12 +209,12 @@ void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType V
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType), static_cast<int64_t>(Value));
 }
 
-EStereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
+StereoVideoType VideoPlayerSpaceComponent::GetStereoVideoType() const
 {
-    return static_cast<EStereoVideoType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)));
+    return static_cast<StereoVideoType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)));
 }
 
-void VideoPlayerSpaceComponent::SetStereoVideoType(csp::systems::EStereoVideoType Value)
+void VideoPlayerSpaceComponent::SetStereoVideoType(StereoVideoType Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType), static_cast<int64_t>(Value));
 }

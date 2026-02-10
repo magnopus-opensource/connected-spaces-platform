@@ -28,8 +28,6 @@
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Common/SharedEnums.h"
 
-using namespace csp::systems;
-
 namespace csp::multiplayer
 {
 
@@ -232,11 +230,11 @@ public:
 
     /// @brief Gets the type of stereo the video of this component uses.
     /// @return The type of stereo used by this video.
-    EStereoVideoType GetStereoVideoType() const;
+    StereoVideoType GetStereoVideoType() const;
 
     /// @brief Sets the type of stereo the video of this component uses.
     /// @param Value The type of stereo used by this video.
-    void SetStereoVideoType(EStereoVideoType Value);
+    void SetStereoVideoType(StereoVideoType Value);
 
     /// @brief Gets whether the stereo video left and right are flipped.
     /// @return True if the stereo frames are flipped, false for default.

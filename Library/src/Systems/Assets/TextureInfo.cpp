@@ -80,6 +80,12 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Tex
     Obj.UVScale = csp::common::Vector2(UVScaleArray[0], UVScaleArray[1]);
 
     Deserializer.DeserializeMember("texCoord", Obj.TexCoord);
+
+    uint32_t StereoVideoTypeValue;
+    Deserializer.DeserializeMember("stereoVideoType", StereoVideoTypeValue);
+    Obj.StereoVideoType = static_cast<csp::multiplayer::StereoVideoType>(StereoVideoTypeValue);
+
+    Deserializer.DeserializeMember("isStereoFlipped", Obj.IsStereoFlipped);
 }
 
 namespace csp::systems
@@ -93,7 +99,7 @@ TextureInfo::TextureInfo()
     , UVRotation(0.f)
     , UVScale(1.f, 1.f)
     , TexCoord(0)
-    , StereoVideoType(EStereoVideoType::None)
+    , StereoVideoType(csp::multiplayer::StereoVideoType::None)
     , IsStereoFlipped(false)
     , Set(true)
 {
@@ -155,9 +161,9 @@ bool TextureInfo::IsSet() const { return Set; }
 
 void TextureInfo::SetTexture(bool Value) { Set = Value; }
 
-EStereoVideoType TextureInfo::GetStereoVideoType() const { return StereoVideoType; }
+csp::multiplayer::StereoVideoType TextureInfo::GetStereoVideoType() const { return StereoVideoType; }
 
-void TextureInfo::SetStereoVideoType(EStereoVideoType Value) { StereoVideoType = Value; }
+void TextureInfo::SetStereoVideoType(csp::multiplayer::StereoVideoType Value) { StereoVideoType = Value; }
 
 bool TextureInfo::GetIsStereoFlipped() const { return IsStereoFlipped; }
 

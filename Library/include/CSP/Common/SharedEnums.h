@@ -202,6 +202,13 @@ enum class ModifiableStatus
     EntityNotOwnedAndUntransferable
 };
 
+/// @brief Enumerates the type of stereo the video player and texture material supports.
+enum class StereoVideoType
+{
+    None = 0,
+    SideBySide,
+    TopBottom
+};
 } // namespace csp::multiplayer
 
 namespace csp::systems
@@ -265,13 +272,5 @@ enum class ERequestFailureReason
     UserShopifyLimitReached,
     UserTokenRefreshFailed,
     InvalidSequenceKey,
-};
-
-/// @brief Enumerates the type of stereo the video player and texture material supports.
-enum class EStereoVideoType
-{
-    None = 0,
-    SideBySide,
-    TopBottom
 };
 } // namespace csp::systems

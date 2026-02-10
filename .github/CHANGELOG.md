@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [6.23.0] - 2026-02-06_13-50-00
-
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
@@ -13,7 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### 💫 💥 Code Refactors
 
-- [NT-0] refac: Moved enum StereoVideoType to SharedEnums EStereoVideoType by MAG-JamesEdgeworth
+- [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
 
 ## [6.22.0] - 2026-01-30_19-53-59

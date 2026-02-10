@@ -136,12 +136,11 @@ public:
 
     /// @brief Gets the type of stereo the texture uses.
     /// @return The type of stereo used by this texture.
-    EStereoVideoType GetStereoVideoType() const;
+    csp::multiplayer::StereoVideoType GetStereoVideoType() const;
 
     /// @brief Sets the type of stereo the texture uses.
     /// @param Value The type of stereo used by this texture.
-    void SetStereoVideoType(EStereoVideoType Value);
-
+    void SetStereoVideoType(csp::multiplayer::StereoVideoType Value);
     /// @brief Gets whether the stereo video left and right are flipped.
     /// @return True if the stereo frames are flipped, false for default.
     bool GetIsStereoFlipped() const;
@@ -161,7 +160,7 @@ private:
     float UVRotation;
     csp::common::Vector2 UVScale;
 
-    EStereoVideoType StereoVideoType;
+    csp::multiplayer::StereoVideoType StereoVideoType;
     bool IsStereoFlipped;
 
     int TexCoord;
