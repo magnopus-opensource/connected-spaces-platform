@@ -24,18 +24,6 @@
 
 using namespace csp::systems;
 
-namespace
-{
-
-// Lifted from CustomSpaceComponentScriptInterface for consistency with how we're handling variant types in our script interfaces.
-const uint8_t ValueType_Integer = 0;
-const uint8_t ValueType_Float = 1;
-const uint8_t ValueType_String = 2;
-const uint8_t ValueType_Vector = 3;
-const uint8_t ValueType_Boolean = 4;
-
-} // namespace
-
 namespace csp::multiplayer
 {
 
