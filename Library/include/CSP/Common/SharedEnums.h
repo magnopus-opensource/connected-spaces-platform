@@ -141,6 +141,14 @@ enum class AvatarPlayMode
     Num
 };
 
+/// @brief Enumerates the supported locomotion models available for the avatar movements.
+enum class LocomotionModel
+{
+    Grounded = 0,
+    FreeCamera,
+    Num
+};
+
 /// @brief Enum used to indicate the failure state of a multiplayer request.
 enum class ErrorCode
 {

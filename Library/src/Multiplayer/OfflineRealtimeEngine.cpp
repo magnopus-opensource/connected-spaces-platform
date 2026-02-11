@@ -126,13 +126,14 @@ OfflineRealtimeEngine::~OfflineRealtimeEngine()
 
 void csp::multiplayer::OfflineRealtimeEngine::CreateAvatar(const csp::common::String& Name, const csp::common::String& UserId,
     const csp::multiplayer::SpaceTransform& Transform, bool IsVisible, csp::multiplayer::AvatarState State, const csp::common::String& AvatarId,
-    csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::EntityCreatedCallback Callback)
+    csp::multiplayer::AvatarPlayMode AvatarPlayMode, csp::multiplayer::LocomotionModel LocomotionModel,
+    csp::multiplayer::EntityCreatedCallback Callback)
 {
     // Some of our interfaces use int64_t ... real bugs here.
     const uint64_t Id = NextId();
 
-    std::unique_ptr<csp::multiplayer::SpaceEntity> NewAvatar = RealtimeEngineUtils::BuildNewAvatar(
-        UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode);
+    auto NewAvatar = RealtimeEngineUtils::BuildNewAvatar(
+        UserId, *this, *ScriptRunner, *LogSystem, Id, Name, Transform, IsVisible, 0, false, false, AvatarId, State, AvatarPlayMode, LocomotionModel);
 
     std::scoped_lock EntitiesLocker(EntitiesLock);
 

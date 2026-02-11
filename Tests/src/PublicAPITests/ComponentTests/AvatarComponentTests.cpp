@@ -77,12 +77,12 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     const AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "Creator1Avatar";
     const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Creator;
-    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    const LocomotionModel UserAvatarLocomotionModel = LocomotionModel::FreeCamera;
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -120,7 +120,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     constexpr const char* NewAvatarId = "TestAvatarId";
     const AvatarState NewAvatarState = AvatarState::Flying;
     const AvatarPlayMode NewAvatarPlayMode = AvatarPlayMode::VR;
-    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::FreeCamera;
+    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::Grounded;
     const bool NewIsVisible = true;
     const bool NewIsARVisible = false;
     const bool NewIsVirtualVisible = false;
@@ -218,8 +218,8 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarScriptInterfaceTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
