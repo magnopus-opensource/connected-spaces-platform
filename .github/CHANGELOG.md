@@ -4,7 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-🔥 ❗Breaking Changes
+### 🍰 🙌 New Features
+
+- [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
+  This property allows users to specify whether the left and right eye videos should be flipped when rendering stereoscopic video. This is useful for supporting videos that may have been encoded with different stereo formats, ensuring correct playback in the appropriate format.
+
+### 💫 💥 Code Refactors
+
+- [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
+  This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
+### 🔥 ❗Breaking Changes
 
 - [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
   When creating an Avatar, a `csp::multiplayer::LocomotionModel` must now be passed. This is a breaking change.

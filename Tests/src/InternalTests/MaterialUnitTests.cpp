@@ -250,6 +250,8 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     Emissive.SetUVRotation(TestEmissiveTextureRotation);
     Emissive.SetUVScale(TestEmissiveTextureUVScale);
     Emissive.SetTexCoord(TestEmissiveTextureTexCoord);
+    Emissive.SetStereoVideoType(csp::multiplayer::StereoVideoType::SideBySide);
+    Emissive.SetIsStereoFlipped(true);
 
     Material.SetBaseColorTexture(BaseColor);
     Material.SetMetallicRoughnessTexture(Metallic);
@@ -278,6 +280,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetUVRotation(), TestBaseTextureRotation);
     EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetUVScale(), TestBaseTextureUVScale);
     EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetTexCoord(), TestBaseTextureTexCoord);
+    EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetEntityComponentId(), TestMetallicTextureEntityComponentId);
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetSourceType(), ETextureResourceType::Component);
@@ -285,6 +288,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetUVRotation(), TestMetallicTextureRotation);
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetUVScale(), TestMetallicTextureUVScale);
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetTexCoord(), TestMetallicTextureTexCoord);
+    EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetAssetCollectionId(), TestNormalTextureAssetCollectionId);
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetAssetId(), TestNormalTextureAssetId);
@@ -293,6 +297,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetUVRotation(), TestNormalTextureRotation);
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetUVScale(), TestNormalTextureUVScale);
     EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetTexCoord(), TestNormalTextureTexCoord);
+    EXPECT_EQ(DeserializedMaterial.GetNormalTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetEntityComponentId(), TestOcclusionTextureEntityComponentId);
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetSourceType(), ETextureResourceType::Component);
@@ -300,6 +305,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetUVRotation(), TestOcclusionTextureRotation);
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetUVScale(), TestOcclusionTextureUVScale);
     EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetTexCoord(), TestOcclusionTextureTexCoord);
+    EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::None);
 
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetAssetCollectionId(), TestEmissiveTextureAssetCollectionId);
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetAssetId(), TestEmissiveTextureAssetId);
@@ -308,6 +314,8 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, GLTFMaterialJsonSerializationTes
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVRotation(), TestEmissiveTextureRotation);
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVScale(), TestEmissiveTextureUVScale);
     EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetTexCoord(), TestEmissiveTextureTexCoord);
+    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetStereoVideoType(), csp::multiplayer::StereoVideoType::SideBySide);
+    EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetIsStereoFlipped(), true);
 
     EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().IsSet(), true);
     EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().IsSet(), true);

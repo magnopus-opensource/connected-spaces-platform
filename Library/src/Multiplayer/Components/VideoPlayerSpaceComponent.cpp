@@ -47,6 +47,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(csp::common::LogSystem* Log
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)] = static_cast<int64_t>(VideoPlayerSourceType::AssetSource);
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType)] = static_cast<int64_t>(StereoVideoType::None);
+    Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)] = false;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)] = true;
     Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)] = static_cast<int64_t>(0);
@@ -217,6 +218,10 @@ void VideoPlayerSpaceComponent::SetStereoVideoType(StereoVideoType Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::StereoVideoType), static_cast<int64_t>(Value));
 }
+
+bool VideoPlayerSpaceComponent::GetIsStereoFlipped() const { return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped)); }
+
+void VideoPlayerSpaceComponent::SetIsStereoFlipped(bool Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStereoFlipped), Value); }
 
 /* IVisibleComponent */
 
