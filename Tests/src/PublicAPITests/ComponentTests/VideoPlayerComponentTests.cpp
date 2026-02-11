@@ -92,6 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsARVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
+    EXPECT_EQ(VideoComponent->GetIsStereoFlipped(), false);
 
     CreatedObject->QueueUpdate();
     RealtimeEngine->ProcessPendingEntityOperations();
@@ -117,6 +118,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     VideoComponent->SetIsARVisible(false);
     VideoComponent->SetIsVirtualVisible(false);
     VideoComponent->SetIsEnabled(false);
+    VideoComponent->SetIsStereoFlipped(true);
 
     // Ensure values are set correctly
     EXPECT_EQ(VideoComponent->GetPosition(), csp::common::Vector3::One());
@@ -136,6 +138,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
     EXPECT_EQ(VideoComponent->GetIsARVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsVirtualVisible(), false);
     EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
+    EXPECT_EQ(VideoComponent->GetIsStereoFlipped(), true);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -203,6 +206,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsEnabled(), true);
+    EXPECT_EQ(VideoPlayerComponent->GetIsStereoFlipped(), false);
 
     // Setup script
     const std::string VideoPlayerScriptText = R"xx(
@@ -223,6 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.timeSincePlay = 1;
         video.videoPlayerSourceType = 0;
         video.stereoVideoType = 1;
+        video.isStereoFlipped = true;
 		video.isVisible = false;
         video.isARVisible = false;
         video.isVirtualVisible = false;
@@ -252,6 +257,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
     EXPECT_EQ(VideoPlayerComponent->GetTimeSincePlay(), 1.f);
     EXPECT_EQ(VideoPlayerComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
     EXPECT_EQ(VideoPlayerComponent->GetStereoVideoType(), StereoVideoType::SideBySide);
+    EXPECT_EQ(VideoPlayerComponent->GetIsStereoFlipped(), true);
     EXPECT_EQ(VideoPlayerComponent->GetIsVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsARVisible(), false);
     EXPECT_EQ(VideoPlayerComponent->GetIsVirtualVisible(), false);
