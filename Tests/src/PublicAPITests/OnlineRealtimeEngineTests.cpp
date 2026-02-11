@@ -154,7 +154,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
             RealtimeEngine->SendNewAvatarObjectMessage(
-                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default, LocomotionModel::Grounded))
         .then(async::inline_scheduler(),
             [](async::task<uint64_t> Id)
             {
@@ -193,7 +193,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
     async::spawn(async::inline_scheduler(), []() { return uint64_t(55); }) // This continuation takes the ID as its input
         .then(async::inline_scheduler(),
             RealtimeEngine->SendNewAvatarObjectMessage(
-                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default))
+                "Username", LoginState.UserId, UserTransform, IsVisible, "AvatarId", AvatarState::Idle, AvatarPlayMode::Default, LocomotionModel::Grounded))
         .then(async::inline_scheduler(),
             [](async::task<uint64_t> Id)
             {
@@ -226,6 +226,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
     const csp::common::String AvatarId = "AvatarId";
     AvatarState AvatarState = AvatarState::Flying;
     AvatarPlayMode AvatarPlayMode = AvatarPlayMode::Creator;
+    const auto LocomotionModel = LocomotionModel::FreeCamera;
     const uint64_t Id = 55;
     const SpaceTransform UserTransform
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
@@ -233,7 +234,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
 
     EXPECT_CALL(MockCallback, Call(::testing::_))
         .WillOnce(::testing::Invoke(
-            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, &UserTransform, IsVisible](SpaceEntity* CreatedSpaceEntity)
+            [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, IsVisible](SpaceEntity* CreatedSpaceEntity)
             {
                 ASSERT_NE(CreatedSpaceEntity, nullptr);
                 ASSERT_EQ(CreatedSpaceEntity->GetId(), Id);
@@ -249,6 +250,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
                 ASSERT_EQ(AvatarComponent->GetAvatarId(), AvatarId);
                 ASSERT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode);
                 ASSERT_EQ(AvatarComponent->GetState(), AvatarState);
+                ASSERT_EQ(AvatarComponent->GetLocomotionModel(), LocomotionModel);
                 ASSERT_EQ(AvatarComponent->GetIsVisible(), IsVisible);
             }));
 
@@ -259,7 +261,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
         { return async::make_task(uint64_t { 55 }); }) // This continuation takes the ID (and another void return from a when_all branch) as its input
         .then(async::inline_scheduler(),
             RealtimeEngine->CreateNewLocalAvatar(
-                Username, LoginState.UserId, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, MockCallback.AsStdFunction()));
+                Username, LoginState.UserId, UserTransform, IsVisible, AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, MockCallback.AsStdFunction()));
 }
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLoggedFromWholeCreateAvatarChain)
@@ -297,7 +299,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
     RealtimeEngine->CreateAvatar("Username", LoginState.UserId, UserTransform, IsVisible, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
-        MockCallback.AsStdFunction());
+        LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
 // This ensures the callback fires only once, with nullptr if the internal GenerateObjectIds fails.
@@ -548,8 +550,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarGen
     const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar(
-        "Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
+    RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
+        LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
 
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSendObjectMessageFailureTest)
@@ -612,6 +614,6 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
     const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
     const auto LoginState = SystemsManager.GetUserSystem()->GetLoginState();
 
-    RealtimeEngine->CreateAvatar(
-        "Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default, MockCallback.AsStdFunction());
+    RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
+        LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
