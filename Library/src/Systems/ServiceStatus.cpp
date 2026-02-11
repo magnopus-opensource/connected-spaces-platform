@@ -23,6 +23,22 @@
 namespace csp::systems
 {
 
+bool VersionMetadata::operator==(const VersionMetadata& Other) const
+{
+    return Version == Other.Version && DeprecationDatetime == Other.DeprecationDatetime;
+}
+
+bool ServiceStatus::operator==(const ServiceStatus& Other) const
+{
+    return ReverseProxy == Other.ReverseProxy && Name == Other.Name && ApiVersions == Other.ApiVersions
+        && CurrentApiVersion == Other.CurrentApiVersion;
+}
+
+bool ServicesDeploymentStatus::operator==(const ServicesDeploymentStatus& Other) const
+{
+    return Version == Other.Version && Services == Other.Services;
+}
+
 const ServicesDeploymentStatus& ServicesDeploymentStatusResult::GetLatestServicesDeploymentStatus() const { return ServicesDeploymentStatusResponse; }
 
 void ServicesDeploymentStatusResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }

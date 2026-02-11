@@ -51,6 +51,8 @@ public:
     GeoLocation Location;
     OlyRotation Rotation;
     /** @} */
+
+    bool operator==(const Site& Other) const;
 };
 
 /// @ingroup Space System

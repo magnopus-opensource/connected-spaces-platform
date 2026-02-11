@@ -44,6 +44,8 @@ public:
     double Amount;
     /// @brief Currency type
     csp::common::String CurrencyCode;
+
+    bool operator==(const CurrencyInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -67,6 +69,8 @@ public:
     int32_t Width;
     /// @brief Height of the media.
     int32_t Height;
+
+    bool operator==(const ProductMediaInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -80,6 +84,8 @@ public:
     csp::common::String Name;
     /// @brief Value of variant option.
     csp::common::String Value;
+
+    bool operator==(const VariantOptionInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -109,6 +115,8 @@ public:
     CurrencyInfo UnitPrice;
     /// @brief Quantity of variant available
     int32_t AvailableStock;
+
+    bool operator==(const ProductVariantInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -132,6 +140,8 @@ public:
     csp::common::Array<csp::common::String> Tags;
     /// @brief This array holds media for the product
     csp::common::Array<ProductMediaInfo> Media;
+
+    bool operator==(const ProductInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -165,6 +175,8 @@ public:
 
     /// @brief Quantity of the product in the cart.
     int Quantity;
+
+    bool operator==(const CartLine& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -214,6 +226,8 @@ public:
 
     /// @brief Is Ecommerce active.
     bool IsEcommerceActive;
+
+    bool operator==(const ShopifyStoreInfo& Other) const;
 };
 
 /// @ingroup ECommerce System

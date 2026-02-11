@@ -60,6 +60,8 @@ public:
     double Y;
     double Z;
     double W;
+
+    bool operator==(const OlyRotation& Other) const;
 };
 
 } // namespace csp::systems

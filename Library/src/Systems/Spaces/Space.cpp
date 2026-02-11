@@ -118,6 +118,17 @@ bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
         || UserId == OwnerId;
 }
 
+bool BasicSpace::operator==(const BasicSpace& Other) const
+{
+    return Id == Other.Id && Name == Other.Name && Description == Other.Description && Attributes == Other.Attributes && Tags == Other.Tags;
+}
+
+bool Space::operator==(const Space& Other) const
+{
+    return BasicSpace::operator==(Other) && CreatedBy == Other.CreatedBy && OwnerId == Other.OwnerId && UserIds == Other.UserIds
+        && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
+}
+
 const Space& SpaceResult::GetSpace() const { return Space; }
 
 const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }

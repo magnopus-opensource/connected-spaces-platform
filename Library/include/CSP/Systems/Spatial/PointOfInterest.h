@@ -64,6 +64,8 @@ public:
     csp::common::String AssetCollectionId;
     csp::common::String SpaceId;
     /** @} */
+
+    bool operator==(const PointOfInterest& Other) const;
 };
 
 /// @ingroup Point Of Interest System

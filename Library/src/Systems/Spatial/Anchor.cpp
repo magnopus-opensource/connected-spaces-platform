@@ -137,6 +137,22 @@ OlyAnchorPosition::OlyAnchorPosition()
 {
 }
 
+bool OlyAnchorPosition::operator==(const OlyAnchorPosition& Other) const { return X == Other.X && Y == Other.Y && Z == Other.Z; }
+
+bool Anchor::operator==(const Anchor& Other) const
+{
+    return Id == Other.Id && ThirdPartyAnchorProvider == Other.ThirdPartyAnchorProvider && ThirdPartyAnchorId == Other.ThirdPartyAnchorId
+        && CreatedBy == Other.CreatedBy && SpaceId == Other.SpaceId && SpaceEntityId == Other.SpaceEntityId
+        && AssetCollectionId == Other.AssetCollectionId && Location == Other.Location && Position == Other.Position && Rotation == Other.Rotation
+        && Tags == Other.Tags && SpatialKeyValue == Other.SpatialKeyValue;
+}
+
+bool AnchorResolution::operator==(const AnchorResolution& Other) const
+{
+    return Id == Other.Id && AnchorId == Other.AnchorId && SuccessfullyResolved == Other.SuccessfullyResolved
+        && ResolveAttempted == Other.ResolveAttempted && ResolveTime == Other.ResolveTime && Tags == Other.Tags;
+}
+
 Anchor& AnchorResult::GetAnchor() { return Anchor; }
 
 const Anchor& AnchorResult::GetAnchor() const { return Anchor; }

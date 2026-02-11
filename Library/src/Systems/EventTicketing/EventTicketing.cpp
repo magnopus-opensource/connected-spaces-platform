@@ -194,6 +194,12 @@ void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems:
 namespace csp::systems
 {
 
+bool TicketedEvent::operator==(const TicketedEvent& Other) const
+{
+    return Id == Other.Id && SpaceId == Other.SpaceId && Vendor == Other.Vendor && VendorEventId == Other.VendorEventId
+        && VendorEventUri == Other.VendorEventUri && IsTicketingActive == Other.IsTicketingActive;
+}
+
 void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);

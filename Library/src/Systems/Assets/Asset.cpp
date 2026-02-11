@@ -193,6 +193,15 @@ Asset::Asset()
 {
 }
 
+bool Asset::operator==(const Asset& Other) const
+{
+    return AssetCollectionId == Other.AssetCollectionId && Id == Other.Id && FileName == Other.FileName && Name == Other.Name
+        && LanguageCode == Other.LanguageCode && Type == Other.Type && Platforms == Other.Platforms && Styles == Other.Styles
+        && ExternalUri == Other.ExternalUri && Uri == Other.Uri && Checksum == Other.Checksum && Version == Other.Version
+        && MimeType == Other.MimeType && ExternalMimeType == Other.ExternalMimeType
+        && ThirdPartyPackagedAssetIdentifier == Other.ThirdPartyPackagedAssetIdentifier && ThirdPartyPlatformType == Other.ThirdPartyPlatformType;
+}
+
 const csp::common::String& FileAssetDataSource::GetMimeType() const { return MimeType; }
 
 void FileAssetDataSource::SetMimeType(const csp::common::String& InMimeType) { MimeType = InMimeType; }

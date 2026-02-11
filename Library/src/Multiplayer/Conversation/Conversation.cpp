@@ -111,6 +111,12 @@ MessageInfo& MessageInfo::operator=(const MessageInfo& MessageData)
     return *this;
 }
 
+bool MessageInfo::operator==(const MessageInfo& Other) const
+{
+    return ConversationId == Other.ConversationId && CreatedTimestamp == Other.CreatedTimestamp && EditedTimestamp == Other.EditedTimestamp
+        && UserId == Other.UserId && Message == Other.Message && MessageId == Other.MessageId;
+}
+
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));

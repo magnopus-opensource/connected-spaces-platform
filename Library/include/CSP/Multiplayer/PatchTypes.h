@@ -54,6 +54,8 @@ class CSP_API ComponentUpdateInfo
 public:
     uint16_t ComponentId;
     ComponentUpdateType UpdateType;
+
+    bool operator==(const ComponentUpdateInfo& Other) const { return ComponentId == Other.ComponentId && UpdateType == Other.UpdateType; }
 };
 
 } // namespace csp::multiplayer

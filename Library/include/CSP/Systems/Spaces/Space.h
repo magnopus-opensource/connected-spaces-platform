@@ -109,6 +109,8 @@ public:
     csp::common::String Description;
     SpaceAttributes Attributes;
     csp::common::Array<csp::common::String> Tags;
+
+    bool operator==(const BasicSpace& Other) const;
 };
 
 /// @ingroup Space System
@@ -136,6 +138,8 @@ public:
     /// is the Creator. Banned users do not count as known.
     /// @return Whether or not the user is known to the space
     CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
+
+    bool operator==(const Space& Other) const;
 };
 
 /// @ingroup Space System

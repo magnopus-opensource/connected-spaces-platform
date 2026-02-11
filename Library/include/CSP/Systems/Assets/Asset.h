@@ -114,6 +114,8 @@ public:
     csp::common::String ExternalMimeType;
     csp::common::String ThirdPartyPackagedAssetIdentifier;
     EThirdPartyPlatform ThirdPartyPlatformType;
+
+    bool operator==(const Asset& Other) const;
 };
 
 /// @brief Defines a base data source for an Asset, attributing a mime type and providing functionality for uploading the data.

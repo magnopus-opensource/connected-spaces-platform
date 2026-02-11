@@ -65,6 +65,11 @@ void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& Dto, csp::syste
 namespace csp::systems
 {
 
+bool Site::operator==(const Site& Other) const
+{
+    return Id == Other.Id && Name == Other.Name && SpaceId == Other.SpaceId && Location == Other.Location && Rotation == Other.Rotation;
+}
+
 Site& SiteResult::GetSite() { return Site; }
 
 const Site& SiteResult::GetSite() const { return Site; }

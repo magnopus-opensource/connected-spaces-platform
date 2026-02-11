@@ -60,6 +60,8 @@ public:
     csp::common::String VendorEventUri;
     /// @brief Specifies whether ticketing is currently turned on for the space.
     bool IsTicketingActive;
+
+    bool operator==(const TicketedEvent& Other) const;
 };
 
 /// @ingroup Event Ticketing System

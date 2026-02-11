@@ -54,6 +54,8 @@ public:
 
     csp::common::String UserId;
     SpaceUserRole UserRole;
+
+    bool operator==(const UserRoleInfo& Other) const;
 };
 
 /// @ingroup Space System
@@ -67,6 +69,8 @@ public:
 
     csp::common::String UserEmail;
     SpaceUserRole UserRole;
+
+    bool operator==(const InviteUserRoleInfo& Other) const;
 };
 
 /// @ingroup Space System

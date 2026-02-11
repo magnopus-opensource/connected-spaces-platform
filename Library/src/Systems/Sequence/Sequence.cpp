@@ -37,6 +37,12 @@ void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Seque
     Sequence.MetaData = Convert(Dto.GetMetadata());
 }
 
+bool Sequence::operator==(const Sequence& Other) const
+{
+    return Key == Other.Key && ReferenceType == Other.ReferenceType && ReferenceId == Other.ReferenceId && Items == Other.Items
+        && MetaData == Other.MetaData;
+}
+
 const Sequence& csp::systems::SequenceResult::GetSequence() const { return Sequence; }
 
 void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

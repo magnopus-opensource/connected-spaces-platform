@@ -40,6 +40,8 @@ public:
     csp::common::String UserName;
     csp::common::String DisplayName;
     csp::common::String AvatarId;
+
+    bool operator==(const BasicProfile& Other) const;
 };
 
 /// @brief Data structure for a full user profile, which incudes user email, roles, and data for creation and update history.
@@ -56,6 +58,8 @@ public:
     csp::common::String CreatedAt;
     csp::common::String UpdatedBy;
     csp::common::String UpdatedAt;
+
+    bool operator==(const Profile& Other) const;
 };
 
 /// @brief Result structure for a Profile request

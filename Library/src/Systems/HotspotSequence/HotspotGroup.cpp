@@ -20,6 +20,9 @@
 
 namespace csp::systems
 {
+
+bool HotspotGroup::operator==(const HotspotGroup& Other) const { return Name == Other.Name && Items == Other.Items; }
+
 const HotspotGroup& csp::systems::HotspotGroupResult::GetHotspotGroup() const { return Group; }
 
 void csp::systems::HotspotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }

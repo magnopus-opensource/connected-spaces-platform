@@ -31,4 +31,6 @@ bool GeoLocation::operator==(const GeoLocation& Other) const
 
 bool GeoLocation::operator!=(const GeoLocation& Other) const { return !operator==(Other); }
 
+bool OlyRotation::operator==(const OlyRotation& Other) const { return X == Other.X && Y == Other.Y && Z == Other.Z && W == Other.W; }
+
 } // namespace csp::systems
