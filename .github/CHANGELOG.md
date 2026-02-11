@@ -13,10 +13,49 @@ All notable changes to this project will be documented in this file.
 - [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
   This property allows users to specify whether the left and right eye videos should be flipped when rendering stereoscopic video. This is useful for supporting videos that may have been encoded with different stereo formats, ensuring correct playback in the appropriate format.
 
+- [OPE-3119] feat: Add equality operators to several types, in support of explicitly instantiating template container exports by MAG-ElliotMorris.
+  This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
+  all U's need equality. All equality operations are standard memberwise == comparison, of the like a c++20 =default would generate.
+  The following types have been given equality:
+    - MessageInfo
+    - ComponentUpdateInfo
+    - Asset
+    - AssetCollection
+    - CurrencyInfo
+    - ProductMediaInfo
+    - VariantOptionInfo
+    - ProductVariantInfo
+    - ProductInfo
+    - CartLine
+    - ShopifyStoreInfo
+    - TicketedEvent
+    - HotspotGroup
+    - Scope
+    - FeatureLimitInfo
+    - UserTierInfo
+    - FeatureQuotaInfo
+    - Sequence
+    - VersionMetadata
+    - ServiceStatus
+    - ServicesDeploymentStatus
+    - Site
+    - BasicSpace
+    - Space
+    - UserRoleInfo
+    - InviteUserRoleInfo
+    - OlyAnchorPosition
+    - OlyRotation
+    - Anchor
+    - AnchorResolution
+    - PointOfInterest
+    - BasicProfile
+    - Profile
+
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
+  
 ### 🔥 ❗Breaking Changes
 
 - [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
