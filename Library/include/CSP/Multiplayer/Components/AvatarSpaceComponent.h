@@ -27,13 +27,6 @@
 
 namespace csp::multiplayer
 {
-/// @brief Enumerates the supported locomotion models available for the avatar movements.
-enum class LocomotionModel
-{
-    Grounded = 0,
-    FreeCamera,
-    Num
-};
 
 /// @brief Enumerates the list of properties that can be replicated for an avatar component.
 enum class AvatarComponentPropertyKeys

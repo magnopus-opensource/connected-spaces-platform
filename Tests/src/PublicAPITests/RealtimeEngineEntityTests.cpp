@@ -187,12 +187,12 @@ TEST_P(CreateAvatar, CreateAvatarTest)
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::FreeCamera;
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -270,8 +270,8 @@ TEST_P(CreateCreatorAvatar, CreateCreatorAvatarTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, UserAvatarLocomotionModel);
     EXPECT_NE(Avatar, nullptr);
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
@@ -348,8 +348,8 @@ TEST_P(AvatarMovementDirection, AvatarMovementDirectionTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
     auto& Components = *Avatar->GetComponents();
@@ -903,8 +903,8 @@ TEST_P(EntitySelection, EntitySelectionTest)
 
     const auto LoginState = UserSystem->GetLoginState();
 
-    auto [Avatar] = AWAIT(
-        RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+    auto [Avatar] = AWAIT(RealtimeEngine.get(), CreateAvatar, UserName, LoginState.UserId, UserTransform, IsVisible, UserAvatarState, UserAvatarId,
+        UserAvatarPlayMode, LocomotionModel::Grounded);
     EXPECT_NE(Avatar, nullptr);
 
     csp::common::String ObjectName = "Object 1";

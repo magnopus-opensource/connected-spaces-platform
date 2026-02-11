@@ -81,8 +81,8 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, CreateAvatar)
 
     SpaceEntity* CreatedEntity = nullptr;
 
-    Engine.CreateAvatar(
-        TestName, nullptr, Transform, IsVisible, State, AvatarId, PlayMode, [&CreatedEntity](SpaceEntity* NewEntity) { CreatedEntity = NewEntity; });
+    Engine.CreateAvatar(TestName, nullptr, Transform, IsVisible, State, AvatarId, PlayMode, LocomotionModel::Grounded,
+        [&CreatedEntity](SpaceEntity* NewEntity) { CreatedEntity = NewEntity; });
 
     // Callback should be called before the function ends in offline mode, so this should be set.
     if (CreatedEntity == nullptr)
@@ -224,7 +224,8 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, DestroyAvatar)
     CSPSceneDescription SceneDescription;
     OfflineRealtimeEngine Engine { SceneDescription, *SystemsManager.GetLogSystem(), *SystemsManager.GetScriptSystem() };
 
-    Engine.CreateAvatar("", nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, [](SpaceEntity*) {});
+    Engine.CreateAvatar(
+        "", nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded, [](SpaceEntity*) { });
 
     if (Engine.GetNumEntities() != 1)
     {
@@ -326,7 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntity)
     SpaceEntity* Entity3 = nullptr;
 
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
     Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 
@@ -375,7 +376,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceEntityById)
     SpaceEntity* Entity3 = nullptr;
 
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
     Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 
@@ -423,10 +424,10 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceAvatar)
     SpaceEntity* Entity1 = nullptr;
     SpaceEntity* Avatar3 = nullptr;
 
-    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Avatar1](SpaceEntity* NewEntity) { Avatar1 = NewEntity; });
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Avatar3](SpaceEntity* NewEntity) { Avatar3 = NewEntity; });
 
     SpaceEntity* FoundAvatar1 = Engine.FindSpaceEntity(AvatarName1);
@@ -475,7 +476,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, FindSpaceObject)
     SpaceEntity* Entity3 = nullptr;
 
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
     Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 
@@ -521,7 +522,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetEntityByIndex)
     SpaceEntity* Entity3 = nullptr;
 
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
     Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 
@@ -574,10 +575,10 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetAvatarByIndex)
     SpaceEntity* Avatar2 = nullptr;
     SpaceEntity* Avatar3 = nullptr;
 
-    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(AvatarName1, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Avatar1](SpaceEntity* NewEntity) { Avatar1 = NewEntity; });
     Engine.CreateEntity(AvatarName2, SpaceTransform {}, nullptr, [&Avatar2](SpaceEntity* NewEntity) { Avatar2 = NewEntity; });
-    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(AvatarName3, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Avatar3](SpaceEntity* NewEntity) { Avatar3 = NewEntity; });
 
     EXPECT_EQ(Engine.GetNumEntities(), 3);
@@ -623,7 +624,7 @@ CSP_PUBLIC_TEST(CSPEngine, OfflineRealtimeEngineTests, GetObjectByIndex)
     SpaceEntity* Entity3 = nullptr;
 
     Engine.CreateEntity(EntityName1, SpaceTransform {}, nullptr, [&Entity1](SpaceEntity* NewEntity) { Entity1 = NewEntity; });
-    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default,
+    Engine.CreateAvatar(EntityName2, nullptr, SpaceTransform {}, false, AvatarState::Idle, "", AvatarPlayMode::Default, LocomotionModel::Grounded,
         [&Entity2](SpaceEntity* NewEntity) { Entity2 = NewEntity; });
     Engine.CreateEntity(EntityName3, SpaceTransform {}, nullptr, [&Entity3](SpaceEntity* NewEntity) { Entity3 = NewEntity; });
 

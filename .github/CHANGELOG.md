@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+🔥 ❗Breaking Changes
 
+- [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
+  When creating an Avatar, a `csp::multiplayer::LocomotionModel` must now be passed. This is a breaking change.
+  To obtain the same behaviour as before, `csp::multiplayer::LocomotionModel::Grounded` should be provided.
 
 ## [6.23.0] - 2026-02-04_17-54-18
 
