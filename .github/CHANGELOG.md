@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file.
 
 - [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
-🔥 ❗Breaking Changes
+### 🔥 ❗Breaking Changes
 
 - [OF-1821] feat!: Pass `LocomotionModel` on init via `CreateAvatar` by mag-lt
   When creating an Avatar, a `csp::multiplayer::LocomotionModel` must now be passed. This is a breaking change.
