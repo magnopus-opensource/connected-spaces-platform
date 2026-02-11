@@ -20,6 +20,8 @@
 #include "CSP/Multiplayer/ComponentExtensions.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
+#include <variant>
+
 using namespace csp::systems;
 
 namespace
@@ -79,32 +81,28 @@ void ComponentExtensionsScriptInterface::SetProperty(
 {
     csp::common::ReplicatedValue SetValue;
 
-    switch (Value.index())
+    struct PropertyVisitor
     {
-    case ValueType_Boolean:
-        SetValue.SetBool(std::get<ValueType_Boolean>(Value));
-        break;
-    case ValueType_Integer:
-        SetValue.SetInt(std::get<ValueType_Integer>(Value));
-        break;
-    case ValueType_Float:
-        SetValue.SetFloat(std::get<ValueType_Float>(Value));
-        break;
-    case ValueType_String:
-        SetValue.SetString(std::get<ValueType_String>(Value).c_str());
-        break;
-    case ValueType_Vector:
-        if (std::get<ValueType_Vector>(Value).size() == 3)
+        csp::common::ReplicatedValue& Target;
+
+        void operator()(bool Value) const { Target.SetBool(Value); }
+        void operator()(int64_t Value) const { Target.SetInt(Value); }
+        void operator()(float Value) const { Target.SetFloat(Value); }
+        void operator()(const std::string& Value) const { Target.SetString(Value.c_str()); }
+        void operator()(const std::vector<float>& Value) const
         {
-            SetValue.SetVector3({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2] });
+            if (Value.size() == 3)
+            {
+                Target.SetVector3({ Value[0], Value[1], Value[2] });
+            }
+            else if (Value.size() >= 4)
+            {
+                Target.SetVector4({ Value[0], Value[1], Value[2], Value[3] });
+            }
         }
-        else
-        {
-            SetValue.SetVector4({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2],
-                std::get<ValueType_Vector>(Value)[3] });
-        }
-        break;
-    }
+    };
+
+    std::visit(PropertyVisitor { SetValue }, Value);
 
     Extensions->SetProperty(Key.c_str(), SetValue);
 
