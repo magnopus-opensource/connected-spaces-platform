@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file.
 - [NT-0] refac: Moved enum StereoVideoType to SharedEnums StereoVideoType by MAG-JamesEdgeworth
   This change moves the StereoVideoType enum from the VideoComponent to the SharedEnums header, making it more accessible for use across different components and systems that may need to reference stereo video types.
 
+## [6.23.0] - 2026-02-04_17-54-18
+
+
+
 ## [6.22.0] - 2026-01-30_19-53-59
 
 ### 🔥 ❗ Breaking Changes
