@@ -13,10 +13,10 @@ All notable changes to this project will be documented in this file.
 - [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
   This property allows users to specify whether the left and right eye videos should be flipped when rendering stereoscopic video. This is useful for supporting videos that may have been encoded with different stereo formats, ensuring correct playback in the appropriate format.
 
-- [OPE-3119] feat: Add equality operators to several types, in support of explicitly instantiating template container exports by MAG-ElliotMorris.
+- [OPE-3119] feat: Add equality and inequality operators to several types, in support of explicitly instantiating template container exports by MAG-ElliotMorris.
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
   all U's need equality. All equality operations are standard memberwise == comparison, of the like a c++20 =default would generate.
-  The following types have been given equality:
+  The following types have been given new operators:
     - MessageInfo
     - ComponentUpdateInfo
     - Asset
@@ -50,6 +50,7 @@ All notable changes to this project will be documented in this file.
     - PointOfInterest
     - BasicProfile
     - Profile
+    - Array<T>
 
 ### 💫 💥 Code Refactors
 
