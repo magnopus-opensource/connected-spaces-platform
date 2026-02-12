@@ -71,6 +71,7 @@ template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
 template class CSP_API csp::common::Array<csp::systems::Material*>;
 template class CSP_API csp::common::Array<csp::systems::Scope>;
 template class CSP_API csp::common::Array<csp::systems::SpaceUserRole>;
+template class CSP_API csp::common::Array<csp::systems::EAssetCollectionType>;
 
 // csp::common::List
 template class CSP_API csp::common::List<csp::common::String>;
