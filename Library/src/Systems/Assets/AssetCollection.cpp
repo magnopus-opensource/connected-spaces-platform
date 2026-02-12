@@ -184,7 +184,8 @@ bool AssetCollection::operator==(const AssetCollection& Other) const
 {
     return Id == Other.Id && Name == Other.Name && Type == Other.Type && Tags == Other.Tags && PointOfInterestId == Other.PointOfInterestId
         && ParentId == Other.ParentId && SpaceId == Other.SpaceId && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt
-        && UpdatedBy == Other.UpdatedBy && UpdatedAt == Other.UpdatedAt && IsUnique == Other.IsUnique && Version == Other.Version;
+        && UpdatedBy == Other.UpdatedBy && UpdatedAt == Other.UpdatedAt && IsUnique == Other.IsUnique && Version == Other.Version
+        && *Metadata == *Other.Metadata;
 }
 
 csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataMutable() { return *Metadata; }
