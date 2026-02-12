@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.24.0] - 2026-02-12_12-42-40
+
 ### 🍰 🙌 New Features
 
 - [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
