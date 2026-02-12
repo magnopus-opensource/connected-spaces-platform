@@ -125,8 +125,8 @@ bool BasicSpace::operator==(const BasicSpace& Other) const
 
 bool Space::operator==(const Space& Other) const
 {
-    return BasicSpace::operator==(Other) && CreatedBy == Other.CreatedBy && OwnerId == Other.OwnerId && UserIds == Other.UserIds
-        && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
+    return BasicSpace::operator==(Other) && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && OwnerId == Other.OwnerId
+        && UserIds == Other.UserIds && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
 }
 
 const Space& SpaceResult::GetSpace() const { return Space; }

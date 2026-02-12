@@ -142,7 +142,7 @@ bool OlyAnchorPosition::operator==(const OlyAnchorPosition& Other) const { retur
 bool Anchor::operator==(const Anchor& Other) const
 {
     return Id == Other.Id && ThirdPartyAnchorProvider == Other.ThirdPartyAnchorProvider && ThirdPartyAnchorId == Other.ThirdPartyAnchorId
-        && CreatedBy == Other.CreatedBy && SpaceId == Other.SpaceId && SpaceEntityId == Other.SpaceEntityId
+        && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && SpaceId == Other.SpaceId && SpaceEntityId == Other.SpaceEntityId
         && AssetCollectionId == Other.AssetCollectionId && Location == Other.Location && Position == Other.Position && Rotation == Other.Rotation
         && Tags == Other.Tags && SpatialKeyValue == Other.SpatialKeyValue;
 }
