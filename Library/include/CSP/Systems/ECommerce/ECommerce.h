@@ -160,6 +160,9 @@ public:
     csp::common::String StoreUrl;
     /// @brief Url of Checkout.
     csp::common::String CheckoutUrl;
+
+    bool operator==(const CheckoutInfo& Other) const;
+    bool operator!=(const CheckoutInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -206,6 +209,9 @@ public:
 
     /// @brief Total quantity of all lines in the cart.
     int TotalQuantity;
+
+    bool operator==(const CartInfo& Other) const;
+    bool operator!=(const CartInfo& Other) const;
 };
 
 /// @ingroup ECommerce System

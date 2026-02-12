@@ -87,6 +87,9 @@ public:
     csp::common::String EmailLinkUrl;
     csp::common::String SignupUrl;
     csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
+
+    bool operator==(const InviteUserRoleInfoCollection& Other) const;
+    bool operator!=(const InviteUserRoleInfoCollection& Other) const;
 };
 
 /// @ingroup Space System

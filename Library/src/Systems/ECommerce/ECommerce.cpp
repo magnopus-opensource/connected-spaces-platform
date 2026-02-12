@@ -44,9 +44,16 @@ bool ProductInfo::operator==(const ProductInfo& Other) const
         && Tags == Other.Tags && Media == Other.Media;
 }
 
+bool CheckoutInfo::operator==(const CheckoutInfo& Other) const { return StoreUrl == Other.StoreUrl && CheckoutUrl == Other.CheckoutUrl; }
+
 bool CartLine::operator==(const CartLine& Other) const
 {
     return CartLineId == Other.CartLineId && ProductVariantId == Other.ProductVariantId && Quantity == Other.Quantity;
+}
+
+bool CartInfo::operator==(const CartInfo& Other) const
+{
+    return SpaceId == Other.SpaceId && CartId == Other.CartId && CartLines == Other.CartLines && TotalQuantity == Other.TotalQuantity;
 }
 
 bool ShopifyStoreInfo::operator==(const ShopifyStoreInfo& Other) const
@@ -60,7 +67,9 @@ bool ProductMediaInfo::operator!=(const ProductMediaInfo& Other) const { return 
 bool VariantOptionInfo::operator!=(const VariantOptionInfo& Other) const { return !(*this == Other); }
 bool ProductVariantInfo::operator!=(const ProductVariantInfo& Other) const { return !(*this == Other); }
 bool ProductInfo::operator!=(const ProductInfo& Other) const { return !(*this == Other); }
+bool CheckoutInfo::operator!=(const CheckoutInfo& Other) const { return !(*this == Other); }
 bool CartLine::operator!=(const CartLine& Other) const { return !(*this == Other); }
+bool CartInfo::operator!=(const CartInfo& Other) const { return !(*this == Other); }
 bool ShopifyStoreInfo::operator!=(const ShopifyStoreInfo& Other) const { return !(*this == Other); }
 
 void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, csp::systems::ProductInfo& ProductInfo)

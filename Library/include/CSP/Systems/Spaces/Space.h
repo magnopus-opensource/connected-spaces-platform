@@ -160,6 +160,9 @@ public:
     float Orientation;
     csp::common::Array<csp::systems::GeoLocation> GeoFence;
 
+    bool operator==(const SpaceGeoLocation& Other) const;
+    bool operator!=(const SpaceGeoLocation& Other) const;
+
 private:
     // This ID is the POI ID in the spatial data service. It is intentionally not exposed so that
     // clients cannot directly pass it to the PointOfInterestSystem. This ensures that clients

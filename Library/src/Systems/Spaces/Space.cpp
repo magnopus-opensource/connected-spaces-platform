@@ -329,6 +329,13 @@ void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& I
 
 void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
 
+bool SpaceGeoLocation::operator==(const SpaceGeoLocation& Other) const
+{
+    return SpaceId == Other.SpaceId && Location == Other.Location && Orientation == Other.Orientation && GeoFence == Other.GeoFence && Id == Other.Id;
+}
+
+bool SpaceGeoLocation::operator!=(const SpaceGeoLocation& Other) const { return !(*this == Other); }
+
 bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
 
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const { return GeoLocation; }
