@@ -28,12 +28,14 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
+#include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/Multiplayer/Scope.h"
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/Spatial/Anchor.h"
 #include "CSP/Systems/Spatial/PointOfInterest.h"
+#include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
@@ -107,3 +109,10 @@ template class CSP_API csp::common::Optional<csp::systems::Space>;
 template class CSP_API csp::common::Optional<csp::systems::SpaceAttributes>;
 template class CSP_API csp::common::Optional<csp::common::LoginState>;
 template class CSP_API csp::common::Optional<csp::common::Array<csp::FeatureFlag>>;
+template class CSP_API csp::common::Optional<csp::systems::EventTicketingVendor>;
+template class CSP_API csp::common::Optional<csp::systems::EPointOfInterestType>;
+template class CSP_API csp::common::Optional<csp::systems::EThirdPartyPlatform>;
+template class CSP_API csp::common::Optional<csp::common::Array<csp::systems::EAssetCollectionType>>;
+template class CSP_API csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>;
+template class CSP_API csp::common::Optional<csp::systems::GeoLocation>;
+template class CSP_API csp::common::Optional<csp::systems::TokenOptions>;
