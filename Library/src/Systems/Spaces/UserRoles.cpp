@@ -26,6 +26,9 @@ bool UserRoleInfo::operator==(const UserRoleInfo& Other) const { return UserId =
 
 bool InviteUserRoleInfo::operator==(const InviteUserRoleInfo& Other) const { return UserEmail == Other.UserEmail && UserRole == Other.UserRole; }
 
+bool UserRoleInfo::operator!=(const UserRoleInfo& Other) const { return !(*this == Other); }
+bool InviteUserRoleInfo::operator!=(const InviteUserRoleInfo& Other) const { return !(*this == Other); }
+
 namespace UserRolesHelpers
 {
 

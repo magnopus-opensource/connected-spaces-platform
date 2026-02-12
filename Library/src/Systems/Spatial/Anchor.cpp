@@ -153,6 +153,10 @@ bool AnchorResolution::operator==(const AnchorResolution& Other) const
         && ResolveAttempted == Other.ResolveAttempted && ResolveTime == Other.ResolveTime && Tags == Other.Tags;
 }
 
+bool OlyAnchorPosition::operator!=(const OlyAnchorPosition& Other) const { return !(*this == Other); }
+bool Anchor::operator!=(const Anchor& Other) const { return !(*this == Other); }
+bool AnchorResolution::operator!=(const AnchorResolution& Other) const { return !(*this == Other); }
+
 Anchor& AnchorResult::GetAnchor() { return Anchor; }
 
 const Anchor& AnchorResult::GetAnchor() const { return Anchor; }

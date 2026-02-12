@@ -98,10 +98,12 @@ PointOfInterest::PointOfInterest()
 
 bool PointOfInterest::operator==(const PointOfInterest& Other) const
 {
-    return Id == Other.Id && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && Title == Other.Title
-           && Description == Other.Description && Name == Other.Name && Type == Other.Type && Tags == Other.Tags && Owner == Other.Owner
-           && Location == Other.Location && AssetCollectionId == Other.AssetCollectionId && SpaceId == Other.SpaceId;
+    return Id == Other.Id && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && Title == Other.Title && Description == Other.Description
+        && Name == Other.Name && Type == Other.Type && Tags == Other.Tags && Owner == Other.Owner && Location == Other.Location
+        && AssetCollectionId == Other.AssetCollectionId && SpaceId == Other.SpaceId;
 }
+
+bool PointOfInterest::operator!=(const PointOfInterest& Other) const { return !(*this == Other); }
 
 PointOfInterest& POIResult::GetPointOfInterest() { return POI; }
 

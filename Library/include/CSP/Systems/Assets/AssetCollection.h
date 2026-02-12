@@ -112,6 +112,7 @@ public:
     csp::common::String Version;
 
     bool operator==(const AssetCollection& Other) const;
+    bool operator!=(const AssetCollection& Other) const;
 
 private:
     // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's

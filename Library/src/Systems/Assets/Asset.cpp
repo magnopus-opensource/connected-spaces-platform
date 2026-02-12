@@ -202,6 +202,8 @@ bool Asset::operator==(const Asset& Other) const
         && ThirdPartyPackagedAssetIdentifier == Other.ThirdPartyPackagedAssetIdentifier && ThirdPartyPlatformType == Other.ThirdPartyPlatformType;
 }
 
+bool Asset::operator!=(const Asset& Other) const { return !(*this == Other); }
+
 const csp::common::String& FileAssetDataSource::GetMimeType() const { return MimeType; }
 
 void FileAssetDataSource::SetMimeType(const csp::common::String& InMimeType) { MimeType = InMimeType; }

@@ -117,6 +117,8 @@ bool MessageInfo::operator==(const MessageInfo& Other) const
         && UserId == Other.UserId && Message == Other.Message && MessageId == Other.MessageId;
 }
 
+bool MessageInfo::operator!=(const MessageInfo& Other) const { return !(*this == Other); }
+
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));

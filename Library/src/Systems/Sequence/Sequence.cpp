@@ -43,6 +43,8 @@ bool Sequence::operator==(const Sequence& Other) const
         && MetaData == Other.MetaData;
 }
 
+bool Sequence::operator!=(const Sequence& Other) const { return !(*this == Other); }
+
 const Sequence& csp::systems::SequenceResult::GetSequence() const { return Sequence; }
 
 void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

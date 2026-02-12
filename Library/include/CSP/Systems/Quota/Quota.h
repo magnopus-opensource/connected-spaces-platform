@@ -84,6 +84,7 @@ public:
     int32_t Limit;
 
     bool operator==(const FeatureLimitInfo& Other) const;
+    bool operator!=(const FeatureLimitInfo& Other) const;
 };
 
 /// @ingroup Quota System
@@ -98,6 +99,7 @@ public:
     TierNames TierName;
 
     bool operator==(const UserTierInfo& Other) const;
+    bool operator!=(const UserTierInfo& Other) const;
 };
 
 /// @ingroup Quota System
@@ -115,6 +117,7 @@ public:
     PeriodEnum Period;
 
     bool operator==(const FeatureQuotaInfo& Other) const;
+    bool operator!=(const FeatureQuotaInfo& Other) const;
 };
 
 /// @ingroup Quota System

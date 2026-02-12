@@ -66,6 +66,7 @@ public:
     /** @} */
 
     bool operator==(const PointOfInterest& Other) const;
+    bool operator!=(const PointOfInterest& Other) const;
 };
 
 /// @ingroup Point Of Interest System

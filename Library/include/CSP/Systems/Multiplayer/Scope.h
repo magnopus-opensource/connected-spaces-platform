@@ -81,6 +81,7 @@ public:
     bool ManagedLeaderElection = false;
 
     bool operator==(const Scope& Other) const;
+    bool operator!=(const Scope& Other) const;
 };
 
 void DtoToScope(const csp::services::generated::multiplayerservice::ScopeDto& Dto, csp::systems::Scope& ScopeLeader);

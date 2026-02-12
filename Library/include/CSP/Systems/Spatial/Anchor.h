@@ -61,6 +61,7 @@ public:
     double Z;
 
     bool operator==(const OlyAnchorPosition& Other) const;
+    bool operator!=(const OlyAnchorPosition& Other) const;
 };
 
 void AnchorDtoToAnchor(const csp::services::generated::spatialdataservice::AnchorDto& Dto, csp::systems::Anchor& Anchor);
@@ -91,6 +92,7 @@ public:
     csp::common::Map<csp::common::String, csp::common::String> SpatialKeyValue;
 
     bool operator==(const Anchor& Other) const;
+    bool operator!=(const Anchor& Other) const;
     /** @} */
 };
 
@@ -164,6 +166,7 @@ public:
     csp::common::Array<csp::common::String> Tags;
 
     bool operator==(const AnchorResolution& Other) const;
+    bool operator!=(const AnchorResolution& Other) const;
 };
 
 /// @ingroup Anchor System

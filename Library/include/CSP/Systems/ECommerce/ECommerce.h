@@ -46,6 +46,7 @@ public:
     csp::common::String CurrencyCode;
 
     bool operator==(const CurrencyInfo& Other) const;
+    bool operator!=(const CurrencyInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -71,6 +72,7 @@ public:
     int32_t Height;
 
     bool operator==(const ProductMediaInfo& Other) const;
+    bool operator!=(const ProductMediaInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -86,6 +88,7 @@ public:
     csp::common::String Value;
 
     bool operator==(const VariantOptionInfo& Other) const;
+    bool operator!=(const VariantOptionInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -117,6 +120,7 @@ public:
     int32_t AvailableStock;
 
     bool operator==(const ProductVariantInfo& Other) const;
+    bool operator!=(const ProductVariantInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -142,6 +146,7 @@ public:
     csp::common::Array<ProductMediaInfo> Media;
 
     bool operator==(const ProductInfo& Other) const;
+    bool operator!=(const ProductInfo& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -177,6 +182,7 @@ public:
     int Quantity;
 
     bool operator==(const CartLine& Other) const;
+    bool operator!=(const CartLine& Other) const;
 };
 
 /// @ingroup ECommerce System
@@ -228,6 +234,7 @@ public:
     bool IsEcommerceActive;
 
     bool operator==(const ShopifyStoreInfo& Other) const;
+    bool operator!=(const ShopifyStoreInfo& Other) const;
 };
 
 /// @ingroup ECommerce System

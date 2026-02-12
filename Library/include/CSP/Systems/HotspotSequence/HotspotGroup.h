@@ -30,6 +30,7 @@ public:
     csp::common::Array<csp::common::String> Items;
 
     bool operator==(const HotspotGroup& Other) const;
+    bool operator!=(const HotspotGroup& Other) const;
 };
 
 /// @ingroup HotspotSequence System

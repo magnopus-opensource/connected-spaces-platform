@@ -62,6 +62,7 @@ public:
     bool IsTicketingActive;
 
     bool operator==(const TicketedEvent& Other) const;
+    bool operator!=(const TicketedEvent& Other) const;
 };
 
 /// @ingroup Event Ticketing System

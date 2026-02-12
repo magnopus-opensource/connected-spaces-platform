@@ -53,6 +53,7 @@ public:
     /** @} */
 
     bool operator==(const Site& Other) const;
+    bool operator!=(const Site& Other) const;
 };
 
 /// @ingroup Space System

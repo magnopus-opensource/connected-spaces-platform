@@ -56,6 +56,7 @@ public:
     SpaceUserRole UserRole;
 
     bool operator==(const UserRoleInfo& Other) const;
+    bool operator!=(const UserRoleInfo& Other) const;
 };
 
 /// @ingroup Space System
@@ -71,6 +72,7 @@ public:
     SpaceUserRole UserRole;
 
     bool operator==(const InviteUserRoleInfo& Other) const;
+    bool operator!=(const InviteUserRoleInfo& Other) const;
 };
 
 /// @ingroup Space System

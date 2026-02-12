@@ -47,6 +47,7 @@ public:
     csp::common::String DeprecationDatetime;
 
     bool operator==(const VersionMetadata& Other) const;
+    bool operator!=(const VersionMetadata& Other) const;
 };
 
 /// @ingroup Status System
@@ -67,6 +68,7 @@ public:
     csp::common::String CurrentApiVersion;
 
     bool operator==(const ServiceStatus& Other) const;
+    bool operator!=(const ServiceStatus& Other) const;
 };
 
 /// @ingroup Status System
@@ -82,6 +84,7 @@ public:
     csp::common::Array<ServiceStatus> Services;
 
     bool operator==(const ServicesDeploymentStatus& Other) const;
+    bool operator!=(const ServicesDeploymentStatus& Other) const;
 };
 
 /// @ingroup Status System

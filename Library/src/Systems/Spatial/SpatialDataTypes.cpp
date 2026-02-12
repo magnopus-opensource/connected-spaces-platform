@@ -28,9 +28,9 @@ bool GeoLocation::operator==(const GeoLocation& Other) const
     const auto LongitudeDiff = std::fabs(Longitude - Other.Longitude);
     return LatitudeDiff <= 0.0000001 && LongitudeDiff <= 0.0000001;
 }
-
-bool GeoLocation::operator!=(const GeoLocation& Other) const { return !operator==(Other); }
-
 bool OlyRotation::operator==(const OlyRotation& Other) const { return X == Other.X && Y == Other.Y && Z == Other.Z && W == Other.W; }
+
+bool GeoLocation::operator!=(const GeoLocation& Other) const { return !(*this == Other); }
+bool OlyRotation::operator!=(const OlyRotation& Other) const { return !(*this == Other); }
 
 } // namespace csp::systems

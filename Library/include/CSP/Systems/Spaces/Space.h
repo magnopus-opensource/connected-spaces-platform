@@ -111,6 +111,7 @@ public:
     csp::common::Array<csp::common::String> Tags;
 
     bool operator==(const BasicSpace& Other) const;
+    bool operator!=(const BasicSpace& Other) const;
 };
 
 /// @ingroup Space System
@@ -140,6 +141,7 @@ public:
     CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
 
     bool operator==(const Space& Other) const;
+    bool operator!=(const Space& Other) const;
 };
 
 /// @ingroup Space System

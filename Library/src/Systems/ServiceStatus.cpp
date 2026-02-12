@@ -39,6 +39,10 @@ bool ServicesDeploymentStatus::operator==(const ServicesDeploymentStatus& Other)
     return Version == Other.Version && Services == Other.Services;
 }
 
+bool VersionMetadata::operator!=(const VersionMetadata& Other) const { return !(*this == Other); }
+bool ServiceStatus::operator!=(const ServiceStatus& Other) const { return !(*this == Other); }
+bool ServicesDeploymentStatus::operator!=(const ServicesDeploymentStatus& Other) const { return !(*this == Other); }
+
 const ServicesDeploymentStatus& ServicesDeploymentStatusResult::GetLatestServicesDeploymentStatus() const { return ServicesDeploymentStatusResponse; }
 
 void ServicesDeploymentStatusResult::OnResponse(const csp::services::ApiResponseBase* /*ApiResponse*/) { }

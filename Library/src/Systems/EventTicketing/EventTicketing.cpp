@@ -200,6 +200,8 @@ bool TicketedEvent::operator==(const TicketedEvent& Other) const
         && VendorEventUri == Other.VendorEventUri && IsTicketingActive == Other.IsTicketingActive;
 }
 
+bool TicketedEvent::operator!=(const TicketedEvent& Other) const { return !(*this == Other); }
+
 void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);

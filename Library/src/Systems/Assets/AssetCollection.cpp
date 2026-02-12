@@ -188,6 +188,8 @@ bool AssetCollection::operator==(const AssetCollection& Other) const
         && *Metadata == *Other.Metadata;
 }
 
+bool AssetCollection::operator!=(const AssetCollection& Other) const { return !(*this == Other); }
+
 csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataMutable() { return *Metadata; }
 
 const csp::common::Map<csp::common::String, csp::common::String>& AssetCollection::GetMetadataImmutable() const { return *Metadata; }

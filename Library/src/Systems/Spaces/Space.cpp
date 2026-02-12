@@ -129,6 +129,9 @@ bool Space::operator==(const Space& Other) const
         && UserIds == Other.UserIds && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
 }
 
+bool BasicSpace::operator!=(const BasicSpace& Other) const { return !(*this == Other); }
+bool Space::operator!=(const Space& Other) const { return !(*this == Other); }
+
 const Space& SpaceResult::GetSpace() const { return Space; }
 
 const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }

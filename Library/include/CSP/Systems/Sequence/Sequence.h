@@ -40,6 +40,7 @@ public:
     csp::common::Map<csp::common::String, csp::common::String> MetaData;
 
     bool operator==(const Sequence& Other) const;
+    bool operator!=(const Sequence& Other) const;
 };
 
 /// @ingroup Sequence System
