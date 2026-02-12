@@ -279,7 +279,7 @@ bool TicketedEventVendorAuthInfo::operator==(const TicketedEventVendorAuthInfo& 
         && OAuthRedirectUrl == Other.OAuthRedirectUrl;
 }
 
-bool TicketedEventVendorAuthInfo::operator!=(const TicketedEventVendorAuthInfo& Other) const { return false; }
+bool TicketedEventVendorAuthInfo::operator!=(const TicketedEventVendorAuthInfo& Other) const { return !(*this == Other); }
 
 void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
