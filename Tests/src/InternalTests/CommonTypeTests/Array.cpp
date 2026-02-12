@@ -236,3 +236,33 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         FAIL();
     }
 }
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, EqualityTest)
+{
+    Array<String> Empty1 = {};
+    Array<String> Empty2 = {};
+
+    ASSERT_EQ(Empty1, Empty1);
+    ASSERT_EQ(Empty1, Empty2);
+
+    Array<String> SingleInstance1 = { "Hello" };
+    Array<String> SingleInstance2 = { "Hello" };
+
+    ASSERT_EQ(SingleInstance1, SingleInstance1);
+    ASSERT_EQ(SingleInstance1, SingleInstance2);
+    ASSERT_NE(Empty1, SingleInstance1);
+
+    Array<String> SingleInstanceDifferent = { "Goodbye" };
+    ASSERT_NE(SingleInstance1, SingleInstanceDifferent);
+
+    Array<String> MultiInstance1 = { "Is", "it", "me", "you're", "looking", "for" };
+    Array<String> MultiInstance2 = { "Is", "it", "me", "you're", "looking", "for" };
+
+    ASSERT_EQ(MultiInstance1, MultiInstance1);
+    ASSERT_EQ(MultiInstance1, MultiInstance2);
+    ASSERT_NE(SingleInstance1, MultiInstance1);
+    ASSERT_NE(Empty1, MultiInstance1);
+
+    Array<String> MultiInstanceDifferent = { "I", "can", "see", "it", "in", "your", "eyes" };
+    ASSERT_NE(MultiInstance1, MultiInstanceDifferent);
+}

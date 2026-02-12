@@ -192,7 +192,7 @@ public:
 
         for (size_t i = 0; i < ArraySize; ++i)
         {
-            if (!(ObjectArray[i] == Other.ObjectArray[i]))
+            if (ObjectArray[i] != Other.ObjectArray[i])
             {
                 return false;
             }
@@ -200,6 +200,8 @@ public:
 
         return true;
     }
+
+    bool operator!=(const Array<T>& Other) const { return !(*this == Other); }
 
     /// @brief Returns the number of elements in the array.
     /// @return const size_t
