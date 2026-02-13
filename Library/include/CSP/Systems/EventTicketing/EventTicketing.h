@@ -60,6 +60,9 @@ public:
     csp::common::String VendorEventUri;
     /// @brief Specifies whether ticketing is currently turned on for the space.
     bool IsTicketingActive;
+
+    bool operator==(const TicketedEvent& Other) const;
+    bool operator!=(const TicketedEvent& Other) const;
 };
 
 /// @ingroup Event Ticketing System
@@ -88,6 +91,9 @@ public:
     /// @brief Email address of the user associated with this ticket. The email associated to the 3rd party ticket should match the email of the CHS
     /// user.
     csp::common::String Email;
+
+    bool operator==(const EventTicket& Other) const;
+    bool operator!=(const EventTicket& Other) const;
 };
 
 /// @ingroup Event Ticketing System
@@ -108,6 +114,9 @@ public:
     csp::common::String AuthorizeEndpoint;
     /// @brief CHS URL the third party vendor can provide the OAuth code to.
     csp::common::String OAuthRedirectUrl;
+
+    bool operator==(const TicketedEventVendorAuthInfo& Other) const;
+    bool operator!=(const TicketedEventVendorAuthInfo& Other) const;
 };
 
 /// @ingroup Event Ticketing System

@@ -45,6 +45,9 @@ public:
     /// @brief The date and time at which the API version is considered deprecated, in ISO 8601 format.
     /// If empty, the version is currently active, or the deprecation date is unknown.
     csp::common::String DeprecationDatetime;
+
+    bool operator==(const VersionMetadata& Other) const;
+    bool operator!=(const VersionMetadata& Other) const;
 };
 
 /// @ingroup Status System
@@ -63,6 +66,9 @@ public:
 
     /// @brief The currently active API version; this version is guaranteed to be stable and supported.
     csp::common::String CurrentApiVersion;
+
+    bool operator==(const ServiceStatus& Other) const;
+    bool operator!=(const ServiceStatus& Other) const;
 };
 
 /// @ingroup Status System
@@ -76,6 +82,9 @@ public:
 
     /// @brief A list of services available in the current deployment, with their metadata and API versions.
     csp::common::Array<ServiceStatus> Services;
+
+    bool operator==(const ServicesDeploymentStatus& Other) const;
+    bool operator!=(const ServicesDeploymentStatus& Other) const;
 };
 
 /// @ingroup Status System

@@ -22,6 +22,19 @@
 namespace csp::systems
 {
 
+bool UserRoleInfo::operator==(const UserRoleInfo& Other) const { return UserId == Other.UserId && UserRole == Other.UserRole; }
+
+bool InviteUserRoleInfo::operator==(const InviteUserRoleInfo& Other) const { return UserEmail == Other.UserEmail && UserRole == Other.UserRole; }
+
+bool InviteUserRoleInfoCollection::operator==(const InviteUserRoleInfoCollection& Other) const
+{
+    return EmailLinkUrl == Other.EmailLinkUrl && SignupUrl == Other.SignupUrl && InviteUserRoleInfos == Other.InviteUserRoleInfos;
+}
+
+bool UserRoleInfo::operator!=(const UserRoleInfo& Other) const { return !(*this == Other); }
+bool InviteUserRoleInfo::operator!=(const InviteUserRoleInfo& Other) const { return !(*this == Other); }
+bool InviteUserRoleInfoCollection::operator!=(const InviteUserRoleInfoCollection& Other) const { return !(*this == Other); }
+
 namespace UserRolesHelpers
 {
 

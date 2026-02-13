@@ -109,6 +109,9 @@ public:
     csp::common::String Description;
     SpaceAttributes Attributes;
     csp::common::Array<csp::common::String> Tags;
+
+    bool operator==(const BasicSpace& Other) const;
+    bool operator!=(const BasicSpace& Other) const;
 };
 
 /// @ingroup Space System
@@ -136,6 +139,9 @@ public:
     /// is the Creator. Banned users do not count as known.
     /// @return Whether or not the user is known to the space
     CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
+
+    bool operator==(const Space& Other) const;
+    bool operator!=(const Space& Other) const;
 };
 
 /// @ingroup Space System
@@ -153,6 +159,9 @@ public:
     csp::systems::GeoLocation Location;
     float Orientation;
     csp::common::Array<csp::systems::GeoLocation> GeoFence;
+
+    bool operator==(const SpaceGeoLocation& Other) const;
+    bool operator!=(const SpaceGeoLocation& Other) const;
 
 private:
     // This ID is the POI ID in the spatial data service. It is intentionally not exposed so that

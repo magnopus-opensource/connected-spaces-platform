@@ -73,6 +73,9 @@ public:
 
     MessageInfo(const MessageInfo& MessageData);
     MessageInfo& operator=(const MessageInfo& MessageData);
+
+    bool operator==(const MessageInfo& Other) const;
+    bool operator!=(const MessageInfo& Other) const;
 };
 
 /// @ingroup Conversation

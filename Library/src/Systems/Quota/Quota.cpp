@@ -30,6 +30,25 @@ FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNam
     , Limit(LimitIn)
     , Period(PeriodIn) {};
 
+bool FeatureLimitInfo::operator==(const FeatureLimitInfo& Other) const
+{
+    return FeatureName == Other.FeatureName && ActivityCount == Other.ActivityCount && Limit == Other.Limit;
+}
+
+bool UserTierInfo::operator==(const UserTierInfo& Other) const
+{
+    return AssignToType == Other.AssignToType && AssignToId == Other.AssignToId && TierName == Other.TierName;
+}
+
+bool FeatureQuotaInfo::operator==(const FeatureQuotaInfo& Other) const
+{
+    return FeatureName == Other.FeatureName && TierName == Other.TierName && Limit == Other.Limit && Period == Other.Period;
+}
+
+bool FeatureLimitInfo::operator!=(const FeatureLimitInfo& Other) const { return !(*this == Other); }
+bool UserTierInfo::operator!=(const UserTierInfo& Other) const { return !(*this == Other); }
+bool FeatureQuotaInfo::operator!=(const FeatureQuotaInfo& Other) const { return !(*this == Other); }
+
 const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimitInfo() const { return FeaturesLimitInfo; }
 
 void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

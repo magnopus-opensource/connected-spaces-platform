@@ -118,6 +118,20 @@ bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
         || UserId == OwnerId;
 }
 
+bool BasicSpace::operator==(const BasicSpace& Other) const
+{
+    return Id == Other.Id && Name == Other.Name && Description == Other.Description && Attributes == Other.Attributes && Tags == Other.Tags;
+}
+
+bool Space::operator==(const Space& Other) const
+{
+    return BasicSpace::operator==(Other) && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && OwnerId == Other.OwnerId
+        && UserIds == Other.UserIds && ModeratorIds == Other.ModeratorIds && BannedUserIds == Other.BannedUserIds;
+}
+
+bool BasicSpace::operator!=(const BasicSpace& Other) const { return !(*this == Other); }
+bool Space::operator!=(const Space& Other) const { return !(*this == Other); }
+
 const Space& SpaceResult::GetSpace() const { return Space; }
 
 const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }
@@ -314,6 +328,13 @@ const Map<String, Array<String>>& SpacesMetadataResult::GetTags() const { return
 void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& InMetadata) { Metadata = InMetadata; }
 
 void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags) { Tags = InTags; }
+
+bool SpaceGeoLocation::operator==(const SpaceGeoLocation& Other) const
+{
+    return SpaceId == Other.SpaceId && Location == Other.Location && Orientation == Other.Orientation && GeoFence == Other.GeoFence && Id == Other.Id;
+}
+
+bool SpaceGeoLocation::operator!=(const SpaceGeoLocation& Other) const { return !(*this == Other); }
 
 bool SpaceGeoLocationResult::HasSpaceGeoLocation() const { return HasGeoLocation; }
 

@@ -194,6 +194,14 @@ void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems:
 namespace csp::systems
 {
 
+bool TicketedEvent::operator==(const TicketedEvent& Other) const
+{
+    return Id == Other.Id && SpaceId == Other.SpaceId && Vendor == Other.Vendor && VendorEventId == Other.VendorEventId
+        && VendorEventUri == Other.VendorEventUri && IsTicketingActive == Other.IsTicketingActive;
+}
+
+bool TicketedEvent::operator!=(const TicketedEvent& Other) const { return !(*this == Other); }
+
 void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
@@ -253,9 +261,25 @@ void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
     }
 }
 
+bool EventTicket::operator==(const EventTicket& Other) const
+{
+    return Id == Other.Id && SpaceId == Other.SpaceId && Vendor == Other.Vendor && VendorEventId == Other.VendorEventId
+        && VendorTicketId == Other.VendorTicketId && Status == Other.Status && UserId == Other.UserId && Email == Other.Email;
+}
+
+bool EventTicket::operator!=(const EventTicket& Other) const { return !(*this == Other); }
+
 EventTicket& EventTicketResult::GetEventTicket() { return Ticket; }
 
 const EventTicket& EventTicketResult::GetEventTicket() const { return Ticket; }
+
+bool TicketedEventVendorAuthInfo::operator==(const TicketedEventVendorAuthInfo& Other) const
+{
+    return Vendor == Other.Vendor && ClientId == Other.ClientId && AuthorizeEndpoint == Other.AuthorizeEndpoint
+        && OAuthRedirectUrl == Other.OAuthRedirectUrl;
+}
+
+bool TicketedEventVendorAuthInfo::operator!=(const TicketedEventVendorAuthInfo& Other) const { return !(*this == Other); }
 
 void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
