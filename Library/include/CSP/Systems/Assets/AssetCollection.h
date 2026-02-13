@@ -117,7 +117,7 @@ public:
 private:
     // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
     // internal STL map's destructor invokes client application's deallocators when they override 'delete'
-    // in their codebase.
+    // in their codebase. (Later note, EM. Custom allocators don't exist anymore, we can change this)
     csp::common::Map<csp::common::String, csp::common::String>* Metadata;
 };
 

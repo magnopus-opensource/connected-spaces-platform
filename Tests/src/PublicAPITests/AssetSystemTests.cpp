@@ -276,6 +276,71 @@ void GetAssetCollectionCount(csp::systems::AssetSystem* AssetSystem, const csp::
     Count = Result.GetCount();
 }
 
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetCollectionEqualityTest)
+{
+    const csp::systems::AssetCollection AssetCollection1;
+    csp::systems::AssetCollection AssetCollection2;
+
+    ASSERT_EQ(AssetCollection1, AssetCollection1);
+    ASSERT_EQ(AssetCollection1, AssetCollection2);
+
+    AssetCollection2.Id = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.Name = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.Type = csp::systems::EAssetCollectionType::COMMENT;
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.Tags = { "Test" };
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.PointOfInterestId = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.ParentId = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.SpaceId = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.CreatedBy = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.CreatedAt = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.UpdatedBy = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.UpdatedAt = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.IsUnique = true;
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    AssetCollection2.Version = "Test";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+    AssetCollection2 = AssetCollection1;
+
+    csp::common::Map<csp::common::String, csp::common::String>& Metadata = AssetCollection2.GetMetadataMutable();
+    Metadata["TestKey"] = "TestValue";
+    ASSERT_NE(AssetCollection1, AssetCollection2);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 {
     SetRandSeed();
