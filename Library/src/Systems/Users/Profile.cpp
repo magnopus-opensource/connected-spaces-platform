@@ -110,10 +110,26 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
 namespace csp::systems
 {
 
+bool BasicProfile::operator==(const BasicProfile& Other) const
+{
+    return UserId == Other.UserId && UserName == Other.UserName && DisplayName == Other.DisplayName && AvatarId == Other.AvatarId;
+}
+
+bool BasicProfile::operator!=(const BasicProfile& Other) const { return !(*this == Other); }
+
 Profile::Profile()
     : IsEmailConfirmed(false)
 {
 }
+
+bool Profile::operator==(const Profile& Other) const
+{
+    return BasicProfile::operator==(Other) && Email == Other.Email && IsEmailConfirmed == Other.IsEmailConfirmed && Roles == Other.Roles
+        && LastDeviceId == Other.LastDeviceId && CreatedBy == Other.CreatedBy && CreatedAt == Other.CreatedAt && UpdatedBy == Other.UpdatedBy
+        && UpdatedAt == Other.UpdatedAt;
+}
+
+bool Profile::operator!=(const Profile& Other) const { return !(*this == Other); }
 
 void ProfileResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

@@ -79,6 +79,9 @@ public:
     /// @brief Determines whether server side leader election is enabled on this scope.
     /// If this is true, MCS will automatically determine the leader for this scope.
     bool ManagedLeaderElection = false;
+
+    bool operator==(const Scope& Other) const;
+    bool operator!=(const Scope& Other) const;
 };
 
 void DtoToScope(const csp::services::generated::multiplayerservice::ScopeDto& Dto, csp::systems::Scope& ScopeLeader);

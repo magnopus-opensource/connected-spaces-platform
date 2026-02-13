@@ -21,6 +21,14 @@ namespace
     }
 }
 
+bool Scope::operator==(const Scope& Other) const
+{
+    return Id == Other.Id && ReferenceId == Other.ReferenceId && ReferenceType == Other.ReferenceType && Name == Other.Name
+        && PubSubType == Other.PubSubType && SolveRadius == Other.SolveRadius && ManagedLeaderElection == Other.ManagedLeaderElection;
+}
+
+bool Scope::operator!=(const Scope& Other) const { return !(*this == Other); }
+
 void DtoToScope(const chs::multiplayerservice::ScopeDto& Dto, csp::systems::Scope& ScopeLeader)
 {
     if (Dto.HasId())

@@ -82,6 +82,9 @@ public:
     TierFeatures FeatureName;
     int32_t ActivityCount;
     int32_t Limit;
+
+    bool operator==(const FeatureLimitInfo& Other) const;
+    bool operator!=(const FeatureLimitInfo& Other) const;
 };
 
 /// @ingroup Quota System
@@ -94,6 +97,9 @@ public:
     csp::common::String AssignToType;
     csp::common::String AssignToId;
     TierNames TierName;
+
+    bool operator==(const UserTierInfo& Other) const;
+    bool operator!=(const UserTierInfo& Other) const;
 };
 
 /// @ingroup Quota System
@@ -109,6 +115,9 @@ public:
     TierNames TierName;
     int32_t Limit;
     PeriodEnum Period;
+
+    bool operator==(const FeatureQuotaInfo& Other) const;
+    bool operator!=(const FeatureQuotaInfo& Other) const;
 };
 
 /// @ingroup Quota System
