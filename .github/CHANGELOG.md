@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [6.25.0] - 2026-02-13_16-41-40
+
+
+
 ## [6.24.0] - 2026-02-12_12-42-40
 
 ### 🍰 🙌 New Features
