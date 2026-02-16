@@ -55,7 +55,7 @@ class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
 
 public:
     ProviderDetailsResult() = default;
-    ProviderDetailsResult(void*) {};
+    ProviderDetailsResult(void*) { };
 
     [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
     [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
@@ -66,6 +66,43 @@ private:
     ThirdPartyProviderDetails ProviderDetails;
 };
 
+/// @brief Data requred to establish third party authentication.
+class CSP_API ThirdPartyAuthDetails
+{
+public:
+    ThirdPartyAuthDetails()
+        : ThirdPartyRequestedAuthProvider(EThirdPartyAuthenticationProviders::Invalid) { };
+
+    csp::common::String ThirdPartyAuthStateId;
+    EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider;
+    csp::common::String ThirdPartyAuthRedirectURL;
+    csp::common::String ThirdPartyAuthURL;
+};
+
+/// @ingroup User System
+/// @brief Data class used to contain third party auth details provided by MCS for the specified provider
+class CSP_API ThirdPartyAuthDetailsResult : public ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    friend class UserSystem;
+    /** @endcond */
+
+public:
+    [[nodiscard]] const ThirdPartyAuthDetails& GetThirdPartyAuthDetails() const;
+    CSP_NO_EXPORT ThirdPartyAuthDetailsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode)
+    {
+    }
+
+private:
+    ThirdPartyAuthDetailsResult() = default;
+    ThirdPartyAuthDetailsResult(csp::common::String ThirdPartyAuthStateId, EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider,
+        csp::common::String ThirdPartyAuthRedirectURL, csp::common::String ThirdPartyAuthURL);
+
+    ThirdPartyAuthDetails AuthDetails;
+};
+
 typedef std::function<void(const ProviderDetailsResult& Result)> ProviderDetailsResultCallback;
+typedef std::function<void(const ThirdPartyAuthDetailsResult& Result)> ThirdPartyAuthDetailsResultCallback;
 
 }; // namespace csp::systems

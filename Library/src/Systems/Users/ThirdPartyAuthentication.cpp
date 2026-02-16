@@ -76,4 +76,19 @@ void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* Api
         SocialProviderInfoDtoToProviderDetails(*InfoResponse, ProviderDetails);
     }
 }
+
+const ThirdPartyAuthDetails& ThirdPartyAuthDetailsResult::GetThirdPartyAuthDetails() const { return AuthDetails; }
+
+ThirdPartyAuthDetailsResult::ThirdPartyAuthDetailsResult(csp::common::String ThirdPartyAuthStateId,
+    csp::systems::EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider, csp::common::String ThirdPartyAuthRedirectURL,
+    csp::common::String ThirdPartyAuthURL)
+{
+    SetResult(EResultCode::Success, static_cast<uint16_t>(web::EResponseCodes::ResponseOK));
+
+    AuthDetails.ThirdPartyAuthStateId = ThirdPartyAuthStateId;
+    AuthDetails.ThirdPartyRequestedAuthProvider = ThirdPartyRequestedAuthProvider;
+    AuthDetails.ThirdPartyAuthRedirectURL = ThirdPartyAuthRedirectURL;
+    AuthDetails.ThirdPartyAuthURL = ThirdPartyAuthURL;
+}
+
 } // namespace csp::systems

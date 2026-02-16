@@ -93,6 +93,25 @@ bool CheckExpiryLengthFormat(const csp::common::String& ExpiryLength)
     return false;
 }
 
+/*
+ * Construct a Third Party Authentication URL to be used for authentication with a 3rd party provider.
+ */
+bool ConstructThirdPartyAuthURL(const csp::common::String& AuthoriseURL, const csp::common::String& ProviderClientId,
+    const csp::common::String& AuthProviderFormattedScopes, const csp::common::String& ThirdPartyAuthStateId,
+    const csp::common::String& ThirdPartyAuthRedirectURL, csp::common::String& ThirdPartyAuthURL)
+{
+    if (AuthoriseURL.IsEmpty() || ProviderClientId.IsEmpty() || AuthProviderFormattedScopes.IsEmpty())
+    {
+        return false;
+    }
+
+    ThirdPartyAuthURL = csp::common::StringFormat(
+        "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post", AuthoriseURL.c_str(),
+        ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(), ThirdPartyAuthRedirectURL.c_str());
+
+    return true;
+}
+
 }
 
 namespace csp::systems
@@ -537,39 +556,52 @@ csp::common::Array<EThirdPartyAuthenticationProviders> UserSystem::GetSupportedT
 }
 
 void UserSystem::GetThirdPartyProviderAuthoriseURL(
-    EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL, StringResultCallback Callback)
+    EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL, ThirdPartyAuthDetailsResultCallback Callback)
 {
-    ResetAuthenticationState();
+    if (AuthProvider == EThirdPartyAuthenticationProviders::Invalid || RedirectURL.IsEmpty())
+    {
+        CSP_LOG_ERROR_FORMAT("Invalid parameters passed to GetThirdPartyProviderAuthoriseURL. AuthProvider: %s, RedirectURL: %s",
+            ConvertExternalAuthProvidersToString(AuthProvider).c_str(), RedirectURL.c_str());
 
-    // Get provider_base_url and client_id
-    ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback = [=](const ProviderDetailsResult& ProviderDetailsRes)
+        ThirdPartyAuthDetailsResult ErrorResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(ErrorResult);
+
+        return;
+    }
+
+    ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback
+        = [AuthProvider, RedirectURL, Callback](const ProviderDetailsResult& ProviderDetailsRes)
     {
         if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            const auto AuthoriseUrl = ProviderDetailsRes.GetDetails().AuthoriseURL;
-            const auto ProviderClientId = ProviderDetailsRes.GetDetails().ProviderClientId;
-            ThirdPartyAuthStateId = csp::GenerateUUID().c_str();
-            ThirdPartyRequestedAuthProvider = AuthProvider;
-            ThirdPartyAuthRedirectURL = RedirectURL;
-            const auto AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
+            const csp::common::String AuthoriseURL = ProviderDetailsRes.GetDetails().AuthoriseURL;
+            const csp::common::String ProviderClientId = ProviderDetailsRes.GetDetails().ProviderClientId;
+            const csp::common::String AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
+            const csp::common::String ThirdPartyAuthStateId = csp::GenerateUUID().c_str();
 
-            auto AuthoriseURL = csp::common::StringFormat(
-                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post", AuthoriseUrl.c_str(),
-                ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(), RedirectURL.c_str());
+            csp::common::String ThirdPartyAuthURL;
+            if (ConstructThirdPartyAuthURL(
+                    AuthoriseURL, ProviderClientId, AuthProviderFormattedScopes, ThirdPartyAuthStateId, RedirectURL, ThirdPartyAuthURL))
+            {
+                ThirdPartyAuthDetailsResult SuccessResult(ThirdPartyAuthStateId, AuthProvider, RedirectURL, ThirdPartyAuthURL);
+                Callback(SuccessResult);
 
-            StringResult SuccessResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
-            SuccessResult.SetValue(AuthoriseURL);
-            Callback(SuccessResult);
+                return;
+            }
+
+            CSP_LOG_ERROR_FORMAT(
+                "The returned provider details were invalid. AuthoriseURL: %s, ProviderClientId: %s, AuthProviderFormattedScopes: %s",
+                AuthoriseURL.c_str(), ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str());
+
+            ThirdPartyAuthDetailsResult ErrorResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+            Callback(ErrorResult);
         }
         else if (ProviderDetailsRes.GetResultCode() != csp::systems::EResultCode::InProgress)
         {
             CSP_LOG_FORMAT(common::LogLevel::Error, "The retrieval of third party details was not successful. ResCode: %d, HttpResCode: %d",
                 static_cast<int>(ProviderDetailsRes.GetResultCode()), ProviderDetailsRes.GetHttpResultCode());
 
-            CurrentLoginState.State = csp::common::ELoginState::Error;
-
-            StringResult ErrorResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
-            ErrorResult.SetValue("error");
+            ThirdPartyAuthDetailsResult ErrorResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
             Callback(ErrorResult);
         }
     };
@@ -578,72 +610,104 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
         = AuthenticationAPI->CreateHandler<ProviderDetailsResultCallback, ProviderDetailsResult, void, chs_user::SocialProviderInfo>(
             ThirdPartyAuthenticationDetailsCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
-    CurrentLoginState.State = csp::common::ELoginState::LoginThirdPartyProviderDetailsRequested;
-
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
         ->social_providersProviderGet({ ConvertExternalAuthProvidersToString(AuthProvider), csp::CSPFoundation::GetTenant() }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
-    LoginStateResultCallback Callback)
+    const ThirdPartyAuthDetails& ThirdPartyAuthDetails, bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
+    const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
 {
-    if (CurrentLoginState.State != csp::common::ELoginState::LoginThirdPartyProviderDetailsRequested)
+    if (ThirdPartyToken.IsEmpty() || ThirdPartyStateId.IsEmpty())
     {
-        CSP_LOG_FORMAT(common::LogLevel::Error, "The LoginState: %d is incorrect for proceeding with the third party authentication login",
-            CurrentLoginState.State);
-        CurrentLoginState.State = csp::common::ELoginState::Error;
+        CSP_LOG_ERROR_FORMAT("Invalid parameters passed to LoginToThirdPartyAuthenticationProvider. ThirdPartyToken: %s, ThirdPartyStateId: %s",
+            ThirdPartyToken.c_str(), ThirdPartyStateId.c_str());
 
+        CurrentLoginState.State = csp::common::ELoginState::Error;
         csp::systems::LoginStateResult ErrorResult;
-        ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseForbidden);
+        ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
         Callback(ErrorResult);
+
+        return;
     }
 
-    // checking that the stored ThirdPartyAuthStateId matches the one passed by the Client as a security safety net suggested by the Auth Providers
-    if (ThirdPartyAuthStateId != ThirdPartyStateId)
+    if (ThirdPartyAuthDetails.ThirdPartyRequestedAuthProvider == EThirdPartyAuthenticationProviders::Invalid
+        || ThirdPartyAuthDetails.ThirdPartyAuthRedirectURL.IsEmpty())
     {
-        CSP_LOG_MSG(common::LogLevel::Error, "The state ID is not correct"); // intentionally not to explicit about the error for security reasons
+        CSP_LOG_ERROR_FORMAT(
+            "The third party provider details are not valid. You must call AssetSystem::GetThirdPartyProviderAuthoriseURL() first to "
+            "retrieve the provider details from MCS. AuthProvider: %s, RedirectURL: %s",
+            ConvertExternalAuthProvidersToString(ThirdPartyAuthDetails.ThirdPartyRequestedAuthProvider).c_str(),
+            ThirdPartyAuthDetails.ThirdPartyAuthRedirectURL.c_str());
+
+        CurrentLoginState.State = csp::common::ELoginState::Error;
+        csp::systems::LoginStateResult ErrorResult;
+        ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
+        Callback(ErrorResult);
+
+        return;
+    }
+
+    // Confirm that the stored ThirdPartyAuthStateId matches the one passed by the Client.
+    if (ThirdPartyAuthDetails.ThirdPartyAuthStateId != ThirdPartyStateId)
+    {
+        CSP_LOG_MSG(common::LogLevel::Error,
+            "The state ID is not correct. If you have not already done so, please call AssetSystem::GetThirdPartyProviderAuthoriseURL() first to "
+            "retrieve the provider details from MCS."); // The ThirdPartyStateId is not being logged for security reasons
+
         CurrentLoginState.State = csp::common::ELoginState::Error;
 
         csp::systems::LoginStateResult ErrorResult;
         ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t)csp::web::EResponseCodes::ResponseBadRequest);
         Callback(ErrorResult);
+
+        return;
+    }
+
+    if (CurrentLoginState.State == csp::common::ELoginState::LoggedIn)
+    {
+        CSP_LOG_MSG(common::LogLevel::Warning,
+            "You are already logged in. Please note that this call to UserSystem::LoginToThirdPartyAuthenticationProvider will issue a new access "
+            "token. Your existing token will still be valid but cannot be refreshed after it expires.");
     }
 
     LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
     {
-        if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+        if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::InProgress)
         {
-            NotifyRefreshTokenHasChanged();
-
-            csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
-                = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
-            {
-                if (ErrCode != csp::multiplayer::ErrorCode::None)
-                {
-                    CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
-
-                    Callback(LoginStateRes);
-                    return;
-                }
-
-                Callback(LoginStateRes);
-            };
-
-            StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(),
-                CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(), ConnectionCallback, LoginStateRes, *LogSystem,
-                CreateMultiplayerConnection);
+            return;
         }
-        else
+
+        if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
         {
             Callback(LoginStateRes);
+
+            return;
         }
+
+        NotifyRefreshTokenHasChanged();
+
+        csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
+            = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+        {
+            if (ErrCode != csp::multiplayer::ErrorCode::None)
+            {
+                CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+            }
+
+            Callback(LoginStateRes);
+
+            return;
+        };
+
+        StartMultiplayerConnection(*SystemsManager::Get().GetMultiplayerConnection(), CSPFoundation::GetEndpoints().MultiplayerConnection.GetURI(),
+            ConnectionCallback, LoginStateRes, *LogSystem, CreateMultiplayerConnection);
     };
 
     const auto Request = std::make_shared<chs_user::LoginSocialRequest>();
     Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-    Request->SetOAuthRedirectUri(ThirdPartyAuthRedirectURL);
-    Request->SetProvider(ConvertExternalAuthProvidersToString(ThirdPartyRequestedAuthProvider));
+    Request->SetOAuthRedirectUri(ThirdPartyAuthDetails.ThirdPartyAuthRedirectURL);
+    Request->SetProvider(ConvertExternalAuthProvidersToString(ThirdPartyAuthDetails.ThirdPartyRequestedAuthProvider));
     Request->SetToken(ThirdPartyToken);
     Request->SetTenant(csp::CSPFoundation::GetTenant());
 
@@ -941,12 +1005,12 @@ void UserSystem::NotifyRefreshTokenHasChanged()
     }
 }
 
-void UserSystem::ResetAuthenticationState()
-{
-    CurrentLoginState.State = csp::common::ELoginState::LoggedOut;
-    ThirdPartyAuthStateId = "";
-    ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
-}
+// void UserSystem::ResetAuthenticationState()
+//{
+//     CurrentLoginState.State = csp::common::ELoginState::LoggedOut;
+//     ThirdPartyAuthStateId = "";
+//     ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+// }
 
 void UserSystem::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
 {
@@ -987,4 +1051,5 @@ void UserSystem::OnAccessControlChangedEvent(const csp::common::NetworkEventData
 }
 
 csp::common::IAuthContext& UserSystem::GetAuthContext() { return Auth; }
+
 } // namespace csp::systems

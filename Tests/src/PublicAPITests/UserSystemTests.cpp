@@ -23,6 +23,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Common/DateTime.h"
 #include "Common/Web/HttpPayload.h"
+#include "Debug/Logging.h"
 #include "RAIIMockLogger.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
@@ -949,13 +950,79 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
     const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
     // Retrieve Authorise URL for Google
-    auto [ResGoogle] = AWAIT_PRE(
+    auto [Result] = AWAIT_PRE(
         UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
-    EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = ResGoogle.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthoriseDetails = Result.GetThirdPartyAuthDetails();
+    ValidateThirdPartyAuthoriseURL(AuthoriseDetails.ThirdPartyAuthURL, RedirectURL);
 }
+
+// As the following three tests require manual actions explained inside, they are currently disabled
+// ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
+/*
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+
+    // Retrieve Authorise URL for Google
+    auto [Result] = AWAIT_PRE(
+        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto& AuthoriseDetails = Result.GetThirdPartyAuthDetails();
+    ValidateThirdPartyAuthoriseURL(AuthoriseDetails.ThirdPartyAuthURL, RedirectURL);
+
+    // retrieve the StateId from the URL
+    const auto& AuthoriseURL = AuthoriseDetails.ThirdPartyAuthURL;
+    const auto Tokens = AuthoriseURL.Split('&');
+    std::string StateId = "";
+    for (size_t idx = 0; idx < Tokens.Size(); ++idx)
+    {
+        std::string URLElement(Tokens[idx].c_str());
+        size_t pos = URLElement.find("state=", 0);
+        if (pos == 0)
+        {
+            StateId = URLElement.substr(strlen("state="));
+            break;
+        }
+    }
+
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "AuthoriseURL: %s", AuthoriseURL.c_str());
+
+    std::filesystem::path token_file = "D:\\git\\csp-foundation\\third_party_auth_token.txt";
+    CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Looking in: %s", token_file.c_str());
+
+    // 1. Set a breakpoint on the next line before reading from the file
+    // 2. Navigate to the AuthoriseURL in a browser, but make sure that for the Third party account you're using there's already a created CHS account
+    // (same email address)
+    // 3. Get the "code" param value from the response URL and drop it in the file below (this file should be next to the Test binary)
+    if (!std::filesystem::exists(token_file))
+    {
+        LogFatal("third_party_auth_token.txt not found! This file must exist and must contain the provider authentication code/token");
+    }
+
+    std::ifstream TokenFile;
+    TokenFile.open(token_file);
+    std::string GoogleToken;
+    TokenFile >> GoogleToken;
+
+    auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProvider, RequestPredicate, GoogleToken.c_str(), StateId.c_str(),
+        AuthoriseDetails, false, true, nullptr);
+
+    EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
+    const auto UserId = LoginResult.GetLoginState().UserId;
+
+    // test that we are in fact logged in
+    auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
+
+    // Log out
+    LogOut(UserSystem);
+}
+*/
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
 {
@@ -969,8 +1036,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
         UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthoriseDetails = Result.GetThirdPartyAuthDetails();
+    ValidateThirdPartyAuthoriseURL(AuthoriseDetails.ThirdPartyAuthURL, RedirectURL);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
@@ -985,169 +1052,81 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
         UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    const auto& AuthoriseURL = Result.GetValue();
-    ValidateThirdPartyAuthoriseURL(AuthoriseURL, RedirectURL);
+    const auto& AuthoriseDetails = Result.GetThirdPartyAuthDetails();
+    ValidateThirdPartyAuthoriseURL(AuthoriseDetails.ThirdPartyAuthURL, RedirectURL);
 }
 
-// As the following three tests require manual actions explained inside, they are currently disabled
-// ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
-#if 0
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLInvalidArgumentsTest)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-	// Retrieve Authorise URL for Google
-	auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    // Retrieve Authorise URL for Google with an invalid provider specified
+    auto [Result1] = AWAIT_PRE(
+        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Invalid, RedirectURL);
+    EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Failed);
 
-	//retrieve the StateId from the URL
-	const auto& AuthoriseURL = Result.GetValue();
-	const auto Tokens = AuthoriseURL.Split('&');
-	std::string StateId = ""; 
-	for(size_t idx = 0; idx< Tokens.Size(); ++idx)
-	{
-		std::string URLElement(Tokens[idx].c_str());
-		size_t pos = URLElement.find("state=", 0);
-		if(pos == 0)
-		{
-			StateId = URLElement.substr(strlen("state="));
-			break;
-		}
-	}
-
-	std::cerr << "AuthoriseURL: " << AuthoriseURL << std::endl;
-
-	// 1. Set a breakpoint on the next line before reading from the file
-	// 2. Navigate to the AuthoriseURL in a browser, but make sure that for the Third party account you're using there's already a created CHS account (same email address)
-	// 3. Get the "code" param value from the response URL and drop it in the file below (this file should be next to the Test binary)
-	if (!std::filesystem::exists("third_party_auth_token.txt"))
-	{
-		LogFatal("third_party_auth_token.txt not found! This file must exist and must contain the provider authentication code/token");
-	}
-
-	std::ifstream TokenFile;
-	TokenFile.open("third_party_auth_token.txt");
-	std::string GoogleToken;
-	TokenFile >> GoogleToken;
-
-	auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyProvider, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, csp::common::String(GoogleToken.c_str()), csp::common::String(StateId.c_str()));
-	EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
-	const auto UserId = LoginResult.GetLoginState()->UserId;
-
-	// test that we are in fact logged in
-	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
-
-	// Log out
-	LogOut(UserSystem);
+    // Retrieve Authorise URL for Google with an invalid redirect url specified
+    auto [Result2]
+        = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, "");
+    EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Failed);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLDoesNotInvalidateLogInTest)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
+    csp::common::String UserId;
 
-	// Retrieve Authorise URL for Google
-	auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    // Create test user
+    csp::systems::Profile TestUser = CreateTestUser();
 
-	//retrieve the StateId from the URL
-	const auto& AuthoriseURL = Result.GetValue();
-	const auto Tokens = AuthoriseURL.Split('&');
-	std::string StateId = ""; 
-	for(size_t idx = 0; idx< Tokens.Size(); ++idx)
-	{
-		std::string URLElement(Tokens[idx].c_str());
-		size_t pos = URLElement.find("state=", 0);
-		if(pos == 0)
-		{
-			StateId = URLElement.substr(strlen("state="));
-			break;
-		}
-	}
+    // Log in
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
-	std::cerr << "AuthoriseURL: " << AuthoriseURL << std::endl;
+    // Check that calling 'GetThirdPartyProviderAuthoriseURL' does not impact the current login state
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-	// 1. Set a breakpoint on the next line before reading from the file
-	// 2. Navigate to the AuthoriseURL in a browser, but make sure that for the Third party account you're using there's already a created CHS account (same email address)
-	// 3. Get the "code" param value from the response URL and drop it in the file below (this file should be next to the Test binary)
-	if (!std::filesystem::exists("third_party_auth_token.txt"))
-	{
-		LogFatal("third_party_auth_token.txt not found! This file must exist and must contain the provider authentication code/token");
-	}
+    // Retrieve Authorise URL for Google
+    auto [Result] = AWAIT_PRE(
+        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	std::ifstream TokenFile;
-	TokenFile.open("third_party_auth_token.txt");
-	std::string DiscordToken;
-	TokenFile >> DiscordToken;
+    EXPECT_EQ(UserSystem->GetLoginState().State, csp::common::ELoginState::LoggedIn);
 
-	auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyProvider, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, csp::common::String(DiscordToken.c_str()), csp::common::String(StateId.c_str()));
-	EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
-	const auto UserId = LoginResult.GetLoginState()->UserId;
-
-	// test that we are in fact logged in
-	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
-
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CanLoginAfterGetAuthoriseURLTest)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://example-app.com/redirect";
+    const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
-	// Retrieve Authorise URL for Apple
-	auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL);
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    // Retrieve Authorise URL for Google
+    auto [Result] = AWAIT_PRE(
+        UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	//retrieve the StateId from the URL
-	const auto& AuthoriseURL = Result.GetValue();
-	const auto Tokens = AuthoriseURL.Split('&');
-	std::string StateId = ""; 
-	for(size_t idx = 0; idx< Tokens.Size(); ++idx)
-	{
-		std::string URLElement(Tokens[idx].c_str());
-		size_t pos = URLElement.find("state=", 0);
-		if(pos == 0)
-		{
-			StateId = URLElement.substr(strlen("state="));
-			break;
-		}
-	}
+    // Check that calling 'GetThirdPartyProviderAuthoriseURL' does not impact our ability to login
+    csp::common::String UserId;
 
-	std::cerr << "AuthoriseURL: " << AuthoriseURL << std::endl;
+    // Create test user
+    csp::systems::Profile TestUser = CreateTestUser();
 
-	// 1. Set a breakpoint on the next line before reading from the file
-	// 2. Navigate to the AuthoriseURL in a browser, but make sure that for the Third party account you're using there's already a created CHS account (same email address)
-	// 3. Get the "code" param value from the response POST_FROM and drop it in the file below (this file should be next to the Test binary)
-	if (!std::filesystem::exists("third_party_auth_token.txt"))
-	{
-		LogFatal("third_party_auth_token.txt not found! This file must exist and must contain the provider authentication code/token");
-	}
+    // Log in
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
-	std::ifstream TokenFile;
-	TokenFile.open("third_party_auth_token.txt");
-	std::string GoogleToken;
-	TokenFile >> GoogleToken;
+    EXPECT_EQ(UserSystem->GetLoginState().State, csp::common::ELoginState::LoggedIn);
 
-	auto [LoginResult] = AWAIT_PRE(UserSystem, LoginToThirdPartyProvider, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, csp::common::String(GoogleToken.c_str()), csp::common::String(StateId.c_str()));
-	EXPECT_EQ(LoginResult.GetResultCode(), csp::systems::EResultCode::Success);
-	const auto UserId = LoginResult.GetLoginState()->UserId;
-
-	// test that we are in fact logged in
-	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
-
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
-#endif
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 {
