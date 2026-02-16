@@ -89,13 +89,6 @@ public:
     {
         char* NewText = new char[Len + 1];
 
-#if DEBUG
-        if (Len > 0)
-        {
-            memset((void*)NewText, 0, sizeof(NewText));
-        }
-#endif
-
         NewText[Len] = 0;
         Text = NewText;
         Length = Len;
