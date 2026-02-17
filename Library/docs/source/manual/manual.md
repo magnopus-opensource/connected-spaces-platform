@@ -70,20 +70,6 @@ If you're forking CSP for your own purposes, or seeking to contribute back, you 
    building/ios
 ```
 
-## Tests
-
-CSP's functionality is validated via an ever-growing suite of tests, and any change introducing new functionality is expected to also include test coverage.
-In this section, you can find out how the tests work, testing best practices, and how to run them.
-
-```eval_rst
-.. toctree::
-   :maxdepth: 1
-   :titlesonly:
-
-   tests/best_practices
-   tests/test_locations
-```
-
 ## Debugging
 
 Inevitably, at some point you will encounter unexpected behavior in your application, and you'll break out the debugger to diagnose.
