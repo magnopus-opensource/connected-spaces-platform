@@ -131,8 +131,8 @@ csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticati
         return "Apple";
     default:
     {
-        CSP_LOG_FORMAT(common::LogLevel::Error, "Unsupported Provider Type requested: %d, returning Google", static_cast<uint8_t>(Provider));
-        return "Google";
+        CSP_LOG_FORMAT(common::LogLevel::Error, "Unsupported Provider Type requested: %d, returning Invalid", static_cast<uint8_t>(Provider));
+        return "Invalid";
     }
     }
 }

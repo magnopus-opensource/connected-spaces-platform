@@ -31,6 +31,7 @@
 
 #include "gtest/gtest.h"
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <future>
 
@@ -1126,6 +1127,87 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CanLoginAfterGetAuthoriseURLTest)
 
     // Log out
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginToThirdPartyAuthInvalidArgumentsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ThirdPartyStateId("StateId");
+
+    RAIIMockLogger MockLogger {};
+
+    csp::common::String InvalidArgsSubstring = fmt::format(
+        "Invalid parameters passed to LoginToThirdPartyAuthenticationProvider. ThirdPartyToken: , ThirdPartyStateId: {}", ThirdPartyStateId.c_str())
+                                                   .c_str();
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, InvalidArgsSubstring));
+
+    csp::systems::ThirdPartyAuthDetails AuthoriseDetails;
+    AuthoriseDetails.ThirdPartyRequestedAuthProvider = csp::systems::EThirdPartyAuthenticationProviders::Invalid;
+
+    // Check that calling 'LoginToThirdPartyAuthenticationProvider' with an empty Token string fails as expected
+    auto [LoginResult1] = AWAIT_PRE(
+        UserSystem, LoginToThirdPartyAuthenticationProvider, RequestPredicate, "", ThirdPartyStateId, AuthoriseDetails, false, true, nullptr);
+    EXPECT_EQ(LoginResult1.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginToThirdPartyAuthInvalidAuthDetailsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ThirdPartyToken("AuthToken");
+    const csp::common::String ThirdPartyStateId("StateId");
+
+    RAIIMockLogger MockLogger {};
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
+
+    csp::common::String InvalidArgsSubstring(
+        "The third party provider details are not valid. You must call AssetSystem::GetThirdPartyProviderAuthoriseURL() first to retrieve the "
+        "provider details from MCS. AuthProvider: Invalid, RedirectURL: ");
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, InvalidArgsSubstring));
+
+    csp::systems::ThirdPartyAuthDetails AuthoriseDetails;
+    AuthoriseDetails.ThirdPartyRequestedAuthProvider = csp::systems::EThirdPartyAuthenticationProviders::Invalid;
+
+    // Check that calling 'LoginToThirdPartyAuthenticationProvider' with an invalid auth provider and no redirect url in the AuthoriseDetails fails as
+    // expected
+    auto [LoginResult1] = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProvider, RequestPredicate, ThirdPartyToken, ThirdPartyStateId,
+        AuthoriseDetails, false, true, nullptr);
+    EXPECT_EQ(LoginResult1.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginToThirdPartyAuthStateIDNoMatchTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    const csp::common::String ThirdPartyToken("AuthToken");
+    const csp::common::String ThirdPartyStateId("StateId");
+
+    RAIIMockLogger MockLogger {};
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(::testing::_, ::testing::_)).Times(::testing::AnyNumber());
+
+    csp::common::String InvalidArgsSubstring("The state ID is not correct. If you have not already done so, please call "
+                                             "AssetSystem::GetThirdPartyProviderAuthoriseURL() first to retrieve the provider details from MCS.");
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, InvalidArgsSubstring));
+
+    // Set the 'ThirdPartyRequestedAuthProvider' and 'ThirdPartyAuthRedirectURL' to something valid but set the state id to one that does not match the
+    // state Id passed as an argument to this method
+    csp::systems::ThirdPartyAuthDetails AuthoriseDetails;
+    AuthoriseDetails.ThirdPartyRequestedAuthProvider = csp::systems::EThirdPartyAuthenticationProviders::Google;
+    AuthoriseDetails.ThirdPartyAuthStateId = "AnotherStateId";
+    AuthoriseDetails.ThirdPartyAuthRedirectURL = "RedirectURL";
+
+    auto [LoginResult1] = AWAIT_PRE(UserSystem, LoginToThirdPartyAuthenticationProvider, RequestPredicate, ThirdPartyToken, ThirdPartyStateId,
+        AuthoriseDetails, false, true, nullptr);
+    EXPECT_EQ(LoginResult1.GetResultCode(), csp::systems::EResultCode::Failed);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
