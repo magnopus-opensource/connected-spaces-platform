@@ -16,7 +16,6 @@
 #pragma once
 
 #include "CSP/Common/String.h"
-#include "Common/StlString.h"
 #include "Common/Web/Json.h"
 
 #include <map>
@@ -29,7 +28,7 @@ namespace csp::web
 class HttpPayload
 {
 public:
-    using HeadersMap = std::map<csp::StlString, csp::StlString, std::less<csp::StlString>>;
+    using HeadersMap = std::map<std::string, std::string>;
 
     HttpPayload();
     HttpPayload(const char* InContent);

@@ -17,7 +17,6 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#include "Common/StlString.h"
 #include "Common/Web/HttpAuth.h"
 #include "Debug/Logging.h"
 
