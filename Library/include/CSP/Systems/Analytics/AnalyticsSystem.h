@@ -31,6 +31,7 @@ class CSPEngine_AnalyticsSystemTests_QueueAnalyticsEventQueueSendRateTest_Test;
 class CSPEngine_AnalyticsSystemTests_QueueAnalyticsEventQueueSizeTest_Test;
 class CSPEngine_AnalyticsSystemTests_FlushAnalyticsEventsQueueTest_Test;
 class CSPEngine_AnalyticsSystemTests_ClearAnalyticsEventQueueTest_Test;
+class CSPEngine_AnalyticsSystemTests_FlushEmptyAnalyticsEventsQueueTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -71,6 +72,7 @@ class CSP_API AnalyticsSystem : public SystemBase
     friend class ::CSPEngine_AnalyticsSystemTests_QueueAnalyticsEventQueueSizeTest_Test;
     friend class ::CSPEngine_AnalyticsSystemTests_FlushAnalyticsEventsQueueTest_Test;
     friend class ::CSPEngine_AnalyticsSystemTests_ClearAnalyticsEventQueueTest_Test;
+    friend class ::CSPEngine_AnalyticsSystemTests_FlushEmptyAnalyticsEventsQueueTest_Test;
 #endif
     /** @endcond */
     CSP_END_IGNORE
