@@ -124,19 +124,19 @@ public:
     CSP_ASYNC_RESULT void GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback);
 
     /// @brief Retrieves asset collections based on the specified search criteria.
+    /// These parameters filter the search criteria using the intersection of the provided parameters.
     /// Results pagination is supported through the use of ResultsSkipNumber and ResultsMaxNumber.
-    /// @param Space Space : optional space to get asset collections associated with it
-    /// @param AssetCollectionParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
-    /// @param AssetCollectionType EAssetCollectionType : type of the asset collection
-    /// @param AssetCollectionTags csp::common::Array<csp::common::String> : optional array of strings representing asset collection tags
-    /// @param AssetCollectionNames csp::common::Optional<csp::common::Array<csp::common::String>> : optional array of strings representing asset
-    /// collection names
-    /// @param ResultsSkipNumber int : optional param representing the number of result entries that will be skipped from the result. For no skip pass
+    /// @param AssetCollectionIds : Search for asset collections with these ids.
+    /// @param ParentId : Search for asset collections with this parent id.
+    /// @param Names : Search for asset collections with these names.
+    /// @param Types : Search for asset collections of these types.
+    /// @param Tags : Search for asset collections with these user provided tags.
+    /// @param SpaceIds : Search for asset collections associated with the provided spaces.
+    /// @param ResultsSkipNumber : The number of result entries that will be skipped from the result. For no skip pass
     /// nullptr.
-    /// @param ResultsMaxNumber int : optional param representing the maximum number of result entries to be retrieved. For all available result
-    /// entries pass nullptr.
-    /// @param Callback AssetCollectionsResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+    /// @param ResultsMaxNumber : The maximum number of result entries to be retrieved. For all available results pass nullptr.
+    /// @param Callback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionIds,
         const csp::common::Optional<csp::common::String>& ParentId, const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
         const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
         const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
