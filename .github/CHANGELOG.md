@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fixed crash when loading older materials by MAG-mv
+  We weren't checking if a property existed before deserializing which was causing a crash with older materials.
+
 - [OB-4151] fix: Address AnalyticsSystem hang after flush of empty queue by MAG-AdamThorn
   Ensure that if the `AnalyticsSystem::FlushAnalyticsEventsQueue()` method is called with an empty queue, that the method fires the passed callback with a valid response.
 
