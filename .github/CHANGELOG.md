@@ -9,16 +9,10 @@ All notable changes to this project will be documented in this file.
 - [NT-0] fix: Fixed crash when loading older materials by MAG-mv
   We weren't checking if a property existed before deserializing which was causing a crash with older materials.
 
+- [OB-4151] fix: Address AnalyticsSystem hang after flush of empty queue by MAG-AdamThorn
+  Ensure that if the `AnalyticsSystem::FlushAnalyticsEventsQueue()` method is called with an empty queue, that the method fires the passed callback with a valid response.
+
 ## [6.25.0] - 2026-02-13_16-41-40
-
-
-
-## [6.24.0] - 2026-02-12_12-42-40
-
-### 🍰 🙌 New Features
-
-- [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
-  This property allows users to specify whether the left and right eye videos should be flipped when rendering stereoscopic video. This is useful for supporting videos that may have been encoded with different stereo formats, ensuring correct playback in the appropriate format.
 
 - [OPE-3119] feat: Add equality and inequality operators to several types, in support of explicitly instantiating template container exports by MAG-ElliotMorris.
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
@@ -58,6 +52,13 @@ All notable changes to this project will be documented in this file.
     - BasicProfile
     - Profile
     - Array<T>
+
+## [6.24.0] - 2026-02-12_12-42-40
+
+### 🍰 🙌 New Features
+
+- [NT-0] feat: Add isStereoFlipped property to Video component and texture material by MAG-JamesEdgeworth
+  This property allows users to specify whether the left and right eye videos should be flipped when rendering stereoscopic video. This is useful for supporting videos that may have been encoded with different stereo formats, ensuring correct playback in the appropriate format.
 
 ### 💫 💥 Code Refactors
 

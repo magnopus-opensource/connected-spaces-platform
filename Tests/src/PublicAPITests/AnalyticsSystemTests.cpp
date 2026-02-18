@@ -448,3 +448,41 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushAnalyticsEventsQueueTest)
     // Log out
     LogOut(UserSystem);
 }
+
+/*
+ * Test that when we try to flush an empty queue of analytics events the callback is fired correctly.
+ */
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, FlushEmptyAnalyticsEventsQueueTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* AnalyticsSystem = SystemsManager.GetAnalyticsSystem();
+
+    // Log in
+    String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    std::promise<NullResult> ResultPromise;
+    std::future<NullResult> ResultFuture = ResultPromise.get_future();
+
+    NullResultCallback FlushResultCallback = [&ResultPromise](const NullResult& Result)
+    {
+        ResultPromise.set_value(Result);
+    };
+
+    // Check that the queue is empty
+    EXPECT_TRUE(AnalyticsSystem->GetCurrentQueueSize() == 0);
+
+    AnalyticsSystem->FlushAnalyticsEventsQueue(FlushResultCallback);
+
+    // Wait for the callback to be received
+    ResultFuture.wait();
+    auto Result = ResultFuture.get();
+    EXPECT_TRUE(Result.GetResultCode() == csp::systems::EResultCode::Success);
+    EXPECT_TRUE(Result.GetHttpResultCode() == static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNoContent));
+
+    // Log out
+    LogOut(UserSystem);
+}
