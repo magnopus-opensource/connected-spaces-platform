@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+
+
+## [6.26.0] - 2026-02-18_12-49-33
+
 ### 🐛 🔨 Bug Fixes
 
 - [NT-0] fix: Fixed crash when loading older materials by MAG-mv
