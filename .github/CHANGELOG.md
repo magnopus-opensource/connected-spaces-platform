@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### 🐛 🔨 Bug Fixes
 
+- [NT-0] fix: Fixed crash when loading older materials by MAG-mv
+  We weren't checking if a property existed before deserializing which was causing a crash with older materials.
 
 ## [6.25.0] - 2026-02-13_16-41-40
 
