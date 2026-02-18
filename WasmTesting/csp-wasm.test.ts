@@ -1,7 +1,7 @@
 import './pretend-to-be-a-browser'
 import { CreatePublicTestSpace, CreateTestUser, LoginAsUser, LaunchTestPage, DeleteSpace, LogoutUser, TEST_ACCOUNT_PASSWORD } from './testhelpers'
 
-import { test } from 'uvu';
+import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
 import { CSPFoundation, ready, Systems } from 'connected-spaces-platform.web';
 import { initializeCSP } from './shared/csp-initializer.js';
@@ -10,12 +10,28 @@ import { initializeCSP } from './shared/csp-initializer.js';
 //True if USE_RELEASE_CSP is not set, false otherwise. Idea here is we want debug to be the default mode.
 const USE_DEBUG_CSP: boolean = process.env.USE_RELEASE_CSP === undefined;
 
+interface UserContext {
+  user: Systems.ProfileResult;
+}
+
+const test = suite<UserContext>();
+
+test.before.each(async (context) => {
+  const user = await CreateTestUser();
+  await LoginAsUser(user);
+
+  context.user = user;
+});
+
+test.after.each(async (context) => {
+  await LogoutUser(context.user)
+});
+
 test.before(async () => {
   return initializeCSP(USE_DEBUG_CSP); //gotta return the promise or tests wont automatically await
 });
 
-test('Login', async () => {
-  const user = await CreateTestUser();
+test('Login', async ({ user }) => {
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/Login.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
@@ -26,8 +42,6 @@ test('Login', async () => {
 })
 
 test('EnterSpace', async () => {
-  const user = await CreateTestUser();
-  await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/EnterSpace.html', USE_DEBUG_CSP, null, spaceId)
 
@@ -39,11 +53,9 @@ test('EnterSpace', async () => {
 
   //Cleanup
   await DeleteSpace(spaceId);
-  await LogoutUser(user);
 })
 
-test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
-  const user = await CreateTestUser();
+test('Cross Thread Callbacks From Log Callback, OB-3782', async ({ user }) => {
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadLogCallbackLogin.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, null)
 
   console.log(consoleMessages);
@@ -54,9 +66,7 @@ test('Cross Thread Callbacks From Log Callback, OB-3782', async () => {
 
 });
 
-test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async () => {
-  const user = await CreateTestUser();
-  await LoginAsUser(user);
+test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async ({ user }) => {
   const spaceId = await CreatePublicTestSpace();
   // This test relies on a 10s timeout for a C++ thread. Add that time to the default timeout.
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CrossThreadConnectionInterrupted.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId, undefined, undefined, 15000)
@@ -68,17 +78,12 @@ test('Cross Thread Callbacks From NetworkInterrupted Callback, OB-1524', async (
     !errors.some(e => e.message.includes('table index is out of bounds')));
 
   assert.ok(consoleMessages.some(e => e.includes('Connection interrupted: true')));
-
-  const userSystem = Systems.SystemsManager.get().getUserSystem();
-  await userSystem.logout();
 });
 
-test('SendReceiveNetworkEvent', async () => {
+test('SendReceiveNetworkEvent', async ({ user }) => {
   // This test was added as a regression test against `RuntimeError: null function or function signature mismatch`
   // Caused by a wrapper gen bug when you make a return type of an enclosing function different for the return type of the callback
   // We didn't actually fix it at time of writing, change `ListenNetworkEvent` to return a bool and you'll see what I mean.
-  const user = await CreateTestUser();
-  await LoginAsUser(user);
   const spaceId = await CreatePublicTestSpace();
 
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/SendReceiveNetworkEvent.html', USE_DEBUG_CSP, { email: user.getProfile().email, password: TEST_ACCOUNT_PASSWORD }, spaceId);
@@ -91,12 +96,9 @@ test('SendReceiveNetworkEvent', async () => {
 
   //Cleanup
   await DeleteSpace(spaceId);
-  await LogoutUser(user);
 })
 
-test('CreateAvatar', async () => {
-  const user = await CreateTestUser();
-  await LoginAsUser(user);
+test('CreateAvatar', async ({ user }) => {
   const spaceId = await CreatePublicTestSpace();
   const { errors, consoleMessages } = await LaunchTestPage('http://127.0.0.1:8888/CreateAvatar.html', USE_DEBUG_CSP, null, spaceId)
 
@@ -108,7 +110,6 @@ test('CreateAvatar', async () => {
 
   //Cleanup
   await DeleteSpace(spaceId);
-  await LogoutUser(user);
 })
 
 test('Offline', async () => {
