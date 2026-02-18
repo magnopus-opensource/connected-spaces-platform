@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [6.27.0] - 2026-02-18_07-39-32
+
+
+
 ## [6.26.0] - 2026-02-18_12-49-33
 
 ### 🐛 🔨 Bug Fixes
