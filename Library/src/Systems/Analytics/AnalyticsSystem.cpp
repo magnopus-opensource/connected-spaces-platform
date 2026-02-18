@@ -213,6 +213,12 @@ void AnalyticsSystem::FlushAnalyticsEventsQueue(NullResultCallback Callback)
 
     if (AnalyticsRecordQueue.empty())
     {
+        CSP_LOG_MSG(common::LogLevel::Verbose, "AnalyticsSystem::FlushAnalyticsEventsQueue called but the AnalyticsRecordQueue is empty.");
+
+        // Return Success and ResponseNoContent to indicate that the flush operation was successful but there were no records to send.
+        NullResult Result(csp::systems::EResultCode::Success, 204);
+        INVOKE_IF_NOT_NULL(Callback, Result);
+
         return;
     }
 
