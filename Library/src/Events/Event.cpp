@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #include "Events/Event.h"
-
-#include "Common/StlString.h"
 #include "Common/Wrappers.h"
 
 #include <map>
@@ -109,7 +107,7 @@ private:
         };
     };
 
-    using ParamMap = std::map<csp::StlString, EventParam, std::less<csp::StlString>>;
+    using ParamMap = std::map<std::string, EventParam>;
 
     ParamMap Parameters;
 };

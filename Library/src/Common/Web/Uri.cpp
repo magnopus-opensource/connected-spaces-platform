@@ -16,7 +16,6 @@
 #include "Common/Web/Uri.h"
 
 #include "Common/NumberFormatter.h"
-#include "Common/StlString.h"
 
 #include <iostream>
 #include <string>
@@ -47,7 +46,7 @@ const std::string Uri::GetAsStdString() const { return std::string(UriPath.c_str
 
 void Uri::SetWithParams(const char* InUri, std::initializer_list<csp::common::String> Params)
 {
-    csp::StlString Uri(InUri);
+    std::string Uri(InUri);
     constexpr size_t SearchStartIndex = 0;
 
     for (auto Param : Params)

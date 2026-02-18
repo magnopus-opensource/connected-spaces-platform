@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #include "Events/EventId.h"
-
-#include "Common/StlString.h"
 #include "Common/Wrappers.h"
 
 namespace csp::events
