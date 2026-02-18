@@ -49,7 +49,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Tex
 {
     // Deserialize the source type first to get the necessary information
     uint32_t SourceType;
-    Deserializer.DeserializeMember("sourceType", SourceType);
+    Deserializer.SafeDeserializeMember("sourceType", SourceType);
 
     Obj.SourceType = static_cast<csp::systems::ETextureResourceType>(SourceType);
 
@@ -57,35 +57,35 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Tex
     {
         // If the resource type is an ImageAsset, we only need to deserialize
         // AssetCollectionId and AssetId
-        Deserializer.DeserializeMember("assetCollectionId", Obj.AssetCollectionId);
-        Deserializer.DeserializeMember("assetId", Obj.AssetId);
+        Deserializer.SafeDeserializeMember("assetCollectionId", Obj.AssetCollectionId);
+        Deserializer.SafeDeserializeMember("assetId", Obj.AssetId);
     }
     else
     {
         // If the resource type is a Component, we only need to deserialize
         // EntityComponentId
-        Deserializer.DeserializeMember("entityComponentId", Obj.EntityComponentId);
+        Deserializer.SafeDeserializeMember("entityComponentId", Obj.EntityComponentId);
     }
 
     csp::common::Array<float> UVOffsetArray;
-    Deserializer.DeserializeMember("uvOffset", UVOffsetArray);
+    Deserializer.SafeDeserializeMember("uvOffset", UVOffsetArray);
 
     Obj.UVOffset = csp::common::Vector2(UVOffsetArray[0], UVOffsetArray[1]);
 
-    Deserializer.DeserializeMember("uvRotation", Obj.UVRotation);
+    Deserializer.SafeDeserializeMember("uvRotation", Obj.UVRotation);
 
     csp::common::Array<float> UVScaleArray;
-    Deserializer.DeserializeMember("uvScale", UVScaleArray);
+    Deserializer.SafeDeserializeMember("uvScale", UVScaleArray);
 
     Obj.UVScale = csp::common::Vector2(UVScaleArray[0], UVScaleArray[1]);
 
-    Deserializer.DeserializeMember("texCoord", Obj.TexCoord);
+    Deserializer.SafeDeserializeMember("texCoord", Obj.TexCoord);
 
     uint32_t StereoVideoTypeValue;
-    Deserializer.DeserializeMember("stereoVideoType", StereoVideoTypeValue);
+    Deserializer.SafeDeserializeMember("stereoVideoType", StereoVideoTypeValue);
     Obj.StereoVideoType = static_cast<csp::multiplayer::StereoVideoType>(StereoVideoTypeValue);
 
-    Deserializer.DeserializeMember("isStereoFlipped", Obj.IsStereoFlipped);
+    Deserializer.SafeDeserializeMember("isStereoFlipped", Obj.IsStereoFlipped);
 }
 
 namespace csp::systems
