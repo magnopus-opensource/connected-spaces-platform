@@ -1,16 +1,19 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
-## [Unreleased]
-
-
-
-## [6.27.0] - 2026-02-18_07-39-32
+## [6.28.0]
 
 
 
-## [6.26.0] - 2026-02-18_12-49-33
+## [6.27.0]
+
+### 🙈 🙉 🙊 Test Changes
+
+- [OF-1823] test: Ensure logout between each WASM test by mag-lt
+  If any of the tests that login fail, any subsequent test that needs to login will fail, as we're already logged in. The CSP instance is stateful across test cases, and due to the current singleton nature of the API (and impl) we can't have a new instance per test. So, for simplicity, this currently leans on uvu's test suite context to create and login before each test, and logout after. 
+
+## [6.26.0]
 
 ### 🐛 🔨 Bug Fixes
 
@@ -20,7 +23,9 @@ All notable changes to this project will be documented in this file.
 - [OB-4151] fix: Address AnalyticsSystem hang after flush of empty queue by MAG-AdamThorn
   Ensure that if the `AnalyticsSystem::FlushAnalyticsEventsQueue()` method is called with an empty queue, that the method fires the passed callback with a valid response.
 
-## [6.25.0] - 2026-02-13_16-41-40
+## [6.25.0]
+
+### 🍰 🙌 New Features
 
 - [OPE-3119] feat: Add equality and inequality operators to several types, in support of explicitly instantiating template container exports by MAG-ElliotMorris.
   This has been done because of a single sticky Map<T, Array<U>> type, which obviously needs equality for Array<U>, which means
@@ -61,7 +66,7 @@ All notable changes to this project will be documented in this file.
     - Profile
     - Array<T>
 
-## [6.24.0] - 2026-02-12_12-42-40
+## [6.24.0]
 
 ### 🍰 🙌 New Features
 
@@ -79,11 +84,14 @@ All notable changes to this project will be documented in this file.
   When creating an Avatar, a `csp::multiplayer::LocomotionModel` must now be passed. This is a breaking change.
   To obtain the same behaviour as before, `csp::multiplayer::LocomotionModel::Grounded` should be provided.
 
-## [6.23.0] - 2026-02-04_17-54-18
+## [6.23.0]
 
+### 🐛 🔨 Bug Fixes
 
+- [OB-5015] fix: Leader election fixes by MAG-mv
+  This addresses both OB-5015 and OB-5019. OB-5019 - We were always passing the local client id when registering the default scope, so local client always assumed it was the leader. OB-5015 - We were not deregistering the remote script event when leader election was disabled, which was causing the event to attempt to access a dangling realtimeengine pointer.
 
-## [6.22.0] - 2026-01-30_19-53-59
+## [6.22.0]
 
 ### 🔥 ❗ Breaking Changes
 
@@ -92,12 +100,13 @@ All notable changes to this project will be documented in this file.
   SpaceEntity::IsModifiable now returns an enum, specifying the reason.
   Also adds IRealtimeEngine::IsEntityModifiable and derived functions in all realtime engine implementations.
   Also adds SpaceEntity::IsModifiableWithReason which acts as a wrapper around the above functions.
+  
 ### 💫 💥 Code Refactors
 
 - [NT-0] refac: Remove use of metadata for storing Hotspot Sequence keys by MAG-AdamThorn
   When creating a new HotspotGroup, the name property has the sequence type ("Hotspots") and SpaceId appended. The original name was also being stored in the sequence metadata. This was causing issues with renaming Hotspot sequences or when retrieving on Space entry. This change removes use of metadata. As part of this change `StartsWith`, `EndsWith` and `SubString` String utility methods have also be added.
 
-## [6.21.0] - 2026-01-28_11-22-27
+## [6.21.0]
 
 ### 🍰 🙌 New Features
 
@@ -116,6 +125,7 @@ All notable changes to this project will be documented in this file.
     - Exported Map<String,ReplicatedValue>, and a gamut of Optional<T> arithmetic type instantiations
     - Add `iterator` and `reverse_iterator` typedefs and implementation to `List`
     - Add `std::hash` specializations for `String`, `Array<T>`, `List<T>`, `Map<T>`, `ReplicatedValue`, `ApplicationSettings` and `SettingsCollection`.
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-5015] fix: Fixed crash with server-side leader election after exiting space by MAG-MV
@@ -124,7 +134,7 @@ All notable changes to this project will be documented in this file.
 - [OB-5019] fix: Fixed server-side leader election leader change when a new client enters space by MAG-mv
   An incorrect client id was being used internally, causing the new client to always think it is leader.
 
-## [6.20.0] - 2026-01-13_17-38-31
+## [6.20.0]
 
 ### 🔥 ❗ Breaking Changes
 
@@ -137,9 +147,9 @@ All notable changes to this project will be documented in this file.
       * SequenceChangedNetworkEventData.HotspotData.Name > SequenceChangedNetworkEventData.Key
 	  * SequenceChangedNetworkEventData.HotspotData.NewName > SequenceChangedNetworkEventData.NewKey
 
-## [6.19.0] - 2026-01-07_12-46-10
+## [6.19.0]
 
-🍰 🙌 New Features
+### 🍰 🙌 New Features
 
 - [NT-0] feat: Exposed equality and inequality operators for `Vector2`, `Vector3`, `Vector4` and `Map` by MAG-ElliotMorris.
   Also added hash functions in the `std` namespace for the Vector types.
@@ -148,7 +158,7 @@ All notable changes to this project will be documented in this file.
 
 - [OB-4123] fix: Fix some text rendering as black/unreadable in generated docs.
 
-## [6.17.0] - 2025-12-15_14-00-12
+## [6.17.0]
 
 ### 🐛 🔨 Bug Fixes
 
@@ -161,37 +171,33 @@ All notable changes to this project will be documented in this file.
   Google made changes to the way the oauth URL works, so we need to set prompt to select_account rather than none to restore the functionality. This change updates that parameter in the GetThirdPartyProviderAuthoriseURL function.
 - [OPE-2982] fix: Unity Android debug builds crash on login. Caused by Android not being able to find the CSP library file.
 
-## [6.16.0] - 2025-12-09_19-48-30
+## [6.15.0]
 
-
-
-## [6.15.0] - 2025-12-08_20-00-56
-
-🔥 ❗Breaking Changes
+### 🔥 ❗Breaking Changes
 
 - [OB-4579] fix!: Issues around renaming hotspot groups by MAG-ChristopherAtkinson
   Rename event has been deprecated and removed at the services level. This is a breaking change due to the removal of the csp::common::ESequenceUpdateType::Rename.
 
-🍰 🙌 New Features
+### 🍰 🙌 New Features
 
 - [OF-1758] feat: replace assertion in token expiration with meaningful log to notify users by MAG-ChristopherAtkinson
   RefreshIfExpired invokes a fatal log message in place of the existing assert as asserting on a refresh token failure is too aggressive.
   
-🙈 🙉 🙊 Test Changes
+### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] test: Await exiting spaces in certain realtime engine tests by MAG-ElliotMorris.
   Correct usage of the realtime engine requires that the exit space call returns fully before deleting the memory, these tests did not do that.
 
-## [6.14.0] - 2025-12-02_17-43-07
+## [6.14.0]
 
-🔥 ❗Breaking Changes
+### 🔥 ❗Breaking Changes
 
 - [OF-1806] refac!: Add a new URL property and deprecate others in the AvatarSpaceComponent in https://github.com/magnopus-opensource/connected-spaces-platform/pull/872
   Simplify the setting and getting of the mesh URL for the avatar component. This is a breaking change due to the removal of the getters and setters for CustomAvatarUrl and AvatarMeshIndex.
 
-## [6.13.0] - 2025-11-28_20-11-35
+## [6.13.0]
 
-🔥 ❗Breaking Changes
+### 🔥 ❗Breaking Changes
 
 - [NT-0] feat!: expose refresh token expiry length by MAG-ChristopherAtkinson in https://github.com/magnopus-opensource/connected-spaces-platform/pull/863
   Expose RefreshTokenExpiryLength to the token options to support clients configuring custom durations.
@@ -201,7 +207,7 @@ All notable changes to this project will be documented in this file.
 - [NT-0] chore: Change 'Dirty components map already contains key' log to very verbose by MAG-ThomasGreenhalgh in https://github.com/magnopus-opensource/connected-spaces-platform/pull/874
   Changed the log level of the _'Dirty components map already contains key'_ message emitted from `SpaceEntityStatePatcher::SetDirtyComponent` to `VeryVerbose`.
 
-## [6.12.0] - 2025-11-21_18-23-39
+## [6.12.0]
 
 ### 🍰 🙌 New Features
 
@@ -218,7 +224,7 @@ All notable changes to this project will be documented in this file.
 - [NT-0] test: Update QuotaSystem test by MAG-AdamThorn in https://github.com/magnopus-opensource/connected-spaces-platform/pull/862
   Updated the QuotaSystem `GetTierFeaturesQuota` test to account for the addition of the new `GoogleGenAI` Quota tier feature in MCS.
 
-## [6.11.0] - 2025-11-18_11-14-15
+## [6.11.0]
 
 ### 🍰 🙌 New Features
 
@@ -239,6 +245,7 @@ All notable changes to this project will be documented in this file.
   This fixes crashes with the log callback if UserSystem::Login fails, and also the MultiplayerConnection::ConnectionInterrupted callback on wasm builds.
 - [OB-4961] fix: Some spaces could not find the default scope. by MAG-mv in https://github.com/magnopus-opensource/connected-spaces-platform/pull/886
   Fixes issue with EnterSpace with older spaces using an unexpected format for the scope name.
+
 ### 🔨 🔨 Chore
 
 - [NT-0] chore: Finish NO_EXPORT heirarchy by MAG-ElliotMorris in https://github.com/magnopus-opensource/connected-spaces-platform/pull/848
