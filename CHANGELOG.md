@@ -10,8 +10,8 @@ All notable changes to this project will be documented in this file. For compile
 
 ### 🙈 🙉 🙊 Test Changes
 
-- [OF-1823] test: Ensure logout between each WASM test by mag-lt
-  If any of the tests that login fail, any subsequent test that needs to login will fail, as we're already logged in. The CSP instance is stateful across test cases, and due to the current singleton nature of the API (and impl) we can't have a new instance per test. So, for simplicity, this currently leans on uvu's test suite context to create and login before each test, and logout after. 
+- [NT-0] chore: Remove analytics flush log by MAG-ElliotMorris
+  A verbose log was added to the AnalyticsSystem::FlushAnalyticsEventsQueue method for instances where the method was called when the queue was empty. However, this method is called on Tick once a given period of time has elapsed since the queue was last sent, which resulted in log spamming. The log has been removed.
 
 ## [6.26.0]
 
