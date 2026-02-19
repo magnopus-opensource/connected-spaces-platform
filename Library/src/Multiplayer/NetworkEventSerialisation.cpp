@@ -397,9 +397,26 @@ csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
     csp::common::AsyncCallCompletedEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
+    //ParsedEvent.OperationName = ParsedEvent.EventValues[0].GetString();
+    //ParsedEvent.ReferenceId = ParsedEvent.EventValues[1].GetString();
+    //ParsedEvent.ReferenceType = ParsedEvent.EventValues[2].GetString();
+
     ParsedEvent.OperationName = ParsedEvent.EventValues[0].GetString();
-    ParsedEvent.ReferenceId = ParsedEvent.EventValues[1].GetString();
-    ParsedEvent.ReferenceType = ParsedEvent.EventValues[2].GetString();
+    if (ParsedEvent.EventValues[1].GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
+    {
+        const auto& ReferencesStringMap = ParsedEvent.EventValues[1].GetStringMap();
+
+        for (const auto& [Key, ReplicatedValue] : ReferencesStringMap)
+        {
+            ParsedEvent.References[Key] = ReplicatedValue.GetString();
+        }
+    }
+
+    ParsedEvent.ReferenceId = ParsedEvent.References["GroupId"];
+    ParsedEvent.ReferenceType = "GroupId";
+    
+    ParsedEvent.Success = ParsedEvent.EventValues[2].GetBool();
+    ParsedEvent.StatusReason = ParsedEvent.EventValues[3].GetString();
 
     return ParsedEvent;
 }

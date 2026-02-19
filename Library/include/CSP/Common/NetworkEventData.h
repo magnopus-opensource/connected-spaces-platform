@@ -159,6 +159,18 @@ public:
     /// @brief The type that the Id represents.
     /// In the previous example this would be "GroupId".
     csp::common::String ReferenceType;
+
+    /// @brief A map containing all references for this operation.
+    /// For example, in the case of the DuplicatedSpaceAsync operation, this map would contain the following:
+    /// "OrignalSpaceId":[SpaceId]
+    /// "GroupId":[SpaceId]
+    csp::common::Map<csp::common::String, csp::common::String> References;
+
+    /// @brief Whether the operation completed successfully or not.
+    bool Success;
+
+    /// @brief This will be an empty string if the operation was successful, but if the operation failed it will contain the failure status.
+    csp::common::String StatusReason;
 };
 
 // TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.
