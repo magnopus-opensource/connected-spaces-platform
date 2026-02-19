@@ -25,6 +25,7 @@
 
 #include <list>
 #include <memory>
+#include <rapidjson/error/en.h>
 #include <vector>
 
 namespace csp::services
@@ -78,14 +79,15 @@ public:
 
     virtual void FromJson(const utility::string_t& Json) override
     {
-        rapidjson::Document JsonDoc;
+        assert(Json.c_str());
 
-        if (Json.c_str() == nullptr)
+        rapidjson::Document JsonDoc;
+        rapidjson::ParseResult ok = JsonDoc.Parse(Json.c_str());
+        if (!ok)
         {
+            CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
             return;
         }
-
-        JsonDoc.Parse(Json.c_str());
 
         if (JsonDoc.IsArray())
         {

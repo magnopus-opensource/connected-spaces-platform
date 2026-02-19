@@ -25,6 +25,7 @@
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include <charconv>
+#include <rapidjson/error/en.h>
 #include <regex>
 
 using namespace csp;
@@ -237,25 +238,27 @@ void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 
 void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
 {
+    assert(JsonContent.c_str());
+
     rapidjson::Document JsonDoc;
+    rapidjson::ParseResult ok = JsonDoc.Parse(JsonContent.c_str());
+    if (!ok)
+    {
+        CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+        return;
+    }
 
     ResultTotalCount = 0;
-
-    if (JsonContent.c_str() != nullptr)
+    if (JsonDoc.HasMember("itemTotalCount"))
     {
-        JsonDoc.Parse(JsonContent.c_str());
+        rapidjson::Value& Val = JsonDoc["itemTotalCount"];
+        auto TotalCountStr = csp::web::JsonObjectToString(Val);
 
-        if (JsonDoc.HasMember("itemTotalCount"))
+        uint64_t ConvertedTotalCount = 0;
+        const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+        if (result.ec == std::errc())
         {
-            rapidjson::Value& Val = JsonDoc["itemTotalCount"];
-            auto TotalCountStr = csp::web::JsonObjectToString(Val);
-
-            uint64_t ConvertedTotalCount = 0;
-            const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
-            if (result.ec == std::errc())
-            {
-                ResultTotalCount = ConvertedTotalCount;
-            }
+            ResultTotalCount = ConvertedTotalCount;
         }
     }
 }

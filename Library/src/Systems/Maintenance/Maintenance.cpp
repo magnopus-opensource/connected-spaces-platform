@@ -19,6 +19,7 @@
 #include "Services/ApiBase/ApiBase.h"
 
 #include <algorithm>
+#include <rapidjson/error/en.h>
 
 namespace csp::systems
 {
@@ -41,8 +42,13 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         rapidjson::Document JsonDoc;
+        rapidjson::ParseResult ok = JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
+        if (!ok)
+        {
+            CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            return;
+        }
 
-        JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
         assert(JsonDoc.IsArray());
         auto LocalArray = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
 
