@@ -21,6 +21,8 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 
+#include <rapidjson/error/en.h>
+
 using namespace csp::common;
 
 namespace chs = csp::services::generated::userservice;
@@ -80,11 +82,17 @@ namespace SpaceSystemHelpers
     void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata)
     {
         rapidjson::Document Json;
-        Json.Parse(JsonMetadata.c_str());
-
-        if (!Json.IsObject())
+        rapidjson::ParseResult ok = Json.Parse(JsonMetadata.c_str());
+        if (!ok || !Json.IsObject())
         {
-            CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+            if (!ok)
+            {
+                CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            }
+            else
+            {
+                CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+            }
 
             OutMapMetadata["site"] = "Void";
             OutMapMetadata["multiplayerVersion"]

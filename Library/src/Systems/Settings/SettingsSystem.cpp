@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <rapidjson/rapidjson.h>
+#include <rapidjson/error/en.h>
 #include <sstream>
 
 constexpr int MAX_RECENT_SPACES = 50;
@@ -870,7 +871,13 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         }
 
         rapidjson::Document Json;
-        Json.Parse(Value.c_str());
+        rapidjson::ParseResult ok = Json.Parse(Value.c_str());
+        if (!ok)
+        {
+            CSP_LOG_ERROR_FORMAT("Failed to parse avatar info JSON data. Error: %s, Offset: %zu", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            Callback(InternalResult);
+            return;
+        }
 
         // Avatar type
         if (Json.HasMember("type") && Json["type"].IsInt())

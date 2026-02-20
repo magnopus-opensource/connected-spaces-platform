@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <charconv>
+#include <rapidjson/error/en.h>
 
 namespace chs = csp::services::generated::prototypeservice;
 
@@ -247,33 +248,36 @@ void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* Ap
 
 void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& JsonContent)
 {
+    assert(JsonContent.c_str());
+
     rapidjson::Document JsonDoc;
-
-    ResultTotalCount = 0;
-
-    if (JsonContent.c_str() != nullptr)
+    rapidjson::ParseResult ok = JsonDoc.Parse(JsonContent.c_str());
+    if (!ok)
     {
-        JsonDoc.Parse(JsonContent.c_str());
+        CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+        return;
+    }
+    
+    ResultTotalCount = 0;
+    if (JsonDoc.IsArray())
+    {
+        ResultTotalCount = JsonDoc.GetArray().Size();
+    }
+    else if (JsonDoc.HasMember("itemTotalCount"))
+    {
+        rapidjson::Value& Val = JsonDoc["itemTotalCount"];
+        const auto TotalCountStr = csp::web::JsonObjectToString(Val);
 
-        if (JsonDoc.IsArray())
+        uint64_t ConvertedTotalCount = 0;
+        const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+
+        if (result.ec == std::errc())
         {
-            ResultTotalCount = JsonDoc.GetArray().Size();
-        }
-        else if (JsonDoc.HasMember("itemTotalCount"))
-        {
-            rapidjson::Value& Val = JsonDoc["itemTotalCount"];
-            const auto TotalCountStr = csp::web::JsonObjectToString(Val);
-
-            uint64_t ConvertedTotalCount = 0;
-            const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
-
-            if (result.ec == std::errc())
-            {
-                ResultTotalCount = ConvertedTotalCount;
-            }
+            ResultTotalCount = ConvertedTotalCount;
         }
     }
 }
+
 uint64_t AssetCollectionCountResult::GetCount() const { return Count; }
 void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

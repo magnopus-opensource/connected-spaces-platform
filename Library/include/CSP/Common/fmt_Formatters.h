@@ -30,6 +30,8 @@ CSP_START_IGNORE
 #include "Common/Web/Json.h"
 
 #include <fmt/base.h>
+#include <rapidjson/document.h>
+#include <rapidjson/error/en.h>
 #include <string_view>
 
 namespace fmt
@@ -92,9 +94,12 @@ template <> struct fmt::formatter<csp::web::HttpRequest> : formatter<std::string
         if (!RequestPayload.IsEmpty())
         {
             rapidjson::Document RequestJson;
-            RequestJson.Parse(RequestPayload);
-
-            if (RequestJson.IsObject())
+            rapidjson::ParseResult ok = RequestJson.Parse(RequestPayload);
+            if (!ok)
+            {
+                RequestBody.Append(fmt::format("\tFailed to parse request body as JSON: {}\n", rapidjson::GetParseError_En(ok.Code())).c_str());
+            }
+            else if (RequestJson.IsObject())
             {
                 for (rapidjson::Value::ConstMemberIterator itr = RequestJson.MemberBegin(); itr != RequestJson.MemberEnd(); ++itr)
                 {
