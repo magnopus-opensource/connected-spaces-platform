@@ -311,7 +311,12 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
         std::string InputText = Response->GetPayload().GetContent().c_str();
 
         rapidjson::Document ResponseJson;
-        ResponseJson.Parse(InputText.c_str());
+        rapidjson::ParseResult ok = ResponseJson.Parse(InputText.c_str());
+        if (!ok)
+        {
+            CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            return;
+        }
 
         // We expect the response to be a JSON object with a set of fields describing key/value pairs of space IDs and bools,
         // where the bool describes if it is ticketed or not

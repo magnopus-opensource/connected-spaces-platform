@@ -82,7 +82,12 @@ void GetAgoraTokenResult::OnResponse(const services::ApiResponseBase* ApiRespons
     {
         // Extract the Agora token from the observed operation result.
         rapidjson::Document OperationResultJson;
-        OperationResultJson.Parse(OperationResult);
+        rapidjson::ParseResult ok = OperationResultJson.Parse(OperationResult);
+        if (!ok)
+        {
+            CSP_LOG_ERROR_FORMAT("Error: JSON parse error: %s (at offset %zu)", rapidjson::GetParseError_En(ok.Code()), ok.Offset());
+            return;
+        }
 
         // As this is a specialized function for Agora, we know the format to expect.
         if (OperationResultJson.HasMember("token") && OperationResultJson["token"].IsString())
