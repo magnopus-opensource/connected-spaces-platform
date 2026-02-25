@@ -32,11 +32,11 @@ constexpr uint64_t DataTypeString = static_cast<uint64_t>(mcs::ItemComponentData
 constexpr uint64_t DataTypeStringDictionary = static_cast<uint64_t>(mcs::ItemComponentDataType::STRING_DICTIONARY);
 constexpr uint64_t DataTypeNullableBool = static_cast<uint64_t>(mcs::ItemComponentDataType::NULLABLE_BOOL);
 
-signalr::value ConstructComponentElement(uint64_t typeId, const signalr::value& field)
+signalr::value ConstructComponentElement(uint64_t TypeId, const signalr::value& Value)
 {
-    std::vector<signalr::value> innerField = { field };
-    std::vector<signalr::value> pair = { signalr::value(typeId), signalr::value(innerField) };
-    return signalr::value(pair);
+    std::vector<signalr::value> SignalRValue = { Value };
+    std::vector<signalr::value> ComponentElement = { signalr::value(TypeId), signalr::value(SignalRValue) };
+    return signalr::value(ComponentElement);
 };
 
 std::vector<signalr::value> ConstructEventValues(const std::map<uint64_t, signalr::value>& Components)
