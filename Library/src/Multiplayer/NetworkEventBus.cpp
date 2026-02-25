@@ -23,6 +23,7 @@
 #include "NetworkEventManagerImpl.h"
 
 #include "CSP/Common/CSPAsyncScheduler.h"
+#include "signalrclient/signalr_exception.h"
 #include <algorithm>
 #include <fmt/format.h>
 #include <limits>
@@ -135,11 +136,24 @@ bool NetworkEventBus::StartEventMessageListening()
     {
         if (Result.is_null())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus unexpectedly received event with null data, returning.");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus: Received event with null data, returning.");
+            return;
+        }
+
+        if (!Result.is_array() || Result.as_array().empty() || !Result.as_array()[0].is_array())
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: SignalR Result value is malformed.");
             return;
         }
 
         std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
+
+        if (EventValues.empty() || !EventValues[0].is_string())
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message missing EventType string at index 0.");
+            return;
+        }
+
         const csp::common::String EventTypeStr(EventValues[0].as_string().c_str());
 
         // Find all registrations that match this network event type.
@@ -165,8 +179,16 @@ bool NetworkEventBus::StartEventMessageListening()
         // After this, we'll have ReplicatedValues, which serves as our common exchange type.
         // NOTE: This is not ideal, we'd rather have systems interpret this data directly. However, that would mean breaking the signalr dependency
         // in the deserialisation, which is very possible, just a bit time consuming, so we'll do it later.
+        // This will be nullptr if the deserialisation fails or throws.
         std::unique_ptr<csp::common::NetworkEventData> DeserialisedEventData
             = DeserialiseForEventType(NetworkEventFromString(EventTypeStr), EventValues);
+
+        if (DeserialisedEventData == nullptr)
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                fmt::format("NetworkEventBus: Failed to deserialize event '{}'. Registered events will not be fired.", EventTypeStr).c_str());
+            return;
+        }
 
         // Dispatch the events
         for (const NetworkEventRegistration& Registration : MatchingRegistrations)
@@ -243,47 +265,61 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
 {
     using namespace csp::common;
 
-    switch (EventType)
+    try
     {
-    case NetworkEvent::AssetDetailBlobChanged:
-        return std::make_unique<AssetDetailBlobChangedNetworkEventData>(
-            csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(EventValues, LogSystem));
-    case NetworkEvent::Conversation:
-        return std::make_unique<ConversationNetworkEventData>(csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem));
-    case NetworkEvent::SequenceChanged:
-    {
-        std::unique_ptr<SequenceChangedNetworkEventData> SequenceEventData
-            = std::make_unique<SequenceChangedNetworkEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
-
-        const csp::common::String Key = SequenceEventData->Key;
-        const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
-
-        if (SequenceType == "Hotspots")
+        switch (EventType)
         {
-            SequenceEventData->SequenceType = ESequenceType::Hotspot;
+        case NetworkEvent::AssetDetailBlobChanged:
+            return std::make_unique<AssetDetailBlobChangedNetworkEventData>(
+                csp::multiplayer::DeserializeAssetDetailBlobChangedEvent(EventValues, LogSystem));
+        case NetworkEvent::Conversation:
+            return std::make_unique<ConversationNetworkEventData>(csp::multiplayer::DeserializeConversationEvent(EventValues, LogSystem));
+        case NetworkEvent::SequenceChanged:
+        {
+            std::unique_ptr<SequenceChangedNetworkEventData> SequenceEventData
+                = std::make_unique<SequenceChangedNetworkEventData>(csp::multiplayer::DeserializeSequenceChangedEvent(EventValues, LogSystem));
 
-            // If it is a hotspot, the 'key' will contain the following information [SequenceType]:[SpaceId]:[SequenceName]
-            // eg: Hotspots:abc123456:My-Hotspot-Sequence
-            String OldHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 2);
-            // NewKey will be structured in the same way, eg: Hotspots:abc123456:My-New-Hotspot-Sequence
-            String NewHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->NewKey, 2);
-            
-            SequenceEventData->SpaceId = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 1);
-            SequenceEventData->Key = OldHotspotSequenceName;
-            SequenceEventData->NewKey = NewHotspotSequenceName;
+            const csp::common::String Key = SequenceEventData->Key;
+            const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
+
+            if (SequenceType == "Hotspots")
+            {
+                SequenceEventData->SequenceType = ESequenceType::Hotspot;
+
+                // If it is a hotspot, the 'key' will contain the following information [SequenceType]:[SpaceId]:[SequenceName]
+                // eg: Hotspots:abc123456:My-Hotspot-Sequence
+                String OldHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 2);
+                // NewKey will be structured in the same way, eg: Hotspots:abc123456:My-New-Hotspot-Sequence
+                String NewHotspotSequenceName = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->NewKey, 2);
+
+                SequenceEventData->SpaceId = csp::multiplayer::GetSequenceKeyIndex(SequenceEventData->Key, 1);
+                SequenceEventData->Key = OldHotspotSequenceName;
+                SequenceEventData->NewKey = NewHotspotSequenceName;
+            }
+
+            return SequenceEventData;
         }
-        
-        return SequenceEventData;
+        case NetworkEvent::AccessControlChanged:
+            return std::make_unique<AccessControlChangedNetworkEventData>(
+                csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem));
+        case NetworkEvent::GeneralPurposeEvent:
+            return std::make_unique<NetworkEventData>(csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem));
+        case NetworkEvent::AsyncCallCompleted:
+            return std::make_unique<AsyncCallCompletedEventData>(csp::multiplayer::DeserializeAsyncCallCompletedEvent(EventValues, LogSystem));
+        default:
+            throw std::invalid_argument(
+                fmt::format("DeserialiseForEventType: unknown enum value {}", static_cast<std::underlying_type_t<NetworkEvent>>(EventType)));
+        }
     }
-    case NetworkEvent::AccessControlChanged:
-        return std::make_unique<AccessControlChangedNetworkEventData>(csp::multiplayer::DeserializeAccessControlChangedEvent(EventValues, LogSystem));
-    case NetworkEvent::GeneralPurposeEvent:
-        return std::make_unique<NetworkEventData>(csp::multiplayer::DeserializeGeneralPurposeEvent(EventValues, LogSystem));
-    case NetworkEvent::AsyncCallCompleted:
-        return std::make_unique<AsyncCallCompletedEventData>(csp::multiplayer::DeserializeAsyncCallCompletedEvent(EventValues, LogSystem));
-    default:
-        throw std::invalid_argument(
-            fmt::format("DeserialiseForEventType: unknown enum value {}", static_cast<std::underlying_type_t<NetworkEvent>>(EventType)));
+    catch (const signalr::signalr_exception& e)
+    {
+        LogSystem.LogMsg(LogLevel::Error, fmt::format("NetworkEventBus: SignalR type mismatch encountered in Event {}: {}", static_cast<int>(EventType), e.what()).c_str());
     }
+    catch (...)
+    {
+        LogSystem.LogMsg(LogLevel::Error, "NetworkEventBus: Unknown error encountered during event deserialization.");
+    }
+
+    return nullptr;
 }
 } // namespace csp::multiplayer

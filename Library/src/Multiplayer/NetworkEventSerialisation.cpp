@@ -71,6 +71,19 @@ csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
     return csp::common::Decode::URI(RawValue.GetString());
 }
 
+// forward declaring the ParseSignalRComponent method.
+csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component, csp::common::LogSystem& LogSystem);
+
+csp::common::ReplicatedValue ParseSignalRComponentFromItemComponent(const signalr::value& ItemComponentData, csp::common::LogSystem& LogSystem)
+{
+    const auto& ItemComponentDataArray = ItemComponentData.as_array();
+
+    uint64_t Type = ItemComponentDataArray[0].as_uinteger();
+    const signalr::value& Value = ItemComponentDataArray[1].as_array()[0]; // ItemComponentData<T> only has a single field
+
+    return ParseSignalRComponent(Type, Value, LogSystem);
+}
+
 csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component, csp::common::LogSystem& LogSystem)
 {
     csp::common::ReplicatedValue ReplicatedValue;
@@ -129,41 +142,15 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
     }
     else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING_DICTIONARY))
     {
-        if (Component.is_string_map())
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ResultMap;
+        const auto& StringMap = Component.as_string_map();
+
+        for (const auto& [Key, ItemComponentData] : StringMap)
         {
-            csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ResultMap;
-            const auto& StringMap = Component.as_string_map();
-
-            for (const auto& Pair : StringMap)
-            {
-                const std::string& Key = Pair.first;
-                const signalr::value& ItemComponentData = Pair.second;
-
-                if (!ItemComponentData.is_array() || ItemComponentData.as_array().size() < 2)
-                {
-                    LogSystem.LogMsg(
-                        csp::common::LogLevel::Error, "Error parsing SignalR component: Malformed ItemComponentData inside STRING_DICTIONARY.");
-
-                    ResultMap[Key.c_str()] = csp::common::ReplicatedValue();
-
-                    continue;
-                }
-
-                // ItemComponentData = [TypeId, [SignalRValue1, SignalRValue2, ...]]
-                const auto& ItemComponentDataArray = ItemComponentData.as_array();
-                uint64_t InnerComponentType = ItemComponentDataArray[0].as_uinteger();
-
-                const signalr::value& SignalRValue = ItemComponentDataArray[1].as_array()[0];
-
-                ResultMap[Key.c_str()] = ParseSignalRComponent(InnerComponentType, SignalRValue, LogSystem);
-            }
-
-            ReplicatedValue = csp::common::ReplicatedValue { ResultMap };
+            ResultMap[Key.c_str()] = ParseSignalRComponentFromItemComponent(ItemComponentData, LogSystem);
         }
-        else
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "Unsupported event argument type: Expected a string map argument.");
-        }
+
+        ReplicatedValue = csp::common::ReplicatedValue { ResultMap };
     }
     else
     {
@@ -201,12 +188,9 @@ void PopulateCommonEventData(
         OutEventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(Components.size());
         int i = 0;
 
-        for (auto& Component : Components)
+        for (auto& [Key, ItemComponentData] : Components)
         {
-            // Component is in form [TypeId, [Field0, Field1, ...]]
-            auto Type = Component.second.as_array()[0].as_uinteger();
-            auto& Value = Component.second.as_array()[1].as_array()[0]; // ItemComponentData<T> only has a single field
-            OutEventData.EventValues[i++] = ParseSignalRComponent(Type, Value, LogSystem);
+            OutEventData.EventValues[i++] = ParseSignalRComponentFromItemComponent(ItemComponentData, LogSystem);
         }
     }
 }
