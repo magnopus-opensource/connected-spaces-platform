@@ -1560,10 +1560,9 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             return;
         }
 
-        // Create a shared reference to prevent it going out of scope between callbacks
-        auto AssetCollections = std::make_shared<csp::common::Array<csp::systems::AssetCollection>>(FindAssetCollectionsResult.GetAssetCollections());
+        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
 
-        if ((*AssetCollections).Size() == 0)
+        if (AssetCollections.IsEmpty())
         {
             // There are no asset collections for this space
             Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
@@ -1571,11 +1570,11 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         }
 
         // 2. Find material assets in collections
-        csp::common::Array<csp::common::String> AssetCollectionIds((*AssetCollections).Size());
+        auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
 
-        for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
+        for (size_t i = 0; i < AssetCollections.Size(); ++i)
         {
-            AssetCollectionIds[i] = (*AssetCollections)[i].Id;
+            AssetCollectionIds[i] = AssetCollections[i].Id;
         }
 
         auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
@@ -1635,9 +1634,9 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                 };
 
                 const auto& Asset = Assets[i];
-                if (const auto AssetCollection = std::find_if(std::begin(*AssetCollections), std::end(*AssetCollections),
+                if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
                         [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
-                    AssetCollection != std::end(*AssetCollections))
+                    AssetCollection != std::end(AssetCollections))
                 {
                     GetMaterialFromUri(*AssetCollection, Asset.Id, Asset.Uri, DownloadMaterialCallback);
                 }
