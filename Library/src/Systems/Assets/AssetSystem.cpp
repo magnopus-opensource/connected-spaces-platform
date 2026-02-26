@@ -1724,7 +1724,16 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetCollection, const csp::common::String& AssetId,
     const csp::common::String& Uri, MaterialResultCallback Callback)
 {
-    auto DownloadMaterialCallback = [Callback, AssetCollection, AssetId](const AssetDataResult& DownloadResult)
+    std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
+    if (!ShaderType.has_value())
+    {
+        CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
+        return;
+    }
+
+    auto DownloadMaterialCallback
+        = [Callback, AssetId, AssetCollectionId = AssetCollection.Id, ShaderType = *ShaderType](const AssetDataResult& DownloadResult)
     {
         if (DownloadResult.GetResultCode() != EResultCode::Success)
         {
@@ -1734,19 +1743,11 @@ void AssetSystem::GetMaterialFromUri(const csp::systems::AssetCollection& AssetC
 
         const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
-        std::optional<csp::systems::EShaderType> ShaderType = GetShaderTypeFromMaterialCollection(AssetCollection);
-        if (!ShaderType.has_value())
-        {
-            CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialResult>());
-            return;
-        }
-
         // Create material of the specific derived type.
-        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType.value(), "", AssetCollection.Id, AssetId);
+        Material* FoundMaterial = InstantiateMaterialOfType(ShaderType, "", AssetCollectionId, AssetId);
 
         // Deserialse material data.
-        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType.value(), FoundMaterial);
+        auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType, FoundMaterial);
 
         if (!DeserializationResult.has_value())
         {
