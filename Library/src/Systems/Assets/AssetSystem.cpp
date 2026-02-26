@@ -31,6 +31,8 @@
 #include "CSP/Common/StringFormat.h"
 #include "Common/Convert.h"
 
+#include <fmt/format.h>
+
 #include <algorithm>
 
 using namespace csp;
@@ -1570,7 +1572,6 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             auto AssetsDownloaded = std::make_shared<std::atomic<size_t>>();
             auto Failed = std::make_shared<std::atomic<bool>>();
 
-            // 3. Download asset data for each material asset
             for (size_t i = 0; i < Assets.Size(); ++i)
             {
                 auto DownloadMaterialCallback
@@ -1624,25 +1625,20 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         };
     };
 
-    // 1. find asset collection for space
-    auto FindAssetCollectionsCB = [this, Callback, MakeDownloadAll](const AssetCollectionsResult& FindAssetCollectionsResult)
+    auto FetchAssets = [this, MakeDownloadAll](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
     {
-        if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
+        if (Result.GetResultCode() != EResultCode::Success)
         {
-            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
+            throw std::runtime_error(fmt::format("FindAssetCollections returned failure response code {}", Result.GetHttpResultCode()));
         }
 
-        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
+        const auto& AssetCollections = Result.GetAssetCollections();
 
         if (AssetCollections.IsEmpty())
         {
-            // There are no asset collections for this space
-            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
+            return async::make_task(MaterialsResult(Result.GetResultCode(), Result.GetHttpResultCode()));
         }
 
-        // 2. Find material assets in collections
         auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
 
         for (size_t i = 0; i < AssetCollections.Size(); ++i)
@@ -1650,14 +1646,51 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             AssetCollectionIds[i] = AssetCollections[i].Id;
         }
 
-        auto GetAssetsCB
-            = [DownloadAll = MakeDownloadAll(AssetCollections), Callback](const auto& GetAssetsResult) { DownloadAll(GetAssetsResult, Callback); };
+        return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
+            .then(
+                [this, DownloadAll = MakeDownloadAll(AssetCollections)](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
+                {
+                    auto OnCompleteEvent = std::make_shared<async::event_task<MaterialsResult>>();
 
-        GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL }, GetAssetsCB);
+                    DownloadAll(GetAssetsResult,
+                        [OnCompleteEvent](const MaterialsResult& Result)
+                        {
+                            if (Result.GetResultCode() == EResultCode::Failed)
+                            {
+                                OnCompleteEvent->set_exception(std::make_exception_ptr(std::runtime_error("Failed downloading materials")));
+                                return;
+                            }
+
+                            if (Result.GetResultCode() == EResultCode::Success)
+                            {
+                                OnCompleteEvent->set(Result);
+                                return;
+                            }
+                        });
+
+                    return OnCompleteEvent->get_task();
+                });
     };
 
-    FindAssetCollections(
-        nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr, FindAssetCollectionsCB);
+    FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
+        .then(std::move(FetchAssets))
+        .then(
+            [Callback](async::task<MaterialsResult> Result)
+            {
+                try
+                {
+                    Callback(Result.get());
+                }
+                catch (const std::exception& Exception)
+                {
+                    CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials failed: %s", Exception.what());
+                    Callback(MakeInvalid<MaterialsResult>());
+                }
+                catch (...)
+                {
+                    Callback(MakeInvalid<MaterialsResult>());
+                }
+            });
 }
 
 void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, MaterialResultCallback Callback)
