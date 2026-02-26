@@ -1551,33 +1551,9 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
 
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
-    // 1. find asset collection for space
-    auto FindAssetCollectionsCB = [this, Callback](const AssetCollectionsResult& FindAssetCollectionsResult)
+    const auto MakeDownloadAll = [this](const auto& AssetCollections)
     {
-        if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
-        {
-            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
-        }
-
-        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
-
-        if (AssetCollections.IsEmpty())
-        {
-            // There are no asset collections for this space
-            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
-            return;
-        }
-
-        // 2. Find material assets in collections
-        auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
-
-        for (size_t i = 0; i < AssetCollections.Size(); ++i)
-        {
-            AssetCollectionIds[i] = AssetCollections[i].Id;
-        }
-
-        auto GetAssetsCB = [this, AssetCollections, Callback](const AssetsResult& GetAssetsResult)
+        return [this, AssetCollections](const AssetsResult& GetAssetsResult, MaterialsResultCallback Callback)
         {
             const auto& Assets = GetAssetsResult.GetAssets();
             const size_t AssetsToDownload = Assets.Size();
@@ -1646,6 +1622,36 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                 }
             }
         };
+    };
+
+    // 1. find asset collection for space
+    auto FindAssetCollectionsCB = [this, Callback, MakeDownloadAll](const AssetCollectionsResult& FindAssetCollectionsResult)
+    {
+        if (FindAssetCollectionsResult.GetResultCode() != EResultCode::Success)
+        {
+            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            return;
+        }
+
+        const auto& AssetCollections = FindAssetCollectionsResult.GetAssetCollections();
+
+        if (AssetCollections.IsEmpty())
+        {
+            // There are no asset collections for this space
+            Callback(MaterialsResult(FindAssetCollectionsResult.GetResultCode(), FindAssetCollectionsResult.GetHttpResultCode()));
+            return;
+        }
+
+        // 2. Find material assets in collections
+        auto AssetCollectionIds = csp::common::Array<csp::common::String>(AssetCollections.Size());
+
+        for (size_t i = 0; i < AssetCollections.Size(); ++i)
+        {
+            AssetCollectionIds[i] = AssetCollections[i].Id;
+        }
+
+        auto GetAssetsCB
+            = [DownloadAll = MakeDownloadAll(AssetCollections), Callback](const auto& GetAssetsResult) { DownloadAll(GetAssetsResult, Callback); };
 
         GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL }, GetAssetsCB);
     };
