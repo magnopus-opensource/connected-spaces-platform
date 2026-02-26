@@ -24,6 +24,8 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+
+#include <algorithm>
 #include <filesystem>
 #include <future>
 
@@ -443,6 +445,180 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMaterialsSomeFail)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+
+    auto AuthContext = TestAuthContext();
+    WebClientMock->WebClient::SetAuthContext(AuthContext);
+
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillRepeatedly([Mock = WebClientMock](auto&&... Args) { Mock->WebClient::SendRequest(std::forward<decltype(Args)>(Args)...); });
+
+    EXPECT_CALL(*WebClientMock, Send)
+        .WillRepeatedly(
+            [](csp::web::HttpRequest& Request)
+            {
+                const auto Verb = Request.GetVerb();
+                const auto Uri = Request.GetUri();
+
+                ASSERT_EQ(Verb, csp::web::ERequestVerb::GET);
+
+                auto& Response = Request.GetMutableResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+
+                const auto RawUri = csp::common::String(Uri.GetAsString());
+
+                if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestPrototypeIdStandard1",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdUnsupportedShaderType",
+                            "metadata": {
+                                "ShaderType": "FutureTypeThatOldClientsDoNotSupport"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdInvalidContent",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdMissing",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdStandard2",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        },
+                        {
+                            "id": "TestPrototypeIdStandard3",
+                            "metadata": {
+                                "ShaderType": "Standard"
+                            }
+                        }
+                    ])");
+                }
+                else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
+                {
+                    ASSERT_TRUE(RawUri.Contains("AssetTypes=Material"));
+                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdStandard"));
+                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdUnsupportedShaderType"));
+                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdInvalidContent"));
+                    ASSERT_TRUE(RawUri.Contains("PrototypeIds=TestPrototypeIdMissing"));
+
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+
+                    Response.GetMutablePayload().SetContent(R"([
+                        {
+                            "id": "TestIdStandard1",
+                            "prototypeId": "TestPrototypeIdStandard1",
+                            "uri": "https://example.com/standard1.json"
+                        },
+                        {
+                            "id": "TestIdUnsupportedShaderType",
+                            "prototypeId": "TestPrototypeIdUnsupportedShaderType",
+                            "uri": "https://example.com/unsupported.json"
+                        },
+                        {
+                            "id": "TestIdInvalidContent",
+                            "prototypeId": "TestPrototypeIdInvalidContent",
+                            "uri": "https://example.com/invalid.json"
+                        },
+                        {
+                            "id": "TestIdMissing",
+                            "prototypeId": "TestPrototypeIdMissing",
+                            "uri": "https://example.com/missing.json"
+                        },
+                        {
+                            "id": "TestIdStandard2",
+                            "prototypeId": "TestPrototypeIdStandard2",
+                            "uri": "https://example.com/standard2.json"
+                        },
+                        {
+                            "id": "TestIdStandard3",
+                            "prototypeId": "TestPrototypeIdStandard3",
+                            "uri": "https://example.com/standard3.json"
+                        }
+                    ])");
+                }
+                else if (RawUri == "https://example.com/standard1.json" || RawUri == "https://example.com/standard2.json"
+                    || RawUri == "https://example.com/standard3.json")
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent("{}");
+                }
+                else if (RawUri == "https://example.com/unsupported.json")
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent(R"({"unsupported": 42})");
+                }
+                else if (RawUri == "https://example.com/invalid.json")
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                    Response.GetMutablePayload().SetContent("invalid");
+                }
+                else if (RawUri == "https://example.com/missing.json")
+                {
+                    Response.SetResponseCode(csp::web::EResponseCodes::ResponseNotFound);
+                }
+            });
+
+    const auto SpaceId = csp::common::String("TestSpaceId");
+
+    using OwnedMaterials = std::vector<std::unique_ptr<Material>>;
+
+    const auto FoundMaterials = [&]() -> OwnedMaterials
+    {
+        auto FoundMaterials = csp::common::Array<Material*>();
+        GetMaterials(AssetSystem, SpaceId, FoundMaterials);
+
+        const auto Adopt = [](const csp::common::Array<Material*>& UnownedMaterials) -> OwnedMaterials
+        {
+            auto Owned = OwnedMaterials();
+            Owned.reserve(UnownedMaterials.Size());
+
+            for (auto* Unowned : UnownedMaterials)
+            {
+                Owned.emplace_back(Unowned);
+            }
+
+            return Owned;
+        };
+
+        return Adopt(FoundMaterials);
+    }();
+
+    EXPECT_EQ(FoundMaterials.size(), 3);
+
+    const auto ContainsMaterial = [](const auto& Range, csp::common::String MaterialId)
+    {
+        return std::find_if(
+                   std::begin(Range), std::end(Range), [&MaterialId](const auto& Material) { return Material->GetMaterialId() == MaterialId; })
+            != std::end(Range);
+    };
+
+    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard1"));
+    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard2"));
+    EXPECT_TRUE(ContainsMaterial(FoundMaterials, "TestIdStandard3"));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetGLTFMaterialTest)
