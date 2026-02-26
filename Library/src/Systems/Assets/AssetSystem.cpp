@@ -1591,10 +1591,9 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             }
 
             // These are shared references to prevent going out of scope between callbacks
-            // Note: The callbacks ARE called on the main thread
             auto DownloadedMaterials = std::make_shared<csp::common::Array<Material*>>(AssetsToDownload);
-            auto AssetsDownloaded = std::make_shared<size_t>();
-            auto Failed = std::make_shared<bool>();
+            auto AssetsDownloaded = std::make_shared<std::atomic<size_t>>();
+            auto Failed = std::make_shared<std::atomic<bool>>();
 
             // 3. Download asset data for each material asset
             for (size_t i = 0; i < Assets.Size(); ++i)
