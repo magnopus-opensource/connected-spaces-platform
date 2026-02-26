@@ -437,7 +437,9 @@ csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
 
     // Check to see if this event has the new structure that includes a Reference map in place of the old ReferenceId and ReferenceType. As part of
     // the transition, we will populate both the new and old properties to maintain backwards compatibility with clients.
-    if (ParsedEvent.EventValues[1].GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap)
+    bool IsNewReferenceMapFormat = ParsedEvent.EventValues[1].GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap;
+
+    if (IsNewReferenceMapFormat)
     {
         const auto& ReferencesStringMap = ParsedEvent.EventValues[1].GetStringMap();
 

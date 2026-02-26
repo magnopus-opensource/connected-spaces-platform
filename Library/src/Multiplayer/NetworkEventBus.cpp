@@ -136,13 +136,19 @@ bool NetworkEventBus::StartEventMessageListening()
     {
         if (Result.is_null())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus: Received event with null data, returning.");
+            LogSystem.LogMsg(csp::common::LogLevel::Log, "NetworkEventBus: Event message received with null data.");
             return;
         }
 
-        if (!Result.is_array() || Result.as_array().empty() || !Result.as_array()[0].is_array())
+        if (!Result.is_array() || Result.as_array().empty())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: SignalR Result value is malformed.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message expected to be a non-empty array.");
+            return;
+        }
+
+        if (!Result.as_array()[0].is_array())
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message expected to be an array with an array at element[0] but the element was of a different type.");
             return;
         }
 
