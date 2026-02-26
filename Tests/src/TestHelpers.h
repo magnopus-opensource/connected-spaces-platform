@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Awaitable.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
@@ -131,6 +132,16 @@ public:
 private:
     csp::systems::EResultCode ExpectedResult;
     std::atomic<bool> ResponseReceived;
+};
+
+class TestAuthContext : public csp::common::IAuthContext
+{
+public:
+    const csp::common::LoginState& GetLoginState() const override { return State; }
+    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+
+private:
+    csp::common::LoginState State;
 };
 
 #if defined CSP_WINDOWS

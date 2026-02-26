@@ -248,16 +248,6 @@ class MockScriptRunner : public csp::common::IJSScriptRunner
     void ClearModuleSource(csp::common::String) override { }
 };
 
-class TestAuthContext : public csp::common::IAuthContext
-{
-public:
-    const csp::common::LoginState& GetLoginState() const override { return State; }
-    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
-
-private:
-    csp::common::LoginState State;
-};
-
 /*
     CSPSceneDescription / CSPSceneData tests from a generated checkpoint file.
 
