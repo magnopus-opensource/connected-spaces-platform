@@ -31,6 +31,8 @@
 #include "CSP/Common/StringFormat.h"
 #include "Common/Convert.h"
 
+#include <algorithm>
+
 using namespace csp;
 using namespace csp::common;
 
@@ -335,21 +337,6 @@ std::optional<EShaderType> GetShaderTypeFromMaterialCollection(const csp::system
     }
 
     return Result;
-}
-
-std::optional<EShaderType> GetShaderTypeFromMaterialCollectionArray(
-    std::shared_ptr<csp::common::Array<csp::systems::AssetCollection>> AssetCollections, const csp::common::String& AssetCollectionId)
-{
-    for (size_t i = 0; i < (*AssetCollections).Size(); ++i)
-    {
-        if ((*AssetCollections)[i].Id == AssetCollectionId)
-        {
-            return GetShaderTypeFromMaterialCollection((*AssetCollections)[i]);
-        }
-    }
-
-    CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
-    return {};
 }
 
 AssetSystem::AssetSystem()
@@ -1612,20 +1599,8 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
             // 3. Download asset data for each material asset
             for (size_t i = 0; i < Assets.Size(); ++i)
             {
-                csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
-                csp::common::String AssetId = Assets[i].Id;
-
-                std::optional<EShaderType> ShaderType = GetShaderTypeFromMaterialCollectionArray(AssetCollections, AssetCollectionId);
-
-                if (!ShaderType.has_value())
-                {
-                    CSP_LOG_ERROR_MSG("Error: Material contains an invalid shader type.");
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialsResult>());
-                    return;
-                }
-
-                auto DownloadMaterialCallback = [Callback, AssetsToDownload, i, AssetCollectionId, AssetId, ShaderType, DownloadedMaterials,
-                                                    AssetsDownloaded, Failed](const AssetDataResult& DownloadResult)
+                auto DownloadMaterialCallback
+                    = [Callback, AssetsToDownload, i, DownloadedMaterials, AssetsDownloaded, Failed](MaterialResult DownloadResult)
                 {
                     // Return early as one of the calls has already failed
                     if (*Failed)
@@ -1646,24 +1621,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                         return;
                     }
 
-                    const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
-
-                    // Create material of the specific derived type.
-                    Material* FoundMaterial = InstantiateMaterialOfType(ShaderType.value(), "", AssetCollectionId, AssetId);
-
-                    // Deserialize material data.
-                    auto DeserializationResult = DeserializeIntoMaterialOfType(MaterialData, ShaderType.value(), FoundMaterial);
-
-                    if (!DeserializationResult.has_value())
-                    {
-                        CSP_LOG_ERROR_MSG("Failed to deserialize material");
-
-                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaterialsResult>());
-
-                        return;
-                    }
-
-                    (*DownloadedMaterials)[i] = DeserializationResult.value();
+                    (*DownloadedMaterials)[i] = DownloadResult.GetMaterial();
 
                     (*AssetsDownloaded)++;
 
@@ -1677,7 +1635,17 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                     }
                 };
 
-                DownloadAssetData(Assets[i], DownloadMaterialCallback);
+                const auto& Asset = Assets[i];
+                if (const auto AssetCollection = std::find_if(std::begin(*AssetCollections), std::end(*AssetCollections),
+                        [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
+                    AssetCollection != std::end(*AssetCollections))
+                {
+                    GetMaterialFromUri(*AssetCollection, Asset.Id, Asset.Uri, DownloadMaterialCallback);
+                }
+                else
+                {
+                    CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+                }
             }
         };
 
