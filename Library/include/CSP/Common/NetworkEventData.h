@@ -174,10 +174,13 @@ public:
     /// In the previous example this would be "GroupId".
     csp::common::String ReferenceType;
 
-    /// @brief A map containing all references for this operation.
+    /// @brief A string map containing reference information related to this operation.
+    /// Each key:value pair in this map represents a reference name and its corresponding Id.
+    /// The contents of this map will differ based on the specific Async Call, but it is intended to provide additional context and
+    /// information about the completed operation.
     /// For example, in the case of the DuplicatedSpaceAsync operation, this map would contain the following:
-    /// - "OrignalSpaceId":[SpaceId]
-    /// - "SpaceId":[SpaceId]
+    /// - "OrignalSpaceId": Id of the original Space being duplicated.
+    /// - "SpaceId": Id of the newly duplicated Space.
     csp::common::Map<csp::common::String, csp::common::String> References;
 
     /// @brief Whether the operation completed successfully or not.
