@@ -446,11 +446,11 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
     const csp::ClientUserAgent& ClientUserAgentHeader, const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     // Nullptr means the signalRConnection will be internally instantiated
-    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, FeatureFlagOverrides);
+    return InitialiseWithInject(EndpointRootURI, InTenant, ClientUserAgentHeader, nullptr, nullptr, FeatureFlagOverrides);
 }
 
 bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant,
-    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject,
+    const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject,
     const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides)
 {
     assert(!IsInitialised && "Please call csp::CSPFoundation::Shutdown() before calling csp::CSPFoundation::Initialize() again.");
@@ -467,7 +467,7 @@ bool CSPFoundation::InitialiseWithInject(const csp::common::String& EndpointRoot
     // Apply feature flag overrides
     ApplyFeatureFlagOverrides(FeatureFlagOverrides, FeatureFlags);
 
-    csp::systems::SystemsManager::Instantiate(SignalRInject);
+    csp::systems::SystemsManager::Instantiate(SignalRInject, WebClientInject);
 
     *DeviceId = LoadDeviceId().c_str();
     IsInitialised = true;

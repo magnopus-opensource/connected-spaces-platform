@@ -21,6 +21,7 @@
 #include "CSP/Systems/Settings/SettingsCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "Mocks/SignalRConnectionMock.h"
+#include "Mocks/WebClientMock.h"
 #include <gtest/gtest.h>
 
 namespace
@@ -60,6 +61,7 @@ protected:
     // Confusing from an external user perspective I know, and somewhat fragile because we're relying on SystemsManager::destroy to trigger the RAII
     // behaviour, may change with a new initialisation api.
     SignalRConnectionMock* SignalRMock;
+    WebClientMock* WebClientMock;
 };
 
 // For parameterized (data driven) tests
