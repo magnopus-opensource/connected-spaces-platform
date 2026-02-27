@@ -20,6 +20,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Events/EventId.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/NgxScript/NgxCodeComponentRuntime.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "TestHelpers.h"
 
@@ -163,6 +164,31 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ModuleImportResolvesFromInMem
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModuleValue", -1), 42);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, BuiltInSignalsModuleImportResolvesAndExecutes)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/engine/signals-main.js",
+        "import { signal } from '@preact/signals-core'; "
+        "const value = signal(3); "
+        "globalThis.__ngxSignalInitial = value.value; "
+        "value.value = 7; "
+        "globalThis.__ngxSignalUpdated = value.value;");
+
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/signals-main.js"));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSignalInitial", -1), 3);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSignalUpdated", -1), 7);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsBuiltInSignalsModule)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("@preact/signals-core"));
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsLoadedModuleSource)
 {
     csp::common::LogSystem LogSystem;
@@ -172,6 +198,40 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsLoadedModule
 
     ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/custom-module.js"));
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxCustomModuleLoaded", -1), 1);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsStaticModuleSource)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+
+    NgxScriptSystem.RegisterStaticModuleSource("/__test/static-module.js", "globalThis.__ngxStaticModuleLoaded = 17;");
+
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/__test/static-module.js"));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxStaticModuleLoaded", -1), 17);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("codecomponent-runtime-test-space", &OfflineEngine);
+    NgxCodeComponentRuntime.OnEnterSpace("codecomponent-runtime-test-space", &OfflineEngine);
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(
+        "globalThis.__ngxRegistryPresent = (typeof globalThis.scriptRegistry !== 'undefined') ? 1 : 0;"));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRegistryPresent", -1), 1);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(
+        "globalThis.__ngxRegistryRemoved = (typeof globalThis.scriptRegistry === 'undefined') ? 1 : 0;"));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRegistryRemoved", -1), 1);
+
+    NgxScriptSystem.OnExitSpace();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, MissingModuleLogsExplicitError)

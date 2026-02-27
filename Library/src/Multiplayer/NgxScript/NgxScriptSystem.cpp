@@ -24,6 +24,7 @@
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/NgxScript/signals.h"
 
 #include "quickjs.h"
 #include "quickjspp.hpp"
@@ -34,6 +35,8 @@
 
 namespace
 {
+
+constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -226,6 +229,39 @@ void NgxScriptSystem::OnExitSpace()
     TeardownContext();
 }
 
+void NgxScriptSystem::RegisterStaticModuleSource(const csp::common::String& ModulePath, const csp::common::String& ModuleSource)
+{
+    if (ModulePath.IsEmpty())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: Cannot register static module source with empty module path.");
+        return;
+    }
+
+    {
+        std::scoped_lock ModuleLock(ModuleSourcesMutex);
+        StaticModuleSources[ModulePath.c_str()] = ModuleSource.c_str();
+    }
+
+    const std::string RegisterMessage = fmt::format("NgxScript Trace: Registered static module source '{}'.", ModulePath.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Log, RegisterMessage.c_str());
+}
+
+void NgxScriptSystem::UnregisterStaticModuleSource(const csp::common::String& ModulePath)
+{
+    if (ModulePath.IsEmpty())
+    {
+        return;
+    }
+
+    {
+        std::scoped_lock ModuleLock(ModuleSourcesMutex);
+        StaticModuleSources.erase(ModulePath.c_str());
+    }
+
+    const std::string UnregisterMessage = fmt::format("NgxScript Trace: Unregistered static module source '{}'.", ModulePath.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Log, UnregisterMessage.c_str());
+}
+
 void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
 {
     const std::string ReloadRequestMessage = fmt::format(
@@ -408,8 +444,25 @@ void NgxScriptSystem::InstallModuleLoader()
         {
             const std::string RequestedModule(ModuleName);
 
+            if (RequestedModule == PREACT_SIGNALS_CORE_MODULE)
+            {
+                const std::string ResolveMessage
+                    = fmt::format("NgxScript Trace: Resolved built-in module '{}'.", RequestedModule);
+                LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
+                return qjs::Context::ModuleData { RequestedModule, csp::systems::SignalsScriptCode.c_str(), std::nullopt };
+            }
+
             {
                 std::scoped_lock ModuleLock(ModuleSourcesMutex);
+                auto StaticSourceIt = StaticModuleSources.find(RequestedModule);
+                if (StaticSourceIt != StaticModuleSources.end())
+                {
+                    const std::string ResolveMessage
+                        = fmt::format("NgxScript Trace: Resolved static module '{}'.", RequestedModule);
+                    LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
+                    return qjs::Context::ModuleData { RequestedModule, StaticSourceIt->second, std::nullopt };
+                }
+
                 auto SourceIt = LoadedModuleSources.find(RequestedModule);
                 if (SourceIt != LoadedModuleSources.end())
                 {
@@ -720,10 +773,13 @@ bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
 
     {
         std::scoped_lock ModuleLock(ModuleSourcesMutex);
-        if (LoadedModuleSources.find(ModulePathStd) == LoadedModuleSources.end())
+        const bool bFoundInLoaded = (LoadedModuleSources.find(ModulePathStd) != LoadedModuleSources.end());
+        const bool bFoundInStatic = (StaticModuleSources.find(ModulePathStd) != StaticModuleSources.end());
+        const bool bFoundInBuiltIn = (ModulePathStd == PREACT_SIGNALS_CORE_MODULE);
+        if (!bFoundInLoaded && !bFoundInStatic && !bFoundInBuiltIn)
         {
             const std::string WarningMessage = fmt::format(
-                "NgxScript: Module '{}' not found in loaded module map.", ModulePathStd);
+                "NgxScript: Module '{}' not found in loaded or static module maps.", ModulePathStd);
             LogSystem.LogMsg(csp::common::LogLevel::Warning, WarningMessage.c_str());
             return false;
         }

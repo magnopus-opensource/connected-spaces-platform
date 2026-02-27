@@ -28,6 +28,7 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Multiplayer/NgxScript/NgxCodeComponentRuntime.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
@@ -605,6 +606,18 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                     CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxScriptSystem unavailable during EnterSpace.");
                 }
 
+                if (auto* NgxCodeComponentRuntime = csp::systems::SystemsManager::Get().GetNgxCodeComponentRuntime();
+                    NgxCodeComponentRuntime != nullptr)
+                {
+                    CSP_LOG_FORMAT(csp::common::LogLevel::Log,
+                        "SpaceSystem Trace: Calling NgxCodeComponentRuntime::OnEnterSpace for space '%s'.", SpaceResult.GetSpace().Id.c_str());
+                    NgxCodeComponentRuntime->OnEnterSpace(SpaceResult.GetSpace().Id, RealtimeEngine);
+                }
+                else
+                {
+                    CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxCodeComponentRuntime unavailable during EnterSpace.");
+                }
+
                 // This is what fetches the data for the space, all the assets and whatnot. Creates the space entities in the realtime engine.
                 RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(SpaceResult.GetSpace().Id,
                     [FinishedFetchEntitySetupEvent, ResultCopy = SpaceResult]()
@@ -625,6 +638,17 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
     CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
+
+    if (auto* NgxCodeComponentRuntime = csp::systems::SystemsManager::Get().GetNgxCodeComponentRuntime(); NgxCodeComponentRuntime != nullptr)
+    {
+        CSP_LOG_FORMAT(
+            csp::common::LogLevel::Log, "SpaceSystem Trace: Calling NgxCodeComponentRuntime::OnExitSpace for '%s'.", CurrentSpace.Id.c_str());
+        NgxCodeComponentRuntime->OnExitSpace();
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxCodeComponentRuntime unavailable during ExitSpace.");
+    }
 
     if (auto* NgxScriptSystem = csp::systems::SystemsManager::Get().GetNgxScriptSystem(); NgxScriptSystem != nullptr)
     {

@@ -31,6 +31,7 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/NgxScript/NgxCodeComponentRuntime.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Settings/ApplicationSettingsSystem.h"
@@ -110,6 +111,8 @@ csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &Multi
 
 NgxScriptSystem* SystemsManager::GetNgxScriptSystem() { return NgxScriptSystem; }
 
+NgxCodeComponentRuntime* SystemsManager::GetNgxCodeComponentRuntime() { return NgxCodeComponentRuntime; }
+
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
     return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
@@ -141,6 +144,7 @@ SystemsManager::SystemsManager()
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
     , NgxScriptSystem(nullptr)
+    , NgxCodeComponentRuntime(nullptr)
     , ScriptSystem(nullptr)
     , VoipSystem(nullptr)
     , PointOfInterestSystem(nullptr)
@@ -218,7 +222,9 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
     MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
     NgxScriptSystem = new csp::systems::NgxScriptSystem(*LogSystem);
+    NgxCodeComponentRuntime = new csp::systems::NgxCodeComponentRuntime(*LogSystem, *NgxScriptSystem);
     LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: NgxScriptSystem created.");
+    LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: NgxCodeComponentRuntime created.");
     SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
 }
 
@@ -240,6 +246,11 @@ void SystemsManager::DestroySystems()
     delete ApplicationSettingsSystem;
     delete PointOfInterestSystem;
     delete AnchorSystem;
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: Destroying NgxCodeComponentRuntime.");
+    }
+    delete NgxCodeComponentRuntime;
     if (LogSystem != nullptr)
     {
         LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: Destroying NgxScriptSystem.");
