@@ -1577,80 +1577,81 @@ async::task<MaterialResult> AssetSystem::DownloadMaterial(
     return OnCompleteTask;
 }
 
+std::function<async::task<MaterialsResult>(const AssetsResult&)> AssetSystem::DownloadAllMaterials(
+    const csp::common::Array<AssetCollection>& AssetCollections)
+{
+    return [this, AssetCollections](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
+    {
+        const auto& Assets = GetAssetsResult.GetAssets();
+
+        if (Assets.IsEmpty())
+        {
+            // There are no material assets in this space
+            return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
+        }
+
+        auto DownloadTasks = std::vector<async::task<MaterialResult>>();
+        DownloadTasks.reserve(Assets.Size());
+
+        for (const auto& Asset : Assets)
+        {
+            if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
+                    [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
+                AssetCollection != std::end(AssetCollections))
+            {
+                DownloadTasks.push_back(DownloadMaterial(*AssetCollection, Asset.Id, Asset.Uri));
+            }
+            else
+            {
+                CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
+            }
+        }
+
+        return async::when_all(DownloadTasks)
+            .then(
+                [](std::vector<async::task<MaterialResult>> DownloadTasks) -> MaterialsResult
+                {
+                    auto DownloadedMaterials = std::vector<Material*>();
+                    DownloadedMaterials.reserve(DownloadTasks.size());
+
+                    for (auto& Task : DownloadTasks)
+                    {
+                        try
+                        {
+                            if (auto Result = Task.get().GetMaterial())
+                            {
+                                DownloadedMaterials.push_back(Result);
+                            }
+                        }
+                        catch (const std::exception& Exception)
+                        {
+                            CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials: %s", Exception.what());
+                        }
+                    }
+
+                    if (DownloadedMaterials.empty())
+                    {
+                        return MakeInvalid<MaterialsResult>();
+                    }
+
+                    auto Materials = csp::common::Array<Material*>(DownloadedMaterials.size());
+
+                    for (size_t i = 0; i < DownloadedMaterials.size(); ++i)
+                    {
+                        Materials[i] = DownloadedMaterials[i];
+                    }
+
+                    auto Result = MaterialsResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+                    Result.SetMaterials(Materials);
+
+                    return Result;
+                });
+    };
+}
+
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
-    const auto MakeDownloadAll = [this](const auto& AssetCollections)
-    {
-        return [this, AssetCollections](const AssetsResult& GetAssetsResult) -> async::task<MaterialsResult>
-        {
-            const auto& Assets = GetAssetsResult.GetAssets();
-
-            if (Assets.IsEmpty())
-            {
-                // There are no material assets in this space
-                return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
-            }
-
-            auto DownloadTasks = std::vector<async::task<MaterialResult>>();
-            DownloadTasks.reserve(Assets.Size());
-
-            for (const auto& Asset : Assets)
-            {
-                if (const auto AssetCollection = std::find_if(std::begin(AssetCollections), std::end(AssetCollections),
-                        [&](const auto& Collection) { return Collection.Id == Asset.AssetCollectionId; });
-                    AssetCollection != std::end(AssetCollections))
-                {
-                    DownloadTasks.push_back(DownloadMaterial(*AssetCollection, Asset.Id, Asset.Uri));
-                }
-                else
-                {
-                    CSP_LOG_ERROR_MSG("A Material Collection with the specified Id was not found.");
-                }
-            }
-
-            return async::when_all(DownloadTasks)
-                .then(
-                    [](std::vector<async::task<MaterialResult>> DownloadTasks) -> MaterialsResult
-                    {
-                        auto DownloadedMaterials = std::vector<Material*>();
-                        DownloadedMaterials.reserve(DownloadTasks.size());
-
-                        for (auto& Task : DownloadTasks)
-                        {
-                            try
-                            {
-                                if (auto Result = Task.get().GetMaterial())
-                                {
-                                    DownloadedMaterials.push_back(Result);
-                                }
-                            }
-                            catch (const std::exception& Exception)
-                            {
-                                CSP_LOG_ERROR_FORMAT("AssetSystem::GetMaterials: %s", Exception.what());
-                            }
-                        }
-
-                        if (DownloadedMaterials.empty())
-                        {
-                            return MakeInvalid<MaterialsResult>();
-                        }
-
-                        auto Materials = csp::common::Array<Material*>(DownloadedMaterials.size());
-
-                        for (size_t i = 0; i < DownloadedMaterials.size(); ++i)
-                        {
-                            Materials[i] = DownloadedMaterials[i];
-                        }
-
-                        auto Result = MaterialsResult(EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
-                        Result.SetMaterials(Materials);
-
-                        return Result;
-                    });
-        };
-    };
-
-    auto FetchMaterials = [this, MakeDownloadAll](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
+    auto FetchMaterials = [this](const AssetCollectionsResult& Result) -> async::task<MaterialsResult>
     {
         if (Result.GetResultCode() != EResultCode::Success)
         {
@@ -1672,7 +1673,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
         }
 
         return GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array { EAssetType::MATERIAL })
-            .then(MakeDownloadAll(AssetCollections));
+            .then(DownloadAllMaterials(AssetCollections));
     };
 
     FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { SpaceId }, nullptr, nullptr)
