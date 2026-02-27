@@ -29,6 +29,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <CSP/Common/ReplicatedValueException.h>
 
 namespace csp::multiplayer
 {
@@ -321,9 +322,13 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
     {
         LogSystem.LogMsg(LogLevel::Error, fmt::format("NetworkEventBus: SignalR type mismatch encountered in Event {}: {}", static_cast<int>(EventType), e.what()).c_str());
     }
+    catch (const csp::common::ReplicatedValueException& e)
+    {
+        LogSystem.LogMsg(LogLevel::Error, fmt::format("NetworkEventBus: ReplicatedValue type mismatch: {}", e.what()).c_str());
+    }
     catch (...)
     {
-        LogSystem.LogMsg(LogLevel::Error, "NetworkEventBus: Unknown error encountered during event deserialization.");
+        LogSystem.LogMsg(LogLevel::Error, "NetworkEventBus: Unknown error encountered during event deserialisation.");
     }
 
     return nullptr;

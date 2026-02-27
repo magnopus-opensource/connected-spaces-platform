@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #include "CSP/Common/ReplicatedValue.h"
+#include "CSP/Common/ReplicatedValueException.h"
 
 namespace csp::common
 {
+
 static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
 static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
 static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
@@ -123,7 +125,11 @@ void ReplicatedValue::SetBool(bool InValue)
 
 bool ReplicatedValue::GetBool() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Boolean);
+    if (ReplicatedType != ReplicatedValueType::Boolean)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Boolean, ReplicatedType);
+    }
+
     return Get<bool>();
 }
 
@@ -135,7 +141,11 @@ void ReplicatedValue::SetFloat(float InValue)
 
 float ReplicatedValue::GetFloat() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Float);
+    if (ReplicatedType != ReplicatedValueType::Float)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Float, ReplicatedType);
+    }
+
     return Get<float>();
 }
 
@@ -147,7 +157,11 @@ void ReplicatedValue::SetInt(int64_t InValue)
 
 int64_t ReplicatedValue::GetInt() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Integer);
+    if (ReplicatedType != ReplicatedValueType::Integer)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Integer, ReplicatedType);
+    }
+
     return Get<int64_t>();
 }
 
@@ -165,7 +179,11 @@ void ReplicatedValue::SetString(const csp::common::String& InValue)
 
 const csp::common::String& ReplicatedValue::GetString() const
 {
-    assert(ReplicatedType == ReplicatedValueType::String);
+    if (ReplicatedType != ReplicatedValueType::String)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::String, ReplicatedType);
+    }
+
     return Get<csp::common::String>();
 }
 
@@ -183,7 +201,11 @@ void ReplicatedValue::SetVector2(const csp::common::Vector2& InValue)
 
 const csp::common::Vector2& ReplicatedValue::GetVector2() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Vector2);
+    if (ReplicatedType != ReplicatedValueType::Vector2)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Vector2, ReplicatedType);
+    }
+
     return Get<csp::common::Vector2>();
 }
 
@@ -197,7 +219,11 @@ void ReplicatedValue::SetVector3(const csp::common::Vector3& InValue)
 
 const csp::common::Vector3& ReplicatedValue::GetVector3() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Vector3);
+    if (ReplicatedType != ReplicatedValueType::Vector3)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Vector3, ReplicatedType);
+    }
+
     return Get<csp::common::Vector3>();
 }
 
@@ -211,7 +237,11 @@ void ReplicatedValue::SetVector4(const csp::common::Vector4& InValue)
 
 const csp::common::Vector4& ReplicatedValue::GetVector4() const
 {
-    assert(ReplicatedType == ReplicatedValueType::Vector4);
+    if (ReplicatedType != ReplicatedValueType::Vector4)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::Vector4, ReplicatedType);
+    }
+
     return Get<csp::common::Vector4>();
 }
 
@@ -219,7 +249,11 @@ const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return Invali
 
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {
-    assert(ReplicatedType == ReplicatedValueType::StringMap);
+    if (ReplicatedType != ReplicatedValueType::StringMap)
+    {
+        throw ReplicatedValueException(ReplicatedValueType::StringMap, ReplicatedType);
+    }
+
     return Get<csp::common::Map<csp::common::String, ReplicatedValue>>();
 }
 
