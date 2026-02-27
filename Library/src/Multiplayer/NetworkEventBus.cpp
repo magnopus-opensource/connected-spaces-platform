@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/NetworkEventBus.h"
 
+#include "CSP/Common/ReplicatedValueException.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
 #include "CSP/Systems/SystemBase.h"
@@ -29,7 +30,6 @@
 #include <limits>
 #include <memory>
 #include <optional>
-#include <CSP/Common/ReplicatedValueException.h>
 
 namespace csp::multiplayer
 {
@@ -149,7 +149,8 @@ bool NetworkEventBus::StartEventMessageListening()
 
         if (!Result.as_array()[0].is_array())
         {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "NetworkEventBus: Event message expected to be an array with an array at element[0] but the element was of a different type.");
+            LogSystem.LogMsg(csp::common::LogLevel::Error,
+                "NetworkEventBus: Event message expected to be an array with an array at element[0] but the element was of a different type.");
             return;
         }
 
@@ -320,7 +321,8 @@ std::unique_ptr<csp::common::NetworkEventData> NetworkEventBus::DeserialiseForEv
     }
     catch (const signalr::signalr_exception& e)
     {
-        LogSystem.LogMsg(LogLevel::Error, fmt::format("NetworkEventBus: SignalR type mismatch encountered in Event {}: {}", static_cast<int>(EventType), e.what()).c_str());
+        LogSystem.LogMsg(LogLevel::Error,
+            fmt::format("NetworkEventBus: SignalR type mismatch encountered in Event {}: {}", static_cast<int>(EventType), e.what()).c_str());
     }
     catch (const csp::common::ReplicatedValueException& e)
     {

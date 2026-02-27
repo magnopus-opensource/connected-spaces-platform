@@ -20,9 +20,9 @@
 #include <stdexcept>
 #include <fmt/format.h>
 
-namespace
+namespace csp::common
 {
-csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedValueType Type)
+inline csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedValueType Type)
 {
     switch (Type)
     {
@@ -48,10 +48,7 @@ csp::common::String ReplicatedValueTypeToString(csp::common::ReplicatedValueType
         return "UnknownType";
     }
 }
-}
 
-namespace csp::common
-{
 class ReplicatedValueException : public std::runtime_error
 {
 public:
