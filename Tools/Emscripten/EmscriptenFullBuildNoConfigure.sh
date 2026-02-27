@@ -23,7 +23,7 @@ if [ $? -ne 0 ]
 	exit 1
 fi
 
-python3 Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
+python3.11 Tools/WrapperGenerator/WrapperGenerator.py --generate_typescript
 if [ $? -ne 0 ]
   then
     cd Tools/Emscripten
@@ -31,8 +31,8 @@ if [ $? -ne 0 ]
 	exit 1
 fi
 
-python ./teamcity/GenerateReadMeWithLink.py
-python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
+python3.11 ./teamcity/GenerateReadMeWithLink.py
+python3.11 ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
 if [ $? -ne 0 ]
   then
     cd Tools/Emscripten

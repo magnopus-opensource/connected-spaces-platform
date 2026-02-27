@@ -28,6 +28,7 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Debug/Logging.h"
@@ -593,6 +594,17 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                 auto FinishedFetchEntitySetupEvent = std::make_shared<async::event_task<csp::systems::SpaceResult>>();
                 auto FinishedFetchEntitySetupContinuation = FinishedFetchEntitySetupEvent->get_task();
 
+                if (auto* NgxScriptSystem = csp::systems::SystemsManager::Get().GetNgxScriptSystem(); NgxScriptSystem != nullptr)
+                {
+                    CSP_LOG_FORMAT(csp::common::LogLevel::Log,
+                        "SpaceSystem Trace: Calling NgxScriptSystem::OnEnterSpace for space '%s'.", SpaceResult.GetSpace().Id.c_str());
+                    NgxScriptSystem->OnEnterSpace(SpaceResult.GetSpace().Id, RealtimeEngine);
+                }
+                else
+                {
+                    CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxScriptSystem unavailable during EnterSpace.");
+                }
+
                 // This is what fetches the data for the space, all the assets and whatnot. Creates the space entities in the realtime engine.
                 RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(SpaceResult.GetSpace().Id,
                     [FinishedFetchEntitySetupEvent, ResultCopy = SpaceResult]()
@@ -613,6 +625,16 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
 void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
     CSP_LOG_FORMAT(csp::common::LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
+
+    if (auto* NgxScriptSystem = csp::systems::SystemsManager::Get().GetNgxScriptSystem(); NgxScriptSystem != nullptr)
+    {
+        CSP_LOG_FORMAT(csp::common::LogLevel::Log, "SpaceSystem Trace: Calling NgxScriptSystem::OnExitSpace for '%s'.", CurrentSpace.Id.c_str());
+        NgxScriptSystem->OnExitSpace();
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxScriptSystem unavailable during ExitSpace.");
+    }
 
     // As the user is exiting the space, we now clear all scopes that they are registered to.
     auto& SystemsManager = systems::SystemsManager::Get();

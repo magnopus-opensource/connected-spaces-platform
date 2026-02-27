@@ -46,7 +46,7 @@ fi
 
 "premake5" gmake2 --generate_wasm
 
-python Tools/Emscripten/ReplaceComSpec.py
+python3.11 Tools/Emscripten/ReplaceComSpec.py
 docker run -w /src -v `pwd`:/src --rm emscripten/emsdk:$emsdk_version emmake make config="$1"_wasm clean
 if [ $? -ne 0 ]
   then
@@ -63,8 +63,8 @@ if [ $? -ne 0 ]
 	exit 1
 fi
 
-python ./teamcity/GenerateReadMeWithLink.py
-python ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
+python3.11 ./teamcity/GenerateReadMeWithLink.py
+python3.11 ./teamcity/BuildNPMWebPackage.py --npm_publish_flag=False
 if [ $? -ne 0 ]
   then
     cd Tools/Emscripten

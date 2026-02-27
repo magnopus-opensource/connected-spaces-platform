@@ -26,14 +26,14 @@ if not Project then
 
         if CSP.IsAppleTarget() then
             if not CSP.IsGeneratingVS() then
-                code = os.execute("python3 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
+                code = os.execute("python3.11 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
                 if (code ~= true) then
                     return code
                 end
             end
         else
-            code = os.execute("py " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
+            code = os.execute("python3.11 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
             if (code ~= true) then
                 return code

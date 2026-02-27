@@ -31,6 +31,7 @@
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Settings/ApplicationSettingsSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
@@ -107,6 +108,8 @@ csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnectio
 
 csp::multiplayer::NetworkEventBus* SystemsManager::GetEventBus() { return &MultiplayerConnection->GetEventBus(); }
 
+NgxScriptSystem* SystemsManager::GetNgxScriptSystem() { return NgxScriptSystem; }
+
 csp::multiplayer::OnlineRealtimeEngine* SystemsManager::MakeOnlineRealtimeEngine()
 {
     return new csp::multiplayer::OnlineRealtimeEngine { *GetMultiplayerConnection(), *GetLogSystem(), *GetEventBus(), *GetScriptSystem() };
@@ -137,6 +140,7 @@ SystemsManager::SystemsManager()
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
+    , NgxScriptSystem(nullptr)
     , ScriptSystem(nullptr)
     , VoipSystem(nullptr)
     , PointOfInterestSystem(nullptr)
@@ -213,6 +217,8 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
     AnalyticsSystem = new csp::systems::AnalyticsSystem(WebClient, &(csp::CSPFoundation::GetClientUserAgentInfo()), *LogSystem);
     ExternalServiceProxySystem = new csp::systems::ExternalServiceProxySystem(WebClient, *LogSystem);
     MultiplayerSystem = new csp::systems::MultiplayerSystem(WebClient, *SpaceSystem, *LogSystem);
+    NgxScriptSystem = new csp::systems::NgxScriptSystem(*LogSystem);
+    LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: NgxScriptSystem created.");
     SpaceSystem->SetMultiplayerSystem(*MultiplayerSystem);
 }
 
@@ -234,6 +240,11 @@ void SystemsManager::DestroySystems()
     delete ApplicationSettingsSystem;
     delete PointOfInterestSystem;
     delete AnchorSystem;
+    if (LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: Destroying NgxScriptSystem.");
+    }
+    delete NgxScriptSystem;
     delete AssetSystem;
     delete SpaceSystem;
     delete UserSystem;
