@@ -447,6 +447,17 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     LogOut(UserSystem);
 }
 
+/*
+ * This test is concerned with ensuring `AssetSystem::GetMaterials` is robust to the different ways in which the
+ * downloading of materials can fail, and documents that our design is such that if one download fails that
+ * the others are still run to completion.
+ *
+ * To that end, we inject a mock web client, which is setup to handle all the different API requests that are made by
+ * `AssetSystem::GetMaterials`. As such, we can have quite fine grained control over the responses, to exercise the
+ * different failure cases. This is one test vs individual tests for the different failure cases, so that we ensure
+ * there are multiple threads at play (for targets other than WASM each request runs on a thread from the thread pool)
+ * which can help shake out any thread safety issues in the implementation.
+ */
 CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMaterialsSomeFail)
 {
     SetRandSeed();
@@ -474,6 +485,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
 
                 const auto RawUri = csp::common::String(Uri.GetAsString());
 
+                // `/mag-prototype/api/v1/prototypes`: Endpoint hit for requests sent by `AssetSystem::FindAssetCollections`
                 if (RawUri.Contains("/mag-prototype/api/v1/prototypes?GroupIds=TestSpaceId"))
                 {
                     Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
@@ -517,6 +529,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
                         }
                     ])");
                 }
+                // `/mag-prototype/api/v1/prototypes/asset-details`: Endpoint hit for requests sent by `AssetSystem::GetAssetsByCriteria`
                 else if (RawUri.Contains("/mag-prototype/api/v1/prototypes/asset-details"))
                 {
                     ASSERT_TRUE(RawUri.Contains("AssetTypes=Material"));
@@ -560,6 +573,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MaterialTestsWithMocks, GetMultipleMateria
                         }
                     ])");
                 }
+                // Handle requests for individual `Asset::Uri`s
                 else if (RawUri == "https://example.com/standard1.json" || RawUri == "https://example.com/standard2.json"
                     || RawUri == "https://example.com/standard3.json")
                 {
