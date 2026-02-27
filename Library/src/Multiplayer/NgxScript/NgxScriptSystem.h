@@ -66,12 +66,15 @@ public:
     // Manual single-module refresh path.
     void ReloadScriptModule(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
+    // Execute a loaded module path using the in-memory module map.
+    bool ExecuteModule(const csp::common::String& ModulePath);
+
 #ifdef CSP_TESTS
     CSP_NO_EXPORT bool HasActiveContextForTesting() const;
     CSP_NO_EXPORT bool EvaluateModuleScriptForTesting(const csp::common::String& ScriptText);
     CSP_NO_EXPORT int32_t GetGlobalIntForTesting(const csp::common::String& Key, int32_t DefaultValue = 0) const;
     CSP_NO_EXPORT void SetLoadedModuleSourceForTesting(const csp::common::String& ModulePath, const csp::common::String& ModuleSource);
-    CSP_NO_EXPORT bool RunEntryModuleForTesting(const csp::common::String& EntryModulePath);
+    CSP_NO_EXPORT bool RunModuleForTesting(const csp::common::String& ModulePath);
 #endif
 
 private:
@@ -85,7 +88,6 @@ private:
     void InstallModuleLoader();
     void InstallHostBindings();
     void DrainPendingJobs();
-    void RunBootstrapScript();
 
     void LoadScriptModules();
 
@@ -94,7 +96,6 @@ private:
 
     bool IsGenerationCurrent(uint64_t Generation) const;
     bool EvaluateModuleScript(const std::string& ScriptText, const char* DebugName);
-    bool ExecuteEntryModule(const std::string& EntryModulePath);
 
     csp::common::LogSystem& LogSystem;
     csp::common::IRealtimeEngine* ActiveRealtimeEngine;

@@ -30,11 +30,10 @@
 
 #include <fmt/format.h>
 #include <optional>
+#include <vector>
 
 namespace
 {
-
-constexpr const char* DEFAULT_ENTRY_MODULE = "/scripts/engine/main.js";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -207,7 +206,6 @@ void NgxScriptSystem::OnEnterSpace(const csp::common::String& InSpaceId, csp::co
     }
 
     RebuildContext();
-    RunBootstrapScript();
     LoadScriptModules();
 }
 
@@ -323,8 +321,6 @@ void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollect
 
                             // Rebuild context to clear module cache and execute updated source.
                             RebuildContext();
-                            RunBootstrapScript();
-                            ExecuteEntryModule(DEFAULT_ENTRY_MODULE);
                         });
                 });
         });
@@ -367,12 +363,11 @@ void NgxScriptSystem::SetLoadedModuleSourceForTesting(const csp::common::String&
     LoadedModuleSources[ModulePath.c_str()] = ModuleSource.c_str();
 }
 
-bool NgxScriptSystem::RunEntryModuleForTesting(const csp::common::String& EntryModulePath)
+bool NgxScriptSystem::RunModuleForTesting(const csp::common::String& ModulePath)
 {
     // Mirror reload flow so test calls observe freshly compiled module state.
     RebuildContext();
-    RunBootstrapScript();
-    return ExecuteEntryModule(EntryModulePath.c_str());
+    return ExecuteModule(ModulePath);
 }
 #endif
 
@@ -485,16 +480,6 @@ void NgxScriptSystem::DrainPendingJobs()
     }
 }
 
-void NgxScriptSystem::RunBootstrapScript()
-{
-    static constexpr const char* BOOTSTRAP_SCRIPT = "console.log('Hello World from NgxScript');";
-    LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Running bootstrap script.");
-    if (EvaluateModuleScript(BOOTSTRAP_SCRIPT, "<ngx-bootstrap>"))
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Bootstrap script completed.");
-    }
-}
-
 void NgxScriptSystem::LoadScriptModules()
 {
     const std::string LoadStartMessage = fmt::format("NgxScript Trace: LoadScriptModules(spaceId='{}').", ActiveSpaceId.c_str());
@@ -532,97 +517,115 @@ void NgxScriptSystem::LoadScriptModules()
             if (!AssetCollectionIds || AssetCollectionIds->IsEmpty())
             {
                 LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: No asset collections found while loading scripts.");
-                ExecuteEntryModule(DEFAULT_ENTRY_MODULE);
                 return;
             }
 
+            auto BeginDownloads = [this, Generation, AssetSystem, AssetCollections](const std::vector<csp::systems::Asset>& ScriptAssets)
+            {
+                const size_t TotalAssets = ScriptAssets.size();
+                if (TotalAssets == 0)
+                {
+                    LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: No JavaScript module assets found for active space.");
+                    return;
+                }
+
+                auto DownloadedSources = std::make_shared<ModuleSourceMap>();
+                auto DownloadedCount = std::make_shared<size_t>(0);
+                auto HasFailed = std::make_shared<bool>(false);
+
+                for (const csp::systems::Asset& ScriptAsset : ScriptAssets)
+                {
+                    AssetSystem->DownloadAssetData(ScriptAsset,
+                        [this, Generation, TotalAssets, ScriptAsset, AssetCollections, DownloadedSources, DownloadedCount, HasFailed](
+                            const csp::systems::AssetDataResult& DownloadResult)
+                        {
+                            if (!IsGenerationCurrent(Generation))
+                            {
+                                return;
+                            }
+
+                            if (DownloadResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+                            {
+                                return;
+                            }
+
+                            if (*HasFailed)
+                            {
+                                return;
+                            }
+
+                            if (DownloadResult.GetResultCode() != csp::systems::EResultCode::Success)
+                            {
+                                *HasFailed = true;
+                                LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Failed to download a script module.");
+                                return;
+                            }
+
+                            const char* ModuleSourceData = static_cast<const char*>(DownloadResult.GetData());
+                            const size_t ModuleSourceLength = DownloadResult.GetDataLength();
+                            const std::string ModuleSource = (ModuleSourceData != nullptr)
+                                ? std::string(ModuleSourceData, ModuleSourceLength)
+                                : std::string();
+
+                            const csp::common::String CanonicalPath = ngxscript::BuildCanonicalAssetPath(ScriptAsset, *AssetCollections);
+                            (*DownloadedSources)[CanonicalPath.c_str()] = ModuleSource;
+                            const std::string DownloadMessage = fmt::format("NgxScript Trace: Loaded module '{}'.", CanonicalPath.c_str());
+                            LogSystem.LogMsg(csp::common::LogLevel::Verbose, DownloadMessage.c_str());
+
+                            (*DownloadedCount)++;
+                            if (*DownloadedCount < TotalAssets)
+                            {
+                                return;
+                            }
+
+                            size_t LoadedModuleCount = 0;
+                            {
+                                std::scoped_lock ModuleLock(ModuleSourcesMutex);
+                                LoadedModuleSources = *DownloadedSources;
+                                LoadedModuleCount = LoadedModuleSources.size();
+                            }
+
+                            const std::string LoadCompleteMessage
+                                = fmt::format("NgxScript Trace: Module load complete ({} modules).", LoadedModuleCount);
+                            LogSystem.LogMsg(csp::common::LogLevel::Log, LoadCompleteMessage.c_str());
+                        });
+                }
+            };
+
             AssetSystem->GetAssetsByCriteria(*AssetCollectionIds, nullptr, nullptr, csp::common::Array { csp::systems::EAssetType::SCRIPT_LIBRARY },
-                [this, Generation, AssetCollections](const csp::systems::AssetsResult& AssetsResult)
+                [this, Generation, BeginDownloads](const csp::systems::AssetsResult& ScriptLibraryAssetsResult)
                 {
                     if (!IsGenerationCurrent(Generation))
                     {
                         return;
                     }
 
-                    if (AssetsResult.GetResultCode() != csp::systems::EResultCode::Success)
+                    if (ScriptLibraryAssetsResult.GetResultCode() != csp::systems::EResultCode::Success)
                     {
                         LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: Failed to load script asset metadata.");
                         return;
                     }
 
-                    const auto Assets = AssetsResult.GetAssets();
-                    const size_t TotalAssets = Assets.Size();
-                    const std::string DiscoveredModulesMessage = fmt::format(
-                        "NgxScript Trace: Discovered {} script library asset(s) for active space.", TotalAssets);
-                    LogSystem.LogMsg(csp::common::LogLevel::Log, DiscoveredModulesMessage.c_str());
-                    if (TotalAssets == 0)
+                    const auto ScriptLibraryAssetsArray = ScriptLibraryAssetsResult.GetAssets();
+                    std::vector<csp::systems::Asset> ScriptLibraryAssets;
+                    ScriptLibraryAssets.reserve(ScriptLibraryAssetsArray.Size());
+                    for (size_t Index = 0; Index < ScriptLibraryAssetsArray.Size(); ++Index)
                     {
-                        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: No script library assets found for active space.");
-                        ExecuteEntryModule(DEFAULT_ENTRY_MODULE);
+                        ScriptLibraryAssets.emplace_back(ScriptLibraryAssetsArray[Index]);
+                    }
+
+                    const std::string DiscoveredScriptLibrariesMessage = fmt::format(
+                        "NgxScript Trace: Discovered {} script library asset(s) for active space.", ScriptLibraryAssets.size());
+                    LogSystem.LogMsg(csp::common::LogLevel::Log, DiscoveredScriptLibrariesMessage.c_str());
+
+                    if (!ScriptLibraryAssets.empty())
+                    {
+                        BeginDownloads(ScriptLibraryAssets);
                         return;
                     }
 
-                    auto DownloadedSources = std::make_shared<ModuleSourceMap>();
-                    auto DownloadedCount = std::make_shared<size_t>(0);
-                    auto HasFailed = std::make_shared<bool>(false);
-
-                    for (size_t Index = 0; Index < TotalAssets; ++Index)
-                    {
-                        const csp::systems::Asset ScriptAsset = Assets[Index];
-                        csp::systems::SystemsManager::Get().GetAssetSystem()->DownloadAssetData(ScriptAsset,
-                            [this, Generation, TotalAssets, ScriptAsset, AssetCollections, DownloadedSources, DownloadedCount, HasFailed](
-                                const csp::systems::AssetDataResult& DownloadResult)
-                            {
-                                if (!IsGenerationCurrent(Generation))
-                                {
-                                    return;
-                                }
-
-                                if (DownloadResult.GetResultCode() == csp::systems::EResultCode::InProgress)
-                                {
-                                    return;
-                                }
-
-                                if (*HasFailed)
-                                {
-                                    return;
-                                }
-
-                                if (DownloadResult.GetResultCode() != csp::systems::EResultCode::Success)
-                                {
-                                    *HasFailed = true;
-                                    LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Failed to download a script module.");
-                                    return;
-                                }
-
-                                const char* ModuleSourceData = static_cast<const char*>(DownloadResult.GetData());
-                                const size_t ModuleSourceLength = DownloadResult.GetDataLength();
-                                const std::string ModuleSource = (ModuleSourceData != nullptr)
-                                    ? std::string(ModuleSourceData, ModuleSourceLength)
-                                    : std::string();
-
-                                const csp::common::String CanonicalPath
-                                    = ngxscript::BuildCanonicalAssetPath(ScriptAsset, *AssetCollections);
-                                (*DownloadedSources)[CanonicalPath.c_str()] = ModuleSource;
-                                const std::string DownloadMessage
-                                    = fmt::format("NgxScript Trace: Loaded module '{}'.", CanonicalPath.c_str());
-                                LogSystem.LogMsg(csp::common::LogLevel::Verbose, DownloadMessage.c_str());
-
-                                (*DownloadedCount)++;
-                                if (*DownloadedCount >= TotalAssets)
-                                {
-                                    {
-                                        std::scoped_lock ModuleLock(ModuleSourcesMutex);
-                                        LoadedModuleSources = *DownloadedSources;
-                                    }
-
-                                    const std::string LoadCompleteMessage
-                                        = fmt::format("NgxScript Trace: Module load complete ({} modules).", LoadedModuleSources.size());
-                                    LogSystem.LogMsg(csp::common::LogLevel::Log, LoadCompleteMessage.c_str());
-                                    ExecuteEntryModule(DEFAULT_ENTRY_MODULE);
-                                }
-                            });
-                    }
+                    LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                        "NgxScript: No script library assets found for active space. Ensure scripts are uploaded as EAssetType::SCRIPT_LIBRARY.");
                 });
         });
 }
@@ -709,26 +712,29 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
     return false;
 }
 
-bool NgxScriptSystem::ExecuteEntryModule(const std::string& EntryModulePath)
+bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
 {
-    const std::string RunEntryMessage = fmt::format("NgxScript Trace: Executing entry module '{}'.", EntryModulePath);
-    LogSystem.LogMsg(csp::common::LogLevel::Log, RunEntryMessage.c_str());
+    const std::string ModulePathStd = ModulePath.c_str();
+    const std::string RunModuleMessage = fmt::format("NgxScript Trace: Executing module '{}'.", ModulePathStd);
+    LogSystem.LogMsg(csp::common::LogLevel::Log, RunModuleMessage.c_str());
 
     {
         std::scoped_lock ModuleLock(ModuleSourcesMutex);
-        if (LoadedModuleSources.find(EntryModulePath) == LoadedModuleSources.end())
+        if (LoadedModuleSources.find(ModulePathStd) == LoadedModuleSources.end())
         {
             const std::string WarningMessage = fmt::format(
-                "NgxScript: Entry module '{}' not found. Continuing without executing an entrypoint.", EntryModulePath);
+                "NgxScript: Module '{}' not found in loaded module map.", ModulePathStd);
             LogSystem.LogMsg(csp::common::LogLevel::Warning, WarningMessage.c_str());
             return false;
         }
     }
 
-    const std::string Script = "import '" + EscapeJSStringLiteral(EntryModulePath) + "';";
-    const bool bSuccess = EvaluateModuleScript(Script, "<ngx-entry-module>");
+    const std::string Script = "import '" + EscapeJSStringLiteral(ModulePathStd) + "';";
+
+    const bool bSuccess = EvaluateModuleScript(Script, "<ngx-module>");
+
     const std::string CompletedMessage = fmt::format(
-        "NgxScript Trace: Entry module '{}' {}.", EntryModulePath, bSuccess ? "completed" : "failed");
+        "NgxScript Trace: Module '{}' {}.", ModulePathStd, bSuccess ? "completed" : "failed");
     LogSystem.LogMsg(csp::common::LogLevel::Log, CompletedMessage.c_str());
     return bSuccess;
 }

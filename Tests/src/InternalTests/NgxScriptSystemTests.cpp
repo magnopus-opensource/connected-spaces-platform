@@ -103,15 +103,15 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, TickEventDrainsPendingJobs)
     NgxScriptSystem.OnExitSpace();
 }
 
-CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, HelloWorldLogEmittedOncePerEnter)
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EnterSpaceDoesNotExecuteUserScriptsByDefault)
 {
-    std::atomic<int32_t> HelloWorldCount = 0;
+    std::atomic<int32_t> ScriptExecutionLogCount = 0;
     csp::common::LogSystem LogSystem;
-    LogSystem.SetLogCallback([&HelloWorldCount](csp::common::LogLevel, const csp::common::String& Message)
+    LogSystem.SetLogCallback([&ScriptExecutionLogCount](csp::common::LogLevel, const csp::common::String& Message)
     {
-        if (Message == "Hello World from NgxScript")
+        if (std::string(Message.c_str()).find("NgxScript Trace: Executing module") != std::string::npos)
         {
-            ++HelloWorldCount;
+            ++ScriptExecutionLogCount;
         }
     });
 
@@ -123,7 +123,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, HelloWorldLogEmittedOncePerEn
     NgxScriptSystem.OnEnterSpace("hello-space-b", &OfflineEngine);
     NgxScriptSystem.OnExitSpace();
 
-    EXPECT_EQ(HelloWorldCount.load(), 2);
+    EXPECT_EQ(ScriptExecutionLogCount.load(), 0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CanonicalPathMappingIsStable)
@@ -159,8 +159,19 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ModuleImportResolvesFromInMem
     NgxScriptSystem.SetLoadedModuleSourceForTesting(
         "/scripts/engine/main.js", "import { value } from '/scripts/lib/value.js'; globalThis.__ngxModuleValue = value + 1;");
 
-    ASSERT_TRUE(NgxScriptSystem.RunEntryModuleForTesting("/scripts/engine/main.js"));
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/main.js"));
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModuleValue", -1), 42);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsLoadedModuleSource)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/engine/custom-module.js", "globalThis.__ngxCustomModuleLoaded = 1;");
+
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/custom-module.js"));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxCustomModuleLoaded", -1), 1);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, MissingModuleLogsExplicitError)
@@ -178,7 +189,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, MissingModuleLogsExplicitErro
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/engine/main.js", "import '/scripts/missing.js';");
 
-    EXPECT_FALSE(NgxScriptSystem.RunEntryModuleForTesting("/scripts/engine/main.js"));
+    EXPECT_FALSE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/main.js"));
 
     const auto MissingModuleLog = std::find_if(ErrorMessages.begin(), ErrorMessages.end(),
         [](const std::string& Message) { return Message.find("NgxScript: Missing module '/scripts/missing.js'.") != std::string::npos; });
@@ -193,10 +204,10 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ReloadUsesUpdatedSourceAndRer
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/lib/reload.js", "export const value = 5;");
     NgxScriptSystem.SetLoadedModuleSourceForTesting(
         "/scripts/engine/main.js", "import { value } from '/scripts/lib/reload.js'; globalThis.__ngxReloadValue = value;");
-    ASSERT_TRUE(NgxScriptSystem.RunEntryModuleForTesting("/scripts/engine/main.js"));
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/main.js"));
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxReloadValue", -1), 5);
 
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/lib/reload.js", "export const value = 9;");
-    ASSERT_TRUE(NgxScriptSystem.RunEntryModuleForTesting("/scripts/engine/main.js"));
+    ASSERT_TRUE(NgxScriptSystem.RunModuleForTesting("/scripts/engine/main.js"));
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxReloadValue", -1), 9);
 }
