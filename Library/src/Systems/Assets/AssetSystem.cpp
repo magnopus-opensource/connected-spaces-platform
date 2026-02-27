@@ -1551,6 +1551,32 @@ void AssetSystem::DeleteMaterial(const Material& Material, NullResultCallback Ca
     DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
+async::task<MaterialResult> AssetSystem::DownloadMaterial(
+    const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri)
+{
+    auto OnCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
+    auto OnCompleteTask = OnCompleteEvent->get_task();
+
+    GetMaterialFromUri(AssetCollection, AssetId, Uri,
+        [OnCompleteEvent, AssetId](const auto& Result)
+        {
+            if (Result.GetResultCode() == EResultCode::Failed)
+            {
+                OnCompleteEvent->set_exception(
+                    std::make_exception_ptr(std::runtime_error(fmt::format("Failed to download Material: {}", AssetId.c_str()))));
+                return;
+            }
+
+            if (Result.GetResultCode() == EResultCode::Success)
+            {
+                OnCompleteEvent->set(Result);
+                return;
+            }
+        });
+
+    return OnCompleteTask;
+}
+
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResultCallback Callback)
 {
     const auto MakeDownloadAll = [this](const auto& AssetCollections)
@@ -1564,31 +1590,6 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, MaterialsResu
                 // There are no material assets in this space
                 return async::make_task(MaterialsResult(GetAssetsResult.GetResultCode(), GetAssetsResult.GetHttpResultCode()));
             }
-
-            const auto DownloadMaterial = [this](const auto& AssetCollection, const auto& AssetId, const auto& Uri) -> async::task<MaterialResult>
-            {
-                auto OnCompleteEvent = std::make_shared<async::event_task<MaterialResult>>();
-                auto OnCompleteTask = OnCompleteEvent->get_task();
-
-                GetMaterialFromUri(AssetCollection, AssetId, Uri,
-                    [OnCompleteEvent, AssetId](const auto& Result)
-                    {
-                        if (Result.GetResultCode() == EResultCode::Failed)
-                        {
-                            OnCompleteEvent->set_exception(
-                                std::make_exception_ptr(std::runtime_error(fmt::format("Failed to download Material: {}", AssetId.c_str()))));
-                            return;
-                        }
-
-                        if (Result.GetResultCode() == EResultCode::Success)
-                        {
-                            OnCompleteEvent->set(Result);
-                            return;
-                        }
-                    });
-
-                return OnCompleteTask;
-            };
 
             auto DownloadTasks = std::vector<async::task<MaterialResult>>();
             DownloadTasks.reserve(Assets.Size());

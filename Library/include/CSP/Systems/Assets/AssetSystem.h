@@ -367,6 +367,9 @@ private:
     CSP_ASYNC_RESULT void DeleteAssetById(
         const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
 
+    async::task<MaterialResult> DownloadMaterial(
+        const AssetCollection& AssetCollection, const csp::common::String& AssetId, const csp::common::String& Uri);
+
     csp::services::ApiBase* PrototypeAPI;
     csp::services::ApiBase* AssetDetailAPI;
 
