@@ -77,6 +77,7 @@ enum class ComponentType
     CinematicCamera = 27,
     ScreenSharing = 28,
     AIChatbot = 29,
+    Code = 35,
     // spare values
     Delete = 56
 };

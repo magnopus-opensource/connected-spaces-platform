@@ -29,6 +29,7 @@
 #include "quickjs.h"
 #include "quickjspp.hpp"
 
+#include <cmath>
 #include <fmt/format.h>
 #include <optional>
 #include <vector>
@@ -744,8 +745,14 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_MODULE);
     if (!EvalResult.isException())
     {
-        const std::string SuccessMessage = fmt::format("NgxScript Trace: JavaScript execution succeeded ({}).", DebugName);
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, SuccessMessage.c_str());
+        const std::string DebugNameString = (DebugName != nullptr) ? std::string(DebugName) : std::string();
+        const bool bIsCodeComponentSnippet = (DebugNameString.rfind("<ngx-codecomponent-", 0) == 0);
+        const bool bIsClientScriptTickSnippet = (DebugNameString == "<ngx-client-script-tick>");
+        if (!bIsCodeComponentSnippet && !bIsClientScriptTickSnippet)
+        {
+            const std::string SuccessMessage = fmt::format("NgxScript Trace: JavaScript execution succeeded ({}).", DebugName);
+            LogSystem.LogMsg(csp::common::LogLevel::Verbose, SuccessMessage.c_str());
+        }
         return true;
     }
 
@@ -763,6 +770,49 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
 
     LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMessage.c_str());
     return false;
+}
+
+bool NgxScriptSystem::HasModuleSource(const csp::common::String& ModulePath) const
+{
+    const std::string ModulePathStd = ModulePath.c_str();
+    if (ModulePathStd.empty())
+    {
+        return false;
+    }
+
+    if (ModulePathStd == PREACT_SIGNALS_CORE_MODULE)
+    {
+        return true;
+    }
+
+    std::scoped_lock ModuleLock(ModuleSourcesMutex);
+    const bool bFoundInLoaded = (LoadedModuleSources.find(ModulePathStd) != LoadedModuleSources.end());
+    const bool bFoundInStatic = (StaticModuleSources.find(ModulePathStd) != StaticModuleSources.end());
+    return bFoundInLoaded || bFoundInStatic;
+}
+
+bool NgxScriptSystem::EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName)
+{
+    const char* DebugNameValue = DebugName.IsEmpty() ? "<ngx-snippet>" : DebugName.c_str();
+    return EvaluateModuleScript(ScriptText.c_str(), DebugNameValue);
+}
+
+void NgxScriptSystem::PumpPendingJobs() { DrainPendingJobs(); }
+
+bool NgxScriptSystem::TickScriptRegistry(double TimestampMs)
+{
+    if (!std::isfinite(TimestampMs))
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: TickScriptRegistry received non-finite timestamp.");
+        return false;
+    }
+
+    const std::string TickSnippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
+        "    globalThis.scriptRegistry.tick(" + fmt::format("{:.6f}", TimestampMs) + ");\n" + "}\n";
+
+    const bool bSuccess = EvaluateSnippet(TickSnippet.c_str(), "<ngx-client-script-tick>");
+    PumpPendingJobs();
+    return bSuccess;
 }
 
 bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)

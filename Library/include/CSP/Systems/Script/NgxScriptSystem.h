@@ -53,7 +53,16 @@ public:
     // Execute a loaded module path using the in-memory module map.
     bool ExecuteModule(const csp::common::String& ModulePath);
 
+    // Invoke scriptRegistry.tick(timestampMs) from the client frame loop.
+    // Intended to be called from display refresh (e.g. requestAnimationFrame), not foundation tick.
+    bool TickScriptRegistry(double TimestampMs);
+
     CSP_START_IGNORE
+    // Internal runtime hooks (not exposed through wrappers).
+    CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
+    CSP_NO_EXPORT bool EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName);
+    CSP_NO_EXPORT void PumpPendingJobs();
+
     // Managed by SpaceSystem during space lifecycle.
     CSP_NO_EXPORT void OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine);
     CSP_NO_EXPORT void OnExitSpace();

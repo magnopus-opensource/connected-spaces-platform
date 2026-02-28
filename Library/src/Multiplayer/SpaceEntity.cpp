@@ -25,6 +25,7 @@
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
@@ -530,6 +531,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t InstantiateId, Compone
         break;
     case ComponentType::ScriptData:
         Component = new ScriptSpaceComponent(LogSystem, this);
+        break;
+    case ComponentType::Code:
+        Component = new CodeSpaceComponent(LogSystem, this);
         break;
     case ComponentType::Button:
         Component = new ButtonSpaceComponent(LogSystem, this);
