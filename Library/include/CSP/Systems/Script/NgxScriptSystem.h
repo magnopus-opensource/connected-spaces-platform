@@ -28,6 +28,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace qjs
 {
@@ -39,6 +40,7 @@ namespace csp::common
 {
 class IRealtimeEngine;
 class LogSystem;
+class NetworkEventData;
 } // namespace csp::common
 
 namespace csp::systems
@@ -53,15 +55,37 @@ public:
     // Execute a loaded module path using the in-memory module map.
     bool ExecuteModule(const csp::common::String& ModulePath);
 
-    // Invoke scriptRegistry.tick(timestampMs) from the client frame loop.
-    // Intended to be called from display refresh (e.g. requestAnimationFrame), not foundation tick.
+    // Invoke scriptRegistry.tick(timestampMs).
+    // Can be called from client display refresh and internal runtime tick paths.
     bool TickScriptRegistry(double TimestampMs);
+
+    // Sync schema from scriptRegistry for a Code component entity.
+    // Returns JSON stringified attributes object. Falls back to "{}" on missing registry or failure.
+    csp::common::String SyncCodeComponentSchema(const csp::common::String& EntityId);
+
+    // Add or replace a Code component definition for an entity.
+    // PayloadJson should contain { scriptAssetPath, attributes }.
+    bool AddCodeComponent(const csp::common::String& EntityId, const csp::common::String& PayloadJson);
+
+    // Sync all component attributes from scriptRegistry for a Code component entity.
+    // Returns JSON stringified attributes object. Falls back to "{}" on missing registry or failure.
+    csp::common::String SyncCodeComponentAttributes(const csp::common::String& EntityId, const csp::common::String& AttributesJson);
+
+    // Update one attribute in scriptRegistry for a Code component entity.
+    // ValueJson should be a JSON value (e.g. number, string, object).
+    bool UpdateAttributeForEntity(
+        const csp::common::String& EntityId, const csp::common::String& Key, const csp::common::String& ValueJson);
+
+    // Remove a Code component from scriptRegistry for an entity.
+    bool RemoveCodeComponent(const csp::common::String& EntityId);
 
     CSP_START_IGNORE
     // Internal runtime hooks (not exposed through wrappers).
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
     CSP_NO_EXPORT bool EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName);
     CSP_NO_EXPORT void PumpPendingJobs();
+    CSP_NO_EXPORT bool AreScriptModulesLoaded() const;
+    CSP_NO_EXPORT uint64_t GetContextGeneration() const;
 
     // Managed by SpaceSystem during space lifecycle.
     CSP_NO_EXPORT void OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine);
@@ -96,6 +120,10 @@ private:
     void DrainPendingJobs();
 
     void LoadScriptModules();
+    void RegisterAssetDetailBlobChangedListener();
+    void UnregisterAssetDetailBlobChangedListener();
+    void OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData);
+    bool IsTrackedScriptAssetCollection(const csp::common::String& AssetCollectionId) const;
 
     void FetchAssetCollectionMapForSpace(
         uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const;
@@ -114,8 +142,12 @@ private:
     mutable std::mutex ModuleSourcesMutex;
     ModuleSourceMap LoadedModuleSources;
     ModuleSourceMap StaticModuleSources;
+    std::unordered_set<std::string> TrackedScriptAssetCollectionIds;
 
     std::atomic<uint64_t> SessionGeneration;
+    std::atomic<uint64_t> ContextGeneration;
+    std::atomic<bool> ScriptModulesLoaded;
+    bool bAssetDetailBlobChangedListenerRegistered;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;
     CSP_END_IGNORE
 };

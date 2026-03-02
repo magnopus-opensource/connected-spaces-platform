@@ -20,9 +20,9 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 
+#include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 namespace csp::common
 {
@@ -49,10 +49,10 @@ private:
     struct CodeComponentSnapshot
     {
         std::string ScriptAssetPath;
-        std::unordered_map<std::string, csp::multiplayer::CodeAttribute> Attributes;
+        std::map<std::string, csp::multiplayer::CodeAttribute> Attributes;
     };
 
-    using EntitySnapshotMap = std::unordered_map<uint64_t, CodeComponentSnapshot>;
+    using EntitySnapshotMap = std::map<uint64_t, CodeComponentSnapshot>;
 
     class NgxCodeComponentTickEventHandler;
 
@@ -60,8 +60,11 @@ private:
     void OnTick();
     bool CaptureEntitySnapshots(EntitySnapshotMap& OutSnapshots) const;
     void SyncSnapshots(const EntitySnapshotMap& CurrentSnapshots);
+    bool BootstrapRegistryIfReady();
 
     bool ExecuteRegistrySnippet(const std::string& Snippet, const char* DebugName) const;
+    void SyncSchemaInRegistry(uint64_t EntityId);
+    void SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot);
     void AddOrReplaceEntityInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot);
     void UpdateAttributeInRegistry(uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute);
     void RemoveEntityFromRegistry(uint64_t EntityId);
@@ -70,6 +73,8 @@ private:
     NgxScriptSystem& ScriptSystem;
     csp::common::IRealtimeEngine* ActiveRealtimeEngine;
     csp::common::String ActiveSpaceId;
+    bool IsRegistryBootstrapped;
+    uint64_t LastKnownContextGeneration;
     EntitySnapshotMap LastEntitySnapshots;
     std::unique_ptr<NgxCodeComponentTickEventHandler> TickEventHandler;
 };

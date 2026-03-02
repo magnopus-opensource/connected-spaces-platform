@@ -25,6 +25,7 @@
 #include "Events/EventSystem.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 
+#include <chrono>
 #include <cmath>
 #include <fmt/format.h>
 
@@ -87,6 +88,68 @@ std::string EscapeJSStringLiteral(const std::string& Input)
     return Escaped;
 }
 
+std::string BuildReplicatedValueLiteral(const csp::common::ReplicatedValue& Value)
+{
+    switch (Value.GetReplicatedValueType())
+    {
+    case csp::common::ReplicatedValueType::Boolean:
+        return Value.GetBool() ? "true" : "false";
+    case csp::common::ReplicatedValueType::Integer:
+        return std::to_string(Value.GetInt());
+    case csp::common::ReplicatedValueType::Float:
+        if (!std::isfinite(Value.GetFloat()))
+        {
+            return "0";
+        }
+        return fmt::format("{:.9g}", static_cast<double>(Value.GetFloat()));
+    case csp::common::ReplicatedValueType::String:
+        return "'" + EscapeJSStringLiteral(Value.GetString().c_str()) + "'";
+    case csp::common::ReplicatedValueType::Vector2:
+    {
+        const auto& VectorValue = Value.GetVector2();
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + "]";
+    }
+    case csp::common::ReplicatedValueType::Vector3:
+    {
+        const auto& VectorValue = Value.GetVector3();
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Z)) + "]";
+    }
+    case csp::common::ReplicatedValueType::Vector4:
+    {
+        const auto& VectorValue = Value.GetVector4();
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Z)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.W)) + "]";
+    }
+    case csp::common::ReplicatedValueType::StringMap:
+    {
+        std::string Literal = "{";
+        bool bIsFirst = true;
+        for (const auto& Pair : Value.GetStringMap())
+        {
+            if (!bIsFirst)
+            {
+                Literal += ",";
+            }
+
+            bIsFirst = false;
+            Literal += "'";
+            Literal += EscapeJSStringLiteral(Pair.first.c_str());
+            Literal += "':";
+            Literal += BuildReplicatedValueLiteral(Pair.second);
+        }
+        Literal += "}";
+        return Literal;
+    }
+    default:
+        return "undefined";
+    }
+}
+
 std::string BuildAttributeValueLiteral(const csp::multiplayer::CodeAttribute& Attribute)
 {
     switch (Attribute.Type)
@@ -103,12 +166,14 @@ std::string BuildAttributeValueLiteral(const csp::multiplayer::CodeAttribute& At
         return fmt::format("{:.9g}", static_cast<double>(Attribute.FloatValue));
     case csp::multiplayer::CodePropertyType::String:
         return "'" + EscapeJSStringLiteral(Attribute.StringValue.c_str()) + "'";
+    case csp::multiplayer::CodePropertyType::EntityQuery:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.EntityQueryValue));
     default:
         return "undefined";
     }
 }
 
-std::string BuildAttributesObjectLiteral(const std::unordered_map<std::string, csp::multiplayer::CodeAttribute>& Attributes)
+std::string BuildAttributesObjectLiteral(const std::map<std::string, csp::multiplayer::CodeAttribute>& Attributes)
 {
     std::string Literal = "{";
     bool bIsFirst = true;
@@ -152,7 +217,39 @@ constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = R"(
 export function createScriptRegistry() {
     const codeComponents = new Map();
 
-    const safeCall = (callback, payload, label) => {
+    function isObject(value) {
+        return value && typeof value === 'object' && !Array.isArray(value);
+    }
+
+    function cloneValue(value) {
+        if (Array.isArray(value)) {
+            return value.map((item) => cloneValue(item));
+        }
+
+        if (isObject(value)) {
+            const result = {};
+            for (const key of Object.keys(value)) {
+                result[key] = cloneValue(value[key]);
+            }
+            return result;
+        }
+
+        return value;
+    }
+
+    function cloneAttributes(attributes) {
+        return isObject(attributes) ? cloneValue(attributes) : {};
+    }
+
+    function cloneScriptAttributes(attributes) {
+        return isObject(attributes) ? { ...attributes } : {};
+    }
+
+    function sortedKeys(value) {
+        return Object.keys(isObject(value) ? value : {}).sort();
+    }
+
+    function safeCall(callback, payload, label) {
         if (typeof callback !== 'function') {
             return;
         }
@@ -162,95 +259,876 @@ export function createScriptRegistry() {
         } catch (error) {
             console.error(`NgxCodeComponentRuntime: ${label} failed`, error);
         }
-    };
+    }
 
-    const cloneAttributes = (attributes) => ({ ...(attributes || {}) });
+    function safeInvokeScript(entry, payload, label = 'script') {
+        if (!entry || typeof entry.scriptCallback !== 'function') {
+            return;
+        }
+
+        safeCall(entry.scriptCallback, payload, label);
+    }
+
+    function initializeScriptCallback(entityId, entry) {
+        if (!entry) {
+            return;
+        }
+
+        entry.scriptCallback = null;
+        if (!entry.module || typeof entry.module.script !== 'function') {
+            return;
+        }
+
+        try {
+            const callback = entry.module.script();
+            if (typeof callback === 'function') {
+                entry.scriptCallback = callback;
+                return;
+            }
+
+            warn(entityId, 'script export must return a function; callback ignored.');
+        } catch (error) {
+            console.error(`NgxCodeComponentRuntime: script() failed for entity ${entityId}`, error);
+        }
+    }
+
+    function warn(entityId, message) {
+        console.warn(`NgxCodeComponentRuntime [${entityId}]: ${message}`);
+    }
+
+    function normalizeSchemaType(rawType) {
+        if (typeof rawType !== 'string') {
+            return null;
+        }
+
+        const lower = rawType.toLowerCase();
+        if (lower === 'boolean' || lower === 'bool') {
+            return 'boolean';
+        }
+
+        if (lower === 'integer' || lower === 'int') {
+            return 'integer';
+        }
+
+        if (lower === 'float' || lower === 'number') {
+            return 'float';
+        }
+
+        if (lower === 'string') {
+            return 'string';
+        }
+
+        if (lower === 'entity') {
+            return 'entity';
+        }
+
+        return null;
+    }
+
+    function isEntityQuery(value, depth = 0) {
+        if (!isObject(value) || depth > 16) {
+            return false;
+        }
+
+        const kind = value.kind;
+        if (typeof kind !== 'string') {
+            return false;
+        }
+
+        if (kind === 'id') {
+            return (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0)
+                || (typeof value.id === 'string' && value.id.length > 0);
+        }
+
+        if (kind === 'name') {
+            return typeof value.name === 'string' && value.name.length > 0;
+        }
+
+        if (kind === 'tag') {
+            return typeof value.tag === 'string' && value.tag.length > 0;
+        }
+
+        if (kind === 'componentType') {
+            return typeof value.componentType === 'number' && Number.isInteger(value.componentType) && value.componentType > 0;
+        }
+
+        if (kind === 'not') {
+            return isEntityQuery(value.operand, depth + 1);
+        }
+
+        if (kind === 'and' || kind === 'or') {
+            if (Array.isArray(value.operands)) {
+                return value.operands.length > 0 && value.operands.every((operand) => isEntityQuery(operand, depth + 1));
+            }
+
+            if (isObject(value.operands)) {
+                const operandKeys = Object.keys(value.operands);
+                return operandKeys.length > 0 && operandKeys.every((operandKey) => isEntityQuery(value.operands[operandKey], depth + 1));
+            }
+        }
+
+        return false;
+    }
+
+    function valueMatchesType(type, value) {
+        if (type === 'boolean') {
+            return typeof value === 'boolean';
+        }
+
+        if (type === 'integer') {
+            return typeof value === 'number' && Number.isInteger(value);
+        }
+
+        if (type === 'float') {
+            return typeof value === 'number' && Number.isFinite(value);
+        }
+
+        if (type === 'string') {
+            return typeof value === 'string';
+        }
+
+        if (type === 'entity') {
+            return isEntityQuery(value);
+        }
+
+        return false;
+    }
+
+    function describeValueType(value) {
+        if (value === null) {
+            return 'null';
+        }
+
+        if (Array.isArray(value)) {
+            return 'array';
+        }
+
+        if (typeof value === 'number') {
+            return Number.isInteger(value) ? 'integer' : 'float';
+        }
+
+        if (isEntityQuery(value)) {
+            return 'entityQuery';
+        }
+
+        return typeof value;
+    }
+
+    function readSchema(moduleRef, entityId) {
+        if (!moduleRef) {
+            return null;
+        }
+
+        let rawSchema;
+        if (typeof moduleRef.schema !== 'undefined') {
+            rawSchema = moduleRef.schema;
+        } else if (typeof moduleRef.attributes !== 'undefined') {
+            rawSchema = moduleRef.attributes;
+        } else if (typeof moduleRef.codeComponentSchema !== 'undefined') {
+            rawSchema = moduleRef.codeComponentSchema;
+        } else {
+            return null;
+        }
+
+        if (!isObject(rawSchema)) {
+            warn(entityId, 'schema export exists but is not an object; ignoring schema.');
+            return null;
+        }
+
+        const schema = {};
+        for (const key of sortedKeys(rawSchema)) {
+            const rawEntry = rawSchema[key];
+            let rawType;
+            let hasDefault = false;
+            let defaultValue;
+
+            if (typeof rawEntry === 'string') {
+                rawType = rawEntry;
+            } else if (isObject(rawEntry)) {
+                rawType = rawEntry.type;
+                if (typeof rawType === 'undefined') {
+                    rawType = rawEntry.valueType;
+                }
+                if (typeof rawType === 'undefined') {
+                    rawType = rawEntry.propertyType;
+                }
+
+                if (Object.prototype.hasOwnProperty.call(rawEntry, 'default')) {
+                    hasDefault = true;
+                    defaultValue = rawEntry.default;
+                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'defaultValue')) {
+                    hasDefault = true;
+                    defaultValue = rawEntry.defaultValue;
+                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'value')) {
+                    hasDefault = true;
+                    defaultValue = rawEntry.value;
+                }
+            } else {
+                warn(entityId, `schema entry '${key}' is invalid and will be ignored.`);
+                continue;
+            }
+
+            const type = normalizeSchemaType(rawType);
+            if (!type) {
+                warn(entityId, `schema entry '${key}' has unsupported type '${String(rawType)}' and will be ignored.`);
+                continue;
+            }
+
+            if (hasDefault && !valueMatchesType(type, defaultValue)) {
+                warn(entityId,
+                    `schema entry '${key}' has default of type '${describeValueType(defaultValue)}' but expected '${type}'; default ignored.`);
+                hasDefault = false;
+                defaultValue = undefined;
+            }
+
+            schema[key] = { type, hasDefault, defaultValue };
+        }
+
+        return Object.keys(schema).length > 0 ? schema : null;
+    }
+
+    function reconcileAttributes(entityId, schema, incomingAttributes, previousAttributes) {
+        const incoming = cloneAttributes(incomingAttributes);
+        const previous = cloneAttributes(previousAttributes);
+
+        if (!schema) {
+            return incoming;
+        }
+
+        const next = {};
+
+        for (const key of sortedKeys(incoming)) {
+            if (!Object.prototype.hasOwnProperty.call(schema, key)) {
+                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
+            }
+        }
+
+        for (const key of sortedKeys(schema)) {
+            const rule = schema[key];
+            const hasIncoming = Object.prototype.hasOwnProperty.call(incoming, key);
+            const hasPrevious = Object.prototype.hasOwnProperty.call(previous, key);
+
+            if (hasIncoming) {
+                const value = incoming[key];
+                if (valueMatchesType(rule.type, value)) {
+                    next[key] = cloneValue(value);
+                    continue;
+                }
+
+                warn(entityId,
+                    `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; value ignored.`);
+            }
+
+            if (hasPrevious && valueMatchesType(rule.type, previous[key])) {
+                next[key] = cloneValue(previous[key]);
+                continue;
+            }
+
+            if (rule.hasDefault) {
+                next[key] = cloneValue(rule.defaultValue);
+            }
+        }
+
+        return next;
+    }
+
+    function valuesEqual(lhs, rhs) {
+        if (Object.is(lhs, rhs)) {
+            return true;
+        }
+
+        if (Array.isArray(lhs) && Array.isArray(rhs)) {
+            if (lhs.length !== rhs.length) {
+                return false;
+            }
+
+            for (let i = 0; i < lhs.length; i += 1) {
+                if (!valuesEqual(lhs[i], rhs[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if (isObject(lhs) && isObject(rhs)) {
+            const keys = sortedKeys({ ...lhs, ...rhs });
+            for (const key of keys) {
+                if (!valuesEqual(lhs[key], rhs[key])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    function getChangedKeys(previousAttributes, nextAttributes) {
+        const keySet = new Set([...Object.keys(previousAttributes), ...Object.keys(nextAttributes)]);
+        return Array.from(keySet).sort().filter((key) => !valuesEqual(previousAttributes[key], nextAttributes[key]));
+    }
+
+    function tryParseJSON(value) {
+        if (typeof value !== 'string' || value.length === 0) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function resolveEntityRefState(query, previousState) {
+        if (!isEntityQuery(query)) {
+            return {
+                query: null,
+                id: null,
+                status: 'unbound',
+                snapshot: null,
+            };
+        }
+
+        if (!globalThis.csp || typeof globalThis.csp.__resolveEntityQuery !== 'function') {
+            return {
+                query: cloneValue(query),
+                id: null,
+                status: 'missing',
+                snapshot: null,
+            };
+        }
+
+        const resolvedId = globalThis.csp.__resolveEntityQuery(JSON.stringify(query));
+        if (typeof resolvedId !== 'string' || resolvedId.length === 0) {
+            return {
+                query: cloneValue(query),
+                id: null,
+                status: (previousState && previousState.id !== null) ? 'deleted' : 'missing',
+                snapshot: null,
+            };
+        }
+
+        let snapshot = null;
+        if (typeof globalThis.csp.__getEntitySnapshot === 'function') {
+            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(resolvedId));
+        }
+
+        return {
+            query: cloneValue(query),
+            id: resolvedId,
+            status: snapshot ? 'resolved' : 'missing',
+            snapshot,
+        };
+    }
+
+    function createComponentRef(entityRefState, componentType, index = 0) {
+        if (!entityRefState || entityRefState.status !== 'resolved' || !entityRefState.id) {
+            return {
+                status: 'missing',
+                id: null,
+                snapshot: null,
+            };
+        }
+
+        if (!globalThis.csp || typeof globalThis.csp.__getComponentSnapshot !== 'function') {
+            return {
+                status: 'missing',
+                id: null,
+                snapshot: null,
+            };
+        }
+
+        const componentSnapshot = tryParseJSON(globalThis.csp.__getComponentSnapshot(entityRefState.id, Number(componentType), Number(index)));
+        if (!componentSnapshot) {
+            return {
+                status: 'missing',
+                id: null,
+                snapshot: null,
+            };
+        }
+
+        return {
+            status: 'resolved',
+            id: componentSnapshot.componentId ?? null,
+            snapshot: componentSnapshot,
+        };
+    }
+
+    function toVector3(value) {
+        if (Array.isArray(value) && value.length >= 3) {
+            return [Number(value[0]), Number(value[1]), Number(value[2])];
+        }
+
+        if (isObject(value)) {
+            return [Number(value.x), Number(value.y), Number(value.z)];
+        }
+
+        return null;
+    }
+
+    function toVector4(value) {
+        if (Array.isArray(value) && value.length >= 4) {
+            return [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])];
+        }
+
+        if (isObject(value)) {
+            return [Number(value.x), Number(value.y), Number(value.z), Number(value.w)];
+        }
+
+        return null;
+    }
+
+    function createScriptEntityRef(entityRefState) {
+        function writePosition(value) {
+            if (!globalThis.csp || typeof globalThis.csp.__setEntityPosition !== 'function') {
+                return false;
+            }
+
+            if (!entityRefState.id) {
+                return false;
+            }
+
+            const vector = toVector3(value);
+            if (!vector || !vector.every((component) => Number.isFinite(component))) {
+                return false;
+            }
+
+            const success = !!globalThis.csp.__setEntityPosition(entityRefState.id, vector[0], vector[1], vector[2]);
+            if (success && entityRefState.snapshot) {
+                entityRefState.snapshot.position = [...vector];
+            }
+            return success;
+        }
+
+        function writeRotation(value) {
+            if (!globalThis.csp || typeof globalThis.csp.__setEntityRotation !== 'function') {
+                return false;
+            }
+
+            if (!entityRefState.id) {
+                return false;
+            }
+
+            const vector = toVector4(value);
+            if (!vector || !vector.every((component) => Number.isFinite(component))) {
+                return false;
+            }
+
+            const success = !!globalThis.csp.__setEntityRotation(entityRefState.id, vector[0], vector[1], vector[2], vector[3]);
+            if (success && entityRefState.snapshot) {
+                entityRefState.snapshot.rotation = [...vector];
+            }
+            return success;
+        }
+
+        function writeScale(value) {
+            if (!globalThis.csp || typeof globalThis.csp.__setEntityScale !== 'function') {
+                return false;
+            }
+
+            if (!entityRefState.id) {
+                return false;
+            }
+
+            const vector = toVector3(value);
+            if (!vector || !vector.every((component) => Number.isFinite(component))) {
+                return false;
+            }
+
+            const success = !!globalThis.csp.__setEntityScale(entityRefState.id, vector[0], vector[1], vector[2]);
+            if (success && entityRefState.snapshot) {
+                entityRefState.snapshot.scale = [...vector];
+            }
+            return success;
+        }
+
+        function writePatch(patch) {
+            if (!isObject(patch) || !entityRefState.id) {
+                return false;
+            }
+
+            let didSucceed = true;
+
+            if (Object.prototype.hasOwnProperty.call(patch, 'position')) {
+                didSucceed = writePosition(patch.position) && didSucceed;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(patch, 'rotation')) {
+                didSucceed = writeRotation(patch.rotation) && didSucceed;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(patch, 'scale')) {
+                didSucceed = writeScale(patch.scale) && didSucceed;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(patch, 'name')
+                && globalThis.csp
+                && typeof globalThis.csp.__setEntityName === 'function'
+                && typeof patch.name === 'string') {
+                const success = !!globalThis.csp.__setEntityName(entityRefState.id, patch.name);
+                if (success && entityRefState.snapshot) {
+                    entityRefState.snapshot.name = patch.name;
+                }
+                didSucceed = success && didSucceed;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(patch, 'thirdPartyRef')
+                && globalThis.csp
+                && typeof globalThis.csp.__setEntityThirdPartyRef === 'function'
+                && typeof patch.thirdPartyRef === 'string') {
+                const success = !!globalThis.csp.__setEntityThirdPartyRef(entityRefState.id, patch.thirdPartyRef);
+                if (success && entityRefState.snapshot) {
+                    entityRefState.snapshot.thirdPartyRef = patch.thirdPartyRef;
+                }
+                didSucceed = success && didSucceed;
+            }
+
+            return didSucceed;
+        }
+
+        return {
+            get id() {
+                return entityRefState.id;
+            },
+            get status() {
+                return entityRefState.status;
+            },
+            get snapshot() {
+                return entityRefState.snapshot ? cloneValue(entityRefState.snapshot) : null;
+            },
+            patch(value) {
+                return writePatch(value);
+            },
+            setPosition(value) {
+                return writePosition(value);
+            },
+            setRotation(value) {
+                return writeRotation(value);
+            },
+            setScale(value) {
+                return writeScale(value);
+            },
+            getComponent(componentType, index = 0) {
+                return createComponentRef(entityRefState, componentType, index);
+            },
+            getLightComponent(index = 0) {
+                return createComponentRef(entityRefState, 10, index);
+            },
+        };
+    }
+
+    function buildScriptAttributes(entityId, entry) {
+        const output = {};
+        const rawAttributes = cloneAttributes(entry.attributes);
+        const schema = entry.schema || {};
+
+        for (const key of sortedKeys(rawAttributes)) {
+            const rule = schema[key];
+            if (rule && rule.type === 'entity') {
+                const previousState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null, query: null };
+                const nextState = resolveEntityRefState(rawAttributes[key], previousState);
+                entry.entityRefStates[key] = nextState;
+                output[key] = createScriptEntityRef(nextState);
+                continue;
+            }
+
+            output[key] = rawAttributes[key];
+        }
+
+        return output;
+    }
+
+    function dispatchAttributeChanges(entityId, entry, previousAttributes, nextAttributes) {
+        if (!entry.module || !entry.initialized) {
+            return;
+        }
+
+        const scriptAttributes = buildScriptAttributes(entityId, entry);
+        const changedKeys = getChangedKeys(previousAttributes, nextAttributes);
+        for (const key of changedKeys) {
+            safeCall(entry.module.onUpdateAttributes, {
+                entityId,
+                key,
+                value: scriptAttributes[key],
+                attributes: cloneScriptAttributes(scriptAttributes),
+            }, 'onUpdateAttributes');
+        }
+    }
+
+    function tryImportCodeComponentModule(entityId, entry, reason = 'unspecified') {
+        if (!entry || typeof entry.scriptAssetPath !== 'string' || entry.scriptAssetPath.length === 0) {
+            return false;
+        }
+
+        if (entry.importInFlight) {
+            return false;
+        }
+
+        const scriptAssetPath = entry.scriptAssetPath;
+        const importGeneration = (typeof entry.importGeneration === 'number' ? entry.importGeneration : 0) + 1;
+        entry.importGeneration = importGeneration;
+        entry.importInFlight = true;
+
+        import(scriptAssetPath)
+            .then((moduleRef) => {
+                const current = codeComponents.get(entityId);
+                if (!current
+                    || current.scriptAssetPath !== scriptAssetPath
+                    || current.importGeneration !== importGeneration) {
+                    return;
+                }
+
+                current.importInFlight = false;
+                current.retryDelayFrames = 1;
+                current.retryCountdown = 0;
+                current.hasWarnedMissingModule = false;
+                current.module = moduleRef;
+                initializeScriptCallback(entityId, current);
+                if (current.pendingSchemaSync) {
+                    syncCodeComponentSchema(entityId);
+                }
+
+                current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);
+                current.initialized = true;
+
+                const scriptAttributes = buildScriptAttributes(entityId, current);
+                safeInvokeScript(current, {
+                    entityId,
+                    attributes: cloneScriptAttributes(scriptAttributes),
+                }, 'script');
+                safeCall(current.module.onInit, {
+                    entityId,
+                    attributes: cloneScriptAttributes(scriptAttributes),
+                }, 'onInit');
+            })
+            .catch((error) => {
+                const current = codeComponents.get(entityId);
+                if (!current
+                    || current.scriptAssetPath !== scriptAssetPath
+                    || current.importGeneration !== importGeneration) {
+                    return;
+                }
+
+                current.importInFlight = false;
+                const delayFrames = typeof current.retryDelayFrames === 'number' && current.retryDelayFrames > 0
+                    ? Math.min(current.retryDelayFrames * 2, 300)
+                    : 1;
+                current.retryDelayFrames = delayFrames;
+                current.retryCountdown = delayFrames;
+
+                const errorMessage = (error && typeof error.message === 'string') ? error.message : String(error);
+                if (errorMessage.includes('module not found') && !current.hasWarnedMissingModule) {
+                    current.hasWarnedMissingModule = true;
+                    warn(entityId, `module '${scriptAssetPath}' is not available yet; import will be retried automatically.`);
+                }
+                console.error(`NgxCodeComponentRuntime: Failed to import module ${scriptAssetPath} (${reason})`, error);
+            });
+
+        return true;
+    }
+
+    function syncCodeComponentSchema(entityId) {
+        const entry = codeComponents.get(entityId);
+        if (!entry) {
+            return {};
+        }
+
+        if (!entry.module) {
+            entry.pendingSchemaSync = true;
+            const startedImport = tryImportCodeComponentModule(entityId, entry, 'syncCodeComponentSchema');
+            if (!entry.importInFlight && !startedImport) {
+                warn(entityId, 'syncCodeComponentSchema requested before module import completed; returning current attributes.');
+            }
+            return cloneAttributes(entry.attributes);
+        }
+
+        const previousAttributes = cloneAttributes(entry.attributes);
+        entry.schema = readSchema(entry.module, entityId);
+        entry.attributes = reconcileAttributes(entityId, entry.schema, entry.attributes, previousAttributes);
+        entry.pendingSchemaSync = false;
+
+        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
+        return cloneAttributes(entry.attributes);
+    }
+
+    function addCodeComponent(entityId, payload = {}) {
+        const payloadObject = isObject(payload) ? payload : {};
+        const scriptAssetPath = typeof payloadObject.scriptAssetPath === 'string' ? payloadObject.scriptAssetPath : '';
+        const inputAttributes = cloneAttributes(payloadObject.attributes);
+        const existing = codeComponents.get(entityId);
+
+        if (existing && existing.scriptAssetPath === scriptAssetPath) {
+            syncCodeComponentAttributes(entityId, inputAttributes);
+            if (!existing.module && scriptAssetPath.length > 0) {
+                tryImportCodeComponentModule(entityId, existing, 'addCodeComponent-existing');
+            }
+            return true;
+        }
+
+        if (existing) {
+            if (existing.module && existing.initialized) {
+                const scriptAttributes = buildScriptAttributes(entityId, existing);
+                safeCall(existing.module.onDispose, {
+                    entityId,
+                    attributes: cloneScriptAttributes(scriptAttributes),
+                }, 'onDispose');
+            }
+            codeComponents.delete(entityId);
+        }
+
+        const entry = {
+            scriptAssetPath,
+            attributes: inputAttributes,
+            module: null,
+            scriptCallback: null,
+            schema: null,
+            initialized: false,
+            pendingSchemaSync: true,
+            importGeneration: 0,
+            importInFlight: false,
+            retryDelayFrames: 1,
+            retryCountdown: 0,
+            hasWarnedMissingModule: false,
+            entityRefStates: {},
+        };
+
+        codeComponents.set(entityId, entry);
+
+        if (!scriptAssetPath) {
+            warn(entityId, 'missing scriptAssetPath; component will not be initialized.');
+            return false;
+        }
+
+        tryImportCodeComponentModule(entityId, entry, 'addCodeComponent');
+
+        return true;
+    }
+
+    function syncCodeComponentAttributes(entityId, attributes = {}) {
+        const entry = codeComponents.get(entityId);
+        if (!entry) {
+            return {};
+        }
+
+        const previousAttributes = cloneAttributes(entry.attributes);
+        entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);
+        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
+        return cloneAttributes(entry.attributes);
+    }
+
+    function updateAttributeForEntity(entityId, key, value) {
+        const entry = codeComponents.get(entityId);
+        if (!entry) {
+            return;
+        }
+
+        if (entry.schema) {
+            if (!Object.prototype.hasOwnProperty.call(entry.schema, key)) {
+                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
+                return;
+            }
+
+            const rule = entry.schema[key];
+            if (!valueMatchesType(rule.type, value)) {
+                warn(entityId, `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; update ignored.`);
+                return;
+            }
+        }
+
+        const previousAttributes = cloneAttributes(entry.attributes);
+        const nextAttributes = cloneAttributes(entry.attributes);
+        nextAttributes[key] = cloneValue(value);
+        entry.attributes = nextAttributes;
+
+        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
+    }
+
+    function removeCodeComponent(entityId) {
+        const entry = codeComponents.get(entityId);
+        if (!entry) {
+            return;
+        }
+
+        if (entry.module && entry.initialized) {
+            const scriptAttributes = buildScriptAttributes(entityId, entry);
+            safeCall(entry.module.onDispose, {
+                entityId,
+                attributes: cloneScriptAttributes(scriptAttributes),
+            }, 'onDispose');
+        }
+
+        codeComponents.delete(entityId);
+    }
+
+    function tick(timestampMs) {
+        const sortedEntityIds = Array.from(codeComponents.keys()).sort((lhs, rhs) => {
+            const lhsNumber = Number(lhs);
+            const rhsNumber = Number(rhs);
+            if (Number.isFinite(lhsNumber) && Number.isFinite(rhsNumber) && lhsNumber !== rhsNumber) {
+                return lhsNumber - rhsNumber;
+            }
+
+            const lhsString = String(lhs);
+            const rhsString = String(rhs);
+            if (lhsString < rhsString) {
+                return -1;
+            }
+
+            if (lhsString > rhsString) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        for (const entityId of sortedEntityIds) {
+            const entry = codeComponents.get(entityId);
+            if (entry && !entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {
+                if (entry.importInFlight) {
+                    continue;
+                }
+
+                if (typeof entry.retryCountdown === 'number' && entry.retryCountdown > 0) {
+                    entry.retryCountdown -= 1;
+                    continue;
+                }
+
+                tryImportCodeComponentModule(entityId, entry, 'tick-retry');
+                continue;
+            }
+
+            if (entry && entry.module && entry.initialized) {
+                const scriptAttributes = buildScriptAttributes(entityId, entry);
+                safeCall(entry.module.onTick, {
+                    entityId,
+                    timestampMs,
+                    attributes: cloneScriptAttributes(scriptAttributes),
+                }, 'onTick');
+            }
+        }
+    }
+
+    function destroy() {
+        const entityIds = Array.from(codeComponents.keys()).sort();
+        for (const entityId of entityIds) {
+            removeCodeComponent(entityId);
+        }
+    }
 
     return {
-        addCodeComponent(entityId, payload = {}) {
-            const existing = codeComponents.get(entityId);
-            if (existing && existing.module) {
-                safeCall(existing.module.onDispose, { entityId, attributes: cloneAttributes(existing.attributes) }, "onDispose");
-            }
-
-            const scriptAssetPath = typeof payload.scriptAssetPath === 'string' ? payload.scriptAssetPath : '';
-            const attributes = cloneAttributes(payload.attributes);
-            const entry = {
-                scriptAssetPath,
-                attributes,
-                module: null,
-            };
-
-            codeComponents.set(entityId, entry);
-
-            if (!scriptAssetPath) {
-                console.warn(`NgxCodeComponentRuntime: Missing scriptAssetPath for entity ${entityId}.`);
-                return;
-            }
-
-            import(scriptAssetPath)
-                .then((module) => {
-                    const current = codeComponents.get(entityId);
-                    if (!current || current.scriptAssetPath !== scriptAssetPath) {
-                        return;
-                    }
-
-                    current.module = module;
-                    safeCall(module.onInit, { entityId, attributes: cloneAttributes(current.attributes) }, "onInit");
-                })
-                .catch((error) => {
-                    console.error(`NgxCodeComponentRuntime: Failed to import module ${scriptAssetPath}`, error);
-                });
-        },
-        updateAttributeForEntity(entityId, key, value) {
-            const entry = codeComponents.get(entityId);
-            if (!entry) {
-                return;
-            }
-
-            entry.attributes[key] = value;
-            if (entry.module) {
-                safeCall(entry.module.onUpdateAttributes,
-                    { entityId, key, value, attributes: cloneAttributes(entry.attributes) },
-                    "onUpdateAttributes");
-            }
-        },
-        removeCodeComponent(entityId) {
-            const entry = codeComponents.get(entityId);
-            if (!entry) {
-                return;
-            }
-
-            if (entry.module) {
-                safeCall(entry.module.onDispose, { entityId, attributes: cloneAttributes(entry.attributes) }, "onDispose");
-            }
-
-            codeComponents.delete(entityId);
-        },
-        tick(timestampMs) {
-            for (const [entityId, entry] of codeComponents) {
-                if (entry.module) {
-                    safeCall(entry.module.onTick,
-                        { entityId, timestampMs, attributes: cloneAttributes(entry.attributes) },
-                        "onTick");
-                }
-            }
-        },
-        destroy() {
-            for (const [entityId, entry] of codeComponents) {
-                if (entry.module) {
-                    safeCall(entry.module.onDispose, { entityId, attributes: cloneAttributes(entry.attributes) }, "onDispose");
-                }
-            }
-
-            codeComponents.clear();
-        }
+        syncCodeComponentSchema,
+        addCodeComponent,
+        syncCodeComponentAttributes,
+        updateAttributeForEntity,
+        removeCodeComponent,
+        tick,
+        destroy,
     };
 }
 
 export default createScriptRegistry;
 )";
-
 constexpr const char* CODECOMPONENT_BOOTSTRAP_SOURCE = R"(
 import * as __ngxRegistryModule from '/__csp/internal/codecomponent/registry.js';
 const __ngxFactory = (typeof __ngxRegistryModule.createScriptRegistry === 'function')
@@ -305,6 +1183,8 @@ NgxCodeComponentRuntime::NgxCodeComponentRuntime(csp::common::LogSystem& InLogSy
     , ScriptSystem(InNgxScriptSystem)
     , ActiveRealtimeEngine(nullptr)
     , ActiveSpaceId("")
+    , IsRegistryBootstrapped(false)
+    , LastKnownContextGeneration(0)
     , LastEntitySnapshots()
     , TickEventHandler(std::make_unique<NgxCodeComponentTickEventHandler>(this))
 {
@@ -327,35 +1207,18 @@ void NgxCodeComponentRuntime::OnEnterSpace(const csp::common::String& InSpaceId,
 
     ActiveSpaceId = InSpaceId;
     ActiveRealtimeEngine = InRealtimeEngine;
+    IsRegistryBootstrapped = false;
+    LastKnownContextGeneration = ScriptSystem.GetContextGeneration();
     LastEntitySnapshots.clear();
 
     RegisterBuiltInModules();
-
-    const bool bHasAssetRegistry = ScriptSystem.HasModuleSource(CODECOMPONENT_ASSET_REGISTRY_MODULE);
-    if (bHasAssetRegistry)
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Log,
-            "NgxCodeComponentRuntime Trace: Bootstrap strategy uses asset module '/scripts/engine/registry.js'.");
-        const std::string AssetBootstrapSnippet = BuildBootstrapSnippet(CODECOMPONENT_ASSET_REGISTRY_MODULE);
-        if (!ScriptSystem.EvaluateSnippet(AssetBootstrapSnippet.c_str(), "<ngx-codecomponent-asset-bootstrap>"))
-        {
-            LogSystem.LogMsg(
-                csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap script registry from asset module path.");
-        }
-        return;
-    }
-
     LogSystem.LogMsg(csp::common::LogLevel::Log,
-        "NgxCodeComponentRuntime Trace: Bootstrap strategy uses built-in fallback registry module.");
-    if (!ScriptSystem.ExecuteModule(CODECOMPONENT_BOOTSTRAP_MODULE))
-    {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap built-in script registry module.");
-    }
+        "NgxCodeComponentRuntime Trace: Deferring script registry bootstrap until script module loading completes.");
 }
 
 void NgxCodeComponentRuntime::OnExitSpace()
 {
-    if ((ActiveRealtimeEngine == nullptr) && ActiveSpaceId.IsEmpty() && LastEntitySnapshots.empty())
+    if ((ActiveRealtimeEngine == nullptr) && ActiveSpaceId.IsEmpty() && LastEntitySnapshots.empty() && !IsRegistryBootstrapped)
     {
         return;
     }
@@ -364,9 +1227,15 @@ void NgxCodeComponentRuntime::OnExitSpace()
     LastEntitySnapshots.clear();
     ActiveSpaceId = "";
     ActiveRealtimeEngine = nullptr;
+    LastKnownContextGeneration = 0;
 
-    ScriptSystem.ExecuteModule(CODECOMPONENT_SHUTDOWN_MODULE);
-    ScriptSystem.PumpPendingJobs();
+    if (IsRegistryBootstrapped)
+    {
+        ScriptSystem.ExecuteModule(CODECOMPONENT_SHUTDOWN_MODULE);
+        ScriptSystem.PumpPendingJobs();
+    }
+
+    IsRegistryBootstrapped = false;
 }
 
 void NgxCodeComponentRuntime::RegisterBuiltInModules()
@@ -385,6 +1254,21 @@ void NgxCodeComponentRuntime::OnTick()
 
     ScriptSystem.PumpPendingJobs();
 
+    const uint64_t CurrentContextGeneration = ScriptSystem.GetContextGeneration();
+    if (CurrentContextGeneration != LastKnownContextGeneration)
+    {
+        LastKnownContextGeneration = CurrentContextGeneration;
+        IsRegistryBootstrapped = false;
+        LastEntitySnapshots.clear();
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            "NgxCodeComponentRuntime Trace: Script context generation changed; forcing registry re-bootstrap and full entity resync.");
+    }
+
+    if (!BootstrapRegistryIfReady())
+    {
+        return;
+    }
+
     EntitySnapshotMap CurrentSnapshots;
     if (!CaptureEntitySnapshots(CurrentSnapshots))
     {
@@ -393,7 +1277,51 @@ void NgxCodeComponentRuntime::OnTick()
 
     SyncSnapshots(CurrentSnapshots);
 
-    ScriptSystem.PumpPendingJobs();
+    const double TimestampMs
+        = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    ScriptSystem.TickScriptRegistry(TimestampMs);
+}
+
+bool NgxCodeComponentRuntime::BootstrapRegistryIfReady()
+{
+    if (IsRegistryBootstrapped)
+    {
+        return true;
+    }
+
+    if (!ScriptSystem.AreScriptModulesLoaded())
+    {
+        return false;
+    }
+
+    RegisterBuiltInModules();
+
+    const bool bHasAssetRegistry = ScriptSystem.HasModuleSource(CODECOMPONENT_ASSET_REGISTRY_MODULE);
+    if (bHasAssetRegistry)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            "NgxCodeComponentRuntime Trace: Bootstrap strategy uses asset module '/scripts/engine/registry.js'.");
+        const std::string AssetBootstrapSnippet = BuildBootstrapSnippet(CODECOMPONENT_ASSET_REGISTRY_MODULE);
+        if (ScriptSystem.EvaluateSnippet(AssetBootstrapSnippet.c_str(), "<ngx-codecomponent-asset-bootstrap>"))
+        {
+            IsRegistryBootstrapped = true;
+            return true;
+        }
+
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap script registry from asset module path.");
+    }
+
+    LogSystem.LogMsg(csp::common::LogLevel::Log,
+        "NgxCodeComponentRuntime Trace: Bootstrap strategy uses built-in fallback registry module.");
+    if (ScriptSystem.ExecuteModule(CODECOMPONENT_BOOTSTRAP_MODULE))
+    {
+        IsRegistryBootstrapped = true;
+        return true;
+    }
+
+    LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap built-in script registry module.");
+    return false;
 }
 
 bool NgxCodeComponentRuntime::CaptureEntitySnapshots(EntitySnapshotMap& OutSnapshots) const
@@ -494,8 +1422,7 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
 
         if (bHasRemovedAttributes)
         {
-            RemoveEntityFromRegistry(EntityId);
-            AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot);
+            SyncAttributesInRegistry(EntityId, CurrentSnapshot);
             continue;
         }
 
@@ -524,6 +1451,30 @@ bool NgxCodeComponentRuntime::ExecuteRegistrySnippet(const std::string& Snippet,
     return true;
 }
 
+void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
+{
+    const std::string EntityIdString = std::to_string(EntityId);
+    const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
+        "    globalThis.scriptRegistry.syncCodeComponentSchema('"
+        + EscapeJSStringLiteral(EntityIdString) + "');\n" + "}\n";
+
+    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-schema>");
+}
+
+void NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
+{
+    const std::string EntityIdString = std::to_string(EntityId);
+    const std::string AttributesLiteral = BuildAttributesObjectLiteral(Snapshot.Attributes);
+    std::string Snippet = "if (globalThis.scriptRegistry) {\n"
+                          "    if (typeof globalThis.scriptRegistry.syncCodeComponentAttributes === 'function') {\n"
+                          "        globalThis.scriptRegistry.syncCodeComponentAttributes('"
+        + EscapeJSStringLiteral(EntityIdString) + "', " + AttributesLiteral + ");\n"
+          "    }\n"
+          "}\n";
+
+    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-attributes>");
+}
+
 void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
 {
     const std::string EntityIdString = std::to_string(EntityId);
@@ -534,6 +1485,8 @@ void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, co
         + "', attributes: " + AttributesLiteral + " });\n" + "}\n";
 
     ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-add>");
+    SyncSchemaInRegistry(EntityId);
+    SyncAttributesInRegistry(EntityId, Snapshot);
 }
 
 void NgxCodeComponentRuntime::UpdateAttributeInRegistry(

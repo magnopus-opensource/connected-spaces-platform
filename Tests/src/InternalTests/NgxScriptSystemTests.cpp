@@ -117,6 +117,14 @@ private:
     std::vector<csp::multiplayer::SpaceEntity*> Entities;
 };
 
+csp::multiplayer::CodeAttribute::EntityQueryValueType BuildNameEntityQuery(const csp::common::String& Name)
+{
+    csp::multiplayer::CodeAttribute::EntityQueryValueType Query;
+    Query["kind"] = "name";
+    Query["name"] = Name;
+    return Query;
+}
+
 void ProcessTickEvent()
 {
     auto& EventSystem = csp::events::EventSystem::Get();
@@ -125,11 +133,19 @@ void ProcessTickEvent()
     EventSystem.ProcessEvents();
 }
 
+void ProcessScriptTick(csp::systems::NgxScriptSystem& NgxScriptSystem, double TimestampMs)
+{
+    EXPECT_TRUE(NgxScriptSystem.TickScriptRegistry(TimestampMs));
+}
+
 void RegisterTrackingRegistryModule(csp::systems::NgxScriptSystem& NgxScriptSystem)
 {
     NgxScriptSystem.RegisterStaticModuleSource("/scripts/engine/registry.js", R"(
 export function createScriptRegistry() {
+    const entries = new Map();
     globalThis.__ngxAddCalls = 0;
+    globalThis.__ngxSchemaSyncCalls = 0;
+    globalThis.__ngxSyncAttributesCalls = 0;
     globalThis.__ngxUpdateCalls = 0;
     globalThis.__ngxRemoveCalls = 0;
     globalThis.__ngxTickCalls = 0;
@@ -137,14 +153,34 @@ export function createScriptRegistry() {
     globalThis.__ngxTickLast = -1;
 
     return {
-        addCodeComponent(_entityId, _payload) {
+        syncCodeComponentSchema(_entityId) {
+            globalThis.__ngxSchemaSyncCalls += 1;
+        },
+        addCodeComponent(entityId, payload = {}) {
             globalThis.__ngxAddCalls += 1;
+            entries.set(entityId, { attributes: { ...(payload.attributes || {}) } });
         },
-        updateAttributeForEntity(_entityId, _key, _value) {
+        syncCodeComponentAttributes(entityId, attributes = {}) {
+            globalThis.__ngxSyncAttributesCalls += 1;
+            const entry = entries.get(entityId);
+            if (!entry) {
+                return;
+            }
+
+            entry.attributes = { ...attributes };
+        },
+        updateAttributeForEntity(entityId, key, value) {
             globalThis.__ngxUpdateCalls += 1;
+            const entry = entries.get(entityId);
+            if (!entry) {
+                return;
+            }
+
+            entry.attributes[key] = value;
         },
-        removeCodeComponent(_entityId) {
+        removeCodeComponent(entityId) {
             globalThis.__ngxRemoveCalls += 1;
+            entries.delete(entityId);
         },
         tick(timestampMs) {
             globalThis.__ngxTickCalls += 1;
@@ -188,21 +224,30 @@ void RunRuntimeSyncSmokeScenario(csp::common::RealtimeEngineType EngineType)
 
     ProcessTickEvent();
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAddCalls", -1), 1);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickCalls", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSchemaSyncCalls", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSyncAttributesCalls", -1), 1);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickCalls", -1), 1);
+
+    ProcessScriptTick(NgxScriptSystem, 10.0);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickCalls", -1), 2);
 
     CodeComponent->SetAttribute("score", csp::multiplayer::CodeAttribute::FromInteger(2));
     ProcessTickEvent();
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxUpdateCalls", -1), 1);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickCalls", -1), 2);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAddCalls", -1), 1);
+    ProcessScriptTick(NgxScriptSystem, 20.0);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickCalls", -1), 4);
 
     CodeComponent->RemoveAttribute("score");
     ProcessTickEvent();
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAddCalls", -1), 2);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRemoveCalls", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAddCalls", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRemoveCalls", -1), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSyncAttributesCalls", -1), 2);
 
     Engine.RemoveEntity(&Entity);
     ProcessTickEvent();
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRemoveCalls", -1), 2);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRemoveCalls", -1), 1);
+    ProcessScriptTick(NgxScriptSystem, 30.0);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickMonotonic", -1), 1);
 
     EXPECT_EQ(Engine.GetLockCount(), Engine.GetUnlockCount());
@@ -210,6 +255,7 @@ void RunRuntimeSyncSmokeScenario(csp::common::RealtimeEngineType EngineType)
 
     ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting("globalThis.scriptRegistry = {};"));
     ProcessTickEvent();
+    ProcessScriptTick(NgxScriptSystem, 40.0);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickMonotonic", -1), 1);
 
     NgxCodeComponentRuntime.OnExitSpace();
@@ -373,6 +419,88 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ExecuteModuleRunsStaticModule
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxStaticModuleLoaded", -1), 17);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentBridgeMethodsReturnExpectedJsonAndBoolValues)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("bridge-methods-space", &OfflineEngine);
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+globalThis.scriptRegistry = {
+    syncCodeComponentSchema(entityId) {
+        return {
+            speed: 1,
+            enabled: true,
+            target: { kind: 'id', id: entityId },
+        };
+    },
+    addCodeComponent(entityId, payload = {}) {
+        return entityId === '200'
+            && payload.scriptAssetPath === '/scripts/modules/test.js'
+            && payload.attributes
+            && payload.attributes.speed === 3;
+    },
+    syncCodeComponentAttributes(entityId, attributes = {}) {
+        return {
+            ...attributes,
+            echoedEntityId: entityId,
+        };
+    },
+    updateAttributeForEntity(entityId, key, value) {
+        return entityId === '200' && key === 'speed' && value === 6;
+    },
+    removeCodeComponent(entityId) {
+        return entityId === '200';
+    },
+};
+)"));
+
+    const std::string SchemaJson = NgxScriptSystem.SyncCodeComponentSchema("200").c_str();
+    EXPECT_NE(SchemaJson.find("\"speed\":1"), std::string::npos);
+    EXPECT_NE(SchemaJson.find("\"enabled\":true"), std::string::npos);
+    EXPECT_NE(SchemaJson.find("\"kind\":\"id\""), std::string::npos);
+
+    EXPECT_TRUE(NgxScriptSystem.AddCodeComponent("200", R"({"scriptAssetPath":"/scripts/modules/test.js","attributes":{"speed":3}})"));
+
+    const std::string SyncedAttributesJson
+        = NgxScriptSystem.SyncCodeComponentAttributes("200", R"({"speed":3,"target":{"kind":"id","id":"123"}})").c_str();
+    EXPECT_NE(SyncedAttributesJson.find("\"echoedEntityId\":\"200\""), std::string::npos);
+    EXPECT_NE(SyncedAttributesJson.find("\"speed\":3"), std::string::npos);
+    EXPECT_NE(SyncedAttributesJson.find("\"kind\":\"id\""), std::string::npos);
+
+    EXPECT_TRUE(NgxScriptSystem.UpdateAttributeForEntity("200", "speed", "6"));
+    EXPECT_TRUE(NgxScriptSystem.RemoveCodeComponent("200"));
+
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentBridgeMethodsFallbackWhenRegistryUnavailableOrEntityIdInvalid)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("bridge-fallback-space", &OfflineEngine);
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting("delete globalThis.scriptRegistry;"));
+
+    EXPECT_EQ(std::string(NgxScriptSystem.SyncCodeComponentSchema("123").c_str()), "{}");
+    EXPECT_EQ(std::string(NgxScriptSystem.SyncCodeComponentAttributes("123", "{\"score\":1}").c_str()), "{}");
+    EXPECT_FALSE(NgxScriptSystem.AddCodeComponent("123", "{\"scriptAssetPath\":\"/scripts/test.js\",\"attributes\":{}}"));
+    EXPECT_FALSE(NgxScriptSystem.UpdateAttributeForEntity("123", "score", "1"));
+    EXPECT_FALSE(NgxScriptSystem.RemoveCodeComponent("123"));
+
+    EXPECT_EQ(std::string(NgxScriptSystem.SyncCodeComponentSchema("").c_str()), "{}");
+    EXPECT_EQ(std::string(NgxScriptSystem.SyncCodeComponentAttributes("", "{\"score\":1}").c_str()), "{}");
+    EXPECT_FALSE(NgxScriptSystem.AddCodeComponent("", "{\"scriptAssetPath\":\"/scripts/test.js\",\"attributes\":{}}"));
+    EXPECT_FALSE(NgxScriptSystem.UpdateAttributeForEntity("", "score", "1"));
+    EXPECT_FALSE(NgxScriptSystem.UpdateAttributeForEntity("123", "", "1"));
+    EXPECT_FALSE(NgxScriptSystem.RemoveCodeComponent(""));
+
+    NgxScriptSystem.OnExitSpace();
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal)
 {
     csp::common::LogSystem LogSystem;
@@ -382,6 +510,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrap
 
     NgxScriptSystem.OnEnterSpace("codecomponent-runtime-test-space", &OfflineEngine);
     NgxCodeComponentRuntime.OnEnterSpace("codecomponent-runtime-test-space", &OfflineEngine);
+    ProcessTickEvent();
 
     ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(
         "globalThis.__ngxRegistryPresent = (typeof globalThis.scriptRegistry !== 'undefined') ? 1 : 0;"));
@@ -412,16 +541,19 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentAttributeRo
     CodeComponent->SetAttribute("count", csp::multiplayer::CodeAttribute::FromInteger(42));
     CodeComponent->SetAttribute("ratio", csp::multiplayer::CodeAttribute::FromFloat(1.5f));
     CodeComponent->SetAttribute("label", csp::multiplayer::CodeAttribute::FromString("hello"));
+    CodeComponent->SetAttribute("target", csp::multiplayer::CodeAttribute::FromEntityQuery(BuildNameEntityQuery("target")));
 
     csp::multiplayer::CodeAttribute EnabledAttribute;
     csp::multiplayer::CodeAttribute CountAttribute;
     csp::multiplayer::CodeAttribute RatioAttribute;
     csp::multiplayer::CodeAttribute LabelAttribute;
+    csp::multiplayer::CodeAttribute TargetAttribute;
 
     EXPECT_TRUE(CodeComponent->GetAttribute("enabled", EnabledAttribute));
     EXPECT_TRUE(CodeComponent->GetAttribute("count", CountAttribute));
     EXPECT_TRUE(CodeComponent->GetAttribute("ratio", RatioAttribute));
     EXPECT_TRUE(CodeComponent->GetAttribute("label", LabelAttribute));
+    EXPECT_TRUE(CodeComponent->GetAttribute("target", TargetAttribute));
 
     EXPECT_EQ(EnabledAttribute.Type, csp::multiplayer::CodePropertyType::Boolean);
     EXPECT_TRUE(EnabledAttribute.BooleanValue);
@@ -431,6 +563,9 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentAttributeRo
     EXPECT_FLOAT_EQ(RatioAttribute.FloatValue, 1.5f);
     EXPECT_EQ(LabelAttribute.Type, csp::multiplayer::CodePropertyType::String);
     EXPECT_EQ(LabelAttribute.StringValue, "hello");
+    EXPECT_EQ(TargetAttribute.Type, csp::multiplayer::CodePropertyType::EntityQuery);
+    EXPECT_EQ(TargetAttribute.GetEntityQueryValue()["kind"].GetString(), "name");
+    EXPECT_EQ(TargetAttribute.GetEntityQueryValue()["name"].GetString(), "target");
 
     EXPECT_TRUE(CodeComponent->HasAttribute("label"));
     CodeComponent->RemoveAttribute("label");
@@ -438,6 +573,35 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentAttributeRo
 
     CodeComponent->ClearAttributes();
     EXPECT_EQ(CodeComponent->GetAttributeKeys().Size(), 0);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeEntityQueryRoundtripSerializesAndDeserializes)
+{
+    const auto Query = BuildNameEntityQuery("npc-a");
+    const csp::multiplayer::CodeAttribute SourceAttribute = csp::multiplayer::CodeAttribute::FromEntityQuery(Query);
+
+    EXPECT_EQ(SourceAttribute.Type, csp::multiplayer::CodePropertyType::EntityQuery);
+
+    csp::multiplayer::CodeAttribute ParsedAttribute;
+    EXPECT_TRUE(csp::multiplayer::CodeAttribute::TryFromReplicatedValue(SourceAttribute.ToReplicatedValue(), ParsedAttribute));
+    EXPECT_EQ(ParsedAttribute.Type, csp::multiplayer::CodePropertyType::EntityQuery);
+    EXPECT_EQ(ParsedAttribute.GetEntityQueryValue()["kind"].GetString(), "name");
+    EXPECT_EQ(ParsedAttribute.GetEntityQueryValue()["name"].GetString(), "npc-a");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeEntityQueryRejectsInvalidPayload)
+{
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> InvalidEntityQuery;
+    InvalidEntityQuery["kind"] = "id";
+    InvalidEntityQuery["id"] = "invalid-id";
+
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> InvalidSerializedAttribute;
+    InvalidSerializedAttribute["type"] = static_cast<int64_t>(csp::multiplayer::CodePropertyType::EntityQuery);
+    InvalidSerializedAttribute["entityQueryValue"] = InvalidEntityQuery;
+
+    csp::multiplayer::CodeAttribute ParsedAttribute;
+    EXPECT_FALSE(csp::multiplayer::CodeAttribute::TryFromReplicatedValue(
+        csp::common::ReplicatedValue(InvalidSerializedAttribute), ParsedAttribute));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapUsesAssetModuleWhenAvailable)
@@ -462,6 +626,7 @@ export function createScriptRegistry() {
 
     NgxScriptSystem.OnEnterSpace("asset-registry-space", &OfflineEngine);
     NgxCodeComponentRuntime.OnEnterSpace("asset-registry-space", &OfflineEngine);
+    ProcessTickEvent();
     NgxScriptSystem.PumpPendingJobs();
 
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAssetRegistryBootstrapUsed", 0), 1);
@@ -479,6 +644,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapFallsBackToB
 
     NgxScriptSystem.OnEnterSpace("fallback-registry-space", &OfflineEngine);
     NgxCodeComponentRuntime.OnEnterSpace("fallback-registry-space", &OfflineEngine);
+    ProcessTickEvent();
 
     ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(
         "globalThis.__ngxFallbackRegistryPresent = (typeof globalThis.scriptRegistry !== 'undefined') ? 1 : 0;"));
@@ -496,6 +662,225 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeAutoSyncW
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeAutoSyncWorksOnline)
 {
     RunRuntimeSyncSmokeScenario(csp::common::RealtimeEngineType::Online);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackSchemaSyncAppliesDefaultsAndRejectsInvalidTypes)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("schema-sync-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("schema-sync-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/schema-test.js", R"(
+export const schema = {
+    speed: { type: 'float', default: 1.5 },
+    enabled: { type: 'boolean', default: true },
+    label: { type: 'string', default: 'player' },
+};
+
+export function onInit({ attributes }) {
+    globalThis.__ngxSchemaSpeedScaled = Math.round(attributes.speed * 100);
+    globalThis.__ngxSchemaEnabled = attributes.enabled ? 1 : 0;
+    globalThis.__ngxSchemaLabelLength = attributes.label.length;
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/schema-test.js");
+    CodeComponent->SetAttribute("speed", csp::multiplayer::CodeAttribute::FromString("3.25"));
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSchemaSpeedScaled", -1), 150);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSchemaEnabled", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSchemaLabelLength", -1), 6);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentEntityReferenceResolvesWritesAndHandlesDeletion)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("entity-ref-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("entity-ref-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/entity-ref-test.js", R"(
+export const schema = {
+    target: { type: 'entity' },
+};
+
+export function onInit({ attributes }) {
+    globalThis.__ngxEntityRefInitResolved = attributes.target.status === 'resolved' ? 1 : 0;
+    globalThis.__ngxEntityRefInitHasId = attributes.target.id !== null ? 1 : 0;
+    const lightComponent = attributes.target.getLightComponent();
+    globalThis.__ngxEntityRefLightResolved = lightComponent.status === 'resolved' ? 1 : 0;
+}
+
+export function onTick({ attributes }) {
+    globalThis.__ngxEntityRefTickStatusResolved = attributes.target.status === 'resolved' ? 1 : 0;
+    globalThis.__ngxEntityRefTickStatusDeleted = attributes.target.status === 'deleted' ? 1 : 0;
+
+    if (!globalThis.__ngxEntityRefDidWrite) {
+        globalThis.__ngxEntityRefDidWrite = attributes.target.setPosition([7, 8, 9]) ? 1 : 0;
+    }
+}
+)");
+
+    csp::multiplayer::SpaceEntity TargetEntity;
+    EXPECT_TRUE(TargetEntity.SetName("target-entity"));
+    EXPECT_NE(TargetEntity.AddComponent(csp::multiplayer::ComponentType::Light), nullptr);
+    Engine.AddEntity(&TargetEntity);
+
+    csp::multiplayer::SpaceEntity ScriptEntity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(ScriptEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/entity-ref-test.js");
+    CodeComponent->SetAttribute("target", csp::multiplayer::CodeAttribute::FromEntityQuery(BuildNameEntityQuery("target-entity")));
+    Engine.AddEntity(&ScriptEntity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefInitResolved", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefInitHasId", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefLightResolved", 0), 1);
+
+    ProcessScriptTick(NgxScriptSystem, 16.0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusResolved", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefDidWrite", 0), 1);
+    EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3 { 7.0f, 8.0f, 9.0f });
+
+    Engine.RemoveEntity(&TargetEntity);
+    ProcessScriptTick(NgxScriptSystem, 32.0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusDeleted", 0), 1);
+
+    Engine.RemoveEntity(&ScriptEntity);
+    ProcessTickEvent();
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackLifecycleIsStableAndIncremental)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("lifecycle-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("lifecycle-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/lifecycle-test.js", R"(
+export function onInit({ attributes }) {
+    globalThis.__ngxLifecycleInitCalls = (globalThis.__ngxLifecycleInitCalls || 0) + 1;
+    globalThis.__ngxLifecycleLastScore = attributes.score;
+}
+
+export function onUpdateAttributes({ key, value }) {
+    globalThis.__ngxLifecycleUpdateCalls = (globalThis.__ngxLifecycleUpdateCalls || 0) + 1;
+    if (key === 'score') {
+        globalThis.__ngxLifecycleLastScore = value;
+    }
+}
+
+export function onTick() {
+    globalThis.__ngxLifecycleTickCalls = (globalThis.__ngxLifecycleTickCalls || 0) + 1;
+}
+
+export function onDispose() {
+    globalThis.__ngxLifecycleDisposeCalls = (globalThis.__ngxLifecycleDisposeCalls || 0) + 1;
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/lifecycle-test.js");
+    CodeComponent->SetAttribute("score", csp::multiplayer::CodeAttribute::FromInteger(1));
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleLastScore", -1), 1);
+
+    CodeComponent->SetAttribute("score", csp::multiplayer::CodeAttribute::FromInteger(2));
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleLastScore", -1), 2);
+
+    ProcessScriptTick(NgxScriptSystem, 16.0);
+    ProcessScriptTick(NgxScriptSystem, 32.0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleTickCalls", 0), 2);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleDisposeCalls", 0), 1);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ScriptWithoutSchemaStillExecutesThroughFallbackRegistry)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("no-schema-script-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("no-schema-script-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/no-schema-test.js", R"(
+export function onInit({ attributes }) {
+    globalThis.__ngxNoSchemaInitCalls = (globalThis.__ngxNoSchemaInitCalls || 0) + 1;
+    globalThis.__ngxNoSchemaValue = attributes.value;
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/no-schema-test.js");
+    CodeComponent->SetAttribute("value", csp::multiplayer::CodeAttribute::FromInteger(42));
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxNoSchemaInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxNoSchemaValue", -1), 42);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, MissingModuleLogsExplicitError)

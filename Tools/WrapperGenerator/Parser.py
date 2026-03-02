@@ -1340,6 +1340,24 @@ class Parser:
             current_namespace = current_namespace[:pos]
     
 
+    def __apply_typedef_type(self, object_type: TypeMetadata, typedef_type: TypeMetadata) -> None:
+        # Preserve qualifiers from the use-site while copying the full aliased type metadata.
+        # This keeps template and nested type information intact when resolving typedef/using aliases.
+        is_const = object_type.is_const
+        is_pointer = object_type.is_pointer
+        is_pointer_pointer = object_type.is_pointer_pointer
+        is_reference = object_type.is_reference
+
+        resolved_type = deepcopy(typedef_type)
+        resolved_type.is_const = resolved_type.is_const or is_const
+        resolved_type.is_pointer = resolved_type.is_pointer or is_pointer
+        resolved_type.is_pointer_pointer = resolved_type.is_pointer_pointer or is_pointer_pointer
+        resolved_type.is_reference = resolved_type.is_reference or is_reference
+        resolved_type.is_pointer_or_reference = resolved_type.is_pointer or resolved_type.is_reference
+
+        object_type.__dict__.update(resolved_type.__dict__)
+
+
     def __find_and_set_type_namespace(self, object_: Any, object_type: TypeMetadata, parent_namespace: str, types: Dict[str, Any]) -> None:
         if object_type.namespace == '':
             object_type.namespace = self.__find_type_namespace(object_type.name, parent_namespace, types)
@@ -1366,9 +1384,7 @@ class Parser:
 
         if full_type_name in self.typedefs:
             td = self.typedefs[full_type_name]
-            object_type.name = td.type.name
-            object_type.namespace = td.type.namespace
-            object_type.is_string = td.type.is_string
+            self.__apply_typedef_type(object_type, td.type)
 
             if td.type.is_function_signature:
                 assert td.type.function_signature is not None
@@ -1378,6 +1394,18 @@ class Parser:
 
                 if td.doc_comments != None:
                     object_type.function_signature.doc_comments = td.doc_comments
+
+            if object_type.namespace != None:
+                full_type_name = f"{object_type.namespace}::{object_type.name}"
+            else:
+                full_type_name = object_type.name
+        
+        if object_type.is_template:
+            assert object_type.template_arguments is not None
+
+            for a in object_type.template_arguments:
+                if a.type.namespace == '':
+                    a.type.namespace = self.__find_type_namespace(a.type.name, parent_namespace, types)
             
         if object_type.is_function_signature:
             assert object_type.function_signature is not None

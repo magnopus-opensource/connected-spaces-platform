@@ -17,6 +17,7 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Map.h"
 #include "CSP/Common/ReplicatedValue.h"
 #include "CSP/Common/String.h"
 
@@ -30,18 +31,26 @@ enum class CodePropertyType
     Integer = 2,
     Float = 3,
     String = 4,
+    EntityQuery = 5,
     Num
 };
 
 class CSP_API CodeAttribute
 {
 public:
+    using EntityQueryValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
+
     CodeAttribute();
 
     static CodeAttribute FromBoolean(bool Value);
     static CodeAttribute FromInteger(int64_t Value);
     static CodeAttribute FromFloat(float Value);
     static CodeAttribute FromString(const csp::common::String& Value);
+    static CodeAttribute FromEntityQuery(const EntityQueryValueType& Value);
+
+    static bool IsValidEntityQueryValue(const EntityQueryValueType& Value);
+    const EntityQueryValueType& GetEntityQueryValue() const;
+    void SetEntityQueryValue(const EntityQueryValueType& Value);
 
     csp::common::ReplicatedValue ToReplicatedValue() const;
     static bool TryFromReplicatedValue(const csp::common::ReplicatedValue& InValue, CodeAttribute& OutAttribute);
@@ -54,6 +63,7 @@ public:
     int64_t IntegerValue;
     float FloatValue;
     csp::common::String StringValue;
+    EntityQueryValueType EntityQueryValue;
 };
 
 } // namespace csp::multiplayer

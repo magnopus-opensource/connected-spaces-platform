@@ -337,3 +337,47 @@ class TestParserParseType(unittest.TestCase):
         expected.template_name = "function"
 
         self.assertDictEqual(result.__dict__, expected.__dict__)
+
+
+class TestParserTypedefResolution(unittest.TestCase):
+    def setUp(self):
+        self.parser = Parser.Parser(log_file=sys.stdout)
+
+    def test_typedef_template_alias_keeps_template_arguments(self):
+        alias_type = MetadataTypes.TypeMetadata(namespace="csp::common", name="Map")
+        alias_type.is_template = True
+        alias_type.template_name = "Map"
+        alias_type.template_arguments = [
+            MetadataTypes.TemplateArgumentMetadata(
+                type=MetadataTypes.TypeMetadata(namespace="csp::common", name="String"),
+                is_last=False
+            ),
+            MetadataTypes.TemplateArgumentMetadata(
+                type=MetadataTypes.TypeMetadata(namespace="csp::common", name="ReplicatedValue"),
+                is_last=True
+            )
+        ]
+
+        self.parser.typedefs["csp::multiplayer::EntityQueryValueType"] = MetadataTypes.TypedefMetadata(
+            namespace="csp::multiplayer",
+            name="EntityQueryValueType",
+            type=alias_type
+        )
+
+        resolved_type = MetadataTypes.TypeMetadata(namespace="", name="EntityQueryValueType")
+        resolved_type.is_pointer = True
+        resolved_type.is_pointer_or_reference = True
+        param = MetadataTypes.ParameterMetadata(name="Value", type=resolved_type, is_out=False, is_in_out=False)
+
+        self.parser._Parser__find_and_set_type_namespace(param, param.type, "csp::multiplayer", {})
+
+        self.assertEqual(param.type.namespace, "csp::common")
+        self.assertEqual(param.type.name, "Map")
+        self.assertTrue(param.type.is_template)
+        self.assertEqual(param.type.template_name, "Map")
+        self.assertEqual(len(param.type.template_arguments), 2)
+        self.assertEqual(param.type.template_arguments[0].type.namespace, "csp::common")
+        self.assertEqual(param.type.template_arguments[0].type.name, "String")
+        self.assertEqual(param.type.template_arguments[1].type.namespace, "csp::common")
+        self.assertEqual(param.type.template_arguments[1].type.name, "ReplicatedValue")
+        self.assertTrue(param.type.is_pointer)
