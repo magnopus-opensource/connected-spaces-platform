@@ -1552,10 +1552,30 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, MultiplayerTestsMock, TestNoSignalRCommuni
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
 
+    EXPECT_CALL(*WebClientMock, SendRequest)
+        .WillOnce(
+            [](auto Verb, const auto& Uri, auto& Payload, auto* ResponseCallback, const auto& /*CancellationToken*/, bool /*AsyncResponse*/)
+            {
+                ASSERT_EQ(Verb, csp::web::ERequestVerb::POST);
+                ASSERT_TRUE(csp::common::String(Uri.GetAsString()).Contains("/mag-user/api/v1/users/login"));
+                ASSERT_TRUE(Payload.GetContent().Contains("mock.user@magnopus.com"));
+                ASSERT_TRUE(Payload.GetContent().Contains(GeneratedTestAccountPassword));
+
+                auto Response = csp::web::HttpResponse();
+                Response.SetResponseCode(csp::web::EResponseCodes::ResponseOK);
+                Response.GetMutablePayload().SetContent(R"({
+                    "accessToken": "MockAccessToken",
+                    "accessTokenExpiresAt": "1970-01-01T00:00:00.000+00:00",
+                    "refreshToken": "MockRefreshToken",
+                    "userId": "MockUserId",
+                    "deviceId": "MockDeviceId"
+                })");
+                ResponseCallback->OnHttpResponse(Response);
+            });
+
     // Log in
     csp::common::String UserId;
-    const csp::systems::Profile TestUser = CreateTestUser();
-    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, false, true);
+    LogIn(UserSystem, UserId, "mock.user@magnopus.com", GeneratedTestAccountPassword, false, true);
 
     std::unique_ptr<csp::multiplayer::OfflineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOfflineRealtimeEngine() };
     RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
