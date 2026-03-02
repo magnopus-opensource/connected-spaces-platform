@@ -15,6 +15,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1818] feat: Update AsyncCompletedEventCallback format by MAG-AdamThorn
   The structure of the AsyncCallCompletedEvent has been updated by the backend services to include additional properties. `ReferenceId` and `ReferenceType` are being replaced by a new `References` Map, and new `Status` and `StatusReason` properties have been added. This change is being made to enable the backend services to communicate more information about the async call. For example in the case of `DuplicateSpaceAsync`, the new References map will contain both the Id of the old space as well as the newly duplicated one. This change is currently behind a backend feature flag. As this will be a breaking change we have added these new properties to the event, but will temporarily be keeping the old ones. We are populating both the old and new properties when we deserialise the SignalR event values, which means that Clients will continue to be able to consume the event as before. Once this CSP change has been adopted by clients we will remove the old properties and transition logic.
 
+### 🐛 🔨 Bug Fixes
+
+- [OB-5070] fix: `GetMaterials` no longer bails out after first failure
+  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success. 
+
 ## [6.27.0]
 
 ### 🙈 🙉 🙊 Test Changes

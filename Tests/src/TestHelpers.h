@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Awaitable.h"
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
@@ -133,6 +134,16 @@ private:
     std::atomic<bool> ResponseReceived;
 };
 
+class TestAuthContext : public csp::common::IAuthContext
+{
+public:
+    const csp::common::LoginState& GetLoginState() const override { return State; }
+    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
+
+private:
+    csp::common::LoginState State;
+};
+
 #if defined CSP_WINDOWS
 #define SPRINTF sprintf_s
 #else
@@ -201,15 +212,15 @@ inline const csp::ClientUserAgent& GetDefaultClientUserAgentInfo()
     return ClientHeaderInfo;
 }
 
-inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr)
+inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
 {
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, nullptr);
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, nullptr);
 }
 
 inline void InitialiseFoundationWithUserAgentInfoAndFeatureFlags(const csp::common::String& EndpointRootURI,
-    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr)
+    const csp::common::Optional<csp::common::Array<csp::FeatureFlag>>& FeatureFlags, SignalRConnectionMock* SignalRMock = nullptr, csp::web::WebClient* WebClient = nullptr)
 {
-    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, FeatureFlags);
+    csp::CSPFoundation::InitialiseWithInject(EndpointRootURI, "OKO_TESTS", GetDefaultClientUserAgentInfo(), SignalRMock, WebClient, FeatureFlags);
 }
 
 inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)

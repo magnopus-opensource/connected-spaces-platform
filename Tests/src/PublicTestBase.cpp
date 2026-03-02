@@ -19,7 +19,6 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "Mocks/SignalRConnectionMock.h"
 #include "TestHelpers.h"
 
 void PublicTestBase::SetUp()
@@ -57,11 +56,12 @@ void PublicTestBase::TearDown()
 void PublicTestBaseWithMocks::SetUp()
 {
     SignalRMock = new SignalRConnectionMock();
+    WebClientMock = new ::WebClientMock(80, csp::web::ETransferProtocol::HTTPS, nullptr, true);
 
     ::testing::Test::SetUp();
 
     // Yield SignalRMock ownership
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), SignalRMock);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI(), SignalRMock, WebClientMock);
 
     csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
     LogSystem->SetSystemLevel(csp::common::LogLevel::VeryVerbose);

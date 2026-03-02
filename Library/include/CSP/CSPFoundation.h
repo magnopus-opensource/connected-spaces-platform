@@ -43,6 +43,11 @@ namespace csp::multiplayer
 class ISignalRConnection;
 } // namespace csp::multiplayer
 
+namespace csp::web
+{
+class WebClient;
+} // namespace csp::web
+
 namespace csp
 {
 // New developer feature flags should be added here. Please leave 'Invalid' as the first element.
@@ -200,7 +205,7 @@ public:
     // In a different, perhaps better api, this wouldn't be necessary as constructors would inject this at client level and the configurability would
     // be there by default
     CSP_NO_EXPORT static bool InitialiseWithInject(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant,
-        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject,
+        const csp::ClientUserAgent& ClientUserAgentHeader, csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject,
         const csp::common::Optional<csp::common::Array<FeatureFlag>>& FeatureFlagOverrides);
 
     /// @brief This should be used at the end of the application lifecycle.
