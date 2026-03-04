@@ -40,8 +40,8 @@
 #include <algorithm>
 #include <cmath>
 #include <fmt/format.h>
-#include <set>
 #include <optional>
+#include <set>
 #include <vector>
 
 namespace
@@ -345,8 +345,7 @@ std::set<uint64_t> EvaluateQueryToEntityIds(const rapidjson::Value& Query, const
             {
                 const std::set<uint64_t> Next = EvaluateQueryToEntityIds(*OperandValues[OperandIndex], Entities);
                 std::set<uint64_t> Result;
-                std::set_intersection(
-                    Intersection.begin(), Intersection.end(), Next.begin(), Next.end(), std::inserter(Result, Result.begin()));
+                std::set_intersection(Intersection.begin(), Intersection.end(), Next.begin(), Next.end(), std::inserter(Result, Result.begin()));
                 Intersection = std::move(Result);
                 if (Intersection.empty())
                 {
@@ -376,16 +375,14 @@ std::set<uint64_t> EvaluateQueryToEntityIds(const rapidjson::Value& Query, const
         const std::set<uint64_t> AllEntityIds = BuildAllEntityIdSet(Entities);
         const std::set<uint64_t> ExcludedIds = EvaluateQueryToEntityIds(Query["operand"], Entities);
         std::set<uint64_t> Result;
-        std::set_difference(AllEntityIds.begin(), AllEntityIds.end(), ExcludedIds.begin(), ExcludedIds.end(),
-            std::inserter(Result, Result.begin()));
+        std::set_difference(AllEntityIds.begin(), AllEntityIds.end(), ExcludedIds.begin(), ExcludedIds.end(), std::inserter(Result, Result.begin()));
         return Result;
     }
 
     return {};
 }
 
-std::optional<uint64_t> ResolveEntityIdFromQueryJson(
-    const std::string& QueryJson, const std::vector<csp::multiplayer::SpaceEntity*>& Entities)
+std::optional<uint64_t> ResolveEntityIdFromQueryJson(const std::string& QueryJson, const std::vector<csp::multiplayer::SpaceEntity*>& Entities)
 {
     rapidjson::Document QueryDocument;
     if (QueryDocument.Parse(QueryJson.c_str()).HasParseError() || !QueryDocument.IsObject())
@@ -583,8 +580,8 @@ NgxScriptSystem::~NgxScriptSystem()
 
 void NgxScriptSystem::OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine)
 {
-    const std::string EnterMessage = fmt::format("NgxScript Trace: OnEnterSpace(spaceId='{}', engineType={}).", InSpaceId.c_str(),
-        RealtimeEngineTypeToString(InRealtimeEngine));
+    const std::string EnterMessage
+        = fmt::format("NgxScript Trace: OnEnterSpace(spaceId='{}', engineType={}).", InSpaceId.c_str(), RealtimeEngineTypeToString(InRealtimeEngine));
     LogSystem.LogMsg(csp::common::LogLevel::Log, EnterMessage.c_str());
 
     ActiveSpaceId = InSpaceId;
@@ -633,8 +630,8 @@ void NgxScriptSystem::RegisterAssetDetailBlobChangedListener()
     auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
     if (!MultiplayerConnection)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning,
-            "NgxScript: Failed to register AssetDetailBlobChanged listener (MultiplayerConnection unavailable).");
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Warning, "NgxScript: Failed to register AssetDetailBlobChanged listener (MultiplayerConnection unavailable).");
         return;
     }
 
@@ -658,8 +655,8 @@ void NgxScriptSystem::UnregisterAssetDetailBlobChangedListener()
     if (auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection())
     {
         auto* EventBus = &MultiplayerConnection->GetEventBus();
-        const csp::common::String EventName = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(
-            csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
+        const csp::common::String EventName
+            = csp::multiplayer::NetworkEventBus::StringFromNetworkEvent(csp::multiplayer::NetworkEventBus::NetworkEvent::AssetDetailBlobChanged);
         EventBus->StopListenNetworkEvent(csp::multiplayer::NetworkEventRegistration(ASSET_BLOB_CHANGED_RECEIVER_ID, EventName));
     }
 
@@ -704,8 +701,7 @@ void NgxScriptSystem::OnAssetDetailBlobChanged(const csp::common::NetworkEventDa
 
     if (AssetBlobEvent.ChangeType == csp::common::EAssetChangeType::Deleted)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Log,
-            "NgxScript Trace: Script library asset deleted; rebuilding context and reloading module map.");
+        LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Script library asset deleted; rebuilding context and reloading module map.");
         ScriptModulesLoaded.store(false);
         RebuildContext();
         LoadScriptModules();
@@ -747,8 +743,8 @@ void NgxScriptSystem::UnregisterStaticModuleSource(const csp::common::String& Mo
 
 void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
 {
-    const std::string ReloadRequestMessage = fmt::format(
-        "NgxScript Trace: ReloadScriptModule(assetCollectionId='{}', assetId='{}').", AssetCollectionId.c_str(), AssetId.c_str());
+    const std::string ReloadRequestMessage
+        = fmt::format("NgxScript Trace: ReloadScriptModule(assetCollectionId='{}', assetId='{}').", AssetCollectionId.c_str(), AssetId.c_str());
     LogSystem.LogMsg(csp::common::LogLevel::Log, ReloadRequestMessage.c_str());
 
     if (AssetCollectionId.IsEmpty() || AssetId.IsEmpty())
@@ -795,8 +791,7 @@ void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollect
 
                     if (AssetResult.GetResultCode() != csp::systems::EResultCode::Success)
                     {
-                        LogSystem.LogMsg(
-                            csp::common::LogLevel::Error, "NgxScript: Failed to find script asset to reload by id.");
+                        LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Failed to find script asset to reload by id.");
                         return;
                     }
 
@@ -816,21 +811,17 @@ void NgxScriptSystem::ReloadScriptModule(const csp::common::String& AssetCollect
 
                             if (DownloadResult.GetResultCode() != csp::systems::EResultCode::Success)
                             {
-                                LogSystem.LogMsg(
-                                    csp::common::LogLevel::Error, "NgxScript: Failed to download script module for reload.");
+                                LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Failed to download script module for reload.");
                                 return;
                             }
 
                             const char* ModuleSourceData = static_cast<const char*>(DownloadResult.GetData());
                             const size_t ModuleSourceLength = DownloadResult.GetDataLength();
-                            const std::string ModuleSource = (ModuleSourceData != nullptr)
-                                ? std::string(ModuleSourceData, ModuleSourceLength)
-                                : std::string();
+                            const std::string ModuleSource
+                                = (ModuleSourceData != nullptr) ? std::string(ModuleSourceData, ModuleSourceLength) : std::string();
 
-                            const csp::common::String CanonicalPath
-                                = ngxscript::BuildCanonicalAssetPath(ScriptAsset, *AssetCollections);
-                            const std::string ReloadSuccessMessage
-                                = fmt::format("NgxScript Trace: Reloaded module '{}'.", CanonicalPath.c_str());
+                            const csp::common::String CanonicalPath = ngxscript::BuildCanonicalAssetPath(ScriptAsset, *AssetCollections);
+                            const std::string ReloadSuccessMessage = fmt::format("NgxScript Trace: Reloaded module '{}'.", CanonicalPath.c_str());
                             LogSystem.LogMsg(csp::common::LogLevel::Log, ReloadSuccessMessage.c_str());
 
                             {
@@ -932,8 +923,7 @@ void NgxScriptSystem::InstallModuleLoader()
 
             if (RequestedModule == PREACT_SIGNALS_CORE_MODULE)
             {
-                const std::string ResolveMessage
-                    = fmt::format("NgxScript Trace: Resolved built-in module '{}'.", RequestedModule);
+                const std::string ResolveMessage = fmt::format("NgxScript Trace: Resolved built-in module '{}'.", RequestedModule);
                 LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
                 return qjs::Context::ModuleData { RequestedModule, csp::systems::SignalsScriptCode.c_str(), std::nullopt };
             }
@@ -943,8 +933,7 @@ void NgxScriptSystem::InstallModuleLoader()
                 auto StaticSourceIt = StaticModuleSources.find(RequestedModule);
                 if (StaticSourceIt != StaticModuleSources.end())
                 {
-                    const std::string ResolveMessage
-                        = fmt::format("NgxScript Trace: Resolved static module '{}'.", RequestedModule);
+                    const std::string ResolveMessage = fmt::format("NgxScript Trace: Resolved static module '{}'.", RequestedModule);
                     LogSystem.LogMsg(csp::common::LogLevel::Verbose, ResolveMessage.c_str());
                     return qjs::Context::ModuleData { RequestedModule, StaticSourceIt->second, std::nullopt };
                 }
@@ -959,12 +948,10 @@ void NgxScriptSystem::InstallModuleLoader()
                 }
             }
 
-            const std::string MissingMessage
-                = fmt::format("NgxScript: Missing module '{}' (module source may still be loading).", RequestedModule);
+            const std::string MissingMessage = fmt::format("NgxScript: Missing module '{}' (module source may still be loading).", RequestedModule);
             LogSystem.LogMsg(csp::common::LogLevel::Warning, MissingMessage.c_str());
 
-            const std::string ThrowingModule
-                = "throw new Error('NgxScript module not found: " + EscapeJSStringLiteral(RequestedModule) + "');";
+            const std::string ThrowingModule = "throw new Error('NgxScript module not found: " + EscapeJSStringLiteral(RequestedModule) + "');";
             return qjs::Context::ModuleData { RequestedModule, ThrowingModule, std::nullopt };
         };
         LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Module loader installed.");
@@ -981,196 +968,201 @@ void NgxScriptSystem::InstallHostBindings()
 
     auto& CSPModule = Context->addModule("csp");
     CSPModule.function("__log", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Log, JoinArgs(Args).c_str()); });
-    CSPModule.function(
-        "__warn", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Warning, JoinArgs(Args).c_str()); });
-    CSPModule.function(
-        "__error", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Error, JoinArgs(Args).c_str()); });
-    CSPModule.function("__resolveEntityQuery", [this](const std::string& QueryJson) -> std::string
-    {
-        if (ActiveRealtimeEngine == nullptr)
+    CSPModule.function("__warn", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Warning, JoinArgs(Args).c_str()); });
+    CSPModule.function("__error", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Error, JoinArgs(Args).c_str()); });
+    CSPModule.function("__resolveEntityQuery",
+        [this](const std::string& QueryJson) -> std::string
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return "";
+            }
 
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        const auto ResolvedEntityId = ResolveEntityIdFromQueryJson(QueryJson, Entities);
-        return ResolvedEntityId.has_value() ? std::to_string(*ResolvedEntityId) : std::string();
-    });
-    CSPModule.function("__getEntitySnapshot", [this](const std::string& EntityIdText) -> std::string
-    {
-        if (ActiveRealtimeEngine == nullptr)
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            const auto ResolvedEntityId = ResolveEntityIdFromQueryJson(QueryJson, Entities);
+            return ResolvedEntityId.has_value() ? std::to_string(*ResolvedEntityId) : std::string();
+        });
+    CSPModule.function("__getEntitySnapshot",
+        [this](const std::string& EntityIdText) -> std::string
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return "";
+            }
 
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return "";
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return "";
+            }
+
+            return BuildEntitySnapshotJson(*Entity);
+        });
+    CSPModule.function("__getComponentSnapshot",
+        [this](const std::string& EntityIdText, int32_t ComponentTypeValue, int32_t ComponentIndex) -> std::string
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return "";
+            }
 
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return "";
+            }
+
+            if (ComponentTypeValue <= 0)
+            {
+                return "";
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return "";
+            }
+
+            auto* Component = FindComponentByTypeAndIndex(*Entity, static_cast<csp::multiplayer::ComponentType>(ComponentTypeValue), ComponentIndex);
+            if (Component == nullptr)
+            {
+                return "";
+            }
+
+            return BuildComponentSnapshotJson(*Component);
+        });
+    CSPModule.function("__setEntityPosition",
+        [this](const std::string& EntityIdText, double X, double Y, double Z) -> bool
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return false;
+            }
 
-        return BuildEntitySnapshotJson(*Entity);
-    });
-    CSPModule.function("__getComponentSnapshot", [this](const std::string& EntityIdText, int32_t ComponentTypeValue, int32_t ComponentIndex) -> std::string
-    {
-        if (ActiveRealtimeEngine == nullptr)
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return false;
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return false;
+            }
+
+            return Entity->SetPosition(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+        });
+    CSPModule.function("__setEntityRotation",
+        [this](const std::string& EntityIdText, double X, double Y, double Z, double W) -> bool
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return false;
+            }
 
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return false;
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return false;
+            }
+
+            return Entity->SetRotation(
+                csp::common::Vector4 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z), static_cast<float>(W) });
+        });
+    CSPModule.function("__setEntityScale",
+        [this](const std::string& EntityIdText, double X, double Y, double Z) -> bool
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return false;
+            }
 
-        if (ComponentTypeValue <= 0)
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return false;
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return false;
+            }
+
+            return Entity->SetScale(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
+        });
+    CSPModule.function("__setEntityName",
+        [this](const std::string& EntityIdText, const std::string& Name) -> bool
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return false;
+            }
 
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return false;
+            }
+
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return false;
+            }
+
+            return Entity->SetName(Name.c_str());
+        });
+    CSPModule.function("__setEntityThirdPartyRef",
+        [this](const std::string& EntityIdText, const std::string& ThirdPartyRef) -> bool
         {
-            return "";
-        }
+            if (ActiveRealtimeEngine == nullptr)
+            {
+                return false;
+            }
 
-        auto* Component = FindComponentByTypeAndIndex(
-            *Entity, static_cast<csp::multiplayer::ComponentType>(ComponentTypeValue), ComponentIndex);
-        if (Component == nullptr)
-        {
-            return "";
-        }
+            const auto EntityId = TryParseEntityId(EntityIdText);
+            if (!EntityId.has_value())
+            {
+                return false;
+            }
 
-        return BuildComponentSnapshotJson(*Component);
-    });
-    CSPModule.function("__setEntityPosition", [this](const std::string& EntityIdText, double X, double Y, double Z) -> bool
-    {
-        if (ActiveRealtimeEngine == nullptr)
-        {
-            return false;
-        }
+            EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
+            const auto Entities = CollectEntities(ActiveRealtimeEngine);
+            auto* Entity = FindEntityById(Entities, *EntityId);
+            if (Entity == nullptr)
+            {
+                return false;
+            }
 
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
-        {
-            return false;
-        }
-
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
-        {
-            return false;
-        }
-
-        return Entity->SetPosition(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
-    });
-    CSPModule.function("__setEntityRotation", [this](const std::string& EntityIdText, double X, double Y, double Z, double W) -> bool
-    {
-        if (ActiveRealtimeEngine == nullptr)
-        {
-            return false;
-        }
-
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
-        {
-            return false;
-        }
-
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
-        {
-            return false;
-        }
-
-        return Entity->SetRotation(
-            csp::common::Vector4 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z), static_cast<float>(W) });
-    });
-    CSPModule.function("__setEntityScale", [this](const std::string& EntityIdText, double X, double Y, double Z) -> bool
-    {
-        if (ActiveRealtimeEngine == nullptr)
-        {
-            return false;
-        }
-
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
-        {
-            return false;
-        }
-
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
-        {
-            return false;
-        }
-
-        return Entity->SetScale(csp::common::Vector3 { static_cast<float>(X), static_cast<float>(Y), static_cast<float>(Z) });
-    });
-    CSPModule.function("__setEntityName", [this](const std::string& EntityIdText, const std::string& Name) -> bool
-    {
-        if (ActiveRealtimeEngine == nullptr)
-        {
-            return false;
-        }
-
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
-        {
-            return false;
-        }
-
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
-        {
-            return false;
-        }
-
-        return Entity->SetName(Name.c_str());
-    });
-    CSPModule.function("__setEntityThirdPartyRef", [this](const std::string& EntityIdText, const std::string& ThirdPartyRef) -> bool
-    {
-        if (ActiveRealtimeEngine == nullptr)
-        {
-            return false;
-        }
-
-        const auto EntityId = TryParseEntityId(EntityIdText);
-        if (!EntityId.has_value())
-        {
-            return false;
-        }
-
-        EntityUpdateLockGuard LockGuard(ActiveRealtimeEngine);
-        const auto Entities = CollectEntities(ActiveRealtimeEngine);
-        auto* Entity = FindEntityById(Entities, *EntityId);
-        if (Entity == nullptr)
-        {
-            return false;
-        }
-
-        return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
-    });
+            return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
+        });
 
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
@@ -1179,6 +1171,52 @@ globalThis.console = {
     log: (...args) => csp.__log(...args.map((value) => String(value))),
     warn: (...args) => csp.__warn(...args.map((value) => String(value))),
     error: (...args) => csp.__error(...args.map((value) => String(value))),
+};
+
+const __cspAnimationFrameState = {
+    nextId: 1,
+    callbacks: new Map(),
+};
+
+globalThis.__cspRafPendingCount = 0;
+
+globalThis.requestAnimationFrame = (callback) => {
+    if (typeof callback !== 'function') {
+        throw new TypeError('requestAnimationFrame callback must be a function');
+    }
+
+    const id = __cspAnimationFrameState.nextId++;
+    __cspAnimationFrameState.callbacks.set(id, callback);
+    globalThis.__cspRafPendingCount = __cspAnimationFrameState.callbacks.size;
+    return id;
+};
+
+globalThis.cancelAnimationFrame = (handle) => {
+    const id = Math.trunc(Number(handle));
+    if (!Number.isFinite(id)) {
+        return;
+    }
+
+    __cspAnimationFrameState.callbacks.delete(id);
+    globalThis.__cspRafPendingCount = __cspAnimationFrameState.callbacks.size;
+};
+
+globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
+    if (__cspAnimationFrameState.callbacks.size === 0) {
+        return;
+    }
+
+    const frameCallbacks = Array.from(__cspAnimationFrameState.callbacks.values());
+    __cspAnimationFrameState.callbacks.clear();
+    globalThis.__cspRafPendingCount = 0;
+
+    for (const callback of frameCallbacks) {
+        try {
+            callback(timestampMs);
+        } catch (error) {
+            csp.__error(String(error));
+        }
+    }
 };
 )";
 
@@ -1309,9 +1347,8 @@ void NgxScriptSystem::LoadScriptModules()
 
                             const char* ModuleSourceData = static_cast<const char*>(DownloadResult.GetData());
                             const size_t ModuleSourceLength = DownloadResult.GetDataLength();
-                            const std::string ModuleSource = (ModuleSourceData != nullptr)
-                                ? std::string(ModuleSourceData, ModuleSourceLength)
-                                : std::string();
+                            const std::string ModuleSource
+                                = (ModuleSourceData != nullptr) ? std::string(ModuleSourceData, ModuleSourceLength) : std::string();
 
                             const csp::common::String CanonicalPath = ngxscript::BuildCanonicalAssetPath(ScriptAsset, *AssetCollections);
                             (*DownloadedSources)[CanonicalPath.c_str()] = ModuleSource;
@@ -1366,8 +1403,8 @@ void NgxScriptSystem::LoadScriptModules()
                         ScriptLibraryAssets.emplace_back(ScriptLibraryAssetsArray[Index]);
                     }
 
-                    const std::string DiscoveredScriptLibrariesMessage = fmt::format(
-                        "NgxScript Trace: Discovered {} script library asset(s) for active space.", ScriptLibraryAssets.size());
+                    const std::string DiscoveredScriptLibrariesMessage
+                        = fmt::format("NgxScript Trace: Discovered {} script library asset(s) for active space.", ScriptLibraryAssets.size());
                     LogSystem.LogMsg(csp::common::LogLevel::Log, DiscoveredScriptLibrariesMessage.c_str());
 
                     if (!ScriptLibraryAssets.empty())
@@ -1383,11 +1420,9 @@ void NgxScriptSystem::LoadScriptModules()
         });
 }
 
-void NgxScriptSystem::FetchAssetCollectionMapForSpace(
-    uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const
+void NgxScriptSystem::FetchAssetCollectionMapForSpace(uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const
 {
-    const std::string QueryCollectionsMessage
-        = fmt::format("NgxScript Trace: Querying asset collections for spaceId='{}'.", ActiveSpaceId.c_str());
+    const std::string QueryCollectionsMessage = fmt::format("NgxScript Trace: Querying asset collections for spaceId='{}'.", ActiveSpaceId.c_str());
     LogSystem.LogMsg(csp::common::LogLevel::Log, QueryCollectionsMessage.c_str());
 
     if (ActiveSpaceId.IsEmpty())
@@ -1402,8 +1437,8 @@ void NgxScriptSystem::FetchAssetCollectionMapForSpace(
         return;
     }
 
-    AssetSystem->FindAssetCollections(
-        nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { ActiveSpaceId }, nullptr, nullptr,
+    AssetSystem->FindAssetCollections(nullptr, nullptr, nullptr, nullptr, nullptr, csp::common::Array<csp::common::String> { ActiveSpaceId }, nullptr,
+        nullptr,
         [this, Generation, Callback = std::move(Callback)](const csp::systems::AssetCollectionsResult& AssetCollectionsResult)
         {
             if (!IsGenerationCurrent(Generation))
@@ -1424,8 +1459,7 @@ void NgxScriptSystem::FetchAssetCollectionMapForSpace(
                 (*ResultMap)[Collections[Index].Id] = Collections[Index];
             }
 
-            const std::string CollectionsMessage
-                = fmt::format("NgxScript Trace: Resolved {} asset collection(s).", ResultMap->Size());
+            const std::string CollectionsMessage = fmt::format("NgxScript Trace: Resolved {} asset collection(s).", ResultMap->Size());
             LogSystem.LogMsg(csp::common::LogLevel::Log, CollectionsMessage.c_str());
             Callback(ResultMap);
         });
@@ -1447,7 +1481,8 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
         const std::string DebugNameString = (DebugName != nullptr) ? std::string(DebugName) : std::string();
         const bool bIsCodeComponentSnippet = (DebugNameString.rfind("<ngx-codecomponent-", 0) == 0);
         const bool bIsClientScriptTickSnippet = (DebugNameString == "<ngx-client-script-tick>");
-        if (!bIsCodeComponentSnippet && !bIsClientScriptTickSnippet)
+        const bool bIsAnimationFrameTickSnippet = (DebugNameString == "<ngx-animation-frame-tick>");
+        if (!bIsCodeComponentSnippet && !bIsClientScriptTickSnippet && !bIsAnimationFrameTickSnippet)
         {
             const std::string SuccessMessage = fmt::format("NgxScript Trace: JavaScript execution succeeded ({}).", DebugName);
             LogSystem.LogMsg(csp::common::LogLevel::Verbose, SuccessMessage.c_str());
@@ -1502,26 +1537,27 @@ bool NgxScriptSystem::AreScriptModulesLoaded() const { return ScriptModulesLoade
 
 uint64_t NgxScriptSystem::GetContextGeneration() const { return ContextGeneration.load(); }
 
-bool NgxScriptSystem::TickScriptRegistry(double TimestampMs)
+bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
 {
     if (!std::isfinite(TimestampMs))
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: TickScriptRegistry received non-finite timestamp.");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript: TickAnimationFrame received non-finite timestamp.");
         return false;
     }
 
-    const std::string TickSnippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
-        "    globalThis.scriptRegistry.tick(" + fmt::format("{:.6f}", TimestampMs) + ");\n" + "}\n";
+    const std::string TickSnippet
+        = "if (typeof globalThis.__cspDispatchAnimationFrames === 'function' && (globalThis.__cspRafPendingCount | 0) > 0) {\n"
+          "    globalThis.__cspDispatchAnimationFrames("
+        + fmt::format("{:.6f}", TimestampMs) + ");\n" + "}\n";
 
-    const bool bSuccess = EvaluateSnippet(TickSnippet.c_str(), "<ngx-client-script-tick>");
+    const bool bSuccess = EvaluateSnippet(TickSnippet.c_str(), "<ngx-animation-frame-tick>");
     PumpPendingJobs();
     return bSuccess;
 }
 
 csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::String& EntityId)
 {
-    const std::string SyncSchemaRequestMessage
-        = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') called.", EntityId.c_str());
+    const std::string SyncSchemaRequestMessage = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') called.", EntityId.c_str());
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, SyncSchemaRequestMessage.c_str());
 
     if (EntityId.IsEmpty())
@@ -1531,16 +1567,17 @@ csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage = fmt::format(
-            "NgxScript Trace: SyncCodeComponentSchema(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
+        const std::string DeferredMessage
+            = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return EMPTY_JSON_OBJECT_STRING;
     }
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT) + " = '{}';\n"
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
-        "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentSchema('"
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
+        + " = '{}';\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
+          "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentSchema('"
         + EntityIdEscaped
         + "');\n"
           "    const __cspSerializable = (__cspResult === undefined || __cspResult === null) ? {} : __cspResult;\n"
@@ -1598,16 +1635,16 @@ csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::
         }
     }
 
-    const std::string SyncSchemaResultMessage = fmt::format(
-        "NgxScript Trace: SyncCodeComponentSchema(entityId='{}') resultLength={}.", EntityId.c_str(), JsonResultString.size());
+    const std::string SyncSchemaResultMessage
+        = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') resultLength={}.", EntityId.c_str(), JsonResultString.size());
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, SyncSchemaResultMessage.c_str());
     return csp::common::String(JsonResultString.c_str());
 }
 
 bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, const csp::common::String& PayloadJson)
 {
-    const std::string AddRequestMessage = fmt::format(
-        "NgxScript Trace: AddCodeComponent(entityId='{}', payloadLength={}) called.", EntityId.c_str(), PayloadJson.Length());
+    const std::string AddRequestMessage
+        = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}', payloadLength={}) called.", EntityId.c_str(), PayloadJson.Length());
     LogSystem.LogMsg(csp::common::LogLevel::Verbose, AddRequestMessage.c_str());
 
     if (EntityId.IsEmpty())
@@ -1617,27 +1654,29 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage = fmt::format(
-            "NgxScript Trace: AddCodeComponent(entityId='{}') deferred until script modules finish loading.", EntityId.c_str());
+        const std::string DeferredMessage
+            = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}') deferred until script modules finish loading.", EntityId.c_str());
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return true;
     }
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string PayloadJsonEscaped = EscapeJSStringLiteral(PayloadJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = false;\n"
-        "let __cspPayload = {};\n"
-        "try {\n"
-        "    __cspPayload = JSON.parse('" + PayloadJsonEscaped + "');\n"
-        "} catch (_error) {\n"
-        "    __cspPayload = {};\n"
-        "}\n"
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.addCodeComponent === 'function') {\n"
-        "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = !!globalThis.scriptRegistry.addCodeComponent('"
-        + EntityIdEscaped + "', __cspPayload);\n"
-                           "}\n";
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
+        + " = false;\n"
+          "let __cspPayload = {};\n"
+          "try {\n"
+          "    __cspPayload = JSON.parse('"
+        + PayloadJsonEscaped
+        + "');\n"
+          "} catch (_error) {\n"
+          "    __cspPayload = {};\n"
+          "}\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.addCodeComponent === 'function') {\n"
+          "    globalThis."
+        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.addCodeComponent('" + EntityIdEscaped
+        + "', __cspPayload);\n"
+          "}\n";
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-add-bridge>"))
     {
@@ -1657,8 +1696,7 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
     {
         const qjs::Value BoolResult = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT];
         const bool bResult = BoolResult.as<bool>();
-        const std::string AddResultMessage
-            = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}') -> {}.", EntityId.c_str(), bResult);
+        const std::string AddResultMessage = fmt::format("NgxScript Trace: AddCodeComponent(entityId='{}') -> {}.", EntityId.c_str(), bResult);
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, AddResultMessage.c_str());
         return bResult;
     }
@@ -1668,8 +1706,7 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
     }
 }
 
-csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(
-    const csp::common::String& EntityId, const csp::common::String& AttributesJson)
+csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(const csp::common::String& EntityId, const csp::common::String& AttributesJson)
 {
     if (EntityId.IsEmpty())
     {
@@ -1678,26 +1715,31 @@ csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage = fmt::format(
-            "NgxScript Trace: SyncCodeComponentAttributes(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
+        const std::string DeferredMessage
+            = fmt::format("NgxScript Trace: SyncCodeComponentAttributes(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return EMPTY_JSON_OBJECT_STRING;
     }
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string AttributesJsonEscaped = EscapeJSStringLiteral(AttributesJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT) + " = '{}';\n"
-        "let __cspAttributes = {};\n"
-        "try {\n"
-        "    __cspAttributes = JSON.parse('" + AttributesJsonEscaped + "');\n"
-        "} catch (_error) {\n"
-        "    __cspAttributes = {};\n"
-        "}\n"
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentAttributes === 'function') {\n"
-        "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentAttributes('" + EntityIdEscaped + "', __cspAttributes);\n"
-        "    const __cspSerializable = (__cspResult === undefined || __cspResult === null) ? {} : __cspResult;\n"
-        "    try {\n"
-        "        globalThis."
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
+        + " = '{}';\n"
+          "let __cspAttributes = {};\n"
+          "try {\n"
+          "    __cspAttributes = JSON.parse('"
+        + AttributesJsonEscaped
+        + "');\n"
+          "} catch (_error) {\n"
+          "    __cspAttributes = {};\n"
+          "}\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentAttributes === 'function') {\n"
+          "    const __cspResult = globalThis.scriptRegistry.syncCodeComponentAttributes('"
+        + EntityIdEscaped
+        + "', __cspAttributes);\n"
+          "    const __cspSerializable = (__cspResult === undefined || __cspResult === null) ? {} : __cspResult;\n"
+          "    try {\n"
+          "        globalThis."
         + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
         + " = JSON.stringify(__cspSerializable);\n"
           "    } catch (_error) {\n"
@@ -1761,10 +1803,9 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage = fmt::format(
-            "NgxScript Trace: UpdateAttributeForEntity(entityId='{}', key='{}') deferred while script modules are loading.",
-            EntityId.c_str(),
-            Key.c_str());
+        const std::string DeferredMessage
+            = fmt::format("NgxScript Trace: UpdateAttributeForEntity(entityId='{}', key='{}') deferred while script modules are loading.",
+                EntityId.c_str(), Key.c_str());
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return true;
     }
@@ -1772,19 +1813,22 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string KeyEscaped = EscapeJSStringLiteral(Key.c_str());
     const std::string ValueJsonEscaped = EscapeJSStringLiteral(ValueJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = false;\n"
-        "let __cspValue = null;\n"
-        "try {\n"
-        "    __cspValue = JSON.parse('" + ValueJsonEscaped + "');\n"
-        "} catch (_error) {\n"
-        "    __cspValue = null;\n"
-        "}\n"
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.updateAttributeForEntity === 'function') {\n"
-        "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = !!globalThis.scriptRegistry.updateAttributeForEntity('"
-        + EntityIdEscaped + "', '" + KeyEscaped + "', __cspValue);\n"
-                                                  "}\n";
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
+        + " = false;\n"
+          "let __cspValue = null;\n"
+          "try {\n"
+          "    __cspValue = JSON.parse('"
+        + ValueJsonEscaped
+        + "');\n"
+          "} catch (_error) {\n"
+          "    __cspValue = null;\n"
+          "}\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.updateAttributeForEntity === 'function') {\n"
+          "    globalThis."
+        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.updateAttributeForEntity('" + EntityIdEscaped + "', '"
+        + KeyEscaped
+        + "', __cspValue);\n"
+          "}\n";
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-update-attribute-bridge>"))
     {
@@ -1820,20 +1864,20 @@ bool NgxScriptSystem::RemoveCodeComponent(const csp::common::String& EntityId)
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage = fmt::format(
-            "NgxScript Trace: RemoveCodeComponent(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
+        const std::string DeferredMessage
+            = fmt::format("NgxScript Trace: RemoveCodeComponent(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
         LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return true;
     }
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = false;\n"
-        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.removeCodeComponent === 'function') {\n"
-        "    globalThis."
-        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
-        + " = !!globalThis.scriptRegistry.removeCodeComponent('"
-        + EntityIdEscaped + "');\n"
-                           "}\n";
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
+        + " = false;\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.removeCodeComponent === 'function') {\n"
+          "    globalThis."
+        + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.removeCodeComponent('" + EntityIdEscaped
+        + "');\n"
+          "}\n";
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-remove-bridge>"))
     {
@@ -1873,8 +1917,7 @@ bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
         const bool bFoundInBuiltIn = (ModulePathStd == PREACT_SIGNALS_CORE_MODULE);
         if (!bFoundInLoaded && !bFoundInStatic && !bFoundInBuiltIn)
         {
-            const std::string WarningMessage = fmt::format(
-                "NgxScript: Module '{}' not found in loaded or static module maps.", ModulePathStd);
+            const std::string WarningMessage = fmt::format("NgxScript: Module '{}' not found in loaded or static module maps.", ModulePathStd);
             LogSystem.LogMsg(csp::common::LogLevel::Warning, WarningMessage.c_str());
             return false;
         }
@@ -1884,8 +1927,7 @@ bool NgxScriptSystem::ExecuteModule(const csp::common::String& ModulePath)
 
     const bool bSuccess = EvaluateModuleScript(Script, "<ngx-module>");
 
-    const std::string CompletedMessage = fmt::format(
-        "NgxScript Trace: Module '{}' {}.", ModulePathStd, bSuccess ? "completed" : "failed");
+    const std::string CompletedMessage = fmt::format("NgxScript Trace: Module '{}' {}.", ModulePathStd, bSuccess ? "completed" : "failed");
     LogSystem.LogMsg(csp::common::LogLevel::Log, CompletedMessage.c_str());
     return bSuccess;
 }

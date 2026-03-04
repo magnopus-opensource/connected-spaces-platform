@@ -138,6 +138,11 @@ void ProcessScriptTick(csp::systems::NgxScriptSystem& NgxScriptSystem, double Ti
     EXPECT_TRUE(NgxScriptSystem.TickScriptRegistry(TimestampMs));
 }
 
+void ProcessAnimationFrameTick(csp::systems::NgxScriptSystem& NgxScriptSystem, double TimestampMs)
+{
+    EXPECT_TRUE(NgxScriptSystem.TickAnimationFrame(TimestampMs));
+}
+
 void RegisterTrackingRegistryModule(csp::systems::NgxScriptSystem& NgxScriptSystem)
 {
     NgxScriptSystem.RegisterStaticModuleSource("/scripts/engine/registry.js", R"(
@@ -308,6 +313,62 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, TickEventDrainsPendingJobs)
 
     ProcessTickEvent();
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTickValue", -1), 2);
+
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RequestAnimationFrameUsesAnimationFrameTickNotFoundationTick)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("raf-hook-space", &OfflineEngine);
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+globalThis.__ngxRafCallbacks = 0;
+globalThis.__ngxRafCancelled = 0;
+globalThis.__ngxRafFirstTimestampRounded = -1;
+globalThis.__ngxRafSecondTimestampRounded = -1;
+
+const cancelledHandle = requestAnimationFrame(() => {
+    globalThis.__ngxRafCancelled = 1;
+});
+cancelAnimationFrame(cancelledHandle);
+
+requestAnimationFrame((timestampMs) => {
+    globalThis.__ngxRafCallbacks += 1;
+    globalThis.__ngxRafFirstTimestampRounded = Math.round(timestampMs);
+
+    requestAnimationFrame((nextTimestampMs) => {
+        globalThis.__ngxRafCallbacks += 1;
+        globalThis.__ngxRafSecondTimestampRounded = Math.round(nextTimestampMs);
+    });
+});
+)"));
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCallbacks", -1), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCancelled", -1), 0);
+
+    ProcessTickEvent();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCallbacks", -1), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCancelled", -1), 0);
+
+    ProcessAnimationFrameTick(NgxScriptSystem, 1000.0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCallbacks", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafFirstTimestampRounded", -1), 1000);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafSecondTimestampRounded", -1), -1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCancelled", -1), 0);
+
+    ProcessTickEvent();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCallbacks", -1), 1);
+
+    ProcessAnimationFrameTick(NgxScriptSystem, 1016.0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCallbacks", -1), 2);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafSecondTimestampRounded", -1), 1016);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafSecondTimestampRounded", -1),
+        NgxScriptSystem.GetGlobalIntForTesting("__ngxRafFirstTimestampRounded", -1));
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRafCancelled", -1), 0);
 
     NgxScriptSystem.OnExitSpace();
 }

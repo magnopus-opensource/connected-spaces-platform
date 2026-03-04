@@ -55,9 +55,9 @@ public:
     // Execute a loaded module path using the in-memory module map.
     bool ExecuteModule(const csp::common::String& ModulePath);
 
-    // Invoke scriptRegistry.tick(timestampMs).
-    // Can be called from client display refresh and internal runtime tick paths.
-    bool TickScriptRegistry(double TimestampMs);
+    // Invoke requestAnimationFrame callbacks using a display-timestamp tick.
+    // This is intentionally separate from scriptRegistry tick and foundation tick cadence.
+    bool TickAnimationFrame(double TimestampMs);
 
     // Sync schema from scriptRegistry for a Code component entity.
     // Returns JSON stringified attributes object. Falls back to "{}" on missing registry or failure.
@@ -73,8 +73,7 @@ public:
 
     // Update one attribute in scriptRegistry for a Code component entity.
     // ValueJson should be a JSON value (e.g. number, string, object).
-    bool UpdateAttributeForEntity(
-        const csp::common::String& EntityId, const csp::common::String& Key, const csp::common::String& ValueJson);
+    bool UpdateAttributeForEntity(const csp::common::String& EntityId, const csp::common::String& Key, const csp::common::String& ValueJson);
 
     // Remove a Code component from scriptRegistry for an entity.
     bool RemoveCodeComponent(const csp::common::String& EntityId);
@@ -125,8 +124,7 @@ private:
     void OnAssetDetailBlobChanged(const csp::common::NetworkEventData& NetworkEventData);
     bool IsTrackedScriptAssetCollection(const csp::common::String& AssetCollectionId) const;
 
-    void FetchAssetCollectionMapForSpace(
-        uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const;
+    void FetchAssetCollectionMapForSpace(uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const;
 
     bool IsGenerationCurrent(uint64_t Generation) const;
     bool EvaluateModuleScript(const std::string& ScriptText, const char* DebugName);

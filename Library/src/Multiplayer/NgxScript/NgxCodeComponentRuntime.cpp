@@ -25,7 +25,6 @@
 #include "Events/EventSystem.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 
-#include <chrono>
 #include <cmath>
 #include <fmt/format.h>
 
@@ -107,23 +106,20 @@ std::string BuildReplicatedValueLiteral(const csp::common::ReplicatedValue& Valu
     case csp::common::ReplicatedValueType::Vector2:
     {
         const auto& VectorValue = Value.GetVector2();
-        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
-            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + "]";
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + "," + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y))
+            + "]";
     }
     case csp::common::ReplicatedValueType::Vector3:
     {
         const auto& VectorValue = Value.GetVector3();
-        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
-            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + "," + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
             + fmt::format("{:.9g}", static_cast<double>(VectorValue.Z)) + "]";
     }
     case csp::common::ReplicatedValueType::Vector4:
     {
         const auto& VectorValue = Value.GetVector4();
-        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + ","
-            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
-            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Z)) + ","
-            + fmt::format("{:.9g}", static_cast<double>(VectorValue.W)) + "]";
+        return "[" + fmt::format("{:.9g}", static_cast<double>(VectorValue.X)) + "," + fmt::format("{:.9g}", static_cast<double>(VectorValue.Y)) + ","
+            + fmt::format("{:.9g}", static_cast<double>(VectorValue.Z)) + "," + fmt::format("{:.9g}", static_cast<double>(VectorValue.W)) + "]";
     }
     case csp::common::ReplicatedValueType::StringMap:
     {
@@ -200,17 +196,18 @@ std::string BuildBootstrapSnippet(const std::string& ModulePath)
 {
     const std::string EscapedModulePath = EscapeJSStringLiteral(ModulePath);
 
-    return "import * as __ngxRegistryModule from '" + EscapedModulePath + "';\n"
-           "const __ngxFactory = (typeof __ngxRegistryModule.createScriptRegistry === 'function')\n"
-           "    ? __ngxRegistryModule.createScriptRegistry\n"
-           "    : ((typeof __ngxRegistryModule.default === 'function') ? __ngxRegistryModule.default : null);\n"
-           "if (typeof globalThis.scriptRegistry === 'undefined') {\n"
-           "    if (__ngxFactory !== null) {\n"
-           "        globalThis.scriptRegistry = __ngxFactory();\n"
-           "    } else if (__ngxRegistryModule && typeof __ngxRegistryModule.default === 'object') {\n"
-           "        globalThis.scriptRegistry = __ngxRegistryModule.default;\n"
-           "    }\n"
-           "}\n";
+    return "import * as __ngxRegistryModule from '" + EscapedModulePath
+        + "';\n"
+          "const __ngxFactory = (typeof __ngxRegistryModule.createScriptRegistry === 'function')\n"
+          "    ? __ngxRegistryModule.createScriptRegistry\n"
+          "    : ((typeof __ngxRegistryModule.default === 'function') ? __ngxRegistryModule.default : null);\n"
+          "if (typeof globalThis.scriptRegistry === 'undefined') {\n"
+          "    if (__ngxFactory !== null) {\n"
+          "        globalThis.scriptRegistry = __ngxFactory();\n"
+          "    } else if (__ngxRegistryModule && typeof __ngxRegistryModule.default === 'object') {\n"
+          "        globalThis.scriptRegistry = __ngxRegistryModule.default;\n"
+          "    }\n"
+          "}\n";
 }
 
 constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = R"(
@@ -325,51 +322,6 @@ export function createScriptRegistry() {
         return null;
     }
 
-    function isEntityQuery(value, depth = 0) {
-        if (!isObject(value) || depth > 16) {
-            return false;
-        }
-
-        const kind = value.kind;
-        if (typeof kind !== 'string') {
-            return false;
-        }
-
-        if (kind === 'id') {
-            return (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0)
-                || (typeof value.id === 'string' && value.id.length > 0);
-        }
-
-        if (kind === 'name') {
-            return typeof value.name === 'string' && value.name.length > 0;
-        }
-
-        if (kind === 'tag') {
-            return typeof value.tag === 'string' && value.tag.length > 0;
-        }
-
-        if (kind === 'componentType') {
-            return typeof value.componentType === 'number' && Number.isInteger(value.componentType) && value.componentType > 0;
-        }
-
-        if (kind === 'not') {
-            return isEntityQuery(value.operand, depth + 1);
-        }
-
-        if (kind === 'and' || kind === 'or') {
-            if (Array.isArray(value.operands)) {
-                return value.operands.length > 0 && value.operands.every((operand) => isEntityQuery(operand, depth + 1));
-            }
-
-            if (isObject(value.operands)) {
-                const operandKeys = Object.keys(value.operands);
-                return operandKeys.length > 0 && operandKeys.every((operandKey) => isEntityQuery(value.operands[operandKey], depth + 1));
-            }
-        }
-
-        return false;
-    }
-
     function valueMatchesType(type, value) {
         if (type === 'boolean') {
             return typeof value === 'boolean';
@@ -388,7 +340,7 @@ export function createScriptRegistry() {
         }
 
         if (type === 'entity') {
-            return isEntityQuery(value);
+            return typeof value === 'string';
         }
 
         return false;
@@ -405,10 +357,6 @@ export function createScriptRegistry() {
 
         if (typeof value === 'number') {
             return Number.isInteger(value) ? 'integer' : 'float';
-        }
-
-        if (isEntityQuery(value)) {
-            return 'entityQuery';
         }
 
         return typeof value;
@@ -497,8 +445,11 @@ export function createScriptRegistry() {
 
         const next = {};
 
+        // Pass through builtin attributes (keys starting with '$') regardless of schema.
         for (const key of sortedKeys(incoming)) {
-            if (!Object.prototype.hasOwnProperty.call(schema, key)) {
+            if (key.startsWith('$')) {
+                next[key] = cloneValue(incoming[key]);
+            } else if (!Object.prototype.hasOwnProperty.call(schema, key)) {
                 warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
             }
         }
@@ -580,43 +531,23 @@ export function createScriptRegistry() {
         }
     }
 
-    function resolveEntityRefState(query, previousState) {
-        if (!isEntityQuery(query)) {
+    function resolveEntityRefState(entityId, previousState) {
+        // Entity attributes are stored as plain entity ID strings.
+        if (typeof entityId !== 'string' || entityId.length === 0) {
             return {
-                query: null,
                 id: null,
                 status: 'unbound',
                 snapshot: null,
             };
         }
 
-        if (!globalThis.csp || typeof globalThis.csp.__resolveEntityQuery !== 'function') {
-            return {
-                query: cloneValue(query),
-                id: null,
-                status: 'missing',
-                snapshot: null,
-            };
-        }
-
-        const resolvedId = globalThis.csp.__resolveEntityQuery(JSON.stringify(query));
-        if (typeof resolvedId !== 'string' || resolvedId.length === 0) {
-            return {
-                query: cloneValue(query),
-                id: null,
-                status: (previousState && previousState.id !== null) ? 'deleted' : 'missing',
-                snapshot: null,
-            };
-        }
-
         let snapshot = null;
-        if (typeof globalThis.csp.__getEntitySnapshot === 'function') {
-            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(resolvedId));
+        if (globalThis.csp && typeof globalThis.csp.__getEntitySnapshot === 'function') {
+            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(entityId));
         }
 
         return {
-            query: cloneValue(query),
-            id: resolvedId,
+            id: entityId,
             status: snapshot ? 'resolved' : 'missing',
             snapshot,
         };
@@ -853,6 +784,15 @@ export function createScriptRegistry() {
                 value: scriptAttributes[key],
                 attributes: cloneScriptAttributes(scriptAttributes),
             }, 'onUpdateAttributes');
+        }
+
+        // Re-invoke the script callback so scripts that use the imperative
+        // callback pattern (rather than signals + effects) see the updated values.
+        if (changedKeys.length > 0) {
+            safeInvokeScript(entry, {
+                entityId,
+                attributes: cloneScriptAttributes(scriptAttributes),
+            }, 'update');
         }
     }
 
@@ -1201,8 +1141,8 @@ NgxCodeComponentRuntime::~NgxCodeComponentRuntime()
 
 void NgxCodeComponentRuntime::OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine)
 {
-    const std::string EnterMessage = fmt::format("NgxCodeComponentRuntime Trace: OnEnterSpace(spaceId='{}', engineType={}).", InSpaceId.c_str(),
-        RealtimeEngineTypeToString(InRealtimeEngine));
+    const std::string EnterMessage = fmt::format(
+        "NgxCodeComponentRuntime Trace: OnEnterSpace(spaceId='{}', engineType={}).", InSpaceId.c_str(), RealtimeEngineTypeToString(InRealtimeEngine));
     LogSystem.LogMsg(csp::common::LogLevel::Log, EnterMessage.c_str());
 
     ActiveSpaceId = InSpaceId;
@@ -1212,8 +1152,8 @@ void NgxCodeComponentRuntime::OnEnterSpace(const csp::common::String& InSpaceId,
     LastEntitySnapshots.clear();
 
     RegisterBuiltInModules();
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        "NgxCodeComponentRuntime Trace: Deferring script registry bootstrap until script module loading completes.");
+    LogSystem.LogMsg(
+        csp::common::LogLevel::Log, "NgxCodeComponentRuntime Trace: Deferring script registry bootstrap until script module loading completes.");
 }
 
 void NgxCodeComponentRuntime::OnExitSpace()
@@ -1277,9 +1217,8 @@ void NgxCodeComponentRuntime::OnTick()
 
     SyncSnapshots(CurrentSnapshots);
 
-    const double TimestampMs
-        = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    ScriptSystem.TickScriptRegistry(TimestampMs);
+    // requestAnimationFrame callbacks are driven by the client display loop via NgxScriptSystem::TickAnimationFrame.
+    // Keep animation-frame dispatch decoupled from foundation tick cadence.
 }
 
 bool NgxCodeComponentRuntime::BootstrapRegistryIfReady()
@@ -1299,8 +1238,8 @@ bool NgxCodeComponentRuntime::BootstrapRegistryIfReady()
     const bool bHasAssetRegistry = ScriptSystem.HasModuleSource(CODECOMPONENT_ASSET_REGISTRY_MODULE);
     if (bHasAssetRegistry)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Log,
-            "NgxCodeComponentRuntime Trace: Bootstrap strategy uses asset module '/scripts/engine/registry.js'.");
+        LogSystem.LogMsg(
+            csp::common::LogLevel::Log, "NgxCodeComponentRuntime Trace: Bootstrap strategy uses asset module '/scripts/engine/registry.js'.");
         const std::string AssetBootstrapSnippet = BuildBootstrapSnippet(CODECOMPONENT_ASSET_REGISTRY_MODULE);
         if (ScriptSystem.EvaluateSnippet(AssetBootstrapSnippet.c_str(), "<ngx-codecomponent-asset-bootstrap>"))
         {
@@ -1308,12 +1247,10 @@ bool NgxCodeComponentRuntime::BootstrapRegistryIfReady()
             return true;
         }
 
-        LogSystem.LogMsg(
-            csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap script registry from asset module path.");
+        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxCodeComponentRuntime: Failed to bootstrap script registry from asset module path.");
     }
 
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        "NgxCodeComponentRuntime Trace: Bootstrap strategy uses built-in fallback registry module.");
+    LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxCodeComponentRuntime Trace: Bootstrap strategy uses built-in fallback registry module.");
     if (ScriptSystem.ExecuteModule(CODECOMPONENT_BOOTSTRAP_MODULE))
     {
         IsRegistryBootstrapped = true;
@@ -1455,7 +1392,7 @@ void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
-        "    globalThis.scriptRegistry.syncCodeComponentSchema('"
+                                "    globalThis.scriptRegistry.syncCodeComponentSchema('"
         + EscapeJSStringLiteral(EntityIdString) + "');\n" + "}\n";
 
     ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-schema>");
@@ -1468,7 +1405,8 @@ void NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const 
     std::string Snippet = "if (globalThis.scriptRegistry) {\n"
                           "    if (typeof globalThis.scriptRegistry.syncCodeComponentAttributes === 'function') {\n"
                           "        globalThis.scriptRegistry.syncCodeComponentAttributes('"
-        + EscapeJSStringLiteral(EntityIdString) + "', " + AttributesLiteral + ");\n"
+        + EscapeJSStringLiteral(EntityIdString) + "', " + AttributesLiteral
+        + ");\n"
           "    }\n"
           "}\n";
 
@@ -1480,7 +1418,7 @@ void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, co
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string AttributesLiteral = BuildAttributesObjectLiteral(Snapshot.Attributes);
     const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.addCodeComponent === 'function') {\n"
-        "    globalThis.scriptRegistry.addCodeComponent('"
+                                "    globalThis.scriptRegistry.addCodeComponent('"
         + EscapeJSStringLiteral(EntityIdString) + "', { scriptAssetPath: '" + EscapeJSStringLiteral(Snapshot.ScriptAssetPath)
         + "', attributes: " + AttributesLiteral + " });\n" + "}\n";
 
@@ -1489,13 +1427,12 @@ void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, co
     SyncAttributesInRegistry(EntityId, Snapshot);
 }
 
-void NgxCodeComponentRuntime::UpdateAttributeInRegistry(
-    uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute)
+void NgxCodeComponentRuntime::UpdateAttributeInRegistry(uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string AttributeLiteral = BuildAttributeValueLiteral(Attribute);
     const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.updateAttributeForEntity === 'function') {\n"
-        "    globalThis.scriptRegistry.updateAttributeForEntity('"
+                                "    globalThis.scriptRegistry.updateAttributeForEntity('"
         + EscapeJSStringLiteral(EntityIdString) + "', '" + EscapeJSStringLiteral(Key) + "', " + AttributeLiteral + ");\n" + "}\n";
 
     ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-update>");
@@ -1505,11 +1442,10 @@ void NgxCodeComponentRuntime::RemoveEntityFromRegistry(uint64_t EntityId)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.removeCodeComponent === 'function') {\n"
-        "    globalThis.scriptRegistry.removeCodeComponent('"
+                                "    globalThis.scriptRegistry.removeCodeComponent('"
         + EscapeJSStringLiteral(EntityIdString) + "');\n" + "}\n";
 
     ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-remove>");
 }
 
 } // namespace csp::systems
-
