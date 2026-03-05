@@ -29,6 +29,7 @@
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
 #include "Multiplayer/NgxScript/signals.h"
 
 #include "quickjs.h"
@@ -1226,6 +1227,9 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Failed to install host bindings.");
         return;
     }
+
+    csp::multiplayer::NgxEntityScriptBinding EntityBinding(ActiveRealtimeEngine, LogSystem);
+    EntityBinding.BindToContext(*Context);
 
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Host bindings installed.");
 }

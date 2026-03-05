@@ -617,3 +617,93 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
     RealtimeEngine->CreateAvatar("Username", LoginState.UserId, Transform, true, AvatarState::Idle, "AvatarId", AvatarPlayMode::Default,
         LocomotionModel::Grounded, MockCallback.AsStdFunction());
 }
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateLocalEntityDoesNotCallRemoteCreate)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), ::testing::_, ::testing::_))
+        .Times(0);
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), ::testing::_, ::testing::_))
+        .Times(0);
+
+    const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+    SpaceEntity* CreatedEntity = nullptr;
+    RealtimeEngine->CreateLocalEntity("Local Entity", Transform, csp::common::Optional<uint64_t> {},
+        [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
+
+    ASSERT_NE(CreatedEntity, nullptr);
+    EXPECT_TRUE(CreatedEntity->IsLocal());
+    EXPECT_EQ(RealtimeEngine->GetNumObjects(), size_t(1));
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyLocalEntityDoesNotSendRemoteDeletePatch)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+    SpaceEntity* CreatedEntity = nullptr;
+    RealtimeEngine->CreateLocalEntity("Local Entity", Transform, csp::common::Optional<uint64_t> {},
+        [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
+
+    ASSERT_NE(CreatedEntity, nullptr);
+    ASSERT_TRUE(CreatedEntity->IsLocal());
+
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), ::testing::_, ::testing::_))
+        .Times(0);
+
+    bool DestroyResult = false;
+    CreatedEntity->Destroy([&DestroyResult](bool Ok) { DestroyResult = Ok; });
+
+    EXPECT_TRUE(DestroyResult);
+    EXPECT_EQ(RealtimeEngine->GetNumObjects(), size_t(0));
+}
+
+CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, LocalEntityBypassesPatchRateLimiterAndStillUpdatesLocally)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    const SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
+    SpaceEntity* CreatedEntity = nullptr;
+    RealtimeEngine->CreateLocalEntity("Local Entity", Transform, csp::common::Optional<uint64_t> {},
+        [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
+
+    ASSERT_NE(CreatedEntity, nullptr);
+    ASSERT_TRUE(CreatedEntity->IsLocal());
+
+    EXPECT_CALL(
+        *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_PATCHES), ::testing::_, ::testing::_))
+        .Times(0);
+
+    int UpdateCount = 0;
+    CreatedEntity->SetUpdateCallback([&UpdateCount](SpaceEntity*, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+        {
+            if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+            {
+                ++UpdateCount;
+            }
+        });
+
+    EXPECT_TRUE(CreatedEntity->SetPosition(csp::common::Vector3(1.0f, 0.0f, 0.0f)));
+    CreatedEntity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    EXPECT_TRUE(CreatedEntity->SetPosition(csp::common::Vector3(2.0f, 0.0f, 0.0f)));
+    CreatedEntity->QueueUpdate();
+    RealtimeEngine->ProcessPendingEntityOperations();
+
+    EXPECT_EQ(CreatedEntity->GetPosition(), csp::common::Vector3(2.0f, 0.0f, 0.0f));
+    EXPECT_EQ(UpdateCount, 2);
+}

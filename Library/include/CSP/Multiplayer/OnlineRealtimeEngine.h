@@ -60,6 +60,7 @@ namespace csp::common
 {
 class LogSystem;
 class LoginState;
+class IScriptBinding;
 }
 
 namespace csp::common::events
@@ -144,6 +145,14 @@ public:
     /// which will provide a non-owning pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT virtual void CreateEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
         const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback) override;
+
+    /// @brief Create and add a local-only object entity that is never replicated to CHS.
+    /// @param Name csp::common::String : The name of the newly created SpaceEntity.
+    /// @param SpaceTransform csp::multiplayer::SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param ParentID csp::common::Optional<uint64_t> : Optional parent entity id.
+    /// @param Callback csp::multiplayer::EntityCreatedCallback : Callback containing the created local entity.
+    CSP_ASYNC_RESULT virtual void CreateLocalEntity(const csp::common::String& Name, const csp::multiplayer::SpaceTransform& SpaceTransform,
+        const csp::common::Optional<uint64_t>& ParentID, csp::multiplayer::EntityCreatedCallback Callback);
 
     /// @brief Destroy the specified entity.
     /// @param Entity csp::multiplayer::SpaceEntity : A non-owning pointer to the entity to be destroyed.
@@ -466,7 +475,7 @@ private:
         LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
-    class EntityScriptBinding* ScriptBinding;
+    csp::common::IScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
 
     // Leader election ---------------------------------------------------------

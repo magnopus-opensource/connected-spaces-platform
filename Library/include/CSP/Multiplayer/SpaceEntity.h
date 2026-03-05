@@ -121,7 +121,7 @@ public:
     /// Initially implemented for use in OnlineRealtimeEngine::CreateAvatar
     CSP_NO_EXPORT SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner,
         csp::common::LogSystem* LogSystem, SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const SpaceTransform& Transform,
-        uint64_t OwnerId, csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent);
+        uint64_t OwnerId, csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent, bool IsLocal = false);
 
     /// @brief Destroys the SpaceEntity instance.
     ~SpaceEntity();
@@ -229,6 +229,15 @@ public:
     /// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
     /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
     CSP_ASYNC_RESULT void CreateChildEntity(
+        const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+
+    /// @brief Create a new local-only entity with this entity as it's parent.
+    /// Local entities are never replicated to CHS and are updated locally only.
+    /// @param InName csp::common::String : The name to give the new SpaceEntity.
+    /// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+    /// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
+    /// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
+    CSP_ASYNC_RESULT void CreateLocalChildEntity(
         const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
     /// @brief Gets the children of this entity
@@ -377,6 +386,12 @@ public:
     /// Generally true of all entities except entities representing a user within a space
     CSP_NO_EXPORT bool GetIsPersistent() const;
 
+    /// @brief Whether this entity is local-only and should not replicate over the network.
+    CSP_NO_EXPORT bool IsLocal() const;
+
+    /// @brief Marks whether this entity is local-only and should not replicate over the network.
+    CSP_NO_EXPORT void SetLocal(bool InIsLocal);
+
     /// @brief Getter for the time of the last patch
     /// @return std::chrono::milliseconds
     CSP_NO_EXPORT std::chrono::milliseconds GetTimeOfLastPatch();
@@ -460,6 +475,7 @@ private:
     uint64_t Id;
     bool IsTransferable;
     bool IsPersistent;
+    bool IsOwnedByLocalClient;
     uint64_t OwnerId;
     csp::common::Optional<uint64_t> ParentId;
 

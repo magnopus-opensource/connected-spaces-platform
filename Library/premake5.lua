@@ -106,6 +106,7 @@ if not Project then
         -- Preprocessor defines
         defines { 
             "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
+            "CONFIG_BIGNUM",
             "NO_SIGNALRCLIENT_EXPORTS",
             "USE_MSGPACK",
             "POCO_NO_INOTIFY",

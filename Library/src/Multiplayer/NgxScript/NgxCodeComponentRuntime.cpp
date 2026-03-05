@@ -263,7 +263,18 @@ export function createScriptRegistry() {
             return;
         }
 
-        safeCall(entry.scriptCallback, payload, label);
+        if (entry.entityRef && payload && typeof payload.entityId === 'string') {
+            const prevState = entry.entityRef.value
+                ? { id: entry.entityRef.value.id, status: entry.entityRef.value.status, snapshot: entry.entityRef.value.snapshot }
+                : { id: null, status: 'unbound', snapshot: null };
+            entry.entityRef.value = createScriptEntityRef(resolveEntityRefState(payload.entityId, prevState));
+        }
+
+        try {
+            entry.scriptCallback(entry.entityRef ?? { value: null }, payload);
+        } catch (error) {
+            console.error(`NgxCodeComponentRuntime: ${label} failed`, error);
+        }
     }
 
     function initializeScriptCallback(entityId, entry) {
@@ -931,6 +942,7 @@ export function createScriptRegistry() {
             retryCountdown: 0,
             hasWarnedMissingModule: false,
             entityRefStates: {},
+            entityRef: { value: null },
         };
 
         codeComponents.set(entityId, entry);

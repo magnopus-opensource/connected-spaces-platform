@@ -98,6 +98,7 @@ SpaceEntity::SpaceEntity()
     , Id(0)
     , IsTransferable(true)
     , IsPersistent(true)
+    , IsOwnedByLocalClient(false)
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
@@ -119,6 +120,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , Id(0)
     , IsTransferable(true)
     , IsPersistent(true)
+    , IsOwnedByLocalClient(false)
     , OwnerId(0)
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
@@ -154,7 +156,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
 
 SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common::IJSScriptRunner& ScriptRunner, csp::common::LogSystem* LogSystem,
     SpaceEntityType Type, uint64_t Id, const csp::common::String& Name, const csp::multiplayer::SpaceTransform& Transform, uint64_t OwnerId,
-    csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent)
+    csp::common::Optional<uint64_t> ParentId, bool IsTransferable, bool IsPersistent, bool IsLocal)
     : SpaceEntity(EntitySystem, ScriptRunner, LogSystem)
 {
     this->Id = Id;
@@ -164,6 +166,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* EntitySystem, csp::common
     this->OwnerId = OwnerId;
     this->IsTransferable = IsTransferable;
     this->IsPersistent = IsPersistent;
+    this->IsOwnedByLocalClient = IsLocal;
     this->ParentId = ParentId;
 }
 
@@ -285,10 +288,45 @@ bool SpaceEntity::GetIsTransferable() const { return IsTransferable; }
 
 bool SpaceEntity::GetIsPersistent() const { return IsPersistent; }
 
+bool SpaceEntity::IsLocal() const { return IsOwnedByLocalClient; }
+
+void SpaceEntity::SetLocal(bool InIsLocal)
+{
+    if (IsOwnedByLocalClient == InIsLocal)
+    {
+        return;
+    }
+
+    if (InIsLocal && LogSystem != nullptr)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Warning,
+            "SetLocal(true) on an existing replicated entity may suppress outbound patches and cause client divergence.");
+    }
+
+    IsOwnedByLocalClient = InIsLocal;
+}
+
 SpaceEntity* SpaceEntity::GetParentEntity() const { return Parent; }
 
 void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
+    EntitySystem->CreateEntity(InName, InSpaceTransform, GetId(), Callback);
+}
+
+void SpaceEntity::CreateLocalChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+    if (EntitySystem == nullptr)
+    {
+        Callback(nullptr);
+        return;
+    }
+
+    if (EntitySystem->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online)
+    {
+        static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem)->CreateLocalEntity(InName, InSpaceTransform, GetId(), Callback);
+        return;
+    }
+
     EntitySystem->CreateEntity(InName, InSpaceTransform, GetId(), Callback);
 }
 

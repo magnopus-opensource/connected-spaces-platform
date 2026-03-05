@@ -980,3 +980,20 @@ CSP_PUBLIC_TEST(CSPEngine, UnlockPrerequisites, UnlockPrerequisitesTest)
 
     Entity.Unlock();
 }
+
+CSP_PUBLIC_TEST(CSPEngine, LocalEntityFlag, LocalEntityFlagRoundTripTest)
+{
+    RAIIMockLogger MockLogger {};
+    csp::systems::ScriptSystem& ScriptSystem = *csp::systems::SystemsManager::Get().GetScriptSystem();
+    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    SpaceEntity Entity { nullptr, ScriptSystem, LogSystem };
+
+    EXPECT_FALSE(Entity.IsLocal());
+
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Warning, testing::HasSubstr("SetLocal(true)"))).Times(1);
+    Entity.SetLocal(true);
+    EXPECT_TRUE(Entity.IsLocal());
+
+    Entity.SetLocal(false);
+    EXPECT_FALSE(Entity.IsLocal());
+}

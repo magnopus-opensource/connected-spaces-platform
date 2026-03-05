@@ -33,12 +33,12 @@ namespace csp::common
 {
 class LoginState;
 class LogSystem;
+class IScriptBinding;
 }
 
 namespace csp::multiplayer
 {
 class CSPSceneDescription;
-class EntityScriptBinding;
 class SpaceEntityStatePatcher;
 
 /// @brief Class for creating and managing objects in an offline context.
@@ -259,6 +259,6 @@ private:
     std::recursive_mutex EntitiesLock;
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
-    EntityScriptBinding* ScriptBinding;
+    csp::common::IScriptBinding* ScriptBinding;
 };
 }

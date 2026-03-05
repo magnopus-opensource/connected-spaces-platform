@@ -13,6 +13,7 @@ function QuickJS.AddProject()
 
     defines { 
         "_HAS_EXCEPTIONS=0", 
+        "CONFIG_BIGNUM",
     }
 
     warnings "Off"
