@@ -21,6 +21,7 @@
 #include "Common/Web/Json.h"
 #include "Common/Web/WebClient.h"
 #include "Debug/Logging.h"
+#include "Json/JsonParseHelper.h"
 #include "Services/DtoBase/DtoBase.h"
 
 #include <list>
@@ -78,14 +79,14 @@ public:
 
     virtual void FromJson(const utility::string_t& Json) override
     {
-        rapidjson::Document JsonDoc;
+        assert(Json.c_str());
 
-        if (Json.c_str() == nullptr)
+        rapidjson::Document JsonDoc;
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, Json, "DtoArray::FromJson");
+        if (!ok)
         {
             return;
         }
-
-        JsonDoc.Parse(Json.c_str());
 
         if (JsonDoc.IsArray())
         {

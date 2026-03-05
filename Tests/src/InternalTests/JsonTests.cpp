@@ -18,6 +18,8 @@
 #include "gtest/gtest.h"
 
 #include "Json/JsonSerializer.h"
+#include "Json/JsonParseHelper.h"
+#include <CSP/Systems/SystemsManager.h>
 
 using namespace csp::json;
 
@@ -328,4 +330,28 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonEmptyStdContainerObjectTest)
 
     EXPECT_EQ(Obj.Vector.size(), Obj2.Vector.size());
     EXPECT_EQ(Obj.Map.size(), Obj2.Map.size());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, JsonTests, ParseWithErrorLogging_LogsFailure)
+{
+    // Initialize CSP so we can test that ParseWithErrorLogging logs errors to the LogSystem.
+    // Note: If we need to write additional tests around logging in the future, consider creating a separate test fixture.
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& LogSystem = *SystemsManager.GetLogSystem();
+
+    // Set a log callback to capture log messages for verification.
+    std::string log_;
+    LogSystem.SetLogCallback([&]([[maybe_unused]] csp::common::LogLevel Level, const csp::common::String& Message) { log_ += Message; });
+
+    const csp::common::String InvalidJson = "{ invalid json }";
+    rapidjson::Document Doc;
+
+    rapidjson::ParseResult Result = ParseWithErrorLogging(Doc, InvalidJson, "ParseWithErrorLogging_LogsFailure");
+
+    EXPECT_NE(Result, rapidjson::kParseErrorNone);
+    
+    EXPECT_EQ(
+        log_,
+        "Error: ParseWithErrorLogging_LogsFailure: JSON parse error: Missing a name for object member. (at offset 2). Context: { invalid json }");
 }

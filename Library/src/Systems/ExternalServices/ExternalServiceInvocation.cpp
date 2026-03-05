@@ -15,9 +15,9 @@
  */
 #include "CSP/Systems/ExternalServices/ExternalServiceInvocation.h"
 #include "Debug/Logging.h"
-
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/aggregationservice/Dto.h"
+#include "Json/JsonParseHelper.h"
 
 #include <regex>
 
@@ -82,7 +82,11 @@ void GetAgoraTokenResult::OnResponse(const services::ApiResponseBase* ApiRespons
     {
         // Extract the Agora token from the observed operation result.
         rapidjson::Document OperationResultJson;
-        OperationResultJson.Parse(OperationResult);
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(OperationResultJson, OperationResult, "GetAgoraTokenResult::OnResponse");
+        if (!ok)
+        {
+            return;
+        }
 
         // As this is a specialized function for Agora, we know the format to expect.
         if (OperationResultJson.HasMember("token") && OperationResultJson["token"].IsString())

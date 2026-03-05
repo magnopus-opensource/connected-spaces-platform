@@ -15,8 +15,8 @@
  */
 
 #include "CSP/Systems/Maintenance/Maintenance.h"
-
 #include "Services/ApiBase/ApiBase.h"
+#include "Json/JsonParseHelper.h"
 
 #include <algorithm>
 
@@ -41,8 +41,13 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {
         rapidjson::Document JsonDoc;
+        rapidjson::ParseResult ok
+            = csp::json::ParseWithErrorLogging(JsonDoc, ApiResponse->GetResponse()->GetPayload().GetContent(), "MaintenanceInfoResult::OnResponse");
+        if (!ok)
+        {
+            return;
+        }
 
-        JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
         assert(JsonDoc.IsArray());
         auto LocalArray = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
 

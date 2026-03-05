@@ -20,6 +20,7 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
+#include "Json/JsonParseHelper.h"
 
 using namespace csp::common;
 
@@ -80,11 +81,13 @@ namespace SpaceSystemHelpers
     void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata)
     {
         rapidjson::Document Json;
-        Json.Parse(JsonMetadata.c_str());
-
-        if (!Json.IsObject())
+        rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(Json, JsonMetadata, "ConvertJsonMetadataToMapMetadata");
+        if (!ok || !Json.IsObject())
         {
-            CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+            if (ok)
+            {
+                CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+            }
 
             OutMapMetadata["site"] = "Void";
             OutMapMetadata["multiplayerVersion"]
