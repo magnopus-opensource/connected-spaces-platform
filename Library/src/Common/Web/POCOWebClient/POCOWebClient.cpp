@@ -138,7 +138,8 @@ void POCOWebClient::Get(HttpRequest& Request)
 
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-    Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
     for (auto Header : Request.GetPayload().GetHeaders())
@@ -202,7 +203,8 @@ void POCOWebClient::Post(HttpRequest& Request)
 
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-    Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_POST, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
     for (auto Header : Request.GetPayload().GetHeaders())
@@ -259,7 +261,8 @@ void POCOWebClient::Put(HttpRequest& Request)
 
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-    Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
     for (auto Header : Request.GetPayload().GetHeaders())
@@ -305,7 +308,8 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-    Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
     for (auto Header : Request.GetPayload().GetHeaders())
@@ -345,7 +349,8 @@ void POCOWebClient::Head(HttpRequest& Request)
 
     Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-    Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
     for (auto Header : Request.GetPayload().GetHeaders())

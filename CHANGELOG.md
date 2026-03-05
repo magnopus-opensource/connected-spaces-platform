@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.29.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5232] fix: Clean up HttpClientSession after use by MAG-AdamThorn
+  As reported in the OB-5232, CSP were not correctly cleaning up HttpClientSession objects after performing Http Methods. This meant the HTTPSession objects were not being destroyed and their sockets closed. The poco/Net/src/HTTPSessionInstantiator.cpp class creates and returns a raw pointer to the HTTPClientSession, it does not own the memory. The fix is to use a unique_ptr to ensure the session is correctly cleaned up after use.
+
 ## [6.28.0]
 
 ### 🐛 🔨 Bug Fixes
