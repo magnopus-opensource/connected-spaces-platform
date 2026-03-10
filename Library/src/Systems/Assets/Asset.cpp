@@ -288,8 +288,6 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     }
 }
 
-csp::common::String& UriResult::GetUri() { return Uri; }
-
 const csp::common::String& UriResult::GetUri() const { return Uri; }
 
 void UriResult::SetUri(const csp::common::String& Value) { Uri = Value; }

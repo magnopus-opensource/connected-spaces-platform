@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.30.0]
+
+### 🔥 ❗Breaking Changes
+
+- [OF-1843] chore!: Remove mutable `csp::common::String& GetUri()` from `UriResult`. The const getter remains available. By @MAG-ElliotMorris
+
 ## [6.29.0]
 
 ### 🐛 🔨 Bug Fixes
