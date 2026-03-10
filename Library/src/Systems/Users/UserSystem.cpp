@@ -221,11 +221,10 @@ const csp::common::LoginState& UserSystem::GetLoginState() const { return Curren
 
 void UserSystem::SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback) { RefreshTokenChangedCallback = Callback; }
 
-void UserSystem::Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
-    bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
-    LoginStateResultCallback Callback)
+void UserSystem::Login(const csp::common::String& Email, const csp::common::String& Password, bool CreateMultiplayerConnection,
+    const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback)
 {
-    if (UserName.IsEmpty() && Email.IsEmpty())
+    if (Email.IsEmpty())
     {
         CSP_LOG_ERROR_MSG("UserSystem::Login, One of either Username or Email must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
@@ -244,7 +243,6 @@ void UserSystem::Login(const csp::common::String& UserName, const csp::common::S
 
         auto Request = std::make_shared<chs_user::LoginRequest>();
         Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-        Request->SetUserName(UserName);
         Request->SetEmail(Email);
         Request->SetPassword(Password);
         Request->SetTenant(csp::CSPFoundation::GetTenant());
@@ -554,8 +552,9 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
             const auto AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
 
             auto AuthoriseURL = csp::common::StringFormat(
-                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post", AuthoriseUrl.c_str(),
-                ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(), RedirectURL.c_str());
+                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post",
+                AuthoriseUrl.c_str(), ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(),
+                RedirectURL.c_str());
 
             StringResult SuccessResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
             SuccessResult.SetValue(AuthoriseURL);

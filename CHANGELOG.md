@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.30.0]
 
-### 🔥 ❗Breaking Changes
+🔥 ❗Breaking Changes
+
+- [OF-1771] refac!: Remove `username` as an option to for account management by MAG-ElliotMorris
+  Login has traditionally accepted either an email or a username, but username
+  has rarely/never been used, and dealing with both creates some complexity in
+  the error handling behaviour which we can just do without. Login with email
+  now, you probably already are.
+  Removes username as an option from public api:
+    - UserSystem::Login
+    - UserSystem::CreateUser
+    - UserSystem::UpgradeGuestAccount
+     
 
 - [OF-1843] chore!: Remove mutable `csp::common::String& GetUri()` from `UriResult`. The const getter remains available. By @MAG-ElliotMorris
 
