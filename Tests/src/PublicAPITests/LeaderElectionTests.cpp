@@ -491,7 +491,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
             OnElectedScopeLeaderPromise.set_value();
         });
 
-    EXPECT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
+    ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
 
     // Get the scope leader
     auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
