@@ -156,9 +156,20 @@ void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
 {
     const signalr::value Params { std::vector { signalr::value { ScopeId } } };
 
+    // Get a weak pointer from this.
+    std::weak_ptr<ScopeLeadershipManager> WeakThis = weak_from_this();
+
     Connection.GetSignalRConnection()->Invoke(Connection.GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT), Params,
-        [this, ScopeId](signalr::value, std::exception_ptr Exception)
+        [WeakThis, ScopeId](signalr::value, std::exception_ptr Exception)
         {
+                auto Self = WeakThis.lock();
+
+                // Bail if the weak pointer is not valid. Indicates the ScopeLeadershipManager has been destroyed.
+                if (!Self)
+                {
+                    return;
+                }
+
             if (Exception)
             {
                 // An exception was thrown. In this case, we just log an error to notify clients.
@@ -169,14 +180,14 @@ void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
                 }
                 catch (const std::exception& Exception)
                 {
-                    LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    Self->LogSystem.LogMsg(csp::common::LogLevel::Error,
                         fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {0} with error: {1}", ScopeId,
                             Exception.what())
                             .c_str());
                 }
                 catch (...)
                 {
-                    LogSystem.LogMsg(csp::common::LogLevel::Error,
+                    Self->LogSystem.LogMsg(csp::common::LogLevel::Error,
                         fmt::format(
                             "ScopeLeadershipManager::SendLeaderHeartbeat Failed to send heartbeat for scope: {} with an unknown error.", ScopeId)
                             .c_str());
@@ -185,9 +196,9 @@ void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
             else
             {
                 // Successfuly sent the heartbeat.
-                LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
+                Self->LogSystem.LogMsg(csp::common::LogLevel::VeryVerbose,
                     fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Heartbeat was successfuly sent for scope: {}", ScopeId).c_str());
             }
         });
-}
+    }
 }

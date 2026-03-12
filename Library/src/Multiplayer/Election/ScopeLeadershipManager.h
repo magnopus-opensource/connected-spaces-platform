@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -38,7 +39,7 @@ class MultiplayerConnection;
 // with the scopeId as the key, and optional scope leader data as the value.
 // This map gets updated through the OnElectedScopeLeader and OnVacatedAsScopeLeader callbacks.
 // This also sends heartbeats to the server to notify chs that the current leader is still active.
-class ScopeLeadershipManager
+class ScopeLeadershipManager : public std::enable_shared_from_this<ScopeLeadershipManager>
 {
 public:
     ScopeLeadershipManager(MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem);
