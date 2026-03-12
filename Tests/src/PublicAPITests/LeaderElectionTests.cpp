@@ -479,6 +479,20 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
     // Enter space
     auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
+    // Wait for initial elected event
+    std::promise<void> OnElectedScopeLeaderPromise;
+    auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
+    RealtimeEngine->SetOnElectedScopeLeaderCallback(
+        [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+        {
+            std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
+            EXPECT_EQ(UserId, LeaderUserId);
+            OnElectedScopeLeaderPromise.set_value();
+        });
+
+    EXPECT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
+
     // Get the scope leader
     auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
     EXPECT_EQ(GetScopeLeaderResult.GetResultCode(), csp::systems::EResultCode::Success);
