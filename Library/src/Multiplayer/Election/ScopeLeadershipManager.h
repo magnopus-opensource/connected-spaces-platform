@@ -39,7 +39,7 @@ class MultiplayerConnection;
 // with the scopeId as the key, and optional scope leader data as the value.
 // This map gets updated through the OnElectedScopeLeader and OnVacatedAsScopeLeader callbacks.
 // This also sends heartbeats to the server to notify chs that the current leader is still active.
-class ScopeLeadershipManager : public std::enable_shared_from_this<ScopeLeadershipManager>
+class ScopeLeadershipManager
 {
 public:
     ScopeLeadershipManager(MultiplayerConnection& Connection, csp::common::LogSystem& LogSystem);
@@ -88,6 +88,9 @@ private:
     // Key is the Scope id.
     // std::nullopt represents a scope which doesn't have a leader, meaning an election is currently in progress.
     std::unordered_map<std::string, std::optional<ScopeLeaderData>> Scopes;
+
+     // Represents the lifetime of the ScopeLeadershipManager. Used to ensure async callbacks don't operate on this object after it is destroyed.
+    std::shared_ptr<int> LifetimeToken = std::make_shared<int>(0);
 };
 
 CSP_START_IGNORE
