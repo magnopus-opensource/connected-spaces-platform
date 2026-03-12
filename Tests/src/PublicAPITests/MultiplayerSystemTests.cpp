@@ -297,8 +297,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerSystemTests, GetScopeLeaderNoManagedElecti
     {
         FAIL();
     }
+    
+    csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
+    csp::common::String ScopeId = DefaultScope.Id;
 
-    csp::common::String ScopeId = GetScopesResult.GetScopes()[0].Id;
+    // Ensure managed leader election is turned off first
+    {
+
+        DefaultScope.ManagedLeaderElection = false;
+        auto [UpdateScopeResult] = AWAIT_PRE(MultiplayerSystem, UpdateScopeById, RequestPredicate, ScopeId, DefaultScope);
+        EXPECT_EQ(UpdateScopeResult.GetResultCode(), csp::systems::EResultCode::Success);
+    }
 
     // Getting the scope leader should fail because the scope doesn't have managed leader election enabled.
     auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
