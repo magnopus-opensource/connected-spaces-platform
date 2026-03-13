@@ -16,6 +16,8 @@
 
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 
+#include <rapidjson/document.h>
+
 namespace csp::multiplayer
 {
 
@@ -23,8 +25,10 @@ CodeSpaceComponent::CodeSpaceComponent(csp::common::LogSystem* LogSystem, SpaceE
     : ComponentBase(ComponentType::Code, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::ScriptAssetPath)] = "";
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType)] = static_cast<int64_t>(csp::multiplayer::CodeScopeType::Owner);
-    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes)] = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
+    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType)] = static_cast<int64_t>(csp::multiplayer::CodeScopeType::Local);
+    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes)]
+        = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
+    Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema)] = "";
 }
 
 const csp::common::String& CodeSpaceComponent::GetScriptAssetPath() const
@@ -81,8 +85,8 @@ void CodeSpaceComponent::RemoveAttribute(const csp::common::String& Key)
 
 void CodeSpaceComponent::ClearAttributes()
 {
-    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes),
-        csp::common::Map<csp::common::String, csp::common::ReplicatedValue>());
+    SetProperty(
+        static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes), csp::common::Map<csp::common::String, csp::common::ReplicatedValue>());
 }
 
 csp::common::List<csp::common::String> CodeSpaceComponent::GetAttributeKeys() const
@@ -96,5 +100,252 @@ csp::common::List<csp::common::String> CodeSpaceComponent::GetAttributeKeys() co
     return AttributeKeys;
 }
 
-} // namespace csp::multiplayer
+const csp::common::String& CodeSpaceComponent::GetSchema() const
+{
+    return GetStringProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema));
+}
 
+void CodeSpaceComponent::SetSchema(const csp::common::String& SchemaJson)
+{
+    SetProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Schema), SchemaJson);
+}
+
+namespace
+{
+
+ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
+{
+    if (!TypeString)
+    {
+        return ScriptAttributeType::Invalid;
+    }
+
+    if (strcmp(TypeString, "boolean") == 0)
+    {
+        return ScriptAttributeType::Boolean;
+    }
+
+    if (strcmp(TypeString, "integer") == 0)
+    {
+        return ScriptAttributeType::Integer;
+    }
+
+    if (strcmp(TypeString, "float") == 0 || strcmp(TypeString, "number") == 0)
+    {
+        return ScriptAttributeType::Float;
+    }
+
+    if (strcmp(TypeString, "string") == 0)
+    {
+        return ScriptAttributeType::String;
+    }
+
+    if (strcmp(TypeString, "entity") == 0)
+    {
+        return ScriptAttributeType::EntityQuery;
+    }
+
+    return ScriptAttributeType::Invalid;
+}
+
+bool TryApplySchemaDefault(const rapidjson::Value& Entry, ScriptAttributeType Type, NgxScriptAttribute& OutAttribute)
+{
+    if (!Entry.HasMember("default"))
+    {
+        return false;
+    }
+
+    const rapidjson::Value& DefaultValue = Entry["default"];
+    switch (Type)
+    {
+    case ScriptAttributeType::Boolean:
+        if (!DefaultValue.IsBool())
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(DefaultValue.GetBool());
+        return true;
+
+    case ScriptAttributeType::Integer:
+        if (!DefaultValue.IsNumber())
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(static_cast<int64_t>(DefaultValue.GetInt64()));
+        return true;
+
+    case ScriptAttributeType::Float:
+        if (!DefaultValue.IsNumber())
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(static_cast<float>(DefaultValue.GetDouble()));
+        return true;
+
+    case ScriptAttributeType::String:
+        if (!DefaultValue.IsString())
+        {
+            return false;
+        }
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::String(DefaultValue.GetString()));
+        return true;
+
+    case ScriptAttributeType::EntityQuery:
+        if (DefaultValue.IsString())
+        {
+            csp::common::Map<csp::common::String, csp::common::ReplicatedValue> QueryMap;
+            QueryMap["id"] = csp::common::ReplicatedValue(csp::common::String(DefaultValue.GetString()));
+            OutAttribute.Value = csp::common::ReplicatedValue(QueryMap);
+            return true;
+        }
+
+        if (DefaultValue.IsObject() && DefaultValue.HasMember("id") && DefaultValue["id"].IsString())
+        {
+            csp::common::Map<csp::common::String, csp::common::ReplicatedValue> QueryMap;
+            QueryMap["id"] = csp::common::ReplicatedValue(csp::common::String(DefaultValue["id"].GetString()));
+            OutAttribute.Value = csp::common::ReplicatedValue(QueryMap);
+            return true;
+        }
+        return false;
+
+    default:
+        return false;
+    }
+}
+
+void ApplyBuiltInTypeDefault(ScriptAttributeType Type, NgxScriptAttribute& OutAttribute)
+{
+    switch (Type)
+    {
+    case ScriptAttributeType::Boolean:
+        OutAttribute.Value = csp::common::ReplicatedValue(false);
+        break;
+
+    case ScriptAttributeType::Integer:
+        OutAttribute.Value = csp::common::ReplicatedValue(static_cast<int64_t>(0));
+        break;
+
+    case ScriptAttributeType::Float:
+        OutAttribute.Value = csp::common::ReplicatedValue(0.0f);
+        break;
+
+    case ScriptAttributeType::String:
+        OutAttribute.Value = csp::common::ReplicatedValue(csp::common::String(""));
+        break;
+
+    case ScriptAttributeType::EntityQuery:
+    {
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> QueryMap;
+        QueryMap["id"] = csp::common::ReplicatedValue(csp::common::String(""));
+        OutAttribute.Value = csp::common::ReplicatedValue(QueryMap);
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
+} // namespace
+
+csp::common::List<NgxScriptAttribute> CodeSpaceComponent::GetScriptAttributes() const
+{
+    csp::common::List<NgxScriptAttribute> Result;
+
+    const csp::common::String& SchemaJson = GetSchema();
+    if (SchemaJson.IsEmpty())
+    {
+        return Result;
+    }
+
+    rapidjson::Document SchemaDoc;
+    SchemaDoc.Parse(SchemaJson.c_str());
+    if (SchemaDoc.HasParseError() || !SchemaDoc.IsObject())
+    {
+        return Result;
+    }
+
+    const auto& Attributes = GetStringMapProperty(static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes));
+
+    for (auto SchemaIt = SchemaDoc.MemberBegin(); SchemaIt != SchemaDoc.MemberEnd(); ++SchemaIt)
+    {
+        if (!SchemaIt->value.IsObject())
+        {
+            continue;
+        }
+
+        const char* KeyName = SchemaIt->name.GetString();
+        const auto& Entry = SchemaIt->value;
+
+        if (!Entry.HasMember("type") || !Entry["type"].IsString())
+        {
+            continue;
+        }
+
+        const ScriptAttributeType ParsedType = SchemaTypeStringToEnum(Entry["type"].GetString());
+        if (ParsedType == ScriptAttributeType::Invalid)
+        {
+            continue;
+        }
+
+        NgxScriptAttribute ScriptAttr;
+        ScriptAttr.Name = KeyName;
+        ScriptAttr.Type = ParsedType;
+
+        if (Entry.HasMember("min") && Entry["min"].IsNumber())
+        {
+            ScriptAttr.Min = static_cast<float>(Entry["min"].GetDouble());
+            ScriptAttr.HasMin = true;
+        }
+
+        if (Entry.HasMember("max") && Entry["max"].IsNumber())
+        {
+            ScriptAttr.Max = static_cast<float>(Entry["max"].GetDouble());
+            ScriptAttr.HasMax = true;
+        }
+
+        if (Entry.HasMember("step") && Entry["step"].IsNumber())
+        {
+            ScriptAttr.Step = static_cast<float>(Entry["step"].GetDouble());
+            ScriptAttr.HasStep = true;
+        }
+
+        if (Entry.HasMember("required") && Entry["required"].IsBool())
+        {
+            ScriptAttr.Required = Entry["required"].GetBool();
+        }
+
+        // Look up the current live value from the Attributes map.
+        const auto ValueIt = Attributes.Find(KeyName);
+        if (ValueIt != Attributes.end())
+        {
+            CodeAttribute CodeAttr;
+            if (CodeAttribute::TryFromReplicatedValue(ValueIt->second, CodeAttr))
+            {
+                ScriptAttr.Value = CodeAttr.ToReplicatedValue();
+            }
+            else
+            {
+                const bool bAppliedSchemaDefault = TryApplySchemaDefault(Entry, ScriptAttr.Type, ScriptAttr);
+                if (!bAppliedSchemaDefault)
+                {
+                    ApplyBuiltInTypeDefault(ScriptAttr.Type, ScriptAttr);
+                }
+            }
+        }
+        else
+        {
+            const bool bAppliedSchemaDefault = TryApplySchemaDefault(Entry, ScriptAttr.Type, ScriptAttr);
+            if (!bAppliedSchemaDefault)
+            {
+                ApplyBuiltInTypeDefault(ScriptAttr.Type, ScriptAttr);
+            }
+        }
+
+        Result.Append(ScriptAttr);
+    }
+
+    return Result;
+}
+
+} // namespace csp::multiplayer

@@ -24,9 +24,8 @@
 #include "Common/UUIDGenerator.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
-#include "Multiplayer/RealtimeEngineUtils.h"
 #include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
-
+#include "Multiplayer/RealtimeEngineUtils.h"
 
 #include "CSP/Common/fmt_Formatters.h"
 
@@ -37,7 +36,6 @@ namespace csp::multiplayer
 {
 
 using RealtimeEntityScriptBinding = csp::multiplayer::NgxEntityScriptBinding;
-
 
 // Handler to listen to tick events, and do the script update
 class OfflineSpaceEntityEventHandler : public csp::events::EventListener
@@ -113,7 +111,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
     : LogSystem { &LogSystem }
     , ScriptRunner { &RemoteScriptRunner }
 {
-    ScriptBinding = RealtimeEntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+    ScriptBinding = RealtimeEntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner, true);
 
     // Is this undefined behaviour? Probably only if we actually use the pointer during construction
     EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);

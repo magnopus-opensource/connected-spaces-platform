@@ -64,6 +64,7 @@ private:
 
     bool ExecuteRegistrySnippet(const std::string& Snippet, const char* DebugName) const;
     void SyncSchemaInRegistry(uint64_t EntityId);
+    void DrainPendingSchemaSyncs();
     void SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot);
     void AddOrReplaceEntityInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot);
     void UpdateAttributeInRegistry(uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute);

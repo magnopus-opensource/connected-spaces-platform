@@ -78,6 +78,10 @@ public:
     // Remove a Code component from scriptRegistry for an entity.
     bool RemoveCodeComponent(const csp::common::String& EntityId);
 
+    // Drain entity IDs whose schema was resolved after an async module load.
+    // Returns a JSON array string e.g. ["123","456"]. Falls back to "[]" on failure.
+    csp::common::String DrainPendingSchemaSyncs();
+
     CSP_START_IGNORE
     // Internal runtime hooks (not exposed through wrappers).
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
@@ -104,6 +108,7 @@ public:
     CSP_NO_EXPORT int32_t GetGlobalIntForTesting(const csp::common::String& Key, int32_t DefaultValue = 0) const;
     CSP_NO_EXPORT void SetLoadedModuleSourceForTesting(const csp::common::String& ModulePath, const csp::common::String& ModuleSource);
     CSP_NO_EXPORT bool RunModuleForTesting(const csp::common::String& ModulePath);
+    CSP_NO_EXPORT bool TickScriptRegistry(double TimestampMs);
 #endif
 
 private:

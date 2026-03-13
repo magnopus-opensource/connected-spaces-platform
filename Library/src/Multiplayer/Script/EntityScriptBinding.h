@@ -30,16 +30,17 @@ namespace csp::multiplayer
 class EntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
-    EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem);
+    EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool LocalScope = false);
     void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
 
-    static EntityScriptBinding* BindEntitySystem(
-        csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+    static EntityScriptBinding* BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem,
+        csp::common::IJSScriptRunner& ScriptRunner, bool LocalScope = false);
     static void RemoveBinding(EntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:
     csp::common::IRealtimeEngine* EntitySystem;
     csp::common::LogSystem& LogSystem;
+    bool LocalScope;
 };
 
 } // namespace csp::multiplayer

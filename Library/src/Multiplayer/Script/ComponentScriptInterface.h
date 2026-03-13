@@ -49,8 +49,13 @@ public:
 
     void SendPropertyUpdate();
 
+    void SetLocalScope(bool IsLocal) { LocalScope = IsLocal; }
+
 protected:
     ComponentBase* Component;
+
+private:
+    bool LocalScope = false;
 };
 
 } // namespace csp::multiplayer

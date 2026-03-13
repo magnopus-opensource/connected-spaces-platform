@@ -882,6 +882,16 @@ bool NgxScriptSystem::RunModuleForTesting(const csp::common::String& ModulePath)
     RebuildContext();
     return ExecuteModule(ModulePath);
 }
+
+bool NgxScriptSystem::TickScriptRegistry(double TimestampMs)
+{
+    std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
+                          "    globalThis.scriptRegistry.tick("
+        + std::to_string(TimestampMs)
+        + ");\n"
+          "}\n";
+    return EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-tick>");
+}
 #endif
 
 void NgxScriptSystem::RebuildContext()
@@ -1228,7 +1238,7 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
         return;
     }
 
-    csp::multiplayer::NgxEntityScriptBinding EntityBinding(ActiveRealtimeEngine, LogSystem);
+    csp::multiplayer::NgxEntityScriptBinding EntityBinding(ActiveRealtimeEngine, LogSystem, true);
     EntityBinding.BindToContext(*Context);
 
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Host bindings installed.");
@@ -1905,6 +1915,47 @@ bool NgxScriptSystem::RemoveCodeComponent(const csp::common::String& EntityId)
     catch (...)
     {
         return false;
+    }
+}
+
+csp::common::String NgxScriptSystem::DrainPendingSchemaSyncs()
+{
+    if (!Context)
+    {
+        return "[]";
+    }
+
+    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
+        + " = '[]';\n"
+          "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.drainPendingSchemaSyncs === 'function') {\n"
+          "    try {\n"
+          "        globalThis."
+        + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
+        + " = JSON.stringify(globalThis.scriptRegistry.drainPendingSchemaSyncs());\n"
+          "    } catch (_e) {}\n"
+          "}\n";
+
+    if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-drain-schema-syncs>"))
+    {
+        PumpPendingJobs();
+        return "[]";
+    }
+
+    PumpPendingJobs();
+
+    std::scoped_lock ContextLock(ContextMutex);
+    if (!Context)
+    {
+        return "[]";
+    }
+    try
+    {
+        const qjs::Value Result = Context->global()[CODECOMPONENT_JSON_RESULT_SLOT];
+        return csp::common::String(Result.as<std::string>().c_str());
+    }
+    catch (...)
+    {
+        return "[]";
     }
 }
 

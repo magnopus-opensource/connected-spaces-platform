@@ -32,7 +32,7 @@ class VideoPlayerSpaceComponentScriptInterface;
 class EntityScriptInterface
 {
 public:
-    EntityScriptInterface(SpaceEntity* InEntity = nullptr);
+    EntityScriptInterface(SpaceEntity* InEntity = nullptr, bool IsLocal = false);
 
     using Vector3 = std::vector<float>;
     using Vector4 = std::vector<float>;
@@ -74,7 +74,10 @@ public:
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
 private:
+    void CommitEntityUpdate();
+
     SpaceEntity* Entity;
+    bool LocalScope = false;
 };
 
 template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
@@ -94,7 +97,9 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
 
             if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
             {
-                Components.push_back((ScriptInterface*)Component->GetScriptInterface());
+                auto* Iface = (ScriptInterface*)Component->GetScriptInterface();
+                Iface->SetLocalScope(LocalScope);
+                Components.push_back(Iface);
             }
         }
 

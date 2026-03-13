@@ -16,8 +16,8 @@
 #include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
+#include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -49,9 +49,9 @@ private:
 namespace csp::multiplayer
 {
 
-NgxEntityScriptBinding::NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
+NgxEntityScriptBinding::NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool LocalScope)
     : EntitySystem(InEntitySystem)
-    , LegacyBinding(std::make_unique<EntityScriptBinding>(InEntitySystem, LogSystem))
+    , LegacyBinding(std::make_unique<EntityScriptBinding>(InEntitySystem, LogSystem, LocalScope))
 {
 }
 
@@ -115,8 +115,8 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
             = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
 
         SpaceEntity* CreatedEntity = nullptr;
-        OnlineEngine->CreateLocalEntity(Name.c_str(), DefaultTransform, csp::common::Optional<uint64_t> {},
-            [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
+        OnlineEngine->CreateLocalEntity(
+            Name.c_str(), DefaultTransform, csp::common::Optional<uint64_t> {}, [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
 
         return CreatedEntity != nullptr ? CreatedEntity->GetScriptInterface() : nullptr;
     };
@@ -148,9 +148,9 @@ if (typeof globalThis.__ngxCreateLocalEntity === "function") {
 }
 
 NgxEntityScriptBinding* NgxEntityScriptBinding::BindEntitySystem(
-    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner, bool LocalScope)
 {
-    auto* ScriptBinding = new NgxEntityScriptBinding(InEntitySystem, LogSystem);
+    auto* ScriptBinding = new NgxEntityScriptBinding(InEntitySystem, LogSystem, LocalScope);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
 }

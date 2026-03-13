@@ -48,6 +48,8 @@
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
+#include <unordered_map>
+
 namespace csp::multiplayer
 {
 
@@ -92,6 +94,10 @@ public:
     {
     }
 
+    virtual ~EntitySystemScriptInterface() = default;
+
+    virtual EntityScriptInterface* WrapEntity(SpaceEntity* Entity) { return Entity->GetScriptInterface(); }
+
     std::vector<uint64_t> GetEntityIds()
     {
         std::vector<uint64_t> EntityIds;
@@ -121,7 +127,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                Entities.push_back(Entity->GetScriptInterface());
+                Entities.push_back(WrapEntity(Entity));
             }
         }
 
@@ -137,7 +143,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumObjects(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetObjectByIndex(i);
-                Objects.push_back(Entity->GetScriptInterface());
+                Objects.push_back(WrapEntity(Entity));
             }
         }
 
@@ -153,7 +159,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetNumAvatars(); ++i)
             {
                 SpaceEntity* Entity = EntitySystem->GetAvatarByIndex(i);
-                Avatars.push_back(Entity->GetScriptInterface());
+                Avatars.push_back(WrapEntity(Entity));
             }
         }
 
@@ -195,7 +201,7 @@ public:
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
                 if (Entity->GetId() == static_cast<uint64_t>(EntityId))
                 {
-                    ScriptInterface = Entity->GetScriptInterface();
+                    ScriptInterface = WrapEntity(Entity);
                     break;
                 }
             }
@@ -216,7 +222,7 @@ public:
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
                 if (Entity->GetName() == EntityName.c_str())
                 {
-                    ScriptInterface = Entity->GetScriptInterface();
+                    ScriptInterface = WrapEntity(Entity);
                     break;
                 }
             }
@@ -235,7 +241,7 @@ public:
             for (size_t i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
             {
                 SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
-                RootHierarchyEntities.push_back(Entity->GetScriptInterface());
+                RootHierarchyEntities.push_back(WrapEntity(Entity));
             }
         }
 
@@ -246,6 +252,39 @@ public:
 
 private:
     csp::common::IRealtimeEngine* EntitySystem;
+};
+
+class LocalEntitySystemScriptInterface : public EntitySystemScriptInterface
+{
+public:
+    LocalEntitySystemScriptInterface(csp::common::IRealtimeEngine* InEntitySystem)
+        : EntitySystemScriptInterface(InEntitySystem)
+    {
+    }
+
+    ~LocalEntitySystemScriptInterface() override
+    {
+        for (auto& [Id, Iface] : EntityCache)
+        {
+            delete Iface;
+        }
+    }
+
+    EntityScriptInterface* WrapEntity(SpaceEntity* Entity) override
+    {
+        const uint64_t Id = Entity->GetId();
+        auto It = EntityCache.find(Id);
+        if (It != EntityCache.end())
+        {
+            return It->second;
+        }
+        auto* Iface = new EntityScriptInterface(Entity, true);
+        EntityCache[Id] = Iface;
+        return Iface;
+    }
+
+private:
+    std::unordered_map<uint64_t, EntityScriptInterface*> EntityCache;
 };
 
 void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSystem)
@@ -260,16 +299,17 @@ void EntityScriptLog(qjs::rest<std::string> Args, csp::common::LogSystem& LogSys
     LogSystem.LogMsg(csp::common::LogLevel::Log, Str.str().c_str());
 }
 
-EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem)
+EntityScriptBinding::EntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool InLocalScope)
     : EntitySystem(InEntitySystem)
     , LogSystem(LogSystem)
+    , LocalScope(InLocalScope)
 {
 }
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(
-    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner)
+    csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner, bool LocalScope)
 {
-    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem);
+    EntityScriptBinding* ScriptBinding = new EntityScriptBinding(InEntitySystem, LogSystem, LocalScope);
     ScriptRunner.RegisterScriptBinding(ScriptBinding);
     return ScriptBinding;
 }
@@ -674,8 +714,19 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
-    Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
-    Context->global()["ThisEntity"] = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+    SpaceEntity* ThisEntityPtr = EntitySystem->FindSpaceEntityById(ContextId);
+
+    if (LocalScope)
+    {
+        // Expose local-scoped wrapper via registered base type so quickjspp can wrap it.
+        Context->global()["TheEntitySystem"] = static_cast<EntitySystemScriptInterface*>(new LocalEntitySystemScriptInterface(EntitySystem));
+        Context->global()["ThisEntity"] = new EntityScriptInterface(ThisEntityPtr, true);
+    }
+    else
+    {
+        Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+        Context->global()["ThisEntity"] = new EntityScriptInterface(ThisEntityPtr);
+    }
 
     // Always import OKO module into scripts
     std::stringstream ss;

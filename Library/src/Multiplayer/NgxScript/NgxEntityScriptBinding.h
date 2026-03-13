@@ -41,14 +41,14 @@ class EntityScriptBinding;
 class NgxEntityScriptBinding : public csp::common::IScriptBinding
 {
 public:
-    NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem);
+    NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool LocalScope = false);
     ~NgxEntityScriptBinding() override;
 
     void Bind(int64_t ContextId, csp::common::IJSScriptRunner& ScriptRunner) override;
     void BindToContext(qjs::Context& Context, int64_t ContextId = 0);
 
-    static NgxEntityScriptBinding* BindEntitySystem(
-        csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, csp::common::IJSScriptRunner& ScriptRunner);
+    static NgxEntityScriptBinding* BindEntitySystem(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem,
+        csp::common::IJSScriptRunner& ScriptRunner, bool LocalScope = false);
     static void RemoveBinding(NgxEntityScriptBinding* InEntityBinding, csp::common::IJSScriptRunner& ScriptRunner);
 
 private:

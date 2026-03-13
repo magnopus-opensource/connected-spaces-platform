@@ -736,16 +736,22 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackSchemaSy
     NgxCodeComponentRuntime.OnEnterSpace("schema-sync-space", &Engine);
 
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/schema-test.js", R"(
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
 export const schema = {
     speed: { type: 'float', default: 1.5 },
     enabled: { type: 'boolean', default: true },
     label: { type: 'string', default: 'player' },
 };
 
-export function onInit({ attributes }) {
-    globalThis.__ngxSchemaSpeedScaled = Math.round(attributes.speed * 100);
-    globalThis.__ngxSchemaEnabled = attributes.enabled ? 1 : 0;
-    globalThis.__ngxSchemaLabelLength = attributes.label.length;
+export function script() {
+    return ({ attributes }) => {
+        useEffect(() => {
+            globalThis.__ngxSchemaSpeedScaled = Math.round(attributes.speed.value * 100);
+            globalThis.__ngxSchemaEnabled = attributes.enabled.value ? 1 : 0;
+            globalThis.__ngxSchemaLabelLength = attributes.label.value.length;
+        });
+    };
 }
 )");
 
@@ -781,24 +787,29 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentEntityReferenceR
     NgxCodeComponentRuntime.OnEnterSpace("entity-ref-space", &Engine);
 
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/entity-ref-test.js", R"(
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
 export const schema = {
     target: { type: 'entity' },
 };
 
-export function onInit({ attributes }) {
-    globalThis.__ngxEntityRefInitResolved = attributes.target.status === 'resolved' ? 1 : 0;
-    globalThis.__ngxEntityRefInitHasId = attributes.target.id !== null ? 1 : 0;
-    const lightComponent = attributes.target.getLightComponent();
-    globalThis.__ngxEntityRefLightResolved = lightComponent.status === 'resolved' ? 1 : 0;
-}
+export function script() {
+    return ({ attributes }) => {
+        useEffect(() => {
+            const ref = attributes.target.value;
+            globalThis.__ngxEntityRefInitResolved = ref.status === 'resolved' ? 1 : 0;
+            globalThis.__ngxEntityRefInitHasId = ref.id !== null ? 1 : 0;
+            const lightComponent = ref.getLightComponent();
+            globalThis.__ngxEntityRefLightResolved = lightComponent.status === 'resolved' ? 1 : 0;
 
-export function onTick({ attributes }) {
-    globalThis.__ngxEntityRefTickStatusResolved = attributes.target.status === 'resolved' ? 1 : 0;
-    globalThis.__ngxEntityRefTickStatusDeleted = attributes.target.status === 'deleted' ? 1 : 0;
+            globalThis.__ngxEntityRefTickStatusResolved = ref.status === 'resolved' ? 1 : 0;
+            globalThis.__ngxEntityRefTickStatusDeleted = ref.status === 'deleted' ? 1 : 0;
 
-    if (!globalThis.__ngxEntityRefDidWrite) {
-        globalThis.__ngxEntityRefDidWrite = attributes.target.setPosition([7, 8, 9]) ? 1 : 0;
-    }
+            if (!globalThis.__ngxEntityRefDidWrite) {
+                globalThis.__ngxEntityRefDidWrite = ref.setPosition([7, 8, 9]) ? 1 : 0;
+            }
+        });
+    };
 }
 )");
 
@@ -822,15 +833,11 @@ export function onTick({ attributes }) {
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefInitHasId", 0), 1);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefLightResolved", 0), 1);
 
-    ProcessScriptTick(NgxScriptSystem, 16.0);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusResolved", 0), 1);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefDidWrite", 0), 1);
     EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3 { 7.0f, 8.0f, 9.0f });
 
     Engine.RemoveEntity(&TargetEntity);
-    ProcessScriptTick(NgxScriptSystem, 32.0);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusDeleted", 0), 1);
-
     Engine.RemoveEntity(&ScriptEntity);
     ProcessTickEvent();
 
@@ -849,24 +856,18 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackLifecycl
     NgxCodeComponentRuntime.OnEnterSpace("lifecycle-space", &Engine);
 
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/lifecycle-test.js", R"(
-export function onInit({ attributes }) {
-    globalThis.__ngxLifecycleInitCalls = (globalThis.__ngxLifecycleInitCalls || 0) + 1;
-    globalThis.__ngxLifecycleLastScore = attributes.score;
-}
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
 
-export function onUpdateAttributes({ key, value }) {
-    globalThis.__ngxLifecycleUpdateCalls = (globalThis.__ngxLifecycleUpdateCalls || 0) + 1;
-    if (key === 'score') {
-        globalThis.__ngxLifecycleLastScore = value;
-    }
-}
+export function script() {
+    return ({ attributes }) => {
+        globalThis.__ngxLifecycleInitCalls = (globalThis.__ngxLifecycleInitCalls || 0) + 1;
+        globalThis.__ngxLifecycleLastScore = attributes.score.value;
 
-export function onTick() {
-    globalThis.__ngxLifecycleTickCalls = (globalThis.__ngxLifecycleTickCalls || 0) + 1;
-}
-
-export function onDispose() {
-    globalThis.__ngxLifecycleDisposeCalls = (globalThis.__ngxLifecycleDisposeCalls || 0) + 1;
+        useEffect(() => {
+            globalThis.__ngxLifecycleUpdateCalls = (globalThis.__ngxLifecycleUpdateCalls || 0) + 1;
+            globalThis.__ngxLifecycleLastScore = attributes.score.value;
+        });
+    };
 }
 )");
 
@@ -882,7 +883,7 @@ export function onDispose() {
     NgxScriptSystem.PumpPendingJobs();
 
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleInitCalls", 0), 1);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 1);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleLastScore", -1), 1);
 
     CodeComponent->SetAttribute("score", csp::multiplayer::CodeAttribute::FromInteger(2));
@@ -890,18 +891,13 @@ export function onDispose() {
     NgxScriptSystem.PumpPendingJobs();
 
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleInitCalls", 0), 1);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleUpdateCalls", 0), 2);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleLastScore", -1), 2);
-
-    ProcessScriptTick(NgxScriptSystem, 16.0);
-    ProcessScriptTick(NgxScriptSystem, 32.0);
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleTickCalls", 0), 2);
 
     Engine.RemoveEntity(&Entity);
     ProcessTickEvent();
     ProcessTickEvent();
     NgxScriptSystem.PumpPendingJobs();
-    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxLifecycleDisposeCalls", 0), 1);
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
@@ -918,9 +914,17 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ScriptWithoutSchemaStillExecu
     NgxCodeComponentRuntime.OnEnterSpace("no-schema-script-space", &Engine);
 
     NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/no-schema-test.js", R"(
-export function onInit({ attributes }) {
-    globalThis.__ngxNoSchemaInitCalls = (globalThis.__ngxNoSchemaInitCalls || 0) + 1;
-    globalThis.__ngxNoSchemaValue = attributes.value;
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
+export function script() {
+    return ({ attributes }) => {
+        globalThis.__ngxNoSchemaInitCalls = (globalThis.__ngxNoSchemaInitCalls || 0) + 1;
+        globalThis.__ngxNoSchemaValue = attributes.value.value;
+
+        useEffect(() => {
+            globalThis.__ngxNoSchemaValue = attributes.value.value;
+        });
+    };
 }
 )");
 

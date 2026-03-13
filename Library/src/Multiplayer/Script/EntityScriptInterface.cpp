@@ -23,8 +23,9 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity)
+EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity, bool IsLocal)
     : Entity(InEntity)
+    , LocalScope(IsLocal)
 {
 }
 
@@ -44,6 +45,18 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetPosition() const
     return Pos;
 }
 
+void EntityScriptInterface::CommitEntityUpdate()
+{
+    if (LocalScope)
+    {
+        Entity->ApplyLocalPatch();
+    }
+    else
+    {
+        Entity->QueueUpdate();
+    }
+}
+
 void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
 {
     // CSP_LOG_FORMAT(LogLevel::VeryVerbose, "EntityScriptWrapper::SetPosition { %.2f, %.2f, %.2f }\n", Pos[0], Pos[1], Pos[2]);
@@ -54,7 +67,7 @@ void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
     if (CurrentPosition != NewPosition)
     {
         Entity->SetPosition(NewPosition);
-        Entity->QueueUpdate();
+        CommitEntityUpdate();
     }
 }
 
@@ -100,7 +113,7 @@ void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 Rot)
     if (CurrentRotation != NewRotation)
     {
         Entity->SetRotation(NewRotation);
-        Entity->QueueUpdate();
+        CommitEntityUpdate();
     }
 }
 
@@ -181,7 +194,7 @@ void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 Scale)
     if (CurrentScale != NewScale)
     {
         Entity->SetScale(NewScale);
-        Entity->QueueUpdate();
+        CommitEntityUpdate();
     }
 }
 

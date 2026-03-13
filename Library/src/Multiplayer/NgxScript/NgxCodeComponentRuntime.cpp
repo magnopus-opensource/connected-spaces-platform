@@ -27,6 +27,9 @@
 
 #include <cmath>
 #include <fmt/format.h>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace
 {
@@ -35,6 +38,25 @@ constexpr const char* CODECOMPONENT_ASSET_REGISTRY_MODULE = "/scripts/engine/reg
 constexpr const char* CODECOMPONENT_REGISTRY_MODULE = "/__csp/internal/codecomponent/registry.js";
 constexpr const char* CODECOMPONENT_BOOTSTRAP_MODULE = "/__csp/internal/codecomponent/bootstrap.js";
 constexpr const char* CODECOMPONENT_SHUTDOWN_MODULE = "/__csp/internal/codecomponent/shutdown.js";
+constexpr const char* CODECOMPONENT_HOOKS_MODULE = "@csp/hooks";
+constexpr const char* CODECOMPONENT_HOOKS_SOURCE = "export { useEffect } from '/__csp/internal/codecomponent/registry.js';\n";
+constexpr const char* CODECOMPONENT_CORE_MODULE = "@csp/core";
+constexpr const char* CODECOMPONENT_CORE_SOURCE = R"CORE(
+export { useEffect } from '/__csp/internal/codecomponent/registry.js';
+export const TheEntitySystem = new Proxy({}, {
+    get(_, prop) {
+        const sys = globalThis.TheEntitySystem;
+        if (sys == null) return undefined;
+        const val = sys[prop];
+        return typeof val === 'function' ? val.bind(sys) : val;
+    },
+    set(_, prop, value) {
+        if (globalThis.TheEntitySystem == null) return false;
+        globalThis.TheEntitySystem[prop] = value;
+        return true;
+    },
+});
+)CORE";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -211,8 +233,22 @@ std::string BuildBootstrapSnippet(const std::string& ModulePath)
 }
 
 constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = R"(
+import { signal, effect, batch } from '@preact/signals-core';
+
+const codeComponents = new Map();
+
+export const useEffect = (callback) => {
+    const dispose = effect(callback);
+    const entityId = globalThis.__cspCurrentEntityId;
+    if (entityId && codeComponents.has(entityId)) {
+        codeComponents.get(entityId).effects.push(dispose);
+    }
+    return dispose;
+};
+
 export function createScriptRegistry() {
-    const codeComponents = new Map();
+    codeComponents.clear();
+    const pendingSchemaSyncs = new Set();
 
     function isObject(value) {
         return value && typeof value === 'object' && !Array.isArray(value);
@@ -238,66 +274,8 @@ export function createScriptRegistry() {
         return isObject(attributes) ? cloneValue(attributes) : {};
     }
 
-    function cloneScriptAttributes(attributes) {
-        return isObject(attributes) ? { ...attributes } : {};
-    }
-
     function sortedKeys(value) {
         return Object.keys(isObject(value) ? value : {}).sort();
-    }
-
-    function safeCall(callback, payload, label) {
-        if (typeof callback !== 'function') {
-            return;
-        }
-
-        try {
-            callback(payload);
-        } catch (error) {
-            console.error(`NgxCodeComponentRuntime: ${label} failed`, error);
-        }
-    }
-
-    function safeInvokeScript(entry, payload, label = 'script') {
-        if (!entry || typeof entry.scriptCallback !== 'function') {
-            return;
-        }
-
-        if (entry.entityRef && payload && typeof payload.entityId === 'string') {
-            const prevState = entry.entityRef.value
-                ? { id: entry.entityRef.value.id, status: entry.entityRef.value.status, snapshot: entry.entityRef.value.snapshot }
-                : { id: null, status: 'unbound', snapshot: null };
-            entry.entityRef.value = createScriptEntityRef(resolveEntityRefState(payload.entityId, prevState));
-        }
-
-        try {
-            entry.scriptCallback(entry.entityRef ?? { value: null }, payload);
-        } catch (error) {
-            console.error(`NgxCodeComponentRuntime: ${label} failed`, error);
-        }
-    }
-
-    function initializeScriptCallback(entityId, entry) {
-        if (!entry) {
-            return;
-        }
-
-        entry.scriptCallback = null;
-        if (!entry.module || typeof entry.module.script !== 'function') {
-            return;
-        }
-
-        try {
-            const callback = entry.module.script();
-            if (typeof callback === 'function') {
-                entry.scriptCallback = callback;
-                return;
-            }
-
-            warn(entityId, 'script export must return a function; callback ignored.');
-        } catch (error) {
-            console.error(`NgxCodeComponentRuntime: script() failed for entity ${entityId}`, error);
-        }
     }
 
     function warn(entityId, message) {
@@ -400,6 +378,9 @@ export function createScriptRegistry() {
             let rawType;
             let hasDefault = false;
             let defaultValue;
+            let min;
+            let max;
+            let step;
 
             if (typeof rawEntry === 'string') {
                 rawType = rawEntry;
@@ -422,6 +403,18 @@ export function createScriptRegistry() {
                     hasDefault = true;
                     defaultValue = rawEntry.value;
                 }
+
+                if (typeof rawEntry.min === 'number' && Number.isFinite(rawEntry.min)) {
+                    min = rawEntry.min;
+                }
+
+                if (typeof rawEntry.max === 'number' && Number.isFinite(rawEntry.max)) {
+                    max = rawEntry.max;
+                }
+
+                if (typeof rawEntry.step === 'number' && Number.isFinite(rawEntry.step) && rawEntry.step > 0) {
+                    step = rawEntry.step;
+                }
             } else {
                 warn(entityId, `schema entry '${key}' is invalid and will be ignored.`);
                 continue;
@@ -440,10 +433,36 @@ export function createScriptRegistry() {
                 defaultValue = undefined;
             }
 
-            schema[key] = { type, hasDefault, defaultValue };
+            schema[key] = { type, hasDefault, defaultValue, min, max, step };
         }
 
         return Object.keys(schema).length > 0 ? schema : null;
+    }
+
+    function buildSchemaMetadata(schema) {
+        if (!schema) {
+            return {};
+        }
+
+        const result = {};
+        for (const key of sortedKeys(schema)) {
+            const rule = schema[key];
+            const entry = { type: rule.type };
+            if (typeof rule.min === 'number') {
+                entry.min = rule.min;
+            }
+            if (typeof rule.max === 'number') {
+                entry.max = rule.max;
+            }
+            if (typeof rule.step === 'number') {
+                entry.step = rule.step;
+            }
+            if (rule.hasDefault) {
+                entry.default = cloneValue(rule.defaultValue);
+            }
+            result[key] = entry;
+        }
+        return result;
     }
 
     function reconcileAttributes(entityId, schema, incomingAttributes, previousAttributes) {
@@ -456,7 +475,6 @@ export function createScriptRegistry() {
 
         const next = {};
 
-        // Pass through builtin attributes (keys starting with '$') regardless of schema.
         for (const key of sortedKeys(incoming)) {
             if (key.startsWith('$')) {
                 next[key] = cloneValue(incoming[key]);
@@ -494,42 +512,6 @@ export function createScriptRegistry() {
         return next;
     }
 
-    function valuesEqual(lhs, rhs) {
-        if (Object.is(lhs, rhs)) {
-            return true;
-        }
-
-        if (Array.isArray(lhs) && Array.isArray(rhs)) {
-            if (lhs.length !== rhs.length) {
-                return false;
-            }
-
-            for (let i = 0; i < lhs.length; i += 1) {
-                if (!valuesEqual(lhs[i], rhs[i])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        if (isObject(lhs) && isObject(rhs)) {
-            const keys = sortedKeys({ ...lhs, ...rhs });
-            for (const key of keys) {
-                if (!valuesEqual(lhs[key], rhs[key])) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    function getChangedKeys(previousAttributes, nextAttributes) {
-        const keySet = new Set([...Object.keys(previousAttributes), ...Object.keys(nextAttributes)]);
-        return Array.from(keySet).sort().filter((key) => !valuesEqual(previousAttributes[key], nextAttributes[key]));
-    }
-
     function tryParseJSON(value) {
         if (typeof value !== 'string' || value.length === 0) {
             return null;
@@ -543,7 +525,6 @@ export function createScriptRegistry() {
     }
 
     function resolveEntityRefState(entityId, previousState) {
-        // Entity attributes are stored as plain entity ID strings.
         if (typeof entityId !== 'string' || entityId.length === 0) {
             return {
                 id: null,
@@ -760,52 +741,109 @@ export function createScriptRegistry() {
         };
     }
 
-    function buildScriptAttributes(entityId, entry) {
-        const output = {};
-        const rawAttributes = cloneAttributes(entry.attributes);
+    // --- Signal attribute management ---
+
+    function createSignalAttributes(entry, entityId) {
+        const attrs = {};
         const schema = entry.schema || {};
 
-        for (const key of sortedKeys(rawAttributes)) {
-            const rule = schema[key];
-            if (rule && rule.type === 'entity') {
-                const previousState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null, query: null };
-                const nextState = resolveEntityRefState(rawAttributes[key], previousState);
-                entry.entityRefStates[key] = nextState;
-                output[key] = createScriptEntityRef(nextState);
+        for (const key of sortedKeys(entry.attributes)) {
+            if (key.startsWith('$')) {
                 continue;
             }
 
-            output[key] = rawAttributes[key];
+            const rule = schema[key];
+            if (rule && rule.type === 'entity') {
+                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
+                const nextState = resolveEntityRefState(entry.attributes[key], prevState);
+                entry.entityRefStates[key] = nextState;
+                attrs[key] = signal(createScriptEntityRef(nextState));
+            } else {
+                attrs[key] = signal(entry.attributes[key]);
+            }
         }
 
-        return output;
+        return attrs;
     }
 
-    function dispatchAttributeChanges(entityId, entry, previousAttributes, nextAttributes) {
-        if (!entry.module || !entry.initialized) {
+    function updateSignalAttributes(entry, entityId) {
+        const schema = entry.schema || {};
+
+        batch(() => {
+            for (const key of sortedKeys(entry.attributes)) {
+                if (key.startsWith('$')) {
+                    continue;
+                }
+
+                const rule = schema[key];
+
+                if (!entry.signalAttributes[key]) {
+                    if (rule && rule.type === 'entity') {
+                        const state = resolveEntityRefState(entry.attributes[key],
+                            entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null });
+                        entry.entityRefStates[key] = state;
+                        entry.signalAttributes[key] = signal(createScriptEntityRef(state));
+                    } else {
+                        entry.signalAttributes[key] = signal(entry.attributes[key]);
+                    }
+                } else {
+                    if (rule && rule.type === 'entity') {
+                        const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
+                        const nextState = resolveEntityRefState(entry.attributes[key], prevState);
+                        entry.entityRefStates[key] = nextState;
+                        entry.signalAttributes[key].value = createScriptEntityRef(nextState);
+                    } else {
+                        entry.signalAttributes[key].value = entry.attributes[key];
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Effect lifecycle ---
+
+    function disposeAllEffects(entry) {
+        for (const dispose of entry.effects) {
+            try {
+                dispose();
+            } catch (e) {
+                console.error('NgxCodeComponentRuntime: effect dispose failed', e);
+            }
+        }
+        entry.effects = [];
+    }
+
+    // --- Script initialization ---
+
+    function initializeScript(entityId, entry) {
+        if (!entry || !entry.module || typeof entry.module.script !== 'function') {
             return;
         }
 
-        const scriptAttributes = buildScriptAttributes(entityId, entry);
-        const changedKeys = getChangedKeys(previousAttributes, nextAttributes);
-        for (const key of changedKeys) {
-            safeCall(entry.module.onUpdateAttributes, {
-                entityId,
-                key,
-                value: scriptAttributes[key],
-                attributes: cloneScriptAttributes(scriptAttributes),
-            }, 'onUpdateAttributes');
-        }
+        try {
+            const scriptFn = entry.module.script();
+            if (typeof scriptFn !== 'function') {
+                warn(entityId, 'script export must return a function.');
+                return;
+            }
 
-        // Re-invoke the script callback so scripts that use the imperative
-        // callback pattern (rather than signals + effects) see the updated values.
-        if (changedKeys.length > 0) {
-            safeInvokeScript(entry, {
-                entityId,
-                attributes: cloneScriptAttributes(scriptAttributes),
-            }, 'update');
+            const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')
+                ? globalThis.TheEntitySystem.getEntityById(entityId)
+                : null;
+            entry.thisEntitySignal = signal(liveEntity ?? null);
+
+            globalThis.__cspCurrentEntityId = entityId;
+            try {
+                scriptFn({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
+            } finally {
+                globalThis.__cspCurrentEntityId = undefined;
+            }
+        } catch (error) {
+            console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId}`, error);
         }
     }
+
+    // --- Module import with retry ---
 
     function tryImportCodeComponentModule(entityId, entry, reason = 'unspecified') {
         if (!entry || typeof entry.scriptAssetPath !== 'string' || entry.scriptAssetPath.length === 0) {
@@ -835,23 +873,17 @@ export function createScriptRegistry() {
                 current.retryCountdown = 0;
                 current.hasWarnedMissingModule = false;
                 current.module = moduleRef;
-                initializeScriptCallback(entityId, current);
+
                 if (current.pendingSchemaSync) {
                     syncCodeComponentSchema(entityId);
+                    pendingSchemaSyncs.add(entityId);
                 }
 
                 current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);
+                current.signalAttributes = createSignalAttributes(current, entityId);
                 current.initialized = true;
 
-                const scriptAttributes = buildScriptAttributes(entityId, current);
-                safeInvokeScript(current, {
-                    entityId,
-                    attributes: cloneScriptAttributes(scriptAttributes),
-                }, 'script');
-                safeCall(current.module.onInit, {
-                    entityId,
-                    attributes: cloneScriptAttributes(scriptAttributes),
-                }, 'onInit');
+                initializeScript(entityId, current);
             })
             .catch((error) => {
                 const current = codeComponents.get(entityId);
@@ -879,6 +911,8 @@ export function createScriptRegistry() {
         return true;
     }
 
+    // --- Public API (called from C++) ---
+
     function syncCodeComponentSchema(entityId) {
         const entry = codeComponents.get(entityId);
         if (!entry) {
@@ -887,11 +921,8 @@ export function createScriptRegistry() {
 
         if (!entry.module) {
             entry.pendingSchemaSync = true;
-            const startedImport = tryImportCodeComponentModule(entityId, entry, 'syncCodeComponentSchema');
-            if (!entry.importInFlight && !startedImport) {
-                warn(entityId, 'syncCodeComponentSchema requested before module import completed; returning current attributes.');
-            }
-            return cloneAttributes(entry.attributes);
+            tryImportCodeComponentModule(entityId, entry, 'syncCodeComponentSchema');
+            return {};
         }
 
         const previousAttributes = cloneAttributes(entry.attributes);
@@ -899,8 +930,11 @@ export function createScriptRegistry() {
         entry.attributes = reconcileAttributes(entityId, entry.schema, entry.attributes, previousAttributes);
         entry.pendingSchemaSync = false;
 
-        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
-        return cloneAttributes(entry.attributes);
+        if (entry.initialized && entry.signalAttributes) {
+            updateSignalAttributes(entry, entityId);
+        }
+
+        return buildSchemaMetadata(entry.schema);
     }
 
     function addCodeComponent(entityId, payload = {}) {
@@ -918,21 +952,16 @@ export function createScriptRegistry() {
         }
 
         if (existing) {
-            if (existing.module && existing.initialized) {
-                const scriptAttributes = buildScriptAttributes(entityId, existing);
-                safeCall(existing.module.onDispose, {
-                    entityId,
-                    attributes: cloneScriptAttributes(scriptAttributes),
-                }, 'onDispose');
-            }
+            disposeAllEffects(existing);
             codeComponents.delete(entityId);
         }
 
         const entry = {
             scriptAssetPath,
             attributes: inputAttributes,
+            signalAttributes: {},
+            thisEntitySignal: null,
             module: null,
-            scriptCallback: null,
             schema: null,
             initialized: false,
             pendingSchemaSync: true,
@@ -942,7 +971,7 @@ export function createScriptRegistry() {
             retryCountdown: 0,
             hasWarnedMissingModule: false,
             entityRefStates: {},
-            entityRef: { value: null },
+            effects: [],
         };
 
         codeComponents.set(entityId, entry);
@@ -953,7 +982,6 @@ export function createScriptRegistry() {
         }
 
         tryImportCodeComponentModule(entityId, entry, 'addCodeComponent');
-
         return true;
     }
 
@@ -965,7 +993,11 @@ export function createScriptRegistry() {
 
         const previousAttributes = cloneAttributes(entry.attributes);
         entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);
-        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
+
+        if (entry.initialized && entry.signalAttributes) {
+            updateSignalAttributes(entry, entityId);
+        }
+
         return cloneAttributes(entry.attributes);
     }
 
@@ -988,12 +1020,20 @@ export function createScriptRegistry() {
             }
         }
 
-        const previousAttributes = cloneAttributes(entry.attributes);
-        const nextAttributes = cloneAttributes(entry.attributes);
-        nextAttributes[key] = cloneValue(value);
-        entry.attributes = nextAttributes;
+        entry.attributes[key] = cloneValue(value);
 
-        dispatchAttributeChanges(entityId, entry, previousAttributes, entry.attributes);
+        if (entry.initialized && entry.signalAttributes && entry.signalAttributes[key]) {
+            const schema = entry.schema || {};
+            const rule = schema[key];
+            if (rule && rule.type === 'entity') {
+                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
+                const nextState = resolveEntityRefState(value, prevState);
+                entry.entityRefStates[key] = nextState;
+                entry.signalAttributes[key].value = createScriptEntityRef(nextState);
+            } else {
+                entry.signalAttributes[key].value = value;
+            }
+        }
     }
 
     function removeCodeComponent(entityId) {
@@ -1002,41 +1042,16 @@ export function createScriptRegistry() {
             return;
         }
 
-        if (entry.module && entry.initialized) {
-            const scriptAttributes = buildScriptAttributes(entityId, entry);
-            safeCall(entry.module.onDispose, {
-                entityId,
-                attributes: cloneScriptAttributes(scriptAttributes),
-            }, 'onDispose');
+        if (entry.thisEntitySignal) {
+            entry.thisEntitySignal.value = null;
         }
-
+        disposeAllEffects(entry);
         codeComponents.delete(entityId);
     }
 
-    function tick(timestampMs) {
-        const sortedEntityIds = Array.from(codeComponents.keys()).sort((lhs, rhs) => {
-            const lhsNumber = Number(lhs);
-            const rhsNumber = Number(rhs);
-            if (Number.isFinite(lhsNumber) && Number.isFinite(rhsNumber) && lhsNumber !== rhsNumber) {
-                return lhsNumber - rhsNumber;
-            }
-
-            const lhsString = String(lhs);
-            const rhsString = String(rhs);
-            if (lhsString < rhsString) {
-                return -1;
-            }
-
-            if (lhsString > rhsString) {
-                return 1;
-            }
-
-            return 0;
-        });
-
-        for (const entityId of sortedEntityIds) {
-            const entry = codeComponents.get(entityId);
-            if (entry && !entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {
+    function tick() {
+        for (const [entityId, entry] of codeComponents) {
+            if (!entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {
                 if (entry.importInFlight) {
                     continue;
                 }
@@ -1047,25 +1062,22 @@ export function createScriptRegistry() {
                 }
 
                 tryImportCodeComponentModule(entityId, entry, 'tick-retry');
-                continue;
-            }
-
-            if (entry && entry.module && entry.initialized) {
-                const scriptAttributes = buildScriptAttributes(entityId, entry);
-                safeCall(entry.module.onTick, {
-                    entityId,
-                    timestampMs,
-                    attributes: cloneScriptAttributes(scriptAttributes),
-                }, 'onTick');
             }
         }
     }
 
+    function drainPendingSchemaSyncs() {
+        const ids = Array.from(pendingSchemaSyncs);
+        pendingSchemaSyncs.clear();
+        return ids;
+    }
+
     function destroy() {
-        const entityIds = Array.from(codeComponents.keys()).sort();
-        for (const entityId of entityIds) {
-            removeCodeComponent(entityId);
+        for (const [entityId, entry] of codeComponents) {
+            disposeAllEffects(entry);
         }
+        codeComponents.clear();
+        pendingSchemaSyncs.clear();
     }
 
     return {
@@ -1075,6 +1087,7 @@ export function createScriptRegistry() {
         updateAttributeForEntity,
         removeCodeComponent,
         tick,
+        drainPendingSchemaSyncs,
         destroy,
     };
 }
@@ -1195,6 +1208,8 @@ void NgxCodeComponentRuntime::RegisterBuiltInModules()
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_REGISTRY_MODULE, CODECOMPONENT_REGISTRY_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_BOOTSTRAP_MODULE, CODECOMPONENT_BOOTSTRAP_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_SHUTDOWN_MODULE, CODECOMPONENT_SHUTDOWN_SOURCE);
+    ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_HOOKS_MODULE, CODECOMPONENT_HOOKS_SOURCE);
+    ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_CORE_MODULE, CODECOMPONENT_CORE_SOURCE);
 }
 
 void NgxCodeComponentRuntime::OnTick()
@@ -1228,6 +1243,7 @@ void NgxCodeComponentRuntime::OnTick()
     }
 
     SyncSnapshots(CurrentSnapshots);
+    DrainPendingSchemaSyncs();
 
     // requestAnimationFrame callbacks are driven by the client display loop via NgxScriptSystem::TickAnimationFrame.
     // Keep animation-frame dispatch decoupled from foundation tick cadence.
@@ -1403,11 +1419,92 @@ bool NgxCodeComponentRuntime::ExecuteRegistrySnippet(const std::string& Snippet,
 void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
 {
     const std::string EntityIdString = std::to_string(EntityId);
-    const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.syncCodeComponentSchema === 'function') {\n"
-                                "    globalThis.scriptRegistry.syncCodeComponentSchema('"
-        + EscapeJSStringLiteral(EntityIdString) + "');\n" + "}\n";
 
-    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-schema>");
+    // Use the NgxScriptSystem bridge which returns a schema metadata object only.
+    const csp::common::String SchemaResultJson = ScriptSystem.SyncCodeComponentSchema(EntityIdString.c_str());
+    LogSystem.LogMsg(csp::common::LogLevel::Log,
+        fmt::format("NgxCodeComponentRuntime Trace: SyncSchemaInRegistry(entity={}) rawSchemaJson={}", EntityIdString, SchemaResultJson.c_str())
+            .c_str());
+
+    // Parse and write the schema object to the code component's dedicated schema property.
+    if (ActiveRealtimeEngine == nullptr)
+    {
+        return;
+    }
+
+    rapidjson::Document ResultDoc;
+    ResultDoc.Parse(SchemaResultJson.c_str());
+    if (ResultDoc.HasParseError() || !ResultDoc.IsObject())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning,
+            fmt::format("NgxCodeComponentRuntime: SyncSchemaInRegistry(entity={}) schema JSON parse failed or was not an object.", EntityIdString)
+                .c_str());
+        return;
+    }
+
+    rapidjson::StringBuffer SchemaBuffer;
+    rapidjson::Writer<rapidjson::StringBuffer> SchemaWriter(SchemaBuffer);
+    ResultDoc.Accept(SchemaWriter);
+    const std::string SchemaJsonString = SchemaBuffer.GetString();
+    LogSystem.LogMsg(csp::common::LogLevel::Log,
+        fmt::format("NgxCodeComponentRuntime Trace: SyncSchemaInRegistry(entity={}) writing schema={}", EntityIdString, SchemaJsonString).c_str());
+
+    // Find the entity and write the schema to it.
+    ActiveRealtimeEngine->LockEntityUpdate();
+    const size_t EntityCount = ActiveRealtimeEngine->GetNumEntities();
+    for (size_t EntityIndex = 0; EntityIndex < EntityCount; ++EntityIndex)
+    {
+        auto* Entity = ActiveRealtimeEngine->GetEntityByIndex(EntityIndex);
+        if (Entity != nullptr && Entity->GetId() == EntityId)
+        {
+            auto* Component = Entity->FindFirstComponentOfType(csp::multiplayer::ComponentType::Code);
+            if (Component != nullptr)
+            {
+                auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component);
+                CodeComponent->SetSchema(SchemaJsonString.c_str());
+            }
+            break;
+        }
+    }
+    ActiveRealtimeEngine->UnlockEntityUpdate();
+}
+
+void NgxCodeComponentRuntime::DrainPendingSchemaSyncs()
+{
+    const csp::common::String ResultJson = ScriptSystem.DrainPendingSchemaSyncs();
+    LogSystem.LogMsg(csp::common::LogLevel::Log,
+        fmt::format("NgxCodeComponentRuntime Trace: DrainPendingSchemaSyncs result={}", ResultJson.c_str()).c_str());
+    if (ResultJson.IsEmpty() || strcmp(ResultJson.c_str(), "[]") == 0)
+    {
+        return;
+    }
+
+    rapidjson::Document Doc;
+    Doc.Parse(ResultJson.c_str());
+    if (Doc.HasParseError() || !Doc.IsArray())
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Warning,
+            "NgxCodeComponentRuntime: DrainPendingSchemaSyncs result was not a valid JSON array.");
+        return;
+    }
+
+    for (const auto& IdValue : Doc.GetArray())
+    {
+        if (!IdValue.IsString())
+        {
+            continue;
+        }
+        try
+        {
+            const uint64_t EntityId = std::stoull(IdValue.GetString());
+            LogSystem.LogMsg(csp::common::LogLevel::Log,
+                fmt::format("NgxCodeComponentRuntime Trace: DrainPendingSchemaSyncs processing entityId={}", EntityId).c_str());
+            SyncSchemaInRegistry(EntityId);
+        }
+        catch (...)
+        {
+        }
+    }
 }
 
 void NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
