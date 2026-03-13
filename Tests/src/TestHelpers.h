@@ -29,6 +29,7 @@
 #include <iostream>
 #include <random>
 #include <thread>
+#include <future>
 
 using namespace std::chrono_literals;
 
@@ -243,6 +244,13 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
         printf("Test timed out - Callback wasn't called\n");
     }
 }
+
+template <typename T> inline bool WaitForFuture(const std::future<T>& Future, int MaxWaitTimeSeconds = 20)
+{
+    auto Status = Future.wait_for(std::chrono::seconds(MaxWaitTimeSeconds));
+    return Status == std::future_status::ready;
+}
+
 
 inline void ProcessPendingIfOnline(csp::common::IRealtimeEngine& RealtimeEngine)
 {
