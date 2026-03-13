@@ -476,8 +476,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
 
     auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
+    // Wait for initial elected event
+    std::promise<void> OnElectedScopeLeaderPromise;
+    auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
+    RealtimeEngine->SetOnElectedScopeLeaderCallback(
+        [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+        {
+            std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
+            EXPECT_EQ(UserId, LeaderUserId);
+            OnElectedScopeLeaderPromise.set_value();
+        });
+
     // Enter space
     auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+    ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
 
     // Get the scope leader
     auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
@@ -583,21 +597,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
     {
         auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-        // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
         // Wait for initial elected event
-        bool ElectedCallbackCalled = false;
+        std::promise<void> OnElectedScopeLeaderPromise;
+        auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
         RealtimeEngine->SetOnElectedScopeLeaderCallback(
-            [&ElectedCallbackCalled, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+            [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
             {
                 std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
                 EXPECT_EQ(UserId, LeaderUserId);
-                ElectedCallbackCalled = true;
+                OnElectedScopeLeaderPromise.set_value();
             });
 
-        WaitForCallback(ElectedCallbackCalled);
+        // Enter space
+        auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
     }
 
     //  Create 2 additional clients for leader election.
@@ -848,21 +863,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
 
         RealtimeEngine.get()->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
 
-        // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+       // Wait for initial elected event
+        std::promise<void> OnElectedScopeLeaderPromise;
+        auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
 
-        // Wait for initial elected event
-        bool ElectedCallbackCalled = false;
         RealtimeEngine->SetOnElectedScopeLeaderCallback(
-            [&ElectedCallbackCalled, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+            [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
             {
                 std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
                 EXPECT_EQ(UserId, LeaderUserId);
-                ElectedCallbackCalled = true;
+                OnElectedScopeLeaderPromise.set_value();
             });
 
-        WaitForCallback(ElectedCallbackCalled);
+        // Enter space
+        auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
     }
 
     // Wait for the script system to be ready
