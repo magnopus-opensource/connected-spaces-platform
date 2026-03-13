@@ -76,9 +76,8 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
     const csp::common::String& Password, bool CreateMultiplayerConnection, bool AgeVerified, const csp::systems::TokenOptions& TokenOptions,
     csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
-    auto [Result]
-        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, CreateMultiplayerConnection, AgeVerified, TokenOptions)
-              .Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, Email, Password, CreateMultiplayerConnection, AgeVerified, TokenOptions)
+                        .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 
@@ -358,9 +357,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
         });
 
     csp::common::String UserId;
-    // Log in with empty email and username
+    // Log in with empty email
     auto [Result]
-        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", "", GeneratedTestAccountPassword, true, true, nullptr).Await(RequestPredicate);
+        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", GeneratedTestAccountPassword, true, true, nullptr).Await(RequestPredicate);
 
     EXPECT_TRUE(CallbackCalled);
     EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -386,8 +385,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyPasswordCredentialsTest)
 
     csp::common::String UserId;
     // Log in with empty password
-    auto [Result]
-        = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", "", true, true, nullptr).Await(RequestPredicate);
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "afakeemail@email.com", "", true, true, nullptr).Await(RequestPredicate);
 
     EXPECT_TRUE(CallbackCalled);
     EXPECT_EQ(Result.GetHttpResultCode(), 0);
@@ -1184,7 +1182,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
     // null Log in
     // does not use login helper function as the login helper function defaults to false.
-    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", TestUser.Email, GeneratedTestAccountPassword, true, true, nullptr)
+    auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, TestUser.Email, GeneratedTestAccountPassword, true, true, nullptr)
                         .Await(RequestPredicate);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1267,7 +1265,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DefaultApplicationSettingsTest)
     std::promise<csp::common::LoginState> SettingsPromise;
     std::future<csp::common::LoginState> SettingsFuture = SettingsPromise.get_future();
 
-    UserSystem->Login("", TestUser.Email, GeneratedTestAccountPassword, false, true, {},
+    UserSystem->Login(TestUser.Email, GeneratedTestAccountPassword, false, true, {},
         [&SettingsPromise](const csp::systems::LoginStateResult& Result) { SettingsPromise.set_value(Result.GetLoginState()); });
 
     csp::common::LoginState LoginState = SettingsFuture.get();

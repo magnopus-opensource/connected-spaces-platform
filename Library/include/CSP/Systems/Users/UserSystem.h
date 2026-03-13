@@ -90,7 +90,6 @@ public:
     CSP_EVENT void SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback);
 
     /// @brief Log in to Magnopus Cloud Services services using a username-password or email-password combination.
-    /// @param UserName csp::common::String
     /// @param Email csp::common::String
     /// @param Password csp::common::String
     /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
@@ -101,11 +100,11 @@ public:
     /// The default token expiry length is configured by MCS and defaults to 30 minutes. Value must be less than the default expiry length, or it will
     /// be ignored.
     /// @param Callback LoginStateResultCallback : callback to call when a response is received
-    /// @pre One of either UserName or Email must not be empty.
+    /// @pre Email must not be empty.
     /// @pre Password must not be empty.
-    CSP_ASYNC_RESULT void Login(const csp::common::String& UserName, const csp::common::String& Email, const csp::common::String& Password,
-        bool CreateMultiplayerConnection, const csp::common::Optional<bool>& UserHasVerifiedAge,
-        const csp::common::Optional<TokenOptions>& TokenOptions, LoginStateResultCallback Callback);
+    CSP_ASYNC_RESULT void Login(const csp::common::String& Email, const csp::common::String& Password, bool CreateMultiplayerConnection,
+        const csp::common::Optional<bool>& UserHasVerifiedAge, const csp::common::Optional<TokenOptions>& TokenOptions,
+        LoginStateResultCallback Callback);
 
     /// @brief Resume a previous session for the associated user ID using a refresh token
     /// The refresh token can be obtained after registering a callback with `SetNewLoginTokenReceivedCallback` and logging in regularly.
