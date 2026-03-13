@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.30.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley
+  Resolving a potential crash that can occur when callbacks are executed in response to heartbeat invocations by the ScopeLeadershipManager.
+
 ## [6.29.0]
 
 ### 🐛 🔨 Bug Fixes
