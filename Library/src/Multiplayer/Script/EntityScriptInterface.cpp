@@ -49,7 +49,7 @@ void EntityScriptInterface::CommitEntityUpdate()
 {
     if (LocalScope)
     {
-        Entity->ApplyLocalPatch();
+        Entity->ApplyLocalPropertyPatch();
     }
     else
     {

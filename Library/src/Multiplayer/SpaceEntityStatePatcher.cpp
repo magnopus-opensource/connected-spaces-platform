@@ -203,6 +203,37 @@ std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> Space
     return std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>>(UpdateFlags, ComponentUpdates);
 }
 
+std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> SpaceEntityStatePatcher::ApplyLocalPropertyPatch()
+{
+    std::scoped_lock<std::mutex> PropertiesLocker(DirtyPropertiesLock);
+
+    auto UpdateFlags = static_cast<SpaceEntityUpdateFlags>(0);
+
+    for (const auto& DirtyProperty : DirtyProperties)
+    {
+        const SpaceEntityComponentKey PropertyKey = DirtyProperty.first;
+        auto PropertyIt = RegisteredProperties.find(PropertyKey);
+
+        if (PropertyIt != RegisteredProperties.end())
+        {
+            EntityProperty& Property = PropertyIt->second;
+            UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | Property.GetUpdateFlag());
+            Property.Set(DirtyProperty.second);
+        }
+        else
+        {
+            if (LogSystem)
+            {
+                LogSystem->LogMsg(csp::common::LogLevel::Error, "ApplyLocalPropertyPatch: No Property with the specified key found!");
+            }
+        }
+    }
+
+    DirtyProperties.clear();
+
+    return { UpdateFlags, csp::common::Array<ComponentUpdateInfo>(0) };
+}
+
 std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> SpaceEntityStatePatcher::GetDirtyProperties() const
 {
     return DirtyProperties;

@@ -505,6 +505,21 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback, bool AllowSelfMessa
     }
 }
 
+void SpaceEntity::ApplyLocalPropertyPatch()
+{
+    if (StatePatcher == nullptr)
+    {
+        return;
+    }
+
+    auto [UpdateFlags, ComponentUpdates] = StatePatcher->ApplyLocalPropertyPatch();
+
+    if (EntityUpdateCallback != nullptr)
+    {
+        EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
+    }
+}
+
 SpaceEntity::UpdateCallback SpaceEntity::GetEntityUpdateCallback() { return EntityUpdateCallback; }
 
 SpaceEntity::DestroyCallback SpaceEntity::GetEntityDestroyCallback() { return EntityDestroyCallback; }

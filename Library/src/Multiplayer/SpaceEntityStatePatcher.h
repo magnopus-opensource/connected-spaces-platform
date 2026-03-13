@@ -160,6 +160,10 @@ public:
     //        Second: Record of all component updates made in the patch application
     [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPatch();
 
+    // Applies only dirty view-layer properties (position, rotation, scale, etc.) without touching DirtyComponents.
+    // Use this from script local-scope paths so that component structure changes queued for network send are not consumed prematurely.
+    [[nodiscard]] std::pair<SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>> ApplyLocalPropertyPatch();
+
     std::unordered_map<SpaceEntityComponentKey, csp::common::ReplicatedValue> GetDirtyProperties() const;
     std::unordered_map<uint16_t, DirtyComponent> GetDirtyComponents() const;
 

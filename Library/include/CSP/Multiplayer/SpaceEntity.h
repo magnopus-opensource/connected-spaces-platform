@@ -413,6 +413,10 @@ public:
     /// unless you know what you are doing. (default: false)
     CSP_NO_EXPORT void ApplyLocalPatch(bool InvokeUpdateCallback = true, bool AllowSelfMessaging = false);
 
+    /// @brief Apply only dirty view-layer properties (position, rotation, scale, etc.) without consuming DirtyComponents.
+    /// Use this from script local-scope paths to avoid clearing component structure changes that are still pending network send.
+    CSP_NO_EXPORT void ApplyLocalPropertyPatch();
+
     /// @brief Resolve the relationship between the parent and the child
     CSP_NO_EXPORT void ResolveParentChildRelationship();
 

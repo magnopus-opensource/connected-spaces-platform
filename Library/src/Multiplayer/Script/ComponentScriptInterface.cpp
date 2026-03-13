@@ -88,7 +88,7 @@ void ComponentScriptInterface::SendPropertyUpdate()
     {
         if (LocalScope)
         {
-            Component->GetParent()->ApplyLocalPatch();
+            Component->GetParent()->ApplyLocalPropertyPatch();
         }
         else
         {
