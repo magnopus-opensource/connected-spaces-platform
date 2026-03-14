@@ -24,6 +24,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/Script/EntityScriptInterface.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Events/EventId.h"
@@ -566,8 +567,10 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , ContextGeneration(0)
     , ScriptModulesLoaded(false)
     , bAssetDetailBlobChangedListenerRegistered(false)
+    , GcTickCounter(0)
     , TickEventHandler(std::make_unique<NgxScriptTickEventHandler>(this))
 {
+    JS_SetMemoryLimit(Runtime->rt, 256 * 1024 * 1024);
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, TickEventHandler.get());
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: System constructed and tick listener registered.");
 }
@@ -894,9 +897,43 @@ bool NgxScriptSystem::TickScriptRegistry(double TimestampMs)
 }
 #endif
 
+void NgxScriptSystem::ClearAllEntityEventListeners()
+{
+    if (ActiveRealtimeEngine == nullptr)
+    {
+        return;
+    }
+    for (size_t i = 0; i < ActiveRealtimeEngine->GetNumEntities(); ++i)
+    {
+        if (auto* Entity = ActiveRealtimeEngine->GetEntityByIndex(i))
+        {
+            Entity->GetScriptInterface()->ClearEventListeners();
+        }
+    }
+}
+
+void NgxScriptSystem::FireEntityEvent(const csp::common::String& EntityId, const csp::common::String& EventName, const csp::common::String& PayloadJson)
+{
+    if (EntityId.IsEmpty())
+    {
+        return;
+    }
+    // EntityId is a numeric string (e.g. "12345"). Embedding it unquoted makes it a
+    // JS number literal. EventName is a C++ constant. PayloadJson is standard JSON
+    // (double-quoted strings only) so it is safe to embed inside single quotes.
+    const std::string Snippet = fmt::format(
+        R"(if (typeof globalThis.__ngxFireEntityEvent === "function") {{ globalThis.__ngxFireEntityEvent({}, "{}", JSON.parse('{}')); }})",
+        EntityId.c_str(), EventName.c_str(), PayloadJson.c_str());
+    EvaluateSnippet(Snippet.c_str(), "<fire-entity-event>");
+}
+
 void NgxScriptSystem::RebuildContext()
 {
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: RebuildContext begin.");
+
+    // Clear stale JS callbacks before destroying the context. qjs::Value destructors
+    // call JS_FreeValue which must execute while the owning context is still alive.
+    ClearAllEntityEventListeners();
 
     {
         std::scoped_lock ContextLock(ContextMutex);
@@ -905,7 +942,15 @@ void NgxScriptSystem::RebuildContext()
         if (!Runtime)
         {
             Runtime = std::make_unique<qjs::Runtime>();
+            JS_SetMemoryLimit(Runtime->rt, 256 * 1024 * 1024);
         }
+
+        // Collect any cyclic garbage left over from the old context before
+        // creating a new one, to reclaim memory held by signal/effect cycles.
+        JS_RunGC(Runtime->rt);
+
+        static constexpr size_t GC_HEAP_CAP = 4 * 1024 * 1024; // 4 MB
+        JS_SetGCThreshold(Runtime->rt, GC_HEAP_CAP);
 
         Context = std::make_unique<qjs::Context>(*Runtime);
     }
@@ -919,6 +964,7 @@ void NgxScriptSystem::RebuildContext()
 void NgxScriptSystem::TeardownContext()
 {
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: TeardownContext.");
+    ClearAllEntityEventListeners();
     std::scoped_lock ContextLock(ContextMutex);
     Context.reset();
 }
@@ -1178,10 +1224,26 @@ void NgxScriptSystem::InstallHostBindings()
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
 globalThis.csp = csp;
+
+// Format a single console argument. For Error objects we use the stack
+// property (when available) so callers get a useful trace. Plain objects
+// are serialised with JSON.stringify.
+function __cspFormatArg(value) {
+    if (value instanceof Error) {
+        return typeof value.stack === 'string' && value.stack.length > 0
+            ? value.stack
+            : String(value);
+    }
+    if (value !== null && typeof value === 'object') {
+        try { return JSON.stringify(value); } catch { return String(value); }
+    }
+    return String(value);
+}
+
 globalThis.console = {
-    log: (...args) => csp.__log(...args.map((value) => String(value))),
-    warn: (...args) => csp.__warn(...args.map((value) => String(value))),
-    error: (...args) => csp.__error(...args.map((value) => String(value))),
+    log:   (...args) => csp.__log(...args.map(__cspFormatArg)),
+    warn:  (...args) => csp.__warn(...args.map(__cspFormatArg)),
+    error: (...args) => csp.__error(...args.map(__cspFormatArg)),
 };
 
 const __cspAnimationFrameState = {
@@ -1225,7 +1287,7 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
         try {
             callback(timestampMs);
         } catch (error) {
-            csp.__error(String(error));
+            csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
         }
     }
 };
@@ -1255,6 +1317,19 @@ void NgxScriptSystem::DrainPendingJobs()
     while (Runtime->isJobPending())
     {
         Runtime->executePendingJob();
+    }
+
+    // QuickJS reference-counting cannot collect cyclic garbage (signals ↔ effects,
+    // Proxy chains, etc.). JS_RunGC runs the full mark-and-sweep cycle collector.
+    // We also reset the threshold afterwards to prevent the adaptive 1.5× growth
+    // from allowing heap unbounded growth inside the fixed WASM address space.
+    static constexpr uint32_t GC_INTERVAL_TICKS = 180; // ~3 s at 60 fps
+    static constexpr size_t   GC_HEAP_CAP        = 4 * 1024 * 1024;
+    if (++GcTickCounter >= GC_INTERVAL_TICKS)
+    {
+        GcTickCounter = 0;
+        JS_RunGC(Runtime->rt);
+        JS_SetGCThreshold(Runtime->rt, GC_HEAP_CAP);
     }
 }
 
@@ -1481,6 +1556,52 @@ void NgxScriptSystem::FetchAssetCollectionMapForSpace(uint64_t Generation, std::
 
 bool NgxScriptSystem::IsGenerationCurrent(uint64_t Generation) const { return SessionGeneration.load() == Generation; }
 
+bool NgxScriptSystem::EvaluateGlobalScript(const std::string& ScriptText, const char* DebugName)
+{
+    std::scoped_lock ContextLock(ContextMutex);
+    if (!Context)
+    {
+        return false;
+    }
+
+    const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_GLOBAL);
+    if (!EvalResult.isException())
+    {
+        return true;
+    }
+
+    std::string ErrorMessage = "NgxScript: JavaScript execution failed.";
+    try
+    {
+        qjs::Value ExceptionValue = Context->getException();
+        ErrorMessage += " ";
+        ErrorMessage += ExceptionValue.as<std::string>();
+
+        // Append the stack trace when the exception is an Error object.
+        if (ExceptionValue.isError())
+        {
+            try
+            {
+                const std::string StackString = ExceptionValue["stack"].as<std::string>();
+                if (!StackString.empty())
+                {
+                    ErrorMessage += "\n";
+                    ErrorMessage += StackString;
+                }
+            }
+            catch (...)
+            {
+            }
+        }
+    }
+    catch (...)
+    {
+    }
+
+    LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMessage.c_str());
+    return false;
+}
+
 bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const char* DebugName)
 {
     std::scoped_lock ContextLock(ContextMutex);
@@ -1492,25 +1613,34 @@ bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const 
     const qjs::Value EvalResult = Context->eval(ScriptText, DebugName, JS_EVAL_TYPE_MODULE);
     if (!EvalResult.isException())
     {
-        const std::string DebugNameString = (DebugName != nullptr) ? std::string(DebugName) : std::string();
-        const bool bIsCodeComponentSnippet = (DebugNameString.rfind("<ngx-codecomponent-", 0) == 0);
-        const bool bIsClientScriptTickSnippet = (DebugNameString == "<ngx-client-script-tick>");
-        const bool bIsAnimationFrameTickSnippet = (DebugNameString == "<ngx-animation-frame-tick>");
-        if (!bIsCodeComponentSnippet && !bIsClientScriptTickSnippet && !bIsAnimationFrameTickSnippet)
-        {
-            const std::string SuccessMessage = fmt::format("NgxScript Trace: JavaScript execution succeeded ({}).", DebugName);
-            LogSystem.LogMsg(csp::common::LogLevel::Verbose, SuccessMessage.c_str());
-        }
+        const std::string SuccessMessage = fmt::format("NgxScript Trace: Module evaluation succeeded ({}).", DebugName);
+        LogSystem.LogMsg(csp::common::LogLevel::Verbose, SuccessMessage.c_str());
         return true;
     }
 
-    std::string ErrorMessage = "NgxScript: JavaScript execution failed.";
+    std::string ErrorMessage = "NgxScript: Module evaluation failed.";
 
     try
     {
-        const qjs::Value ExceptionValue = Context->getException();
+        qjs::Value ExceptionValue = Context->getException();
         ErrorMessage += " ";
         ErrorMessage += ExceptionValue.as<std::string>();
+
+        if (ExceptionValue.isError())
+        {
+            try
+            {
+                const std::string StackString = ExceptionValue["stack"].as<std::string>();
+                if (!StackString.empty())
+                {
+                    ErrorMessage += "\n";
+                    ErrorMessage += StackString;
+                }
+            }
+            catch (...)
+            {
+            }
+        }
     }
     catch (...)
     {
@@ -1542,7 +1672,7 @@ bool NgxScriptSystem::HasModuleSource(const csp::common::String& ModulePath) con
 bool NgxScriptSystem::EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName)
 {
     const char* DebugNameValue = DebugName.IsEmpty() ? "<ngx-snippet>" : DebugName.c_str();
-    return EvaluateModuleScript(ScriptText.c_str(), DebugNameValue);
+    return EvaluateGlobalScript(ScriptText.c_str(), DebugNameValue);
 }
 
 void NgxScriptSystem::PumpPendingJobs() { DrainPendingJobs(); }

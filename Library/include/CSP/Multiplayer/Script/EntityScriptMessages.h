@@ -23,6 +23,9 @@ CSP_START_IGNORE
 /// @brief Mouse click or touch press.
 constexpr const char* SCRIPT_MSG_ENTITY_CLICK = "entityClick";
 
+/// @brief Fired when something enters a trigger volume attached to the entity.
+constexpr const char* SCRIPT_MSG_ENTITY_TRIGGER_ENTER = "trigger-enter";
+
 /// @brief Called once per frame.
 constexpr const char* SCRIPT_MSG_ENTITY_TICK = "entityTick";
 

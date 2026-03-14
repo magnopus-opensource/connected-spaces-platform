@@ -82,6 +82,11 @@ public:
     // Returns a JSON array string e.g. ["123","456"]. Falls back to "[]" on failure.
     csp::common::String DrainPendingSchemaSyncs();
 
+    // Fire a named event on an entity, dispatching to all JS listeners registered via entity.on().
+    // EventName should be e.g. "click" or "trigger-enter".
+    // PayloadJson should be a JSON object string e.g. "{}" or "{\"isLocalPlayer\":true}".
+    void FireEntityEvent(const csp::common::String& EntityId, const csp::common::String& EventName, const csp::common::String& PayloadJson);
+
     CSP_START_IGNORE
     // Internal runtime hooks (not exposed through wrappers).
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
@@ -122,6 +127,7 @@ private:
     void InstallModuleLoader();
     void InstallHostBindings();
     void DrainPendingJobs();
+    void ClearAllEntityEventListeners();
 
     void LoadScriptModules();
     void RegisterAssetDetailBlobChangedListener();
@@ -132,6 +138,7 @@ private:
     void FetchAssetCollectionMapForSpace(uint64_t Generation, std::function<void(std::shared_ptr<AssetCollectionMap>)> Callback) const;
 
     bool IsGenerationCurrent(uint64_t Generation) const;
+    bool EvaluateGlobalScript(const std::string& ScriptText, const char* DebugName);
     bool EvaluateModuleScript(const std::string& ScriptText, const char* DebugName);
 
     csp::common::LogSystem& LogSystem;
@@ -151,6 +158,7 @@ private:
     std::atomic<uint64_t> ContextGeneration;
     std::atomic<bool> ScriptModulesLoaded;
     bool bAssetDetailBlobChangedListenerRegistered;
+    uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;
     CSP_END_IGNORE
 };

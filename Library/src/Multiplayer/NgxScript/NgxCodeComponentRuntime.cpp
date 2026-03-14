@@ -329,7 +329,22 @@ export function createScriptRegistry() {
         }
 
         if (type === 'entity') {
-            return typeof value === 'string';
+            // Accept plain string entity IDs and object forms such as {id: '...'}
+            // or {kind: 'id', id: <number>} produced by BuildAttributeValueLiteral
+            // for EntityQuery attributes.
+            if (typeof value === 'string') {
+                return true;
+            }
+            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+                const rawId = value.id;
+                if (typeof rawId === 'string' && rawId.length > 0) {
+                    return true;
+                }
+                if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         return false;
@@ -525,21 +540,34 @@ export function createScriptRegistry() {
     }
 
     function resolveEntityRefState(entityId, previousState) {
-        if (typeof entityId !== 'string' || entityId.length === 0) {
+        // Normalise entity ID: accept plain strings, {id: string} and
+        // {kind: 'id', id: number} objects emitted by BuildAttributeValueLiteral
+        // for EntityQuery attributes.
+        let normalizedEntityId = entityId;
+        if (normalizedEntityId !== null && typeof normalizedEntityId === 'object' && !Array.isArray(normalizedEntityId)) {
+            const rawId = normalizedEntityId.id;
+            if (typeof rawId === 'string') {
+                normalizedEntityId = rawId;
+            } else if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {
+                normalizedEntityId = String(rawId);
+            }
+        }
+        if (typeof normalizedEntityId !== 'string' || normalizedEntityId.length === 0) {
             return {
                 id: null,
                 status: 'unbound',
                 snapshot: null,
             };
         }
+        const resolvedEntityId = normalizedEntityId;
 
         let snapshot = null;
         if (globalThis.csp && typeof globalThis.csp.__getEntitySnapshot === 'function') {
-            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(entityId));
+            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(resolvedEntityId));
         }
 
         return {
-            id: entityId,
+            id: resolvedEntityId,
             status: snapshot ? 'resolved' : 'missing',
             snapshot,
         };
@@ -743,6 +771,18 @@ export function createScriptRegistry() {
 
     // --- Signal attribute management ---
 
+    // Resolve a live entity object from TheEntitySystem for a given entity ID.
+    // Returns null when the entity system is unavailable or the entity is not found.
+    function resolveEntityFromSystem(entityId) {
+        if (!entityId) {
+            return null;
+        }
+        if (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function') {
+            return globalThis.TheEntitySystem.getEntityById(entityId) ?? null;
+        }
+        return null;
+    }
+
     function createSignalAttributes(entry, entityId) {
         const attrs = {};
         const schema = entry.schema || {};
@@ -757,7 +797,7 @@ export function createScriptRegistry() {
                 const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
                 const nextState = resolveEntityRefState(entry.attributes[key], prevState);
                 entry.entityRefStates[key] = nextState;
-                attrs[key] = signal(createScriptEntityRef(nextState));
+                attrs[key] = signal(resolveEntityFromSystem(nextState.id));
             } else {
                 attrs[key] = signal(entry.attributes[key]);
             }
@@ -782,7 +822,7 @@ export function createScriptRegistry() {
                         const state = resolveEntityRefState(entry.attributes[key],
                             entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null });
                         entry.entityRefStates[key] = state;
-                        entry.signalAttributes[key] = signal(createScriptEntityRef(state));
+                        entry.signalAttributes[key] = signal(resolveEntityFromSystem(state.id));
                     } else {
                         entry.signalAttributes[key] = signal(entry.attributes[key]);
                     }
@@ -791,7 +831,7 @@ export function createScriptRegistry() {
                         const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
                         const nextState = resolveEntityRefState(entry.attributes[key], prevState);
                         entry.entityRefStates[key] = nextState;
-                        entry.signalAttributes[key].value = createScriptEntityRef(nextState);
+                        entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);
                     } else {
                         entry.signalAttributes[key].value = entry.attributes[key];
                     }
@@ -839,7 +879,11 @@ export function createScriptRegistry() {
                 globalThis.__cspCurrentEntityId = undefined;
             }
         } catch (error) {
-            console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId}`, error);
+            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
+            const detail = error instanceof Error
+                ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))
+                : String(error);
+            console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId} (${scriptPath})\n${detail}`);
         }
     }
 
@@ -873,6 +917,13 @@ export function createScriptRegistry() {
                 current.retryCountdown = 0;
                 current.hasWarnedMissingModule = false;
                 current.module = moduleRef;
+
+                // If reinitializing (e.g. after a hot-reload), tear down any
+                // old effects so they don't accumulate in memory.
+                if (current.initialized) {
+                    disposeAllEffects(current);
+                    current.initialized = false;
+                }
 
                 if (current.pendingSchemaSync) {
                     syncCodeComponentSchema(entityId);
@@ -1029,7 +1080,7 @@ export function createScriptRegistry() {
                 const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
                 const nextState = resolveEntityRefState(value, prevState);
                 entry.entityRefStates[key] = nextState;
-                entry.signalAttributes[key].value = createScriptEntityRef(nextState);
+                entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);
             } else {
                 entry.signalAttributes[key].value = value;
             }
@@ -1472,8 +1523,6 @@ void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
 void NgxCodeComponentRuntime::DrainPendingSchemaSyncs()
 {
     const csp::common::String ResultJson = ScriptSystem.DrainPendingSchemaSyncs();
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        fmt::format("NgxCodeComponentRuntime Trace: DrainPendingSchemaSyncs result={}", ResultJson.c_str()).c_str());
     if (ResultJson.IsEmpty() || strcmp(ResultJson.c_str(), "[]") == 0)
     {
         return;

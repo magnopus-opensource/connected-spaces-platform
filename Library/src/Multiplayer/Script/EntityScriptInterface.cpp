@@ -15,8 +15,12 @@
  */
 #include "Multiplayer/Script/EntityScriptInterface.h"
 
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "Multiplayer/Script/ComponentScriptInterface.h"
+#include <fmt/format.h>
 
 using namespace csp::systems;
 
@@ -235,6 +239,91 @@ void EntityScriptInterface::PostMessageToScript(std::string Message, std::string
 
 void EntityScriptInterface::ClaimScriptOwnership() { Entity->ClaimScriptOwnership(); }
 
+void EntityScriptInterface::On(const std::string& EventName, qjs::Value Callback)
+{
+    // If this is a local wrapper (created by LocalEntitySystemScriptInterface),
+    // delegate to the entity's canonical ScriptInterface so that Fire() — which
+    // is called via Entity->GetScriptInterface() — finds the registered listeners.
+    if (Entity && Entity->GetScriptInterface() != this)
+    {
+        Entity->GetScriptInterface()->On(EventName, std::move(Callback));
+        return;
+    }
+
+    if (!Callback.ctx || !JS_IsFunction(Callback.ctx, Callback.v))
+    {
+        auto* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+        LogSystem->LogMsg(csp::common::LogLevel::Error,
+            fmt::format("NgxScript: entity.on('{}') called with a non-function callback (entityId={}).",
+                EventName, Entity ? std::to_string(Entity->GetId()) : "?").c_str());
+        return;
+    }
+    EventListeners[EventName].push_back(std::move(Callback));
+}
+
+void EntityScriptInterface::Off(const std::string& EventName, qjs::Value Callback)
+{
+    if (Entity && Entity->GetScriptInterface() != this)
+    {
+        Entity->GetScriptInterface()->Off(EventName, std::move(Callback));
+        return;
+    }
+
+    auto it = EventListeners.find(EventName);
+    if (it == EventListeners.end())
+    {
+        return;
+    }
+    auto& Listeners = it->second;
+    for (auto i = Listeners.begin(); i != Listeners.end();)
+    {
+        if (JS_VALUE_GET_PTR(i->v) == JS_VALUE_GET_PTR(Callback.v))
+            i = Listeners.erase(i);
+        else
+            ++i;
+    }
+}
+
+void EntityScriptInterface::Fire(const std::string& EventName, qjs::Value EventData)
+{
+    auto* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+    const std::string EntityIdStr = Entity ? std::to_string(Entity->GetId()) : "?";
+
+    if (!EventData.ctx)
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Error,
+            fmt::format("NgxScript: Fire('{}') on entity {} called with null JS context; ignoring.",
+                EventName, EntityIdStr).c_str());
+        return;
+    }
+
+    auto it = EventListeners.find(EventName);
+    if (it == EventListeners.end() || it->second.empty())
+    {
+        return;
+    }
+
+    // Copy the listener list so that callbacks may safely call on()/off() without invalidating iterators.
+    auto Listeners = it->second;
+    for (auto& Listener : Listeners)
+    {
+        JSValueConst Args[] = { EventData.v };
+        JSValue Result      = JS_Call(EventData.ctx, Listener.v, JS_UNDEFINED, 1, Args);
+        if (JS_IsException(Result))
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("NgxScript: Fire('{}') on entity {} — listener threw an exception.",
+                    EventName, EntityIdStr).c_str());
+        }
+        JS_FreeValue(EventData.ctx, Result);
+    }
+}
+
+void EntityScriptInterface::ClearEventListeners()
+{
+    EventListeners.clear();
+}
+
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 {
     std::vector<ComponentScriptInterface*> Components;
@@ -250,7 +339,9 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 
             if (Component->GetScriptInterface() != nullptr)
             {
-                Components.push_back(Component->GetScriptInterface());
+                auto* Iface = Component->GetScriptInterface();
+                Iface->SetLocalScope(LocalScope);
+                Components.push_back(Iface);
             }
         }
 

@@ -148,6 +148,29 @@ ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
     return ScriptAttributeType::Invalid;
 }
 
+// Extract the bare scalar ReplicatedValue from a decoded CodeAttribute.
+// This is distinct from CodeAttribute::ToReplicatedValue(), which returns the serialisation
+// envelope (a StringMap wrapper) used for storage. NgxScriptAttribute::Value must hold the
+// plain scalar so that consumers can directly read/compare/display it.
+csp::common::ReplicatedValue ExtractScalarFromCodeAttribute(const CodeAttribute& Attr)
+{
+    switch (Attr.Type)
+    {
+    case CodePropertyType::Boolean:
+        return csp::common::ReplicatedValue(Attr.BooleanValue);
+    case CodePropertyType::Integer:
+        return csp::common::ReplicatedValue(Attr.IntegerValue);
+    case CodePropertyType::Float:
+        return csp::common::ReplicatedValue(Attr.FloatValue);
+    case CodePropertyType::String:
+        return csp::common::ReplicatedValue(Attr.StringValue);
+    case CodePropertyType::EntityQuery:
+        return csp::common::ReplicatedValue(Attr.EntityQueryValue);
+    default:
+        return csp::common::ReplicatedValue();
+    }
+}
+
 bool TryApplySchemaDefault(const rapidjson::Value& Entry, ScriptAttributeType Type, NgxScriptAttribute& OutAttribute)
 {
     if (!Entry.HasMember("default"))
@@ -322,7 +345,8 @@ csp::common::List<NgxScriptAttribute> CodeSpaceComponent::GetScriptAttributes() 
             CodeAttribute CodeAttr;
             if (CodeAttribute::TryFromReplicatedValue(ValueIt->second, CodeAttr))
             {
-                ScriptAttr.Value = CodeAttr.ToReplicatedValue();
+                // Extract the plain scalar value, not the serialisation envelope.
+                ScriptAttr.Value = ExtractScalarFromCodeAttribute(CodeAttr);
             }
             else
             {

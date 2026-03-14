@@ -16,7 +16,9 @@
 #pragma once
 
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "quickjspp.hpp"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -69,6 +71,15 @@ public:
 
     void ClaimScriptOwnership();
 
+    void On(const std::string& EventName, qjs::Value Callback);
+    void Off(const std::string& EventName, qjs::Value Callback);
+    void Fire(const std::string& EventName, qjs::Value EventData);
+
+    /// @brief Removes all registered event listeners. Called when the script
+    ///        context is rebuilt so stale callbacks from the old context are
+    ///        discarded before new scripts re-register.
+    void ClearEventListeners();
+
     std::vector<ComponentScriptInterface*> GetComponents();
 
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
@@ -78,6 +89,7 @@ private:
 
     SpaceEntity* Entity;
     bool LocalScope = false;
+    std::map<std::string, std::vector<qjs::Value>> EventListeners;
 };
 
 template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()

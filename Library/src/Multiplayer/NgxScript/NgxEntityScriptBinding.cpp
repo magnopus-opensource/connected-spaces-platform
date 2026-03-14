@@ -18,6 +18,9 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
+#include "CSP/Systems/SystemsManager.h"
+
+#include "fmt/format.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -49,9 +52,9 @@ private:
 namespace csp::multiplayer
 {
 
-NgxEntityScriptBinding::NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& LogSystem, bool LocalScope)
+NgxEntityScriptBinding::NgxEntityScriptBinding(csp::common::IRealtimeEngine* InEntitySystem, csp::common::LogSystem& InLogSystem, bool LocalScope)
     : EntitySystem(InEntitySystem)
-    , LegacyBinding(std::make_unique<EntityScriptBinding>(InEntitySystem, LogSystem, LocalScope))
+    , LegacyBinding(std::make_unique<EntityScriptBinding>(InEntitySystem, InLogSystem, LocalScope))
 {
 }
 
@@ -85,15 +88,15 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
         Context.eval("globalThis.ThisEntity = null;", "<ngx-entity-script-binding-reset-this-entity>", JS_EVAL_TYPE_GLOBAL);
     }
 
-    Context.global()["__ngxGetEntityIsLocal"] = [this](int64_t EntityId) -> bool
+    Context.global()["__ngxGetEntityIsLocal"] = [entitySystem = EntitySystem](int64_t EntityId) -> bool
     {
-        auto* Entity = EntitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
+        auto* Entity = entitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
         return Entity != nullptr && Entity->IsLocal();
     };
 
-    Context.global()["__ngxSetEntityIsLocal"] = [this](int64_t EntityId, bool InIsLocal) -> bool
+    Context.global()["__ngxSetEntityIsLocal"] = [entitySystem = EntitySystem](int64_t EntityId, bool InIsLocal) -> bool
     {
-        auto* Entity = EntitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
+        auto* Entity = entitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
         if (Entity == nullptr)
         {
             return false;
@@ -103,13 +106,27 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
         return true;
     };
 
-    Context.global()["__ngxCreateLocalEntity"] = [this](const std::string& Name) -> EntityScriptInterface*
+    Context.global()["__ngxFireEntityEvent"] = [entitySystem = EntitySystem](int64_t EntityId, const std::string& EventName, qjs::Value Payload)
     {
-        if (EntitySystem == nullptr || EntitySystem->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
+        auto* Entity = entitySystem->FindSpaceEntityById(static_cast<uint64_t>(EntityId));
+        if (Entity == nullptr)
+        {
+            auto* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
+            LogSystem->LogMsg(csp::common::LogLevel::Error,
+                fmt::format("NgxScript: __ngxFireEntityEvent('{}') — entity {} not found in entity system.",
+                    EventName, EntityId).c_str());
+            return;
+        }
+        Entity->GetScriptInterface()->Fire(EventName, std::move(Payload));
+    };
+
+    Context.global()["__ngxCreateLocalEntity"] = [entitySystem = EntitySystem](const std::string& Name) -> EntityScriptInterface*
+    {
+        if (entitySystem == nullptr || entitySystem->GetRealtimeEngineType() != csp::common::RealtimeEngineType::Online)
         {
             return nullptr;
         }
-        auto* OnlineEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(EntitySystem);
+        auto* OnlineEngine = static_cast<csp::multiplayer::OnlineRealtimeEngine*>(entitySystem);
 
         const csp::multiplayer::SpaceTransform DefaultTransform
             = { csp::common::Vector3::Zero(), csp::common::Vector4::Identity(), csp::common::Vector3::One() };
