@@ -1806,7 +1806,8 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string PayloadJsonEscaped = EscapeJSStringLiteral(PayloadJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
+    const std::string Snippet = "{\n"
+          "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
         + " = false;\n"
           "let __cspPayload = {};\n"
           "try {\n"
@@ -1820,6 +1821,7 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
           "    globalThis."
         + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.addCodeComponent('" + EntityIdEscaped
         + "', __cspPayload);\n"
+          "}\n"
           "}\n";
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-add-bridge>"))
@@ -1867,7 +1869,8 @@ csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(const csp::comm
 
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string AttributesJsonEscaped = EscapeJSStringLiteral(AttributesJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
+    const std::string Snippet = "{\n"
+          "globalThis." + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
         + " = '{}';\n"
           "let __cspAttributes = {};\n"
           "try {\n"
@@ -1891,6 +1894,7 @@ csp::common::String NgxScriptSystem::SyncCodeComponentAttributes(const csp::comm
         + std::string(CODECOMPONENT_JSON_RESULT_SLOT)
         + " = '{}';\n"
           "    }\n"
+          "}\n"
           "}\n";
 
     auto ReadJsonResultString = [this]() -> std::string
@@ -1957,7 +1961,8 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
     const std::string EntityIdEscaped = EscapeJSStringLiteral(EntityId.c_str());
     const std::string KeyEscaped = EscapeJSStringLiteral(Key.c_str());
     const std::string ValueJsonEscaped = EscapeJSStringLiteral(ValueJson.c_str());
-    const std::string Snippet = "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
+    const std::string Snippet = "{\n"
+          "globalThis." + std::string(CODECOMPONENT_BOOL_RESULT_SLOT)
         + " = false;\n"
           "let __cspValue = null;\n"
           "try {\n"
@@ -1972,6 +1977,7 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
         + std::string(CODECOMPONENT_BOOL_RESULT_SLOT) + " = !!globalThis.scriptRegistry.updateAttributeForEntity('" + EntityIdEscaped + "', '"
         + KeyEscaped
         + "', __cspValue);\n"
+          "}\n"
           "}\n";
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-update-attribute-bridge>"))
