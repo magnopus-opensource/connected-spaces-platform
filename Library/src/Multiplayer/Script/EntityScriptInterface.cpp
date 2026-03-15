@@ -164,11 +164,15 @@ void EntityScriptInterface::RemoveParentEntity()
     }
 }
 
-SpaceEntity* EntityScriptInterface::GetParentEntity() const
+EntityScriptInterface* EntityScriptInterface::GetParentEntity() const
 {
     if (Entity)
     {
-        return Entity->GetParentEntity();
+        const auto Parent = Entity->GetParentEntity();
+        if (Parent)
+        {
+            return Parent->GetScriptInterface();
+        }
     }
 
     return nullptr;

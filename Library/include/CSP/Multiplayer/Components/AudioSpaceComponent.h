@@ -71,6 +71,8 @@ enum class AudioPropertyKeys
 class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:
+    typedef std::function<void(AudioSpaceComponent&)> PlaySoundCallbackHandler;
+
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
     AudioSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent);
@@ -159,6 +161,14 @@ public:
     /// @param Value The volume of the audio, in a ratio between 0 and 1.
     void SetVolume(float Value);
 
+    /// @brief Requests that this component's audio be played once.
+    /// Intended for one-shot sound effects triggered by gameplay or script.
+    void PlaySound();
+
+    /// @brief Registers a callback invoked whenever PlaySound() is called.
+    /// The client can use this to bridge component/script requests into the platform audio playback layer.
+    CSP_EVENT void SetPlaySoundCallback(PlaySoundCallbackHandler Callback);
+
     /// \addtogroup IEnableableComponent
     /// @{
     /// @copydoc IEnableableComponent::GetIsEnabled()
@@ -174,6 +184,9 @@ public:
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
     /// @}
+
+private:
+    PlaySoundCallbackHandler PlaySoundCallback;
 };
 
 } // namespace csp::multiplayer

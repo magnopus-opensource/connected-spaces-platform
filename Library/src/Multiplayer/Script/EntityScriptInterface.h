@@ -59,7 +59,7 @@ public:
 
     void RemoveParentEntity();
 
-    SpaceEntity* GetParentEntity() const;
+    EntityScriptInterface* GetParentEntity() const;
 
     const std::string GetName() const;
     int64_t GetId() const;

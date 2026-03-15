@@ -126,6 +126,19 @@ void AudioSpaceComponent::SetVolume(float Value)
     }
 }
 
+void AudioSpaceComponent::PlaySound()
+{
+    if (PlaySoundCallback)
+    {
+        PlaySoundCallback(*this);
+    }
+}
+
+void AudioSpaceComponent::SetPlaySoundCallback(PlaySoundCallbackHandler Callback)
+{
+    PlaySoundCallback = Callback;
+}
+
 bool AudioSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)); }
 
 void AudioSpaceComponent::SetIsEnabled(bool InValue) { SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue); }

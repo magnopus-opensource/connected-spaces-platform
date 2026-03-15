@@ -34,4 +34,12 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, bool, bool, IsLoopPlayback);
 DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, float, float, TimeSincePlay);
 DEFINE_SCRIPT_PROPERTY_TYPE(AudioSpaceComponent, float, float, Volume);
 
+void AudioSpaceComponentScriptInterface::PlaySound()
+{
+    if (Component)
+    {
+        static_cast<AudioSpaceComponent*>(Component)->PlaySound();
+    }
+}
+
 } // namespace csp::multiplayer

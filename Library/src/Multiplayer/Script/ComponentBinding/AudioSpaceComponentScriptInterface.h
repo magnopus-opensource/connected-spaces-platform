@@ -35,6 +35,8 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
     DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
     DECLARE_SCRIPT_PROPERTY(float, Volume);
+
+    void PlaySound();
 };
 
 } // namespace csp::multiplayer
