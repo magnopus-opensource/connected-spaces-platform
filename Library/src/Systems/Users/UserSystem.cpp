@@ -226,7 +226,7 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
 {
     if (Email.IsEmpty())
     {
-        CSP_LOG_ERROR_MSG("UserSystem::Login, One of either Username or Email must not be empty.");
+        CSP_LOG_ERROR_MSG("UserSystem::Login, Email must not be empty.");
         Callback(MakeInvalid<LoginStateResult>());
         return;
     }

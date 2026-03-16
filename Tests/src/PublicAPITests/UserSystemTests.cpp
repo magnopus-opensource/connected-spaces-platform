@@ -346,7 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, EmptyUserCredentialsTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const csp::common::String ExpectedErrorLog = "UserSystem::Login, One of either Username or Email must not be empty.";
+    const csp::common::String ExpectedErrorLog = "UserSystem::Login, Email must not be empty.";
     bool CallbackCalled = false;
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
