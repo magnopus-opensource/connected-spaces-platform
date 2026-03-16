@@ -61,6 +61,7 @@
 
 #include <chrono>
 #include <glm/gtc/quaternion.hpp>
+#include <set>
 #include <thread>
 
 using namespace std::chrono;
@@ -70,6 +71,46 @@ using namespace std::chrono;
 
 namespace csp::multiplayer
 {
+namespace
+{
+csp::common::String CanonicalizeTag(const csp::common::String& InTag)
+{
+    return InTag.Trim().ToLower();
+}
+
+csp::common::Map<csp::common::String, csp::common::ReplicatedValue> BuildTagMap(const csp::common::Array<csp::common::String>& InTags)
+{
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> TagMap;
+    for (size_t Index = 0; Index < InTags.Size(); ++Index)
+    {
+        const csp::common::String CanonicalTag = CanonicalizeTag(InTags[Index]);
+        if (!CanonicalTag.IsEmpty())
+        {
+            TagMap[CanonicalTag] = csp::common::ReplicatedValue(true);
+        }
+    }
+    return TagMap;
+}
+
+csp::common::Array<csp::common::String> BuildTagArray(const csp::common::Map<csp::common::String, csp::common::ReplicatedValue>& TagMap)
+{
+    const auto* Keys = TagMap.Keys();
+    std::set<csp::common::String> SortedTags;
+    for (size_t Index = 0; Index < Keys->Size(); ++Index)
+    {
+        SortedTags.insert(Keys->operator[](Index));
+    }
+    delete Keys;
+
+    csp::common::Array<csp::common::String> Tags(SortedTags.size());
+    size_t Index = 0;
+    for (const auto& Tag : SortedTags)
+    {
+        Tags[Index++] = Tag;
+    }
+    return Tags;
+}
+}
 
 glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
 {
@@ -103,6 +144,7 @@ SpaceEntity::SpaceEntity()
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
     , ThirdPartyRef("")
+    , Tags()
     , SelectedId(0)
     , Parent(nullptr)
     , EntityLock(LockType::None)
@@ -125,6 +167,7 @@ SpaceEntity::SpaceEntity(csp::common::IRealtimeEngine* InEntitySystem, csp::comm
     , ParentId(nullptr)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
     , ThirdPartyRef("")
+    , Tags()
     , SelectedId(0)
     , Parent(nullptr)
     , EntityLock(LockType::None)
@@ -262,6 +305,46 @@ const csp::common::String& SpaceEntity::GetThirdPartyRef() const { return ThirdP
 bool SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
     return SetProperty(*this, ThirdPartyRef, InThirdPartyRef, SpaceEntityComponentKey::ThirdPartyRef, UPDATE_FLAGS_THIRD_PARTY_REF, LogSystem);
+}
+
+csp::common::Array<csp::common::String> SpaceEntity::GetTags() const { return BuildTagArray(Tags); }
+
+bool SpaceEntity::SetTags(const csp::common::Array<csp::common::String>& InTags)
+{
+    const auto CanonicalTags = BuildTagMap(InTags);
+    return SetProperty(*this, Tags, CanonicalTags, SpaceEntityComponentKey::Tags, UPDATE_FLAGS_TAGS, LogSystem);
+}
+
+bool SpaceEntity::HasTag(const csp::common::String& InTag) const
+{
+    const csp::common::String CanonicalTag = CanonicalizeTag(InTag);
+    return !CanonicalTag.IsEmpty() && Tags.HasKey(CanonicalTag);
+}
+
+bool SpaceEntity::AddTag(const csp::common::String& InTag)
+{
+    const csp::common::String CanonicalTag = CanonicalizeTag(InTag);
+    if (CanonicalTag.IsEmpty())
+    {
+        return false;
+    }
+
+    auto UpdatedTags = Tags;
+    UpdatedTags[CanonicalTag] = csp::common::ReplicatedValue(true);
+    return SetProperty(*this, Tags, UpdatedTags, SpaceEntityComponentKey::Tags, UPDATE_FLAGS_TAGS, LogSystem);
+}
+
+bool SpaceEntity::RemoveTag(const csp::common::String& InTag)
+{
+    const csp::common::String CanonicalTag = CanonicalizeTag(InTag);
+    if (CanonicalTag.IsEmpty() || !Tags.HasKey(CanonicalTag))
+    {
+        return false;
+    }
+
+    auto UpdatedTags = Tags;
+    UpdatedTags.Remove(CanonicalTag);
+    return SetProperty(*this, Tags, UpdatedTags, SpaceEntityComponentKey::Tags, UPDATE_FLAGS_TAGS, LogSystem);
 }
 
 SpaceEntityType SpaceEntity::GetEntityType() const { return Type; }
@@ -1109,6 +1192,11 @@ csp::common::Array<EntityProperty> SpaceEntity::CreateReplicatedProperties()
             SpaceEntityComponentKey::LockType, UPDATE_FLAGS_LOCK_TYPE,
             [&EntityLock = EntityLock]() { return csp::common::ReplicatedValue { static_cast<int64_t>(EntityLock) }; },
             [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(EntityLock, static_cast<LockType>(Value.GetInt()), UPDATE_FLAGS_LOCK_TYPE); }
+        },
+        {
+            SpaceEntityComponentKey::Tags, UPDATE_FLAGS_TAGS,
+            [this]() { return csp::common::ReplicatedValue { Tags }; },
+            [this](const csp::common::ReplicatedValue& Value) { SetPropertyDirect(Tags, Value.GetStringMap(), UPDATE_FLAGS_TAGS); }
         }
 
     };

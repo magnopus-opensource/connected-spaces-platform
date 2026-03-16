@@ -226,6 +226,77 @@ const std::string EntityScriptInterface::GetName() const { return Entity->GetNam
 
 int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
 
+std::vector<std::string> EntityScriptInterface::GetTags() const
+{
+    std::vector<std::string> Tags;
+    if (!Entity)
+    {
+        return Tags;
+    }
+
+    const auto EntityTags = Entity->GetTags();
+    Tags.reserve(EntityTags.Size());
+    for (size_t Index = 0; Index < EntityTags.Size(); ++Index)
+    {
+        Tags.emplace_back(EntityTags[Index].c_str());
+    }
+    return Tags;
+}
+
+void EntityScriptInterface::SetTags(const std::vector<std::string>& Tags)
+{
+    if (!Entity)
+    {
+        return;
+    }
+
+    csp::common::Array<csp::common::String> NewTags(Tags.size());
+    for (size_t Index = 0; Index < Tags.size(); ++Index)
+    {
+        NewTags[Index] = Tags[Index].c_str();
+    }
+
+    if (Entity->SetTags(NewTags))
+    {
+        CommitEntityUpdate();
+    }
+}
+
+bool EntityScriptInterface::HasTag(const std::string& Tag) const
+{
+    return Entity ? Entity->HasTag(Tag.c_str()) : false;
+}
+
+bool EntityScriptInterface::AddTag(const std::string& Tag)
+{
+    if (!Entity)
+    {
+        return false;
+    }
+
+    const bool bUpdated = Entity->AddTag(Tag.c_str());
+    if (bUpdated)
+    {
+        CommitEntityUpdate();
+    }
+    return bUpdated;
+}
+
+bool EntityScriptInterface::RemoveTag(const std::string& Tag)
+{
+    if (!Entity)
+    {
+        return false;
+    }
+
+    const bool bUpdated = Entity->RemoveTag(Tag.c_str());
+    if (bUpdated)
+    {
+        CommitEntityUpdate();
+    }
+    return bUpdated;
+}
+
 void EntityScriptInterface::SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message)
 {
     Entity->GetScript().SubscribeToPropertyChange(ComponentId, PropertyKey, Message.c_str());

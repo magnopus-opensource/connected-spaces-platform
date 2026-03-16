@@ -21,6 +21,7 @@
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
@@ -229,6 +230,40 @@ public:
         }
 
         return ScriptInterface;
+    }
+
+    std::vector<EntityScriptInterface*> GetEntitiesByQuery(qjs::Value Query)
+    {
+        std::vector<EntityScriptInterface*> Entities;
+        if (!EntitySystem || !Query.ctx)
+        {
+            return Entities;
+        }
+
+        const std::string QueryJson = Query.toJSON();
+
+        RAIILock EntityLock([&]() { EntitySystem->LockEntityUpdate(); }, [&]() { EntitySystem->UnlockEntityUpdate(); });
+
+        std::vector<SpaceEntity*> AllEntities;
+        AllEntities.reserve(EntitySystem->GetNumEntities());
+        for (size_t Index = 0; Index < EntitySystem->GetNumEntities(); ++Index)
+        {
+            if (auto* Entity = EntitySystem->GetEntityByIndex(Index))
+            {
+                AllEntities.push_back(Entity);
+            }
+        }
+
+        const auto MatchingIds = ResolveEntityIdsFromQueryJson(QueryJson, AllEntities);
+        for (auto* Entity : AllEntities)
+        {
+            if ((Entity != nullptr) && (MatchingIds.find(Entity->GetId()) != MatchingIds.end()))
+            {
+                Entities.push_back(WrapEntity(Entity));
+            }
+        }
+
+        return Entities;
     }
 
     std::vector<EntityScriptInterface*> GetRootHierarchyEntities()
@@ -695,7 +730,12 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&EntityScriptInterface::GetParentEntity>("parentEntity")
         .property<&EntityScriptInterface::GetId>("id")
         .property<&EntityScriptInterface::GetName>("name")
-        .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
+        .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId")
+        .fun<&EntityScriptInterface::GetTags>("getTags")
+        .fun<&EntityScriptInterface::SetTags>("setTags")
+        .fun<&EntityScriptInterface::HasTag>("hasTag")
+        .fun<&EntityScriptInterface::AddTag>("addTag")
+        .fun<&EntityScriptInterface::RemoveTag>("removeTag");
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()
@@ -715,6 +755,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
         .fun<&EntitySystemScriptInterface::GetEntityById>("getEntityById")
         .fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
+        .fun<&EntitySystemScriptInterface::GetEntitiesByQuery>("getEntitiesByQuery")
         .fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
         .fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 

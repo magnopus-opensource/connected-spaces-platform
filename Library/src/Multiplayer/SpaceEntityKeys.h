@@ -48,7 +48,8 @@ enum class SpaceEntityComponentKey : uint16_t
     Scale = COMPONENT_KEYS_START_VIEWS + 3,
     SelectedClientId = COMPONENT_KEYS_START_VIEWS + 4,
     ThirdPartyRef = COMPONENT_KEYS_START_VIEWS + 6,
-    LockType = COMPONENT_KEYS_START_VIEWS + 8
+    LockType = COMPONENT_KEYS_START_VIEWS + 8,
+    Tags = COMPONENT_KEYS_START_VIEWS + 9
 };
 
 } // namespace csp::multiplayer

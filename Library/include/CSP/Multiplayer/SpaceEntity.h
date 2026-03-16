@@ -206,6 +206,30 @@ public:
     /// @return Whether a new value was set, may fail if not modifiable, or if a dirty property is already set to this value.
     bool SetThirdPartyRef(const csp::common::String& InThirdPartyRef);
 
+    /// @brief Get the tags set on this entity.
+    /// @return A deduplicated collection of normalized tags.
+    csp::common::Array<csp::common::String> GetTags() const;
+
+    /// @brief Replace all tags on this entity.
+    /// @param InTags csp::common::Array<csp::common::String> : The complete tag set to apply.
+    /// @return Whether a new value was set, may fail if not modifiable.
+    bool SetTags(const csp::common::Array<csp::common::String>& InTags);
+
+    /// @brief Check whether this entity contains a tag.
+    /// @param InTag csp::common::String : The tag to look up.
+    /// @return True if the normalized tag exists.
+    bool HasTag(const csp::common::String& InTag) const;
+
+    /// @brief Add a tag to this entity.
+    /// @param InTag csp::common::String : The tag to add.
+    /// @return Whether a new value was set, may fail if not modifiable.
+    bool AddTag(const csp::common::String& InTag);
+
+    /// @brief Remove a tag from this entity.
+    /// @param InTag csp::common::String : The tag to remove.
+    /// @return Whether a new value was set, may fail if not modifiable.
+    bool RemoveTag(const csp::common::String& InTag);
+
     /// @brief Get the type of the Entity.
     /// @return The SpaceEntityType enum value.
     SpaceEntityType GetEntityType() const;
@@ -486,6 +510,7 @@ private:
     csp::common::String Name;
     SpaceTransform Transform;
     csp::common::String ThirdPartyRef;
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> Tags;
     uint64_t SelectedId;
 
     SpaceEntity* Parent = nullptr;

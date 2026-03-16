@@ -63,6 +63,11 @@ public:
 
     const std::string GetName() const;
     int64_t GetId() const;
+    std::vector<std::string> GetTags() const;
+    void SetTags(const std::vector<std::string>& Tags);
+    bool HasTag(const std::string& Tag) const;
+    bool AddTag(const std::string& Tag);
+    bool RemoveTag(const std::string& Tag);
 
     void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
 

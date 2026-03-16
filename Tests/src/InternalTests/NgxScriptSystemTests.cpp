@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
+#include "CSP/Common/Interfaces/IJSScriptRunner.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
@@ -23,6 +24,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Events/EventId.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/NgxScript/NgxCodeComponentRuntime.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
 #include "TestHelpers.h"
@@ -117,12 +119,35 @@ private:
     std::vector<csp::multiplayer::SpaceEntity*> Entities;
 };
 
+class TestScriptRunner final : public csp::common::IJSScriptRunner
+{
+public:
+    void RegisterScriptBinding(csp::common::IScriptBinding*) override { }
+    void UnregisterScriptBinding(csp::common::IScriptBinding*) override { }
+};
+
 csp::multiplayer::CodeAttribute::EntityQueryValueType BuildNameEntityQuery(const csp::common::String& Name)
 {
     csp::multiplayer::CodeAttribute::EntityQueryValueType Query;
     Query["kind"] = "name";
     Query["name"] = Name;
     return Query;
+}
+
+std::string BuildTagQueryJson(const char* Tag)
+{
+    return std::string("{\"kind\":\"tag\",\"tag\":\"") + Tag + "\"}";
+}
+
+std::string BuildAndTagQueryJson(const char* LeftTag, const char* RightTag)
+{
+    return std::string("{\"kind\":\"and\",\"operands\":[{\"kind\":\"tag\",\"tag\":\"") + LeftTag + "\"},{\"kind\":\"tag\",\"tag\":\"" + RightTag
+        + "\"}]}";
+}
+
+std::string BuildNotTagQueryJson(const char* Tag)
+{
+    return std::string("{\"kind\":\"not\",\"operand\":{\"kind\":\"tag\",\"tag\":\"") + Tag + "\"}}";
 }
 
 void ProcessTickEvent()
@@ -663,6 +688,93 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeEntityQueryRejec
     csp::multiplayer::CodeAttribute ParsedAttribute;
     EXPECT_FALSE(csp::multiplayer::CodeAttribute::TryFromReplicatedValue(
         csp::common::ReplicatedValue(InvalidSerializedAttribute), ParsedAttribute));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, SpaceEntityTagsNormalizeAndDeduplicate)
+{
+    csp::multiplayer::SpaceEntity Entity;
+
+    csp::common::Array<csp::common::String> Tags(4);
+    Tags[0] = " Coin ";
+    Tags[1] = "collectable";
+    Tags[2] = "coin";
+    Tags[3] = "COLLECTABLE";
+
+    EXPECT_TRUE(Entity.SetTags(Tags));
+    EXPECT_TRUE(Entity.HasTag("coin"));
+    EXPECT_TRUE(Entity.HasTag("COLLECTABLE"));
+    EXPECT_FALSE(Entity.HasTag("missing"));
+
+    const auto EntityTags = Entity.GetTags();
+    ASSERT_EQ(EntityTags.Size(), 2);
+    EXPECT_EQ(EntityTags[0], "coin");
+    EXPECT_EQ(EntityTags[1], "collectable");
+
+    EXPECT_TRUE(Entity.AddTag(" Rare "));
+    EXPECT_TRUE(Entity.HasTag("rare"));
+    EXPECT_TRUE(Entity.RemoveTag("RARE"));
+    EXPECT_FALSE(Entity.HasTag("rare"));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EntityQueryResolutionSupportsTagsAndBooleanComposition)
+{
+    csp::common::LogSystem LogSystem;
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    csp::multiplayer::SpaceEntity CoinCollectable(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 1001, "coin-a", csp::multiplayer::SpaceTransform {},
+        1, csp::common::Optional<uint64_t> {}, true, true);
+    csp::multiplayer::SpaceEntity CoinOnly(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 1002, "coin-b", csp::multiplayer::SpaceTransform {},
+        1, csp::common::Optional<uint64_t> {}, true, true);
+    csp::multiplayer::SpaceEntity Decorative(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 1003, "decor", csp::multiplayer::SpaceTransform {},
+        1, csp::common::Optional<uint64_t> {}, true, true);
+
+    csp::common::Array<csp::common::String> CoinCollectableTags(2);
+    CoinCollectableTags[0] = "coin";
+    CoinCollectableTags[1] = "collectable";
+    EXPECT_TRUE(CoinCollectable.SetTags(CoinCollectableTags));
+
+    csp::common::Array<csp::common::String> CoinOnlyTags(1);
+    CoinOnlyTags[0] = "coin";
+    EXPECT_TRUE(CoinOnly.SetTags(CoinOnlyTags));
+
+    csp::common::Array<csp::common::String> DecorativeTags(1);
+    DecorativeTags[0] = "decor";
+    EXPECT_TRUE(Decorative.SetTags(DecorativeTags));
+
+    std::vector<csp::multiplayer::SpaceEntity*> Entities { &CoinCollectable, &CoinOnly, &Decorative };
+
+    EXPECT_EQ(csp::multiplayer::ResolveEntityIdsFromQueryJson(BuildTagQueryJson("CoIn"), Entities), (std::set<uint64_t> { 1001, 1002 }));
+    EXPECT_EQ(csp::multiplayer::ResolveEntityIdsFromQueryJson(BuildAndTagQueryJson("coin", "collectable"), Entities), (std::set<uint64_t> { 1001 }));
+    EXPECT_EQ(csp::multiplayer::ResolveEntityIdsFromQueryJson(BuildNotTagQueryJson("coin"), Entities), (std::set<uint64_t> { 1003 }));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, SingleEntityQueryResolutionContractRemainsUnchangedForTags)
+{
+    csp::common::LogSystem LogSystem;
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    csp::multiplayer::SpaceEntity FirstMatch(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 2001, "first", csp::multiplayer::SpaceTransform {},
+        1, csp::common::Optional<uint64_t> {}, true, true);
+    csp::multiplayer::SpaceEntity SecondMatch(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 2002, "second", csp::multiplayer::SpaceTransform {},
+        1, csp::common::Optional<uint64_t> {}, true, true);
+
+    csp::common::Array<csp::common::String> Tags(1);
+    Tags[0] = "collectable";
+    EXPECT_TRUE(FirstMatch.SetTags(Tags));
+    EXPECT_TRUE(SecondMatch.SetTags(Tags));
+
+    std::vector<csp::multiplayer::SpaceEntity*> Entities { &FirstMatch, &SecondMatch };
+
+    const auto ResolvedId = csp::multiplayer::ResolveEntityIdFromQueryJson(BuildTagQueryJson("collectable"), Entities);
+    ASSERT_TRUE(ResolvedId.has_value());
+    EXPECT_EQ(*ResolvedId, 2001);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapUsesAssetModuleWhenAvailable)
