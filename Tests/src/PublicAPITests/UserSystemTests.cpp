@@ -47,17 +47,14 @@ csp::systems::Profile CreateTestUser()
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const char* TestUserName = "CSP-TEST-NAME";
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
-
-    std::string UniqueUserName = TestUserName + GetUniqueString();
 
     char UniqueEmail[256];
     SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
 
     // Create new user
-    auto [Result] = AWAIT_PRE(UserSystem, CreateUser, RequestPredicate, UniqueUserName.c_str(), TestDisplayName, UniqueEmail,
-        GeneratedTestAccountPassword, false, true, nullptr, nullptr);
+    auto [Result] = AWAIT_PRE(
+        UserSystem, CreateUser, RequestPredicate, TestDisplayName, UniqueEmail, GeneratedTestAccountPassword, false, true, nullptr, nullptr);
 
     SCOPED_TRACE("Failed to create temporary test user in CreateTestUser.");
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -65,7 +62,6 @@ csp::systems::Profile CreateTestUser()
     const auto& CreatedProfile = Result.GetProfile();
 
     SCOPED_TRACE("CreateTestUser returned unexpected details for temporary test user.");
-    EXPECT_EQ(CreatedProfile.UserName, UniqueUserName.c_str());
     EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
     EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
 
@@ -775,11 +771,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
 
-    const char* TestUserName = "CSP-TEST-NAME";
     const char* TestDisplayName = "CSP-TEST-DISPLAY";
-
-    char UniqueUserName[256];
-    SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueString().c_str());
 
     char UniqueEmail[256];
     SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
@@ -788,15 +780,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 
     // Create new user
     {
-        auto [Result] = AWAIT_PRE(UserSystem, CreateUser, RequestPredicate, UniqueUserName, TestDisplayName, UniqueEmail,
-            GeneratedTestAccountPassword, true, true, nullptr, nullptr);
+        auto [Result] = AWAIT_PRE(
+            UserSystem, CreateUser, RequestPredicate, TestDisplayName, UniqueEmail, GeneratedTestAccountPassword, true, true, nullptr, nullptr);
 
         EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
         const auto& CreatedProfile = Result.GetProfile();
         CreatedUserId = CreatedProfile.UserId;
 
-        EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
         EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
         EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
     }

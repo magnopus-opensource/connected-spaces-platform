@@ -89,7 +89,7 @@ public:
     /// @param Callback LoginTokenInfoResultCallback : callback that gets called as described above
     CSP_EVENT void SetNewLoginTokenReceivedCallback(LoginTokenInfoResultCallback Callback);
 
-    /// @brief Log in to Magnopus Cloud Services services using a username-password or email-password combination.
+    /// @brief Log in to Magnopus Cloud Services services using an email-password combination.
     /// @param Email csp::common::String
     /// @param Password csp::common::String
     /// @param CreateMultiplayerConnection bool : Whether to create a multiplayer connection. If false, this session will not establish a SignalR
@@ -187,7 +187,6 @@ public:
     // Profile
 
     /// @brief Creates a new user profile.
-    /// @param UserName csp::common::Optional<csp::common::String> : user name associated with the new profile
     /// @param DisplayName csp::common::Optional<csp::common::String> : user display name associated with the new profile
     /// @param Email csp::common::String : email address associated with the new profile
     /// @param Password csp::common::String : password associated with the new profile
@@ -196,19 +195,18 @@ public:
     /// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
     /// @param InviteToken csp::common::Optional<csp::common::String> : A token provided to the user that can be used to auto-confirm their account
     /// @param Callback ProfileResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void CreateUser(const csp::common::Optional<csp::common::String>& UserName,
-        const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email, const csp::common::String& Password,
-        bool ReceiveNewsletter, bool UserHasVerifiedAge, const csp::common::Optional<csp::common::String>& RedirectUrl,
-        const csp::common::Optional<csp::common::String>& InviteToken, ProfileResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateUser(const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email,
+        const csp::common::String& Password, bool ReceiveNewsletter, bool UserHasVerifiedAge,
+        const csp::common::Optional<csp::common::String>& RedirectUrl, const csp::common::Optional<csp::common::String>& InviteToken,
+        ProfileResultCallback Callback);
 
     /// @brief Upgrade guest user to full user profile.
-    /// @param UserName csp::common::String : user name associated with the new profile
     /// @param DisplayName csp::common::String : user display name associated with the new profile
     /// @param Email csp::common::String : email address associated with the new profile
     /// @param Password csp::common::String : password associated with the new profile
     /// @param Callback ProfileResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void UpgradeGuestAccount(const csp::common::String& UserName, const csp::common::String& DisplayName,
-        const csp::common::String& Email, const csp::common::String& Password, ProfileResultCallback Callback);
+    CSP_ASYNC_RESULT void UpgradeGuestAccount(const csp::common::String& DisplayName, const csp::common::String& Email,
+        const csp::common::String& Password, ProfileResultCallback Callback);
 
     /// @brief Send a confirmation email.
     /// @param Callback NullResultCallback : callback to call when a response is received
@@ -251,7 +249,7 @@ public:
     [[deprecated("Deprecated in favour of GetBasicProfilesByUserId")]] CSP_ASYNC_RESULT void GetProfilesByUserId(
         const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
 
-    /// @brief Get a list of minimal profiles (avatarId, personalityType, userName, and platform) by user IDs.
+    /// @brief Get a list of minimal profiles (avatarId, personalityType, and platform) by user IDs.
     /// @param InUserIds csp::common::Array<csp::common::String> : an array of user IDs to search for users by
     /// @param Callback BasicProfilesResultCallback : callback to call when a response is received
     CSP_ASYNC_RESULT void GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);

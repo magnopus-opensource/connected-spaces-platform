@@ -712,17 +712,11 @@ void UserSystem::Logout(NullResultCallback Callback)
     }
 }
 
-void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& UserName, const csp::common::Optional<csp::common::String>& DisplayName,
-    const csp::common::String& Email, const csp::common::String& Password, bool ReceiveNewsletter, bool HasVerifiedAge,
-    const csp::common::Optional<csp::common::String>& RedirectUrl, const csp::common::Optional<csp::common::String>& InviteToken,
-    ProfileResultCallback Callback)
+void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& DisplayName, const csp::common::String& Email,
+    const csp::common::String& Password, bool ReceiveNewsletter, bool HasVerifiedAge, const csp::common::Optional<csp::common::String>& RedirectUrl,
+    const csp::common::Optional<csp::common::String>& InviteToken, ProfileResultCallback Callback)
 {
     auto Request = std::make_shared<chs_user::CreateUserRequest>();
-
-    if (UserName.HasValue())
-    {
-        Request->SetUserName(*UserName);
-    }
 
     if (DisplayName.HasValue())
     {
@@ -756,14 +750,13 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
     static_cast<chs_user::ProfileApi*>(ProfileAPI)->usersPost({ Request }, ResponseHandler);
 }
 
-void UserSystem::UpgradeGuestAccount(const csp::common::String& UserName, const csp::common::String& DisplayName, const csp::common::String& Email,
-    const csp::common::String& Password, ProfileResultCallback Callback)
+void UserSystem::UpgradeGuestAccount(
+    const csp::common::String& DisplayName, const csp::common::String& Email, const csp::common::String& Password, ProfileResultCallback Callback)
 {
     const csp::common::String UserId = CurrentLoginState.UserId;
 
     auto Request = std::make_shared<chs_user::UpgradeGuestRequest>();
 
-    Request->SetUserName(UserName);
     Request->SetDisplayName(DisplayName);
     Request->SetEmail(Email);
     Request->SetPassword(Password);
