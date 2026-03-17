@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.30.0]
 
+### 🔥 ❗Breaking Changes
+
+- [OF-1843] chore!: Remove mutable `csp::common::String& GetUri()` from `UriResult`. The const getter remains available. By @MAG-ElliotMorris
+
 ### 🐛 🔨 Bug Fixes
 
 - [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley

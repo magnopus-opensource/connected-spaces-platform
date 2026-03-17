@@ -285,10 +285,6 @@ class CSP_API UriResult : public csp::systems::ResultBase
 public:
     /// @brief Retrieves the uri for the asset uploaded.
     /// @return csp::common::String : uri of the uploaded asset.
-    csp::common::String& GetUri();
-
-    /// @brief Retrieves the uri for the asset uploaded.
-    /// @return csp::common::String : uri of the uploaded asset.
     const csp::common::String& GetUri() const;
 
     void SetUri(const csp::common::String& Value);
