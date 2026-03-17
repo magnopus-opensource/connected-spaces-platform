@@ -8,12 +8,10 @@ export const TEST_ACCOUNT_PASSWORD = "3R{d2}3C<x[J7=jU";
 export async function CreateTestUser(): Promise<Systems.ProfileResult> {
   const userSystem = Systems.SystemsManager.get().getUserSystem();
 
-  const uniqueUserName = "CSP-TEST-NAME" + uuidv4();
   const testDisplayName = "CSP-TEST-DISPLAY";
   const uniqueEmail = "testnopus.pokemon+" + uuidv4() + "@magnopus.com";
 
   const user = await userSystem.createUser(
-    uniqueUserName,                         // userName
     testDisplayName,                        // displayName
     uniqueEmail,                            // email
     TEST_ACCOUNT_PASSWORD,                  // password
