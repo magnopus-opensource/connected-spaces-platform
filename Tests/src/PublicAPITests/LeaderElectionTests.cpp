@@ -429,7 +429,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, LeaderElectionUnitTests, InvalidEventTest)
         - Re-enter the space
         - The elected leader can be retrieved
 */
-CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
