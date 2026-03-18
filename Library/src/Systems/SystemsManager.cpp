@@ -170,16 +170,23 @@ SystemsManager::~SystemsManager() { DestroySystems(); }
 
 ConversationSystemInternal* SystemsManager::GetConversationSystem() { return ConversationSystem; }
 
-void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject)
+void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     // Create Log system first, so we can log any startup issues in other systems
     LogSystem = new csp::common::LogSystem();
 
+    if (WebClientInject)
+    {
+        WebClient = WebClientInject;
+    }
+    else
+    {
 #ifdef CSP_WASM
-    WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #else
-    WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
+        WebClient = new csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS, LogSystem);
 #endif
+    }
 
     // Emergency Fix: We have a circular dependency issue here due to SignalR requiring the AuthContext for construction. To get around this
     // we pass nullptr for the NetworkEventBus and then set it after it has been constructed below.
@@ -267,10 +274,10 @@ void SystemsManager::DestroySystems()
     delete LogSystem;
 }
 
-void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject)
+void SystemsManager::Instantiate(csp::multiplayer::ISignalRConnection* SignalRInject, csp::web::WebClient* WebClientInject)
 {
     Instance = new SystemsManager();
-    Instance->CreateSystems(SignalRInject);
+    Instance->CreateSystems(SignalRInject, WebClientInject);
 }
 
 void SystemsManager::Destroy()

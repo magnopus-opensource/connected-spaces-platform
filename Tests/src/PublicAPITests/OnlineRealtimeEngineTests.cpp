@@ -65,6 +65,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInRe
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     // SignalR populates a result and not an exception
     EXPECT_CALL(
         *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::GENERATE_OBJECT_IDS), ::testing::_, ::testing::_))
@@ -100,6 +102,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInRemo
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -137,6 +141,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInSe
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     // SignalR populates a result and not an exception
     EXPECT_CALL(
         *SignalRMock, Invoke(Connection->GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_OBJECT_MESSAGE), ::testing::_, ::testing::_))
@@ -173,6 +179,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorInSend
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
 
     // SignalR populates an exception
     EXPECT_CALL(
@@ -232,6 +240,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestSuccessInCr
         = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
     bool IsVisible = true;
 
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     EXPECT_CALL(MockCallback, Call(::testing::_))
         .WillOnce(::testing::Invoke(
             [Id, &Username, &AvatarId, AvatarState, AvatarPlayMode, LocomotionModel, IsVisible](SpaceEntity* CreatedSpaceEntity)
@@ -273,6 +283,9 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, TestErrorLogged
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
+    
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillOnce(
@@ -311,6 +324,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntityGen
     auto& SystemsManager = csp::systems::SystemsManager::Get();
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
 
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
@@ -363,6 +378,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntitySen
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     bool SendObjectMessageCalled = false;
+
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
 
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
@@ -438,6 +455,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
     const csp::common::String ErrorMsg = "Failed to destroy entity.";
     EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Error, testing::HasSubstr(ErrorMsg))).Times(1);
 
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillRepeatedly(
@@ -512,6 +531,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarGen
 
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
+
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)
         .WillOnce(
@@ -564,6 +585,8 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateAvatarSen
     std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
 
     bool SendObjectMessageCalled = false;
+
+    EXPECT_CALL(*WebClientMock, SendRequest).Times(0);
 
     // SignalR populates an exception
     EXPECT_CALL(*SignalRMock, Invoke)

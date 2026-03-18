@@ -2,9 +2,41 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.30.0]
+
+### 🔥 ❗Breaking Changes
+
+- [OF-1843] chore!: Remove mutable `csp::common::String& GetUri()` from `UriResult`. The const getter remains available. By @MAG-ElliotMorris
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley
+  Resolving a potential crash that can occur when callbacks are executed in response to heartbeat invocations by the ScopeLeadershipManager.
+
+## [6.29.0]
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5232] fix: Clean up HttpClientSession after use by MAG-AdamThorn
+  As reported in the OB-5232, CSP were not correctly cleaning up HttpClientSession objects after performing Http Methods. This meant the HTTPSession objects were not being destroyed and their sockets closed. The poco/Net/src/HTTPSessionInstantiator.cpp class creates and returns a raw pointer to the HTTPClientSession, it does not own the memory. The fix is to use a unique_ptr to ensure the session is correctly cleaned up after use.
+
 ## [6.28.0]
 
+### 🐛 🔨 Bug Fixes
 
+- [OF-1836] fix: Log errors when parsing malformed JSON by magnopus-swifty
+  This is a partial fix to log errors when parsing malformed JSON strings and avoid hitting unwanted assertions.
+  A more complete fix will implement error handling logic so calling code can correctly report failures.
+  
+### 🍰 🙌 New Features
+
+- [OF-1818] feat: Update AsyncCompletedEventCallback format by MAG-AdamThorn
+  The structure of the AsyncCallCompletedEvent has been updated by the backend services to include additional properties. `ReferenceId` and `ReferenceType` are being replaced by a new `References` Map, and new `Status` and `StatusReason` properties have been added. This change is being made to enable the backend services to communicate more information about the async call. For example in the case of `DuplicateSpaceAsync`, the new References map will contain both the Id of the old space as well as the newly duplicated one. This change is currently behind a backend feature flag. As this will be a breaking change we have added these new properties to the event, but will temporarily be keeping the old ones. We are populating both the old and new properties when we deserialise the SignalR event values, which means that Clients will continue to be able to consume the event as before. Once this CSP change has been adopted by clients we will remove the old properties and transition logic.
+
+### 🐛 🔨 Bug Fixes
+
+- [OB-5070] fix: `GetMaterials` no longer bails out after first failure
+  Previously this method was designed such that if any material failed to download, it would effectively cancel all the other in-flight downloads. This has now changed to allow all other downloads to run to completion. This doesn't currently change the result type such that the failed materials are reported back to the caller in any way, but they are logged. Partial success is reported as success. 
 
 ## [6.27.0]
 

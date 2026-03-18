@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 
+#include <stdexcept>
 #include <variant>
 
 namespace csp::common

@@ -19,6 +19,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "Common/Convert.h"
 #include "Common/Web/Json.h"
+#include "Json/JsonParseHelper.h"
 #include "Services/SpatialDataService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
@@ -237,25 +238,26 @@ void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 
 void BasicSpacesResult::FillResultTotalCount(const String& JsonContent)
 {
+    assert(JsonContent.c_str());
+
     rapidjson::Document JsonDoc;
+    rapidjson::ParseResult ok = csp::json::ParseWithErrorLogging(JsonDoc, JsonContent, "BasicSpacesResult::FillResultTotalCount");
+    if (!ok)
+    {
+        return;
+    }
 
     ResultTotalCount = 0;
-
-    if (JsonContent.c_str() != nullptr)
+    if (JsonDoc.HasMember("itemTotalCount"))
     {
-        JsonDoc.Parse(JsonContent.c_str());
+        rapidjson::Value& Val = JsonDoc["itemTotalCount"];
+        auto TotalCountStr = csp::web::JsonObjectToString(Val);
 
-        if (JsonDoc.HasMember("itemTotalCount"))
+        uint64_t ConvertedTotalCount = 0;
+        const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+        if (result.ec == std::errc())
         {
-            rapidjson::Value& Val = JsonDoc["itemTotalCount"];
-            auto TotalCountStr = csp::web::JsonObjectToString(Val);
-
-            uint64_t ConvertedTotalCount = 0;
-            const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
-            if (result.ec == std::errc())
-            {
-                ResultTotalCount = ConvertedTotalCount;
-            }
+            ResultTotalCount = ConvertedTotalCount;
         }
     }
 }

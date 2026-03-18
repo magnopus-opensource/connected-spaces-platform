@@ -156,9 +156,20 @@ void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
 {
     const signalr::value Params { std::vector { signalr::value { ScopeId } } };
 
+    // We will use this to check that our object is still valid when the callback is executed, as the callback could be executed after this object is
+    // destroyed. If the weak pointer can't be accessed via `lock`, then we know the object has been destroyed and we won't execute the body of the callback.
+    std::weak_ptr<int> WeakToken = LifetimeToken;
+
     Connection.GetSignalRConnection()->Invoke(Connection.GetMultiplayerHubMethods().Get(MultiplayerHubMethod::SEND_SCOPE_LEADER_HEARTBEAT), Params,
-        [this, ScopeId](signalr::value, std::exception_ptr Exception)
+        [this, WeakToken, ScopeId](signalr::value, std::exception_ptr Exception)
         {
+            // Bail if the weak token is not valid. Indicates that the ScopeLeadershipManager has been destroyed.
+            std::shared_ptr<int> SharedToken = WeakToken.lock();
+            if (!SharedToken)
+            {
+                return;
+            }
+
             if (Exception)
             {
                 // An exception was thrown. In this case, we just log an error to notify clients.
@@ -189,5 +200,5 @@ void ScopeLeadershipManager::SendLeaderHeartbeat(const std::string& ScopeId)
                     fmt::format("ScopeLeadershipManager::SendLeaderHeartbeat Heartbeat was successfuly sent for scope: {}", ScopeId).c_str());
             }
         });
-}
+    }
 }

@@ -149,6 +149,20 @@ public:
 class CSP_API AsyncCallCompletedEventData : public NetworkEventData
 {
 public:
+    /*
+    Please note:
+    The structure of the AsyncCallCompleted event has been updated by the backend services to include some additional properties.
+    ReferenceId and ReferenceType are being replaced by a Map called References, and new Status and StatusReason properties have been added.
+    This change is currently behind an backend feature flag, ready to be switched over. As this will be a breaking change we have added these new
+    properties to the event, but will temporarily be keeping the old ones. We will populate both the old and new properties when we deserialise the
+    SignalR event values, which means that Clients will continue to be able to consume the event as before.
+
+    Once this CSP change has been adopted by clients and is confirmed working, we can:
+    - Get the backend services to update the flag and send the new AsyncCallCompletedEvent structure.
+    - Ask client teams to update to use the new event properties.
+    - Remove the old event properties and temporary logic, including this comment - this last step is captured by ticket OF-1835.
+    */
+
     /// @brief The name of the async operation that has been completed.
     csp::common::String OperationName;
 
@@ -159,6 +173,21 @@ public:
     /// @brief The type that the Id represents.
     /// In the previous example this would be "GroupId".
     csp::common::String ReferenceType;
+
+    /// @brief A string map containing reference information related to this operation.
+    /// Each key:value pair in this map represents a reference name and its corresponding Id.
+    /// The contents of this map will differ based on the specific Async Call, but it is intended to provide additional context and
+    /// information about the completed operation.
+    /// For example, in the case of the DuplicatedSpaceAsync operation, this map would contain the following:
+    /// - "OrignalSpaceId": Id of the original Space being duplicated.
+    /// - "SpaceId": Id of the newly duplicated Space.
+    csp::common::Map<csp::common::String, csp::common::String> References;
+
+    /// @brief Whether the operation completed successfully or not.
+    bool Success;
+
+    /// @brief This will be an empty string if the operation was successful, but if the operation failed it will contain the failure status.
+    csp::common::String StatusReason;
 };
 
 // TODO, this should not be here. It's not an event data, it's just a type for a callback used in the AssetSystem.

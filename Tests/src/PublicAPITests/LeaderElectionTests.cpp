@@ -452,18 +452,6 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
     EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-    csp::common::String ScopeId;
-
-    // Bind to the OnElectedScopeLeaderCallback.
-    bool CallbackCalled = false;
-    RealtimeEngine->SetOnElectedScopeLeaderCallback(
-        [&CallbackCalled, UserId, &ScopeId](const csp::common::String& ChangedScopeId, const csp::common::String& LeaderUserId)
-        {
-            EXPECT_EQ(LeaderUserId, UserId);
-            EXPECT_EQ(ChangedScopeId, ScopeId);
-            CallbackCalled = true;
-        });
-
     // Get the default scope
     auto [GetScopesResult] = AWAIT_PRE(MultiplayerSystem, GetScopesBySpace, RequestPredicate, Space.Id);
     EXPECT_EQ(GetScopesResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -475,7 +463,7 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
     }
 
     csp::systems::Scope DefaultScope = GetScopesResult.GetScopes()[0];
-    ScopeId = DefaultScope.Id;
+    const csp::common::String ScopeId = DefaultScope.Id;
 
     // Ensure the scope is global
     EXPECT_EQ(DefaultScope.PubSubType, csp::systems::PubSubModelType::Global);
@@ -488,8 +476,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, GetScopeLeaderTest)
 
     auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
+    // Wait for initial elected event
+    std::promise<void> OnElectedScopeLeaderPromise;
+    auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
+    RealtimeEngine->SetOnElectedScopeLeaderCallback(
+        [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+        {
+            std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
+            EXPECT_EQ(UserId, LeaderUserId);
+            OnElectedScopeLeaderPromise.set_value();
+        });
+
     // Enter space
     auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+    ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
 
     // Get the scope leader
     auto [GetScopeLeaderResult] = AWAIT_PRE(MultiplayerSystem, GetScopeLeader, RequestPredicate, ScopeId);
@@ -595,9 +597,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipTest)
     {
         auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
+        // Wait for initial elected event
+        std::promise<void> OnElectedScopeLeaderPromise;
+        auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
+        RealtimeEngine->SetOnElectedScopeLeaderCallback(
+            [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+            {
+                std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
+                EXPECT_EQ(UserId, LeaderUserId);
+                OnElectedScopeLeaderPromise.set_value();
+            });
+
         // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
     }
 
     //  Create 2 additional clients for leader election.
@@ -848,9 +863,22 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
 
         RealtimeEngine.get()->SetScriptLeaderReadyCallback(ScriptSystemReadyCallback);
 
+       // Wait for initial elected event
+        std::promise<void> OnElectedScopeLeaderPromise;
+        auto OnElectedScopeLeaderFuture = OnElectedScopeLeaderPromise.get_future();
+
+        RealtimeEngine->SetOnElectedScopeLeaderCallback(
+            [&OnElectedScopeLeaderPromise, &UserId](const csp::common::String&, const csp::common::String& LeaderUserId)
+            {
+                std::cout << "OnElectedScopeLeaderCallback 1\n" << std::endl;
+                EXPECT_EQ(UserId, LeaderUserId);
+                OnElectedScopeLeaderPromise.set_value();
+            });
+
         // Enter space
-        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
-        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
     }
 
     // Wait for the script system to be ready

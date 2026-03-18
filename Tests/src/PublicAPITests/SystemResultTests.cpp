@@ -69,16 +69,6 @@ public:
 
 #endif
 
-class TestAuthContext : public IAuthContext
-{
-public:
-    const csp::common::LoginState& GetLoginState() const override { return State; }
-    void RefreshToken(std::function<void(bool)> Success) override { Success(true); }
-
-private:
-    csp::common::LoginState State;
-};
-
 class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
 {
 public:

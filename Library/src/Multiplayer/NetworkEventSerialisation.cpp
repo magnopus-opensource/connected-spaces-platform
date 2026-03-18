@@ -71,6 +71,19 @@ csp::common::String DecodeSequenceKey(csp::common::ReplicatedValue& RawValue)
     return csp::common::Decode::URI(RawValue.GetString());
 }
 
+// forward declaring the ParseSignalRComponent method.
+csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component, csp::common::LogSystem& LogSystem);
+
+csp::common::ReplicatedValue ParseSignalRComponentFromItemComponent(const signalr::value& ItemComponentData, csp::common::LogSystem& LogSystem)
+{
+    const auto& ItemComponentDataArray = ItemComponentData.as_array();
+
+    uint64_t Type = ItemComponentDataArray[0].as_uinteger();
+    const signalr::value& Value = ItemComponentDataArray[1].as_array()[0]; // ItemComponentData<T> only has a single field
+
+    return ParseSignalRComponent(Type, Value, LogSystem);
+}
+
 csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component, csp::common::LogSystem& LogSystem)
 {
     csp::common::ReplicatedValue ReplicatedValue;
@@ -127,6 +140,18 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
     {
         ReplicatedValue = (int64_t)Component.as_uinteger();
     }
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::STRING_DICTIONARY))
+    {
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ResultMap;
+        const auto& StringMap = Component.as_string_map();
+
+        for (const auto& [Key, ItemComponentData] : StringMap)
+        {
+            ResultMap[Key.c_str()] = ParseSignalRComponentFromItemComponent(ItemComponentData, LogSystem);
+        }
+
+        ReplicatedValue = csp::common::ReplicatedValue { ResultMap };
+    }
     else
     {
         LogSystem.LogMsg(csp::common::LogLevel::Error, "Unsupported event argument type.");
@@ -163,12 +188,9 @@ void PopulateCommonEventData(
         OutEventData.EventValues = csp::common::Array<csp::common::ReplicatedValue>(Components.size());
         int i = 0;
 
-        for (auto& Component : Components)
+        for (auto& [Key, ItemComponentData] : Components)
         {
-            // Component is in form [TypeId, [Field0, Field1, ...]]
-            auto Type = Component.second.as_array()[0].as_uinteger();
-            auto& Value = Component.second.as_array()[1].as_array()[0]; // ItemComponentData<T> only has a single field
-            OutEventData.EventValues[i++] = ParseSignalRComponent(Type, Value, LogSystem);
+            OutEventData.EventValues[i++] = ParseSignalRComponentFromItemComponent(ItemComponentData, LogSystem);
         }
     }
 }
@@ -397,9 +419,52 @@ csp::common::AsyncCallCompletedEventData DeserializeAsyncCallCompletedEvent(
     csp::common::AsyncCallCompletedEventData ParsedEvent {};
     PopulateCommonEventData(EventValues, ParsedEvent, LogSystem);
 
+    /*
+    Please note:
+    The structure of the AsyncCallCompleted event has been updated by the backend services to include some additional properties.
+    ReferenceId and ReferenceType are being replaced by a Map called References, and new Status and StatusReason properties have been added.
+    This change is currently behind an backend feature flag, ready to be switched over. As this will be a breaking change we have added these
+    new properties to the event, but will temporarily be keeping the old ones. We are populating both the old and new properties when we
+    deserialise the SignalR event values, which means that Clients will continue to be able to consume the event as before.
+
+    Once this CSP change has been adopted by clients and is confirmed working, we can:
+    - Get the backend services to update the flag and send the new AsyncCallCompletedEvent structure.
+    - Ask client teams to update to use the new event properties.
+    - Remove the old event properties and temporary logic, including this comment - this last step is captured by ticket OF-1835.
+    */
+
     ParsedEvent.OperationName = ParsedEvent.EventValues[0].GetString();
-    ParsedEvent.ReferenceId = ParsedEvent.EventValues[1].GetString();
-    ParsedEvent.ReferenceType = ParsedEvent.EventValues[2].GetString();
+
+    // Check to see if this event has the new structure that includes a Reference map in place of the old ReferenceId and ReferenceType. As part of
+    // the transition, we will populate both the new and old properties to maintain backwards compatibility with clients.
+    bool IsNewReferenceMapFormat = ParsedEvent.EventValues[1].GetReplicatedValueType() == csp::common::ReplicatedValueType::StringMap;
+
+    if (IsNewReferenceMapFormat)
+    {
+        const auto& ReferencesStringMap = ParsedEvent.EventValues[1].GetStringMap();
+
+        for (const auto& [Key, ReplicatedValue] : ReferencesStringMap)
+        {
+            ParsedEvent.References[Key] = ReplicatedValue.GetString();
+
+            // For backwards compatibility, we will also populate the old ReferenceId and ReferenceType properties.
+            // Please note: As part of this change the backend services have changed the ReferenceType from "GroupId" > "SpaceId".
+            if (Key == "SpaceId")
+            {
+                ParsedEvent.ReferenceId = ReplicatedValue.GetString();
+                ParsedEvent.ReferenceType = "GroupId";
+            }
+        }
+
+        ParsedEvent.Success = ParsedEvent.EventValues[2].GetBool();
+        ParsedEvent.StatusReason = ParsedEvent.EventValues[3].GetString();
+    }
+    else
+    {
+        // This event uses the old structure with ReferenceId and ReferenceType properties, so we will populate those for backwards compatibility.
+        ParsedEvent.ReferenceId = ParsedEvent.EventValues[1].GetString();
+        ParsedEvent.ReferenceType = ParsedEvent.EventValues[2].GetString();
+    }
 
     return ParsedEvent;
 }

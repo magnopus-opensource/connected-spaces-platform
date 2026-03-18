@@ -62,6 +62,5 @@ public:
             const csp::common::String& MediaType),
         (override));
 
-protected:
     MOCK_METHOD(void, Send, (csp::web::HttpRequest & Request), (override));
 };

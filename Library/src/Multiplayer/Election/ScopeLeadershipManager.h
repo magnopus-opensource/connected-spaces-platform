@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -87,6 +88,9 @@ private:
     // Key is the Scope id.
     // std::nullopt represents a scope which doesn't have a leader, meaning an election is currently in progress.
     std::unordered_map<std::string, std::optional<ScopeLeaderData>> Scopes;
+
+     // Represents the lifetime of the ScopeLeadershipManager. Used to ensure async callbacks don't operate on this object after it is destroyed.
+    std::shared_ptr<int> LifetimeToken = std::make_shared<int>(0);
 };
 
 CSP_START_IGNORE
