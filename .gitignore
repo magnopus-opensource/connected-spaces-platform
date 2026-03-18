@@ -111,3 +111,10 @@ package/
 # Ignore CppCheck artifacts
 Tools/CppCheck/.cppcheck-build-dir
 Tools/CppCheck/*.xml
+
+# Ignore Cmake user file
+CMakeUserPresets.json
+
+# Ignore common build and insall folder names
+build/
+install/
