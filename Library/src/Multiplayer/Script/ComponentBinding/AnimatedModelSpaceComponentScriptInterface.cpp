@@ -18,6 +18,9 @@
 
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "Multiplayer/Script/RuntimeMaterialScriptInterface.h"
 
 using namespace csp::systems;
 
@@ -47,5 +50,49 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldo
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, bool, bool, ShowAsHoldoutInVirtual);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(AnimatedModelSpaceComponent, int32_t, int32_t, AnimationIndex);
+
+std::vector<std::string> AnimatedModelSpaceComponentScriptInterface::GetMaterialPaths() const
+{
+    std::vector<std::string> Result;
+    const auto* AnimatedModelComponent = static_cast<const AnimatedModelSpaceComponent*>(Component);
+    if (AnimatedModelComponent == nullptr)
+    {
+        return Result;
+    }
+
+    const auto Overrides = AnimatedModelComponent->GetMaterialOverrides();
+    std::unique_ptr<csp::common::Array<csp::common::String>> Keys(const_cast<csp::common::Array<csp::common::String>*>(Overrides.Keys()));
+    Result.reserve(Keys->Size());
+    for (size_t Index = 0; Index < Keys->Size(); ++Index)
+    {
+        Result.emplace_back((*Keys)[Index].c_str());
+    }
+    return Result;
+}
+
+RuntimeMaterialScriptInterface* AnimatedModelSpaceComponentScriptInterface::GetMaterial(const std::string& MaterialPath) const
+{
+    const auto* AnimatedModelComponent = static_cast<const AnimatedModelSpaceComponent*>(Component);
+    if (AnimatedModelComponent == nullptr || MaterialPath.empty())
+    {
+        return nullptr;
+    }
+
+    const auto Overrides = AnimatedModelComponent->GetMaterialOverrides();
+    const auto MaterialIt = Overrides.Find(MaterialPath.c_str());
+    if (MaterialIt == Overrides.end())
+    {
+        return nullptr;
+    }
+
+    const int32_t ComponentIndex = GetTypeIndexWithinParent();
+    if (GetParentEntityId() == 0 || ComponentIndex < 0)
+    {
+        return nullptr;
+    }
+
+    return new RuntimeMaterialScriptInterface(csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(), GetParentEntityId(),
+        csp::multiplayer::ComponentType::AnimatedModel, ComponentIndex, MaterialPath.c_str(), MaterialIt->second);
+}
 
 } // namespace csp::multiplayer

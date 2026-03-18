@@ -21,6 +21,8 @@
 #include "CSP/Common/NetworkEventData.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
+#include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -255,6 +257,7 @@ std::string BuildComponentSnapshotJson(const csp::multiplayer::ComponentBase& Co
     Writer.Int(static_cast<int32_t>(Component.GetComponentType()));
     Writer.Key("componentName");
     Writer.String(Component.GetComponentName().c_str());
+
     Writer.EndObject();
 
     return Buffer.GetString();
@@ -1020,7 +1023,6 @@ void NgxScriptSystem::InstallHostBindings()
 
             return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
         });
-
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
 globalThis.csp = csp;
@@ -1489,12 +1491,76 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
         return false;
     }
 
-    const std::string TickSnippet
-        = "if (typeof globalThis.__cspDispatchAnimationFrames === 'function' && (globalThis.__cspRafPendingCount | 0) > 0) {\n"
-          "    globalThis.__cspDispatchAnimationFrames("
-        + fmt::format("{:.6f}", TimestampMs) + ");\n" + "}\n";
+    bool bSuccess = true;
+    {
+        std::scoped_lock ContextLock(ContextMutex);
+        if (!Context)
+        {
+            return false;
+        }
 
-    const bool bSuccess = EvaluateSnippet(TickSnippet.c_str(), "<ngx-animation-frame-tick>");
+        try
+        {
+            int32_t PendingCount = 0;
+            try
+            {
+                PendingCount = Context->global()["__cspRafPendingCount"].as<int32_t>();
+            }
+            catch (...)
+            {
+                PendingCount = 0;
+            }
+
+            if (PendingCount > 0)
+            {
+                const qjs::Value DispatchValue = Context->global()["__cspDispatchAnimationFrames"];
+                if (!JS_IsUndefined(DispatchValue.v) && !JS_IsNull(DispatchValue.v))
+                {
+                    std::function<void(double)> Dispatch = DispatchValue.as<std::function<void(double)>>();
+                    Dispatch(static_cast<double>(TimestampMs));
+                }
+            }
+        }
+        catch (const qjs::exception&)
+        {
+            bSuccess = false;
+
+            std::string ErrorMessage = "NgxScript: Animation frame dispatch failed.";
+            try
+            {
+                qjs::Value ExceptionValue = Context->getException();
+                ErrorMessage += " ";
+                ErrorMessage += ExceptionValue.as<std::string>();
+
+                if (ExceptionValue.isError())
+                {
+                    try
+                    {
+                        const std::string StackString = ExceptionValue["stack"].as<std::string>();
+                        if (!StackString.empty())
+                        {
+                            ErrorMessage += "\n";
+                            ErrorMessage += StackString;
+                        }
+                    }
+                    catch (...)
+                    {
+                    }
+                }
+            }
+            catch (...)
+            {
+            }
+
+            LogSystem.LogMsg(csp::common::LogLevel::Error, ErrorMessage.c_str());
+        }
+        catch (...)
+        {
+            bSuccess = false;
+            LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript: Animation frame dispatch failed with an unknown error.");
+        }
+    }
+
     PumpPendingJobs();
     return bSuccess;
 }

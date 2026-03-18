@@ -18,6 +18,8 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
+#include <memory>
+
 using namespace csp::systems;
 
 namespace csp::multiplayer
@@ -95,6 +97,57 @@ void ComponentScriptInterface::SendPropertyUpdate()
             Component->GetParent()->QueueUpdate();
         }
     }
+}
+
+SpaceEntity* ComponentScriptInterface::GetParentEntity() const
+{
+    return Component != nullptr ? Component->GetParent() : nullptr;
+}
+
+uint64_t ComponentScriptInterface::GetParentEntityId() const
+{
+    const auto* Parent = GetParentEntity();
+    return Parent != nullptr ? Parent->GetId() : 0;
+}
+
+int32_t ComponentScriptInterface::GetTypeIndexWithinParent() const
+{
+    if (Component == nullptr)
+    {
+        return -1;
+    }
+
+    const auto* Parent = Component->GetParent();
+    if (Parent == nullptr)
+    {
+        return -1;
+    }
+
+    const auto* Components = Parent->GetComponents();
+    if (Components == nullptr)
+    {
+        return -1;
+    }
+
+    std::unique_ptr<csp::common::Array<uint16_t>> Keys(const_cast<csp::common::Array<uint16_t>*>(Components->Keys()));
+    int32_t MatchingIndex = 0;
+    for (size_t Index = 0; Index < Keys->Size(); ++Index)
+    {
+        auto* CurrentComponent = (*Components)[(*Keys)[Index]];
+        if (CurrentComponent == nullptr || CurrentComponent->GetComponentType() != Component->GetComponentType())
+        {
+            continue;
+        }
+
+        if (CurrentComponent == Component)
+        {
+            return MatchingIndex;
+        }
+
+        ++MatchingIndex;
+    }
+
+    return -1;
 }
 
 } // namespace csp::multiplayer

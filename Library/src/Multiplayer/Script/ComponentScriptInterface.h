@@ -25,6 +25,7 @@ namespace csp::multiplayer
 {
 
 class ComponentBase;
+class SpaceEntity;
 
 constexpr int64_t INVALID_COMPONENT_ID = -1;
 
@@ -52,6 +53,9 @@ public:
     void SetLocalScope(bool IsLocal) { LocalScope = IsLocal; }
 
 protected:
+    SpaceEntity* GetParentEntity() const;
+    uint64_t GetParentEntityId() const;
+    int32_t GetTypeIndexWithinParent() const;
     ComponentBase* Component;
 
 private:

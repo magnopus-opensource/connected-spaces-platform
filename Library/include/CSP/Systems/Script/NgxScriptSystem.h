@@ -45,7 +45,6 @@ class NetworkEventData;
 
 namespace csp::systems
 {
-
 class CSP_API NgxScriptSystem
 {
 public:

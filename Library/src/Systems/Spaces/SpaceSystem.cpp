@@ -25,6 +25,7 @@
 #include "CSP/Multiplayer/NetworkEventBus.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
 #include "CSP/Systems/Multiplayer/MultiplayerSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -618,6 +619,18 @@ void SpaceSystem::EnterSpace(const String& SpaceId, csp::common::IRealtimeEngine
                     CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxCodeComponentRuntime unavailable during EnterSpace.");
                 }
 
+                if (auto* RuntimeMaterialSystem = csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem();
+                    RuntimeMaterialSystem != nullptr)
+                {
+                    CSP_LOG_FORMAT(csp::common::LogLevel::Log,
+                        "SpaceSystem Trace: Calling RuntimeMaterialSystem::OnEnterSpace for space '%s'.", SpaceResult.GetSpace().Id.c_str());
+                    RuntimeMaterialSystem->OnEnterSpace(SpaceResult.GetSpace().Id);
+                }
+                else
+                {
+                    CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: RuntimeMaterialSystem unavailable during EnterSpace.");
+                }
+
                 // This is what fetches the data for the space, all the assets and whatnot. Creates the space entities in the realtime engine.
                 RealtimeEngine->FetchAllEntitiesAndPopulateBuffers(SpaceResult.GetSpace().Id,
                     [FinishedFetchEntitySetupEvent, ResultCopy = SpaceResult]()
@@ -658,6 +671,17 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     else
     {
         CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: NgxScriptSystem unavailable during ExitSpace.");
+    }
+
+    if (auto* RuntimeMaterialSystem = csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(); RuntimeMaterialSystem != nullptr)
+    {
+        CSP_LOG_FORMAT(
+            csp::common::LogLevel::Log, "SpaceSystem Trace: Calling RuntimeMaterialSystem::OnExitSpace for '%s'.", CurrentSpace.Id.c_str());
+        RuntimeMaterialSystem->OnExitSpace();
+    }
+    else
+    {
+        CSP_LOG_MSG(csp::common::LogLevel::Warning, "SpaceSystem Trace: RuntimeMaterialSystem unavailable during ExitSpace.");
     }
 
     // As the user is exiting the space, we now clear all scopes that they are registered to.

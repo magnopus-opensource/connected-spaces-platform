@@ -44,6 +44,9 @@ public:
 
     DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInAR);
     DECLARE_SCRIPT_PROPERTY(bool, ShowAsHoldoutInVirtual);
+
+    std::vector<std::string> GetMaterialPaths() const;
+    class RuntimeMaterialScriptInterface* GetMaterial(const std::string& MaterialPath) const;
 };
 
 } // namespace csp::multiplayer

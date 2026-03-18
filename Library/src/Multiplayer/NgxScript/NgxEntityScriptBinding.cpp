@@ -159,6 +159,133 @@ if (typeof globalThis.TheEntitySystem.getEntityByID !== "function") {
 if (typeof globalThis.__ngxCreateLocalEntity === "function") {
   globalThis.TheEntitySystem.createLocalEntity = (name) => globalThis.__ngxCreateLocalEntity(name);
 }
+
+async function __ngxWaitForMaterial(material) {
+  for (;;) {
+    if (!material || material.status !== "loading") {
+      return material;
+    }
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+}
+
+function __ngxInstallMaterialHelpersOnPrototype(proto) {
+  if (!proto) {
+    return;
+  }
+
+  if (typeof proto.getMaterial !== "function") {
+    proto.getMaterial = async function(materialPath) {
+      if (typeof this.__getMaterial !== "function") {
+        return null;
+      }
+      return await __ngxWaitForMaterial(this.__getMaterial(String(materialPath ?? "")));
+    };
+  }
+
+  if (typeof proto.getMaterials !== "function") {
+    proto.getMaterials = async function() {
+      if (typeof this.__getMaterialPaths !== "function") {
+        return [];
+      }
+      const paths = this.__getMaterialPaths();
+      const result = [];
+      for (const path of Array.isArray(paths) ? paths : []) {
+        result.push(await this.getMaterial(path));
+      }
+      return result;
+    };
+  }
+}
+
+function __ngxPatchComponentArray(components) {
+  if (!Array.isArray(components) || components.length === 0) {
+    return components;
+  }
+
+  const sample = components[0];
+  if (sample && typeof sample.__getMaterial === "function" && typeof sample.__getMaterialPaths === "function") {
+    __ngxInstallMaterialHelpersOnPrototype(Object.getPrototypeOf(sample));
+  }
+  return components;
+}
+
+function __ngxWrapEntityComponentGetter(name) {
+  if (!globalThis.ThisEntity) {
+    return;
+  }
+
+  const entityProto = Object.getPrototypeOf(globalThis.ThisEntity);
+  if (!entityProto || typeof entityProto[name] !== "function" || entityProto[`__ngxWrapped_${name}`]) {
+    return;
+  }
+
+  const original = entityProto[name];
+  entityProto[name] = function(...args) {
+    return __ngxPatchComponentArray(original.apply(this, args));
+  };
+  entityProto[`__ngxWrapped_${name}`] = true;
+}
+
+__ngxWrapEntityComponentGetter("getStaticModelComponents");
+__ngxWrapEntityComponentGetter("getAnimatedModelComponents");
+
+function __ngxPatchEntity(entity) {
+  if (!entity) {
+    return entity;
+  }
+
+  const entityProto = Object.getPrototypeOf(entity);
+  if (!entityProto) {
+    return entity;
+  }
+
+  for (const name of ["getStaticModelComponents", "getAnimatedModelComponents"]) {
+    if (typeof entityProto[name] !== "function" || entityProto[`__ngxWrapped_${name}`]) {
+      continue;
+    }
+
+    const original = entityProto[name];
+    entityProto[name] = function(...args) {
+      return __ngxPatchComponentArray(original.apply(this, args));
+    };
+    entityProto[`__ngxWrapped_${name}`] = true;
+  }
+
+  return entity;
+}
+
+if (globalThis.ThisEntity) {
+  __ngxPatchEntity(globalThis.ThisEntity);
+}
+
+if (globalThis.TheEntitySystem) {
+  for (const name of ["getEntityById", "getEntityByID", "getEntityByName"]) {
+    if (typeof globalThis.TheEntitySystem[name] === "function" && !globalThis.TheEntitySystem[`__ngxWrapped_${name}`]) {
+      const original = globalThis.TheEntitySystem[name];
+      globalThis.TheEntitySystem[name] = function(...args) {
+        return __ngxPatchEntity(original.apply(this, args));
+      };
+      globalThis.TheEntitySystem[`__ngxWrapped_${name}`] = true;
+    }
+  }
+
+  for (const name of ["getEntities", "getObjects", "getAvatars", "getEntitiesByQuery", "getRootHierarchyEntities"]) {
+    if (typeof globalThis.TheEntitySystem[name] === "function" && !globalThis.TheEntitySystem[`__ngxWrapped_${name}`]) {
+      const original = globalThis.TheEntitySystem[name];
+      globalThis.TheEntitySystem[name] = function(...args) {
+        const entities = original.apply(this, args);
+        if (Array.isArray(entities)) {
+          for (const entity of entities) {
+            __ngxPatchEntity(entity);
+          }
+        }
+        return entities;
+      };
+      globalThis.TheEntitySystem[`__ngxWrapped_${name}`] = true;
+    }
+  }
+}
 )JS";
 
     Context.eval(NgxCompatibilityPatch, "<ngx-entity-script-binding>", JS_EVAL_TYPE_GLOBAL);

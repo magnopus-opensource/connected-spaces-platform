@@ -2305,7 +2305,17 @@ inline JSModuleDef* Runtime::module_loader(JSContext* ctx, const char* module_na
 
 		// compile the module
 		auto func_val = context.eval(*data.source, module_name, JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
-		assert(JS_VALUE_GET_TAG(func_val.v) == JS_TAG_MODULE);
+		if (func_val.isException())
+		{
+			return NULL;
+		}
+
+		if (JS_VALUE_GET_TAG(func_val.v) != JS_TAG_MODULE)
+		{
+			JS_ThrowInternalError(ctx, "module loader expected compiled module for '%s'", module_name);
+			return NULL;
+		}
+
 		JSModuleDef* m = reinterpret_cast<JSModuleDef*>(JS_VALUE_GET_PTR(func_val.v));
 
 		// set import.meta

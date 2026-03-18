@@ -171,7 +171,12 @@ EntityScriptInterface* EntityScriptInterface::GetParentEntity() const
         const auto Parent = Entity->GetParentEntity();
         if (Parent)
         {
-            return Parent->GetScriptInterface();
+            auto* Iface = Parent->GetScriptInterface();
+            if (Iface != nullptr)
+            {
+                Iface->SetLocalScope(LocalScope);
+            }
+            return Iface;
         }
     }
 

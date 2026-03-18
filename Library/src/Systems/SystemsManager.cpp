@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 #include "CSP/Systems/ExternalServices/ExternalServiceProxySystem.h"
@@ -70,6 +71,8 @@ UserSystem* SystemsManager::GetUserSystem() { return UserSystem; }
 SpaceSystem* SystemsManager::GetSpaceSystem() { return SpaceSystem; }
 
 AssetSystem* SystemsManager::GetAssetSystem() { return AssetSystem; }
+
+RuntimeMaterialSystem* SystemsManager::GetRuntimeMaterialSystem() { return RuntimeMaterialSystem; }
 
 ScriptSystem* SystemsManager::GetScriptSystem() { return ScriptSystem; }
 
@@ -143,6 +146,7 @@ SystemsManager::SystemsManager()
     , UserSystem(nullptr)
     , SpaceSystem(nullptr)
     , AssetSystem(nullptr)
+    , RuntimeMaterialSystem(nullptr)
     , NgxScriptSystem(nullptr)
     , NgxCodeComponentRuntime(nullptr)
     , ScriptSystem(nullptr)
@@ -212,6 +216,7 @@ void SystemsManager::CreateSystems(csp::multiplayer::ISignalRConnection* SignalR
 
     SpaceSystem = new csp::systems::SpaceSystem(WebClient, MultiplayerConnection->GetEventBus(), UserSystem, *LogSystem);
     AssetSystem = new csp::systems::AssetSystem(WebClient, MultiplayerConnection->GetEventBus(), *LogSystem);
+    RuntimeMaterialSystem = new csp::systems::RuntimeMaterialSystem(*LogSystem);
     AnchorSystem = new csp::systems::AnchorSystem(WebClient, *LogSystem);
     PointOfInterestSystem = new csp::systems::PointOfInterestInternalSystem(WebClient, *LogSystem);
     ApplicationSettingsSystem = new csp::systems::ApplicationSettingsSystem(WebClient, *LogSystem);
@@ -263,6 +268,7 @@ void SystemsManager::DestroySystems()
         LogSystem->LogMsg(csp::common::LogLevel::Log, "SystemsManager Trace: Destroying NgxScriptSystem.");
     }
     delete NgxScriptSystem;
+    delete RuntimeMaterialSystem;
     delete AssetSystem;
     delete SpaceSystem;
     delete UserSystem;

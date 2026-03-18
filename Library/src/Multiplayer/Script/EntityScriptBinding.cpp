@@ -46,6 +46,7 @@
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
+#include "Multiplayer/Script/RuntimeMaterialScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
@@ -393,6 +394,31 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieAssetId, "cookieAssetId")
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieType, "lightCookieType");
 
+    Module->class_<RuntimeMaterialScriptInterface>("RuntimeMaterial")
+        .property<&RuntimeMaterialScriptInterface::GetStatus>("status")
+        .property<&RuntimeMaterialScriptInterface::GetMaterialId>("materialId")
+        .property<&RuntimeMaterialScriptInterface::GetMaterialPath>("materialPath")
+        .property<&RuntimeMaterialScriptInterface::GetShaderType>("shaderType")
+        .property<&RuntimeMaterialScriptInterface::GetName>("name")
+        .property<&RuntimeMaterialScriptInterface::GetBaseColorFactor, &RuntimeMaterialScriptInterface::SetBaseColorFactor>("baseColorFactor")
+        .property<&RuntimeMaterialScriptInterface::GetMetallicFactor, &RuntimeMaterialScriptInterface::SetMetallicFactor>("metallicFactor")
+        .property<&RuntimeMaterialScriptInterface::GetRoughnessFactor, &RuntimeMaterialScriptInterface::SetRoughnessFactor>("roughnessFactor")
+        .property<&RuntimeMaterialScriptInterface::GetEmissiveFactor, &RuntimeMaterialScriptInterface::SetEmissiveFactor>("emissiveFactor")
+        .property<&RuntimeMaterialScriptInterface::GetEmissiveStrength, &RuntimeMaterialScriptInterface::SetEmissiveStrength>("emissiveStrength")
+        .property<&RuntimeMaterialScriptInterface::GetAlphaCutoff, &RuntimeMaterialScriptInterface::SetAlphaCutoff>("alphaCutoff")
+        .property<&RuntimeMaterialScriptInterface::GetTint, &RuntimeMaterialScriptInterface::SetTint>("tint")
+        .property<&RuntimeMaterialScriptInterface::GetAlphaFactor, &RuntimeMaterialScriptInterface::SetAlphaFactor>("alphaFactor")
+        .property<&RuntimeMaterialScriptInterface::GetEmissiveIntensity, &RuntimeMaterialScriptInterface::SetEmissiveIntensity>("emissiveIntensity")
+        .property<&RuntimeMaterialScriptInterface::GetFresnelFactor, &RuntimeMaterialScriptInterface::SetFresnelFactor>("fresnelFactor")
+        .property<&RuntimeMaterialScriptInterface::GetAlphaMask, &RuntimeMaterialScriptInterface::SetAlphaMask>("alphaMask")
+        .property<&RuntimeMaterialScriptInterface::GetDoubleSided, &RuntimeMaterialScriptInterface::SetDoubleSided>("doubleSided")
+        .property<&RuntimeMaterialScriptInterface::GetIsEmissive, &RuntimeMaterialScriptInterface::SetIsEmissive>("isEmissive")
+        .property<&RuntimeMaterialScriptInterface::GetBlendMode, &RuntimeMaterialScriptInterface::SetBlendMode>("blendMode")
+        .property<&RuntimeMaterialScriptInterface::GetReadAlphaFromChannel, &RuntimeMaterialScriptInterface::SetReadAlphaFromChannel>(
+            "readAlphaFromChannel")
+        .fun<&RuntimeMaterialScriptInterface::Reset>("reset")
+        .fun<&RuntimeMaterialScriptInterface::Save>("save");
+
     Module->class_<AnimatedModelSpaceComponentScriptInterface>("AnimatedModelSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -410,7 +436,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
         .PROPERTY_GET_SET(AnimatedModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
-        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex");
+        .PROPERTY_GET_SET(AnimatedModelSpaceComponent, AnimationIndex, "animationIndex")
+        .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterialPaths>("__getMaterialPaths")
+        .fun<&AnimatedModelSpaceComponentScriptInterface::GetMaterial>("__getMaterial");
 
     Module->class_<VideoPlayerSpaceComponentScriptInterface>("VideoPlayerSpaceComponent")
         .constructor<>()
@@ -551,7 +579,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, IsVirtualVisible, "isVirtualVisible")
         .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInAR, "showAsHoldoutInAR")
-        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual");
+        .PROPERTY_GET_SET(StaticModelSpaceComponent, ShowAsHoldoutInVirtual, "showAsHoldoutInVirtual")
+        .fun<&StaticModelSpaceComponentScriptInterface::GetMaterialPaths>("__getMaterialPaths")
+        .fun<&StaticModelSpaceComponentScriptInterface::GetMaterial>("__getMaterial");
 
     Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
         .constructor<>()

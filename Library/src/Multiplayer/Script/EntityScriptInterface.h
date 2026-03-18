@@ -74,6 +74,8 @@ public:
     void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
     void PostMessageToScript(std::string Message, std::string MessageParamsJson);
 
+    void SetLocalScope(bool IsLocal) { LocalScope = IsLocal; }
+
     void ClaimScriptOwnership();
 
     void On(const std::string& EventName, qjs::Value Callback);

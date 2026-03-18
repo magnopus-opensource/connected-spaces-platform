@@ -36,6 +36,7 @@ class SystemsManager;
 class UserSystem;
 class SpaceSystem;
 class AssetSystem;
+class RuntimeMaterialSystem;
 class NgxScriptSystem;
 class NgxCodeComponentRuntime;
 class VoipSystem;
@@ -107,6 +108,7 @@ public:
     /// @brief Retrieves asset system.
     /// @return SpaceSystem : pointer to the asset system class
     AssetSystem* GetAssetSystem();
+    RuntimeMaterialSystem* GetRuntimeMaterialSystem();
 
     /// @brief Retrieves voip system.
     /// @return SpaceSystem : pointer to the voip system class
@@ -210,6 +212,7 @@ private:
     UserSystem* UserSystem;
     SpaceSystem* SpaceSystem;
     AssetSystem* AssetSystem;
+    RuntimeMaterialSystem* RuntimeMaterialSystem;
     NgxScriptSystem* NgxScriptSystem;
     NgxCodeComponentRuntime* NgxCodeComponentRuntime;
     ScriptSystem* ScriptSystem;
