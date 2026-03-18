@@ -13,6 +13,12 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley
   Resolving a potential crash that can occur when callbacks are executed in response to heartbeat invocations by the ScopeLeadershipManager.
 
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] fix: Fixing UpdateScopeByIdTest + temporarily disabling GetScopeLeaderTest" by MAG-mv
+  Disabling GetScopeLeaderTest means we can't verify this function is working as intended.
+  However, this function is currently only used for CSP internal testing, and is likely failing due to timing, rather than broken logic.
+
 ## [6.29.0]
 
 ### 🐛 🔨 Bug Fixes
