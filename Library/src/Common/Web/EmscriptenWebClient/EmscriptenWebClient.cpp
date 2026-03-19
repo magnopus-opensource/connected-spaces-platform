@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifdef CSP_WASM
+
 #include "EmscriptenWebClient.h"
 
 #include "CSP/Common/Map.h"
@@ -273,3 +275,4 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 }
 
 } // namespace csp::web
+#endif
