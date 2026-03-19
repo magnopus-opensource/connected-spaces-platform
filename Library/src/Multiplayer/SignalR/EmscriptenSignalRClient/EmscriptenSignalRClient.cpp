@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifdef CSP_WASM
+
 #include "EmscriptenSignalRClient.h"
 
 #include <assert.h>
@@ -272,3 +275,4 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
 IWebSocketClient::ReceiveHandler* CSPWebSocketClientEmscripten::getReceiveCallback() { return &ReceiveCallback; }
 
 } // namespace csp::multiplayer
+#endif // CSP_WASM
