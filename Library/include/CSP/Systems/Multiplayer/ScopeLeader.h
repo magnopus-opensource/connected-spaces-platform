@@ -51,7 +51,7 @@ public:
     /// @brief The user id which is the leader.
     csp::common::String ScopeLeaderUserId;
     /// @brief The client id which is the leader.
-    uint64_t ScopeClientId;
+    uint64_t ScopeClientId = 0;
     /// @brief Whether there is a server side election currently in progress when this object is received.
     bool ElectionInProgress = false;
 };
