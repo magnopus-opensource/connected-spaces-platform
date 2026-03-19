@@ -29,7 +29,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a collision component.
-enum class CollisionPropertyKeys
+enum class CollisionPropertyKeys : uint16_t
 {
     Position = 0,
     Rotation,

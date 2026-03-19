@@ -30,7 +30,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a reflection component.
-enum class ReflectionPropertyKeys
+enum class ReflectionPropertyKeys : uint16_t
 {
     Name_DEPRECATED,
     ReflectionAssetId,

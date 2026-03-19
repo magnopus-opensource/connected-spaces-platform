@@ -30,7 +30,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for an text space component.
-enum class TextPropertyKeys
+enum class TextPropertyKeys : uint16_t
 {
     Position,
     Rotation,

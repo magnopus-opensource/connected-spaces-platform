@@ -27,7 +27,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for an ECommerce component.
-enum class ECommercePropertyKeys
+enum class ECommercePropertyKeys : uint16_t
 {
     Position = 0,
     ProductId,

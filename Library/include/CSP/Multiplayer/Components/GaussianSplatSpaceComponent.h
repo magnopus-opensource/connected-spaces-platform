@@ -31,7 +31,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a Gaussian Splat component.
-enum class GaussianSplatPropertyKeys
+enum class GaussianSplatPropertyKeys : uint16_t
 {
     Name_DEPRECATED = 0,
     ExternalResourceAssetId,

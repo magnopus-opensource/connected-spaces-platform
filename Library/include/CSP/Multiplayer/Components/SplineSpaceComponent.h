@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a spline component.
-enum class SplinePropertyKeys
+enum class SplinePropertyKeys : uint16_t
 {
     Waypoints = 0,
     Num
