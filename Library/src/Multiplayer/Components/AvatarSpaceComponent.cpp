@@ -15,34 +15,97 @@
  */
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::AvatarData, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::State)] = static_cast<int64_t>(AvatarState::Idle);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED)] = static_cast<int64_t>(-1);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED)] = "";
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled)] = false;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation)] = csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f };
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage)] = 0.0f;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha)] = 0.0f;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode)] = static_cast<int64_t>(AvatarPlayMode::Default);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection)] = csp::common::Vector3 { 0.0f, 0.0f, 0.0f };
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)] = static_cast<int64_t>(LocomotionModel::Grounded);
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible)] = true;
-    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl)] = "";
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::AvatarData,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::UserId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::State),
+            static_cast<int64_t>(AvatarState::Idle),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarMeshIndex_DEPRECATED),
+            static_cast<int64_t>(-1),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AgoraUserId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::CustomAvatarUrl_DEPRECATED),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsHandIKEnabled),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation),
+            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HandRotation),
+            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::HeadRotation),
+            csp::common::Vector4 { 0.0f, 0.0f, 0.0f, 1.0f },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::WalkRunBlendPercentage),
+            0.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::TorsoTwistAlpha),
+            0.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarPlayMode),
+            static_cast<int64_t>(AvatarPlayMode::Default),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::MovementDirection),
+            csp::common::Vector3 { 0.0f, 0.0f, 0.0f },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::LocomotionModel),
+            static_cast<int64_t>(LocomotionModel::Grounded),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::IsVirtualVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AvatarComponentPropertyKeys::AvatarUrl),
+            "",
+        },
+    },
+};
 
+AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
 

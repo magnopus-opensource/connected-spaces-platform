@@ -15,8 +15,11 @@
  */
 
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
-#include "CSP/Common/Systems/Log/LogSystem.h"
+
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
+
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
 #include "Systems/ResultHelpers.h"
 
@@ -47,19 +50,51 @@ namespace
     }
 }
 
-csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Conversation, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)] = "";
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)] = true;
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)] = "";
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::Resolved)] = false;
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraRotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Conversation,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::IsActive),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Title),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::Resolved),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationCameraPosition),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ConversationPropertyKeys::ConversationCameraRotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+    },
+};
 
+csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new ConversationSpaceComponentScriptInterface(this));
 }
 

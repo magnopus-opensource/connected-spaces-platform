@@ -16,30 +16,75 @@
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
+
 #include <memory>
 
 namespace csp::multiplayer
 {
 
-StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::StaticModel, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)] = "";
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides)]
-        = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>();
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVirtualVisible)] = true;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInAR)] = false;
-    Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual)] = false;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::StaticModel,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ExternalResourceAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::MaterialOverrides),
+            csp::common::Map<csp::common::String, csp::common::ReplicatedValue>(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Rotation),
+            csp::common::Vector4::Identity(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ThirdPartyComponentRef),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsShadowCaster),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::IsVirtualVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ShowAsHoldoutInAR),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(StaticModelPropertyKeys::ShowAsHoldoutInVirtual),
+            false,
+        },
+    },
+};
 
+StaticModelSpaceComponent::StaticModelSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new StaticModelSpaceComponentScriptInterface(this));
 }
 

@@ -14,22 +14,50 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
+
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Portal, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsActive)] = true;
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::SpaceId)] = "";
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)] = true;
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(PortalPropertyKeys::Radius)] = 1.5f;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Portal,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsActive),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::SpaceId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::IsEnabled),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(PortalPropertyKeys::Radius),
+            1.5f,
+        },
+    },
+};
 
+PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new PortalSpaceComponentScriptInterface(this));
 }
 

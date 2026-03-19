@@ -16,17 +16,29 @@
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ECommerce, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ECommercePropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(ECommercePropertyKeys::ProductId)] = "";
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::ECommerce,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ECommercePropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ECommercePropertyKeys::ProductId),
+            "",
+        },
+    },
+};
 
+ECommerceSpaceComponent::ECommerceSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new ECommerceSpaceComponentScriptInterface(this));
 }
 

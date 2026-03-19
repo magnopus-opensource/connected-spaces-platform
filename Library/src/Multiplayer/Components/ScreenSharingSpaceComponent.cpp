@@ -16,6 +16,7 @@
 #include "CSP/Multiplayer/Components/ScreenSharingSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 
 namespace
@@ -26,21 +27,59 @@ constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 namespace csp::multiplayer
 {
 
-ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::ScreenSharing, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsShadowCaster)] = false;
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::UserId)] = "";
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageCollectionId)] = "";
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::DefaultImageAssetId)] = "";
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
-    Properties[static_cast<uint32_t>(ScreenSharingPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::ScreenSharing,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Rotation),
+            csp::common::Vector4::Identity(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsShadowCaster),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::UserId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::DefaultImageCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::DefaultImageAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::AttenuationRadius),
+            DefaultAttenuationRadius,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ScreenSharingPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new ScreenSharingSpaceComponentScriptInterface(this));
 }
 

@@ -16,23 +16,53 @@
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Hotspot, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED)] = "";
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint)] = true;
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint)] = false;
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Hotspot,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::Name_DEPRECATED),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsTeleportPoint),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsSpawnPoint),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(HotspotPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+HotspotSpaceComponent::HotspotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new HotspotSpaceComponentScriptInterface(this));
 }
 
