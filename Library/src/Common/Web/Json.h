@@ -138,8 +138,11 @@ inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocato
     csp::common::String Json = Value.ToJson();
     rapidjson::Document JsonDocument(rapidjson::Type::kObjectType, &Allocator);
     JsonDocument.Parse<0>(Json.c_str());
+    
+    rapidjson::Value Result;
+    Result.CopyFrom(JsonDocument, Allocator);
 
-    return JsonDocument.GetObject();
+    return Result;
 }
 
 // Serialisation function for types that derive from EnumDtoBase
