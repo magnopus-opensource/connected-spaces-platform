@@ -19,6 +19,7 @@
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include <fmt/format.h>
 
@@ -181,6 +182,75 @@ EntityScriptInterface* EntityScriptInterface::GetParentEntity() const
     }
 
     return nullptr;
+}
+
+static void CollectDescendants(SpaceEntity* Root, std::vector<SpaceEntity*>& Out)
+{
+    const auto* Children = Root->GetChildEntities();
+    if (!Children)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < Children->Size(); ++i)
+    {
+        if (auto* Child = (*Children)[i])
+        {
+            Out.push_back(Child);
+            CollectDescendants(Child, Out);
+        }
+    }
+}
+
+std::vector<EntityScriptInterface*> EntityScriptInterface::GetChildEntitiesByQuery(qjs::Value Query, qjs::rest<bool> Recursive)
+{
+    std::vector<EntityScriptInterface*> Result;
+
+    if (!Entity || !Query.ctx)
+    {
+        return Result;
+    }
+
+    const std::string QueryJson = Query.toJSON();
+
+    const auto* Children = Entity->GetChildEntities();
+    if (!Children || Children->Size() == 0)
+    {
+        return Result;
+    }
+
+    std::vector<SpaceEntity*> Candidates;
+    if (!Recursive.empty() && Recursive[0])
+    {
+        CollectDescendants(Entity, Candidates);
+    }
+    else
+    {
+        Candidates.reserve(Children->Size());
+        for (size_t i = 0; i < Children->Size(); ++i)
+        {
+            if (auto* Child = (*Children)[i])
+            {
+                Candidates.push_back(Child);
+            }
+        }
+    }
+
+    const auto MatchingIds = ResolveEntityIdsFromQueryJson(QueryJson, Candidates);
+    for (auto* Candidate : Candidates)
+    {
+        if ((Candidate != nullptr) && (MatchingIds.find(Candidate->GetId()) != MatchingIds.end()))
+        {
+            auto* Iface = Candidate->GetScriptInterface();
+            if (Iface != nullptr)
+            {
+                Iface->SetLocalScope(LocalScope);
+                Result.push_back(Iface);
+            }
+        }
+    }
+
+    return Result;
 }
 
 EntityScriptInterface::Vector3 EntityScriptInterface::GetScale() const

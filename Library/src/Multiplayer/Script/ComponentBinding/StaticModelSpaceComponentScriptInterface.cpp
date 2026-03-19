@@ -16,6 +16,8 @@
 
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 
+#include <memory>
+
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
@@ -65,7 +67,7 @@ std::vector<std::string> StaticModelSpaceComponentScriptInterface::GetMaterialPa
     return Result;
 }
 
-RuntimeMaterialScriptInterface* StaticModelSpaceComponentScriptInterface::GetMaterial(const std::string& MaterialPath) const
+std::shared_ptr<RuntimeMaterialScriptInterface> StaticModelSpaceComponentScriptInterface::GetMaterial(const std::string& MaterialPath) const
 {
     const auto* StaticModelComponent = static_cast<const StaticModelSpaceComponent*>(Component);
     if (StaticModelComponent == nullptr || MaterialPath.empty())
@@ -86,7 +88,7 @@ RuntimeMaterialScriptInterface* StaticModelSpaceComponentScriptInterface::GetMat
         return nullptr;
     }
 
-    return new RuntimeMaterialScriptInterface(csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(), GetParentEntityId(),
+    return std::make_shared<RuntimeMaterialScriptInterface>(csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(), GetParentEntityId(),
         csp::multiplayer::ComponentType::StaticModel, ComponentIndex, MaterialPath.c_str(), MaterialIt->second);
 }
 

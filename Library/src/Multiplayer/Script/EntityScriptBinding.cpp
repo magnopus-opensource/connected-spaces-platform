@@ -751,6 +751,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
             "getScreenSharingComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<AIChatbotSpaceComponentScriptInterface, ComponentType::AIChatbot>>("getAIChatbotComponents")
         .fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
+        .fun<&EntityScriptInterface::GetChildEntitiesByQuery>("getChildEntitiesByQuery")
         .property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
         .property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")
         .property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")

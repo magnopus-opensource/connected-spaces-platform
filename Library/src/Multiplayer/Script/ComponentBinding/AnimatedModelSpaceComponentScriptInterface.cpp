@@ -16,6 +16,8 @@
 
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
+#include <memory>
+
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
@@ -70,7 +72,7 @@ std::vector<std::string> AnimatedModelSpaceComponentScriptInterface::GetMaterial
     return Result;
 }
 
-RuntimeMaterialScriptInterface* AnimatedModelSpaceComponentScriptInterface::GetMaterial(const std::string& MaterialPath) const
+std::shared_ptr<RuntimeMaterialScriptInterface> AnimatedModelSpaceComponentScriptInterface::GetMaterial(const std::string& MaterialPath) const
 {
     const auto* AnimatedModelComponent = static_cast<const AnimatedModelSpaceComponent*>(Component);
     if (AnimatedModelComponent == nullptr || MaterialPath.empty())
@@ -91,7 +93,7 @@ RuntimeMaterialScriptInterface* AnimatedModelSpaceComponentScriptInterface::GetM
         return nullptr;
     }
 
-    return new RuntimeMaterialScriptInterface(csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(), GetParentEntityId(),
+    return std::make_shared<RuntimeMaterialScriptInterface>(csp::systems::SystemsManager::Get().GetRuntimeMaterialSystem(), GetParentEntityId(),
         csp::multiplayer::ComponentType::AnimatedModel, ComponentIndex, MaterialPath.c_str(), MaterialIt->second);
 }
 

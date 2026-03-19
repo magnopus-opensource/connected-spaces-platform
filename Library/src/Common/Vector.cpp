@@ -21,7 +21,7 @@
 namespace csp::common
 {
 
-static constexpr float FloatComparatorThreshold = 0.001f;
+static constexpr float FloatComparatorThreshold = 0.00001f;
 
 bool IsNearlyEqual(const float A, const float B) { return abs(A - B) < FloatComparatorThreshold; }
 

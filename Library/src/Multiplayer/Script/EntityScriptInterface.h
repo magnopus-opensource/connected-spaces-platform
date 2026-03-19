@@ -69,6 +69,8 @@ public:
     bool AddTag(const std::string& Tag);
     bool RemoveTag(const std::string& Tag);
 
+    std::vector<EntityScriptInterface*> GetChildEntitiesByQuery(qjs::Value Query, qjs::rest<bool> Recursive);
+
     void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
 
     void SubscribeToMessage(std::string Message, std::string OnMessageCallback);

@@ -51,7 +51,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(int32_t, AnimationIndex);
 
     std::vector<std::string> GetMaterialPaths() const;
-    class RuntimeMaterialScriptInterface* GetMaterial(const std::string& MaterialPath) const;
+    std::shared_ptr<class RuntimeMaterialScriptInterface> GetMaterial(const std::string& MaterialPath) const;
 };
 
 } // namespace csp::multiplayer
