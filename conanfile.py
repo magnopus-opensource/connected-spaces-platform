@@ -50,9 +50,11 @@ class CSP(ConanFile):
         tc = CMakeToolchain(self)
         # This allows us to set shared libs through the conan install step and pass to cmake
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-        
         tc.generate()
-
+        
+    #def build_requirements(self):
+        #self.tool_requires("cmake/3.31.6")
+        
     def build(self):
         cmake = CMake(self)
         cmake.configure()
