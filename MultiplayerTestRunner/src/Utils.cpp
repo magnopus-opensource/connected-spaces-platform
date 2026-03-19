@@ -49,7 +49,7 @@ csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::
     std::future<csp::systems::ProfileResult> ResultFuture = ResultPromise.get_future();
 
     std::string UniqueEmail = "testnopus.pokemon+" + GetUniqueString() + "@magnopus.com";
-    UserSystem.CreateUser(nullptr, nullptr, UniqueEmail.c_str(), GeneratedTestAccountPassword, false, AgeVerified, nullptr, nullptr,
+    UserSystem.CreateUser(nullptr, UniqueEmail.c_str(), GeneratedTestAccountPassword, false, AgeVerified, nullptr, nullptr,
         [&ResultPromise](csp::systems::ProfileResult Result)
         {
             // Callbacks are called both in progress and at the end, guard against double promise sets

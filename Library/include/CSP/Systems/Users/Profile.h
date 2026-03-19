@@ -37,7 +37,6 @@ class CSP_API BasicProfile
 {
 public:
     csp::common::String UserId;
-    csp::common::String UserName;
     csp::common::String DisplayName;
     csp::common::String AvatarId;
 
