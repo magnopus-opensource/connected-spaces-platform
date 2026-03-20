@@ -18,14 +18,18 @@ static void {{ delegate.name }}Function(
 ) {
     var _handle = (GCHandle)_StateObject__;
     var tcs = (TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>)_handle.Target;
+    {{^ is_static }}
     var _this = ({{ class_name }})tcs.Task.AsyncState;
+    {{/ is_static }}
 
     var task_result = {{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type.is_pointer_or_reference }}new {{# type }}{{> Type }}{{/ type }}({{/ type.is_pointer_or_reference }}_{{ name }}{{# type.is_pointer_or_reference }}){{/ type.is_pointer_or_reference }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }};
     {{# results }}{{# type.is_result_base }}
     if (task_result.GetResultCode() == Csp.Systems.EResultCode.InProgress)
     {
         {{# is_async_result_with_progress }}
+{{^ is_static }}
         _this.{{ delegate.method_name }}OnProgress?.Invoke(_this, new ProgressEventArgs(task_result.GetRequestProgress()));
+{{/ is_static }}
         {{/ is_async_result_with_progress }}
         
         return;
@@ -38,10 +42,15 @@ static void {{ delegate.name }}Function(
 static readonly {{ delegate.name }} {{ name }}DelegateInstance = {{ delegate.name }}Function;
 
 {{> DocComments }}
-public {{# is_virtual }}{{^ is_override }}virtual{{/ is_override }}{{/ is_virtual }}
+public {{# is_static }}static {{/ is_static }}{{# is_virtual }}{{^ is_override }}virtual{{/ is_override }}{{/ is_virtual }}
        {{# is_override }}override{{/ is_override }} Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}> {{ name }}({{# parameters }}{{# type }}{{> Type }}{{# is_optional }}?{{/ is_optional }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
 {
+    {{# is_static }}
+    var tcs = new TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>();
+{{/ is_static }}
+{{^ is_static }}
     var tcs = new TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>(this);
+{{/ is_static }}
     var handle = GCHandle.Alloc(tcs);
     
 {{# parameters }}
@@ -63,7 +72,9 @@ public {{# is_virtual }}{{^ is_override }}virtual{{/ is_override }}{{/ is_virtua
 {{/ parameters }}
 
     {{ unique_name }}(
+{{^ is_static }}
         _ptr{{# has_parameters }},{{/ has_parameters }}
+{{/ is_static }}
 {{# parameters }}
 {{# type.is_pointer_or_reference }}
 {{# type.is_optional }}
