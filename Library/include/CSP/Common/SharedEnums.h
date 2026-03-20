@@ -222,6 +222,16 @@ enum class StereoVideoType
 namespace csp::systems
 {
 
+/// @brief Controls how the current space should behave for editor/play/server-facing systems.
+enum class ESpaceRuntimeMode
+{
+    Edit = 0,
+    Play,
+    /// Reserved for future server-authoritative runtime support.
+    Server,
+    Num
+};
+
 /// @brief Indicates special handling for any thirdparty platform
 /// @note We may remove this soon, as it's deceptive implying these are the only platforms we support.
 enum class EThirdPartyPlatform

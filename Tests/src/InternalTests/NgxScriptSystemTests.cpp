@@ -16,12 +16,14 @@
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Interfaces/IJSScriptRunner.h"
+#include "CSP/Common/SharedConstants.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Events/EventId.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EntityQueryUtils.h"
@@ -75,6 +77,55 @@ public:
         return Entities[EntityIndex];
     }
 
+    csp::multiplayer::SpaceEntity* FindSpaceEntityById(uint64_t EntityId) override
+    {
+        for (auto* Entity : Entities)
+        {
+            if (Entity != nullptr && Entity->GetId() == EntityId)
+            {
+                return Entity;
+            }
+        }
+
+        return nullptr;
+    }
+
+    bool AddEntityToSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override
+    {
+        if (std::find(SelectedEntities.begin(), SelectedEntities.end(), Entity) != SelectedEntities.end())
+        {
+            return false;
+        }
+
+        SelectedEntities.push_back(Entity);
+        return true;
+    }
+
+    bool RemoveEntityFromSelectedEntities(csp::multiplayer::SpaceEntity* Entity) override
+    {
+        const auto SelectedEntityIt = std::find(SelectedEntities.begin(), SelectedEntities.end(), Entity);
+        if (SelectedEntityIt == SelectedEntities.end())
+        {
+            return false;
+        }
+
+        SelectedEntities.erase(SelectedEntityIt);
+        return true;
+    }
+
+    csp::multiplayer::ModifiableStatus IsEntityModifiable(const csp::multiplayer::SpaceEntity*) const override
+    {
+        return csp::multiplayer::ModifiableStatus::Modifiable;
+    }
+
+    void ResolveEntityHierarchy(csp::multiplayer::SpaceEntity* Entity) override
+    {
+        if (Entity != nullptr)
+        {
+            Entity->ResolveParentChildRelationship();
+        }
+    }
+
     void LockEntityUpdate() override
     {
         bEntityLockHeld = true;
@@ -117,6 +168,7 @@ private:
     int32_t LockCount;
     int32_t UnlockCount;
     std::vector<csp::multiplayer::SpaceEntity*> Entities;
+    std::vector<csp::multiplayer::SpaceEntity*> SelectedEntities;
 };
 
 class TestScriptRunner final : public csp::common::IJSScriptRunner
@@ -229,6 +281,7 @@ export function createScriptRegistry() {
 
 void RunRuntimeSyncSmokeScenario(csp::common::RealtimeEngineType EngineType)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -589,6 +642,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentBridgeMethodsFal
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrapsAndTearsDownRegistryGlobal)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -609,6 +663,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrap
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRegistryRemoved", -1), 1);
 
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentAttributeRoundtrip)
@@ -779,6 +834,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, SingleEntityQueryResolutionCo
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapUsesAssetModuleWhenAvailable)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -806,10 +862,12 @@ export function createScriptRegistry() {
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapFallsBackToBuiltInWhenAssetMissing)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -825,6 +883,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RegistryBootstrapFallsBackToB
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeAutoSyncWorksOffline)
@@ -839,6 +898,7 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeAutoSyncW
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackSchemaSyncAppliesDefaultsAndRejectsInvalidTypes)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -886,10 +946,12 @@ export function script() {
     ProcessTickEvent();
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentEntityReferenceResolvesWritesAndHandlesDeletion)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -955,10 +1017,12 @@ export function script() {
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackLifecycleIsStableAndIncremental)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -1013,10 +1077,12 @@ export function script() {
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ScriptWithoutSchemaStillExecutesThroughFallbackRegistry)
 {
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
     csp::common::LogSystem LogSystem;
     csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
     csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
@@ -1058,6 +1124,250 @@ export function script() {
     ProcessTickEvent();
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, LocalCodeComponentOnlyRunsWhenSelectedInEditMode)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    NgxScriptSystem.OnEnterSpace("selection-edit-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("selection-edit-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/selection-test.js", R"(
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
+export function script() {
+    return () => {
+        globalThis.__ngxSelectionInitCalls = (globalThis.__ngxSelectionInitCalls || 0) + 1;
+        useEffect(() => {
+            globalThis.__ngxSelectionEffectCalls = (globalThis.__ngxSelectionEffectCalls || 0) + 1;
+        });
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 3001, "selection-target", csp::multiplayer::SpaceTransform {},
+        csp::common::LocalClientID, csp::common::Optional<uint64_t> {}, true, true);
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/selection-test.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSelectionInitCalls", 0), 0);
+
+    EXPECT_TRUE(Entity.Select());
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSelectionInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSelectionEffectCalls", 0), 1);
+
+    EXPECT_TRUE(Entity.Deselect());
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_TRUE(Entity.Select());
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxSelectionInitCalls", 0), 2);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EditorCodeComponentOnlyRunsInEditAndLocalRunsInPlay)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("runtime-mode-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("runtime-mode-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/runtime-local.js", R"(
+export function script() {
+    return () => {
+        globalThis.__ngxRuntimeLocalInitCalls = (globalThis.__ngxRuntimeLocalInitCalls || 0) + 1;
+    };
+}
+)");
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/runtime-editor.js", R"(
+export function script() {
+    return () => {
+        globalThis.__ngxRuntimeEditorInitCalls = (globalThis.__ngxRuntimeEditorInitCalls || 0) + 1;
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity LocalEntity;
+    auto* LocalCodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(LocalEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(LocalCodeComponent, nullptr);
+    LocalCodeComponent->SetScriptAssetPath("/scripts/modules/runtime-local.js");
+
+    csp::multiplayer::SpaceEntity EditorEntity;
+    auto* EditorCodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(EditorEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(EditorCodeComponent, nullptr);
+    EditorCodeComponent->SetScriptAssetPath("/scripts/modules/runtime-editor.js");
+    EditorCodeComponent->SetCodeScopeType(csp::multiplayer::CodeScopeType::Editor);
+
+    Engine.AddEntity(&LocalEntity);
+    Engine.AddEntity(&EditorEntity);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeLocalInitCalls", 0), 0);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeEditorInitCalls", 0), 1);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeLocalInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeEditorInitCalls", 0), 1);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Server);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeLocalInitCalls", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeEditorInitCalls", 0), 1);
+
+    Engine.RemoveEntity(&LocalEntity);
+    Engine.RemoveEntity(&EditorEntity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, LocalCodeComponentRunsWhenAncestorIsSelectedInEditMode)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    NgxScriptSystem.OnEnterSpace("ancestor-selection-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ancestor-selection-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/ancestor-selection-test.js", R"(
+export function script() {
+    return () => {
+        globalThis.__ngxAncestorSelectionInitCalls = (globalThis.__ngxAncestorSelectionInitCalls || 0) + 1;
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity ParentEntity(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 3010, "selection-parent", csp::multiplayer::SpaceTransform {},
+        csp::common::LocalClientID, csp::common::Optional<uint64_t> {}, true, true);
+    csp::multiplayer::SpaceEntity ChildEntity(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 3011, "selection-child", csp::multiplayer::SpaceTransform {},
+        csp::common::LocalClientID, csp::common::Optional<uint64_t> { 3010 }, true, true);
+    auto* ChildCodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(ChildEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(ChildCodeComponent, nullptr);
+    ChildCodeComponent->SetScriptAssetPath("/scripts/modules/ancestor-selection-test.js");
+
+    Engine.AddEntity(&ParentEntity);
+    Engine.AddEntity(&ChildEntity);
+    ChildEntity.ResolveParentChildRelationship();
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAncestorSelectionInitCalls", 0), 0);
+
+    EXPECT_TRUE(ParentEntity.Select());
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxAncestorSelectionInitCalls", 0), 1);
+
+    Engine.RemoveEntity(&ChildEntity);
+    Engine.RemoveEntity(&ParentEntity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, LocalCodeComponentRecreatesWhenRuntimeModeChangesWhileActive)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    NgxScriptSystem.OnEnterSpace("mode-restart-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("mode-restart-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/mode-restart-test.js", R"(
+export function script() {
+    return () => {
+        globalThis.__ngxModeRestartInitCalls = (globalThis.__ngxModeRestartInitCalls || 0) + 1;
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity(
+        &Engine, ScriptRunner, &LogSystem, csp::multiplayer::SpaceEntityType::Object, 3020, "mode-restart-target", csp::multiplayer::SpaceTransform {},
+        csp::common::LocalClientID, csp::common::Optional<uint64_t> {}, true, true);
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/mode-restart-test.js");
+    Engine.AddEntity(&Entity);
+
+    EXPECT_TRUE(Entity.Select());
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModeRestartInitCalls", 0), 1);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModeRestartInitCalls", 0), 2);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModeRestartInitCalls", 0), 3);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModeRestartInitCalls", 0), 4);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, MissingModuleLogsExplicitError)

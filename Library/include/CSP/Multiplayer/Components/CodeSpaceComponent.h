@@ -29,8 +29,10 @@ namespace csp::multiplayer
 /// @brief Controls where and how a CodeSpaceComponent's script is executed.
 enum class CodeScopeType
 {
-    /// Runs on every client. Entity mutations from within the script are local-only
-    /// and not replicated. Executes at display rate.
+    /// Runs on every client while the space is in Play mode, or while the entity
+    /// (or one of its ancestors) is selected by the local client in Edit mode.
+    /// Entity mutations from within the script are local-only and not replicated.
+    /// Executes at display rate.
     Local = 0,
     /// Runs on a single designated server client only. Entity mutations are
     /// fully replicated to all clients. There can be only one server runner per component.

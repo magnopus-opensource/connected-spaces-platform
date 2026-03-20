@@ -44,6 +44,7 @@
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 
 #include <exception>
+#include <atomic>
 #include <fmt/format.h>
 #include <memory>
 #include <optional>
@@ -62,6 +63,7 @@ namespace
 {
 
 constexpr const int MAX_SPACES_RESULTS = 100;
+std::atomic<int32_t> GSpaceRuntimeMode { static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Edit) };
 
 // Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
 // The only difference is in the value they pass for the AsyncCall parameter.
@@ -99,6 +101,7 @@ SpaceSystem::SpaceSystem()
     , SpaceAPI { nullptr }
     , MultiplayerSystem { nullptr }
 {
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 SpaceSystem::SpaceSystem(
@@ -109,6 +112,7 @@ SpaceSystem::SpaceSystem(
 {
     GroupAPI = new chs::GroupApi(WebClient);
     SpaceAPI = new chsaggregation::SpaceApi(WebClient);
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 SpaceSystem::~SpaceSystem()
@@ -725,11 +729,38 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
 
     CurrentSpace = Space();
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
 bool SpaceSystem::IsInSpace() { return !CurrentSpace.Id.IsEmpty(); }
 
 const Space& SpaceSystem::GetCurrentSpace() const { return CurrentSpace; }
+
+csp::systems::ESpaceRuntimeMode SpaceSystem::GetRuntimeMode() const { return GetGlobalRuntimeMode(); }
+
+void SpaceSystem::SetRuntimeMode(csp::systems::ESpaceRuntimeMode InRuntimeMode)
+{
+    GSpaceRuntimeMode.store(static_cast<int32_t>(InRuntimeMode), std::memory_order_relaxed);
+}
+
+csp::systems::ESpaceRuntimeMode SpaceSystem::GetGlobalRuntimeMode()
+{
+    const int32_t RawValue = GSpaceRuntimeMode.load(std::memory_order_relaxed);
+    if ((RawValue < static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Edit))
+        || (RawValue >= static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Num)))
+    {
+        return csp::systems::ESpaceRuntimeMode::Edit;
+    }
+
+    return static_cast<csp::systems::ESpaceRuntimeMode>(RawValue);
+}
+
+#ifdef CSP_TESTS
+void SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode InRuntimeMode)
+{
+    GSpaceRuntimeMode.store(static_cast<int32_t>(InRuntimeMode), std::memory_order_relaxed);
+}
+#endif
 
 /*
  * ** CreateSpace Flow **

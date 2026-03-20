@@ -19,6 +19,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -98,6 +99,12 @@ public:
     /// @brief Get the user's current space.
     /// @return The space data object the user is currently in
     const Space& GetCurrentSpace() const;
+
+    /// @brief Get the current runtime mode for the active space.
+    csp::systems::ESpaceRuntimeMode GetRuntimeMode() const;
+
+    /// @brief Set the current runtime mode for the active space.
+    void SetRuntimeMode(csp::systems::ESpaceRuntimeMode InRuntimeMode);
 
     /** @} */
 
@@ -409,6 +416,14 @@ public:
     /// 
     /// @param NetworkEventData const csp::common::NetworkEventData& : event values to deserialise
     CSP_NO_EXPORT void OnAsyncCallCompletedEvent(const csp::common::NetworkEventData& NetworkEventData);
+
+    CSP_NO_EXPORT static csp::systems::ESpaceRuntimeMode GetGlobalRuntimeMode();
+
+CSP_START_IGNORE
+#ifdef CSP_TESTS
+    CSP_NO_EXPORT static void SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode InRuntimeMode);
+#endif
+CSP_END_IGNORE
 
 private:
     SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

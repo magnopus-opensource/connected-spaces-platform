@@ -17,8 +17,10 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/SharedEnums.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/CodeAttribute.h"
+#include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 
 #include <map>
 #include <memory>
@@ -29,6 +31,11 @@ namespace csp::common
 class IRealtimeEngine;
 class LogSystem;
 } // namespace csp::common
+
+namespace csp::multiplayer
+{
+class SpaceEntity;
+}
 
 namespace csp::systems
 {
@@ -49,6 +56,8 @@ private:
     struct CodeComponentSnapshot
     {
         std::string ScriptAssetPath;
+        csp::multiplayer::CodeScopeType ScopeType;
+        csp::systems::ESpaceRuntimeMode RuntimeMode;
         std::map<std::string, csp::multiplayer::CodeAttribute> Attributes;
     };
 
@@ -61,6 +70,11 @@ private:
     bool CaptureEntitySnapshots(EntitySnapshotMap& OutSnapshots) const;
     void SyncSnapshots(const EntitySnapshotMap& CurrentSnapshots);
     bool BootstrapRegistryIfReady();
+    csp::systems::ESpaceRuntimeMode GetRuntimeMode() const;
+    uint64_t GetLocalClientId() const;
+    bool IsEntityOrAncestorSelectedByLocalClient(const csp::multiplayer::SpaceEntity* Entity) const;
+    bool ShouldActivateCodeComponent(
+        const csp::multiplayer::SpaceEntity* Entity, const csp::multiplayer::CodeSpaceComponent* CodeComponent) const;
 
     bool ExecuteRegistrySnippet(const std::string& Snippet, const char* DebugName) const;
     void SyncSchemaInRegistry(uint64_t EntityId);

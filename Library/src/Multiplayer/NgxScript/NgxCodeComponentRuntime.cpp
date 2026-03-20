@@ -18,8 +18,12 @@
 
 #include "CSP/Common/Interfaces/IRealtimeEngine.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "CSP/Multiplayer/OfflineRealtimeEngine.h"
+#include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Events/EventId.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
@@ -1093,10 +1097,12 @@ export function createScriptRegistry() {
             return;
         }
 
+        // Dispose reactive effects before invalidating thisEntity so teardown
+        // does not trigger one final rerun against a null entity.
+        disposeAllEffects(entry);
         if (entry.thisEntitySignal) {
             entry.thisEntitySignal.value = null;
         }
-        disposeAllEffects(entry);
         codeComponents.delete(entityId);
     }
 
@@ -1377,9 +1383,15 @@ bool NgxCodeComponentRuntime::CaptureEntitySnapshots(EntitySnapshotMap& OutSnaps
         }
 
         auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Component);
+        if (!ShouldActivateCodeComponent(Entity, CodeComponent))
+        {
+            continue;
+        }
 
         CodeComponentSnapshot Snapshot;
         Snapshot.ScriptAssetPath = CodeComponent->GetScriptAssetPath().c_str();
+        Snapshot.ScopeType = CodeComponent->GetCodeScopeType();
+        Snapshot.RuntimeMode = GetRuntimeMode();
 
         const auto AttributeKeys = CodeComponent->GetAttributeKeys();
         for (size_t KeyIndex = 0; KeyIndex < AttributeKeys.Size(); ++KeyIndex)
@@ -1420,7 +1432,8 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         }
 
         const CodeComponentSnapshot& PreviousSnapshot = PreviousSnapshotIt->second;
-        if (CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath)
+        if ((CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != PreviousSnapshot.ScopeType)
+            || (CurrentSnapshot.RuntimeMode != PreviousSnapshot.RuntimeMode))
         {
             AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot);
             continue;
@@ -1453,6 +1466,71 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
     }
 
     LastEntitySnapshots = CurrentSnapshots;
+}
+
+csp::systems::ESpaceRuntimeMode NgxCodeComponentRuntime::GetRuntimeMode() const
+{
+    return csp::systems::SpaceSystem::GetGlobalRuntimeMode();
+}
+
+uint64_t NgxCodeComponentRuntime::GetLocalClientId() const
+{
+    if ((ActiveRealtimeEngine != nullptr) && (ActiveRealtimeEngine->GetRealtimeEngineType() == csp::common::RealtimeEngineType::Online))
+    {
+        const auto* OnlineRealtimeEngine = static_cast<const csp::multiplayer::OnlineRealtimeEngine*>(ActiveRealtimeEngine);
+        if (OnlineRealtimeEngine != nullptr)
+        {
+            if (auto* MultiplayerConnection = OnlineRealtimeEngine->GetMultiplayerConnectionInstance(); MultiplayerConnection != nullptr)
+            {
+                return MultiplayerConnection->GetClientId();
+            }
+        }
+    }
+
+    return csp::multiplayer::OfflineRealtimeEngine::LocalClientId();
+}
+
+bool NgxCodeComponentRuntime::IsEntityOrAncestorSelectedByLocalClient(const csp::multiplayer::SpaceEntity* Entity) const
+{
+    const uint64_t LocalClientId = GetLocalClientId();
+    for (auto* CurrentEntity = Entity; CurrentEntity != nullptr; CurrentEntity = CurrentEntity->GetParentEntity())
+    {
+        if (CurrentEntity->IsSelected() && (CurrentEntity->GetSelectingClientID() == LocalClientId))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
+    const csp::multiplayer::SpaceEntity* Entity, const csp::multiplayer::CodeSpaceComponent* CodeComponent) const
+{
+    if ((Entity == nullptr) || (CodeComponent == nullptr))
+    {
+        return false;
+    }
+
+    switch (CodeComponent->GetCodeScopeType())
+    {
+    case csp::multiplayer::CodeScopeType::Local:
+        if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play)
+        {
+            return true;
+        }
+
+        return (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit) && IsEntityOrAncestorSelectedByLocalClient(Entity);
+
+    case csp::multiplayer::CodeScopeType::Editor:
+        return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit;
+
+    case csp::multiplayer::CodeScopeType::Server:
+        return false;
+
+    default:
+        return false;
+    }
 }
 
 bool NgxCodeComponentRuntime::ExecuteRegistrySnippet(const std::string& Snippet, const char* DebugName) const
