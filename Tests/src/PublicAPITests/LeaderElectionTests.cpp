@@ -879,6 +879,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
         auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
 
         ASSERT_TRUE(WaitForFuture(OnElectedScopeLeaderFuture));
+
+        // Call to try and send heartbeat
+        csp::CSPFoundation::Tick();
     }
 
     // Wait for the script system to be ready
@@ -892,8 +895,30 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
         ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
     }
 
+    // Call to try and send heartbeat
+    csp::CSPFoundation::Tick();
+
     csp::multiplayer::SpaceEntity* Entity = nullptr;
     csp::multiplayer::AnimatedModelSpaceComponent* ModelComponent = nullptr;
+
+        //  Create another client for leader election
+    MultiplayerTestRunnerProcess TestRunner1
+        = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::LEADER_ELECTION_TICK)
+              .SetSpaceId(Space.Id.c_str())
+              .SetLoginEmail(TestRunnerUser1.Email.c_str())
+              .SetPassword(GeneratedTestAccountPassword)
+              .SetEndpoint(EndpointBaseURI())
+              .SetTimeoutInSeconds(60);
+
+    std::future<void> ReadyForAssertionsFuture = TestRunner1.ReadyForAssertionsFuture();
+
+    TestRunner1.StartProcess();
+
+    while (ReadyForAssertionsFuture.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
+    {
+        // Call to try and send heartbeat
+        csp::CSPFoundation::Tick();
+    }
 
     // Create an entity with a script that increases the models x position by 1 on each tick
     {
@@ -912,6 +937,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
             = static_cast<csp::multiplayer::AnimatedModelSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::AnimatedModel));
         csp::multiplayer::ScriptSpaceComponent* ScriptComponent
             = static_cast<csp::multiplayer::ScriptSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::ScriptData));
+
+        // Call to try and send heartbeat
+        csp::CSPFoundation::Tick();
 
         Entity->QueueUpdate();
         RealtimeEngine->ProcessPendingEntityOperations();
@@ -939,17 +967,6 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
         EXPECT_EQ(ModelComponent->GetPosition().X, 1);
     }
 
-    //  Create another client for leader election
-    MultiplayerTestRunnerProcess TestRunner1
-        = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::LEADER_ELECTION_TICK)
-              .SetSpaceId(Space.Id.c_str())
-              .SetLoginEmail(TestRunnerUser1.Email.c_str())
-              .SetPassword(GeneratedTestAccountPassword)
-              .SetEndpoint(EndpointBaseURI())
-              .SetTimeoutInSeconds(60);
-
-    std::future<void> ReadyForAssertionsFuture = TestRunner1.ReadyForAssertionsFuture();
-
     // Next, we want to remove ourselves as leader and give it to the test runner.
     {
         // First listen to the vacated callback to ensure we are removed as the leader.
@@ -971,12 +988,6 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptTickTest)
                 EXPECT_EQ(TestRunnerUser1.UserId, LeaderUserId);
                 ElectedCallbackCalled = true;
             });
-
-        TestRunner1.StartProcess();
-
-        while (ReadyForAssertionsFuture.wait_for(std::chrono::seconds(1)) != std::future_status::ready)
-        {
-        }
 
         // Restart leader election, exluding this user.
         auto [LeaderElectionResult] = AWAIT_PRE(MultiplayerSystem, __PerformLeaderElectionInScope, RequestPredicate, ScopeId, { { UserId } });
@@ -1154,6 +1165,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
         EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
     }
 
+    // Call to try and send heartbeat
+    csp::CSPFoundation::Tick();
+
     RealtimeEngine->SetEntityPatchRateLimitEnabled(false);
 
     // Wait for the script system to be ready
@@ -1166,6 +1180,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
 
         ASSERT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
     }
+
+    // Call to try and send heartbeat
+    csp::CSPFoundation::Tick();
 
     csp::multiplayer::SpaceEntity* Entity = nullptr;
     csp::multiplayer::AnimatedModelSpaceComponent* ModelComponent = nullptr;
@@ -1188,6 +1205,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
         csp::multiplayer::ScriptSpaceComponent* ScriptComponent
             = static_cast<csp::multiplayer::ScriptSpaceComponent*>(Entity->AddComponent(csp::multiplayer::ComponentType::ScriptData));
 
+        // Call to try and send heartbeat
+        csp::CSPFoundation::Tick();
+
         Entity->QueueUpdate();
         RealtimeEngine->ProcessPendingEntityOperations();
 
@@ -1208,6 +1228,9 @@ CSP_PUBLIC_TEST(CSPEngine, LeaderElectionTests, ScopeLeadershipScriptEventTest)
 
         // Events happen on a different thread so we need to wait a moment.
         std::this_thread::sleep_for(std::chrono::milliseconds { 1000 });
+
+        // Call to try and send heartbeat
+        csp::CSPFoundation::Tick();
 
         // Update the entities values
         RealtimeEngine->QueueEntityUpdate(Entity);
