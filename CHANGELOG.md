@@ -27,6 +27,9 @@ All notable changes to this project will be documented in this file. For compile
 - [OB-5254] fix: Reconciling the lifetimes of ScopeLeadershipManager and SignalRConnection by MAG-SamBirley
   Resolving a potential crash that can occur when callbacks are executed in response to heartbeat invocations by the ScopeLeadershipManager.
 
+- [NT-0] fix: Fixed logs firing that state the scope already has a leader when thw first client joins. by MAG-mv
+  Uninitialized memory was causing the leader election system to think there is a leader.
+
 ### 🙈 🙉 🙊 Test Changes
 
 - [NT-0] fix: Fixing UpdateScopeByIdTest + temporarily disabling GetScopeLeaderTest" by MAG-mv
