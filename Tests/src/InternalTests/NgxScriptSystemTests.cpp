@@ -666,6 +666,94 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeBootstrap
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeSupportsDirectScriptAndRunsTeardownOnRemoval)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/direct-teardown.js", R"(
+export function script({ entityId }) {
+    globalThis.__ngxDirectInitCount = (globalThis.__ngxDirectInitCount || 0) + 1;
+    globalThis.__ngxLastDirectEntityId = entityId;
+    return () => {
+        globalThis.__ngxDirectTeardownCount = (globalThis.__ngxDirectTeardownCount || 0) + 1;
+        globalThis.__ngxLastDirectTeardownEntityId = entityId;
+    };
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("direct-script-removal-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("direct-script-removal-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/direct-teardown.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxDirectInitCount", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxDirectTeardownCount", 0), 0);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxDirectTeardownCount", 0), 1);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeRunsDirectScriptTeardownOnExitSpace)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/direct-exit-teardown.js", R"(
+export function script() {
+    globalThis.__ngxExitInitCount = (globalThis.__ngxExitInitCount || 0) + 1;
+    return () => {
+        globalThis.__ngxExitTeardownCount = (globalThis.__ngxExitTeardownCount || 0) + 1;
+    };
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("direct-script-exit-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("direct-script-exit-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/direct-exit-teardown.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxExitInitCount", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxExitTeardownCount", 0), 0);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxExitTeardownCount", 0), 1);
+
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentAttributeRoundtrip)
 {
     csp::multiplayer::SpaceEntity Entity;
@@ -1362,6 +1450,47 @@ export function script() {
     ProcessTickEvent();
     NgxScriptSystem.PumpPendingJobs();
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxModeRestartInitCalls", 0), 4);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentsRemainDormantUntilRuntimeModeIsExplicitlySet)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Unset);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/runtime-unset-test.js", R"(
+export function script() {
+    globalThis.__ngxRuntimeUnsetInitCalls = (globalThis.__ngxRuntimeUnsetInitCalls || 0) + 1;
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("runtime-unset-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("runtime-unset-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/runtime-unset-test.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeUnsetInitCalls", 0), 0);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeUnsetInitCalls", 0), 1);
 
     Engine.RemoveEntity(&Entity);
     ProcessTickEvent();

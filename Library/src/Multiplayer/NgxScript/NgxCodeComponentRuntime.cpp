@@ -857,6 +857,22 @@ export function createScriptRegistry() {
         entry.effects = [];
     }
 
+    function runScriptTeardown(entityId, entry, reason = 'unspecified') {
+        if (!entry || typeof entry.teardown !== 'function') {
+            return;
+        }
+
+        const teardown = entry.teardown;
+        entry.teardown = null;
+
+        try {
+            teardown();
+        } catch (error) {
+            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
+            console.error(`NgxCodeComponentRuntime: script teardown failed for entity ${entityId} (${scriptPath}) [${reason}]`, error);
+        }
+    }
+
     // --- Script initialization ---
 
     function initializeScript(entityId, entry) {
@@ -865,12 +881,6 @@ export function createScriptRegistry() {
         }
 
         try {
-            const scriptFn = entry.module.script();
-            if (typeof scriptFn !== 'function') {
-                warn(entityId, 'script export must return a function.');
-                return;
-            }
-
             const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')
                 ? globalThis.TheEntitySystem.getEntityById(entityId)
                 : null;
@@ -878,7 +888,8 @@ export function createScriptRegistry() {
 
             globalThis.__cspCurrentEntityId = entityId;
             try {
-                scriptFn({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
+                const teardown = entry.module.script({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
+                entry.teardown = typeof teardown === 'function' ? teardown : null;
             } finally {
                 globalThis.__cspCurrentEntityId = undefined;
             }
@@ -926,6 +937,7 @@ export function createScriptRegistry() {
                 // old effects so they don't accumulate in memory.
                 if (current.initialized) {
                     disposeAllEffects(current);
+                    current.thisEntitySignal = null;
                     current.initialized = false;
                 }
 
@@ -1008,6 +1020,7 @@ export function createScriptRegistry() {
 
         if (existing) {
             disposeAllEffects(existing);
+            existing.thisEntitySignal = null;
             codeComponents.delete(entityId);
         }
 
@@ -1016,6 +1029,7 @@ export function createScriptRegistry() {
             attributes: inputAttributes,
             signalAttributes: {},
             thisEntitySignal: null,
+            teardown: null,
             module: null,
             schema: null,
             initialized: false,
@@ -1099,10 +1113,12 @@ export function createScriptRegistry() {
 
         // Dispose reactive effects before invalidating thisEntity so teardown
         // does not trigger one final rerun against a null entity.
+        runScriptTeardown(entityId, entry, 'remove');
         disposeAllEffects(entry);
         if (entry.thisEntitySignal) {
             entry.thisEntitySignal.value = null;
         }
+        entry.thisEntitySignal = null;
         codeComponents.delete(entityId);
     }
 
@@ -1131,7 +1147,12 @@ export function createScriptRegistry() {
 
     function destroy() {
         for (const [entityId, entry] of codeComponents) {
+            runScriptTeardown(entityId, entry, 'destroy');
             disposeAllEffects(entry);
+            if (entry.thisEntitySignal) {
+                entry.thisEntitySignal.value = null;
+            }
+            entry.thisEntitySignal = null;
         }
         codeComponents.clear();
         pendingSchemaSyncs.clear();
@@ -1515,6 +1536,11 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
     switch (CodeComponent->GetCodeScopeType())
     {
     case csp::multiplayer::CodeScopeType::Local:
+        if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Unset)
+        {
+            return false;
+        }
+
         if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play)
         {
             return true;

@@ -63,7 +63,7 @@ namespace
 {
 
 constexpr const int MAX_SPACES_RESULTS = 100;
-std::atomic<int32_t> GSpaceRuntimeMode { static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Edit) };
+std::atomic<int32_t> GSpaceRuntimeMode { static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Unset) };
 
 // Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
 // The only difference is in the value they pass for the AsyncCall parameter.
@@ -101,7 +101,7 @@ SpaceSystem::SpaceSystem()
     , SpaceAPI { nullptr }
     , MultiplayerSystem { nullptr }
 {
-    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Unset);
 }
 
 SpaceSystem::SpaceSystem(
@@ -112,7 +112,7 @@ SpaceSystem::SpaceSystem(
 {
     GroupAPI = new chs::GroupApi(WebClient);
     SpaceAPI = new chsaggregation::SpaceApi(WebClient);
-    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Unset);
 }
 
 SpaceSystem::~SpaceSystem()
@@ -729,7 +729,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
     events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
 
     CurrentSpace = Space();
-    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Edit);
+    SetRuntimeMode(csp::systems::ESpaceRuntimeMode::Unset);
 }
 
 bool SpaceSystem::IsInSpace() { return !CurrentSpace.Id.IsEmpty(); }
@@ -746,10 +746,10 @@ void SpaceSystem::SetRuntimeMode(csp::systems::ESpaceRuntimeMode InRuntimeMode)
 csp::systems::ESpaceRuntimeMode SpaceSystem::GetGlobalRuntimeMode()
 {
     const int32_t RawValue = GSpaceRuntimeMode.load(std::memory_order_relaxed);
-    if ((RawValue < static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Edit))
+    if ((RawValue < static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Unset))
         || (RawValue >= static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Num)))
     {
-        return csp::systems::ESpaceRuntimeMode::Edit;
+        return csp::systems::ESpaceRuntimeMode::Unset;
     }
 
     return static_cast<csp::systems::ESpaceRuntimeMode>(RawValue);

@@ -225,7 +225,8 @@ namespace csp::systems
 /// @brief Controls how the current space should behave for editor/play/server-facing systems.
 enum class ESpaceRuntimeMode
 {
-    Edit = 0,
+    Unset = 0,
+    Edit,
     Play,
     /// Reserved for future server-authoritative runtime support.
     Server,
