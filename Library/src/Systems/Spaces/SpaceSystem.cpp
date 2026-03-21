@@ -65,6 +65,23 @@ namespace
 constexpr const int MAX_SPACES_RESULTS = 100;
 std::atomic<int32_t> GSpaceRuntimeMode { static_cast<int32_t>(csp::systems::ESpaceRuntimeMode::Unset) };
 
+const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
+{
+    switch (RuntimeMode)
+    {
+    case csp::systems::ESpaceRuntimeMode::Unset:
+        return "Unset";
+    case csp::systems::ESpaceRuntimeMode::Edit:
+        return "Edit";
+    case csp::systems::ESpaceRuntimeMode::Play:
+        return "Play";
+    case csp::systems::ESpaceRuntimeMode::Server:
+        return "Server";
+    default:
+        return "Unknown";
+    }
+}
+
 // Construct a new DuplicateSpaceOptions dto request object. This function is called by both DuplicateSpace and DuplicateSpaceAsync methods.
 // The only difference is in the value they pass for the AsyncCall parameter.
 std::shared_ptr<chsaggregation::DuplicateSpaceOptions> ConstructDuplicateSpaceOptions(csp::systems::UserSystem* UserSystem, const String& SpaceId,
@@ -740,7 +757,16 @@ csp::systems::ESpaceRuntimeMode SpaceSystem::GetRuntimeMode() const { return Get
 
 void SpaceSystem::SetRuntimeMode(csp::systems::ESpaceRuntimeMode InRuntimeMode)
 {
+    const csp::systems::ESpaceRuntimeMode PreviousRuntimeMode = GetGlobalRuntimeMode();
     GSpaceRuntimeMode.store(static_cast<int32_t>(InRuntimeMode), std::memory_order_relaxed);
+
+    if ((LogSystem != nullptr) && (PreviousRuntimeMode != InRuntimeMode))
+    {
+        LogSystem->LogMsg(csp::common::LogLevel::Log,
+            fmt::format("SpaceSystem Trace: Runtime mode changed {} -> {}.", RuntimeModeToString(PreviousRuntimeMode),
+                RuntimeModeToString(InRuntimeMode))
+                .c_str());
+    }
 }
 
 csp::systems::ESpaceRuntimeMode SpaceSystem::GetGlobalRuntimeMode()

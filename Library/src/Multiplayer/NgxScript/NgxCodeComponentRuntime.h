@@ -90,6 +90,7 @@ private:
     csp::common::String ActiveSpaceId;
     bool IsRegistryBootstrapped;
     uint64_t LastKnownContextGeneration;
+    csp::systems::ESpaceRuntimeMode LastObservedRuntimeMode;
     EntitySnapshotMap LastEntitySnapshots;
     std::unique_ptr<NgxCodeComponentTickEventHandler> TickEventHandler;
 };

@@ -1228,6 +1228,7 @@ NgxCodeComponentRuntime::NgxCodeComponentRuntime(csp::common::LogSystem& InLogSy
     , ActiveSpaceId("")
     , IsRegistryBootstrapped(false)
     , LastKnownContextGeneration(0)
+    , LastObservedRuntimeMode(csp::systems::ESpaceRuntimeMode::Unset)
     , LastEntitySnapshots()
     , TickEventHandler(std::make_unique<NgxCodeComponentTickEventHandler>(this))
 {
@@ -1244,14 +1245,17 @@ NgxCodeComponentRuntime::~NgxCodeComponentRuntime()
 
 void NgxCodeComponentRuntime::OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine)
 {
+    const csp::systems::ESpaceRuntimeMode RuntimeMode = GetRuntimeMode();
     const std::string EnterMessage = fmt::format(
-        "NgxCodeComponentRuntime Trace: OnEnterSpace(spaceId='{}', engineType={}).", InSpaceId.c_str(), RealtimeEngineTypeToString(InRealtimeEngine));
+        "NgxCodeComponentRuntime Trace: OnEnterSpace(spaceId='{}', engineType={}, runtimeMode={}).",
+        InSpaceId.c_str(), RealtimeEngineTypeToString(InRealtimeEngine), RuntimeModeToString(RuntimeMode));
     LogSystem.LogMsg(csp::common::LogLevel::Log, EnterMessage.c_str());
 
     ActiveSpaceId = InSpaceId;
     ActiveRealtimeEngine = InRealtimeEngine;
     IsRegistryBootstrapped = false;
     LastKnownContextGeneration = ScriptSystem.GetContextGeneration();
+    LastObservedRuntimeMode = RuntimeMode;
     LastEntitySnapshots.clear();
 
     RegisterBuiltInModules();
@@ -1271,6 +1275,7 @@ void NgxCodeComponentRuntime::OnExitSpace()
     ActiveSpaceId = "";
     ActiveRealtimeEngine = nullptr;
     LastKnownContextGeneration = 0;
+    LastObservedRuntimeMode = csp::systems::ESpaceRuntimeMode::Unset;
 
     if (IsRegistryBootstrapped)
     {
@@ -1295,6 +1300,16 @@ void NgxCodeComponentRuntime::OnTick()
     if (ActiveRealtimeEngine == nullptr)
     {
         return;
+    }
+
+    const csp::systems::ESpaceRuntimeMode RuntimeMode = GetRuntimeMode();
+    if (RuntimeMode != LastObservedRuntimeMode)
+    {
+        LogSystem.LogMsg(csp::common::LogLevel::Log,
+            fmt::format("NgxCodeComponentRuntime Trace: Observed runtime mode change {} -> {} while active in space '{}'.",
+                RuntimeModeToString(LastObservedRuntimeMode), RuntimeModeToString(RuntimeMode), ActiveSpaceId.c_str())
+                .c_str());
+        LastObservedRuntimeMode = RuntimeMode;
     }
 
     ScriptSystem.PumpPendingJobs();
@@ -1556,6 +1571,23 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
 
     default:
         return false;
+    }
+}
+
+const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
+{
+    switch (RuntimeMode)
+    {
+    case csp::systems::ESpaceRuntimeMode::Unset:
+        return "Unset";
+    case csp::systems::ESpaceRuntimeMode::Edit:
+        return "Edit";
+    case csp::systems::ESpaceRuntimeMode::Play:
+        return "Play";
+    case csp::systems::ESpaceRuntimeMode::Server:
+        return "Server";
+    default:
+        return "Unknown";
     }
 }
 
