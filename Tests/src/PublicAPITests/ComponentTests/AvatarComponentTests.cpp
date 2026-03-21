@@ -120,7 +120,7 @@ CSP_PUBLIC_TEST(CSPEngine, AvatarTests, AvatarComponentTest)
     constexpr const char* NewAvatarId = "TestAvatarId";
     const AvatarState NewAvatarState = AvatarState::Flying;
     const AvatarPlayMode NewAvatarPlayMode = AvatarPlayMode::VR;
-    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::Grounded;
+    const LocomotionModel NewAvatarLocomotionModel = LocomotionModel::Scripted;
     const bool NewIsVisible = true;
     const bool NewIsARVisible = false;
     const bool NewIsVirtualVisible = false;

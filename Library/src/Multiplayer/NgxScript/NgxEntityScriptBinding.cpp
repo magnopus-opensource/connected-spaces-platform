@@ -160,6 +160,74 @@ if (typeof globalThis.__ngxCreateLocalEntity === "function") {
   globalThis.TheEntitySystem.createLocalEntity = (name) => globalThis.__ngxCreateLocalEntity(name);
 }
 
+const __ngxPlayerControllerConfigTag = "player-controller-config";
+const __ngxCodeComponentType = 35;
+
+function __ngxFindPlayerControllerHostComponent() {
+  if (!globalThis.TheEntitySystem || typeof globalThis.TheEntitySystem.getEntities !== "function") {
+    return null;
+  }
+
+  const entities = globalThis.TheEntitySystem.getEntities();
+  if (!Array.isArray(entities)) {
+    return null;
+  }
+
+  const configEntity = entities.find((entity) => entity && typeof entity.hasTag === "function" && entity.hasTag(__ngxPlayerControllerConfigTag));
+  if (!configEntity || typeof configEntity.getComponents !== "function") {
+    return null;
+  }
+
+  const components = configEntity.getComponents();
+  if (!Array.isArray(components)) {
+    return null;
+  }
+
+  return components.find(
+    (component) =>
+      component &&
+      component.type === __ngxCodeComponentType &&
+      typeof component.invokeAction === "function"
+  ) ?? null;
+}
+
+if (typeof globalThis.ThePlayerController === "undefined" || globalThis.ThePlayerController === null) {
+  globalThis.ThePlayerController = {};
+}
+
+globalThis.ThePlayerController.moveCharacter = (x, y, z, jump = false, isFlying = false) => {
+  const component = __ngxFindPlayerControllerHostComponent();
+  if (!component) {
+    return false;
+  }
+
+  component.invokeAction(
+    "moveCharacter",
+    JSON.stringify({ x: Number(x), y: Number(y), z: Number(z), jump: !!jump, isFlying: !!isFlying })
+  );
+  return true;
+};
+
+globalThis.ThePlayerController.teleportCharacter = (x, y, z) => {
+  const component = __ngxFindPlayerControllerHostComponent();
+  if (!component) {
+    return false;
+  }
+
+  component.invokeAction("teleportCharacter", JSON.stringify({ x: Number(x), y: Number(y), z: Number(z) }));
+  return true;
+};
+
+globalThis.ThePlayerController.setFirstPersonEnabled = (enabled) => {
+  const component = __ngxFindPlayerControllerHostComponent();
+  if (!component) {
+    return false;
+  }
+
+  component.invokeAction("setFirstPersonEnabled", JSON.stringify({ enabled: !!enabled }));
+  return true;
+};
+
 async function __ngxWaitForMaterial(material) {
   for (;;) {
     if (!material || material.status !== "loading") {

@@ -146,6 +146,8 @@ enum class LocomotionModel
 {
     Grounded = 0,
     FreeCamera,
+    /// Reserved for creator-authored player controllers driven by NGX/code components.
+    Scripted,
     Num
 };
 
@@ -225,8 +227,12 @@ namespace csp::systems
 /// @brief Controls how the current space should behave for editor/play/server-facing systems.
 enum class ESpaceRuntimeMode
 {
+    /// Runtime mode has not been chosen yet. NGX code components stay dormant until
+    /// the hosting client explicitly selects Edit or Play.
     Unset = 0,
+    /// Authoring mode for creator-facing tools and editor-only scripts.
     Edit,
+    /// Runtime mode for normal client play, including active local gameplay scripts.
     Play,
     /// Reserved for future server-authoritative runtime support.
     Server,

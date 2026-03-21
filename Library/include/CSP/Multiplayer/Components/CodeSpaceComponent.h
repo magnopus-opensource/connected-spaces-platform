@@ -31,6 +31,7 @@ enum class CodeScopeType
 {
     /// Runs on every client while the space is in Play mode, or while the entity
     /// (or one of its ancestors) is selected by the local client in Edit mode.
+    /// Leaving that active set tears the script down; re-entering creates a fresh instance.
     /// Entity mutations from within the script are local-only and not replicated.
     /// Executes at display rate.
     Local = 0,

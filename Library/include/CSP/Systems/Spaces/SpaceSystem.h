@@ -101,6 +101,7 @@ public:
     const Space& GetCurrentSpace() const;
 
     /// @brief Get the current runtime mode for the active space.
+    /// @note New spaces begin in Unset until the hosting client explicitly selects a mode.
     csp::systems::ESpaceRuntimeMode GetRuntimeMode() const;
 
     /// @brief Set the current runtime mode for the active space.

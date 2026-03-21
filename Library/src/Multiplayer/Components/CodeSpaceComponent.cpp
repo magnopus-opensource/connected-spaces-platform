@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
+#include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <rapidjson/document.h>
 
@@ -24,6 +25,7 @@ namespace csp::multiplayer
 CodeSpaceComponent::CodeSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(ComponentType::Code, LogSystem, Parent)
 {
+    SetScriptInterface(new ComponentScriptInterface(this));
     Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::ScriptAssetPath)] = "";
     Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::CodeScopeType)] = static_cast<int64_t>(csp::multiplayer::CodeScopeType::Local);
     Properties[static_cast<uint32_t>(CodeSpaceComponentPropertyKeys::Attributes)]
