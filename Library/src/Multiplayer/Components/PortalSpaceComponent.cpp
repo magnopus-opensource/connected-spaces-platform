@@ -16,7 +16,10 @@
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
-csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+namespace csp::multiplayer
+{
+
+PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(ComponentType::Portal, LogSystem, Parent)
 {
     Properties[static_cast<uint32_t>(PortalPropertyKeys::IsVisible)] = true;
@@ -30,32 +33,25 @@ csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(csp::common::LogSys
     SetScriptInterface(new PortalSpaceComponentScriptInterface(this));
 }
 
-const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() const
-{
-    return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId));
-}
+const csp::common::String& PortalSpaceComponent::GetSpaceId() const { return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId)); }
 
-void csp::multiplayer::PortalSpaceComponent::SetSpaceId(const csp::common::String& Value)
-{
-    SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value);
-}
+void PortalSpaceComponent::SetSpaceId(const csp::common::String& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value); }
 
 /* IPositionComponent */
 
-const csp::common::Vector3& csp::multiplayer::PortalSpaceComponent::GetPosition() const
+const csp::common::Vector3& PortalSpaceComponent::GetPosition() const
 {
     return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
 }
 
-void csp::multiplayer::PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value)
-{
-    SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
-}
+void PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value); }
 
-float csp::multiplayer::PortalSpaceComponent::GetRadius() const { return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius)); }
+float PortalSpaceComponent::GetRadius() const { return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius)); }
 
-void csp::multiplayer::PortalSpaceComponent::SetRadius(float Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
+void PortalSpaceComponent::SetRadius(float Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
 
-bool csp::multiplayer::PortalSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)); }
+bool PortalSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)); }
 
-void csp::multiplayer::PortalSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }
+void PortalSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }
+
+} // namespace csp::multiplayer
