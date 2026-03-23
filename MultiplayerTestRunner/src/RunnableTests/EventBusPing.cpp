@@ -19,7 +19,7 @@
 #include "CSP/Multiplayer/SpaceTransform.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 #include <future>
 
 namespace EventBusPing

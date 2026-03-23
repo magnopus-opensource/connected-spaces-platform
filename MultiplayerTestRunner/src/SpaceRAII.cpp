@@ -21,7 +21,7 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Utils.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 
 #include <future>
 
@@ -141,8 +141,7 @@ csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem&
     constexpr char* TestSpaceName = "CSP-MULTIPLAYERTEST-SPACE-MAG";
     constexpr char* TestSpaceDescription = "CSP-MULTIPLAYERTEST--SPACEDESC-MAG";
 
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
+    const auto uuid = sole::uuid4();
     std::string UniqueSpaceName = TestSpaceName + std::string("-") + uuid.str();
 
     std::promise<csp::systems::SpaceResult> ResultPromise;

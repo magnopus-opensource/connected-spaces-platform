@@ -33,7 +33,6 @@
 #include <filesystem>
 #include <future>
 #include <tuple>
-#include <uuid_v4.h>
 
 using namespace csp::common;
 using namespace csp::systems;
@@ -3471,7 +3470,7 @@ TEST_P(EnterSpaceWhenGuest, EnterSpaceWhenGuestTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     // Create a space according to param attribute
     String SpaceOwnerUserId;
@@ -3523,7 +3522,7 @@ TEST_P(EnterSpaceWhenUninvited, EnterSpaceWhenUninvitedTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     // Create a space according to param attribute
     String SpaceOwnerUserId;
@@ -3575,7 +3574,7 @@ TEST_P(EnterSpaceWhenInvited, EnterSpaceWhenInvitedTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     // Create a space according to param attribute, and invite a user
     csp::systems::Profile InvitedUser = CreateTestUser();
@@ -3634,7 +3633,7 @@ TEST_P(EnterSpaceWhenCreator, EnterSpaceWhenCreatorTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     // Create a space according to param attribute
     String SpaceOwnerUserId;
@@ -3676,7 +3675,7 @@ TEST_P(EnterSpaceWhenBanned, EnterSpaceWhenBannedTest)
     const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
     const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     // Create a space according to param attribute, and ban a user
     csp::systems::Profile BannedUser = CreateTestUser();
@@ -3838,7 +3837,7 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     csp::systems::Profile SpaceOwnerUser;
     String SpaceOwnerUserId;
     // Make this space even if using an offline engine, to allow us to check that we've not added a user to it in offline mode later
-    std::string UniqueSpaceName = TestSpaceName + std::string("-") + UUIDv4::UUIDGenerator<std::mt19937_64>().getUUID().str();
+    std::string UniqueSpaceName = TestSpaceName + std::string("-") + GetUniqueString();
 
     SpaceOwnerUser = CreateTestUser();
     LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);

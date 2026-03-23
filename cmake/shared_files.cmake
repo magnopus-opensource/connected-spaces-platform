@@ -91,18 +91,4 @@ set(CSP_SHARED_PRIVATE_INCLUDES
     ${CSP_SHARED_SOURCE_DIR}/Web/EmscriptenWebClient/EmscriptenWebClient.h
 
     ${CSP_SHARED_SOURCE_DIR}/Web/POCOWebClient/POCOWebClient.h
-
-)
-
-# Public
-target_sources(csp-lib PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES ${CSP_SHARED_PUBLIC_INCLUDES}
-)
-
-# Private
-target_sources(csp-lib PRIVATE
-    ${CSP_SHARED_SOURCES}
-    ${CSP_SHARED_PRIVATE_INCLUDES}
 )
