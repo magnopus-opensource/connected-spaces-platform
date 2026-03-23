@@ -44,6 +44,7 @@ target_include_directories(MultiplayerTestRunner
 target_link_libraries(MultiplayerTestRunner
     PRIVATE
         csp-lib
+        csp-lib-internal
         GTest::gtest
         GTest::gtest_main
         GTest::gmock
