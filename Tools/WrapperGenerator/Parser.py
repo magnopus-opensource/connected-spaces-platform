@@ -1087,8 +1087,6 @@ class Parser:
                     is_static = True
                     word = reader.next_word()
                 
-                class_is_static = class_is_static and is_static
-                
                 if word == 'explicit':
                     is_explicit = True
                     word = reader.next_word()
@@ -1122,9 +1120,13 @@ class Parser:
 
                         if modifier == AccessModifier.PUBLIC or (res.is_constructor or res.is_destructor):
                             methods.append(res)
+                        
+                        class_is_static = class_is_static and (is_static or res.is_static)
                 elif hint == '{':
                     is_deprecated = False
                     deprecation_message = None
+
+                    class_is_static = class_is_static and is_static
 
                     # This must be a nested type
                     has_nested_types = True
@@ -1168,6 +1170,8 @@ class Parser:
                 else:   # ';'
                     is_deprecated = False
                     deprecation_message = None
+
+                    class_is_static = class_is_static and is_static
 
                     # Field!
                     res = self.__parse_field(filename, reader, word, _class)
