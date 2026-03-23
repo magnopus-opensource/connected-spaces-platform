@@ -21,7 +21,7 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 
 #include <chrono>
 #include <functional>
@@ -189,9 +189,7 @@ inline double RandomRangeDouble(double Min, double Max)
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString()
 {
-    static thread_local UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-
+    const auto uuid = sole::uuid4();
     return uuid.str();
 }
 

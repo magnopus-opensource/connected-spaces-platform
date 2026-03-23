@@ -21,7 +21,8 @@ class CSP(ConanFile):
         self.requires("msgpack-cxx/7.0.0")
         self.requires("tinyspline/0.6.0")
         self.requires("glm/1.0.1")
-        self.requires("gtest/1.17.0")
+        self.requires("gtest/1.11.0")
+        self.requires("sole/1.0.4")
 
     def configure(self):
         # Disable unnecessary Ppoco modules as this is a big library with dependecies.

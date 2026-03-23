@@ -17,7 +17,7 @@
 #include "Utils.h"
 
 #include "../include/ErrorCodes.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -32,9 +32,7 @@ namespace Utils
 
 std::string Utils::GetUniqueString()
 {
-    UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-
+    const auto uuid = sole::uuid4();
     return uuid.str();
 }
 

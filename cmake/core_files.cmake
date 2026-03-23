@@ -119,6 +119,8 @@ set(CSP_CORE_SOURCES
     ${CSP_CORE_SOURCE_DIR}/Maintenance/Maintenance.cpp
     ${CSP_CORE_SOURCE_DIR}/Maintenance/MaintenanceSystem.cpp
 
+    ${CSP_CORE_INCLUDE_DIR}/MCS/MCSSceneData.cpp
+
     ${CSP_CORE_SOURCE_DIR}/Multiplayer/MultiplayerSystem.cpp
     ${CSP_CORE_SOURCE_DIR}/Multiplayer/Scope.cpp
     ${CSP_CORE_SOURCE_DIR}/Multiplayer/ScopeLeader.cpp
@@ -178,17 +180,4 @@ set(CSP_CORE_PRIVATE_INCLUDES
 
     ${CSP_CORE_SOURCE_DIR}/Users/Authentication.h
 
-    )   
-
-# Public
-target_sources(csp-lib PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES ${CSP_CORE_PUBLIC_INCLUDES}
-)
-
-# Private
-target_sources(csp-lib PRIVATE
-    ${CSP_CORE_SOURCES}
-    ${CSP_CORE_PRIVATE_INCLUDES}
-)
+    )
