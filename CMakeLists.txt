@@ -4,8 +4,8 @@ project(CSP VERSION 1.0
     DESCRIPTION "Connected Spaces Platform"
     LANGUAGES CXX)
 
-add_library(csp-lib)
-
+# ------------------------------------------------------------------------------------------------------------------
+# First populate variables with our files
 set(CSP_ROOT        ${CMAKE_CURRENT_SOURCE_DIR}/Library)
 set(CSP_INCLUDE_DIR ${CSP_ROOT}/include)
 set(CSP_SOURCE_DIR  ${CSP_ROOT}/src)
@@ -33,36 +33,13 @@ set(CSP_PRIVATE_SOURCES
   ${CSP_MISC_PRIVATE_INCLUDES}
 )
 
-target_sources(csp-lib
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES 
-      ${CSP_PUBLIC_SOURCES}
-  PRIVATE
-    ${CSP_PRIVATE_SOURCES}
-
-)
-
 # Preserve folder structure for files in IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
-  ${CSP_SHARED_PUBLIC_INCLUDES}
-  ${CSP_SHARED_SOURCES}
-  ${CSP_SHARED_PRIVATE_INCLUDES}
-
-  ${CSP_CORE_PUBLIC_INCLUDES}
-  ${CSP_CORE_SOURCES}
-  ${CSP_CORE_PRIVATE_INCLUDES}
-
-  ${CSP_MULTIPLAYER_PUBLIC_INCLUDES}
-  ${CSP_MULTIPLAYER_SOURCES}
-  ${CSP_MULTIPLAYER_PRIVATE_INCLUDES}
-
-  ${CSP_MISC_PUBLIC_INCLUDES}
-  ${CSP_MISC_SOURCES}
-  ${CSP_MISC_PRIVATE_INCLUDES}
+  ${CSP_PUBLIC_SOURCES}
+  ${CSP_PRIVATE_SOURCES}
 )
 
+# ------------------------------------------------------------------------------------------------------------------
 # Find dependencies
 find_package(RapidJSON REQUIRED)
 find_package(fmt REQUIRED)
@@ -70,7 +47,6 @@ find_package(Async++ REQUIRED)
 find_package(Poco REQUIRED)
 find_package(tinyspline REQUIRED)
 find_package(glm REQUIRED)
-find_package(GTest CONFIG REQUIRED)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/signalrclient)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/quickjs)
@@ -92,13 +68,49 @@ FetchContent_MakeAvailable(csp-services)
 # This is due to both csp-lib and csp-services depending on each other.
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/services_files.cmake)
 
-target_sources(csp-lib PRIVATE
-    ${CSP_SERVICES_SOURCES}
-)
-
 # Preserve folder structure for files in IDE
 source_group(TREE ${CSP_SERVICES_DIR} FILES
   ${CSP_SERVICES_SOURCES}
+)
+
+# ------------------------------------------------------------------------------------------------------------------
+# Create an interface that exposes internal usage requirements to internal targets.
+# This way our internal tests can still access them without us exposing them to clients.
+add_library(csp-lib-internal INTERFACE)
+
+# Define all of our private include dirs for our interface lib.
+target_include_directories(csp-lib-internal INTERFACE
+  ${CSP_SOURCE_DIR}
+  ${CSP_SERVICES_DIR}
+)
+
+# Link dependencies
+target_link_libraries(csp-lib-internal
+  INTERFACE 
+    rapidjson
+    fmt::fmt
+    Async++
+    Poco::Poco
+    Poco::Net
+    csp-signalr
+    tinysplinecxx::tinysplinecxx
+    glm::glm
+    csp-quickjs
+)
+
+# ------------------------------------------------------------------------------------------------------------------
+# Now create our final target
+add_library(csp-lib)
+
+target_sources(csp-lib
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CSP_INCLUDE_DIR}
+    FILES 
+      ${CSP_PUBLIC_SOURCES}
+  PRIVATE
+    ${CSP_PRIVATE_SOURCES}
+    ${CSP_SERVICES_SOURCES}
 )
 
 # Set include directories
@@ -115,16 +127,8 @@ target_include_directories(csp-lib
 
 # Link dependencies
 target_link_libraries(csp-lib
-  PUBLIC 
-    rapidjson
-    fmt::fmt
-    Async++
-    Poco::Poco
-    Poco::Net
-    csp-signalr
-    tinysplinecxx::tinysplinecxx
-    glm::glm
-    csp-quickjs
+  PRIVATE 
+    csp-lib-internal
 )
 
 # Project uses C++17
@@ -135,10 +139,13 @@ target_compile_options(csp-lib PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
 )
 
+# ------------------------------------------------------------------------------------------------------------------
+# Testing
 include(CTest)
 
 if(BUILD_TESTING)
   
+  find_package(GTest CONFIG REQUIRED)
   find_package(sole REQUIRED)
 
   # Fetch tiny-process lib
@@ -166,6 +173,7 @@ if(BUILD_TESTING)
   target_link_libraries(csp-tests
     PRIVATE 
     csp-lib
+    csp-lib-internal
     GTest::gtest
     GTest::gtest_main
     GTest::gmock
@@ -178,14 +186,12 @@ if(BUILD_TESTING)
     PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/Tests/src
       ${CMAKE_CURRENT_SOURCE_DIR}/MultiplayerTestRunner/include
-      ${CSP_SOURCE_DIR}
-      ${CSP_SERVICES_DIR}
   )
 
-  target_compile_features(csp-tests PUBLIC cxx_std_17)
+  target_compile_features(csp-tests PRIVATE cxx_std_17)
 
   target_compile_definitions(csp-tests
-    PUBLIC
+    PRIVATE
         CSP_TESTS
         # Create a macro for our test runner output path to run the process.
         # This ensures we have the correct path on all configurations
