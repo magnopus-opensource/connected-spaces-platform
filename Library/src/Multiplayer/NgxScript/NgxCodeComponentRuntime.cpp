@@ -45,6 +45,7 @@ constexpr const char* CODECOMPONENT_SHUTDOWN_MODULE = "/__csp/internal/codecompo
 constexpr const char* CODECOMPONENT_HOOKS_MODULE = "@csp/hooks";
 constexpr const char* CODECOMPONENT_HOOKS_SOURCE = "export { useEffect } from '/__csp/internal/codecomponent/registry.js';\n";
 constexpr const char* CODECOMPONENT_CORE_MODULE = "@csp/core";
+constexpr const char* CODECOMPONENT_INPUT_MODULE = "@csp/code";
 constexpr const char* CODECOMPONENT_CORE_SOURCE = R"CORE(
 export { useEffect } from '/__csp/internal/codecomponent/registry.js';
 export const TheEntitySystem = new Proxy({}, {
@@ -61,6 +62,67 @@ export const TheEntitySystem = new Proxy({}, {
     },
 });
 )CORE";
+constexpr const char* CODECOMPONENT_INPUT_SOURCE = R"INPUT(
+function getInputDevice(name) {
+    const input = globalThis.__cspInput;
+    if (!input || !input[name]) {
+        throw new Error(`@csp/code: input device '${name}' is unavailable.`);
+    }
+    return input[name];
+}
+
+export const TheEntitySystem = new Proxy({}, {
+    get(_, prop) {
+        const sys = globalThis.TheEntitySystem;
+        if (sys == null) return undefined;
+        const val = sys[prop];
+        return typeof val === 'function' ? val.bind(sys) : val;
+    },
+    set(_, prop, value) {
+        if (globalThis.TheEntitySystem == null) return false;
+        globalThis.TheEntitySystem[prop] = value;
+        return true;
+    },
+});
+
+export const keyboard = {
+    on(type, callback) {
+        return getInputDevice('keyboard').on(type, callback);
+    },
+    off(type, callback) {
+        return getInputDevice('keyboard').off(type, callback);
+    },
+    isPressed(key) {
+        return getInputDevice('keyboard').isPressed(key);
+    },
+};
+
+export const mouse = {
+    on(type, callback) {
+        return getInputDevice('mouse').on(type, callback);
+    },
+    off(type, callback) {
+        return getInputDevice('mouse').off(type, callback);
+    },
+    isPressed(button) {
+        return getInputDevice('mouse').isPressed(button);
+    },
+};
+
+export const ThePlayerController = new Proxy({}, {
+    get(_, prop) {
+        const controller = globalThis.__cspPlayerController;
+        if (controller == null) return undefined;
+        const val = controller[prop];
+        return typeof val === 'function' ? val.bind(controller) : val;
+    },
+    set(_, prop, value) {
+        if (globalThis.__cspPlayerController == null) return false;
+        globalThis.__cspPlayerController[prop] = value;
+        return true;
+    },
+});
+)INPUT";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -75,6 +137,23 @@ const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEng
         return "Online";
     case csp::common::RealtimeEngineType::Offline:
         return "Offline";
+    default:
+        return "Unknown";
+    }
+}
+
+const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
+{
+    switch (RuntimeMode)
+    {
+    case csp::systems::ESpaceRuntimeMode::Unset:
+        return "Unset";
+    case csp::systems::ESpaceRuntimeMode::Edit:
+        return "Edit";
+    case csp::systems::ESpaceRuntimeMode::Play:
+        return "Play";
+    case csp::systems::ESpaceRuntimeMode::Server:
+        return "Server";
     default:
         return "Unknown";
     }
@@ -242,8 +321,16 @@ import { signal, effect, batch } from '@preact/signals-core';
 const codeComponents = new Map();
 
 export const useEffect = (callback) => {
-    const dispose = effect(callback);
     const entityId = globalThis.__cspCurrentEntityId;
+    const dispose = effect(() => {
+        const previousEntityId = globalThis.__cspCurrentEntityId;
+        globalThis.__cspCurrentEntityId = entityId;
+        try {
+            return callback();
+        } finally {
+            globalThis.__cspCurrentEntityId = previousEntityId;
+        }
+    });
     if (entityId && codeComponents.has(entityId)) {
         codeComponents.get(entityId).effects.push(dispose);
     }
@@ -857,8 +944,14 @@ export function createScriptRegistry() {
         entry.effects = [];
     }
 
+    function removeInputListenersForEntity(entityId) {
+        if (globalThis.__cspInput && typeof globalThis.__cspInput.removeListenersForEntity === 'function') {
+            globalThis.__cspInput.removeListenersForEntity(entityId);
+        }
+    }
+
     function runScriptTeardown(entityId, entry, reason = 'unspecified') {
-        if (!entry || typeof entry.teardown !== 'function') {
+        if (!entry) {
             return;
         }
 
@@ -866,10 +959,14 @@ export function createScriptRegistry() {
         entry.teardown = null;
 
         try {
-            teardown();
+            if (typeof teardown === 'function') {
+                teardown();
+            }
         } catch (error) {
             const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
             console.error(`NgxCodeComponentRuntime: script teardown failed for entity ${entityId} (${scriptPath}) [${reason}]`, error);
+        } finally {
+            removeInputListenersForEntity(entityId);
         }
     }
 
@@ -1293,6 +1390,7 @@ void NgxCodeComponentRuntime::RegisterBuiltInModules()
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_SHUTDOWN_MODULE, CODECOMPONENT_SHUTDOWN_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_HOOKS_MODULE, CODECOMPONENT_HOOKS_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_CORE_MODULE, CODECOMPONENT_CORE_SOURCE);
+    ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_INPUT_MODULE, CODECOMPONENT_INPUT_SOURCE);
 }
 
 void NgxCodeComponentRuntime::OnTick()
@@ -1571,23 +1669,6 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
 
     default:
         return false;
-    }
-}
-
-const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
-{
-    switch (RuntimeMode)
-    {
-    case csp::systems::ESpaceRuntimeMode::Unset:
-        return "Unset";
-    case csp::systems::ESpaceRuntimeMode::Edit:
-        return "Edit";
-    case csp::systems::ESpaceRuntimeMode::Play:
-        return "Play";
-    case csp::systems::ESpaceRuntimeMode::Server:
-        return "Server";
-    default:
-        return "Unknown";
     }
 }
 

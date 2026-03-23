@@ -191,11 +191,11 @@ function __ngxFindPlayerControllerHostComponent() {
   ) ?? null;
 }
 
-if (typeof globalThis.ThePlayerController === "undefined" || globalThis.ThePlayerController === null) {
-  globalThis.ThePlayerController = {};
+if (typeof globalThis.__cspPlayerController === "undefined" || globalThis.__cspPlayerController === null) {
+  globalThis.__cspPlayerController = {};
 }
 
-globalThis.ThePlayerController.moveCharacter = (x, y, z, jump = false, isFlying = false) => {
+globalThis.__cspPlayerController.moveCharacter = (x, y, z, jump = false, isFlying = false) => {
   const component = __ngxFindPlayerControllerHostComponent();
   if (!component) {
     return false;
@@ -208,7 +208,7 @@ globalThis.ThePlayerController.moveCharacter = (x, y, z, jump = false, isFlying 
   return true;
 };
 
-globalThis.ThePlayerController.teleportCharacter = (x, y, z) => {
+globalThis.__cspPlayerController.teleportCharacter = (x, y, z) => {
   const component = __ngxFindPlayerControllerHostComponent();
   if (!component) {
     return false;
@@ -218,7 +218,7 @@ globalThis.ThePlayerController.teleportCharacter = (x, y, z) => {
   return true;
 };
 
-globalThis.ThePlayerController.setFirstPersonEnabled = (enabled) => {
+globalThis.__cspPlayerController.setFirstPersonEnabled = (enabled) => {
   const component = __ngxFindPlayerControllerHostComponent();
   if (!component) {
     return false;
@@ -227,6 +227,41 @@ globalThis.ThePlayerController.setFirstPersonEnabled = (enabled) => {
   component.invokeAction("setFirstPersonEnabled", JSON.stringify({ enabled: !!enabled }));
   return true;
 };
+
+globalThis.__cspPlayerController.getCameraPosition = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraPosition === "function")
+    ? globalThis.csp.__getLocalPlayerCameraPosition()
+    : [0, 0, 0];
+
+globalThis.__cspPlayerController.getCameraRotation = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraRotation === "function")
+    ? globalThis.csp.__getLocalPlayerCameraRotation()
+    : [0, 0, 0, 1];
+
+globalThis.__cspPlayerController.getCameraForward = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraForward === "function")
+    ? globalThis.csp.__getLocalPlayerCameraForward()
+    : [0, 0, -1];
+
+globalThis.__cspPlayerController.getCameraForwardFlat = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraForwardFlat === "function")
+    ? globalThis.csp.__getLocalPlayerCameraForwardFlat()
+    : [0, 0, -1];
+
+globalThis.__cspPlayerController.getCameraRight = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraRight === "function")
+    ? globalThis.csp.__getLocalPlayerCameraRight()
+    : [1, 0, 0];
+
+globalThis.__cspPlayerController.getCameraRightFlat = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraRightFlat === "function")
+    ? globalThis.csp.__getLocalPlayerCameraRightFlat()
+    : [1, 0, 0];
+
+globalThis.__cspPlayerController.getCameraUp = () =>
+  (globalThis.csp && typeof globalThis.csp.__getLocalPlayerCameraUp === "function")
+    ? globalThis.csp.__getLocalPlayerCameraUp()
+    : [0, 1, 0];
 
 async function __ngxWaitForMaterial(material) {
   for (;;) {

@@ -339,6 +339,18 @@ csp::common::String BuildCanonicalAssetPath(
 
 namespace csp::systems
 {
+namespace
+{
+std::vector<float> ToJSVector(const csp::common::Vector3& Value)
+{
+    return { Value.X, Value.Y, Value.Z };
+}
+
+std::vector<float> ToJSVector(const csp::common::Vector4& Value)
+{
+    return { Value.X, Value.Y, Value.Z, Value.W };
+}
+} // namespace
 
 class NgxScriptSystem::NgxScriptTickEventHandler final : public csp::events::EventListener
 {
@@ -730,6 +742,94 @@ void NgxScriptSystem::FireEntityEvent(const csp::common::String& EntityId, const
     EvaluateSnippet(Snippet.c_str(), "<fire-entity-event>");
 }
 
+bool NgxScriptSystem::FireKeyboardEvent(const csp::common::String& EventType, const csp::common::String& Key, const csp::common::String& Code,
+    bool Repeat, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey)
+{
+    if (EventType.IsEmpty())
+    {
+        return false;
+    }
+
+    const std::string Snippet = fmt::format(
+        "if (typeof globalThis.__cspDispatchKeyboardEvent === 'function') {{ globalThis.__cspDispatchKeyboardEvent({{ type: '{}', key: '{}', code: "
+        "'{}', repeat: {}, altKey: {}, ctrlKey: {}, shiftKey: {}, metaKey: {} }}); }}",
+        EscapeJSStringLiteral(EventType.c_str()), EscapeJSStringLiteral(Key.c_str()), EscapeJSStringLiteral(Code.c_str()), Repeat ? "true" : "false",
+        AltKey ? "true" : "false", CtrlKey ? "true" : "false", ShiftKey ? "true" : "false", MetaKey ? "true" : "false");
+    return EvaluateSnippet(Snippet.c_str(), "<fire-keyboard-event>");
+}
+
+bool NgxScriptSystem::FireMouseEvent(const csp::common::String& EventType, int32_t Button, int32_t Buttons, int32_t PointerId,
+    const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey)
+{
+    if (EventType.IsEmpty())
+    {
+        return false;
+    }
+
+    const std::string Snippet = fmt::format(
+        "if (typeof globalThis.__cspDispatchMouseEvent === 'function') {{ globalThis.__cspDispatchMouseEvent({{ type: '{}', button: {}, buttons: {}, "
+        "pointerId: {}, pointerType: '{}', altKey: {}, ctrlKey: {}, shiftKey: {}, metaKey: {} }}); }}",
+        EscapeJSStringLiteral(EventType.c_str()), Button, Buttons, PointerId, EscapeJSStringLiteral(PointerType.c_str()),
+        AltKey ? "true" : "false", CtrlKey ? "true" : "false", ShiftKey ? "true" : "false", MetaKey ? "true" : "false");
+    return EvaluateSnippet(Snippet.c_str(), "<fire-mouse-event>");
+}
+
+void NgxScriptSystem::SetLocalPlayerCameraState(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation,
+    const csp::common::Vector3& Forward, const csp::common::Vector3& ForwardFlat, const csp::common::Vector3& Right,
+    const csp::common::Vector3& RightFlat, const csp::common::Vector3& Up)
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    LocalPlayerCameraPosition = Position;
+    LocalPlayerCameraRotation = Rotation;
+    LocalPlayerCameraForward = Forward;
+    LocalPlayerCameraForwardFlat = ForwardFlat;
+    LocalPlayerCameraRight = Right;
+    LocalPlayerCameraRightFlat = RightFlat;
+    LocalPlayerCameraUp = Up;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraPosition() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraPosition;
+}
+
+csp::common::Vector4 NgxScriptSystem::GetLocalPlayerCameraRotation() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraRotation;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraForward() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraForward;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraForwardFlat() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraForwardFlat;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraRight() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraRight;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraRightFlat() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraRightFlat;
+}
+
+csp::common::Vector3 NgxScriptSystem::GetLocalPlayerCameraUp() const
+{
+    std::scoped_lock CameraLock(CameraStateMutex);
+    return LocalPlayerCameraUp;
+}
+
 void NgxScriptSystem::RebuildContext()
 {
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: RebuildContext begin.");
@@ -830,6 +930,13 @@ void NgxScriptSystem::InstallHostBindings()
     CSPModule.function("__log", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Log, JoinArgs(Args).c_str()); });
     CSPModule.function("__warn", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Warning, JoinArgs(Args).c_str()); });
     CSPModule.function("__error", [this](qjs::rest<std::string> Args) { LogSystem.LogMsg(csp::common::LogLevel::Error, JoinArgs(Args).c_str()); });
+    CSPModule.function("__getLocalPlayerCameraPosition", [this]() { return ToJSVector(GetLocalPlayerCameraPosition()); });
+    CSPModule.function("__getLocalPlayerCameraRotation", [this]() { return ToJSVector(GetLocalPlayerCameraRotation()); });
+    CSPModule.function("__getLocalPlayerCameraForward", [this]() { return ToJSVector(GetLocalPlayerCameraForward()); });
+    CSPModule.function("__getLocalPlayerCameraForwardFlat", [this]() { return ToJSVector(GetLocalPlayerCameraForwardFlat()); });
+    CSPModule.function("__getLocalPlayerCameraRight", [this]() { return ToJSVector(GetLocalPlayerCameraRight()); });
+    CSPModule.function("__getLocalPlayerCameraRightFlat", [this]() { return ToJSVector(GetLocalPlayerCameraRightFlat()); });
+    CSPModule.function("__getLocalPlayerCameraUp", [this]() { return ToJSVector(GetLocalPlayerCameraUp()); });
     CSPModule.function("__resolveEntityQuery",
         [this](const std::string& QueryJson) -> std::string
         {
@@ -1092,6 +1199,148 @@ globalThis.__cspDispatchAnimationFrames = (timestampMs) => {
             csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
         }
     }
+};
+
+const __cspCreateInputDevice = (pressedStore, valueNormalizer) => {
+    const listeners = new Map();
+
+    const getTypeListeners = (type, createIfMissing = false) => {
+        if (!listeners.has(type) && createIfMissing) {
+            listeners.set(type, new Map());
+        }
+        return listeners.get(type) ?? null;
+    };
+
+    return {
+        on(type, callback) {
+            if (typeof type !== 'string' || typeof callback !== 'function') {
+                throw new TypeError('input.on(type, callback) expects a string event type and function callback');
+            }
+
+            const entityId = globalThis.__cspCurrentEntityId;
+            if (!entityId) {
+                throw new Error('input listeners must be registered while a code component is initializing');
+            }
+
+            const listenersByEntity = getTypeListeners(type, true);
+            if (!listenersByEntity.has(entityId)) {
+                listenersByEntity.set(entityId, new Set());
+            }
+            listenersByEntity.get(entityId).add(callback);
+            return true;
+        },
+
+        off(type, callback) {
+            const listenersByEntity = getTypeListeners(type, false);
+            if (!listenersByEntity || typeof callback !== 'function') {
+                return false;
+            }
+
+            let removed = false;
+            for (const callbacks of listenersByEntity.values()) {
+                if (callbacks.delete(callback)) {
+                    removed = true;
+                }
+            }
+            return removed;
+        },
+
+        isPressed(value) {
+            return pressedStore.has(valueNormalizer(value));
+        },
+
+        dispatch(type, event) {
+            const listenersByEntity = getTypeListeners(type, false);
+            if (!listenersByEntity) {
+                return;
+            }
+
+            const callbacks = [];
+            for (const entityCallbacks of listenersByEntity.values()) {
+                callbacks.push(...entityCallbacks);
+            }
+
+            for (const callback of callbacks) {
+                try {
+                    callback(event);
+                } catch (error) {
+                    csp.__error(error instanceof Error && error.stack ? error.stack : String(error));
+                }
+            }
+        },
+
+        removeListenersForEntity(entityId) {
+            for (const listenersByEntity of listeners.values()) {
+                listenersByEntity.delete(entityId);
+            }
+        }
+    };
+};
+
+const __cspKeyboardPressed = new Set();
+const __cspMousePressed = new Set();
+
+const __cspKeyboard = __cspCreateInputDevice(__cspKeyboardPressed, (value) => String(value ?? ''));
+const __cspMouse = __cspCreateInputDevice(__cspMousePressed, (value) => Number(value ?? -1));
+
+globalThis.__cspInput = {
+    keyboard: __cspKeyboard,
+    mouse: __cspMouse,
+    removeListenersForEntity(entityId) {
+        __cspKeyboard.removeListenersForEntity(entityId);
+        __cspMouse.removeListenersForEntity(entityId);
+    }
+};
+
+globalThis.__cspDispatchKeyboardEvent = (event) => {
+    if (!event || typeof event.type !== 'string') {
+        return false;
+    }
+
+    const normalizedKey = String(event.key ?? '');
+    if (event.type === 'keydown') {
+        __cspKeyboardPressed.add(normalizedKey);
+    } else if (event.type === 'keyup') {
+        __cspKeyboardPressed.delete(normalizedKey);
+    }
+
+    __cspKeyboard.dispatch(event.type, Object.freeze({
+        type: event.type,
+        key: normalizedKey,
+        code: String(event.code ?? ''),
+        repeat: !!event.repeat,
+        altKey: !!event.altKey,
+        ctrlKey: !!event.ctrlKey,
+        shiftKey: !!event.shiftKey,
+        metaKey: !!event.metaKey,
+    }));
+    return true;
+};
+
+globalThis.__cspDispatchMouseEvent = (event) => {
+    if (!event || typeof event.type !== 'string') {
+        return false;
+    }
+
+    const normalizedButton = Number(event.button ?? 0);
+    if (event.type === 'mousedown') {
+        __cspMousePressed.add(normalizedButton);
+    } else if (event.type === 'mouseup') {
+        __cspMousePressed.delete(normalizedButton);
+    }
+
+    __cspMouse.dispatch(event.type, Object.freeze({
+        type: event.type,
+        button: normalizedButton,
+        buttons: Number(event.buttons ?? 0),
+        pointerId: Number(event.pointerId ?? 0),
+        pointerType: String(event.pointerType ?? 'mouse'),
+        altKey: !!event.altKey,
+        ctrlKey: !!event.ctrlKey,
+        shiftKey: !!event.shiftKey,
+        metaKey: !!event.metaKey,
+    }));
+    return true;
 };
 )";
 

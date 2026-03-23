@@ -19,6 +19,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Common/Vector.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 
@@ -29,6 +30,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 namespace qjs
 {
@@ -86,6 +88,19 @@ public:
     // PayloadJson should be a JSON object string e.g. "{}" or "{\"isLocalPlayer\":true}".
     void FireEntityEvent(const csp::common::String& EntityId, const csp::common::String& EventName, const csp::common::String& PayloadJson);
 
+    // Dispatch a normalized keyboard event to active Local/Editor scripts.
+    bool FireKeyboardEvent(const csp::common::String& EventType, const csp::common::String& Key, const csp::common::String& Code,
+        bool Repeat, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey);
+
+    // Dispatch a normalized mouse event to active Local/Editor scripts.
+    bool FireMouseEvent(const csp::common::String& EventType, int32_t Button, int32_t Buttons, int32_t PointerId,
+        const csp::common::String& PointerType, bool AltKey, bool CtrlKey, bool ShiftKey, bool MetaKey);
+
+    // Cache the local player's active camera transform/orientation vectors for script queries.
+    void SetLocalPlayerCameraState(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation,
+        const csp::common::Vector3& Forward, const csp::common::Vector3& ForwardFlat, const csp::common::Vector3& Right,
+        const csp::common::Vector3& RightFlat, const csp::common::Vector3& Up);
+
     CSP_START_IGNORE
     // Internal runtime hooks (not exposed through wrappers).
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
@@ -140,6 +155,14 @@ private:
     bool EvaluateGlobalScript(const std::string& ScriptText, const char* DebugName);
     bool EvaluateModuleScript(const std::string& ScriptText, const char* DebugName);
 
+    csp::common::Vector3 GetLocalPlayerCameraPosition() const;
+    csp::common::Vector4 GetLocalPlayerCameraRotation() const;
+    csp::common::Vector3 GetLocalPlayerCameraForward() const;
+    csp::common::Vector3 GetLocalPlayerCameraForwardFlat() const;
+    csp::common::Vector3 GetLocalPlayerCameraRight() const;
+    csp::common::Vector3 GetLocalPlayerCameraRightFlat() const;
+    csp::common::Vector3 GetLocalPlayerCameraUp() const;
+
     csp::common::LogSystem& LogSystem;
     csp::common::IRealtimeEngine* ActiveRealtimeEngine;
     csp::common::String ActiveSpaceId;
@@ -149,6 +172,7 @@ private:
 
     mutable std::mutex ContextMutex;
     mutable std::mutex ModuleSourcesMutex;
+    mutable std::mutex CameraStateMutex;
     ModuleSourceMap LoadedModuleSources;
     ModuleSourceMap StaticModuleSources;
     std::unordered_set<std::string> TrackedScriptAssetCollectionIds;
@@ -156,6 +180,13 @@ private:
     std::atomic<uint64_t> SessionGeneration;
     std::atomic<uint64_t> ContextGeneration;
     std::atomic<bool> ScriptModulesLoaded;
+    csp::common::Vector3 LocalPlayerCameraPosition;
+    csp::common::Vector4 LocalPlayerCameraRotation;
+    csp::common::Vector3 LocalPlayerCameraForward;
+    csp::common::Vector3 LocalPlayerCameraForwardFlat;
+    csp::common::Vector3 LocalPlayerCameraRight;
+    csp::common::Vector3 LocalPlayerCameraRightFlat;
+    csp::common::Vector3 LocalPlayerCameraUp;
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;
