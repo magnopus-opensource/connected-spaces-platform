@@ -67,16 +67,3 @@ set(CSP_MISC_PRIVATE_INCLUDES
 
     ${CSP_MISC_SOURCE_DIR}/Web/MaintenanceApi/MaintenanceApi.h
 )
-
-# Public
-target_sources(csp-lib PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES ${CSP_MISC_PUBLIC_INCLUDES}
-)
-
-# Private
-target_sources(csp-lib PRIVATE
-    ${CSP_MISC_SOURCES}
-    ${CSP_MISC_PRIVATE_INCLUDES}
-)
