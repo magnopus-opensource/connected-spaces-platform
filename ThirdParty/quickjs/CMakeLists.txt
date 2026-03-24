@@ -23,7 +23,7 @@ target_sources(csp-quickjs PRIVATE
 )
 
 target_include_directories(csp-quickjs
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_compile_definitions(csp-quickjs
