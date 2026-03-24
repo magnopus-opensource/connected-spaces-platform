@@ -139,6 +139,28 @@ target_link_libraries(csp-lib
 # Project uses C++17
 target_compile_features(csp-lib PUBLIC cxx_std_17)
 
+target_compile_definitions(csp-lib
+  PRIVATE
+    # We consume libasync statically
+    LIBASYNC_STATIC
+    # We have our own default scheduler to remove the need to additional params
+    LIBASYNC_CUSTOM_DEFAULT_SCHEDULER
+    # Remove codecvt deprecation warnings for msvc
+    <$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING>
+    # Disable min/max macros on Windows
+    $<$<PLATFORM_ID:Windows>:NOMINMAX>
+    # Disable unused POCO features
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:
+      POCO_NO_INOTIFY
+      POCO_NO_FILECHANNEL
+      POCO_NO_SPLITTERCHANNEL
+      POCO_NO_SYSLOGCHANNEL
+      POCO_UTIL_NO_INIFILECONFIGURATION
+      POCO_UTIL_NO_JSONCONFIGURATION
+      POCO_UTIL_NO_XMLCONFIGURATION
+    >
+  )
+
 # Warnings as errors flag
 # Sets WX/Werror
 set_target_properties(csp-lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
