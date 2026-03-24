@@ -1427,10 +1427,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    constexpr char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    constexpr char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    constexpr char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    constexpr char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
+    constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    constexpr const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    constexpr const char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1468,7 +1468,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
 
     // Get uploaded asset
     auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
-    std::string UriStr = AssetResult.GetAsset().Uri;
+    std::string UriStr = std::string { AssetResult.GetAsset().Uri.c_str() };
 
     // Check uri is encoded as expected
     EXPECT_TRUE(UriStr.find("TestWith%20Space") != std::string::npos);
@@ -1495,10 +1495,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    constexpr char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
-    constexpr char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-    constexpr char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
-    constexpr char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
+    constexpr const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    constexpr const char* TestAssetCollectionName = "CSP-UNITTEST-ASSETCOLLECTION-MAG";
+    constexpr const char* TestAssetName = "CSP-UNITTEST-ASSET-MAG";
 
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -1536,7 +1536,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
 
     // Get uploaded asset
     auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
-    std::string UriStr = AssetResult.GetAsset().Uri;
+    std::string UriStr = std::string { AssetResult.GetAsset().Uri.c_str() };
 
     // Check uri is encoded as expected
     EXPECT_TRUE(UriStr.find("TestWithEncoded%20Space") != std::string::npos);

@@ -26,9 +26,9 @@
 
 namespace
 {
-constexpr char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
-constexpr char* AdminAccountEmailName = "MAGNOPUS_SERVICES_ADMIN_EMAIL";
-constexpr char* AdminAccountPasswordName = "MAGNOPUS_SERVICES_ADMIN_PASSWORD";
+constexpr const char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
+constexpr const char* AdminAccountEmailName = "MAGNOPUS_SERVICES_ADMIN_EMAIL";
+constexpr const char* AdminAccountPasswordName = "MAGNOPUS_SERVICES_ADMIN_PASSWORD";
 
 // If you're trying to run with localMCS, set `MAGNOPUS_SERVICES_ENDPOINT=http://localhost:8081` after having launched the maglocal docker instance.
 const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)

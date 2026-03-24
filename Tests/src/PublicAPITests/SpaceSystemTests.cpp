@@ -3856,7 +3856,7 @@ TEST_P(EnterSpaceOnlineOffline, EnterSpaceOnlineOfflineTest)
     // Attempt to enter the space and check the expected result
     testing::internal::CaptureStderr();
 
-    const auto CreatedSpaceId = IsOnline ? CreatedSpace.Id : "Offline Space";
+    const auto CreatedSpaceId = IsOnline ? CreatedSpace.Id : csp::common::String { "Offline Space" };
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, CreatedSpace.Id, RealtimeEngine.get());
     ASSERT_EQ(EnterResult.GetResultCode(), JoinSpaceResultExpected);
