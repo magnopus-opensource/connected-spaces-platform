@@ -49,7 +49,7 @@ public:
      * Build a default space with a random name.
      * Static method for test convenience.
      */
-    static csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem& SpaceSystem);
+    static csp::systems::Space CreateDefaultTestSpace(csp::systems::SpaceSystem& SpaceSystem);
 
     /*
      * Get the RealtimeEngine that is instantiated for the lifetime that we are in the space for.

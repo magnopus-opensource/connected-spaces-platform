@@ -73,7 +73,7 @@ csp::systems::Profile Utils::CreateTestUser(bool AgeVerified /* = true */, csp::
 
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
-    constexpr char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
+    constexpr const char* TESTS_CLIENT_SKU = "MultiplayerTestRunner";
 
     csp::ClientUserAgent ClientHeaderInfo;
     ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetVersion();

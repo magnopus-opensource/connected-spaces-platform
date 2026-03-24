@@ -71,7 +71,7 @@ struct ExceptionWithCode : public std::runtime_error
  */
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI);
 
-constexpr char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
+constexpr const char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
 constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 constexpr bool DEFAULT_EMIT_PROCESS_DESCRIPTORS = true;
 
