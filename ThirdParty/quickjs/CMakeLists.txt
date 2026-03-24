@@ -27,6 +27,10 @@ target_include_directories(csp-quickjs
 )
 
 target_compile_definitions(csp-quickjs
-    # Allows us to compile on MSVC x64
-    PUBLIC JS_STRICT_NAN_BOXING
+    PRIVATE
+        # Disable exceptions
+        _HAS_EXCEPTIONS=0
+    PUBLIC
+         # Allows us to compile on MSVC x64
+        JS_STRICT_NAN_BOXING
 )
