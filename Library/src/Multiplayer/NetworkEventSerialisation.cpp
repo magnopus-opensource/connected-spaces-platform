@@ -100,11 +100,7 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
     }
     else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_BOOL))
     {
-        if (Component.is_null())
-        {
-            LogSystem.LogMsg(csp::common::LogLevel::Error, "Nullable Bool had a null value.");
-        }
-        else
+        if (!Component.is_null())
         {
             ReplicatedValue = Component.as_bool();
         }
