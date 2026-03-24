@@ -15,6 +15,12 @@
  */
 #pragma once
 
+#ifdef _WIN32
+#ifdef GetObject
+#undef GetObject
+#endif
+#endif
+
 #include "CSP/Common/String.h"
 
 #include <map>
@@ -306,7 +312,7 @@ template <typename U, typename V> inline void JsonValueToType(const rapidjson::V
 {
     assert(Value.IsObject());
 
-    for (auto& Member : Value.GetObject())
+    for (auto& Member : (Value.GetObject)())
     {
         U ElementKey;
         V ElementValue;

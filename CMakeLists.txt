@@ -137,6 +137,7 @@ target_compile_features(csp-lib PUBLIC cxx_std_17)
 target_compile_options(csp-lib PRIVATE
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+    $<$<CXX_COMPILER_ID:MSVC>:/permissive->
 )
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -202,6 +203,7 @@ if(BUILD_TESTING)
   target_compile_options(csp-tests PRIVATE
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
-)
+    $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+  )  
 
 endif()

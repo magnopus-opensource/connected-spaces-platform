@@ -138,8 +138,8 @@ std::string SpaceRAII::GetSpaceId() { return SpaceId; }
 csp::systems::Space SpaceRAII::CreateDefaultTestSpace(csp::systems::SpaceSystem& SpaceSystem)
 {
     // Create space
-    constexpr char* TestSpaceName = "CSP-MULTIPLAYERTEST-SPACE-MAG";
-    constexpr char* TestSpaceDescription = "CSP-MULTIPLAYERTEST--SPACEDESC-MAG";
+    constexpr const char* TestSpaceName = "CSP-MULTIPLAYERTEST-SPACE-MAG";
+    constexpr const char* TestSpaceDescription = "CSP-MULTIPLAYERTEST--SPACEDESC-MAG";
 
     const auto uuid = sole::uuid4();
     std::string UniqueSpaceName = TestSpaceName + std::string("-") + uuid.str();
