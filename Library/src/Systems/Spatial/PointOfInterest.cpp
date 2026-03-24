@@ -26,25 +26,45 @@ namespace
 
 void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp::systems::PointOfInterest& POI)
 {
-    POI.Id = Dto.GetId();
-    POI.CreatedBy = Dto.GetCreatedBy();
-    POI.CreatedAt = Dto.GetCreatedAt();
-
-    const auto& LocalisedTitle = Dto.GetTitle();
-
-    for (auto& CurrentTitle : LocalisedTitle)
+    if (Dto.HasId())
     {
-        POI.Title[CurrentTitle->GetLanguageCode()] = CurrentTitle->GetValue();
+        POI.Id = Dto.GetId();
     }
 
-    const auto& LocalisedDescription = Dto.GetDescription();
-
-    for (auto& CurrentDescription : LocalisedDescription)
+    if (Dto.HasCreatedBy())
     {
-        POI.Description[CurrentDescription->GetLanguageCode()] = CurrentDescription->GetValue();
+        POI.CreatedBy = Dto.GetCreatedBy();
     }
 
-    POI.Name = Dto.GetName();
+    if (Dto.HasCreatedAt())
+    {
+        POI.CreatedAt = Dto.GetCreatedAt();
+    }
+
+    if (Dto.HasTitle())
+    {
+        const auto& LocalisedTitle = Dto.GetTitle();
+
+        for (auto& CurrentTitle : LocalisedTitle)
+        {
+            POI.Title[CurrentTitle->GetLanguageCode()] = CurrentTitle->GetValue();
+        }
+    }
+
+    if (Dto.HasDescription())
+    {
+        const auto& LocalisedDescription = Dto.GetDescription();
+
+        for (auto& CurrentDescription : LocalisedDescription)
+        {
+            POI.Description[CurrentDescription->GetLanguageCode()] = CurrentDescription->GetValue();
+        }
+    }
+
+    if (Dto.HasName())
+    {
+        POI.Name = Dto.GetName();
+    }
 
     if (Dto.HasType())
     {

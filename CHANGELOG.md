@@ -16,6 +16,14 @@ All notable changes to this project will be documented in this file. For compile
     - UserSystem::CreateUser
     - UserSystem::UpgradeGuestAccount
 
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Add validation for optional fields in PointOfInterest DTO. by mag-lt
+  Recent changes to MCS, which resulted in only sending fields that are populated
+  (instead of default initialised values), exposed that CSP was naively assuming
+  that various optional fields are always set, resulting in `bad_optional_access`
+  exceptions being thrown.
+
 ## [6.30.0]
 
 ###🔥 ❗Breaking Changes
