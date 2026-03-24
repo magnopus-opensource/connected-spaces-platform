@@ -122,7 +122,12 @@ target_include_directories(csp-lib
     $<INSTALL_INTERFACE:include>
   PRIVATE
     ${CSP_SOURCE_DIR}
-    ${CSP_SERVICES_DIR}
+)
+
+# The generated services should be included as a system header for now,
+# as these create warnings which manifest as errors due to /wd4100.
+target_include_directories(csp-lib SYSTEM PRIVATE
+  ${CSP_SERVICES_DIR}
 )
 
 # Link dependencies
@@ -134,10 +139,26 @@ target_link_libraries(csp-lib
 # Project uses C++17
 target_compile_features(csp-lib PUBLIC cxx_std_17)
 
-target_compile_options(csp-lib PRIVATE
+# Warnings as errors flag
+# Sets WX/Werror
+set_target_properties(csp-lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
+target_compile_options(csp-lib
+  PRIVATE
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+    # strict standard compliance
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+
+    # Set warning level and exceptions for msvc
+    $<$<CXX_COMPILER_ID:MSVC>:
+      /W4       # Sets warning level 4 (high)
+      /utf-8    # fmt asked us for this, seems like we need to explicitly opt into unicode on windows
+      /wd4251   # Allow stl members to be exported
+      /wd4996   # Function maybe unsafe warnings
+      /wd4200   # nonstandard extension: zero-sized array
+    >
+
 )
 
 # ------------------------------------------------------------------------------------------------------------------
