@@ -141,6 +141,12 @@ target_compile_features(csp-lib PUBLIC cxx_std_17)
 
 target_compile_definitions(csp-lib
   PRIVATE
+    # Setup dll export macros if we're building as shared
+    $<$<BOOL:${BUILD_SHARED_LIBS}>:BUILD_CSP_DLL>
+    # Platform macros
+    $<$<PLATFORM_ID:Windows>:CSP_WINDOWS>
+    $<$<PLATFORM_ID:Darwin>:CSP_MACOSX>
+
     # We consume libasync statically
     LIBASYNC_STATIC
     # We have our own default scheduler to remove the need to additional params
