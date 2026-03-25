@@ -99,7 +99,9 @@
 {{# is_task }}
         static extern {{# return_type}}{{# is_pointer_or_reference }}IntPtr{{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{ name }}{{/ is_pointer_or_reference }}{{/ return_type }}{{^ return_type }}void{{/ return_type }}
         {{ unique_name }}(
+{{^ is_static }}
             IntPtr @class,
+{{/ is_static }}
 {{# parameters }}
 {{# type }}
 {{# is_pointer_or_reference }}

@@ -643,7 +643,7 @@ class Parser:
         is_destructor = False
         is_virtual = False
         is_override = False
-
+        is_static = False
         start_line = reader.current_line
 
         if word == config['async_result_macro']:
@@ -654,6 +654,10 @@ class Parser:
             word = reader.next_word()
         elif word == config['event_macro']:
             is_event = True
+            word = reader.next_word()
+        
+        if word == 'static':
+            is_static = True
             word = reader.next_word()
         
         if word == 'virtual':
@@ -696,7 +700,8 @@ class Parser:
             is_const=is_const,
             is_async_result=is_async_result,
             is_async_result_with_progress=is_async_result_with_progress,
-            is_event=is_event
+            is_event=is_event,
+            is_static=is_static
         )
 
         if name.startswith('operator'):
@@ -1082,8 +1087,6 @@ class Parser:
                     is_static = True
                     word = reader.next_word()
                 
-                class_is_static = class_is_static and is_static
-                
                 if word == 'explicit':
                     is_explicit = True
                     word = reader.next_word()
@@ -1109,7 +1112,7 @@ class Parser:
 
                     if not no_export and not any(m.name == res.name and m.parameters == res.parameters for m in methods):
                         res.class_name = name
-                        res.is_static = is_static
+                        res.is_static = is_static or res.is_static
                         res.is_explicit_converter = is_explicit
                         res.parent_class = _class
                         res.unique_name = self.__create_unique_function_name(res)
@@ -1117,9 +1120,13 @@ class Parser:
 
                         if modifier == AccessModifier.PUBLIC or (res.is_constructor or res.is_destructor):
                             methods.append(res)
+                        
+                        class_is_static = class_is_static and (is_static or res.is_static)
                 elif hint == '{':
                     is_deprecated = False
                     deprecation_message = None
+
+                    class_is_static = class_is_static and is_static
 
                     # This must be a nested type
                     has_nested_types = True
@@ -1163,6 +1170,8 @@ class Parser:
                 else:   # ';'
                     is_deprecated = False
                     deprecation_message = None
+
+                    class_is_static = class_is_static and is_static
 
                     # Field!
                     res = self.__parse_field(filename, reader, word, _class)
