@@ -151,6 +151,20 @@ enum class LocomotionModel
     Num
 };
 
+/// @brief Enumerates the supported camera policies available for the avatar.
+enum class CameraType
+{
+    /// The avatar supports both first-person and third-person camera modes.
+    FirstAndThirdPerson = 0,
+    /// The avatar only supports first-person camera mode.
+    FirstPerson,
+    /// The avatar only supports third-person camera mode.
+    ThirdPerson,
+    /// Camera behaviour is fully controlled by scripts.
+    Scripted,
+    Num
+};
+
 /// @brief Enum used to indicate the failure state of a multiplayer request.
 enum class ErrorCode
 {

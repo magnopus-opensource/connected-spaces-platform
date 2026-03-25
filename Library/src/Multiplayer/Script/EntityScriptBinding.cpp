@@ -482,7 +482,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(AvatarSpaceComponent, LocomotionModel, "locomotionModel")
         .PROPERTY_GET_SET(AvatarSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(AvatarSpaceComponent, IsARVisible, "isARVisible")
-        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVirtualVisible, "isVirtualVisible");
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsVirtualVisible, "isVirtualVisible")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, IsAvatarEnabled, "isAvatarEnabled")
+        .PROPERTY_GET_SET(AvatarSpaceComponent, CameraType, "cameraType");
 
     Module->class_<ExternalLinkSpaceComponentScriptInterface>("ExternalLinkSpaceComponent")
         .constructor<>()

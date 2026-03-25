@@ -41,6 +41,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, float, float, WalkRunBlendPerc
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, float, float, TorsoTwistAlpha);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::AvatarPlayMode, int32_t, AvatarPlayMode);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::LocomotionModel, int32_t, LocomotionModel);
+DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsAvatarEnabled);
+DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, csp::multiplayer::CameraType, int32_t, CameraType);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsARVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(AvatarSpaceComponent, bool, bool, IsVirtualVisible);

@@ -50,6 +50,8 @@ enum class AvatarComponentPropertyKeys
     IsARVisible,
     IsVirtualVisible,
     AvatarUrl,
+    IsAvatarEnabled,
+    CameraType,
     Num
 };
 
@@ -219,6 +221,22 @@ public:
     /// @brief Sets which locomotion model this avatar component is using.
     /// @param Value The locomotion model used by this avatar component.
     void SetLocomotionModel(LocomotionModel Value);
+
+    /// @brief Specifies whether the engine-managed avatar should remain enabled.
+    /// @return True when the engine-managed avatar is enabled.
+    bool GetIsAvatarEnabled() const;
+
+    /// @brief Sets whether the engine-managed avatar should remain enabled.
+    /// @param Value True when the engine-managed avatar is enabled.
+    void SetIsAvatarEnabled(bool Value);
+
+    /// @brief Specifies which camera policy this avatar component is using.
+    /// @return The camera policy used by this avatar component.
+    CameraType GetCameraType() const;
+
+    /// @brief Sets which camera policy this avatar component is using.
+    /// @param Value The camera policy used by this avatar component.
+    void SetCameraType(CameraType Value);
 
     /// \addtogroup IVisibleComponent
     /// @{

@@ -42,6 +42,8 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsARVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVirtualVisible)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl)] = "";
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsAvatarEnabled)] = true;
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CameraType)] = static_cast<int64_t>(CameraType::FirstAndThirdPerson);
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
@@ -171,6 +173,26 @@ LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
 void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)
 {
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(Value));
+}
+
+bool AvatarSpaceComponent::GetIsAvatarEnabled() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsAvatarEnabled));
+}
+
+void AvatarSpaceComponent::SetIsAvatarEnabled(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsAvatarEnabled), Value);
+}
+
+CameraType AvatarSpaceComponent::GetCameraType() const
+{
+    return static_cast<CameraType>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CameraType)));
+}
+
+void AvatarSpaceComponent::SetCameraType(CameraType Value)
+{
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CameraType), static_cast<int64_t>(Value));
 }
 
 bool AvatarSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsVisible)); }
