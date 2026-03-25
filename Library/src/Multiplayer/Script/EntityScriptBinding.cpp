@@ -28,6 +28,7 @@
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
@@ -535,6 +536,17 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsEnabled, "isEnabled")
         .PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
 
+    Module->class_<CollisionSpaceComponentScriptInterface>("CollisionSpaceComponent")
+        .constructor<>()
+        .base<ComponentScriptInterface>()
+        .PROPERTY_GET_SET(CollisionSpaceComponent, Position, "position")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, Scale, "scale")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, Rotation, "rotation")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionShape, "collisionShape")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionMode, "collisionMode")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, CollisionAssetId, "collisionAssetId")
+        .PROPERTY_GET_SET(CollisionSpaceComponent, AssetCollectionId, "assetCollectionId");
+
     Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
         .constructor<>()
         .base<ComponentScriptInterface>()
@@ -768,7 +780,23 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::SetTags>("setTags")
         .fun<&EntityScriptInterface::HasTag>("hasTag")
         .fun<&EntityScriptInterface::AddTag>("addTag")
-        .fun<&EntityScriptInterface::RemoveTag>("removeTag");
+        .fun<&EntityScriptInterface::RemoveTag>("removeTag")
+        .fun<&EntityScriptInterface::AddStaticModelComponent>("addStaticModelComponent")
+        .fun<&EntityScriptInterface::AddAnimatedModelComponent>("addAnimatedModelComponent")
+        .fun<&EntityScriptInterface::AddAudioComponent>("addAudioComponent")
+        .fun<&EntityScriptInterface::AddButtonComponent>("addButtonComponent")
+        .fun<&EntityScriptInterface::AddCinematicCameraComponent>("addCinematicCameraComponent")
+        .fun<&EntityScriptInterface::AddCollisionComponent>("addCollisionComponent")
+        .fun<&EntityScriptInterface::AddExternalLinkComponent>("addExternalLinkComponent")
+        .fun<&EntityScriptInterface::AddFogComponent>("addFogComponent")
+        .fun<&EntityScriptInterface::AddGaussianSplatComponent>("addGaussianSplatComponent")
+        .fun<&EntityScriptInterface::AddImageComponent>("addImageComponent")
+        .fun<&EntityScriptInterface::AddLightComponent>("addLightComponent")
+        .fun<&EntityScriptInterface::AddPortalComponent>("addPortalComponent")
+        .fun<&EntityScriptInterface::AddReflectionComponent>("addReflectionComponent")
+        .fun<&EntityScriptInterface::AddSplineComponent>("addSplineComponent")
+        .fun<&EntityScriptInterface::AddTextComponent>("addTextComponent")
+        .fun<&EntityScriptInterface::AddVideoComponent>("addVideoComponent");
 
     Module->class_<ComponentScriptInterface>("Component")
         .constructor<>()

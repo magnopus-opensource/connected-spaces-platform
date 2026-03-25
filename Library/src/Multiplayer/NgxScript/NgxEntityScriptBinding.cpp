@@ -135,7 +135,18 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
         OnlineEngine->CreateLocalEntity(
             Name.c_str(), DefaultTransform, csp::common::Optional<uint64_t> {}, [&CreatedEntity](SpaceEntity* Entity) { CreatedEntity = Entity; });
 
-        return CreatedEntity != nullptr ? CreatedEntity->GetScriptInterface() : nullptr;
+        if (CreatedEntity == nullptr)
+        {
+            return nullptr;
+        }
+
+        auto* ScriptInterface = CreatedEntity->GetScriptInterface();
+        if (ScriptInterface != nullptr)
+        {
+            ScriptInterface->SetLocalScope(true);
+        }
+
+        return ScriptInterface;
     };
 
     constexpr const char* NgxCompatibilityPatch = R"JS(
@@ -353,6 +364,72 @@ function __ngxPatchEntity(entity) {
       return __ngxPatchComponentArray(original.apply(this, args));
     };
     entityProto[`__ngxWrapped_${name}`] = true;
+  }
+
+  if (typeof entityProto.addComponent !== "function") {
+    entityProto.addComponent = function(type) {
+      const normalizedType = String(type ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+      switch (normalizedType) {
+        case "staticmodel":
+        case "staticmodelspacecomponent":
+          return typeof this.addStaticModelComponent === "function" ? this.addStaticModelComponent() : null;
+        case "animatedmodel":
+        case "animatedmodelspacecomponent":
+          return typeof this.addAnimatedModelComponent === "function" ? this.addAnimatedModelComponent() : null;
+        case "audio":
+        case "audiospacecomponent":
+          return typeof this.addAudioComponent === "function" ? this.addAudioComponent() : null;
+        case "button":
+        case "buttonspacecomponent":
+          return typeof this.addButtonComponent === "function" ? this.addButtonComponent() : null;
+        case "cinematiccamera":
+        case "cinematiccameraspacecomponent":
+          return typeof this.addCinematicCameraComponent === "function" ? this.addCinematicCameraComponent() : null;
+        case "collision":
+        case "collisionspacecomponent":
+          return typeof this.addCollisionComponent === "function" ? this.addCollisionComponent() : null;
+        case "externallink":
+        case "externallinkspacecomponent":
+          return typeof this.addExternalLinkComponent === "function" ? this.addExternalLinkComponent() : null;
+        case "fog":
+        case "fogspacecomponent":
+          return typeof this.addFogComponent === "function" ? this.addFogComponent() : null;
+        case "gaussiansplat":
+        case "gaussiansplatspacecomponent":
+          return typeof this.addGaussianSplatComponent === "function" ? this.addGaussianSplatComponent() : null;
+        case "image":
+        case "imagespacecomponent":
+          return typeof this.addImageComponent === "function" ? this.addImageComponent() : null;
+        case "light":
+        case "lightspacecomponent":
+          return typeof this.addLightComponent === "function" ? this.addLightComponent() : null;
+        case "portal":
+        case "portalspacecomponent":
+          return typeof this.addPortalComponent === "function" ? this.addPortalComponent() : null;
+        case "reflection":
+        case "reflectionspacecomponent":
+          return typeof this.addReflectionComponent === "function" ? this.addReflectionComponent() : null;
+        case "spline":
+        case "splinespacecomponent":
+          return typeof this.addSplineComponent === "function" ? this.addSplineComponent() : null;
+        case "text":
+        case "textspacecomponent":
+          return typeof this.addTextComponent === "function" ? this.addTextComponent() : null;
+        case "video":
+        case "videoplayer":
+        case "videoplayerspacecomponent":
+          return typeof this.addVideoComponent === "function" ? this.addVideoComponent() : null;
+        case "script":
+        case "scriptdata":
+        case "scriptspacecomponent":
+        case "code":
+        case "codespacecomponent":
+        case "codecomponent":
+          return null;
+        default:
+          return null;
+      }
+    };
   }
 
   return entity;

@@ -30,6 +30,19 @@ class ComponentScriptInterface;
 class LightSpaceComponentScriptInterface;
 class ButtonSpaceComponentScriptInterface;
 class VideoPlayerSpaceComponentScriptInterface;
+class AudioSpaceComponentScriptInterface;
+class StaticModelSpaceComponentScriptInterface;
+class AnimatedModelSpaceComponentScriptInterface;
+class CinematicCameraSpaceComponentScriptInterface;
+class CollisionSpaceComponentScriptInterface;
+class ExternalLinkSpaceComponentScriptInterface;
+class FogSpaceComponentScriptInterface;
+class GaussianSplatSpaceComponentScriptInterface;
+class ImageSpaceComponentScriptInterface;
+class PortalSpaceComponentScriptInterface;
+class ReflectionSpaceComponentScriptInterface;
+class SplineSpaceComponentScriptInterface;
+class TextSpaceComponentScriptInterface;
 
 class EntityScriptInterface
 {
@@ -90,6 +103,22 @@ public:
     void ClearEventListeners();
 
     std::vector<ComponentScriptInterface*> GetComponents();
+    StaticModelSpaceComponentScriptInterface* AddStaticModelComponent();
+    AnimatedModelSpaceComponentScriptInterface* AddAnimatedModelComponent();
+    AudioSpaceComponentScriptInterface* AddAudioComponent();
+    ButtonSpaceComponentScriptInterface* AddButtonComponent();
+    CinematicCameraSpaceComponentScriptInterface* AddCinematicCameraComponent();
+    CollisionSpaceComponentScriptInterface* AddCollisionComponent();
+    ExternalLinkSpaceComponentScriptInterface* AddExternalLinkComponent();
+    FogSpaceComponentScriptInterface* AddFogComponent();
+    GaussianSplatSpaceComponentScriptInterface* AddGaussianSplatComponent();
+    ImageSpaceComponentScriptInterface* AddImageComponent();
+    LightSpaceComponentScriptInterface* AddLightComponent();
+    PortalSpaceComponentScriptInterface* AddPortalComponent();
+    ReflectionSpaceComponentScriptInterface* AddReflectionComponent();
+    SplineSpaceComponentScriptInterface* AddSplineComponent();
+    TextSpaceComponentScriptInterface* AddTextComponent();
+    VideoPlayerSpaceComponentScriptInterface* AddVideoComponent();
 
     template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
@@ -119,7 +148,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
             if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
             {
                 auto* Iface = (ScriptInterface*)Component->GetScriptInterface();
-                Iface->SetLocalScope(LocalScope);
+                Iface->SetLocalScope(LocalScope || Entity->IsLocal());
                 Components.push_back(Iface);
             }
         }
