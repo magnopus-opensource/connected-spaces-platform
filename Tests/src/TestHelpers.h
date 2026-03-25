@@ -30,6 +30,8 @@
 #include <random>
 #include <thread>
 #include <future>
+#include <filesystem>
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -290,4 +292,28 @@ inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEng
     auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
+}
+
+inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
+{
+    auto UploadFilePath = std::filesystem::absolute(FilePath);
+    if (!std::filesystem::exists(UploadFilePath)) {
+        return std::nullopt;
+    }
+
+    const auto UploadFileSize = std::filesystem::file_size(UploadFilePath);
+
+    std::ifstream UploadFile(UploadFilePath, std::ios::binary);
+    if (!UploadFile) {
+        return std::nullopt;
+    }
+
+    std::vector<unsigned char> UploadFileData(static_cast<size_t>(UploadFileSize));
+
+    if (!UploadFile.read(reinterpret_cast<char*>(UploadFileData.data()),
+                         static_cast<std::streamsize>(UploadFileData.size()))) {
+        return std::nullopt;
+    }
+    
+    return UploadFileData;
 }
