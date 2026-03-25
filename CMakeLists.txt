@@ -263,6 +263,20 @@ if(BUILD_TESTING)
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
-  )  
+  )
+
+  # Ensure csp and MultiplayerTestRunner are built first
+  add_dependencies(csp-tests
+    csp-lib
+    MultiplayerTestRunner
+  )
+
+  # Copy out assets folder next to the test executable
+  add_custom_command(TARGET csp-tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_CURRENT_SOURCE_DIR}/Tests/assets"
+            "$<TARGET_FILE_DIR:csp-tests>/assets"
+    COMMENT "Copying assets to output folder"
+)
 
 endif()
