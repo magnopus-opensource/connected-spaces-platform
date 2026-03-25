@@ -109,16 +109,12 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
     Asset.Name = "OKO";
     Asset.Type = csp::systems::EAssetType::IMAGE;
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_TRUE(UploadFileData.has_value());
 
     csp::systems::BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData;
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -126,8 +122,6 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 
     // Upload data
     UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-    delete[] UploadFileData;
 
     EXPECT_EQ(ImageSpaceComponentInstance->GetBillboardMode(), BillboardMode::Off);
     EXPECT_EQ(ImageSpaceComponentInstance->GetDisplayMode(), DisplayMode::DoubleSided);

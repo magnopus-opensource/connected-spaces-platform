@@ -87,12 +87,12 @@ class CSP_API OnlineRealtimeEngine : public csp::common::IRealtimeEngine
 {
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
-    friend class CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
-    friend class CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestErrorInRemoteGenerateNewAvatarId_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInRemoteGenerateNewAvatarId_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestErrorInSendNewAvatarObjectMessage_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInSendNewAvatarObjectMessage_Test;
+    friend class ::CSPEngine_OnlineRealtimeEngineTests_TestSuccessInCreateNewLocalAvatar_Test;
+    friend class ::CSPEngine_MultiplayerTests_ManyEntitiesTest_Test;
     /** @endcond */
     CSP_END_IGNORE
 

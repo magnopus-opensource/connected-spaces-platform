@@ -152,20 +152,18 @@ target_compile_definitions(csp-lib
     # We have our own default scheduler to remove the need to additional params
     LIBASYNC_CUSTOM_DEFAULT_SCHEDULER
     # Remove codecvt deprecation warnings for msvc
-    <$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING>
+    $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING>
     # Disable min/max macros on Windows
     $<$<PLATFORM_ID:Windows>:NOMINMAX>
     # Disable unused POCO features
-    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:
-      POCO_NO_INOTIFY
-      POCO_NO_FILECHANNEL
-      POCO_NO_SPLITTERCHANNEL
-      POCO_NO_SYSLOGCHANNEL
-      POCO_UTIL_NO_INIFILECONFIGURATION
-      POCO_UTIL_NO_JSONCONFIGURATION
-      POCO_UTIL_NO_XMLCONFIGURATION
-    >
-  )
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_INOTIFY>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_FILECHANNEL>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_SPLITTERCHANNEL>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_SYSLOGCHANNEL>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_INIFILECONFIGURATION>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_JSONCONFIGURATION>
+    $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_XMLCONFIGURATION>
+)
 
 # Warnings as errors flag
 # Sets WX/Werror
@@ -187,6 +185,18 @@ target_compile_options(csp-lib
       /wd4200   # nonstandard extension: zero-sized array
     >
 
+    $<$<CXX_COMPILER_ID:AppleClang,Clang>:
+	-Wextra
+	# --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code,
+	# which has deprecation warnings for some unused but still generated endpoints.
+	-Wno-error=deprecated-declarations
+	# Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+	-Wno-braced-scalar-init
+	# Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+	-Wno-missing-field-initializers
+	# Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
+	-Wno-ignored-qualifiers
+    >
 )
 
 # ------------------------------------------------------------------------------------------------------------------
