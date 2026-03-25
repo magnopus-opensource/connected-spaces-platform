@@ -25,8 +25,13 @@
 namespace csp::multiplayer::component
 {
 
-template <typename ComponentTypeId, typename PropertyKey> //
-struct Schema final
+/// @brief A structural description of a component that can be interrogated at runtime
+/// (i.e. to iterate over the properties) to facilitate registration and hydration (i.e. where a
+/// serialised representation is reconstructed into this structure).
+///
+/// @tparam ComponentTypeId: The type of the stable ID value used to uniquely identify the specific component type this schema describes.
+/// @tparam PropertyKey: The type of the stable ID values used to key individual properties within this schema.
+template <typename ComponentTypeId, typename PropertyKey> struct Schema final
 {
     static_assert(IsPackableIdV<ComponentTypeId, uint64_t>);
 

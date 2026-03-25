@@ -24,8 +24,12 @@
 namespace csp::multiplayer::component
 {
 
-template <typename KeyType> //
-struct Property final
+/// @brief Represents an individual data field, or "property", within a component schema,
+/// consisting of a stable ID/key, a type kind and default value (via ReplicatedValue),
+/// and other metadata.
+///
+/// @tparam KeyType: The type of the stable ID value used for this property's unique key.
+template <typename KeyType> struct Property final
 {
     static_assert(IsPackableIdV<KeyType, uint16_t>);
 
