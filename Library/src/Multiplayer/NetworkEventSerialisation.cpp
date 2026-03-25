@@ -94,9 +94,16 @@ csp::common::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signal
         return ReplicatedValue;
     }
 
-    if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_BOOL))
+    if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::BOOL))
     {
         ReplicatedValue = Component.as_bool();
+    }
+    else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_BOOL))
+    {
+        if (!Component.is_null())
+        {
+            ReplicatedValue = Component.as_bool();
+        }
     }
     else if (TypeId == static_cast<uint64_t>(csp::multiplayer::mcs::ItemComponentDataType::NULLABLE_INT64))
     {
