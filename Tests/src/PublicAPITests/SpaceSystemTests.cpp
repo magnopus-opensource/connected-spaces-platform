@@ -560,18 +560,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
 
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData.get();
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -606,18 +600,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailT
 
     LogInAsNewTestUser(UserSystem, UserId);
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
-
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
+    
     BufferAssetDataSource SpaceThumbnail;
-    SpaceThumbnail.Buffer = UploadFileData.get();
-    SpaceThumbnail.BufferLength = UploadFileSize;
+    SpaceThumbnail.Buffer = UploadFileData->data();
+    SpaceThumbnail.BufferLength = UploadFileData->size();
 
     SpaceThumbnail.SetMimeType("image/png");
 
@@ -648,8 +636,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithThumbnailT
     auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
     memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
 
-    EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
+    EXPECT_EQ(DownloadedAssetDataSize, UploadFileData->size());
+    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData->data(), UploadFileData->size()), 0);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
@@ -679,18 +667,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithInvalidBufferWithThu
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
-
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
+    
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData.get();
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/json");
 
@@ -742,19 +724,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
-
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
-
+    
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
+    
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData.get();
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -800,18 +776,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithEmptyBulkI
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
 
     BufferAssetDataSource BufferSource;
-    BufferSource.Buffer = UploadFileData.get();
-    BufferSource.BufferLength = UploadFileSize;
+    BufferSource.Buffer = UploadFileData->data();
+    BufferSource.BufferLength = UploadFileData->size();
 
     BufferSource.SetMimeType("image/png");
 
@@ -1938,18 +1908,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
         EXPECT_TRUE(Result.GetUri().IsEmpty());
     }
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = nullptr;
-    fopen_s(&UploadFile, UploadFilePath.string().c_str(), "rb");
-
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto UploadFileData = std::make_unique<unsigned char[]>(UploadFileSize);
-    fread(UploadFileData.get(), UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
 
     BufferAssetDataSource SpaceThumbnail;
-    SpaceThumbnail.Buffer = UploadFileData.get();
-    SpaceThumbnail.BufferLength = UploadFileSize;
+    SpaceThumbnail.Buffer = UploadFileData->data();
+    SpaceThumbnail.BufferLength = UploadFileData->size();
 
     SpaceThumbnail.SetMimeType("image/png");
 
@@ -1974,8 +1938,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
     auto DownloadedAssetData = std::make_unique<uint8_t[]>(DownloadedAssetDataSize);
     memcpy(DownloadedAssetData.get(), Download_Result.GetData(), DownloadedAssetDataSize);
 
-    EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData.get(), UploadFileSize), 0);
+    EXPECT_EQ(DownloadedAssetDataSize, UploadFileData->size());
+    EXPECT_EQ(memcmp(DownloadedAssetData.get(), UploadFileData->data(), UploadFileData->size()), 0);
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
