@@ -64,31 +64,6 @@ template <typename T> struct IsSignedInteger : std::conjunction<IsInteger<T>, st
 
 template <typename T> constexpr bool IsSignedIntegerV = IsSignedInteger<T>::value;
 
-// Is `Id` able to be "packed" into `PackedRepresentation` (for property keys and component types, which are unsigned integer types)
-template <typename Id, typename PackedRepresentation> constexpr bool IsPackableId()
-{
-    if (!IsUnsignedIntegerV<PackedRepresentation>)
-    {
-        return false;
-    }
-
-    if constexpr (sizeof(Id) > sizeof(PackedRepresentation))
-    {
-        return false;
-    }
-
-    if constexpr (std::is_enum_v<Id>)
-    {
-        return IsUnsignedIntegerV<std::underlying_type_t<Id>>;
-    }
-    else
-    {
-        return IsUnsignedIntegerV<Id>;
-    }
-}
-
-template <typename Id, typename PackedRepresentation> inline constexpr bool IsPackableIdV = IsPackableId<Id, PackedRepresentation>();
-
 // Is type a custom serializable/deserializable type.
 template <typename T> constexpr bool IsCustomSerializableV = std::is_base_of_v<ISignalRSerializable, T>;
 template <typename T> constexpr bool IsCustomDeserializableV = std::is_base_of_v<ISignalRDeserializable, T>;

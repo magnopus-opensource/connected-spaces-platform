@@ -17,9 +17,7 @@
 
 #include "CSP/Common/ReplicatedValue.h"
 
-#include "Multiplayer/SignalRSerializerTypeTraits.h"
-
-#include <cstdint>
+#include "Multiplayer/MCS/MCSTypes.h"
 
 namespace csp::multiplayer::component
 {
@@ -31,7 +29,7 @@ namespace csp::multiplayer::component
 /// @tparam KeyType: The type of the stable ID value used for this property's unique key.
 template <typename KeyType> struct Property final
 {
-    static_assert(IsPackableIdV<KeyType, uint16_t>);
+    static_assert(mcs::IsPackableIdV<KeyType, mcs::PropertyKeyType>);
 
     KeyType Key;
     csp::common::ReplicatedValue DefaultValue;

@@ -17,7 +17,7 @@
 
 #include "Property.h"
 
-#include "Multiplayer/SignalRSerializerTypeTraits.h"
+#include "Multiplayer/MCS/MCSTypes.h"
 
 #include <cstdint>
 #include <vector>
@@ -33,7 +33,7 @@ namespace csp::multiplayer::component
 /// @tparam PropertyKey: The type of the stable ID values used to key individual properties within this schema.
 template <typename ComponentTypeId, typename PropertyKey> struct Schema final
 {
-    static_assert(IsPackableIdV<ComponentTypeId, uint64_t>);
+    static_assert(mcs::IsPackableIdV<ComponentTypeId, uint64_t>);
 
     using Property = Property<PropertyKey>;
 
