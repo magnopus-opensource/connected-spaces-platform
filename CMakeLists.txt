@@ -74,32 +74,48 @@ source_group(TREE ${CSP_SERVICES_DIR} FILES
 )
 
 # ------------------------------------------------------------------------------------------------------------------
-# Create an interface that exposes internal usage requirements to internal targets.
-# This way our internal tests can still access them without us exposing them to clients.
-add_library(csp-lib-internal INTERFACE)
-
-# Define all of our private include dirs for our interface lib.
-target_include_directories(csp-lib-internal INTERFACE
-  ${CSP_SOURCE_DIR}
-  ${CSP_SERVICES_DIR}
+# First build the implementation as a static lib.
+# This allows tests to link against this, instead of the consumer library, allowing for private access,
+# so they can include private headers and use symbols that are not exported from the shared library.
+add_library(csp-impl STATIC
+  ${CSP_PRIVATE_SOURCES}
+  ${CSP_SERVICES_SOURCES}
+  ${CSP_INCLUDE_DIR}
 )
 
-# Link dependencies
-target_link_libraries(csp-lib-internal
-  INTERFACE 
-    rapidjson
-    fmt::fmt
-    Async++
-    Poco::Poco
-    Poco::Net
-    csp-signalr
-    tinysplinecxx::tinysplinecxx
-    glm::glm
-    csp-quickjs
+target_include_directories(csp-impl
+  PRIVATE
+    ${CSP_SOURCE_DIR}
+    ${CSP_INCLUDE_DIR}
 )
 
-# ------------------------------------------------------------------------------------------------------------------
-# Now create our final target
+# The generated services should be included as a system header for now,
+# as these create warnings which manifest as errors due to /wd4100.
+target_include_directories(csp-impl
+  SYSTEM PRIVATE
+    ${CSP_SERVICES_DIR}
+)
+
+# Create prop with all of our third-party libs
+set(CSP_THIRD_PARTY_LIBS
+  rapidjson
+  fmt::fmt
+  Async++
+  Poco::Poco
+  Poco::Net
+  csp-signalr
+  tinysplinecxx::tinysplinecxx
+  glm::glm
+  csp-quickjs
+)
+
+target_link_libraries(csp-impl
+  PRIVATE
+    ${CSP_THIRD_PARTY_LIBS}
+)
+
+# Project uses C++17
+target_compile_features(csp-impl PRIVATE cxx_std_17)
 
 option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
 
@@ -109,49 +125,10 @@ else()
   set(CSP_LIB_TYPE STATIC)
 endif()
 
-add_library(csp-lib ${CSP_LIB_TYPE})
-
-target_sources(csp-lib
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES 
-      ${CSP_PUBLIC_SOURCES}
-  PRIVATE
-    ${CSP_PRIVATE_SOURCES}
-    ${CSP_SERVICES_SOURCES}
-)
-
-# Set include directories
-target_include_directories(csp-lib
-  PUBLIC
-    # Include dir when building from source
-    $<BUILD_INTERFACE:${CSP_INCLUDE_DIR}>
-    # Include dir after installation 
-    $<INSTALL_INTERFACE:include>
-  PRIVATE
-    ${CSP_SOURCE_DIR}
-)
-
-# The generated services should be included as a system header for now,
-# as these create warnings which manifest as errors due to /wd4100.
-target_include_directories(csp-lib SYSTEM PRIVATE
-  ${CSP_SERVICES_DIR}
-)
-
-# Link dependencies
-target_link_libraries(csp-lib
-  PRIVATE 
-    csp-lib-internal
-)
-
-# Project uses C++17
-target_compile_features(csp-lib PUBLIC cxx_std_17)
-
-target_compile_definitions(csp-lib
+target_compile_definitions(csp-impl
   PRIVATE
     # Setup dll export macros if we're building as shared
-    $<$<BOOL:${BUILD_SHARED_LIBS}>:BUILD_CSP_DLL>
+    $<$<BOOL:${CSP_BUILD_SHARED}>:BUILD_CSP_DLL>
     # Platform macros
     $<$<PLATFORM_ID:Windows>:CSP_WINDOWS>
     $<$<PLATFORM_ID:Darwin>:CSP_MACOSX>
@@ -176,9 +153,9 @@ target_compile_definitions(csp-lib
 
 # Warnings as errors flag
 # Sets WX/Werror
-set_target_properties(csp-lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+set_target_properties(csp-impl PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
-target_compile_options(csp-lib
+target_compile_options(csp-impl
   PRIVATE
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
@@ -195,18 +172,60 @@ target_compile_options(csp-lib
     >
 
     $<$<CXX_COMPILER_ID:AppleClang,Clang>:
-	-Wextra
-	# --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code,
-	# which has deprecation warnings for some unused but still generated endpoints.
-	-Wno-error=deprecated-declarations
-	# Don't warn against doing stuff like `return {0}`, which we do in the interop output.
-	-Wno-braced-scalar-init
-	# Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
-	-Wno-missing-field-initializers
-	# Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
-	-Wno-ignored-qualifiers
+	    -Wextra
+	    # --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code,
+	    # which has deprecation warnings for some unused but still generated endpoints.
+	    -Wno-error=deprecated-declarations
+	    # Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+	    -Wno-braced-scalar-init
+	    # Don't warn against missing field initializers, e.g. uninitialized fields in structs (because of the wrapper generator)
+	    -Wno-missing-field-initializers
+	    # Don't error on ignored qualifiers, such as returning const objects. These should be simple to remove at some point.
+	    -Wno-ignored-qualifiers
     >
 )
+
+set_target_properties(csp-impl
+  # Exclude from ALL build
+  PROPERTIES EXCLUDE_FROM_ALL TRUE
+  # Hide in internal folder
+  FOLDER "_internal"
+  )
+
+# ------------------------------------------------------------------------------------------------------------------
+# Now create our final target
+
+add_library(csp-lib ${CSP_LIB_TYPE})
+
+target_sources(csp-lib
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CSP_INCLUDE_DIR}
+    FILES 
+      ${CSP_PUBLIC_SOURCES}
+  PRIVATE
+    # Ensure we have at least one source file,
+    # as this can prevent some generators from creating the binary.
+    ${CSP_SOURCE_DIR}/Dummy.cpp
+)
+
+# Set include directories
+target_include_directories(csp-lib
+  PUBLIC
+    # Include dir when building from source
+    $<BUILD_INTERFACE:${CSP_INCLUDE_DIR}>
+    # Include dir after installation 
+    $<INSTALL_INTERFACE:include>
+)
+
+# Link to our impl lib
+target_link_libraries(csp-lib 
+  PRIVATE 
+    # LINK_LIBRARY:WHOLE_ARCHIVE is needed here, as it forces all symbols into the final lib
+    "$<LINK_LIBRARY:WHOLE_ARCHIVE,csp-impl>")
+
+# Public as it is a requiremnt that consumers also be >= c++17
+target_compile_features(csp-lib PUBLIC cxx_std_17)
 
 # ------------------------------------------------------------------------------------------------------------------
 # Testing
@@ -232,6 +251,8 @@ if(BUILD_TESTING)
 
   include(${CMAKE_CURRENT_SOURCE_DIR}/Tests/cmake/test_files.cmake)
 
+  target_sources(csp-tests PRIVATE ${CSP_TESTS_SOURCES})
+
   # Preserve folder structure for files in IDE
   source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
     ${CSP_TESTS_SOURCES}
@@ -241,13 +262,17 @@ if(BUILD_TESTING)
 
   target_link_libraries(csp-tests
     PRIVATE 
-    csp-lib
-    csp-lib-internal
-    GTest::gtest
-    GTest::gtest_main
-    GTest::gmock
-    sole::sole
-    tiny-process-library::tiny-process-library
+      csp-impl
+      GTest::gtest
+      GTest::gtest_main
+      GTest::gmock
+      sole::sole
+      tiny-process-library::tiny-process-library
+
+      # We need to link our third party libs here, as well, 
+      # becase we either test these directly, or expose them through private headers.
+      # This way we don't have to make them public libs.
+      ${CSP_THIRD_PARTY_LIBS}
   )
 
   # Set include directories
@@ -255,6 +280,9 @@ if(BUILD_TESTING)
     PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/Tests/src
       ${CMAKE_CURRENT_SOURCE_DIR}/MultiplayerTestRunner/include
+      ${CSP_INCLUDE_DIR}
+      ${CSP_SOURCE_DIR}
+      ${CSP_SERVICES_DIR}
   )
 
   target_compile_features(csp-tests PRIVATE cxx_std_17)
