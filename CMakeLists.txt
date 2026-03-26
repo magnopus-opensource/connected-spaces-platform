@@ -100,7 +100,16 @@ target_link_libraries(csp-lib-internal
 
 # ------------------------------------------------------------------------------------------------------------------
 # Now create our final target
-add_library(csp-lib)
+
+option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
+
+if(CSP_BUILD_SHARED)
+  set(CSP_LIB_TYPE SHARED)
+else()
+  set(CSP_LIB_TYPE STATIC)
+endif()
+
+add_library(csp-lib ${CSP_LIB_TYPE})
 
 target_sources(csp-lib
   PUBLIC
