@@ -49,8 +49,12 @@ class CSP(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
+        # We want to be able to pass shared to Conan to build csp as a shared library
+        # This prevent conan configuring everything to be built as shared.
+        tc.blocks.remove("shared")
         # This allows us to set shared libs through the conan install step and pass to cmake
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["CSP_BUILD_SHARED"] = self.options.shared
+
         tc.generate()
         
     #def build_requirements(self):
