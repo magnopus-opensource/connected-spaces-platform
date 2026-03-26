@@ -114,8 +114,3 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ComponentTests/TextComponentTests.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicAPITests/ComponentTests/VideoPlayerComponentTests.cpp
 )
-
-# Private
-target_sources(csp-tests PRIVATE
-    ${CSP_TESTS_SOURCES}
-)
