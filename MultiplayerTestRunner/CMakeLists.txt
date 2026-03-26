@@ -39,12 +39,15 @@ target_include_directories(MultiplayerTestRunner
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty"
+        ${CSP_INCLUDE_DIR}
+        ${CSP_SOURCE_DIR}
+        ${CSP_SERVICES_DIR}
 )
 
 target_link_libraries(MultiplayerTestRunner
     PRIVATE
+        # We use csp as a consumer here, so don't need to link against the object target.
         csp-lib
-        csp-lib-internal
         GTest::gtest
         GTest::gtest_main
         GTest::gmock
