@@ -45,6 +45,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(float, TorsoTwistAlpha);
     DECLARE_SCRIPT_PROPERTY(int32_t, AvatarPlayMode);
     DECLARE_SCRIPT_PROPERTY(int32_t, LocomotionModel);
+    DECLARE_SCRIPT_PROPERTY(bool, IsScripted);
     DECLARE_SCRIPT_PROPERTY(bool, IsAvatarEnabled);
     DECLARE_SCRIPT_PROPERTY(int32_t, CameraType);
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);

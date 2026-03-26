@@ -33,6 +33,7 @@ enum class ScriptAttributeType
     Float,
     String,
     EntityQuery,
+    ModelAsset,
     Num
 };
 

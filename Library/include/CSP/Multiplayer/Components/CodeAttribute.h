@@ -32,6 +32,7 @@ enum class CodePropertyType
     Float = 3,
     String = 4,
     EntityQuery = 5,
+    ModelAsset = 6,
     Num
 };
 
@@ -39,6 +40,7 @@ class CSP_API CodeAttribute
 {
 public:
     using EntityQueryValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
+    using ModelAssetValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
 
     CodeAttribute();
 
@@ -47,10 +49,15 @@ public:
     static CodeAttribute FromFloat(float Value);
     static CodeAttribute FromString(const csp::common::String& Value);
     static CodeAttribute FromEntityQuery(const EntityQueryValueType& Value);
+    static CodeAttribute FromModelAsset(const ModelAssetValueType& Value);
 
     static bool IsValidEntityQueryValue(const EntityQueryValueType& Value);
     const EntityQueryValueType& GetEntityQueryValue() const;
     void SetEntityQueryValue(const EntityQueryValueType& Value);
+
+    static bool IsValidModelAssetValue(const ModelAssetValueType& Value);
+    const ModelAssetValueType& GetModelAssetValue() const;
+    void SetModelAssetValue(const ModelAssetValueType& Value);
 
     csp::common::ReplicatedValue ToReplicatedValue() const;
     static bool TryFromReplicatedValue(const csp::common::ReplicatedValue& InValue, CodeAttribute& OutAttribute);
@@ -64,6 +71,7 @@ public:
     float FloatValue;
     csp::common::String StringValue;
     EntityQueryValueType EntityQueryValue;
+    ModelAssetValueType ModelAssetValue;
 };
 
 } // namespace csp::multiplayer

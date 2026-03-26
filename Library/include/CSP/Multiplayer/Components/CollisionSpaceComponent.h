@@ -39,6 +39,9 @@ enum class CollisionPropertyKeys
     CollisionAssetId,
     AssetCollectionId,
     ThirdPartyComponentRef,
+    Friction,
+    Restitution,
+    Mass,
     Num
 };
 
@@ -55,7 +58,8 @@ enum class CollisionShape
 enum class CollisionMode
 {
     Collision = 0,
-    Trigger
+    Trigger,
+    DynamicCollision,
 };
 
 /// @ingroup CollisionSpaceComponent
@@ -122,6 +126,30 @@ public:
     /// @note To retrieve this component's collision asset, both the Asset ID and the Asset Collection ID are required.
     /// @param Value The ID of the asset collection associated with this component.
     void SetAssetCollectionId(const csp::common::String& Value);
+
+    /// @brief Gets the friction coefficient used by this collision component.
+    /// @return The friction coefficient.
+    float GetFriction() const;
+
+    /// @brief Sets the friction coefficient used by this collision component.
+    /// @param Value The friction coefficient.
+    void SetFriction(float Value);
+
+    /// @brief Gets the restitution coefficient used by this collision component.
+    /// @return The restitution coefficient.
+    float GetRestitution() const;
+
+    /// @brief Sets the restitution coefficient used by this collision component.
+    /// @param Value The restitution coefficient.
+    void SetRestitution(float Value);
+
+    /// @brief Gets the mass used by this collision component.
+    /// @return The mass value.
+    float GetMass() const;
+
+    /// @brief Sets the mass used by this collision component.
+    /// @param Value The mass value.
+    void SetMass(float Value);
 
     /// @brief Gets the minimum unscaled bounding box of this collision component.
     /// @return The minimum unscaled bounding box of this collision component.

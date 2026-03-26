@@ -115,6 +115,9 @@ void CodeSpaceComponent::SetSchema(const csp::common::String& SchemaJson)
 namespace
 {
 
+constexpr const char* MODEL_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
+constexpr const char* MODEL_ASSET_ASSET_ID_KEY = "assetId";
+
 ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
 {
     if (!TypeString)
@@ -147,6 +150,11 @@ ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
         return ScriptAttributeType::EntityQuery;
     }
 
+    if ((strcmp(TypeString, "modelAsset") == 0) || (strcmp(TypeString, "modelasset") == 0))
+    {
+        return ScriptAttributeType::ModelAsset;
+    }
+
     return ScriptAttributeType::Invalid;
 }
 
@@ -168,6 +176,8 @@ csp::common::ReplicatedValue ExtractScalarFromCodeAttribute(const CodeAttribute&
         return csp::common::ReplicatedValue(Attr.StringValue);
     case CodePropertyType::EntityQuery:
         return csp::common::ReplicatedValue(Attr.EntityQueryValue);
+    case CodePropertyType::ModelAsset:
+        return csp::common::ReplicatedValue(Attr.ModelAssetValue);
     default:
         return csp::common::ReplicatedValue();
     }
@@ -233,6 +243,32 @@ bool TryApplySchemaDefault(const rapidjson::Value& Entry, ScriptAttributeType Ty
         }
         return false;
 
+    case ScriptAttributeType::ModelAsset:
+    {
+        if (!DefaultValue.IsObject())
+        {
+            return false;
+        }
+
+        if (!DefaultValue.HasMember(MODEL_ASSET_COLLECTION_ID_KEY) || !DefaultValue[MODEL_ASSET_COLLECTION_ID_KEY].IsString())
+        {
+            return false;
+        }
+
+        if (!DefaultValue.HasMember(MODEL_ASSET_ASSET_ID_KEY) || !DefaultValue[MODEL_ASSET_ASSET_ID_KEY].IsString())
+        {
+            return false;
+        }
+
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ModelAssetMap;
+        ModelAssetMap[MODEL_ASSET_COLLECTION_ID_KEY]
+            = csp::common::ReplicatedValue(csp::common::String(DefaultValue[MODEL_ASSET_COLLECTION_ID_KEY].GetString()));
+        ModelAssetMap[MODEL_ASSET_ASSET_ID_KEY]
+            = csp::common::ReplicatedValue(csp::common::String(DefaultValue[MODEL_ASSET_ASSET_ID_KEY].GetString()));
+        OutAttribute.Value = csp::common::ReplicatedValue(ModelAssetMap);
+        return true;
+    }
+
     default:
         return false;
     }
@@ -263,6 +299,15 @@ void ApplyBuiltInTypeDefault(ScriptAttributeType Type, NgxScriptAttribute& OutAt
         csp::common::Map<csp::common::String, csp::common::ReplicatedValue> QueryMap;
         QueryMap["id"] = csp::common::ReplicatedValue(csp::common::String(""));
         OutAttribute.Value = csp::common::ReplicatedValue(QueryMap);
+        break;
+    }
+
+    case ScriptAttributeType::ModelAsset:
+    {
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ModelAssetMap;
+        ModelAssetMap[MODEL_ASSET_COLLECTION_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
+        ModelAssetMap[MODEL_ASSET_ASSET_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
+        OutAttribute.Value = csp::common::ReplicatedValue(ModelAssetMap);
         break;
     }
 

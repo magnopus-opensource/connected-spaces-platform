@@ -124,6 +124,7 @@ public:
 
 private:
     void CommitEntityUpdate();
+    template <typename ScriptInterface, ComponentType Type> ScriptInterface* AddComponentForScript();
 
     SpaceEntity* Entity;
     bool LocalScope = false;
@@ -157,6 +158,24 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
     }
 
     return Components;
+}
+
+template <typename ScriptInterface, ComponentType Type> ScriptInterface* EntityScriptInterface::AddComponentForScript()
+{
+    if (Entity == nullptr)
+    {
+        return nullptr;
+    }
+
+    auto* Component = Entity->AddComponent(Type);
+    if ((Component == nullptr) || (Component->GetScriptInterface() == nullptr))
+    {
+        return nullptr;
+    }
+
+    auto* Iface = static_cast<ScriptInterface*>(Component->GetScriptInterface());
+    Iface->SetLocalScope(LocalScope || Entity->IsLocal());
+    return Iface;
 }
 
 } // namespace csp::multiplayer

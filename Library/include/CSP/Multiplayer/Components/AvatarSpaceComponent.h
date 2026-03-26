@@ -52,6 +52,7 @@ enum class AvatarComponentPropertyKeys
     AvatarUrl,
     IsAvatarEnabled,
     CameraType,
+    IsScripted,
     Num
 };
 
@@ -221,6 +222,14 @@ public:
     /// @brief Sets which locomotion model this avatar component is using.
     /// @param Value The locomotion model used by this avatar component.
     void SetLocomotionModel(LocomotionModel Value);
+
+    /// @brief Specifies whether this avatar should use script-driven locomotion.
+    /// @return True when the avatar locomotion model is scripted.
+    bool GetIsScripted() const;
+
+    /// @brief Sets whether this avatar should use script-driven locomotion.
+    /// @param Value True to switch to scripted locomotion, false to switch back to grounded locomotion.
+    void SetIsScripted(bool Value);
 
     /// @brief Specifies whether the engine-managed avatar should remain enabled.
     /// @return True when the engine-managed avatar is enabled.

@@ -44,6 +44,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(csp::common::LogSystem* LogSystem, Sp
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarUrl)] = "";
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsAvatarEnabled)] = true;
     Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::CameraType)] = static_cast<int64_t>(CameraType::FirstAndThirdPerson);
+    Properties[static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted)] = false;
 
     SetScriptInterface(new AvatarSpaceComponentScriptInterface(this));
 }
@@ -173,6 +174,17 @@ LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
 void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)
 {
     SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted), Value == LocomotionModel::Scripted);
+}
+
+bool AvatarSpaceComponent::GetIsScripted() const
+{
+    return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted));
+}
+
+void AvatarSpaceComponent::SetIsScripted(bool Value)
+{
+    SetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsScripted), Value);
 }
 
 bool AvatarSpaceComponent::GetIsAvatarEnabled() const

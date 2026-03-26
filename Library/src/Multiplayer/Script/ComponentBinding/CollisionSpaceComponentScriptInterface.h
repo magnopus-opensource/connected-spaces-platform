@@ -36,6 +36,9 @@ public:
     DECLARE_SCRIPT_PROPERTY(int32_t, CollisionMode);
     DECLARE_SCRIPT_PROPERTY(std::string, CollisionAssetId);
     DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(float, Friction);
+    DECLARE_SCRIPT_PROPERTY(float, Restitution);
+    DECLARE_SCRIPT_PROPERTY(float, Mass);
 };
 
 } // namespace csp::multiplayer

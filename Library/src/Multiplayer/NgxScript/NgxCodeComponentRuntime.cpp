@@ -38,6 +38,8 @@
 namespace
 {
 
+constexpr const char* PLAYER_CONTROLLER_CONFIG_TAG = "player-controller-config";
+
 constexpr const char* CODECOMPONENT_ASSET_REGISTRY_MODULE = "/scripts/engine/registry.js";
 constexpr const char* CODECOMPONENT_REGISTRY_MODULE = "/__csp/internal/codecomponent/registry.js";
 constexpr const char* CODECOMPONENT_BOOTSTRAP_MODULE = "/__csp/internal/codecomponent/bootstrap.js";
@@ -159,6 +161,11 @@ const char* RuntimeModeToString(csp::systems::ESpaceRuntimeMode RuntimeMode)
     }
 }
 
+bool IsPlayerControllerConfigEntity(const csp::multiplayer::SpaceEntity* Entity)
+{
+    return (Entity != nullptr) && Entity->HasTag(PLAYER_CONTROLLER_CONFIG_TAG);
+}
+
 std::string EscapeJSStringLiteral(const std::string& Input)
 {
     std::string Escaped;
@@ -269,6 +276,8 @@ std::string BuildAttributeValueLiteral(const csp::multiplayer::CodeAttribute& At
         return "'" + EscapeJSStringLiteral(Attribute.StringValue.c_str()) + "'";
     case csp::multiplayer::CodePropertyType::EntityQuery:
         return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.EntityQueryValue));
+    case csp::multiplayer::CodePropertyType::ModelAsset:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.ModelAssetValue));
     default:
         return "undefined";
     }
@@ -399,6 +408,10 @@ export function createScriptRegistry() {
             return 'entity';
         }
 
+        if (lower === 'modelasset' || lower === 'model_asset') {
+            return 'modelAsset';
+        }
+
         return null;
     }
 
@@ -436,6 +449,14 @@ export function createScriptRegistry() {
                 }
             }
             return false;
+        }
+
+        if (type === 'modelAsset') {
+            if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+                return false;
+            }
+
+            return typeof value.assetCollectionId === 'string' && typeof value.assetId === 'string';
         }
 
         return false;
@@ -1649,6 +1670,11 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
     switch (CodeComponent->GetCodeScopeType())
     {
     case csp::multiplayer::CodeScopeType::Local:
+        if (IsPlayerControllerConfigEntity(Entity))
+        {
+            return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Play;
+        }
+
         if (GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Unset)
         {
             return false;

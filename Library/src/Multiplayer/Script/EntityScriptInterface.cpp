@@ -43,26 +43,6 @@ using namespace csp::systems;
 
 namespace csp::multiplayer
 {
-namespace
-{
-template <typename ScriptInterface, ComponentType Type> ScriptInterface* AddComponentForScript(SpaceEntity* Entity, bool LocalScope)
-{
-    if (Entity == nullptr)
-    {
-        return nullptr;
-    }
-
-    auto* Component = Entity->AddComponent(Type);
-    if ((Component == nullptr) || (Component->GetScriptInterface() == nullptr))
-    {
-        return nullptr;
-    }
-
-    auto* Iface = static_cast<ScriptInterface*>(Component->GetScriptInterface());
-    Iface->SetLocalScope(LocalScope || Entity->IsLocal());
-    return Iface;
-}
-} // namespace
 
 EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity, bool IsLocal)
     : Entity(InEntity)
@@ -544,82 +524,82 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 
 StaticModelSpaceComponentScriptInterface* EntityScriptInterface::AddStaticModelComponent()
 {
-    return AddComponentForScript<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>(Entity, LocalScope);
+    return AddComponentForScript<StaticModelSpaceComponentScriptInterface, ComponentType::StaticModel>();
 }
 
 AnimatedModelSpaceComponentScriptInterface* EntityScriptInterface::AddAnimatedModelComponent()
 {
-    return AddComponentForScript<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>(Entity, LocalScope);
+    return AddComponentForScript<AnimatedModelSpaceComponentScriptInterface, ComponentType::AnimatedModel>();
 }
 
 AudioSpaceComponentScriptInterface* EntityScriptInterface::AddAudioComponent()
 {
-    return AddComponentForScript<AudioSpaceComponentScriptInterface, ComponentType::Audio>(Entity, LocalScope);
+    return AddComponentForScript<AudioSpaceComponentScriptInterface, ComponentType::Audio>();
 }
 
 ButtonSpaceComponentScriptInterface* EntityScriptInterface::AddButtonComponent()
 {
-    return AddComponentForScript<ButtonSpaceComponentScriptInterface, ComponentType::Button>(Entity, LocalScope);
+    return AddComponentForScript<ButtonSpaceComponentScriptInterface, ComponentType::Button>();
 }
 
 CinematicCameraSpaceComponentScriptInterface* EntityScriptInterface::AddCinematicCameraComponent()
 {
-    return AddComponentForScript<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>(Entity, LocalScope);
+    return AddComponentForScript<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>();
 }
 
 CollisionSpaceComponentScriptInterface* EntityScriptInterface::AddCollisionComponent()
 {
-    return AddComponentForScript<CollisionSpaceComponentScriptInterface, ComponentType::Collision>(Entity, LocalScope);
+    return AddComponentForScript<CollisionSpaceComponentScriptInterface, ComponentType::Collision>();
 }
 
 ExternalLinkSpaceComponentScriptInterface* EntityScriptInterface::AddExternalLinkComponent()
 {
-    return AddComponentForScript<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>(Entity, LocalScope);
+    return AddComponentForScript<ExternalLinkSpaceComponentScriptInterface, ComponentType::ExternalLink>();
 }
 
 FogSpaceComponentScriptInterface* EntityScriptInterface::AddFogComponent()
 {
-    return AddComponentForScript<FogSpaceComponentScriptInterface, ComponentType::Fog>(Entity, LocalScope);
+    return AddComponentForScript<FogSpaceComponentScriptInterface, ComponentType::Fog>();
 }
 
 GaussianSplatSpaceComponentScriptInterface* EntityScriptInterface::AddGaussianSplatComponent()
 {
-    return AddComponentForScript<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>(Entity, LocalScope);
+    return AddComponentForScript<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>();
 }
 
 ImageSpaceComponentScriptInterface* EntityScriptInterface::AddImageComponent()
 {
-    return AddComponentForScript<ImageSpaceComponentScriptInterface, ComponentType::Image>(Entity, LocalScope);
+    return AddComponentForScript<ImageSpaceComponentScriptInterface, ComponentType::Image>();
 }
 
 LightSpaceComponentScriptInterface* EntityScriptInterface::AddLightComponent()
 {
-    return AddComponentForScript<LightSpaceComponentScriptInterface, ComponentType::Light>(Entity, LocalScope);
+    return AddComponentForScript<LightSpaceComponentScriptInterface, ComponentType::Light>();
 }
 
 PortalSpaceComponentScriptInterface* EntityScriptInterface::AddPortalComponent()
 {
-    return AddComponentForScript<PortalSpaceComponentScriptInterface, ComponentType::Portal>(Entity, LocalScope);
+    return AddComponentForScript<PortalSpaceComponentScriptInterface, ComponentType::Portal>();
 }
 
 ReflectionSpaceComponentScriptInterface* EntityScriptInterface::AddReflectionComponent()
 {
-    return AddComponentForScript<ReflectionSpaceComponentScriptInterface, ComponentType::Reflection>(Entity, LocalScope);
+    return AddComponentForScript<ReflectionSpaceComponentScriptInterface, ComponentType::Reflection>();
 }
 
 SplineSpaceComponentScriptInterface* EntityScriptInterface::AddSplineComponent()
 {
-    return AddComponentForScript<SplineSpaceComponentScriptInterface, ComponentType::Spline>(Entity, LocalScope);
+    return AddComponentForScript<SplineSpaceComponentScriptInterface, ComponentType::Spline>();
 }
 
 TextSpaceComponentScriptInterface* EntityScriptInterface::AddTextComponent()
 {
-    return AddComponentForScript<TextSpaceComponentScriptInterface, ComponentType::Text>(Entity, LocalScope);
+    return AddComponentForScript<TextSpaceComponentScriptInterface, ComponentType::Text>();
 }
 
 VideoPlayerSpaceComponentScriptInterface* EntityScriptInterface::AddVideoComponent()
 {
-    return AddComponentForScript<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>(Entity, LocalScope);
+    return AddComponentForScript<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>();
 }
 
 } // namespace csp::multiplayer

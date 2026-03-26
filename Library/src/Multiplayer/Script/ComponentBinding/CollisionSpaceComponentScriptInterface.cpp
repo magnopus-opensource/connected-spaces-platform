@@ -37,5 +37,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, csp::multiplayer::Collision
 
 DEFINE_SCRIPT_PROPERTY_STRING(CollisionSpaceComponent, CollisionAssetId);
 DEFINE_SCRIPT_PROPERTY_STRING(CollisionSpaceComponent, AssetCollectionId);
+DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, float, float, Friction);
+DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, float, float, Restitution);
+DEFINE_SCRIPT_PROPERTY_TYPE(CollisionSpaceComponent, float, float, Mass);
 
 } // namespace csp::multiplayer

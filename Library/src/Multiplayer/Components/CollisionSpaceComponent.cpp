@@ -41,6 +41,9 @@ CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSyst
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId)] = "";
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";
+    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Friction)] = 0.5f;
+    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Restitution)] = 0.0f;
+    Properties[static_cast<uint32_t>(CollisionPropertyKeys::Mass)] = 1.0f;
 
     SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }
@@ -129,6 +132,36 @@ const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
 void CollisionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
     SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId), Value);
+}
+
+float CollisionSpaceComponent::GetFriction() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(CollisionPropertyKeys::Friction));
+}
+
+void CollisionSpaceComponent::SetFriction(float Value)
+{
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Friction), Value);
+}
+
+float CollisionSpaceComponent::GetRestitution() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(CollisionPropertyKeys::Restitution));
+}
+
+void CollisionSpaceComponent::SetRestitution(float Value)
+{
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Restitution), Value);
+}
+
+float CollisionSpaceComponent::GetMass() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(CollisionPropertyKeys::Mass));
+}
+
+void CollisionSpaceComponent::SetMass(float Value)
+{
+    SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Mass), Value);
 }
 
 const csp::common::Vector3 CollisionSpaceComponent::GetUnscaledBoundingBoxMin() { return csp::common::Vector3(-0.5f, -0.5f, -0.5f); }
