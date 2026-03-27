@@ -201,7 +201,33 @@ private:
     std::optional<uint64_t> ParentId;
     std::optional<std::map<PropertyKeyType, ItemComponentData>> Components;
 };
+
+// Is `Id` able to be "packed" into `PackedRepresentation` (for property keys and component types, which are unsigned integer types)
+template <typename Id, typename PackedRepresentation> constexpr bool IsPackableId()
+{
+    if (!IsUnsignedIntegerV<PackedRepresentation>)
+    {
+        return false;
+    }
+
+    if constexpr (sizeof(Id) > sizeof(PackedRepresentation))
+    {
+        return false;
+    }
+
+    if constexpr (std::is_enum_v<Id>)
+    {
+        return IsUnsignedIntegerV<std::underlying_type_t<Id>>;
+    }
+    else
+    {
+        return IsUnsignedIntegerV<Id>;
+    }
 }
+
+template <typename Id, typename PackedRepresentation> inline constexpr bool IsPackableIdV = IsPackableId<Id, PackedRepresentation>();
+
+} // namespace csp::multiplayer::mcs
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::multiplayer::mcs::ItemComponentData& Obj);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::multiplayer::mcs::ItemComponentData& Obj);

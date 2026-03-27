@@ -15,30 +15,81 @@
  */
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Fog, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)] = static_cast<int64_t>(FogMode::Exponential);
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::StartDistance)] = 0.f;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::EndDistance)] = 0.f;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Color)] = csp::common::Vector3 { 0.8f, 0.9f, 1.0f };
-    Properties[static_cast<uint32_t>(FogPropertyKeys::Density)] = 0.4f;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)] = 0.2f;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)] = 1.f;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)] = false;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef)] = "";
-    Properties[static_cast<uint32_t>(FogPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Fog,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::FogMode),
+            static_cast<int64_t>(FogMode::Exponential),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Position),
+            csp::common::Vector3 { 0, 0, 0 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Scale),
+            csp::common::Vector3 { 1, 1, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::StartDistance),
+            0.f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::EndDistance),
+            0.f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Color),
+            csp::common::Vector3 { 0.8f, 0.9f, 1.0f },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::Density),
+            0.4f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::HeightFalloff),
+            0.2f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::MaxOpacity),
+            1.f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVolumetric),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::ThirdPartyComponentRef),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(FogPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new FogSpaceComponentScriptInterface(this));
 }
 

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.32.0]
+
+###💫 💥 Code Refactors
+
+- [OF-1848] refac: Add internal constructor to `ComponentBase` for constructing from a `Schema` structure. By @mag-lt
+  This is an internal refactor step towards more easily defining new components. All existing components
+  have been refactored to specify their properties this way and delegate to this new constructor.
+
+- [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to match SignalR wire representation. By @mag-lt
+  This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
+  the existing constaints into the type system.
+
 ## [6.31.0]
 
 ###🔥 ❗Breaking Changes

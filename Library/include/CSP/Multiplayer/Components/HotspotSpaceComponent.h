@@ -31,7 +31,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for an Hotspot space component.
-enum class HotspotPropertyKeys
+enum class HotspotPropertyKeys : uint16_t
 {
     Position,
     Rotation,

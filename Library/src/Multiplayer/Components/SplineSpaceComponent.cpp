@@ -16,16 +16,27 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
+
 #include "tinysplinecxx.h"
 
 namespace csp::multiplayer
 {
-SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Spline, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
 
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Spline,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(SplinePropertyKeys::Waypoints),
+            0.f,
+        },
+    },
+};
+
+SplineSpaceComponent::SplineSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
 

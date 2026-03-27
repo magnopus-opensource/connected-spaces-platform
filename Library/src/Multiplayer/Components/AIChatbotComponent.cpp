@@ -16,19 +16,37 @@
 
 #include "CSP/Multiplayer/Components/AIChatbotComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/AIChatbotComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::AIChatbot, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::Voice)] = "";
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::GuardrailAssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(AIChatbotPropertyKeys::VisualState)] = static_cast<int64_t>(0);
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::AIChatbot,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::Voice),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::GuardrailAssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(AIChatbotPropertyKeys::VisualState),
+            static_cast<int64_t>(0),
+        },
+    },
+};
 
+csp::multiplayer::AIChatbotSpaceComponent::AIChatbotSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new AIChatbotSpaceComponentScriptInterface(this));
 }
 

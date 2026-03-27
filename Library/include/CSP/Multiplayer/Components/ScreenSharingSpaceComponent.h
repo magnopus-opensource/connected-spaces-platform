@@ -31,7 +31,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a screen sharing component.
-enum class ScreenSharingPropertyKeys
+enum class ScreenSharingPropertyKeys : uint16_t
 {
     Position = 0,
     Rotation,

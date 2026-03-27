@@ -15,28 +15,73 @@
  */
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Text, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Text)] = "";
-    Properties[static_cast<uint32_t>(TextPropertyKeys::TextColor)] = csp::common::Vector3(1.0f, 1.0f, 1.0f);
-    Properties[static_cast<uint32_t>(TextPropertyKeys::BackgroundColor)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible)] = true;
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Width)] = 1.0f;
-    Properties[static_cast<uint32_t>(TextPropertyKeys::Height)] = 1.0f;
-    Properties[static_cast<uint32_t>(TextPropertyKeys::BillboardMode)] = static_cast<int64_t>(BillboardMode::Off);
-    Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(TextPropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Text,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Text),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::TextColor),
+            csp::common::Vector3(1.0f, 1.0f, 1.0f),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BackgroundColor),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsBackgroundVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Width),
+            1.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::Height),
+            1.0f,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::BillboardMode),
+            static_cast<int64_t>(BillboardMode::Off),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(TextPropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
 
