@@ -30,7 +30,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for an image space component.
-enum class ImagePropertyKeys
+enum class ImagePropertyKeys : uint16_t
 {
     Name_DEPRECATED,
     ImageAssetId,

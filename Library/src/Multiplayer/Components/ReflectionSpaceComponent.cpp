@@ -16,22 +16,49 @@
 
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Reflection, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED)] = "";
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)] = "";
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)] = static_cast<int64_t>(ReflectionShape::UnitBox);
-    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Reflection,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Name_DEPRECATED),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ReflectionAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::AssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ReflectionShape),
+            static_cast<int64_t>(ReflectionShape::UnitBox),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ReflectionPropertyKeys::ThirdPartyComponentRef),
+            "",
+        },
+    },
+};
 
+ReflectionSpaceComponent::ReflectionSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }
 

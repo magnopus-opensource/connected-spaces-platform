@@ -29,7 +29,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a fog component.
-enum class FogPropertyKeys
+enum class FogPropertyKeys : uint16_t
 {
     FogMode = 0,
     Position,

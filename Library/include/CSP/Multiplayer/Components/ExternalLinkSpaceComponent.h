@@ -37,7 +37,7 @@ enum class ExternalLinkActions
 };
 
 /// @brief The list of properties defined within an external link component.
-enum class ExternalLinkPropertyKeys
+enum class ExternalLinkPropertyKeys : uint16_t
 {
     Name_DEPRECATED = 0,
     LinkUrl,

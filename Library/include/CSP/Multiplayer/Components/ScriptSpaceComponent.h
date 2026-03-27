@@ -35,7 +35,7 @@ enum class ScriptScope
 };
 
 /// @brief Enumerates the list of properties that can be replicated for a script component.
-enum class ScriptComponentPropertyKeys
+enum class ScriptComponentPropertyKeys : uint16_t
 {
     ScriptSource = 1,
     OwnerId,

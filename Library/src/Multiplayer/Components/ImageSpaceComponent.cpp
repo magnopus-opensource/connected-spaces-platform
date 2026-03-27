@@ -15,27 +15,69 @@
  */
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
 
-ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
-    : ComponentBase(ComponentType::Image, LogSystem, Parent)
-{
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED)] = "";
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId)] = "";
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId)] = "";
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::Position)] = csp::common::Vector3::Zero();
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::Scale)] = csp::common::Vector3::One();
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsVisible)] = true;
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::BillboardMode)] = static_cast<int64_t>(BillboardMode::Off);
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::DisplayMode)] = static_cast<int64_t>(DisplayMode::DoubleSided);
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsARVisible)] = true;
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsEmissive)] = false;
-    Properties[static_cast<uint32_t>(ImagePropertyKeys::IsVirtualVisible)] = true;
+const auto Schema = ComponentBase::ComponentSchema {
+    ComponentType::Image,
+    std::vector<ComponentBase::ComponentSchema::Property> {
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Name_DEPRECATED),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::ImageAssetId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::AssetCollectionId),
+            "",
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Position),
+            csp::common::Vector3::Zero(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Rotation),
+            csp::common::Vector4 { 0, 0, 0, 1 },
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::Scale),
+            csp::common::Vector3::One(),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::BillboardMode),
+            static_cast<int64_t>(BillboardMode::Off),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::DisplayMode),
+            static_cast<int64_t>(DisplayMode::DoubleSided),
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsARVisible),
+            true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsEmissive),
+            false,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(ImagePropertyKeys::IsVirtualVisible),
+            true,
+        },
+    },
+};
 
+ImageSpaceComponent::ImageSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema, LogSystem, Parent)
+{
     SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
 

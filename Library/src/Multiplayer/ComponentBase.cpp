@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/ComponentBase.h"
 
+#include "Multiplayer/Component/Schema.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Common/fmt_Formatters.h"
@@ -49,6 +50,15 @@ ComponentBase::ComponentBase(ComponentType Type, csp::common::LogSystem* LogSyst
     , LogSystem(LogSystem)
 {
     InitialiseProperties();
+}
+
+ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
+    : ComponentBase(Schema.TypeId, LogSystem, Parent)
+{
+    for (const auto& Property : Schema.Properties)
+    {
+        Properties[Property.Key] = Property.DefaultValue;
+    }
 }
 
 ComponentBase::~ComponentBase()

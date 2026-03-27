@@ -28,7 +28,7 @@ namespace csp::multiplayer
 
 /// @brief Enumerates the list of properties that can be replicated for a portal component.
 /// @note IsVisible, IsARVisible and IsActive are no longer exposed but retained for backwards compatibility.
-enum class PortalPropertyKeys
+enum class PortalPropertyKeys : uint16_t
 {
     SpaceId = 0,
     IsVisible,

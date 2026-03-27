@@ -57,7 +57,7 @@ enum class LightCookieType
 };
 
 /// @brief Enumerates the list of properties that can be replicated for a light component.
-enum class LightPropertyKeys
+enum class LightPropertyKeys : uint16_t
 {
     Name_DEPRECATED = 0,
     LightType,

@@ -47,7 +47,7 @@ enum class AudioType
 };
 
 /// @brief Enumerates the list of properties that can be replicated for an audio component.
-enum class AudioPropertyKeys
+enum class AudioPropertyKeys : uint16_t
 {
     Position = 0,
     PlaybackState,

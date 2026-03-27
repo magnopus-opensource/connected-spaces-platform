@@ -29,7 +29,7 @@ namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a CinematicCamera component.
-enum class CinematicCameraPropertyKeys
+enum class CinematicCameraPropertyKeys : uint16_t
 {
     Position = 0,
     Rotation,
