@@ -21,7 +21,7 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
-#include "uuid_v4.h"
+#include "sole.hpp"
 
 #include <chrono>
 #include <functional>
@@ -30,6 +30,8 @@
 #include <random>
 #include <thread>
 #include <future>
+#include <filesystem>
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -189,9 +191,7 @@ inline double RandomRangeDouble(double Min, double Max)
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString()
 {
-    static thread_local UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
-    const UUIDv4::UUID uuid = uuidGenerator.getUUID();
-
+    const auto uuid = sole::uuid4();
     return uuid.str();
 }
 
@@ -292,4 +292,28 @@ inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEng
     auto [CreatedObject] = AWAIT(EntitySystem, CreateEntity, Name, ObjectTransform, csp::common::Optional<uint64_t> {});
     EXPECT_TRUE(CreatedObject != nullptr);
     return CreatedObject;
+}
+
+inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
+{
+    auto UploadFilePath = std::filesystem::absolute(FilePath);
+    if (!std::filesystem::exists(UploadFilePath)) {
+        return std::nullopt;
+    }
+
+    const auto UploadFileSize = std::filesystem::file_size(UploadFilePath);
+
+    std::ifstream UploadFile(UploadFilePath, std::ios::binary);
+    if (!UploadFile) {
+        return std::nullopt;
+    }
+
+    std::vector<unsigned char> UploadFileData(static_cast<size_t>(UploadFileSize));
+
+    if (!UploadFile.read(reinterpret_cast<char*>(UploadFileData.data()),
+                         static_cast<std::streamsize>(UploadFileData.size()))) {
+        return std::nullopt;
+    }
+    
+    return UploadFileData;
 }

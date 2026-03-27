@@ -30,6 +30,7 @@ CSP_START_IGNORE
 #include "Common/Web/Json.h"
 
 #include <fmt/base.h>
+#include <fmt/format.h>
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <string_view>

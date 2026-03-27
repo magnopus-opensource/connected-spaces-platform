@@ -135,7 +135,7 @@ std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifi
 
     /* The multiplayer test runner application is copied to the active directory
     as a post build command, so we just call it directly*/
-    CLIArgs.push_back("MultiplayerTestRunner");
+    CLIArgs.push_back(MULTIPLAYER_TEST_RUNNER_PATH);
     CLIArgs.push_back("--test");
     CLIArgs.push_back(MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(TestToRun));
     CLIArgs.push_back("--email");
