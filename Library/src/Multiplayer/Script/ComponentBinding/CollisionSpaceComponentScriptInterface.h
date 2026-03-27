@@ -16,6 +16,7 @@
 #pragma once
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
+#include "quickjspp.hpp"
 
 #include <string>
 
@@ -39,6 +40,11 @@ public:
     DECLARE_SCRIPT_PROPERTY(float, Friction);
     DECLARE_SCRIPT_PROPERTY(float, Restitution);
     DECLARE_SCRIPT_PROPERTY(float, Mass);
+
+    void SetKinematicPose(qjs::Value Pose, float Dt);
+    void SetKinematicPosition(Vector3 Position, float Dt);
+    void SetKinematicRotation(Vector4 Rotation, float Dt);
+    void ResetKinematicPose();
 };
 
 } // namespace csp::multiplayer

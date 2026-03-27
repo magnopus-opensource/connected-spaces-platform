@@ -37,7 +37,7 @@ CollisionSpaceComponent::CollisionSpaceComponent(csp::common::LogSystem* LogSyst
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape)] = static_cast<int64_t>(CollisionShape::Box);
-    Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)] = static_cast<int64_t>(CollisionMode::Collision);
+    Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)] = static_cast<int64_t>(CollisionMode::CollisionStatic);
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId)] = "";
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)] = "";
     Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";

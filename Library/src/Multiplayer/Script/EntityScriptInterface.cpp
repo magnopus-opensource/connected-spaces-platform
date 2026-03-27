@@ -322,6 +322,21 @@ const std::string EntityScriptInterface::GetName() const { return Entity->GetNam
 
 int64_t EntityScriptInterface::GetId() const { return Entity->GetId(); }
 
+bool EntityScriptInterface::IsLocal() const
+{
+    return Entity != nullptr && Entity->IsLocal();
+}
+
+void EntityScriptInterface::SetLocal(bool InIsLocal)
+{
+    if (Entity == nullptr)
+    {
+        return;
+    }
+
+    Entity->SetLocal(InIsLocal);
+}
+
 std::vector<std::string> EntityScriptInterface::GetTags() const
 {
     std::vector<std::string> Tags;

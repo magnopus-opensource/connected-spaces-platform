@@ -117,7 +117,11 @@
     return (this.{{ name }}Factory(_nPtr) as {{ name }});
 {{/ is_template_argument }}
 {{# is_template }}
-    return ProxyClassFactories[`{{ template_safe_type_name }}{{# template_arguments }}_{{# type.is_template_argument }}${ this.{{ type.name }}TypeName }{{/ type.is_template_argument }}{{^ type.is_template_argument }}{{ full_safe_type_name }}{{/ type.is_template_argument }}{{/ template_arguments }}`](_nPtr);
+    const _factoryKey = `{{ template_safe_type_name }}{{# template_arguments }}_{{# type.is_template_argument }}${ this.{{ type.name }}TypeName }{{/ type.is_template_argument }}{{^ type.is_template_argument }}{{ full_safe_type_name }}{{/ type.is_template_argument }}{{/ template_arguments }}`;
+    const _factory = ProxyClassFactories.get(_factoryKey);
+    if (_factory === undefined)
+        throw new Error(`Missing proxy class factory for ${ _factoryKey }`);
+    return _factory(_nPtr) as {{> TypeName }};
 {{/ is_template }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}

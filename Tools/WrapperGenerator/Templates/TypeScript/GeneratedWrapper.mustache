@@ -38,15 +38,15 @@ function objectToPointer(obj: any): [pointer: number, shouldFree: boolean] {
 }
 
 export class CspOptions {
-  wrapperUrl: string
+  wrapperUrl!: string
   /**
    * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
    */
-  wasmUrl: string
+  wasmUrl!: string
   /**
    * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
    */
-  workerUrl: string
+  workerUrl!: string
 }
 
 export function ready(args: boolean | CspOptions = false) {
@@ -154,18 +154,18 @@ let ProxyClassFactories = new Map<string, ProxyClassFactory>();
 function StringFactory(nativePointer: NativePointer): string {
   return Module.UTF8ToString(nativePointer.pointer);
 }
-ProxyClassFactories["String"] = StringFactory;
+ProxyClassFactories.set("String", StringFactory);
 
 function NumberFactory(nativePointer: NativePointer): number {
   return nativePointer.pointer;
 }
-ProxyClassFactories["Number"] = NumberFactory;
+ProxyClassFactories.set("Number", NumberFactory);
 
 {{# enums }}
 function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): {{> TypeName }} {
   return nativePointer.pointer as {{> TypeName }};
 }
-ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+ProxyClassFactories.set("{{ full_safe_type_name }}", {{ full_safe_type_name }}Factory);
 
 {{/ enums }}
 
@@ -174,7 +174,7 @@ ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Fact
 function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): NativeClassWrapper {
     return new {{> TypeName }}(nativePointer)
 }
-ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+ProxyClassFactories.set("{{ full_safe_type_name }}", {{ full_safe_type_name }}Factory);
 {{/ is_static }}
 
 {{/ classes }}
@@ -193,7 +193,7 @@ function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): NativeC
 {{/ arguments }}
     )
 }
-ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+ProxyClassFactories.set("{{ full_safe_type_name }}", {{ full_safe_type_name }}Factory);
 
 {{/ instances }}
 

@@ -57,9 +57,10 @@ enum class CollisionShape
 /// @brief Enumerates the list of collision modes supported by the collision component.
 enum class CollisionMode
 {
-    Collision = 0,
+    CollisionStatic = 0,
     Trigger,
-    DynamicCollision,
+    CollisionDynamic,
+    CollisionKinematic
 };
 
 /// @ingroup CollisionSpaceComponent

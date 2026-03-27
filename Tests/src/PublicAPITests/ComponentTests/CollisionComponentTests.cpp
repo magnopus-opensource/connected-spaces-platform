@@ -81,7 +81,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
     EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
     EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Collision);
+    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::CollisionStatic);
     EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Box);
     EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "");
     EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "");
@@ -105,6 +105,12 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
     EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Mesh);
     EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "TestAssetID");
     EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "TestAssetCollectionID");
+
+    CollisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::CollisionDynamic);
+    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::CollisionDynamic);
+
+    CollisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::CollisionKinematic);
+    EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::CollisionKinematic);
 
     const float DefaultSphereRadius = CollisionSpaceComponent::GetDefaultSphereRadius();
     const float DefaultCapsuleHalfWidth = CollisionSpaceComponent::GetDefaultCapsuleHalfWidth();

@@ -549,7 +549,11 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(CollisionSpaceComponent, AssetCollectionId, "assetCollectionId")
         .PROPERTY_GET_SET(CollisionSpaceComponent, Friction, "friction")
         .PROPERTY_GET_SET(CollisionSpaceComponent, Restitution, "restitution")
-        .PROPERTY_GET_SET(CollisionSpaceComponent, Mass, "mass");
+        .PROPERTY_GET_SET(CollisionSpaceComponent, Mass, "mass")
+        .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPose>("setKinematicPose")
+        .fun<&CollisionSpaceComponentScriptInterface::SetKinematicPosition>("setKinematicPosition")
+        .fun<&CollisionSpaceComponentScriptInterface::SetKinematicRotation>("setKinematicRotation")
+        .fun<&CollisionSpaceComponentScriptInterface::ResetKinematicPose>("resetKinematicPose");
 
     Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
         .constructor<>()
@@ -738,6 +742,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .fun<&EntityScriptInterface::Fire>("fire")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
+        .fun<&EntityScriptInterface::GetComponentsOfType<CollisionSpaceComponentScriptInterface, ComponentType::Collision>>("getCollisionComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<VideoPlayerSpaceComponentScriptInterface, ComponentType::VideoPlayer>>(
             "getVideoPlayerComponents")
@@ -778,6 +783,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&EntityScriptInterface::GetGlobalScale>("globalScale")
         .property<&EntityScriptInterface::GetParentEntity>("parentEntity")
         .property<&EntityScriptInterface::GetId>("id")
+        .property<&EntityScriptInterface::IsLocal, &EntityScriptInterface::SetLocal>("isLocal")
         .property<&EntityScriptInterface::GetName>("name")
         .property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId")
         .fun<&EntityScriptInterface::GetTags>("getTags")

@@ -10,7 +10,7 @@ async {{ name }}(
     , progressCallback: (requestProgress: number, responseProgress: number) => void
 {{/ is_async_result_with_progress }}
 ): Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}> {
-    var _resolve;
+    let _resolve!: (value: {{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}) => void;
 
     var _promise = new Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}>(
         (_r) => {
@@ -22,7 +22,13 @@ async {{ name }}(
     var _callback = (
         _stateObject__ : number,
 {{# results }}
-        {{ name }}{{> Comma }}
+        {{ name }}: {{# type }}
+{{# is_class_or_interface }}number{{/ is_class_or_interface }}
+{{# is_string }}number{{/ is_string }}
+{{# is_enum }}number{{/ is_enum }}
+{{# is_number }}{{# is_large }}bigint{{/ is_large }}{{^ is_large }}number{{/ is_large }}{{/ is_number }}
+{{^ is_class_or_interface }}{{^ is_string }}{{^ is_enum }}{{^ is_number }}number{{/ is_number }}{{/ is_enum }}{{/ is_string }}{{/ is_class_or_interface }}
+{{/ type }}{{> Comma }}
 {{/ results }}
     ) => {
 {{# results }}

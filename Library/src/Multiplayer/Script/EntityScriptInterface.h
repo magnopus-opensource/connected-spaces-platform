@@ -76,6 +76,8 @@ public:
 
     const std::string GetName() const;
     int64_t GetId() const;
+    bool IsLocal() const;
+    void SetLocal(bool InIsLocal);
     std::vector<std::string> GetTags() const;
     void SetTags(const std::vector<std::string>& Tags);
     bool HasTag(const std::string& Tag) const;

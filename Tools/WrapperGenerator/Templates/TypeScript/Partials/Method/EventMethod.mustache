@@ -12,7 +12,13 @@
     var _callback = (
         _stateObject__: number,
 {{# parameters }}
-        {{ name }}{{> Comma }}
+        {{ name }}: {{# type }}
+{{# is_class_or_interface }}number{{/ is_class_or_interface }}
+{{# is_string }}number{{/ is_string }}
+{{# is_enum }}number{{/ is_enum }}
+{{# is_number }}{{# is_large }}bigint{{/ is_large }}{{^ is_large }}number{{/ is_large }}{{/ is_number }}
+{{^ is_class_or_interface }}{{^ is_string }}{{^ is_enum }}{{^ is_number }}number{{/ is_number }}{{/ is_enum }}{{/ is_string }}{{/ is_class_or_interface }}
+{{/ type }}{{> Comma }}
 {{/ parameters }}
     ) => {
 {{# parameters }}
@@ -28,12 +34,8 @@
         );
 {{/ type.is_class_or_interface }}
 {{# type.is_string }}
-        {
-            const _stringValue = Module.UTF8ToString({{ name }});
-            free({{ name }});
-
-            {{ name }} = _stringValue;
-        }
+        const _{{ name }} = Module.UTF8ToString({{ name }});
+        free({{ name }});
 {{/ type.is_string }}
 {{# type.is_number }}
 {{^ type.is_float }}
@@ -47,11 +49,14 @@
 {{/ type.is_signed }}
 {{/ type.is_float }}
 {{/ type.is_number }}
+{{# type.is_bool }}
+        const _{{ name }} = !!{{ name }};
+{{/ type.is_bool }}
 {{/ parameters }}
 
         callback(
 {{# parameters }}
-        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{ name }}{{> Comma }}
+        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{# type.is_string }}_{{/ type.is_string }}{{# type.is_bool }}_{{/ type.is_bool }}{{ name }}{{> Comma }}
 {{/ parameters }}
         );
     };

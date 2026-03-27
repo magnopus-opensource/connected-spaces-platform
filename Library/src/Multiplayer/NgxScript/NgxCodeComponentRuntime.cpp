@@ -1716,9 +1716,6 @@ void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
 
     // Use the NgxScriptSystem bridge which returns a schema metadata object only.
     const csp::common::String SchemaResultJson = ScriptSystem.SyncCodeComponentSchema(EntityIdString.c_str());
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        fmt::format("NgxCodeComponentRuntime Trace: SyncSchemaInRegistry(entity={}) rawSchemaJson={}", EntityIdString, SchemaResultJson.c_str())
-            .c_str());
 
     // Parse and write the schema object to the code component's dedicated schema property.
     if (ActiveRealtimeEngine == nullptr)
@@ -1740,8 +1737,6 @@ void NgxCodeComponentRuntime::SyncSchemaInRegistry(uint64_t EntityId)
     rapidjson::Writer<rapidjson::StringBuffer> SchemaWriter(SchemaBuffer);
     ResultDoc.Accept(SchemaWriter);
     const std::string SchemaJsonString = SchemaBuffer.GetString();
-    LogSystem.LogMsg(csp::common::LogLevel::Log,
-        fmt::format("NgxCodeComponentRuntime Trace: SyncSchemaInRegistry(entity={}) writing schema={}", EntityIdString, SchemaJsonString).c_str());
 
     // Find the entity and write the schema to it.
     ActiveRealtimeEngine->LockEntityUpdate();
@@ -1789,8 +1784,6 @@ void NgxCodeComponentRuntime::DrainPendingSchemaSyncs()
         try
         {
             const uint64_t EntityId = std::stoull(IdValue.GetString());
-            LogSystem.LogMsg(csp::common::LogLevel::Log,
-                fmt::format("NgxCodeComponentRuntime Trace: DrainPendingSchemaSyncs processing entityId={}", EntityId).c_str());
             SyncSchemaInRegistry(EntityId);
         }
         catch (...)

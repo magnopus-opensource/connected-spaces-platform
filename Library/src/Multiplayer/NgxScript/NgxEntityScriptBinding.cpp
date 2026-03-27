@@ -150,26 +150,6 @@ void NgxEntityScriptBinding::BindToContext(qjs::Context& Context, int64_t Contex
     };
 
     constexpr const char* NgxCompatibilityPatch = R"JS(
-if (globalThis.ThisEntity && typeof globalThis.__ngxGetEntityIsLocal === "function" && typeof globalThis.__ngxSetEntityIsLocal === "function") {
-  Object.defineProperty(Object.getPrototypeOf(globalThis.ThisEntity), "isLocal", {
-    configurable: true,
-    enumerable: true,
-    get() { return globalThis.__ngxGetEntityIsLocal(this.id); },
-    set(value) { globalThis.__ngxSetEntityIsLocal(this.id, !!value); }
-  });
-}
-
-if (typeof globalThis.TheEntitySystem === "undefined" || globalThis.TheEntitySystem === null) {
-  globalThis.TheEntitySystem = {};
-}
-
-if (typeof globalThis.TheEntitySystem.getEntityByID !== "function") {
-  globalThis.TheEntitySystem.getEntityByID = (...args) => globalThis.TheEntitySystem.getEntityById(...args);
-}
-
-if (typeof globalThis.__ngxCreateLocalEntity === "function") {
-  globalThis.TheEntitySystem.createLocalEntity = (name) => globalThis.__ngxCreateLocalEntity(name);
-}
 
 const __ngxPlayerControllerConfigTag = "player-controller-config";
 const __ngxCodeComponentType = 35;
@@ -440,7 +420,7 @@ if (globalThis.ThisEntity) {
 }
 
 if (globalThis.TheEntitySystem) {
-  for (const name of ["getEntityById", "getEntityByID", "getEntityByName"]) {
+  for (const name of ["getEntityById", "getEntityByName"]) {
     if (typeof globalThis.TheEntitySystem[name] === "function" && !globalThis.TheEntitySystem[`__ngxWrapped_${name}`]) {
       const original = globalThis.TheEntitySystem[name];
       globalThis.TheEntitySystem[name] = function(...args) {

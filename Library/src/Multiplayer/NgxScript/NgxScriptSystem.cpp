@@ -1816,9 +1816,6 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
 
 csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::String& EntityId)
 {
-    const std::string SyncSchemaRequestMessage = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') called.", EntityId.c_str());
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, SyncSchemaRequestMessage.c_str());
-
     if (EntityId.IsEmpty())
     {
         return EMPTY_JSON_OBJECT_STRING;
@@ -1826,9 +1823,6 @@ csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::
 
     if (!ScriptModulesLoaded.load())
     {
-        const std::string DeferredMessage
-            = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') deferred while script modules are loading.", EntityId.c_str());
-        LogSystem.LogMsg(csp::common::LogLevel::Verbose, DeferredMessage.c_str());
         return EMPTY_JSON_OBJECT_STRING;
     }
 
@@ -1894,9 +1888,6 @@ csp::common::String NgxScriptSystem::SyncCodeComponentSchema(const csp::common::
         }
     }
 
-    const std::string SyncSchemaResultMessage
-        = fmt::format("NgxScript Trace: SyncCodeComponentSchema(entityId='{}') resultLength={}.", EntityId.c_str(), JsonResultString.size());
-    LogSystem.LogMsg(csp::common::LogLevel::Verbose, SyncSchemaResultMessage.c_str());
     return csp::common::String(JsonResultString.c_str());
 }
 
