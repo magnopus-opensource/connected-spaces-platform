@@ -237,6 +237,59 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
     LogOut(UserSystem);
 }
 
+CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptDestroyTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    {
+        std::unique_ptr<csp::multiplayer::OnlineRealtimeEngine> RealtimeEngine { SystemsManager.MakeOnlineRealtimeEngine() };
+        RealtimeEngine->SetEntityFetchCompleteCallback([](uint32_t) {});
+
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, RealtimeEngine.get());
+
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        RealtimeEngine->SetRemoteEntityCreatedCallback([](csp::multiplayer::SpaceEntity* /*Entity*/) {});
+
+        csp::common::String ObjectName = "Object 1";
+        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(RealtimeEngine.get(), CreateEntity, ObjectName, ObjectTransform, csp::common::Optional<uint64_t> {});
+
+        const std::string StaticModelScriptText = R"xx(
+            var model = ThisEntity.addStaticModelComponent();
+            model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
+            model.externalResourceAssetId = "TestExternalResourceAssetId";
+            model.destroy();
+        )xx";
+
+        CreatedObject->GetScript().SetScriptSource(StaticModelScriptText.c_str());
+        const bool ScriptInvoked = CreatedObject->GetScript().Invoke();
+
+        EXPECT_TRUE(ScriptInvoked);
+        EXPECT_FALSE(CreatedObject->GetScript().HasError());
+
+        RealtimeEngine->ProcessPendingEntityOperations();
+
+        EXPECT_EQ(CreatedObject->GetComponents()->Size(), 1);
+        EXPECT_EQ(CreatedObject->FindFirstComponentOfType(ComponentType::StaticModel), nullptr);
+
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
+
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
 CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 {
     SetRandSeed();

@@ -46,6 +46,29 @@ void ComponentScriptInterface::InvokeAction(std::string ActionId, std::string Ac
     }
 }
 
+bool ComponentScriptInterface::Destroy()
+{
+    if (Component == nullptr)
+    {
+        return false;
+    }
+
+    auto* Parent = Component->GetParent();
+    if (Parent == nullptr)
+    {
+        Component = nullptr;
+        return false;
+    }
+
+    const bool Removed = Parent->RemoveComponent(Component->GetId());
+    if (Removed)
+    {
+        Component = nullptr;
+    }
+
+    return Removed;
+}
+
 int64_t ComponentScriptInterface::GetComponentId() const
 {
     if (Component)

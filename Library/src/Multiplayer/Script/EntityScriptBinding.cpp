@@ -813,6 +813,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::common::IJSScriptRunner& 
         .property<&ComponentScriptInterface::GetComponentId>("id")
         .property<&ComponentScriptInterface::GetComponentType>("type")
         .property<&ComponentScriptInterface::GetComponentName, &ComponentScriptInterface::SetComponentName>("name")
+        .fun<&ComponentScriptInterface::Destroy>("destroy")
         .fun<&ComponentScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&ComponentScriptInterface::InvokeAction>("invokeAction");
 

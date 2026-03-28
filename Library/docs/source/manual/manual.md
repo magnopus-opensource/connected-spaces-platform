@@ -47,6 +47,7 @@ Documentation on processes and principles that the library adheres to.
    documentation/branching_strategy
    documentation/wrapper_generator_specs
    documentation/script_system
+   documentation/ngx_scripting
    documentation/scripted_locomotion
    documentation/expected_application_flow
    documentation/multiplayer_state_replication

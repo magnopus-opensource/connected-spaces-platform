@@ -1,0 +1,422 @@
+# NGX Scripting
+
+This page documents the current NGX code-component scripting path used by `NgxScriptSystem`, `NgxCodeComponentRuntime`, and `NgxEntityScriptBinding`.
+
+It is aimed at writing JavaScript modules for `CodeSpaceComponent` assets, not the older legacy `ScriptSpaceComponent` flow.
+
+## What An NGX Script Module Looks Like
+
+An NGX script module typically exports two things:
+
+- `schema`: the editable attributes for the code component
+- `script`: the function the runtime executes for the entity
+
+Use this shape:
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export const schema = {
+  speed: { type: "float", default: 1.0, min: 0.0, max: 10.0 },
+  enabled: { type: "boolean", default: true },
+};
+
+export function script({ attributes, thisEntity, entityId }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity || !attributes.enabled.value) {
+      return;
+    }
+
+    console.log(`NGX script running for entity ${entityId}: ${entity.name}`);
+  });
+}
+```
+
+## Current Runtime Contract
+
+The current runtime calls your module like this:
+
+```js
+script({ attributes, thisEntity, entityId })
+```
+
+That means:
+
+- `attributes` is an object of signals
+- `thisEntity` is also a signal
+- `entityId` is the current entity id
+
+Prefer `export const schema` plus `export function script(...)`.
+
+Your `script(...)` function may also return a teardown function. That teardown runs when the code component is replaced or removed.
+
+Notes:
+
+- `attributes`, `codeComponentSchema`, and `schema` are all accepted as schema exports today, but `schema` is the clearest choice.
+- Older patterns such as `scriptFactory()` may still exist in sample projects, but they are not the clearest representation of the current runtime.
+
+## Available Imports
+
+The NGX runtime currently exposes these built-in modules:
+
+- `@csp/hooks`
+  - `useEffect`
+- `@csp/core`
+  - `useEffect`
+  - `TheEntitySystem`
+- `@csp/code`
+  - `TheEntitySystem`
+  - `keyboard`
+  - `mouse`
+  - `ThePlayerController`
+
+## Signals And `useEffect`
+
+`useEffect` is backed by reactive signals. Anything you read with `.value` inside an effect becomes a dependency.
+
+Example:
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export const schema = {
+  spinSpeed: { type: "float", default: 0.75 },
+};
+
+export function script({ attributes, thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    const spinSpeed = attributes.spinSpeed.value;
+
+    if (!entity) {
+      return;
+    }
+
+    console.log(`Entity ${entity.name} spin speed is ${spinSpeed}`);
+  });
+}
+```
+
+If an effect returns a function, that function is treated as cleanup. Cleanup runs before the effect is replaced and again when the code component is removed.
+
+## `thisEntity`
+
+`thisEntity` is a signal whose `.value` is the live bound entity or `null`.
+
+Use it like this:
+
+```js
+const entity = thisEntity.value;
+if (!entity) {
+  return;
+}
+
+entity.position = [0, 1, 0];
+```
+
+The entity object exposes the familiar legacy entity API, including:
+
+- transform properties such as `position`, `rotation`, and `scale`
+- component getters such as `getStaticModelComponents()`
+- component creation helpers such as `addStaticModelComponent()`
+- event helpers such as `on(...)`, `off(...)`, and `fire(...)`
+
+`entity.on(...)` listens to NGX entity events delivered through the NGX event bridge. Click, trigger, and collision events are wired today.
+
+## Schema Types
+
+The current NGX schema reader supports these normalized attribute types:
+
+- `boolean`
+- `integer`
+- `float`
+- `string`
+- `entity`
+- `modelAsset`
+
+Example schema:
+
+```js
+export const schema = {
+  enabled: { type: "boolean", default: true },
+  count: { type: "integer", default: 3, min: 0, max: 10 },
+  speed: { type: "float", default: 1.5, min: 0, max: 5, step: 0.1 },
+  label: { type: "string", default: "Hello" },
+  target: { type: "entity" },
+  mesh: {
+    type: "modelAsset",
+    default: { assetCollectionId: "csp-default-assets", assetId: "cube" },
+  },
+};
+```
+
+### Entity Attributes
+
+Entity attributes are resolved to entity references for you.
+
+```js
+export const schema = {
+  target: { type: "entity" },
+};
+
+export function script({ attributes }) {
+  useEffect(() => {
+    const target = attributes.target.value;
+    if (target) {
+      console.log(`Target entity: ${target.name}`);
+    }
+  });
+}
+```
+
+## Example: Animate The Host Entity
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export const schema = {
+  speed: { type: "float", default: 1.0, min: 0.0, max: 10.0 },
+  amplitude: { type: "float", default: 0.25, min: 0.0, max: 3.0 },
+};
+
+export function script({ attributes, thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    let rafId = 0;
+    const startPosition = [...entity.position];
+
+    const tick = (timeMs = 0) => {
+      const offset = Math.sin((timeMs / 1000) * attributes.speed.value) * attributes.amplitude.value;
+      entity.position = [startPosition[0], startPosition[1] + offset, startPosition[2]];
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(rafId);
+      entity.position = startPosition;
+    };
+  });
+}
+```
+
+## Example: Add And Clean Up A Runtime Component
+
+This is the pattern to use when you want a script-created component to go away cleanly.
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export function script({ thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    const mesh = entity.addStaticModelComponent();
+    mesh.assetCollectionId = "csp-default-assets";
+    mesh.modelAssetId = "cube";
+    mesh.isVisible = true;
+    mesh.position = [0, 1, 0];
+
+    return () => {
+      mesh.destroy();
+    };
+  });
+}
+```
+
+Notes:
+
+- `destroy()` is available on the script-side component base interface.
+- This is the right pattern for `useEffect` cleanup.
+
+## Example: Respond To Clicks
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export function script({ thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    const onClick = (eventData) => {
+      console.log(`Clicked ${entity.name}`, eventData);
+    };
+
+    entity.on("click", onClick);
+    return () => entity.off("click", onClick);
+  });
+}
+```
+
+For component clicks, the event payload currently follows the legacy shape:
+
+```js
+{ id, cid }
+```
+
+Where:
+
+- `id` is the clicked entity id
+- `cid` is the clicked component id
+
+## Example: Respond To Trigger Events
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export function script({ thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    const onTriggerEnter = (eventData) => {
+      console.log(`Trigger enter on ${entity.name}`, eventData);
+    };
+
+    entity.on("trigger-enter", onTriggerEnter);
+    return () => entity.off("trigger-enter", onTriggerEnter);
+  });
+}
+```
+
+## Example: Keyboard And Mouse Input
+
+```js
+import { useEffect } from "@csp/hooks";
+import { keyboard, mouse } from "@csp/code";
+
+export function script() {
+  useEffect(() => {
+    const onKeyDown = (event) => console.log(`Key down: ${event.key}`);
+    const onMouseDown = (event) => console.log(`Mouse button: ${event.button}`);
+
+    keyboard.on("keydown", onKeyDown);
+    mouse.on("mousedown", onMouseDown);
+
+    return () => {
+      keyboard.off("keydown", onKeyDown);
+      mouse.off("mousedown", onMouseDown);
+    };
+  });
+}
+```
+
+## Example: Player Controller Access
+
+```js
+import { useEffect } from "@csp/hooks";
+import { ThePlayerController } from "@csp/code";
+
+export function script() {
+  useEffect(() => {
+    ThePlayerController.teleportCharacter(0, 1, 0);
+  });
+}
+```
+
+`ThePlayerController` currently exposes helpers such as:
+
+- `moveCharacter(x, y, z, jump, isFlying)`
+- `teleportCharacter(x, y, z)`
+- `setFirstPersonEnabled(enabled)`
+- camera query helpers such as `getCameraPosition()` and `getCameraForward()`
+
+## Accessing Other Entities
+
+Use `TheEntitySystem` when you need to look up other entities.
+
+```js
+import { useEffect } from "@csp/hooks";
+import { TheEntitySystem } from "@csp/core";
+
+export const schema = {
+  targetName: { type: "string", default: "Target" },
+};
+
+export function script({ attributes }) {
+  useEffect(() => {
+    const target = TheEntitySystem.getEntityByName(attributes.targetName.value);
+    if (target) {
+      console.log(`Found target ${target.id}`);
+    }
+  });
+}
+```
+
+## Materials On Model Components
+
+The NGX compatibility layer adds async material helpers for static and animated model components:
+
+- `await model.getMaterial(path)`
+- `await model.getMaterials()`
+
+Example:
+
+```js
+import { useEffect } from "@csp/hooks";
+
+export function script({ thisEntity }) {
+  useEffect(() => {
+    const entity = thisEntity.value;
+    if (!entity) {
+      return;
+    }
+
+    const model = entity.getStaticModelComponents()[0];
+    if (!model) {
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const material = await model.getMaterial("/nodes/0");
+      if (!cancelled && material) {
+        material.emissiveStrength = 2.0;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  });
+}
+```
+
+## Practical Rules
+
+- Read signals with `.value`.
+- Guard `thisEntity.value` before using it.
+- Prefer `schema` over older alias names.
+- Prefer `export function script({ ... })` over older factory-style examples.
+- Use `useEffect` for subscriptions, timers, animation loops, and cleanup.
+- If you create runtime components, clean them up with `component.destroy()`.
+- If you attach browser or input listeners, always remove them in cleanup.
+
+## Current Runtime Notes
+
+- The NGX code-component runtime is client-side.
+- `Local` and `Editor` scopes are handled in the current client runtime path.
+- `Server` scope is defined at the component level but is not executed by this runtime path today.
+
+## Related Files
+
+If you need to understand the implementation behind this API, the main entry points are:
+
+- `Library/src/Multiplayer/NgxScript/NgxScriptSystem.cpp`
+- `Library/src/Multiplayer/NgxScript/NgxCodeComponentRuntime.cpp`
+- `Library/src/Multiplayer/NgxScript/NgxEntityScriptBinding.cpp`
+- `Library/src/Multiplayer/Script/EntityScriptBinding.cpp`

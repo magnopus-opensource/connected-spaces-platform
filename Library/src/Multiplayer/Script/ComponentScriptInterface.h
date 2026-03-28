@@ -41,6 +41,7 @@ public:
 
     void SubscribeToPropertyChange(int32_t PropertyKey, std::string Message);
     void InvokeAction(std::string ActionId, std::string ActionParams);
+    bool Destroy();
 
     int64_t GetComponentId() const;
     int64_t GetComponentType() const;
