@@ -8,9 +8,6 @@ It is aimed at migration and runtime support, not authoring tools.
 
 This guide assumes:
 
-- Unreal already uses the CSP shared library
-- Unreal already enters spaces through `SpaceSystem`
-- Unreal already uses a CSP realtime engine
 - Unreal does not need code-component authoring UI
 
 The goal is:
@@ -20,14 +17,6 @@ The goal is:
 - add extra host features only when scripts actually need them
 
 ## Required Core Integration
-
-This guide assumes the existing Unreal integration already handles:
-
-- NGX system creation
-- space enter and exit wiring
-- CSP foundation ticking
-
-The remaining required migration work is below.
 
 ### 1. Drive animation-frame ticking every rendered frame
 
@@ -69,6 +58,7 @@ Current runtime rules are:
 - `Editor` components run only in `Edit`
 - `Local` components run in `Play`
 - `Local` components also run in `Edit` when the entity, or one of its ancestors, is selected by the local client
+- `Server` components only run when in server mode, this behaviour is not implemented
 
 So Unreal should:
 
@@ -86,10 +76,10 @@ Without this:
 
 The shortest practical migration path is:
 
-1. Add per-frame `TickAnimationFrame(...)`.
-2. Add Edit/Play runtime-mode switching.
-3. Add editor-selection sync to CSP entities.
-4. Test one `Editor` code component in `Edit`.
+1. Verify NGX systems are being created.
+2. Add per-frame `TickAnimationFrame(...)`.
+3. Add Edit/Play runtime-mode switching.
+4. Add editor-selection sync to CSP entities.
 5. Test one `Local` code component in `Play`.
 6. Test one `Local` code component in `Edit` while selected.
 
@@ -221,7 +211,7 @@ After that, add one test for each optional feature you choose to support:
 
 For the safest Unreal rollout:
 
-1. Animation-frame ticking
+1. Core integration
 2. Edit/Play mode switching
 3. Selection sync
 4. Entity event forwarding

@@ -49,7 +49,6 @@ enum class UIWidgetKind
     FlowRow,
     Floating,
     Spacer,
-    TextHost,
     Text,
     Image,
     Button,
@@ -290,9 +289,9 @@ Clay_Sizing ToClaySizing(const UISizeSpec& Width, const UISizeSpec& Height)
 {
     Clay_Sizing Result;
     Result.width = Width.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Width.Value)
-                                                   : (Width.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
+        : (Width.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
     Result.height = Height.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Height.Value)
-                                                     : (Height.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
+        : (Height.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
     return Result;
 }
 
@@ -388,7 +387,10 @@ Clay_FloatingAttachToElement ParseFloatingAttachTo(const std::string& Value)
     return CLAY_ATTACH_TO_PARENT;
 }
 
-float ClampNonNegative(float Value) { return Value < 0.0f ? 0.0f : Value; }
+float ClampNonNegative(float Value)
+{
+    return Value < 0.0f ? 0.0f : Value;
+}
 
 UIColor ParseColorString(const std::string& Value)
 {
@@ -406,7 +408,10 @@ UIColor ParseColorString(const std::string& Value)
         return Color;
     }
 
-    auto ParsePair = [](const std::string& Pair) -> int32_t { return static_cast<int32_t>(std::strtol(Pair.c_str(), NULL, 16)); };
+    auto ParsePair = [](const std::string& Pair) -> int32_t
+    {
+        return static_cast<int32_t>(std::strtol(Pair.c_str(), NULL, 16));
+    };
 
     Color.R = static_cast<float>(ParsePair(Hex.substr(0, 2))) / 255.0f;
     Color.G = static_cast<float>(ParsePair(Hex.substr(2, 2))) / 255.0f;
@@ -500,7 +505,10 @@ csp::common::Vector3 ParseVector3(const rapidjson::Value& Value)
     return Result;
 }
 
-bool ParseBoolOrDefault(const rapidjson::Value& Value, bool DefaultValue) { return Value.IsBool() ? Value.GetBool() : DefaultValue; }
+bool ParseBoolOrDefault(const rapidjson::Value& Value, bool DefaultValue)
+{
+    return Value.IsBool() ? Value.GetBool() : DefaultValue;
+}
 
 std::string ParseStringOrDefault(const rapidjson::Value& Value, const std::string& DefaultValue)
 {
@@ -585,19 +593,34 @@ const char* RenderCommandTypeToString(Clay_RenderCommandType CommandType)
 
 bool DrawablesEqual(const UIDrawable& Left, const UIDrawable& Right)
 {
-    return Left.Type == Right.Type && Left.Surface == Right.Surface && Left.TargetEntityId == Right.TargetEntityId
-        && std::fabs(Left.SurfaceWidth - Right.SurfaceWidth) < 0.01f && std::fabs(Left.SurfaceHeight - Right.SurfaceHeight) < 0.01f
-        && std::fabs(Left.WorldOffset.X - Right.WorldOffset.X) < 0.01f && std::fabs(Left.WorldOffset.Y - Right.WorldOffset.Y) < 0.01f
-        && std::fabs(Left.WorldOffset.Z - Right.WorldOffset.Z) < 0.01f && Left.BillboardMode == Right.BillboardMode
-        && std::fabs(Left.X - Right.X) < 0.01f && std::fabs(Left.Y - Right.Y) < 0.01f && std::fabs(Left.Width - Right.Width) < 0.01f
-        && std::fabs(Left.Height - Right.Height) < 0.01f && std::fabs(Left.BackgroundColor.R - Right.BackgroundColor.R) < 0.001f
+    return Left.Type == Right.Type
+        && Left.Surface == Right.Surface
+        && Left.TargetEntityId == Right.TargetEntityId
+        && std::fabs(Left.SurfaceWidth - Right.SurfaceWidth) < 0.01f
+        && std::fabs(Left.SurfaceHeight - Right.SurfaceHeight) < 0.01f
+        && std::fabs(Left.WorldOffset.X - Right.WorldOffset.X) < 0.01f
+        && std::fabs(Left.WorldOffset.Y - Right.WorldOffset.Y) < 0.01f
+        && std::fabs(Left.WorldOffset.Z - Right.WorldOffset.Z) < 0.01f
+        && Left.BillboardMode == Right.BillboardMode
+        && std::fabs(Left.X - Right.X) < 0.01f
+        && std::fabs(Left.Y - Right.Y) < 0.01f
+        && std::fabs(Left.Width - Right.Width) < 0.01f
+        && std::fabs(Left.Height - Right.Height) < 0.01f
+        && std::fabs(Left.BackgroundColor.R - Right.BackgroundColor.R) < 0.001f
         && std::fabs(Left.BackgroundColor.G - Right.BackgroundColor.G) < 0.001f
         && std::fabs(Left.BackgroundColor.B - Right.BackgroundColor.B) < 0.001f
-        && std::fabs(Left.BackgroundColor.A - Right.BackgroundColor.A) < 0.001f && std::fabs(Left.TextColor.R - Right.TextColor.R) < 0.001f
-        && std::fabs(Left.TextColor.G - Right.TextColor.G) < 0.001f && std::fabs(Left.TextColor.B - Right.TextColor.B) < 0.001f
-        && std::fabs(Left.TextColor.A - Right.TextColor.A) < 0.001f && std::fabs(Left.CornerRadius - Right.CornerRadius) < 0.01f
-        && std::fabs(Left.Opacity - Right.Opacity) < 0.01f && Left.Text == Right.Text && std::fabs(Left.FontSize - Right.FontSize) < 0.01f
-        && Left.AssetCollectionId == Right.AssetCollectionId && Left.ImageAssetId == Right.ImageAssetId && Left.HandlerId == Right.HandlerId
+        && std::fabs(Left.BackgroundColor.A - Right.BackgroundColor.A) < 0.001f
+        && std::fabs(Left.TextColor.R - Right.TextColor.R) < 0.001f
+        && std::fabs(Left.TextColor.G - Right.TextColor.G) < 0.001f
+        && std::fabs(Left.TextColor.B - Right.TextColor.B) < 0.001f
+        && std::fabs(Left.TextColor.A - Right.TextColor.A) < 0.001f
+        && std::fabs(Left.CornerRadius - Right.CornerRadius) < 0.01f
+        && std::fabs(Left.Opacity - Right.Opacity) < 0.01f
+        && Left.Text == Right.Text
+        && std::fabs(Left.FontSize - Right.FontSize) < 0.01f
+        && Left.AssetCollectionId == Right.AssetCollectionId
+        && Left.ImageAssetId == Right.ImageAssetId
+        && Left.HandlerId == Right.HandlerId
         && Left.Enabled == Right.Enabled;
 }
 
@@ -638,8 +661,7 @@ struct NgxUIRuntime::Impl
 
         Self->LogSystem.LogMsg(csp::common::LogLevel::Error,
             std::string("NgxUIRuntime/Clay: ")
-                .append(ErrorData.errorText.chars != nullptr ? ErrorData.errorText.chars : "",
-                    static_cast<size_t>(std::max(0, ErrorData.errorText.length)))
+                .append(ErrorData.errorText.chars != nullptr ? ErrorData.errorText.chars : "", static_cast<size_t>(std::max(0, ErrorData.errorText.length)))
                 .c_str());
     }
 
@@ -681,7 +703,8 @@ struct NgxUIRuntime::Impl
         if (Self != NULL && !Self->HasWarnedFallbackMeasurement)
         {
             Self->HasWarnedFallbackMeasurement = true;
-            Self->LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxUIRuntime: Text measurement callback not set; using fallback text sizing.");
+            Self->LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                "NgxUIRuntime: Text measurement callback not set; using fallback text sizing.");
         }
 
         Dimensions.width = static_cast<float>(Text.length) * FontSize * 0.6f;
@@ -1123,33 +1146,6 @@ struct NgxUIRuntime::Impl
         Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
     }
 
-    void EmitStandaloneText(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
-        std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage)
-    {
-        Clay_LayoutConfig LayoutConfig;
-        std::memset(&LayoutConfig, 0, sizeof(LayoutConfig));
-        LayoutConfig.sizing = ToClaySizing(Node.Width, Node.Height);
-        LayoutConfig.padding.left = Node.Padding.Left;
-        LayoutConfig.padding.right = Node.Padding.Right;
-        LayoutConfig.padding.top = Node.Padding.Top;
-        LayoutConfig.padding.bottom = Node.Padding.Bottom;
-        LayoutConfig.childAlignment.x = ParseAlignX(Node.AlignX);
-        LayoutConfig.childAlignment.y = ParseAlignY(Node.AlignY);
-
-        Clay_ElementDeclaration Declaration = CLAY__DEFAULT_STRUCT;
-        Declaration.layout = LayoutConfig;
-        Declaration.userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id + "__host", UIWidgetKind::TextHost);
-
-        Clay__OpenElementWithId(Clay_GetElementId(ToClayString(Node.Id + "__host")));
-        Clay__ConfigureOpenElement(Declaration);
-
-        Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, Node);
-        TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, UIWidgetKind::Text);
-        Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
-
-        Clay__CloseElement();
-    }
-
     void EmitNodeToClay(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
         std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage)
     {
@@ -1160,7 +1156,9 @@ struct NgxUIRuntime::Impl
 
         if (Node.Kind == UIWidgetKind::Text)
         {
-            EmitStandaloneText(EntityId, Node, MetadataStorage, TextConfigStorage);
+            Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, Node);
+            TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind);
+            Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
             return;
         }
 
@@ -1261,12 +1259,6 @@ struct NgxUIRuntime::Impl
         Clay_SetLayoutDimensions(Clay_Dimensions { SurfaceWidth, SurfaceHeight });
         Clay_BeginLayout();
 
-        UINode SurfaceRoot = Root;
-        SurfaceRoot.Width.Mode = UISizeMode::Fixed;
-        SurfaceRoot.Width.Value = SurfaceWidth;
-        SurfaceRoot.Height.Mode = UISizeMode::Fixed;
-        SurfaceRoot.Height.Value = SurfaceHeight;
-
         UINode Host = Root;
         Host.Id = Root.Id + "__surface";
         Host.Kind = Root.Surface == UISurfaceKind::Screen ? UIWidgetKind::ScreenRoot : UIWidgetKind::WorldRoot;
@@ -1284,7 +1276,7 @@ struct NgxUIRuntime::Impl
         Host.AlignY = Root.SurfaceAlignY;
         Host.BackgroundColor = UIColor();
         Host.Children.clear();
-        Host.Children.push_back(SurfaceRoot);
+        Host.Children.push_back(Root);
 
         EmitNodeToClay(EntityId, Host, MetadataStorage, TextConfigStorage);
 
@@ -1299,10 +1291,6 @@ struct NgxUIRuntime::Impl
 
             const ClayNodeMetadata& Meta = *static_cast<const ClayNodeMetadata*>(Command->userData);
             if (Meta.Id == Host.Id)
-            {
-                continue;
-            }
-            if (Meta.WidgetKind == UIWidgetKind::TextHost)
             {
                 continue;
             }
@@ -1357,10 +1345,11 @@ struct NgxUIRuntime::Impl
             {
                 std::ostringstream Message;
                 Message << "NgxUIRuntime: Duplicate drawable id '" << Drawable.Id << "' while building entity '" << EntityId
-                        << "'. Existing type=" << Existing->second.Type << " new type=" << Drawable.Type << " existing text='"
-                        << Existing->second.Text << "' new text='" << Drawable.Text
+                        << "'. Existing type=" << Existing->second.Type << " new type=" << Drawable.Type
+                        << " existing text='" << Existing->second.Text << "' new text='" << Drawable.Text
                         << "' commandType=" << RenderCommandTypeToString(Command->commandType)
-                        << " metaWidgetKind=" << WidgetKindToString(Meta.WidgetKind) << " x=" << Drawable.X << " y=" << Drawable.Y
+                        << " metaWidgetKind=" << WidgetKindToString(Meta.WidgetKind)
+                        << " x=" << Drawable.X << " y=" << Drawable.Y
                         << " width=" << Drawable.Width << " height=" << Drawable.Height;
                 LogSystem.LogMsg(csp::common::LogLevel::Warning, Message.str().c_str());
             }
@@ -1571,7 +1560,7 @@ std::string NgxUIRuntime::GetDrawablesJson(const std::string& EntityId) const
     }
 
     for (std::map<std::string, UIDrawable>::const_iterator DrawableIt = It->second.Drawables.begin(); DrawableIt != It->second.Drawables.end();
-        ++DrawableIt)
+         ++DrawableIt)
     {
         Document.PushBack(Pimpl->DrawableToJsonValue(DrawableIt->second, Allocator), Allocator);
     }
