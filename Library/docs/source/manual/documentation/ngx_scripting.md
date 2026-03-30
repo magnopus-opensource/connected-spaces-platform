@@ -70,6 +70,140 @@ The NGX runtime currently exposes these built-in modules:
   - `keyboard`
   - `mouse`
   - `ThePlayerController`
+- `@csp/ui`
+  - `screen`
+  - `world`
+  - `row`
+  - `column`
+  - `flowRow`
+  - `floating`
+  - `spacer`
+  - `text`
+  - `image`
+  - `button`
+
+## Scripted UI With `ui()`
+
+An NGX module may optionally export a `ui(...)` function alongside `script(...)`.
+
+The runtime calls it like this:
+
+```js
+ui({ attributes, thisEntity, entityId })
+```
+
+`ui(...)` returns a UI tree built with `@csp/ui`. The runtime evaluates that tree reactively, runs layout in the shared library, and publishes flattened drawables for the client renderer.
+
+Use `screen(...)` for screen-space UI and `world(...)` for in-space UI anchored to an entity.
+
+Example:
+
+```js
+import { screen, row, column, button, image } from "@csp/ui";
+
+export function ui() {
+  return screen(
+    { width: 900, height: 420, alignX: "center", alignY: "center", padding: 20 },
+    row(
+      { width: "grow", height: "grow", gap: 20 },
+      column(
+        { width: 220, gap: 12 },
+        button("Alpha", { key: "alpha" }),
+        button("Beta", { key: "beta" }),
+      ),
+      image(
+        { assetCollectionId: "museum-assets", imageAssetId: "hero" },
+        { key: "heroImage", width: "grow", height: "grow" }
+      )
+    )
+  );
+}
+```
+
+Wrapping button list example:
+
+```js
+import { flowRow, button } from "@csp/ui";
+
+const cameras = [
+  "CAM_1_Lift",
+  "CAM_2_Lift",
+  "CAM_3_Dock",
+  "CAM_4_Towe",
+  "CAM_5_Land",
+  "CAM_6_JIB",
+  "CAM_7_Dron",
+];
+
+function cameraButton(label) {
+  return button(label, {
+    width: 215,
+    height: 54,
+    backgroundColor: "#111111",
+    textColor: "#F2F2F2",
+  });
+}
+
+export function ui() {
+  return flowRow(
+    {
+      width: 910,
+      columnGap: 16,
+      rowGap: 14,
+    },
+    ...cameras.map(cameraButton)
+  );
+}
+```
+
+Current UI notes:
+
+- `button` supports `onClick`
+- `screen` supports viewport anchoring through root `alignX` and `alignY`
+- `world` supports `targetEntityId`, `worldOffset`, and `billboardMode`
+- `flowRow` lays out children left-to-right and starts a new row when the next child would overflow
+- `floating` is the way to overlap or absolutely anchor UI relative to a parent or the root
+- `width` and `height` currently support fixed numbers plus `"grow"` and `"fit"`
+- colors are currently passed as hex strings such as `"#FFFFFF"` or `"#102713CC"`
+- text color props may be written as `textColor`, `color`, or `colour`
+- if no explicit color is provided, `text(...)` defaults to opaque white text and `button(...)` defaults to opaque white text on a dark background
+
+`floating(...)` is preferred over a generic "stack" abstraction because it expresses overlap and anchoring explicitly.
+
+Example text styling:
+
+```js
+text("Coins: 3", {
+  color: "#00FFFF",
+  fontSize: 16,
+})
+```
+
+Example:
+
+```js
+import { screen, image, floating, button } from "@csp/ui";
+
+export function ui() {
+  return screen(
+    { width: 640, height: 360, alignX: "center", alignY: "center" },
+    image(
+      { assetCollectionId: "museum-assets", imageAssetId: "hero" },
+      { width: "grow", height: "grow" }
+    ),
+    floating(
+      {
+        attachTo: "parent",
+        attachX: "right",
+        attachY: "bottom",
+        offset: { x: -16, y: -16 },
+        zIndex: 10
+      },
+      button("Next")
+    )
+  );
+}
+```
 
 ## Signals And `useEffect`
 

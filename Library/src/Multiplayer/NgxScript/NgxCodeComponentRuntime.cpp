@@ -48,6 +48,7 @@ constexpr const char* CODECOMPONENT_HOOKS_MODULE = "@csp/hooks";
 constexpr const char* CODECOMPONENT_HOOKS_SOURCE = "export { useEffect } from '/__csp/internal/codecomponent/registry.js';\n";
 constexpr const char* CODECOMPONENT_CORE_MODULE = "@csp/core";
 constexpr const char* CODECOMPONENT_INPUT_MODULE = "@csp/code";
+constexpr const char* CODECOMPONENT_UI_MODULE = "@csp/ui";
 constexpr const char* CODECOMPONENT_CORE_SOURCE = R"CORE(
 export { useEffect } from '/__csp/internal/codecomponent/registry.js';
 export const TheEntitySystem = new Proxy({}, {
@@ -125,6 +126,70 @@ export const ThePlayerController = new Proxy({}, {
     },
 });
 )INPUT";
+constexpr const char* CODECOMPONENT_UI_SOURCE = R"UI(
+function normalizeProps(value) {
+    return value && typeof value === 'object' && !Array.isArray(value) ? { ...value } : {};
+}
+
+function flattenChildren(children, out = []) {
+    for (const child of children) {
+        if (Array.isArray(child)) {
+            flattenChildren(child, out);
+        } else if (child !== null && typeof child !== 'undefined' && child !== false) {
+            out.push(child);
+        }
+    }
+    return out;
+}
+
+function createNode(type, props, children) {
+    return {
+        __cspUiNode: true,
+        type,
+        props: normalizeProps(props),
+        children: flattenChildren(children),
+    };
+}
+
+function createContainerFactory(type) {
+    return function(props = {}, ...children) {
+        return createNode(type, props, children);
+    };
+}
+
+export const screen = createContainerFactory('screen');
+export const world = createContainerFactory('world');
+export const row = createContainerFactory('row');
+export const column = createContainerFactory('column');
+export const flowRow = createContainerFactory('flowRow');
+export const floating = createContainerFactory('floating');
+export const spacer = (props = {}) => createNode('spacer', props, []);
+
+export function text(value, props = {}) {
+    const nextProps = normalizeProps(props);
+    nextProps.text = String(value ?? '');
+    return createNode('text', nextProps, []);
+}
+
+export function image(source = {}, props = {}) {
+    const nextProps = normalizeProps(props);
+    if (source && typeof source === 'object') {
+        if (typeof source.assetCollectionId === 'string') {
+            nextProps.assetCollectionId = source.assetCollectionId;
+        }
+        if (typeof source.imageAssetId === 'string') {
+            nextProps.imageAssetId = source.imageAssetId;
+        }
+    }
+    return createNode('image', nextProps, []);
+}
+
+export function button(label, props = {}) {
+    const nextProps = normalizeProps(props);
+    nextProps.text = String(label ?? '');
+    return createNode('button', nextProps, []);
+}
+)UI";
 
 const char* RealtimeEngineTypeToString(csp::common::IRealtimeEngine* RealtimeEngine)
 {
@@ -349,6 +414,8 @@ export const useEffect = (callback) => {
 export function createScriptRegistry() {
     codeComponents.clear();
     const pendingSchemaSyncs = new Set();
+    const pendingUIFlushes = new Set();
+    let isDestroying = false;
 
     function isObject(value) {
         return value && typeof value === 'object' && !Array.isArray(value);
@@ -952,17 +1019,265 @@ export function createScriptRegistry() {
         });
     }
 
+    // --- UI tree management ---
+
+    function flattenUIChildren(children, out = []) {
+        for (const child of Array.isArray(children) ? children : []) {
+            if (Array.isArray(child)) {
+                flattenUIChildren(child, out);
+            } else if (child !== null && typeof child !== 'undefined' && child !== false) {
+                out.push(child);
+            }
+        }
+        return out;
+    }
+
+    function normalizeUIEntityId(value) {
+        if (typeof value === 'string') {
+            return value;
+        }
+        if (value && typeof value === 'object') {
+            if (typeof value.id === 'string') {
+                return value.id;
+            }
+            if (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0) {
+                return String(value.id);
+            }
+        }
+        return null;
+    }
+
+    function normalizeUINode(node, entityId, handlerMap, path = 'root') {
+        if (!node || typeof node !== 'object') {
+            return null;
+        }
+
+        const type = typeof node.type === 'string' ? node.type : null;
+        if (!type) {
+            return null;
+        }
+
+        const props = isObject(node.props) ? { ...node.props } : {};
+        const normalized = {
+            type,
+            id: (typeof props.key === 'string' && props.key.length > 0) ? `${path}:${props.key}` : path,
+            props: {},
+            children: [],
+        };
+
+        for (const [key, value] of Object.entries(props)) {
+            if (key === 'key') {
+                continue;
+            }
+
+            if (key === 'onClick' && typeof value === 'function') {
+                const handlerId = `${path}:click`;
+                handlerMap.set(handlerId, value);
+                normalized.props.onClickHandlerId = handlerId;
+                continue;
+            }
+
+            if (key === 'targetEntity' || key === 'entity') {
+                const normalizedEntity = normalizeUIEntityId(value);
+                if (normalizedEntity) {
+                    normalized.props.targetEntityId = normalizedEntity;
+                }
+                continue;
+            }
+
+            if (typeof value === 'function') {
+                continue;
+            }
+
+            if (Array.isArray(value)) {
+                normalized.props[key] = value.map((item) => cloneValue(item));
+            } else if (isObject(value)) {
+                normalized.props[key] = cloneValue(value);
+            } else if (typeof value !== 'undefined') {
+                normalized.props[key] = value;
+            }
+        }
+
+        if (type === 'world' && !normalized.props.targetEntityId) {
+            normalized.props.targetEntityId = entityId;
+        }
+
+        const children = flattenUIChildren(node.children);
+        normalized.children = children
+            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`))
+            .filter((child) => child !== null);
+
+        return normalized;
+    }
+
+    function clearUIHandlers(entry) {
+        entry.uiHandlers.clear();
+        if (entry.pendingUIHandlers) {
+            entry.pendingUIHandlers.clear();
+        }
+    }
+
+    function unmountUI(entityId) {
+        if (globalThis.csp && typeof globalThis.csp.__uiUnmount === 'function') {
+            try {
+                globalThis.csp.__uiUnmount(entityId);
+            } catch (error) {
+                console.error(`NgxCodeComponentRuntime: failed to unmount UI for entity ${entityId}`, error);
+            }
+        }
+    }
+
+    function queueUIFlush(entityId, entry, treeJson, handlerMap) {
+        if (!entry || entry.isDisposing || isDestroying) {
+            return;
+        }
+
+        entry.pendingUITreeJson = treeJson;
+        entry.pendingUIHandlers = handlerMap;
+        entry.uiDirty = true;
+        pendingUIFlushes.add(entityId);
+    }
+
+    function flushPendingUI(entityId, entry) {
+        if (!entry || !entry.uiDirty || entry.isDisposing || isDestroying) {
+            if (entry) {
+                entry.uiDirty = false;
+                entry.pendingUITreeJson = null;
+                if (entry.pendingUIHandlers) {
+                    entry.pendingUIHandlers.clear();
+                }
+            }
+            pendingUIFlushes.delete(entityId);
+            return;
+        }
+
+        entry.uiDirty = false;
+        pendingUIFlushes.delete(entityId);
+
+        entry.uiHandlers = entry.pendingUIHandlers instanceof Map ? entry.pendingUIHandlers : new Map();
+        entry.pendingUIHandlers = new Map();
+
+        const treeJson = typeof entry.pendingUITreeJson === 'string' ? entry.pendingUITreeJson : null;
+        if (!treeJson) {
+            unmountUI(entityId);
+            return;
+        }
+
+        if (globalThis.csp && typeof globalThis.csp.__uiMount === 'function') {
+            try {
+                globalThis.csp.__uiMount(entityId, treeJson);
+            } catch (error) {
+                console.error(`NgxCodeComponentRuntime: failed to mount UI for entity ${entityId}`, error);
+                entry.uiHandlers.clear();
+                unmountUI(entityId);
+            }
+        }
+    }
+
+    function startUIRuntime(entityId, entry) {
+        if (!entry || entry.isDisposing || isDestroying || !entry.module || typeof entry.module.ui !== 'function') {
+            return;
+        }
+
+        if (typeof entry.uiDispose === 'function') {
+            entry.uiDispose();
+            entry.uiDispose = null;
+        }
+
+        entry.uiDispose = effect(() => {
+            if (entry.isDisposing || isDestroying) {
+                return;
+            }
+
+            const previousEntityId = globalThis.__cspCurrentEntityId;
+            globalThis.__cspCurrentEntityId = entityId;
+            try {
+                const nextHandlers = new Map();
+                const rawTree = entry.module.ui({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
+                const normalizedTree = normalizeUINode(rawTree, entityId, nextHandlers);
+
+                if (!normalizedTree) {
+                    queueUIFlush(entityId, entry, null, nextHandlers);
+                    return;
+                }
+
+                queueUIFlush(entityId, entry, JSON.stringify(normalizedTree), nextHandlers);
+            } catch (error) {
+                console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
+                queueUIFlush(entityId, entry, null, new Map());
+            } finally {
+                globalThis.__cspCurrentEntityId = previousEntityId;
+            }
+        });
+    }
+
+    function stopUIRuntime(entityId, entry) {
+        if (!entry) {
+            return;
+        }
+
+        if (typeof entry.uiDispose === 'function') {
+            try {
+                entry.uiDispose();
+            } catch (error) {
+                console.error(`NgxCodeComponentRuntime: ui dispose failed for entity ${entityId}`, error);
+            }
+        }
+        entry.uiDispose = null;
+        pendingUIFlushes.delete(entityId);
+        entry.uiDirty = false;
+        entry.pendingUITreeJson = null;
+        clearUIHandlers(entry);
+        unmountUI(entityId);
+    }
+
+    function dispatchUIAction(entityId, handlerId) {
+        const entry = codeComponents.get(entityId);
+        if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {
+            return false;
+        }
+
+        const handler = entry.uiHandlers.get(handlerId);
+        if (typeof handler !== 'function') {
+            return false;
+        }
+
+        try {
+            const previousEntityId = globalThis.__cspCurrentEntityId;
+            globalThis.__cspCurrentEntityId = entityId;
+            try {
+                handler({
+                    entityId,
+                    type: 'click',
+                    thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,
+                });
+            } finally {
+                globalThis.__cspCurrentEntityId = previousEntityId;
+            }
+            return true;
+        } catch (error) {
+            console.error(`NgxCodeComponentRuntime: UI handler failed for entity ${entityId}`, error);
+            return false;
+        }
+    }
+
     // --- Effect lifecycle ---
 
     function disposeAllEffects(entry) {
-        for (const dispose of entry.effects) {
+        if (!entry) {
+            return;
+        }
+
+        const effects = Array.isArray(entry.effects) ? [...entry.effects] : [];
+        entry.effects = [];
+
+        for (const dispose of effects) {
             try {
                 dispose();
             } catch (e) {
                 console.error('NgxCodeComponentRuntime: effect dispose failed', e);
             }
         }
-        entry.effects = [];
     }
 
     function removeInputListenersForEntity(entityId) {
@@ -993,16 +1308,31 @@ export function createScriptRegistry() {
 
     // --- Script initialization ---
 
+    function ensureThisEntitySignal(entityId, entry) {
+        if (!entry) {
+            return null;
+        }
+
+        const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')
+            ? globalThis.TheEntitySystem.getEntityById(entityId)
+            : null;
+
+        if (!entry.thisEntitySignal) {
+            entry.thisEntitySignal = signal(liveEntity ?? null);
+        } else {
+            entry.thisEntitySignal.value = liveEntity ?? null;
+        }
+
+        return entry.thisEntitySignal;
+    }
+
     function initializeScript(entityId, entry) {
         if (!entry || !entry.module || typeof entry.module.script !== 'function') {
             return;
         }
 
         try {
-            const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')
-                ? globalThis.TheEntitySystem.getEntityById(entityId)
-                : null;
-            entry.thisEntitySignal = signal(liveEntity ?? null);
+            ensureThisEntitySignal(entityId, entry);
 
             globalThis.__cspCurrentEntityId = entityId;
             try {
@@ -1054,8 +1384,11 @@ export function createScriptRegistry() {
                 // If reinitializing (e.g. after a hot-reload), tear down any
                 // old effects so they don't accumulate in memory.
                 if (current.initialized) {
+                    current.isDisposing = true;
+                    stopUIRuntime(entityId, current);
                     disposeAllEffects(current);
                     current.thisEntitySignal = null;
+                    current.isDisposing = false;
                     current.initialized = false;
                 }
 
@@ -1066,9 +1399,11 @@ export function createScriptRegistry() {
 
                 current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);
                 current.signalAttributes = createSignalAttributes(current, entityId);
+                ensureThisEntitySignal(entityId, current);
                 current.initialized = true;
 
                 initializeScript(entityId, current);
+                startUIRuntime(entityId, current);
             })
             .catch((error) => {
                 const current = codeComponents.get(entityId);
@@ -1137,6 +1472,7 @@ export function createScriptRegistry() {
         }
 
         if (existing) {
+            stopUIRuntime(entityId, existing);
             disposeAllEffects(existing);
             existing.thisEntitySignal = null;
             codeComponents.delete(entityId);
@@ -1159,6 +1495,12 @@ export function createScriptRegistry() {
             hasWarnedMissingModule: false,
             entityRefStates: {},
             effects: [],
+            uiDispose: null,
+            uiHandlers: new Map(),
+            pendingUIHandlers: new Map(),
+            pendingUITreeJson: null,
+            uiDirty: false,
+            isDisposing: false,
         };
 
         codeComponents.set(entityId, entry);
@@ -1229,13 +1571,13 @@ export function createScriptRegistry() {
             return;
         }
 
+        entry.isDisposing = true;
+
         // Dispose reactive effects before invalidating thisEntity so teardown
         // does not trigger one final rerun against a null entity.
+        stopUIRuntime(entityId, entry);
         runScriptTeardown(entityId, entry, 'remove');
         disposeAllEffects(entry);
-        if (entry.thisEntitySignal) {
-            entry.thisEntitySignal.value = null;
-        }
         entry.thisEntitySignal = null;
         codeComponents.delete(entityId);
     }
@@ -1255,6 +1597,17 @@ export function createScriptRegistry() {
                 tryImportCodeComponentModule(entityId, entry, 'tick-retry');
             }
         }
+
+        const dirtyUIIds = Array.from(pendingUIFlushes);
+        for (const entityId of dirtyUIIds) {
+            const entry = codeComponents.get(entityId);
+            if (!entry || !entry.initialized) {
+                pendingUIFlushes.delete(entityId);
+                continue;
+            }
+
+            flushPendingUI(entityId, entry);
+        }
     }
 
     function drainPendingSchemaSyncs() {
@@ -1264,16 +1617,18 @@ export function createScriptRegistry() {
     }
 
     function destroy() {
+        isDestroying = true;
         for (const [entityId, entry] of codeComponents) {
+            entry.isDisposing = true;
+            stopUIRuntime(entityId, entry);
             runScriptTeardown(entityId, entry, 'destroy');
             disposeAllEffects(entry);
-            if (entry.thisEntitySignal) {
-                entry.thisEntitySignal.value = null;
-            }
             entry.thisEntitySignal = null;
         }
         codeComponents.clear();
         pendingSchemaSyncs.clear();
+        pendingUIFlushes.clear();
+        isDestroying = false;
     }
 
     return {
@@ -1282,6 +1637,7 @@ export function createScriptRegistry() {
         syncCodeComponentAttributes,
         updateAttributeForEntity,
         removeCodeComponent,
+        dispatchUIAction,
         tick,
         drainPendingSchemaSyncs,
         destroy,
@@ -1412,6 +1768,7 @@ void NgxCodeComponentRuntime::RegisterBuiltInModules()
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_HOOKS_MODULE, CODECOMPONENT_HOOKS_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_CORE_MODULE, CODECOMPONENT_CORE_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_INPUT_MODULE, CODECOMPONENT_INPUT_SOURCE);
+    ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_UI_MODULE, CODECOMPONENT_UI_SOURCE);
 }
 
 void NgxCodeComponentRuntime::OnTick()
@@ -1456,6 +1813,8 @@ void NgxCodeComponentRuntime::OnTick()
 
     SyncSnapshots(CurrentSnapshots);
     DrainPendingSchemaSyncs();
+    ScriptSystem.FlushPendingCodeComponentUI();
+    ScriptSystem.PumpPendingJobs();
 
     // requestAnimationFrame callbacks are driven by the client display loop via NgxScriptSystem::TickAnimationFrame.
     // Keep animation-frame dispatch decoupled from foundation tick cadence.

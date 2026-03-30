@@ -47,6 +47,8 @@ class NetworkEventData;
 
 namespace csp::systems
 {
+class NgxUIRuntime;
+
 class CSP_API NgxScriptSystem
 {
 public:
@@ -101,13 +103,23 @@ public:
         const csp::common::Vector3& Forward, const csp::common::Vector3& ForwardFlat, const csp::common::Vector3& Right,
         const csp::common::Vector3& RightFlat, const csp::common::Vector3& Up);
 
+    // Update the logical viewport size used for screen-space UI layout.
+    void SetUIViewportSize(float Width, float Height);
+
+    // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
+    csp::common::String DrainPendingUIUpdates();
+
+    // Dispatch a click action back into the scripted UI runtime.
+    bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId);
+
     CSP_START_IGNORE
-    // Internal runtime hooks (not exposed through wrappers).
+    // Internal runtime hooks.
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
     CSP_NO_EXPORT bool EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName);
     CSP_NO_EXPORT void PumpPendingJobs();
     CSP_NO_EXPORT bool AreScriptModulesLoaded() const;
     CSP_NO_EXPORT uint64_t GetContextGeneration() const;
+    CSP_NO_EXPORT bool FlushPendingCodeComponentUI();
 
     // Managed by SpaceSystem during space lifecycle.
     CSP_NO_EXPORT void OnEnterSpace(const csp::common::String& InSpaceId, csp::common::IRealtimeEngine* InRealtimeEngine);
@@ -127,7 +139,7 @@ public:
     CSP_NO_EXPORT int32_t GetGlobalIntForTesting(const csp::common::String& Key, int32_t DefaultValue = 0) const;
     CSP_NO_EXPORT void SetLoadedModuleSourceForTesting(const csp::common::String& ModulePath, const csp::common::String& ModuleSource);
     CSP_NO_EXPORT bool RunModuleForTesting(const csp::common::String& ModulePath);
-    CSP_NO_EXPORT bool TickScriptRegistry(double TimestampMs);
+    CSP_NO_EXPORT csp::common::String GetUIDrawablesJsonForTesting(const csp::common::String& EntityId) const;
 #endif
 
 private:
@@ -173,6 +185,7 @@ private:
     mutable std::mutex ContextMutex;
     mutable std::mutex ModuleSourcesMutex;
     mutable std::mutex CameraStateMutex;
+    mutable std::mutex UIMutex;
     ModuleSourceMap LoadedModuleSources;
     ModuleSourceMap StaticModuleSources;
     std::unordered_set<std::string> TrackedScriptAssetCollectionIds;
@@ -187,6 +200,7 @@ private:
     csp::common::Vector3 LocalPlayerCameraRight;
     csp::common::Vector3 LocalPlayerCameraRightFlat;
     csp::common::Vector3 LocalPlayerCameraUp;
+    std::unique_ptr<NgxUIRuntime> UIRuntime;
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;

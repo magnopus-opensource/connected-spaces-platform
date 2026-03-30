@@ -68,6 +68,13 @@ template <typename... T> struct CallbackData
     std::tuple<void*, T...> Args;
 };
 
+template <typename R, typename... T> struct CallbackDataWithReturn
+{
+    R (*Callback)(void*, T...);
+    std::tuple<void*, T...> Args;
+    R Result;
+};
+
 // Called internally from emscripten_proxy_sync on the main thread.
 // This function is passed to the emscripten proxy api from Emscripten_CallbackOnThread to be called on the main thread.
 template <typename... T> static void Emscripten_CallbackWrapper(void* InData)
@@ -75,6 +82,12 @@ template <typename... T> static void Emscripten_CallbackWrapper(void* InData)
     auto* Data = static_cast<CallbackData<T...>*>(InData);
     // Unpacks the tuple and passes values as the Data->Callback function arguments.
     std::apply(Data->Callback, Data->Args);
+}
+
+template <typename R, typename... T> static void Emscripten_CallbackWrapperWithReturn(void* InData)
+{
+    auto* Data = static_cast<CallbackDataWithReturn<R, T...>*>(InData);
+    Data->Result = std::apply(Data->Callback, Data->Args);
 }
 
 // Function that will push the callback to the main thread if we are not on it.
@@ -94,6 +107,19 @@ template <typename... T> static void Emscripten_CallbackOnThread(void (*Callback
         // Passing refs is safe here due to emscripten_proxy_sync guaranteeing the callback finishes before Emscripten_CallbackOnThread returns.
         emscripten_proxy_sync(ProxyQueue, MainThread, Emscripten_CallbackWrapper<T...>, static_cast<void*>(&Data));
     }
+}
+
+template <typename R, typename... T> static R Emscripten_CallbackOnThreadWithReturn(R (*Callback)(void*, T...), void* Context, T... Args)
+{
+    bool OnMainThread = pthread_equal(pthread_self(), emscripten_main_runtime_thread_id());
+    if (OnMainThread)
+    {
+        return Callback(Context, std::forward<T>(Args)...);
+    }
+
+    CallbackDataWithReturn<R, T...> Data { Callback, std::tuple<void*, T...> { Context, std::forward<T>(Args)... }, R() };
+    emscripten_proxy_sync(ProxyQueue, MainThread, Emscripten_CallbackWrapperWithReturn<R, T...>, static_cast<void*>(&Data));
+    return Data.Result;
 }
 }
 #endif

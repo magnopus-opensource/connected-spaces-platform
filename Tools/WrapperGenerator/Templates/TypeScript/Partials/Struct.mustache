@@ -1,0 +1,26 @@
+{{# translated_namespace }}
+export namespace {{ translated_namespace }} {
+{{/ translated_namespace }}
+
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
+export interface {{ name }} {
+{{# fields }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }};
+{{/ fields }}
+}
+
+{{# translated_namespace }}
+}
+{{/ translated_namespace }}
+
+{{# ts_marshaled_supported }}
+function {{ full_safe_type_name }}Marshal(value: {{# translated_namespace }}{{ translated_namespace }}.{{/ translated_namespace }}{{ name }}): number {
+    const _ptr = Module._malloc({{ ts_marshaled_size }});
+{{# fields }}
+    Module.setValue(_ptr + {{ marshal_offset }}, value.{{ name }}, "{{ marshal_memory_kind }}");
+{{/ fields }}
+    return _ptr;
+}
+{{/ ts_marshaled_supported }}

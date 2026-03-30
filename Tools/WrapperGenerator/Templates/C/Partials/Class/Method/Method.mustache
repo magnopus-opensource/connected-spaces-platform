@@ -239,7 +239,8 @@
             {{/ type.is_string }}
           {{/ parameters }}
 
-          csp::CallCallback({{ name }}, {{ name }}_StateObject,
+{{^ return_type }}
+          csp::CallCallback({{ callback_name }}, {{ callback_state_name }},
               {{# parameters }}
               {{# type.is_string }}
                 (const char*)_{{ name }}
@@ -267,6 +268,77 @@
               {{> Comma }}
             {{/ parameters }}
           );
+{{/ return_type }}
+{{# return_type }}
+{{# is_void }}
+          csp::CallCallback({{ callback_name }}, {{ callback_state_name }},
+              {{# parameters }}
+              {{# type.is_string }}
+                (const char*)_{{ name }}
+              {{/ type.is_string }}
+
+              {{^ type.is_string }}
+                {{# type.is_pointer_or_reference }}
+                  NativePointer {
+                    {{# type.is_reference }}_{{/ type.is_reference }}{{ name }}
+                {{/ type.is_pointer_or_reference }}
+
+                {{^ type.is_pointer_or_reference }}
+                  {{ name }}
+                {{/ type.is_pointer_or_reference }}
+
+                {{# type.is_pointer }}
+                  , false }
+                {{/ type.is_pointer }}
+
+                {{# type.is_reference }}
+                  , true }
+                {{/ type.is_reference }}
+              {{/ type.is_string }}
+
+              {{> Comma }}
+            {{/ parameters }}
+          );
+{{/ is_void }}
+{{^ is_void }}
+          auto _callbackResult = csp::CallCallback({{ callback_name }}, {{ callback_state_name }},
+              {{# parameters }}
+              {{# type.is_string }}
+                (const char*)_{{ name }}
+              {{/ type.is_string }}
+
+              {{^ type.is_string }}
+                {{# type.is_pointer_or_reference }}
+                  NativePointer {
+                    {{# type.is_reference }}_{{/ type.is_reference }}{{ name }}
+                {{/ type.is_pointer_or_reference }}
+
+                {{^ type.is_pointer_or_reference }}
+                  {{ name }}
+                {{/ type.is_pointer_or_reference }}
+
+                {{# type.is_pointer }}
+                  , false }
+                {{/ type.is_pointer }}
+
+                {{# type.is_reference }}
+                  , true }
+                {{/ type.is_reference }}
+              {{/ type.is_string }}
+
+              {{> Comma }}
+            {{/ parameters }}
+          );
+{{# is_struct }}
+          auto _callbackValue = (_callbackResult == nullptr) ? {{> Type }}{} : *_callbackResult;
+          std::free(_callbackResult);
+          return _callbackValue;
+{{/ is_struct }}
+{{^ is_struct }}
+          return _callbackResult;
+{{/ is_struct }}
+{{/ is_void }}
+{{/ return_type }}
         }
 
         {{> Comma }}

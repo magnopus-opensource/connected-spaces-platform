@@ -52,6 +52,8 @@ class TypeScriptWrapperGenerator:
         if type is None:
             return
 
+        original_namespace = type.namespace
+        original_name = type.name
         self.__translate_namespace(type)
 
         if type.is_template and type.template_arguments is not None:
@@ -163,6 +165,16 @@ class TypeScriptWrapperGenerator:
         elif t == "void" and type.is_pointer:
             setattr(type, "is_void_pointer", True)
 
+        full_type_name = None
+        if original_namespace is not None:
+            full_type_name = f"{original_namespace}::{original_name}"
+        else:
+            full_type_name = original_name
+
+        if hasattr(self, "_TypeScriptWrapperGenerator__structs_by_full_name") and full_type_name in self.__structs_by_full_name:
+            setattr(type, "is_struct", True)
+            setattr(type, "struct_definition", self.__structs_by_full_name[full_type_name])
+
         self.__translate_call_type(type)
 
     def __translate_call_type(self, type: TypeMetadata) -> None:
@@ -178,6 +190,23 @@ class TypeScriptWrapperGenerator:
         else:
             setattr(type, "call_param_type", type.name)
             setattr(type, "call_param_name_suffix", None)
+
+        shorthand = "i"
+        if getattr(type, "is_enum", False):
+            shorthand = "i"
+        elif getattr(type, "is_number", False):
+            if getattr(type, "is_float", False):
+                shorthand = "d" if getattr(type, "is_large", False) else "f"
+            else:
+                shorthand = "j" if getattr(type, "is_large", False) else "i"
+        elif getattr(type, "is_string", False):
+            shorthand = "i"
+        elif getattr(type, "is_class_or_interface", False):
+            shorthand = "i"
+        elif getattr(type, "is_struct", False):
+            shorthand = "i"
+
+        setattr(type, "ts_ffi_shorthand", shorthand)
 
     def __class_derives_from(
         self, obj: ClassMetadata, base_namespace: str, base_name: str, classes: Dict[str, ClassMetadata]
@@ -250,6 +279,69 @@ class TypeScriptWrapperGenerator:
         comments.insert(0, "/**")
         comments.append(" */")
 
+    def __get_struct_marshaled_field_info(self, type: TypeMetadata):
+        if getattr(type, "is_bool", False):
+            return ("i8", 1, 1)
+
+        if getattr(type, "is_enum", False):
+            return ("i32", 4, 4)
+
+        if not getattr(type, "is_number", False):
+            return None
+
+        if getattr(type, "is_float", False):
+            return ("double", 8, 8) if getattr(type, "is_large", False) else ("float", 4, 4)
+
+        if getattr(type, "is_large", False):
+            return ("i64", 8, 8)
+
+        if getattr(type, "is_small", False):
+            return ("i16", 2, 2)
+
+        if getattr(type, "is_tiny", False):
+            return ("i8", 1, 1)
+
+        return ("i32", 4, 4)
+
+    def __prepare_structs(self, structs: Dict[str, StructMetadata]) -> None:
+        self.__structs_by_full_name = structs
+
+        for s in structs.values():
+            self.__translate_namespace(s)
+            setattr(s, "full_safe_type_name", (f"{s.namespace}::{s.name}" if s.namespace else s.name).replace("::", "_"))
+
+            if s.doc_comments is not None:
+                self.__translate_comments(s.doc_comments)
+
+            offset = 0
+            max_alignment = 1
+            marshal_supported = True
+
+            for f in s.fields or []:
+                self.__translate_type(f.type)
+
+                if f.name.startswith("In") and len(f.name) > 2 and f.name[2].isupper():
+                    f.name = f.name[2:]
+
+                f.name = f.name[0].lower() + f.name[1:]
+
+                field_info = self.__get_struct_marshaled_field_info(f.type)
+                if field_info is None:
+                    marshal_supported = False
+                    continue
+
+                memory_kind, field_size, field_alignment = field_info
+                aligned_offset = ((offset + field_alignment - 1) // field_alignment) * field_alignment
+                setattr(f, "marshal_memory_kind", memory_kind)
+                setattr(f, "marshal_offset", aligned_offset)
+                setattr(f, "marshal_size", field_size)
+                offset = aligned_offset + field_size
+                max_alignment = max(max_alignment, field_alignment)
+
+            total_size = ((offset + max_alignment - 1) // max_alignment) * max_alignment
+            setattr(s, "ts_marshaled_supported", marshal_supported)
+            setattr(s, "ts_marshaled_size", total_size)
+
     def generate(
         self,
         enums: Dict[str, EnumMetadata],
@@ -266,6 +358,8 @@ class TypeScriptWrapperGenerator:
         classes = deepcopy(classes)
         templates = deepcopy(templates)
         interfaces = deepcopy(interfaces)
+
+        self.__prepare_structs(structs)
 
         for e in enums.values():
             surrounding_types = None
@@ -330,7 +424,6 @@ class TypeScriptWrapperGenerator:
                             setattr(p.type.function_signature.return_type, "is_void", True)
                         else:
                             setattr(p.type.function_signature.return_type, "is_void", False)
-
                         self.__translate_type(p.type.function_signature.return_type)
 
                         for pa in p.type.function_signature.parameters or []:
@@ -341,6 +434,10 @@ class TypeScriptWrapperGenerator:
                         p.name = p.name[2:]
 
                     p.name = p.name[0].lower() + p.name[1:]
+
+                    if p.type.is_function_signature and p.type.function_signature is not None:
+                        setattr(p.type.function_signature.return_type, "callback_name", p.name)
+                        setattr(p.type.function_signature.return_type, "callback_state_name", f"{p.name}StateObject")
 
                     if not m.is_async_result and not m.is_async_result_with_progress:
                         continue
@@ -433,7 +530,6 @@ class TypeScriptWrapperGenerator:
                             setattr(p.type.function_signature.return_type, "is_void", True)
                         else:
                             setattr(p.type.function_signature.return_type, "is_void", False)
-
                         self.__translate_type(p.type.function_signature.return_type)
 
                         for pa in p.type.function_signature.parameters or []:
@@ -444,6 +540,10 @@ class TypeScriptWrapperGenerator:
                         p.name = p.name[2:]
 
                     p.name = p.name[0].lower() + p.name[1:]
+
+                    if p.type.is_function_signature and p.type.function_signature is not None:
+                        setattr(p.type.function_signature.return_type, "callback_name", p.name)
+                        setattr(p.type.function_signature.return_type, "callback_state_name", f"{p.name}StateObject")
 
                     if not m.is_async_result and not m.is_async_result_with_progress:
                         continue
@@ -535,6 +635,7 @@ class TypeScriptWrapperGenerator:
                     template,
                     {
                         "enums": list(enums.values()),
+                        "structs": list(structs.values()),
                         "rendered_functions": rendered_functions["global_functions"],
                         "classes": resorted_classes,
                         "templates": list(templates.values()),

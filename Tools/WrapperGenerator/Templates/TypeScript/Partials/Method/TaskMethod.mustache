@@ -100,7 +100,7 @@ async {{ name }}(
 
     _callbackPtr = Module.addFunction(
         _callback,
-        "vi{{# results }}{{# type }}{{> Method/TypeShorthand }}{{/ type }}{{/ results }}"
+        "vi{{# results }}{{# type }}{{ ts_ffi_shorthand }}{{/ type }}{{/ results }}"
     );
 
 {{# parameters }}

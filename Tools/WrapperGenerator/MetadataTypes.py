@@ -97,6 +97,7 @@ class TypeMetadata:
     is_class: bool = False
     is_interface: bool = False
     is_class_or_interface: bool = False
+    is_struct: bool = False
     is_enum: bool = False
     is_inline_forward: bool = False
     is_template_argument: bool = False

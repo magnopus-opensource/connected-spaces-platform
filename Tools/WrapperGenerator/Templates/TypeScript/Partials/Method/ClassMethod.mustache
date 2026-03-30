@@ -75,16 +75,49 @@
             const _{{ name }} = !!{{ name }};
         {{/ type.is_bool }}
     {{/ type.function_signature.parameters }}
-        {{ name }}(
+{{# type.function_signature.return_type }}
+{{# is_void }}
+        {{ callback_name }}(
 {{# type.function_signature.parameters }}
         {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{# type.is_string }}_{{/ type.is_string }}{{# type.is_bool }}_{{/ type.is_bool }}{{ name }}{{> Comma }}
 {{/ type.function_signature.parameters }}
         );
+{{/ is_void }}
+{{^ is_void }}
+        const _callbackResult = {{ callback_name }}(
+{{# type.function_signature.parameters }}
+        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{# type.is_string }}_{{/ type.is_string }}{{# type.is_bool }}_{{/ type.is_bool }}{{ name }}{{> Comma }}
+{{/ type.function_signature.parameters }}
+        );
+{{# is_bool }}
+        return _callbackResult ? 1 : 0;
+{{/ is_bool }}
+{{# is_string }}
+        const [_callbackResultPtr,] = stringToBuffer(_callbackResult);
+        return _callbackResultPtr;
+{{/ is_string }}
+{{# is_class_or_interface }}
+        return getNativePointer(_callbackResult).pointer;
+{{/ is_class_or_interface }}
+{{# is_struct }}
+        return {{ struct_definition.full_safe_type_name }}Marshal(_callbackResult);
+{{/ is_struct }}
+{{# is_enum }}
+        return _callbackResult;
+{{/ is_enum }}
+{{# is_number }}
+        return _callbackResult;
+{{/ is_number }}
+{{^ is_bool }}{{^ is_string }}{{^ is_class_or_interface }}{{^ is_struct }}{{^ is_enum }}{{^ is_number }}
+        return _callbackResult;
+{{/ is_number }}{{/ is_enum }}{{/ is_struct }}{{/ is_class_or_interface }}{{/ is_string }}{{/ is_bool }}
+{{/ is_void }}
+{{/ type.function_signature.return_type }}
     };
 
     var {{ name }}Ptr = Module.addFunction(
         _{{ name }},
-        "{{# return_type }}{{# is_void }}v{{/ is_void }}{{^ is_void }}{{> Method/TypeShorthand }}{{/ is_void }}{{/ return_type }}i{{# type.function_signature.parameters }}{{# type }}{{> Method/TypeShorthand }}{{/ type }}{{/ type.function_signature.parameters }}"
+        "{{# type.function_signature.return_type }}{{# is_void }}v{{/ is_void }}{{^ is_void }}{{ ts_ffi_shorthand }}{{/ is_void }}{{/ type.function_signature.return_type }}i{{# type.function_signature.parameters }}{{# type }}{{ ts_ffi_shorthand }}{{/ type }}{{/ type.function_signature.parameters }}"
     );
 {{/ type.is_function_signature }}
 {{/ parameters }}

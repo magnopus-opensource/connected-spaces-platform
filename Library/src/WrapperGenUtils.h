@@ -35,4 +35,13 @@ template <typename... T> static void CallCallback(void (*Callback)(T...), T... A
     Callback(Args...);
 #endif
 }
+
+template <typename R, typename... T> static R CallCallback(R (*Callback)(T...), T... Args)
+{
+#ifdef CSP_WASM
+    return csp::Emscripten_CallbackOnThreadWithReturn(Callback, Args...);
+#else
+    return Callback(Args...);
+#endif
+}
 }

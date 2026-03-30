@@ -34,6 +34,7 @@
 #include "Events/EventSystem.h"
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
+#include "Multiplayer/NgxScript/NgxUIRuntime.h"
 #include "Multiplayer/NgxScript/signals.h"
 
 #include "quickjs.h"
@@ -381,6 +382,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , SessionGeneration(0)
     , ContextGeneration(0)
     , ScriptModulesLoaded(false)
+    , UIRuntime(std::make_unique<NgxUIRuntime>(InLogSystem))
     , bAssetDetailBlobChangedListenerRegistered(false)
     , GcTickCounter(0)
     , TickEventHandler(std::make_unique<NgxScriptTickEventHandler>(this))
@@ -434,6 +436,11 @@ void NgxScriptSystem::OnExitSpace()
         std::scoped_lock ModuleLock(ModuleSourcesMutex);
         LoadedModuleSources.clear();
         TrackedScriptAssetCollectionIds.clear();
+    }
+
+    {
+        std::scoped_lock UILock(UIMutex);
+        UIRuntime->Clear();
     }
 
     TeardownContext();
@@ -701,16 +708,66 @@ bool NgxScriptSystem::RunModuleForTesting(const csp::common::String& ModulePath)
     return ExecuteModule(ModulePath);
 }
 
-bool NgxScriptSystem::TickScriptRegistry(double TimestampMs)
+csp::common::String NgxScriptSystem::GetUIDrawablesJsonForTesting(const csp::common::String& EntityId) const
 {
-    std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
-                          "    globalThis.scriptRegistry.tick("
-        + std::to_string(TimestampMs)
-        + ");\n"
-          "}\n";
-    return EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-tick>");
+    std::scoped_lock UILock(UIMutex);
+    return UIRuntime->GetDrawablesJson(EntityId.c_str()).c_str();
 }
 #endif
+
+void NgxScriptSystem::SetUIViewportSize(float Width, float Height)
+{
+    std::scoped_lock UILock(UIMutex);
+    UIRuntime->SetViewportSize(Width, Height);
+}
+
+bool NgxScriptSystem::FlushPendingCodeComponentUI()
+{
+    static constexpr const char* SNIPPET = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
+                                           "    globalThis.scriptRegistry.tick(0);\n"
+                                           "}\n";
+    return EvaluateSnippet(SNIPPET, "<ngx-codecomponent-flush-pending-ui>");
+}
+
+csp::common::String NgxScriptSystem::DrainPendingUIUpdates()
+{
+    std::scoped_lock UILock(UIMutex);
+    return UIRuntime->DrainPendingUpdatesJson().c_str();
+}
+
+bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId)
+{
+    if (EntityId.IsEmpty() || HandlerId.IsEmpty())
+    {
+        return false;
+    }
+
+    const std::string Snippet = fmt::format(
+        "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function') {{ "
+        "globalThis.{} = !!globalThis.scriptRegistry.dispatchUIAction('{}', '{}'); }} else {{ globalThis.{} = false; }}",
+        CODECOMPONENT_BOOL_RESULT_SLOT, EscapeJSStringLiteral(EntityId.c_str()), EscapeJSStringLiteral(HandlerId.c_str()),
+        CODECOMPONENT_BOOL_RESULT_SLOT);
+
+    std::scoped_lock ContextLock(ContextMutex);
+    if (!Context)
+    {
+        return false;
+    }
+
+    if (Context->eval(Snippet, "<ngx-dispatch-ui-action>", JS_EVAL_TYPE_GLOBAL).isException())
+    {
+        return false;
+    }
+
+    try
+    {
+        return Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
 
 void NgxScriptSystem::ClearAllEntityEventListeners()
 {
@@ -837,6 +894,10 @@ void NgxScriptSystem::RebuildContext()
     // Clear stale JS callbacks before destroying the context. qjs::Value destructors
     // call JS_FreeValue which must execute while the owning context is still alive.
     ClearAllEntityEventListeners();
+    {
+        std::scoped_lock UILock(UIMutex);
+        UIRuntime->Clear();
+    }
 
     {
         std::scoped_lock ContextLock(ContextMutex);
@@ -1130,6 +1191,18 @@ void NgxScriptSystem::InstallHostBindings()
 
             return Entity->SetThirdPartyRef(ThirdPartyRef.c_str());
         });
+    CSPModule.function("__uiMount",
+        [this](const std::string& EntityIdText, const std::string& TreeJson) -> bool
+        {
+            std::scoped_lock UILock(UIMutex);
+            return UIRuntime->Mount(EntityIdText, TreeJson);
+        });
+    CSPModule.function("__uiUnmount",
+        [this](const std::string& EntityIdText) -> bool
+        {
+            std::scoped_lock UILock(UIMutex);
+            return UIRuntime->Unmount(EntityIdText);
+        });
     static constexpr const char* HOST_BINDINGS_SCRIPT = R"(
 import * as csp from "csp";
 globalThis.csp = csp;
@@ -1359,15 +1432,29 @@ globalThis.__cspDispatchMouseEvent = (event) => {
 
 void NgxScriptSystem::DrainPendingJobs()
 {
+    static constexpr int32_t MAX_PENDING_JOBS_PER_PUMP = 1000;
+
     std::scoped_lock ContextLock(ContextMutex);
     if (!Runtime || !Context)
     {
         return;
     }
 
+    int32_t ExecutedJobCount = 0;
     while (Runtime->isJobPending())
     {
+        if (ExecutedJobCount >= MAX_PENDING_JOBS_PER_PUMP)
+        {
+            LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                fmt::format(
+                    "NgxScript: pending job budget exceeded ({} jobs in one pump); stopping drain to avoid a runaway loop.",
+                    MAX_PENDING_JOBS_PER_PUMP)
+                    .c_str());
+            break;
+        }
+
         Runtime->executePendingJob();
+        ++ExecutedJobCount;
     }
 
     // QuickJS reference-counting cannot collect cyclic garbage (signals ↔ effects,

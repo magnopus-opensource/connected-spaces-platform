@@ -81,13 +81,18 @@ if not Project then
             "%{wks.location}/ThirdParty/rapidjson/include",
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
+            "%{wks.location}/ThirdParty/clay",
             "%{wks.location}/ThirdParty/glm",
 			"%{wks.location}/ThirdParty/asyncplusplus/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/ThirdParty/fmt/include",
             "%{wks.location}/modules/csp-services/generated",
-			"%{wks.location}/modules/tinyspline/src"
+            "%{wks.location}/modules/tinyspline/src"
         }
+
+        filter "files:**/NgxUIRuntime.cpp"
+            cppdialect "C++20"
+        filter {}
 
         filter "platforms:not wasm"
             externalincludedirs {

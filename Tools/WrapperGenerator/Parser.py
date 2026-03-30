@@ -763,6 +763,10 @@ class Parser:
                 word = reader.next_word()
             
             assert param_type is not None
+
+            if param_type.is_function_signature and param_type.function_signature is not None:
+                setattr(param_type.function_signature, "callback_name", param_name)
+                setattr(param_type.function_signature, "callback_state_name", f"{param_name}_StateObject")
             
             parameters.append(ParameterMetadata(
                 name=param_name,
@@ -1411,6 +1415,17 @@ class Parser:
             assert object_type.function_signature is not None
 
             object_type.function_signature.name = object_.name
+            setattr(object_type.function_signature, "callback_name", object_.name)
+            setattr(object_type.function_signature, "callback_state_name", f"{object_.name}_StateObject")
+
+            if object_type.function_signature.return_type is not None:
+                self.__find_and_set_type_namespace(
+                    object_type.function_signature,
+                    object_type.function_signature.return_type,
+                    parent_namespace,
+                    types,
+                )
+                self.__set_type_classification(object_type.function_signature.return_type)
 
             if object_type.function_signature.parameters is not None:
                 for p in object_type.function_signature.parameters:
@@ -1473,6 +1488,8 @@ class Parser:
             elif full_type_name in self.interfaces:
                 object_type.is_interface = True
                 object_type.is_class_or_interface = True
+            elif full_type_name in self.structs:
+                object_type.is_struct = True
             elif full_type_name in self.templates:
                 object_type.is_class = True
                 object_type.is_class_or_interface = True

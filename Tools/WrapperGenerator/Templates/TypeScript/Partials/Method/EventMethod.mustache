@@ -63,7 +63,7 @@
 
     var _callbackPtr = Module.addFunction(
         _callback,
-        "vi{{# parameters }}{{# type }}{{> Method/TypeShorthand }}{{/ type }}{{/ parameters }}"
+        "vi{{# parameters }}{{# type }}{{ ts_ffi_shorthand }}{{/ type }}{{/ parameters }}"
     );
 {{/ parameters.0.type.function_signature }}
 
