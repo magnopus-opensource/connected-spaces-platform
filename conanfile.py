@@ -44,6 +44,10 @@ class CSP(ConanFile):
         self.options["poco"].enable_jwt = False
         self.options["poco"].enable_activerecord = False
 
+        # Enabling boost adds a lot of time to our conan install step
+        # + emscripten builds fail to compile with it. Disable it.
+        self.options["msgpack-cxx"].use_boost = False
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
