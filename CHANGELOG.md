@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.32.0]
 
+### 🍰 🙌 New Features
+
+- [OF-1625] feat: Add enabled property to `CollisionSpaceComponent`. By @mag-lt.
+
 ###💫 💥 Code Refactors
 
 - [OF-1848] refac: Add internal constructor to `ComponentBase` for constructing from a `Schema` structure. By @mag-lt

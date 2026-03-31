@@ -22,6 +22,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 
@@ -39,6 +40,7 @@ enum class CollisionPropertyKeys : uint16_t
     CollisionAssetId,
     AssetCollectionId,
     ThirdPartyComponentRef,
+    IsEnabled,
     Num
 };
 
@@ -62,7 +64,7 @@ enum class CollisionMode
 /// @brief Add box, mesh, capsule and sphere colliders to objects in your Space.
 ///
 /// These colliders can act as triggers, which can be used in conjunction with Scripts to drive behavior.
-class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent
+class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IEnableableComponent
 {
 public:
     /// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
@@ -157,6 +159,14 @@ public:
     const csp::common::String& GetThirdPartyComponentRef() const override;
     /// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
     void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+    /// @}
+
+    /// \addtogroup IEnableableComponent
+    /// @{
+    /// @copydoc IEnableableComponent::GetIsEnabled()
+    bool GetIsEnabled() const override;
+    /// @copydoc IEnableableComponent::SetIsEnabled()
+    void SetIsEnabled(bool Value) override;
     /// @}
 };
 
