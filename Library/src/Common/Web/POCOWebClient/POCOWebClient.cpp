@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef CSP_WASM
+
 #include "POCOWebClient.h"
 
 #include "Debug/Logging.h"
@@ -576,3 +579,4 @@ void POCOWebClient::SetFileUploadContent(HttpPayload* Payload, Poco::Net::PartSo
 }
 
 } // namespace csp::web
+#endif

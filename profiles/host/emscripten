@@ -1,0 +1,36 @@
+[settings]
+arch=wasm
+build_type=Release
+compiler=emcc
+compiler.cppstd=17
+compiler.libcxx=libc++
+# Optional settings to enable multithreading (see note below)
+# compiler.threads=posix
+compiler.version=3.1.50
+os=Emscripten
+
+[tool_requires]
+ninja/1.11.1
+emsdk/3.1.50
+*: cmake/3.31.6
+
+# Conan profiles don't support inline comments within lists, so adding docs here:
+#    "-pthread"
+#    "-fwasm-exceptions"
+#    "-sPTHREAD_POOL_SIZE_STRICT=0"
+#    "-sEXPORTED_FUNCTIONS=['_malloc','_free']"
+#    "-sEXPORT_ES6=1"
+#    "-sMODULARIZE=1"
+#    "-sEXPORT_NAME=createModule"
+#    "-sFETCH"
+#    "-sALLOW_TABLE_GROWTH=1"
+#    "-sWASM_BIGINT"
+#    "-sALLOW_MEMORY_GROWTH=1"
+#    "-sINITIAL_MEMORY=33554432"
+#    "-sMAXIMUM_MEMORY=1073741824"
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Ninja
+tools.build:cxxflags=["-fwasm-exceptions"]
+tools.build:cflags=["-fwasm-exceptions"]
+tools.build:exelinkflags=["-pthread","-fwasm-exceptions","-sPTHREAD_POOL_SIZE_STRICT=0","-sEXPORTED_FUNCTIONS=['_malloc','_free']","-sEXPORT_ES6=1","-sMODULARIZE=1","-sEXPORT_NAME=createModule","-sFETCH","-sALLOW_TABLE_GROWTH=1","-sWASM_BIGINT","-sALLOW_MEMORY_GROWTH=1","-sINITIAL_MEMORY=33554432","-sMAXIMUM_MEMORY=1073741824","-sEXPORTED_RUNTIME_METHODS=['ccall','setValue','getValue','addFunction','removeFunction','UTF8ToString','stringToUTF8','lengthBytesUTF8']","-sINCOMING_MODULE_JS_API=['buffer','fetchSettings','instantiateWasm','locateFile','mainScriptUrlOrBlob','wasmMemory']"]

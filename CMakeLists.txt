@@ -44,9 +44,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
 find_package(RapidJSON REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Async++ REQUIRED)
-find_package(Poco REQUIRED)
 find_package(tinyspline REQUIRED)
 find_package(glm REQUIRED)
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  find_package(Poco REQUIRED)
+endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/signalrclient)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/quickjs)
@@ -101,13 +104,23 @@ set(CSP_THIRD_PARTY_LIBS
   rapidjson
   fmt::fmt
   Async++
-  Poco::Poco
-  Poco::Net
   csp-signalr
-  tinysplinecxx::tinysplinecxx
+  tinyspline::tinyspline
   glm::glm
   csp-quickjs
 )
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  list(APPEND CSP_THIRD_PARTY_LIBS
+    Poco::Poco
+    Poco::Net
+  )
+endif()
+
+
+set(TINYSPLINE_BUILD_TESTS OFF)
+set(TINYSPLINE_BUILD_EXAMPLES OFF)
+set(TINYSPLINE_BUILD_DOCS OFF)
 
 target_link_libraries(csp-impl
   PRIVATE
@@ -132,6 +145,7 @@ target_compile_definitions(csp-impl
     # Platform macros
     $<$<PLATFORM_ID:Windows>:CSP_WINDOWS>
     $<$<PLATFORM_ID:Darwin>:CSP_MACOSX>
+    $<$<PLATFORM_ID:Emscripten>:CSP_WASM>
 
     # We consume libasync statically
     LIBASYNC_STATIC
@@ -232,6 +246,9 @@ target_compile_features(csp-lib PUBLIC cxx_std_17)
 include(CTest)
 
 if(BUILD_TESTING)
+
+  # Prevent 
+  set(BUILD_TESTING OFF)
   
   find_package(GTest CONFIG REQUIRED)
   find_package(sole REQUIRED)
