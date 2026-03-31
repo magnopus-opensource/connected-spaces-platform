@@ -1,3 +1,5 @@
+# Contains our internal REST API services files that come from https://github.com/magnopus-opensource/csp-services.git.
+
 set(CSP_SERVICES_DIR ${csp-services_SOURCE_DIR}/generated)
 
 # We glob only in the services file due to the way we consume them.

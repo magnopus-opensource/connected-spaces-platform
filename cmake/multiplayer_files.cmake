@@ -1,3 +1,6 @@
+# Contains files that handle our realtime/multiplayer functionality.
+# This has yet to be formally modularized into a separate library.
+
 set(CSP_MULTIPLAYER_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP/Multiplayer)
 set(CSP_MULTIPLAYER_SOURCE_DIR  ${CSP_SOURCE_DIR}/Multiplayer)
 

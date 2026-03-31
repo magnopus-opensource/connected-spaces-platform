@@ -1,3 +1,6 @@
+# Contains files that handle our REST/systems functionality.
+# This has yet to be formally modularized into a separate library.
+
 set(CSP_CORE_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP/Systems)
 set(CSP_CORE_SOURCE_DIR  ${CSP_SOURCE_DIR}/Systems)
 

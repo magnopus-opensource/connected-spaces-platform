@@ -1,3 +1,6 @@
+# Contains files that are used in both multiplayer and core.
+# This has yet to be formally modularized into a separate library.
+
 set(CSP_ROOT_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP)
 set(CSP_SHARED_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP/Common)
 set(CSP_SHARED_SOURCE_DIR  ${CSP_SOURCE_DIR}/Common)
