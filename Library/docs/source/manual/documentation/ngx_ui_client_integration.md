@@ -121,6 +121,7 @@ Important fields on each drawable:
   - Color channels are normalized floats in the range `0..1`.
 - `text`, `fontSize`
   - Text payload for text and button drawables.
+  - Wrapped or multi-line text currently appears as one `text` drawable per rendered line.
 - `assetCollectionId`, `imageAssetId`
   - Image identity for image drawables.
 - `handlerId`

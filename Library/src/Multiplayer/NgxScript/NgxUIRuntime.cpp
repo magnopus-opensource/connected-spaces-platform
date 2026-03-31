@@ -58,10 +58,14 @@ struct UISizeSpec
 {
     UISizeMode Mode;
     float Value;
+    float MinValue;
+    float MaxValue;
 
     UISizeSpec()
         : Mode(UISizeMode::Fit)
         , Value(0.0f)
+        , MinValue(0.0f)
+        , MaxValue(0.0f)
     {
     }
 };
@@ -142,6 +146,8 @@ struct UINode
     bool Visible;
     bool Enabled;
     float FontSize;
+    std::string TextAlign;
+    float AspectRatio;
     std::string Text;
     std::string AssetCollectionId;
     std::string ImageAssetId;
@@ -171,6 +177,8 @@ struct UINode
         , Visible(true)
         , Enabled(true)
         , FontSize(16.0f)
+        , TextAlign("left")
+        , AspectRatio(0.0f)
         , WorldOffset(0.0f, 0.0f, 0.0f)
     {
     }
@@ -289,9 +297,9 @@ Clay_Sizing ToClaySizing(const UISizeSpec& Width, const UISizeSpec& Height)
 {
     Clay_Sizing Result;
     Result.width = Width.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Width.Value)
-        : (Width.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
+        : (Width.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW(Width.MinValue, Width.MaxValue) : CLAY_SIZING_FIT(Width.MinValue, Width.MaxValue));
     Result.height = Height.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Height.Value)
-        : (Height.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
+        : (Height.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW(Height.MinValue, Height.MaxValue) : CLAY_SIZING_FIT(Height.MinValue, Height.MaxValue));
     return Result;
 }
 
@@ -387,9 +395,36 @@ Clay_FloatingAttachToElement ParseFloatingAttachTo(const std::string& Value)
     return CLAY_ATTACH_TO_PARENT;
 }
 
+Clay_TextAlignment ParseTextAlignment(const std::string& Value)
+{
+    if (Value == "center")
+    {
+        return CLAY_TEXT_ALIGN_CENTER;
+    }
+    if (Value == "right")
+    {
+        return CLAY_TEXT_ALIGN_RIGHT;
+    }
+    return CLAY_TEXT_ALIGN_LEFT;
+}
+
 float ClampNonNegative(float Value)
 {
     return Value < 0.0f ? 0.0f : Value;
+}
+
+float ApplySizeConstraints(float Value, const UISizeSpec& Size)
+{
+    float Result = ClampNonNegative(Value);
+    if (Size.MinValue > 0.0f)
+    {
+        Result = std::max(Result, Size.MinValue);
+    }
+    if (Size.MaxValue > 0.0f)
+    {
+        Result = std::min(Result, Size.MaxValue);
+    }
+    return Result;
 }
 
 UIColor ParseColorString(const std::string& Value)
@@ -447,11 +482,17 @@ UISizeSpec ParseSizeSpec(const rapidjson::Value& Value, UISizeMode DefaultMode)
 {
     UISizeSpec Result;
     Result.Mode = DefaultMode;
+    const auto ParseLocalNumberOrDefault = [](const rapidjson::Value& InValue, float DefaultValue) -> float
+    {
+        return InValue.IsNumber() ? static_cast<float>(InValue.GetDouble()) : DefaultValue;
+    };
 
     if (Value.IsNumber())
     {
         Result.Mode = UISizeMode::Fixed;
-        Result.Value = static_cast<float>(Value.GetDouble());
+        Result.Value = std::max(0.0f, static_cast<float>(Value.GetDouble()));
+        Result.MinValue = Result.Value;
+        Result.MaxValue = Result.Value;
         return Result;
     }
 
@@ -469,6 +510,52 @@ UISizeSpec ParseSizeSpec(const rapidjson::Value& Value, UISizeMode DefaultMode)
         else
         {
             Result.Mode = UISizeMode::Fit;
+        }
+    }
+    else if (Value.IsObject())
+    {
+        if (Value.HasMember("mode"))
+        {
+            const std::string ModeText = Value["mode"].IsString() ? std::string(Value["mode"].GetString()) : "";
+            if (ModeText == "grow")
+            {
+                Result.Mode = UISizeMode::Grow;
+            }
+            else if (ModeText == "fixed")
+            {
+                Result.Mode = UISizeMode::Fixed;
+            }
+            else if (ModeText == "fit")
+            {
+                Result.Mode = UISizeMode::Fit;
+            }
+        }
+
+        if (Value.HasMember("value"))
+        {
+            Result.Value = std::max(0.0f, ParseLocalNumberOrDefault(Value["value"], Result.Value));
+        }
+        if (Value.HasMember("min"))
+        {
+            Result.MinValue = std::max(0.0f, ParseLocalNumberOrDefault(Value["min"], Result.MinValue));
+        }
+        if (Value.HasMember("max"))
+        {
+            Result.MaxValue = std::max(0.0f, ParseLocalNumberOrDefault(Value["max"], Result.MaxValue));
+        }
+
+        if (Result.Mode == UISizeMode::Fixed)
+        {
+            if (Result.Value <= 0.0f && Result.MinValue > 0.0f)
+            {
+                Result.Value = Result.MinValue;
+            }
+            Result.MinValue = Result.Value;
+            Result.MaxValue = Result.Value;
+        }
+        else if (Result.MaxValue > 0.0f && Result.MaxValue < Result.MinValue)
+        {
+            Result.MaxValue = Result.MinValue;
         }
     }
 
@@ -875,6 +962,18 @@ struct NgxUIRuntime::Impl
             {
                 OutNode.FontSize = ParseNumberOrDefault(Props["fontSize"], OutNode.FontSize);
             }
+            if (Props.HasMember("aspectRatio"))
+            {
+                OutNode.AspectRatio = std::max(0.0f, ParseNumberOrDefault(Props["aspectRatio"], OutNode.AspectRatio));
+            }
+            if (Props.HasMember("textAlign"))
+            {
+                OutNode.TextAlign = ParseStringOrDefault(Props["textAlign"], OutNode.TextAlign);
+            }
+            else if (Props.HasMember("textAlignment"))
+            {
+                OutNode.TextAlign = ParseStringOrDefault(Props["textAlignment"], OutNode.TextAlign);
+            }
             if (Props.HasMember("text"))
             {
                 OutNode.Text = ParseStringOrDefault(Props["text"], "");
@@ -1006,24 +1105,24 @@ struct NgxUIRuntime::Impl
     {
         if (Node.Width.Mode == UISizeMode::Fixed)
         {
-            return Node.Width.Value;
+            return ApplySizeConstraints(Node.Width.Value, Node.Width);
         }
 
         if (Node.Width.Mode == UISizeMode::Grow)
         {
-            return AvailableWidth;
+            return ApplySizeConstraints(AvailableWidth, Node.Width);
         }
 
         switch (Node.Kind)
         {
         case UIWidgetKind::Text:
-            return MeasureTextWidthForNode(Node.Text, Node.FontSize);
+            return ApplySizeConstraints(MeasureTextWidthForNode(Node.Text, Node.FontSize), Node.Width);
         case UIWidgetKind::Button:
-            return MeasureTextWidthForNode(Node.Text, Node.FontSize) + Node.Padding.Left + Node.Padding.Right;
+            return ApplySizeConstraints(MeasureTextWidthForNode(Node.Text, Node.FontSize) + Node.Padding.Left + Node.Padding.Right, Node.Width);
         case UIWidgetKind::Spacer:
             return 0.0f;
         default:
-            return AvailableWidth;
+            return ApplySizeConstraints(AvailableWidth, Node.Width);
         }
     }
 
@@ -1135,6 +1234,7 @@ struct NgxUIRuntime::Impl
         TextConfig.fontSize = static_cast<uint16_t>(std::max(1.0f, Node.FontSize));
         TextConfig.lineHeight = static_cast<uint16_t>(std::max(1.0f, Node.FontSize * 1.2f));
         TextConfig.textColor = ToClayColor(ApplyOpacity(Node.TextColor, Node.Opacity));
+        TextConfig.textAlignment = ParseTextAlignment(Node.TextAlign);
         return &TextConfig;
     }
 
@@ -1210,6 +1310,10 @@ struct NgxUIRuntime::Impl
         Declaration.layout = LayoutConfig;
         Declaration.backgroundColor = ToClayColor(ApplyOpacity(Node.BackgroundColor, Node.Opacity));
         Declaration.cornerRadius = ToClayCornerRadius(Node.CornerRadius);
+        if (Node.AspectRatio > 0.0f)
+        {
+            Declaration.aspectRatio.aspectRatio = Node.AspectRatio;
+        }
         if (Node.Kind == UIWidgetKind::Image)
         {
             Declaration.image = ImageConfig;
@@ -1281,6 +1385,20 @@ struct NgxUIRuntime::Impl
         EmitNodeToClay(EntityId, Host, MetadataStorage, TextConfigStorage);
 
         const Clay_RenderCommandArray RenderCommands = Clay_EndLayout();
+        std::map<std::string, int32_t> TotalTextCommandCountById;
+        for (int32_t Index = 0; Index < RenderCommands.length; ++Index)
+        {
+            Clay_RenderCommand* Command = Clay_RenderCommandArray_Get(const_cast<Clay_RenderCommandArray*>(&RenderCommands), Index);
+            if (Command == nullptr || Command->userData == nullptr || Command->commandType != CLAY_RENDER_COMMAND_TYPE_TEXT)
+            {
+                continue;
+            }
+
+            const ClayNodeMetadata& Meta = *static_cast<const ClayNodeMetadata*>(Command->userData);
+            ++TotalTextCommandCountById[Meta.Id];
+        }
+
+        std::map<std::string, int32_t> SeenTextCommandCountById;
         for (int32_t Index = 0; Index < RenderCommands.length; ++Index)
         {
             Clay_RenderCommand* Command = Clay_RenderCommandArray_Get(const_cast<Clay_RenderCommandArray*>(&RenderCommands), Index);
@@ -1326,6 +1444,23 @@ struct NgxUIRuntime::Impl
             else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_TEXT)
             {
                 Drawable.Type = "text";
+                const int32_t TotalTextCommands = TotalTextCommandCountById[Meta.Id];
+                const int32_t SeenTextCommands = SeenTextCommandCountById[Meta.Id]++;
+                if (TotalTextCommands > 1)
+                {
+                    Drawable.Id = Meta.Id + ".__line" + std::to_string(SeenTextCommands);
+                }
+
+                const Clay_StringSlice& StringContents = Command->renderData.text.stringContents;
+                if (StringContents.chars != nullptr && StringContents.length >= 0)
+                {
+                    Drawable.Text.assign(StringContents.chars, static_cast<size_t>(StringContents.length));
+                }
+                else
+                {
+                    Drawable.Text.clear();
+                }
+                Drawable.FontSize = static_cast<float>(Command->renderData.text.fontSize);
             }
             else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_IMAGE)
             {

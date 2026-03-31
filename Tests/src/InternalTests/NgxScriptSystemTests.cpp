@@ -1724,6 +1724,132 @@ export function ui({ attributes }) {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeSplitsWrappedTextIntoPerLineDrawablesAndAppliesTextAlignment)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(800.0f, 600.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-text-align.js", R"(
+import { screen, column, text } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 420, height: 180, alignX: 'center', alignY: 'center', backgroundColor: '#020617FF', padding: 16 },
+        column(
+            { key: 'panel', width: 300, padding: 12, backgroundColor: '#111827FF' },
+            text(`Longer first line for alignment
+short`, {
+                key: 'body',
+                textColor: '#FFFFFFFF',
+                fontSize: 18,
+                textAlign: 'right'
+            })
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-text-align-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-text-align-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-text-align.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* FirstLine = FindDrawableById(Drawables, "root.0:panel.0:body.__line0");
+    const rapidjson::Value* SecondLine = FindDrawableById(Drawables, "root.0:panel.0:body.__line1");
+    ASSERT_NE(FirstLine, nullptr);
+    ASSERT_NE(SecondLine, nullptr);
+    ASSERT_TRUE(FirstLine->HasMember("text"));
+    ASSERT_TRUE(SecondLine->HasMember("text"));
+    EXPECT_STREQ((*FirstLine)["text"].GetString(), "Longer first line for alignment");
+    EXPECT_STREQ((*SecondLine)["text"].GetString(), "short");
+    EXPECT_GT((*SecondLine)["x"].GetFloat(), (*FirstLine)["x"].GetFloat());
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeAppliesAspectRatioAndConstrainedGrowSizing)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(800.0f, 600.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-responsive-image.js", R"(
+import { screen, column, image } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 'grow', height: 'grow' },
+        column(
+            { width: 'grow', height: 'grow', alignX: 'center', alignY: 'center' },
+            image(
+                { assetCollectionId: 'museum-assets', imageAssetId: 'hero' },
+                {
+                    key: 'hero',
+                    width: { mode: 'grow', max: 500 },
+                    height: 'grow',
+                    aspectRatio: 2.0
+                }
+            )
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-responsive-image-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-responsive-image-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-responsive-image.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* HeroImage = FindDrawableById(Drawables, "root.0:hero");
+    ASSERT_NE(HeroImage, nullptr);
+    EXPECT_FLOAT_EQ((*HeroImage)["width"].GetFloat(), 500.0f);
+    EXPECT_FLOAT_EQ((*HeroImage)["height"].GetFloat(), 250.0f);
+
+    NgxScriptSystem.SetUIViewportSize(360.0f, 600.0f);
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    HeroImage = FindDrawableById(Drawables, "root.0:hero");
+    ASSERT_NE(HeroImage, nullptr);
+    EXPECT_FLOAT_EQ((*HeroImage)["width"].GetFloat(), 360.0f);
+    EXPECT_FLOAT_EQ((*HeroImage)["height"].GetFloat(), 180.0f);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeMountsWorldUIWithPlacementMetadata)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);

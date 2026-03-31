@@ -163,9 +163,11 @@ Current UI notes:
 - `world` supports `targetEntityId`, `worldOffset`, and `billboardMode`
 - `flowRow` lays out children left-to-right and starts a new row when the next child would overflow
 - `floating` is the way to overlap or absolutely anchor UI relative to a parent or the root
-- `width` and `height` currently support fixed numbers plus `"grow"` and `"fit"`
+- `width` and `height` support fixed numbers, the keywords `"grow"` and `"fit"`, plus constrained objects such as `{ mode: "grow", max: 920 }` or `{ mode: "fit", min: 120, max: 320 }`
+- `aspectRatio` may be set on layout or image nodes to preserve a width-to-height ratio while Clay sizes the element
 - colors are currently passed as hex strings such as `"#FFFFFF"` or `"#102713CC"`
 - text color props may be written as `textColor`, `color`, or `colour`
+- text alignment may be set with `textAlign: "left" | "center" | "right"`
 - if no explicit color is provided, `text(...)` defaults to opaque white text and `button(...)` defaults to opaque white text on a dark background
 
 `floating(...)` is preferred over a generic "stack" abstraction because it expresses overlap and anchoring explicitly.
@@ -176,7 +178,21 @@ Example text styling:
 text("Coins: 3", {
   color: "#00FFFF",
   fontSize: 16,
+  textAlign: "left",
 })
+```
+
+Responsive image example:
+
+```js
+image(
+  { assetCollectionId: "museum-assets", imageAssetId: "hero" },
+  {
+    width: { mode: "grow", max: 920 },
+    height: "grow",
+    aspectRatio: 920 / 620
+  }
+)
 ```
 
 Example:
