@@ -73,10 +73,9 @@ source_group(TREE ${CSP_SERVICES_DIR} FILES
 # First build the implementation as a static lib.
 # This allows tests to link against this, instead of the consumer library, allowing for private access,
 # so they can include private headers and use symbols that are not exported from the shared library.
-add_library(csp-impl STATIC
+add_library(csp-impl OBJECT
   ${CSP_PRIVATE_SOURCES}
   ${CSP_SERVICES_SOURCES}
-  ${CSP_INCLUDE_DIR}
 )
 
 target_include_directories(csp-impl
@@ -199,10 +198,6 @@ target_sources(csp-lib
     BASE_DIRS ${CSP_INCLUDE_DIR}
     FILES 
       ${CSP_PUBLIC_SOURCES}
-  PRIVATE
-    # Ensure we have at least one source file,
-    # as this can prevent some generators from creating the binary.
-    ${CSP_SOURCE_DIR}/Dummy.cpp
 )
 
 # Set include directories
@@ -214,11 +209,8 @@ target_include_directories(csp-lib
     $<INSTALL_INTERFACE:include>
 )
 
-# Link to our impl lib
-target_link_libraries(csp-lib 
-  PRIVATE 
-    # LINK_LIBRARY:WHOLE_ARCHIVE is needed here, as it forces all symbols into the final lib
-    "$<LINK_LIBRARY:WHOLE_ARCHIVE,csp-impl>")
+# Link to our impl lib 
+target_link_libraries(csp-lib PRIVATE csp-impl)
 
 # Public as it is a requiremnt that consumers also be >= c++17
 target_compile_features(csp-lib PUBLIC cxx_std_17)
