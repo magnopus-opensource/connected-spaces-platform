@@ -13,12 +13,10 @@ set(CSP_SOURCE_DIR  ${CSP_ROOT}/src)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/shared_files.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/core_files.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/multiplayer_files.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/misc_files.cmake)
 
 set(CSP_PUBLIC_SOURCES
   ${CSP_SHARED_PUBLIC_INCLUDES}
   ${CSP_CORE_PUBLIC_INCLUDES}
-  ${CSP_MISC_PUBLIC_INCLUDES}
   ${CSP_MULTIPLAYER_PUBLIC_INCLUDES}
 )
 
@@ -29,8 +27,6 @@ set(CSP_PRIVATE_SOURCES
   ${CSP_CORE_PRIVATE_INCLUDES}
   ${CSP_MULTIPLAYER_SOURCES}
   ${CSP_MULTIPLAYER_PRIVATE_INCLUDES}
-  ${CSP_MISC_SOURCES}
-  ${CSP_MISC_PRIVATE_INCLUDES}
 )
 
 # Preserve folder structure for files in IDE
