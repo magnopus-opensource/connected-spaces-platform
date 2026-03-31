@@ -1,3 +1,4 @@
+set(CSP_ROOT_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP)
 set(CSP_SHARED_INCLUDE_DIR ${CSP_INCLUDE_DIR}/CSP/Common)
 set(CSP_SHARED_SOURCE_DIR  ${CSP_SOURCE_DIR}/Common)
 
@@ -32,6 +33,13 @@ set(CSP_SHARED_PUBLIC_INCLUDES
 
     ${CSP_SHARED_INCLUDE_DIR}/Systems/Log/LogLevels.h
     ${CSP_SHARED_INCLUDE_DIR}/Systems/Log/LogSystem.h
+
+    # Files that exist at the root of the Library folder.
+    # We will need to sort these files when we do the formal modularization work.
+    ${CSP_ROOT_INCLUDE_DIR}/AssetHash.h
+    ${CSP_ROOT_INCLUDE_DIR}/CSPCommon.h
+    ${CSP_ROOT_INCLUDE_DIR}/CSPFoundation.h
+    ${CSP_ROOT_INCLUDE_DIR}/version.h
 )
 
 set(CSP_SHARED_SOURCES
@@ -64,6 +72,35 @@ set(CSP_SHARED_SOURCES
 
     ${CSP_SHARED_SOURCE_DIR}/Web/POCOWebClient/POCOWebClient.cpp
 
+    # Files that exist at the root of the Library folder.
+    # We will need to sort these files when we do the formal modularization work.
+    ${CSP_SOURCE_DIR}/AssetHash.cpp
+    ${CSP_SOURCE_DIR}/CSPFoundation.cpp
+    ${CSP_SOURCE_DIR}/ExplicitTypes.cpp
+
+    ${CSP_SOURCE_DIR}/EmscriptenBindings/CallbackQueue.cpp
+
+    ${CSP_SOURCE_DIR}/Events/Event.cpp
+    ${CSP_SOURCE_DIR}/Events/EventDispatcher.cpp
+    ${CSP_SOURCE_DIR}/Events/EventId.cpp
+    ${CSP_SOURCE_DIR}/Events/EventSystem.cpp
+
+    ${CSP_SOURCE_DIR}/Json/JsonParseHelper.cpp
+    ${CSP_SOURCE_DIR}/Json/JsonSerializer.cpp
+
+    ${CSP_SOURCE_DIR}/Services/ApiBase/ApiBase.cpp
+
+    ${CSP_SOURCE_DIR}/Services/DtoBase/DtoBase.cpp
+
+    ${CSP_SOURCE_DIR}/Services/PrototypeService/AssetFileDto.cpp
+
+    ${CSP_SOURCE_DIR}/Web/RemoteFileManager.cpp
+
+    ${CSP_SOURCE_DIR}/Web/GraphQLApi/GraphQLApi.cpp
+
+    ${CSP_SOURCE_DIR}/Web/MaintenanceApi/MaintenanceApi.cpp
+
+
 )
 
 set(CSP_SHARED_PRIVATE_INCLUDES 
@@ -91,4 +128,37 @@ set(CSP_SHARED_PRIVATE_INCLUDES
     ${CSP_SHARED_SOURCE_DIR}/Web/EmscriptenWebClient/EmscriptenWebClient.h
 
     ${CSP_SHARED_SOURCE_DIR}/Web/POCOWebClient/POCOWebClient.h
+
+
+    # Files that exist at the root of the Library folder.
+    # We will need to sort these files when we do the formal modularization work.
+    ${CSP_SOURCE_DIR}/CallHelpers.h
+    ${CSP_SOURCE_DIR}/WrapperGenUtils.h
+
+    ${CSP_SOURCE_DIR}/Debug/Logging.h
+
+    ${CSP_SOURCE_DIR}/EmscriptenBindings/CallbackQueue.h
+
+    ${CSP_SOURCE_DIR}/Events/Event.h
+    ${CSP_SOURCE_DIR}/Events/EventDispatcher.h
+    ${CSP_SOURCE_DIR}/Events/EventId.h
+    ${CSP_SOURCE_DIR}/Events/EventListener.h
+    ${CSP_SOURCE_DIR}/Events/EventSystem.h
+
+    ${CSP_SOURCE_DIR}/Json/JsonParseHelper.h
+    ${CSP_SOURCE_DIR}/Json/JsonSerializer.h
+
+    ${CSP_SOURCE_DIR}/Services/ApiBase/ApiBase.h
+
+    ${CSP_SOURCE_DIR}/Services/DtoBase/DtoBase.h
+
+    ${CSP_SOURCE_DIR}/Services/PrototypeService/AssetFileDto.h
+
+    ${CSP_SOURCE_DIR}/Storage/FileCache.h
+
+    ${CSP_SOURCE_DIR}/Web/RemoteFileManager.h
+
+    ${CSP_SOURCE_DIR}/Web/GraphQLApi/GraphQLApi.h
+
+    ${CSP_SOURCE_DIR}/Web/MaintenanceApi/MaintenanceApi.h
 )
