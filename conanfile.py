@@ -25,12 +25,12 @@ class CSP(ConanFile):
         self.requires("sole/1.0.4")
 
     def configure(self):
-        # Disable unnecessary Ppoco modules as this is a big library with dependecies.
+        # Disable unnecessary Poco modules as this is a big library with dependecies.
         # Even with these removed, Poco increases our install step time by ~5 minutes.
         self.options["poco"].enable_crypto = True
         self.options["poco"].enable_netssl = True
-        self.options["poco"].enable_xml = True
-        self.options["poco"].enable_json = True
+        self.options["poco"].enable_xml = False
+        self.options["poco"].enable_json = False
         self.options["poco"].enable_util = True
         self.options["poco"].enable_pdf = False
         self.options["poco"].enable_zip = False
