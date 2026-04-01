@@ -63,8 +63,6 @@ if(MSVC)
 endif()
 
 target_compile_options(MultiplayerTestRunner PRIVATE
-    # Needed to compile EntityScriptBindings.cpp
-    $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
 )
 

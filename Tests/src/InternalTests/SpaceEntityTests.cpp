@@ -30,7 +30,6 @@
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "RAIIMockLogger.h"
 #include "TestHelpers.h"
-#include "quickjspp.hpp"
 
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
