@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file. For compile
   This is an internal refactor step towards more easily defining new components. All existing components
   have been refactored to specify their properties this way and delegate to this new constructor.
 
-- [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to match SignalR wire representation. By @mag-lt
+- [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to ensure compatibility with SignalR wire representation. By @mag-lt
   This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
   the existing constaints into the type system.
 
