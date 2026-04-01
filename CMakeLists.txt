@@ -44,6 +44,7 @@ find_package(Poco REQUIRED)
 find_package(tinyspline REQUIRED)
 find_package(glm REQUIRED)
 
+# Vendored libs
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/signalrclient)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/quickjs)
 
