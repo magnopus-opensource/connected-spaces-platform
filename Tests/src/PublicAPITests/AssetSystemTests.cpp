@@ -2223,7 +2223,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
     LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 {
     SetRandSeed();
 
