@@ -70,48 +70,54 @@ source_group(TREE ${CSP_SERVICES_DIR} FILES
 )
 
 # ------------------------------------------------------------------------------------------------------------------
-# First build the implementation as a static lib.
-# This allows tests to link against this, instead of the consumer library, allowing for private access,
-# so they can include private headers and use symbols that are not exported from the shared library.
-add_library(csp-impl STATIC
-  ${CSP_PRIVATE_SOURCES}
-  ${CSP_SERVICES_SOURCES}
-  ${CSP_INCLUDE_DIR}
+# Create csp-lib
+
+add_library(csp-lib ${CSP_LIB_TYPE})
+
+target_sources(csp-lib
+  PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CSP_INCLUDE_DIR}
+    FILES 
+      ${CSP_PUBLIC_SOURCES}
+  PRIVATE
+    ${CSP_PRIVATE_SOURCES}
+    ${CSP_SERVICES_SOURCES}
 )
 
-target_include_directories(csp-impl
+# Set include directories
+target_include_directories(csp-lib
+  PUBLIC
+    # Include dir when building from source
+    $<BUILD_INTERFACE:${CSP_INCLUDE_DIR}>
+    # Include dir after installation 
+    $<INSTALL_INTERFACE:include>
   PRIVATE
     ${CSP_SOURCE_DIR}
-    ${CSP_INCLUDE_DIR}
 )
 
 # The generated services should be included as a system header for now,
 # as these create warnings which manifest as errors due to /wd4100.
-target_include_directories(csp-impl
+target_include_directories(csp-lib
   SYSTEM PRIVATE
     ${CSP_SERVICES_DIR}
 )
 
-# Create prop with all of our third-party libs
-set(CSP_THIRD_PARTY_LIBS
-  rapidjson
-  fmt::fmt
-  Async++
-  Poco::Poco
-  Poco::Net
-  csp-signalr
-  tinysplinecxx::tinysplinecxx
-  glm::glm
-  csp-quickjs
-)
-
-target_link_libraries(csp-impl
+target_link_libraries(csp-lib
   PRIVATE
-    ${CSP_THIRD_PARTY_LIBS}
+    rapidjson
+    fmt::fmt
+    Async++
+    Poco::Poco
+    Poco::Net
+    csp-signalr
+    tinysplinecxx::tinysplinecxx
+    glm::glm
+    csp-quickjs
 )
 
-# Project uses C++17
-target_compile_features(csp-impl PRIVATE cxx_std_17)
+# Public as it is a requiremnt that consumers also be >= c++17
+target_compile_features(csp-lib PUBLIC cxx_std_17)
 
 option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
 
@@ -121,7 +127,7 @@ else()
   set(CSP_LIB_TYPE STATIC)
 endif()
 
-target_compile_definitions(csp-impl
+target_compile_definitions(csp-lib
   PRIVATE
     # Setup dll export macros if we're building as shared
     $<$<BOOL:${CSP_BUILD_SHARED}>:BUILD_CSP_DLL>
@@ -149,9 +155,9 @@ target_compile_definitions(csp-impl
 
 # Warnings as errors flag
 # Sets WX/Werror
-set_target_properties(csp-impl PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+set_target_properties(csp-lib PROPERTIES COMPILE_WARNING_AS_ERROR ON)
 
-target_compile_options(csp-impl
+target_compile_options(csp-lib
   PRIVATE
     # Needed to compile EntityScriptBindings.cpp
     $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
@@ -181,47 +187,12 @@ target_compile_options(csp-impl
     >
 )
 
-set_target_properties(csp-impl
+set_target_properties(csp-lib
   # Exclude from ALL build
   PROPERTIES EXCLUDE_FROM_ALL TRUE
   # Hide in internal folder
   FOLDER "_internal"
   )
-
-# ------------------------------------------------------------------------------------------------------------------
-# Now create our final target
-
-add_library(csp-lib ${CSP_LIB_TYPE})
-
-target_sources(csp-lib
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CSP_INCLUDE_DIR}
-    FILES 
-      ${CSP_PUBLIC_SOURCES}
-  PRIVATE
-    # Ensure we have at least one source file,
-    # as this can prevent some generators from creating the binary.
-    ${CSP_SOURCE_DIR}/Dummy.cpp
-)
-
-# Set include directories
-target_include_directories(csp-lib
-  PUBLIC
-    # Include dir when building from source
-    $<BUILD_INTERFACE:${CSP_INCLUDE_DIR}>
-    # Include dir after installation 
-    $<INSTALL_INTERFACE:include>
-)
-
-# Link to our impl lib
-target_link_libraries(csp-lib 
-  PRIVATE 
-    # LINK_LIBRARY:WHOLE_ARCHIVE is needed here, as it forces all symbols into the final lib
-    "$<LINK_LIBRARY:WHOLE_ARCHIVE,csp-impl>")
-
-# Public as it is a requiremnt that consumers also be >= c++17
-target_compile_features(csp-lib PUBLIC cxx_std_17)
 
 # ------------------------------------------------------------------------------------------------------------------
 # Testing
@@ -258,17 +229,29 @@ if(BUILD_TESTING)
 
   target_link_libraries(csp-tests
     PRIVATE 
-      csp-impl
+      csp-lib
       GTest::gtest
       GTest::gtest_main
       GTest::gmock
       sole::sole
       tiny-process-library::tiny-process-library
 
-      # We need to link our third party libs here, as well, 
+      # We need to link a lot of our third party libs here, as well, 
       # becase we either test these directly, or expose them through private headers.
-      # This way we don't have to make them public libs.
-      ${CSP_THIRD_PARTY_LIBS}
+      # This way we don't have to make them public libs for regular consumers.
+
+      # Our tests directly use these libs
+      csp-quickjs
+      rapidjson
+      glm::glm
+      fmt::fmt
+      Async++
+      csp-signalr
+
+      # Libs exposed through private includes
+      # We should find a way of hiding these from headers ideally
+      Poco::Poco
+      Poco::Net
   )
 
   # Set include directories
@@ -276,7 +259,7 @@ if(BUILD_TESTING)
     PRIVATE
       ${CMAKE_CURRENT_SOURCE_DIR}/Tests/src
       ${CMAKE_CURRENT_SOURCE_DIR}/MultiplayerTestRunner/include
-      ${CSP_INCLUDE_DIR}
+      # We need to access private includes in our tests
       ${CSP_SOURCE_DIR}
       ${CSP_SERVICES_DIR}
   )
@@ -293,8 +276,6 @@ if(BUILD_TESTING)
   )
 
   target_compile_options(csp-tests PRIVATE
-    # Needed to compile EntityScriptBindings.cpp
-    $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
     $<$<CXX_COMPILER_ID:MSVC>:/permissive->
   )
 
