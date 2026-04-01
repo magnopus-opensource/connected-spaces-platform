@@ -1900,6 +1900,83 @@ export function ui() {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeQueuesAsyncTextMeasureRequestsAndAppliesSubmittedResults)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(640.0f, 360.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-text-measure-async.js", R"(
+import { screen, column, text } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 'grow', height: 'grow' },
+        column(
+            { width: 'grow', height: 'grow', alignX: 'center', alignY: 'center' },
+            text('Async browser measurement', { key: 'body', fontSize: 22, textAlign: 'left' })
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-text-measure-async-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-text-measure-async-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-text-measure-async.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+    NgxScriptSystem.DrainPendingUIUpdates();
+
+    const rapidjson::Document Requests = ParseJson(NgxScriptSystem.DrainPendingUITextMeasureRequests().c_str());
+    ASSERT_TRUE(Requests.IsArray());
+    ASSERT_EQ(Requests.Size(), 1u);
+    ASSERT_TRUE(Requests[0].IsObject());
+    ASSERT_TRUE(Requests[0].HasMember("text"));
+    ASSERT_TRUE(Requests[0].HasMember("fontSize"));
+    EXPECT_STREQ(Requests[0]["text"].GetString(), "Async browser measurement");
+    EXPECT_FLOAT_EQ(Requests[0]["fontSize"].GetFloat(), 22.0f);
+
+    EXPECT_TRUE(NgxScriptSystem.SubmitUITextMeasureResults(R"([
+        {
+            "text": "Async browser measurement",
+            "fontSize": 22,
+            "width": 246,
+            "height": 29
+        }
+    ])"));
+
+    const rapidjson::Document RemainingRequests = ParseJson(NgxScriptSystem.DrainPendingUITextMeasureRequests().c_str());
+    ASSERT_TRUE(RemainingRequests.IsArray());
+    EXPECT_EQ(RemainingRequests.Size(), 0u);
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* BodyDrawable = FindDrawableById(Drawables, "root.0:body");
+    ASSERT_NE(BodyDrawable, nullptr);
+    EXPECT_FLOAT_EQ((*BodyDrawable)["width"].GetFloat(), 246.0f);
+    EXPECT_FLOAT_EQ((*BodyDrawable)["height"].GetFloat(), 29.0f);
+
+    const rapidjson::Document Updates = ParseJson(NgxScriptSystem.DrainPendingUIUpdates().c_str());
+    const rapidjson::Value* UpdatedDrawable = FindUpdateDrawableByType(Updates, "update", "text");
+    ASSERT_NE(UpdatedDrawable, nullptr);
+    EXPECT_FLOAT_EQ((*UpdatedDrawable)["width"].GetFloat(), 246.0f);
+    EXPECT_FLOAT_EQ((*UpdatedDrawable)["height"].GetFloat(), 29.0f);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeMountsWorldUIWithPlacementMetadata)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
@@ -2131,9 +2208,17 @@ export function ui() {
     const std::string EntityId = std::to_string(Entity.GetId());
     const rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
     const rapidjson::Value* ButtonDrawable = FindDrawableById(Drawables, "root.0");
+    const rapidjson::Value* ButtonLabelDrawable = FindDrawableById(Drawables, "root.0__label");
     ASSERT_NE(ButtonDrawable, nullptr);
+    ASSERT_NE(ButtonLabelDrawable, nullptr);
     ASSERT_TRUE(ButtonDrawable->HasMember("handlerId"));
     ASSERT_TRUE((*ButtonDrawable)["handlerId"].IsString());
+    ASSERT_TRUE(ButtonDrawable->HasMember("text"));
+    EXPECT_STREQ((*ButtonDrawable)["text"].GetString(), "");
+    ASSERT_TRUE(ButtonLabelDrawable->HasMember("text"));
+    EXPECT_STREQ((*ButtonLabelDrawable)["text"].GetString(), "Increment");
+    ASSERT_TRUE(ButtonLabelDrawable->HasMember("handlerId"));
+    EXPECT_STREQ((*ButtonLabelDrawable)["handlerId"].GetString(), "");
 
     EXPECT_TRUE(NgxScriptSystem.DispatchUIAction(EntityId.c_str(), (*ButtonDrawable)["handlerId"].GetString()));
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxUIClickCount", 0), 1);
@@ -2142,6 +2227,77 @@ export function ui() {
     ProcessTickEvent();
 
     EXPECT_FALSE(NgxScriptSystem.DispatchUIAction(EntityId.c_str(), (*ButtonDrawable)["handlerId"].GetString()));
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeDispatchesUIButtonClicksThatBatchReactiveUnmounts)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.SetUIViewportSize(640.0f, 480.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-close-screen.js", R"(
+import { signal } from '@preact/signals-core';
+import { screen, column, button, text } from '@csp/ui';
+
+const showScreen = signal(true);
+const typedCharacterCount = signal(12);
+
+export function ui() {
+    if (!showScreen.value) {
+        return null;
+    }
+
+    return screen(
+        { width: 320, height: 180, alignX: 'center', alignY: 'center', backgroundColor: '#020617FF', padding: 12 },
+        column(
+            { width: 'grow', height: 'grow', gap: 12 },
+            text(`Typed: ${typedCharacterCount.value}`, { key: 'body', fontSize: 18, textAlign: 'left' }),
+            button('Continue', {
+                key: 'continue',
+                backgroundColor: '#2563EBFF',
+                textColor: '#FFFFFFFF',
+                onClick: () => {
+                    typedCharacterCount.value = 0;
+                    showScreen.value = false;
+                }
+            })
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-close-screen-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-close-screen-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-close-screen.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    rapidjson::Document Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    const rapidjson::Value* ButtonDrawable = FindDrawableById(Drawables, "root.0:continue");
+    ASSERT_NE(ButtonDrawable, nullptr);
+    ASSERT_TRUE(ButtonDrawable->HasMember("handlerId"));
+    ASSERT_TRUE((*ButtonDrawable)["handlerId"].IsString());
+
+    EXPECT_TRUE(NgxScriptSystem.DispatchUIAction(EntityId.c_str(), (*ButtonDrawable)["handlerId"].GetString()));
+    ProcessTickEvent();
+
+    Drawables = ParseJson(NgxScriptSystem.GetUIDrawablesJsonForTesting(EntityId.c_str()).c_str());
+    EXPECT_EQ(Drawables.MemberCount(), 0u);
 
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();

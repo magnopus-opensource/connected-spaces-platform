@@ -110,8 +110,17 @@ public:
 
     // Provide a client text measurement callback used by Clay during layout.
     // The callback receives text, font size, and out-parameters for width and height.
-    // In wasm builds the callback is proxied to the main runtime thread before invocation.
+    // This path is intended for native clients. Web clients should prefer the async
+    // request/result flow via DrainPendingUITextMeasureRequests and SubmitUITextMeasureResults.
     void SetUITextMeasureCallback(UITextMeasureCallback InCallback);
+
+    // Drain pending browser-safe text measurement requests as a JSON array.
+    // Each entry has shape: { "text": string, "fontSize": number }.
+    csp::common::String DrainPendingUITextMeasureRequests();
+
+    // Submit measured text results as a JSON array.
+    // Each entry has shape: { "text": string, "fontSize": number, "width": number, "height": number }.
+    bool SubmitUITextMeasureResults(const csp::common::String& ResultsJson);
 
     // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
     csp::common::String DrainPendingUIUpdates();

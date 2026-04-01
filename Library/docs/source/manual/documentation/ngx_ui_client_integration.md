@@ -42,6 +42,12 @@ The relevant hooks are:
 - `NgxScriptSystem::DrainPendingUIUpdates()`
   - Poll this after script/runtime work has been processed.
   - Returns a JSON array of `add`, `update`, and `remove` operations.
+- `NgxScriptSystem::DrainPendingUITextMeasureRequests()`
+  - Poll this on web clients after script/runtime work has been processed.
+  - Returns a JSON array of text measurement requests shaped like `{ text, fontSize }`.
+- `NgxScriptSystem::SubmitUITextMeasureResults(resultsJson)`
+  - Call this after the client measures pending text requests.
+  - `resultsJson` should be a JSON array shaped like `{ text, fontSize, width, height }`.
 - `NgxScriptSystem::DispatchUIAction(entityId, handlerId)`
   - Call when the client determines that a clickable drawable was activated.
   - Returns `true` if the handler existed and ran.
@@ -192,13 +198,18 @@ Current limitations:
 
 ## Text Measurement
 
-Text layout currently falls back to a runtime heuristic unless the client supplies a text measurement callback through the NGX script system.
+Text layout currently falls back to a runtime heuristic unless the client supplies measurements.
 
-When a callback is provided:
+Recommended path for web/wasm clients:
 
-- Clay asks the shared library to measure text during layout.
-- The shared library forwards that request to the client callback.
-- In wasm builds, the callback path should be treated as main-thread-only work. The runtime proxies the invocation back to the main runtime thread before calling the client callback.
+- Clay requests text sizing during layout.
+- The shared library serves cached measurements when available.
+- Cache misses are exposed through `DrainPendingUITextMeasureRequests()`.
+- The browser measures those entries on the main thread.
+- The client sends results back through `SubmitUITextMeasureResults(...)`.
+- The runtime re-lays out mounted UI using the submitted measurements.
+
+Native clients may still provide a direct callback through `SetUITextMeasureCallback(...)`, but web clients should prefer the async request/result flow to avoid blocking or deadlocking layout.
 
 That heuristic estimates:
 
@@ -219,6 +230,8 @@ The smallest maintainable client structure is:
 
 - `NgxUIClientBridge`
   - Polls `DrainPendingUIUpdates()`
+  - Polls `DrainPendingUITextMeasureRequests()` on web builds
+  - Measures text and calls `SubmitUITextMeasureResults(...)`
   - Applies diffs into local render state
   - Forwards clicks through `DispatchUIAction(...)`
 - `ScreenUIRenderer`

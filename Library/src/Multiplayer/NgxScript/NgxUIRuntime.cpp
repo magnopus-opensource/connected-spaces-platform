@@ -1,9 +1,6 @@
 #include "Multiplayer/NgxScript/NgxUIRuntime.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
-#ifdef CSP_WASM
-#include "EmscriptenBindings/CallbackQueue.h"
-#endif
 
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
@@ -15,8 +12,11 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
+#include <limits>
 #include <map>
 #include <memory>
+#include <unordered_map>
+#include <unordered_set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -239,6 +239,12 @@ struct UIPendingUpdate
     std::string Op;
     std::string EntityId;
     UIDrawable Drawable;
+};
+
+struct UITextMeasureRequest
+{
+    std::string Text;
+    float FontSize;
 };
 
 struct ClayNodeMetadata
@@ -714,6 +720,15 @@ bool DrawablesEqual(const UIDrawable& Left, const UIDrawable& Right)
         && Left.Enabled == Right.Enabled;
 }
 
+std::string BuildTextMeasureRequestKey(const std::string& Text, float FontSize)
+{
+    std::ostringstream Stream;
+    Stream.setf(std::ios::fixed, std::ios::floatfield);
+    Stream.precision(std::numeric_limits<float>::max_digits10);
+    Stream << FontSize << '\n' << Text;
+    return Stream.str();
+}
+
 } // namespace
 
 namespace csp::systems
@@ -726,6 +741,7 @@ struct NgxUIRuntime::Impl
         , ViewportWidth(1280.0f)
         , ViewportHeight(720.0f)
         , HasWarnedFallbackMeasurement(false)
+        , HasWarnedWasmCallbackLimitation(false)
         , ClayArenaMemory()
         , ClayContext(nullptr)
     {
@@ -736,10 +752,26 @@ struct NgxUIRuntime::Impl
     float ViewportHeight;
     TextMeasureCallback MeasureCallback;
     bool HasWarnedFallbackMeasurement;
+    bool HasWarnedWasmCallbackLimitation;
     std::vector<char> ClayArenaMemory;
     Clay_Context* ClayContext;
     std::map<std::string, UIEntityState> Entities;
     std::vector<UIPendingUpdate> PendingUpdates;
+    std::unordered_map<std::string, csp::common::Vector2> TextMeasureCache;
+    std::vector<UITextMeasureRequest> PendingTextMeasureRequests;
+    std::unordered_set<std::string> PendingTextMeasureRequestKeys;
+
+    void QueueTextMeasureRequest(const std::string& Text, float FontSize)
+    {
+        const std::string Key = BuildTextMeasureRequestKey(Text, FontSize);
+        if (PendingTextMeasureRequestKeys.find(Key) != PendingTextMeasureRequestKeys.end())
+        {
+            return;
+        }
+
+        PendingTextMeasureRequestKeys.insert(Key);
+        PendingTextMeasureRequests.push_back(UITextMeasureRequest { Text, FontSize });
+    }
 
     static void ClayErrorThunk(Clay_ErrorData ErrorData)
     {
@@ -781,44 +813,52 @@ struct NgxUIRuntime::Impl
         Dimensions.height = 0.0f;
 
         const float FontSize = Config != NULL && Config->fontSize > 0 ? static_cast<float>(Config->fontSize) : 16.0f;
-        if (Self != NULL && Self->MeasureCallback)
+        const std::string RawInput
+            = Text.chars != nullptr && Text.length > 0 ? std::string(Text.chars, static_cast<size_t>(Text.length)) : std::string();
+
+        if (Self != NULL)
         {
-            const std::string RawInput
-                = Text.chars != nullptr && Text.length > 0 ? std::string(Text.chars, static_cast<size_t>(Text.length)) : std::string();
-            csp::common::String Input(RawInput.c_str());
-            const csp::common::Vector2 Size =
-#ifdef CSP_WASM
-                csp::Emscripten_CallbackOnThreadWithReturn<csp::common::Vector2, csp::common::String, float>(
-                    &Impl::MeasureTextOnCallbackThread, Self, Input, FontSize);
+            const std::string Key = BuildTextMeasureRequestKey(RawInput, FontSize);
+            const std::unordered_map<std::string, csp::common::Vector2>::const_iterator Cached = Self->TextMeasureCache.find(Key);
+            if (Cached != Self->TextMeasureCache.end())
+            {
+                Dimensions.width = Cached->second.X;
+                Dimensions.height = Cached->second.Y;
+                return Dimensions;
+            }
+
+#ifndef CSP_WASM
+            if (Self->MeasureCallback)
+            {
+                const csp::common::String Input(RawInput.c_str());
+                const csp::common::Vector2 Size = Self->MeasureCallback(Input, FontSize);
+                Self->TextMeasureCache[Key] = Size;
+                Dimensions.width = Size.X;
+                Dimensions.height = Size.Y;
+                return Dimensions;
+            }
 #else
-                Self->MeasureCallback(Input, FontSize);
+            if (Self->MeasureCallback && !Self->HasWarnedWasmCallbackLimitation)
+            {
+                Self->HasWarnedWasmCallbackLimitation = true;
+                Self->LogSystem.LogMsg(csp::common::LogLevel::Warning,
+                    "NgxUIRuntime: Direct text measurement callbacks are disabled on wasm; use the async text measurement request/result flow.");
+            }
 #endif
-            Dimensions.width = Size.X;
-            Dimensions.height = Size.Y;
-            return Dimensions;
+
+            Self->QueueTextMeasureRequest(RawInput, FontSize);
         }
 
         if (Self != NULL && !Self->HasWarnedFallbackMeasurement)
         {
             Self->HasWarnedFallbackMeasurement = true;
             Self->LogSystem.LogMsg(csp::common::LogLevel::Warning,
-                "NgxUIRuntime: Text measurement callback not set; using fallback text sizing.");
+                "NgxUIRuntime: Text measurement unavailable; using fallback text sizing until client results are submitted.");
         }
 
         Dimensions.width = static_cast<float>(Text.length) * FontSize * 0.6f;
         Dimensions.height = FontSize * 1.2f;
         return Dimensions;
-    }
-
-    static csp::common::Vector2 MeasureTextOnCallbackThread(void* Context, csp::common::String Text, float FontSize)
-    {
-        Impl* Self = static_cast<Impl*>(Context);
-        if (Self == nullptr || !Self->MeasureCallback)
-        {
-            return csp::common::Vector2(0.0f, 0.0f);
-        }
-
-        return Self->MeasureCallback(Text, FontSize);
     }
 
     bool ParseNode(const rapidjson::Value& Value, const std::string& EntityId, UINode& OutNode)
@@ -1264,7 +1304,10 @@ struct NgxUIRuntime::Impl
         std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage)
     {
         Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, Node);
-        TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id + "__label", UIWidgetKind::Text);
+        UINode LabelNode = Node;
+        LabelNode.HandlerId.clear();
+        LabelNode.Enabled = false;
+        TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, LabelNode, Node.Id + "__label", UIWidgetKind::Text);
         Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
     }
 
@@ -1462,6 +1505,10 @@ struct NgxUIRuntime::Impl
             if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_CUSTOM)
             {
                 Drawable.Type = Meta.WidgetKind == UIWidgetKind::Button ? "button" : WidgetKindToString(Meta.WidgetKind);
+                if (Meta.WidgetKind == UIWidgetKind::Button)
+                {
+                    Drawable.Text.clear();
+                }
             }
             else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_TEXT)
             {
@@ -1613,6 +1660,8 @@ void NgxUIRuntime::Clear()
         Pimpl->QueueDiff(It->first, It->second.Drawables, std::map<std::string, UIDrawable>());
     }
     Pimpl->Entities.clear();
+    Pimpl->PendingTextMeasureRequests.clear();
+    Pimpl->PendingTextMeasureRequestKeys.clear();
 }
 
 void NgxUIRuntime::SetViewportSize(float Width, float Height)
@@ -1635,6 +1684,81 @@ void NgxUIRuntime::SetTextMeasureCallback(TextMeasureCallback InCallback)
 {
     Pimpl->MeasureCallback = InCallback;
     Pimpl->HasWarnedFallbackMeasurement = false;
+    Pimpl->HasWarnedWasmCallbackLimitation = false;
+    Pimpl->PendingTextMeasureRequests.clear();
+    Pimpl->PendingTextMeasureRequestKeys.clear();
+    Pimpl->TextMeasureCache.clear();
+}
+
+std::string NgxUIRuntime::DrainPendingTextMeasureRequestsJson()
+{
+    rapidjson::Document Document;
+    Document.SetArray();
+    rapidjson::Document::AllocatorType& Allocator = Document.GetAllocator();
+
+    for (size_t Index = 0; Index < Pimpl->PendingTextMeasureRequests.size(); ++Index)
+    {
+        const UITextMeasureRequest& Request = Pimpl->PendingTextMeasureRequests[Index];
+        rapidjson::Value Entry(rapidjson::kObjectType);
+        Entry.AddMember("text", rapidjson::Value(Request.Text.c_str(), Allocator), Allocator);
+        Entry.AddMember("fontSize", Request.FontSize, Allocator);
+        Document.PushBack(Entry, Allocator);
+    }
+
+    Pimpl->PendingTextMeasureRequests.clear();
+    Pimpl->PendingTextMeasureRequestKeys.clear();
+
+    rapidjson::StringBuffer Buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+    Document.Accept(Writer);
+    return Buffer.GetString();
+}
+
+bool NgxUIRuntime::SubmitTextMeasureResultsJson(const std::string& ResultsJson)
+{
+    rapidjson::Document Document;
+    Document.Parse(ResultsJson.c_str());
+    if (Document.HasParseError() || !Document.IsArray())
+    {
+        return false;
+    }
+
+    bool bAppliedAnyResults = false;
+    for (rapidjson::SizeType Index = 0; Index < Document.Size(); ++Index)
+    {
+        const rapidjson::Value& Entry = Document[Index];
+        if (!Entry.IsObject() || !Entry.HasMember("text") || !Entry["text"].IsString() || !Entry.HasMember("fontSize")
+            || !Entry["fontSize"].IsNumber() || !Entry.HasMember("width") || !Entry["width"].IsNumber() || !Entry.HasMember("height")
+            || !Entry["height"].IsNumber())
+        {
+            continue;
+        }
+
+        const std::string Text = Entry["text"].GetString();
+        const float FontSize = static_cast<float>(Entry["fontSize"].GetDouble());
+        const float Width = std::max(0.0f, static_cast<float>(Entry["width"].GetDouble()));
+        const float Height = std::max(0.0f, static_cast<float>(Entry["height"].GetDouble()));
+        Pimpl->TextMeasureCache[BuildTextMeasureRequestKey(Text, FontSize)] = csp::common::Vector2(Width, Height);
+        bAppliedAnyResults = true;
+    }
+
+    if (bAppliedAnyResults)
+    {
+        Pimpl->HasWarnedFallbackMeasurement = false;
+        std::vector<std::pair<std::string, std::string>> Trees;
+        Trees.reserve(Pimpl->Entities.size());
+        for (std::map<std::string, UIEntityState>::const_iterator It = Pimpl->Entities.begin(); It != Pimpl->Entities.end(); ++It)
+        {
+            Trees.push_back(std::make_pair(It->first, It->second.TreeJson));
+        }
+
+        for (size_t Index = 0; Index < Trees.size(); ++Index)
+        {
+            Mount(Trees[Index].first, Trees[Index].second);
+        }
+    }
+
+    return true;
 }
 
 bool NgxUIRuntime::Mount(const std::string& EntityId, const std::string& TreeJson)

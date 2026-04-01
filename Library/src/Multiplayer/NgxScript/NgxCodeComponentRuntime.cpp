@@ -1246,10 +1246,12 @@ export function createScriptRegistry() {
             const previousEntityId = globalThis.__cspCurrentEntityId;
             globalThis.__cspCurrentEntityId = entityId;
             try {
-                handler({
-                    entityId,
-                    type: 'click',
-                    thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,
+                batch(() => {
+                    handler({
+                        entityId,
+                        type: 'click',
+                        thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,
+                    });
                 });
             } finally {
                 globalThis.__cspCurrentEntityId = previousEntityId;

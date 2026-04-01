@@ -28,6 +28,8 @@ public:
     void Clear();
     void SetViewportSize(float Width, float Height);
     void SetTextMeasureCallback(TextMeasureCallback InCallback);
+    std::string DrainPendingTextMeasureRequestsJson();
+    bool SubmitTextMeasureResultsJson(const std::string& ResultsJson);
 
     bool Mount(const std::string& EntityId, const std::string& TreeJson);
     bool Unmount(const std::string& EntityId);

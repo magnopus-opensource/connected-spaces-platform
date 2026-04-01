@@ -738,6 +738,18 @@ void NgxScriptSystem::SetUITextMeasureCallback(UITextMeasureCallback InCallback)
     });
 }
 
+csp::common::String NgxScriptSystem::DrainPendingUITextMeasureRequests()
+{
+    std::scoped_lock UILock(UIMutex);
+    return UIRuntime->DrainPendingTextMeasureRequestsJson().c_str();
+}
+
+bool NgxScriptSystem::SubmitUITextMeasureResults(const csp::common::String& ResultsJson)
+{
+    std::scoped_lock UILock(UIMutex);
+    return UIRuntime->SubmitTextMeasureResultsJson(ResultsJson.c_str());
+}
+
 bool NgxScriptSystem::FlushPendingCodeComponentUI()
 {
     static constexpr const char* SNIPPET = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"
@@ -1451,7 +1463,18 @@ void NgxScriptSystem::DrainPendingJobs()
 {
     static constexpr int32_t MAX_PENDING_JOBS_PER_PUMP = 1000;
 
+#ifdef CSP_WASM
+    // Never block the browser thread waiting for another script operation to
+    // release the context. Foundation ticks can safely skip one pump and retry
+    // on the next interval.
+    std::unique_lock<std::mutex> ContextLock(ContextMutex, std::defer_lock);
+    if (!ContextLock.try_lock())
+    {
+        return;
+    }
+#else
     std::scoped_lock ContextLock(ContextMutex);
+#endif
     if (!Runtime || !Context)
     {
         return;
@@ -1846,7 +1869,17 @@ bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
 
     bool bSuccess = true;
     {
+#ifdef CSP_WASM
+        // Never block the browser thread waiting for script context work to finish.
+        // requestAnimationFrame can safely drop a frame and retry on the next tick.
+        std::unique_lock<std::mutex> ContextLock(ContextMutex, std::defer_lock);
+        if (!ContextLock.try_lock())
+        {
+            return false;
+        }
+#else
         std::scoped_lock ContextLock(ContextMutex);
+#endif
         if (!Context)
         {
             return false;
