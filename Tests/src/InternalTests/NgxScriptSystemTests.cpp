@@ -1850,6 +1850,56 @@ export function ui() {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeUsesClientTextMeasureCallbackWhenProvided)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    int32_t MeasureCallCount = 0;
+    NgxScriptSystem.SetUITextMeasureCallback([&MeasureCallCount](const csp::common::String& Text, float FontSize, float& OutWidth, float& OutHeight) {
+        ++MeasureCallCount;
+        OutWidth = static_cast<float>(Text.Length()) * FontSize * 0.4f;
+        OutHeight = FontSize * 1.1f;
+    });
+
+    NgxScriptSystem.SetUIViewportSize(640.0f, 360.0f);
+    NgxScriptSystem.RegisterStaticModuleSource("/scripts/modules/ui-text-measure-callback.js", R"(
+import { screen, column, text } from '@csp/ui';
+
+export function ui() {
+    return screen(
+        { width: 'grow', height: 'grow' },
+        column(
+            { width: 'grow', height: 'grow', alignX: 'center', alignY: 'center' },
+            text('Callback path active', { key: 'body', fontSize: 24, textAlign: 'left' })
+        )
+    );
+}
+)");
+
+    NgxScriptSystem.OnEnterSpace("ui-text-measure-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("ui-text-measure-space", &Engine);
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/ui-text-measure-callback.js");
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    EXPECT_GT(MeasureCallCount, 0);
+
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeMountsWorldUIWithPlacementMetadata)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);

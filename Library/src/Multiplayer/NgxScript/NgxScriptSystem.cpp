@@ -721,6 +721,23 @@ void NgxScriptSystem::SetUIViewportSize(float Width, float Height)
     UIRuntime->SetViewportSize(Width, Height);
 }
 
+void NgxScriptSystem::SetUITextMeasureCallback(UITextMeasureCallback InCallback)
+{
+    std::scoped_lock UILock(UIMutex);
+    if (!InCallback)
+    {
+        UIRuntime->SetTextMeasureCallback(nullptr);
+        return;
+    }
+
+    UIRuntime->SetTextMeasureCallback([InCallback = std::move(InCallback)](const csp::common::String& Text, float FontSize) {
+        float Width = 0.0f;
+        float Height = 0.0f;
+        InCallback(Text, FontSize, Width, Height);
+        return csp::common::Vector2(Width, Height);
+    });
+}
+
 bool NgxScriptSystem::FlushPendingCodeComponentUI()
 {
     static constexpr const char* SNIPPET = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.tick === 'function') {\n"

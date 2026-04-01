@@ -52,6 +52,8 @@ class NgxUIRuntime;
 class CSP_API NgxScriptSystem
 {
 public:
+    typedef std::function<void(const csp::common::String& Text, float FontSize, float& OutWidth, float& OutHeight)> UITextMeasureCallback;
+
     explicit NgxScriptSystem(csp::common::LogSystem& InLogSystem);
     ~NgxScriptSystem();
 
@@ -105,6 +107,11 @@ public:
 
     // Update the logical viewport size used for screen-space UI layout.
     void SetUIViewportSize(float Width, float Height);
+
+    // Provide a client text measurement callback used by Clay during layout.
+    // The callback receives text, font size, and out-parameters for width and height.
+    // In wasm builds the callback is proxied to the main runtime thread before invocation.
+    void SetUITextMeasureCallback(UITextMeasureCallback InCallback);
 
     // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
     csp::common::String DrainPendingUIUpdates();

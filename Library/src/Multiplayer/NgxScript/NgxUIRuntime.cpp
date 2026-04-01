@@ -1,6 +1,9 @@
 #include "Multiplayer/NgxScript/NgxUIRuntime.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
+#ifdef CSP_WASM
+#include "EmscriptenBindings/CallbackQueue.h"
+#endif
 
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
@@ -780,8 +783,16 @@ struct NgxUIRuntime::Impl
         const float FontSize = Config != NULL && Config->fontSize > 0 ? static_cast<float>(Config->fontSize) : 16.0f;
         if (Self != NULL && Self->MeasureCallback)
         {
-            csp::common::String Input(std::string(Text.chars, Text.length).c_str());
-            const csp::common::Vector2 Size = Self->MeasureCallback(Input, FontSize);
+            const std::string RawInput
+                = Text.chars != nullptr && Text.length > 0 ? std::string(Text.chars, static_cast<size_t>(Text.length)) : std::string();
+            csp::common::String Input(RawInput.c_str());
+            const csp::common::Vector2 Size =
+#ifdef CSP_WASM
+                csp::Emscripten_CallbackOnThreadWithReturn<csp::common::Vector2, csp::common::String, float>(
+                    &Impl::MeasureTextOnCallbackThread, Self, Input, FontSize);
+#else
+                Self->MeasureCallback(Input, FontSize);
+#endif
             Dimensions.width = Size.X;
             Dimensions.height = Size.Y;
             return Dimensions;
@@ -797,6 +808,17 @@ struct NgxUIRuntime::Impl
         Dimensions.width = static_cast<float>(Text.length) * FontSize * 0.6f;
         Dimensions.height = FontSize * 1.2f;
         return Dimensions;
+    }
+
+    static csp::common::Vector2 MeasureTextOnCallbackThread(void* Context, csp::common::String Text, float FontSize)
+    {
+        Impl* Self = static_cast<Impl*>(Context);
+        if (Self == nullptr || !Self->MeasureCallback)
+        {
+            return csp::common::Vector2(0.0f, 0.0f);
+        }
+
+        return Self->MeasureCallback(Text, FontSize);
     }
 
     bool ParseNode(const rapidjson::Value& Value, const std::string& EntityId, UINode& OutNode)

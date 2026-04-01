@@ -192,7 +192,13 @@ Current limitations:
 
 ## Text Measurement
 
-Text layout currently uses a runtime heuristic inside the shared library.
+Text layout currently falls back to a runtime heuristic unless the client supplies a text measurement callback through the NGX script system.
+
+When a callback is provided:
+
+- Clay asks the shared library to measure text during layout.
+- The shared library forwards that request to the client callback.
+- In wasm builds, the callback path should be treated as main-thread-only work. The runtime proxies the invocation back to the main runtime thread before calling the client callback.
 
 That heuristic estimates:
 
