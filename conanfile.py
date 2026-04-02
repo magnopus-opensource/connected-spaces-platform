@@ -3,7 +3,6 @@ from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 
 class CSP(ConanFile):
     name = "connected-spaces-platform"
-    version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = {"shared": False}

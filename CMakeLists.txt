@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.31)
 
-project(CSP VERSION 1.0
-    DESCRIPTION "Connected Spaces Platform"
+# Populate our version variables
+include(cmake/get_version_from_git.cmake)
+get_version_from_git()
+
+set (CSP_VERSION_STRING "${CSP_VERSION}")
+
+project(CSP
+    DESCRIPTION "Connected Spaces Platform" VERSION ${CSP_VERSION_STRING}
     LANGUAGES CXX)
 
 # ------------------------------------------------------------------------------------------------------------------
@@ -203,6 +209,13 @@ set_target_properties(csp-lib
   # Hide in internal folder
   FOLDER "_internal"
   )
+
+# Generate version header
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/version.h.in
+    # When we remove support for the old build system, we should probably move this into the binary dir
+    ${CSP_INCLUDE_DIR}/CSP/version.h
+)
 
 # ------------------------------------------------------------------------------------------------------------------
 # Testing
