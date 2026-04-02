@@ -52,7 +52,7 @@ class ComponentScriptInterface;
 /// @brief Represents the type of component.
 ///
 /// Values with _DEPRECATED appended to their name should not be used. They are retained only for backwards compatibility.
-enum class ComponentType : uint64_t
+enum class ComponentType : uint16_t
 {
     Invalid = 0,
     Core = 1,
