@@ -8,6 +8,7 @@ set(CSP_TESTS_SOURCES
     ${CSP_TESTS_SOURCE_DIR}/PublicTestBase.cpp
     ${CSP_TESTS_SOURCE_DIR}/PublicTestBase.h
     ${CSP_TESTS_SOURCE_DIR}/RAIIMockLogger.h
+    ${CSP_TESTS_SOURCE_DIR}/TestHelpers.cpp
     ${CSP_TESTS_SOURCE_DIR}/TestHelpers.h
 
     ${CSP_TESTS_SOURCE_DIR}/InternalTests/EncodeTests.cpp

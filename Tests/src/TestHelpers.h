@@ -21,7 +21,6 @@
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
-#include "sole.hpp"
 
 #include <chrono>
 #include <functional>
@@ -189,11 +188,7 @@ inline double RandomRangeDouble(double Min, double Max)
 }
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
-inline std::string GetUniqueString()
-{
-    const auto uuid = sole::uuid4();
-    return uuid.str();
-}
+std::string GetUniqueString();
 
 inline void LogFatal(std::string Message)
 {

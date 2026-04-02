@@ -157,8 +157,6 @@ target_compile_definitions(csp-lib
     POCO_NO_SHAREDMEMORY
     # Remove codecvt deprecation warnings for msvc
     $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING>
-    # Disable min/max macros on Windows
-    $<$<PLATFORM_ID:Windows>:NOMINMAX>
     # Disable unused POCO features
     $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_INOTIFY>
     $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_NO_FILECHANNEL>
