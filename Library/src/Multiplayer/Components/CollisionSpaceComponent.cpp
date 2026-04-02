@@ -66,6 +66,10 @@ const auto Schema = ComponentBase::ComponentSchema {
             static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::ThirdPartyComponentRef),
             "",
         },
+        {
+            static_cast<ComponentBase::PropertyKey>(CollisionPropertyKeys::IsEnabled),
+            true,
+        },
     },
 };
 
@@ -190,5 +194,9 @@ void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::Strin
 {
     SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
+
+bool CollisionSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled)); }
+
+void CollisionSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::IsEnabled), Value); }
 
 } // namespace csp::multiplayer
