@@ -129,7 +129,7 @@ public:
             return false;
         }
 
-        rapidjson::Value& Root = Deserializer.Doc;
+        rapidjson::Value Root { Deserializer.Doc.GetObj() };
 
         Deserializer.ValueStack.push(&Root);
         Deserializer.DeserializeValue(Object);
