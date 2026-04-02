@@ -2,7 +2,6 @@
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 
-#define CLAY_IMPLEMENTATION
 #include "clay.h"
 
 #include <rapidjson/document.h>
@@ -287,11 +286,14 @@ Clay_CornerRadius ToClayCornerRadius(float Radius)
 
 Clay_Sizing ToClaySizing(const UISizeSpec& Width, const UISizeSpec& Height)
 {
+    const Clay_SizingAxis FixedWidth = CLAY__INIT(Clay_SizingAxis) { Clay_SizingMinMax { Width.Value, Width.Value }, CLAY__SIZING_TYPE_FIXED };
+    const Clay_SizingAxis FixedHeight = CLAY__INIT(Clay_SizingAxis) { Clay_SizingMinMax { Height.Value, Height.Value }, CLAY__SIZING_TYPE_FIXED };
+    const Clay_SizingAxis Grow = CLAY__INIT(Clay_SizingAxis) { {}, CLAY__SIZING_TYPE_GROW };
+    const Clay_SizingAxis Fit = CLAY__INIT(Clay_SizingAxis) { {}, CLAY__SIZING_TYPE_FIT };
+
     Clay_Sizing Result;
-    Result.width = Width.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Width.Value)
-        : (Width.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
-    Result.height = Height.Mode == UISizeMode::Fixed ? CLAY_SIZING_FIXED(Height.Value)
-        : (Height.Mode == UISizeMode::Grow ? CLAY_SIZING_GROW() : CLAY_SIZING_FIT());
+    Result.width = Width.Mode == UISizeMode::Fixed ? FixedWidth : (Width.Mode == UISizeMode::Grow ? Grow : Fit);
+    Result.height = Height.Mode == UISizeMode::Fixed ? FixedHeight : (Height.Mode == UISizeMode::Grow ? Grow : Fit);
     return Result;
 }
 
@@ -1165,11 +1167,11 @@ struct NgxUIRuntime::Impl
         Clay_LayoutConfig LayoutConfig;
         std::memset(&LayoutConfig, 0, sizeof(LayoutConfig));
         LayoutConfig.sizing = ToClaySizing(Node.Width, Node.Height);
-        LayoutConfig.padding.left = Node.Padding.Left;
-        LayoutConfig.padding.right = Node.Padding.Right;
-        LayoutConfig.padding.top = Node.Padding.Top;
-        LayoutConfig.padding.bottom = Node.Padding.Bottom;
-        LayoutConfig.childGap = Node.Gap;
+        LayoutConfig.padding.left = static_cast<uint16_t>(Node.Padding.Left);
+        LayoutConfig.padding.right = static_cast<uint16_t>(Node.Padding.Right);
+        LayoutConfig.padding.top = static_cast<uint16_t>(Node.Padding.Top);
+        LayoutConfig.padding.bottom = static_cast<uint16_t>(Node.Padding.Bottom);
+        LayoutConfig.childGap = static_cast<uint16_t>(Node.Gap);
         LayoutConfig.layoutDirection = Node.Layout == UILayoutKind::Row ? CLAY_LEFT_TO_RIGHT : CLAY_TOP_TO_BOTTOM;
         LayoutConfig.childAlignment.x = Node.Kind == UIWidgetKind::Button ? CLAY_ALIGN_X_CENTER : ParseAlignX(Node.AlignX);
         LayoutConfig.childAlignment.y = Node.Kind == UIWidgetKind::Button ? CLAY_ALIGN_Y_CENTER : ParseAlignY(Node.AlignY);

@@ -1155,7 +1155,7 @@ export function script() {
 
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusResolved", 0), 1);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefDidWrite", 0), 1);
-    EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3 { 7.0f, 8.0f, 9.0f });
+    EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3(7.0f, 8.0f, 9.0f));
 
     Engine.RemoveEntity(&TargetEntity);
     Engine.RemoveEntity(&ScriptEntity);

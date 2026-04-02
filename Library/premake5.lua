@@ -10,6 +10,7 @@ include "ThirdParty/poco/Net/premake5.lua"
 include "ThirdParty/poco/Crypto/premake5.lua"
 include "ThirdParty/poco/NETSSL_OpenSSL/premake5.lua"
 
+include "ThirdParty/clay/premake5.lua"
 include "ThirdParty/signalrclient/premake5.lua"
 include "ThirdParty/mimalloc/premake5.lua"
 include "ThirdParty/quickjs/premake5.lua"
@@ -26,14 +27,14 @@ if not Project then
 
         if CSP.IsAppleTarget() then
             if not CSP.IsGeneratingVS() then
-                code = os.execute("python3.11 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
+                code = os.execute("py " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
                 if (code ~= true) then
                     return code
                 end
             end
         else
-            code = os.execute("python3.11 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
+            code = os.execute("py " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
             if (code ~= true) then
                 return code
@@ -81,7 +82,7 @@ if not Project then
             "%{wks.location}/ThirdParty/rapidjson/include",
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
-            "%{wks.location}/ThirdParty/clay",
+			"%{wks.location}/ThirdParty/clay",
             "%{wks.location}/ThirdParty/glm",
 			"%{wks.location}/ThirdParty/asyncplusplus/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
@@ -344,6 +345,7 @@ if not Project then
         -- Libs for all configs to link against
         links {
             "signalrclient",
+			"clay",
             "quickjs",
 			"tinyspline",
 			"asyncplusplus"
@@ -400,6 +402,7 @@ if not Project then
             Project.DefineProject()
 
             SignalRClient.AddProject()
+			Clay.AddProject()
             QuickJS.AddProject()
 			TinySpline.AddProject()
 			AsyncPlusPlus.AddProject()

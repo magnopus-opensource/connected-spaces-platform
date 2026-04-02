@@ -1032,8 +1032,8 @@ void Clay__ErrorHandlerFunctionDefault(Clay_ErrorData errorText) {
     (void) errorText;
 }
 
-Clay_String CLAY__SPACECHAR = { .length = 1, .chars = " " };
-Clay_String CLAY__STRING_DEFAULT = { .length = 0, .chars = NULL };
+Clay_String CLAY__SPACECHAR = { true, 1, " " };
+Clay_String CLAY__STRING_DEFAULT = { false, 0, NULL };
 
 typedef struct {
     bool maxElementsExceeded;
