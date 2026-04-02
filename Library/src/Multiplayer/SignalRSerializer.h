@@ -502,7 +502,7 @@ template <typename T> std::enable_if_t<IsSignedIntegerV<T>> SignalRDeserializer:
         throw std::runtime_error("Invalid call: Value was not an integer");
     }
 
-    if (Object.as_integer() > (std::numeric_limits<T>::max)() || Object.as_integer() < (std::numeric_limits<T>::min)())
+    if (Object.as_integer() > std::numeric_limits<T>::max() || Object.as_integer() < std::numeric_limits<T>::min())
     {
         throw std::runtime_error("Invalid uinteger type: Value being deserialized is larger than the maximum value of the input type");
     }
@@ -518,7 +518,7 @@ std::enable_if_t<IsUnsignedIntegerV<T>> SignalRDeserializer::ReadValueFromObject
         throw std::runtime_error("Invalid call: Value was not a uinteger");
     }
 
-    if (Object.as_uinteger() > (std::numeric_limits<T>().max)())
+    if (Object.as_uinteger() > std::numeric_limits<T>::max())
     {
         throw std::runtime_error("Invalid uinteger type: Value being deserialized is larger than the maximum value of the input type");
     }
