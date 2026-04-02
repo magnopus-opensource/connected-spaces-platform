@@ -61,9 +61,6 @@ class CSP(ConanFile):
 
         tc.generate()
         
-    #def build_requirements(self):
-        #self.tool_requires("cmake/3.31.6")
-        
     def build(self):
         cmake = CMake(self)
         cmake.configure()
