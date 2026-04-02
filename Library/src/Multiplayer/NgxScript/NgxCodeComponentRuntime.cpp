@@ -389,1286 +389,1262 @@ std::string BuildBootstrapSnippet(const std::string& ModulePath)
           "}\n";
 }
 
-constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = R"(
-import { signal, effect, batch } from '@preact/signals-core';
-
-const codeComponents = new Map();
-
-export const useEffect = (callback) => {
-    const entityId = globalThis.__cspCurrentEntityId;
-    const dispose = effect(() => {
-        const previousEntityId = globalThis.__cspCurrentEntityId;
-        globalThis.__cspCurrentEntityId = entityId;
-        try {
-            return callback();
-        } finally {
-            globalThis.__cspCurrentEntityId = previousEntityId;
-        }
-    });
-    if (entityId && codeComponents.has(entityId)) {
-        codeComponents.get(entityId).effects.push(dispose);
-    }
-    return dispose;
-};
-
-export function createScriptRegistry() {
-    codeComponents.clear();
-    const pendingSchemaSyncs = new Set();
-    const pendingUIFlushes = new Set();
-    let isDestroying = false;
-
-    function isObject(value) {
-        return value && typeof value === 'object' && !Array.isArray(value);
-    }
-
-    function cloneValue(value) {
-        if (Array.isArray(value)) {
-            return value.map((item) => cloneValue(item));
-        }
-
-        if (isObject(value)) {
-            const result = {};
-            for (const key of Object.keys(value)) {
-                result[key] = cloneValue(value[key]);
-            }
-            return result;
-        }
-
-        return value;
-    }
-
-    function cloneAttributes(attributes) {
-        return isObject(attributes) ? cloneValue(attributes) : {};
-    }
-
-    function sortedKeys(value) {
-        return Object.keys(isObject(value) ? value : {}).sort();
-    }
-
-    function warn(entityId, message) {
-        console.warn(`NgxCodeComponentRuntime [${entityId}]: ${message}`);
-    }
-
-    function normalizeSchemaType(rawType) {
-        if (typeof rawType !== 'string') {
-            return null;
-        }
-
-        const lower = rawType.toLowerCase();
-        if (lower === 'boolean' || lower === 'bool') {
-            return 'boolean';
-        }
-
-        if (lower === 'integer' || lower === 'int') {
-            return 'integer';
-        }
-
-        if (lower === 'float' || lower === 'number') {
-            return 'float';
-        }
-
-        if (lower === 'string') {
-            return 'string';
-        }
-
-        if (lower === 'entity') {
-            return 'entity';
-        }
-
-        if (lower === 'modelasset' || lower === 'model_asset') {
-            return 'modelAsset';
-        }
-
-        return null;
-    }
-
-    function valueMatchesType(type, value) {
-        if (type === 'boolean') {
-            return typeof value === 'boolean';
-        }
-
-        if (type === 'integer') {
-            return typeof value === 'number' && Number.isInteger(value);
-        }
-
-        if (type === 'float') {
-            return typeof value === 'number' && Number.isFinite(value);
-        }
-
-        if (type === 'string') {
-            return typeof value === 'string';
-        }
-
-        if (type === 'entity') {
-            // Accept plain string entity IDs and object forms such as {id: '...'}
-            // or {kind: 'id', id: <number>} produced by BuildAttributeValueLiteral
-            // for EntityQuery attributes.
-            if (typeof value === 'string') {
-                return true;
-            }
-            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-                const rawId = value.id;
-                if (typeof rawId === 'string' && rawId.length > 0) {
-                    return true;
-                }
-                if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        if (type === 'modelAsset') {
-            if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-                return false;
-            }
-
-            return typeof value.assetCollectionId === 'string' && typeof value.assetId === 'string';
-        }
-
-        return false;
-    }
-
-    function describeValueType(value) {
-        if (value === null) {
-            return 'null';
-        }
-
-        if (Array.isArray(value)) {
-            return 'array';
-        }
-
-        if (typeof value === 'number') {
-            return Number.isInteger(value) ? 'integer' : 'float';
-        }
-
-        return typeof value;
-    }
-
-    function readSchema(moduleRef, entityId) {
-        if (!moduleRef) {
-            return null;
-        }
-
-        let rawSchema;
-        if (typeof moduleRef.schema !== 'undefined') {
-            rawSchema = moduleRef.schema;
-        } else if (typeof moduleRef.attributes !== 'undefined') {
-            rawSchema = moduleRef.attributes;
-        } else if (typeof moduleRef.codeComponentSchema !== 'undefined') {
-            rawSchema = moduleRef.codeComponentSchema;
-        } else {
-            return null;
-        }
-
-        if (!isObject(rawSchema)) {
-            warn(entityId, 'schema export exists but is not an object; ignoring schema.');
-            return null;
-        }
-
-        const schema = {};
-        for (const key of sortedKeys(rawSchema)) {
-            const rawEntry = rawSchema[key];
-            let rawType;
-            let hasDefault = false;
-            let defaultValue;
-            let min;
-            let max;
-            let step;
-
-            if (typeof rawEntry === 'string') {
-                rawType = rawEntry;
-            } else if (isObject(rawEntry)) {
-                rawType = rawEntry.type;
-                if (typeof rawType === 'undefined') {
-                    rawType = rawEntry.valueType;
-                }
-                if (typeof rawType === 'undefined') {
-                    rawType = rawEntry.propertyType;
-                }
-
-                if (Object.prototype.hasOwnProperty.call(rawEntry, 'default')) {
-                    hasDefault = true;
-                    defaultValue = rawEntry.default;
-                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'defaultValue')) {
-                    hasDefault = true;
-                    defaultValue = rawEntry.defaultValue;
-                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'value')) {
-                    hasDefault = true;
-                    defaultValue = rawEntry.value;
-                }
-
-                if (typeof rawEntry.min === 'number' && Number.isFinite(rawEntry.min)) {
-                    min = rawEntry.min;
-                }
-
-                if (typeof rawEntry.max === 'number' && Number.isFinite(rawEntry.max)) {
-                    max = rawEntry.max;
-                }
-
-                if (typeof rawEntry.step === 'number' && Number.isFinite(rawEntry.step) && rawEntry.step > 0) {
-                    step = rawEntry.step;
-                }
-            } else {
-                warn(entityId, `schema entry '${key}' is invalid and will be ignored.`);
-                continue;
-            }
-
-            const type = normalizeSchemaType(rawType);
-            if (!type) {
-                warn(entityId, `schema entry '${key}' has unsupported type '${String(rawType)}' and will be ignored.`);
-                continue;
-            }
-
-            if (hasDefault && !valueMatchesType(type, defaultValue)) {
-                warn(entityId,
-                    `schema entry '${key}' has default of type '${describeValueType(defaultValue)}' but expected '${type}'; default ignored.`);
-                hasDefault = false;
-                defaultValue = undefined;
-            }
-
-            schema[key] = { type, hasDefault, defaultValue, min, max, step };
-        }
-
-        return Object.keys(schema).length > 0 ? schema : null;
-    }
-
-    function buildSchemaMetadata(schema) {
-        if (!schema) {
-            return {};
-        }
-
-        const result = {};
-        for (const key of sortedKeys(schema)) {
-            const rule = schema[key];
-            const entry = { type: rule.type };
-            if (typeof rule.min === 'number') {
-                entry.min = rule.min;
-            }
-            if (typeof rule.max === 'number') {
-                entry.max = rule.max;
-            }
-            if (typeof rule.step === 'number') {
-                entry.step = rule.step;
-            }
-            if (rule.hasDefault) {
-                entry.default = cloneValue(rule.defaultValue);
-            }
-            result[key] = entry;
-        }
-        return result;
-    }
-
-    function reconcileAttributes(entityId, schema, incomingAttributes, previousAttributes) {
-        const incoming = cloneAttributes(incomingAttributes);
-        const previous = cloneAttributes(previousAttributes);
-
-        if (!schema) {
-            return incoming;
-        }
-
-        const next = {};
-
-        for (const key of sortedKeys(incoming)) {
-            if (key.startsWith('$')) {
-                next[key] = cloneValue(incoming[key]);
-            } else if (!Object.prototype.hasOwnProperty.call(schema, key)) {
-                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
-            }
-        }
-
-        for (const key of sortedKeys(schema)) {
-            const rule = schema[key];
-            const hasIncoming = Object.prototype.hasOwnProperty.call(incoming, key);
-            const hasPrevious = Object.prototype.hasOwnProperty.call(previous, key);
-
-            if (hasIncoming) {
-                const value = incoming[key];
-                if (valueMatchesType(rule.type, value)) {
-                    next[key] = cloneValue(value);
-                    continue;
-                }
-
-                warn(entityId,
-                    `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; value ignored.`);
-            }
-
-            if (hasPrevious && valueMatchesType(rule.type, previous[key])) {
-                next[key] = cloneValue(previous[key]);
-                continue;
-            }
-
-            if (rule.hasDefault) {
-                next[key] = cloneValue(rule.defaultValue);
-            }
-        }
-
-        return next;
-    }
-
-    function tryParseJSON(value) {
-        if (typeof value !== 'string' || value.length === 0) {
-            return null;
-        }
-
-        try {
-            return JSON.parse(value);
-        } catch (error) {
-            return null;
-        }
-    }
-
-    function resolveEntityRefState(entityId, previousState) {
-        // Normalise entity ID: accept plain strings, {id: string} and
-        // {kind: 'id', id: number} objects emitted by BuildAttributeValueLiteral
-        // for EntityQuery attributes.
-        let normalizedEntityId = entityId;
-        if (normalizedEntityId !== null && typeof normalizedEntityId === 'object' && !Array.isArray(normalizedEntityId)) {
-            const rawId = normalizedEntityId.id;
-            if (typeof rawId === 'string') {
-                normalizedEntityId = rawId;
-            } else if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {
-                normalizedEntityId = String(rawId);
-            }
-        }
-        if (typeof normalizedEntityId !== 'string' || normalizedEntityId.length === 0) {
-            return {
-                id: null,
-                status: 'unbound',
-                snapshot: null,
-            };
-        }
-        const resolvedEntityId = normalizedEntityId;
-
-        let snapshot = null;
-        if (globalThis.csp && typeof globalThis.csp.__getEntitySnapshot === 'function') {
-            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(resolvedEntityId));
-        }
-
-        return {
-            id: resolvedEntityId,
-            status: snapshot ? 'resolved' : 'missing',
-            snapshot,
-        };
-    }
-
-    function createComponentRef(entityRefState, componentType, index = 0) {
-        if (!entityRefState || entityRefState.status !== 'resolved' || !entityRefState.id) {
-            return {
-                status: 'missing',
-                id: null,
-                snapshot: null,
-            };
-        }
-
-        if (!globalThis.csp || typeof globalThis.csp.__getComponentSnapshot !== 'function') {
-            return {
-                status: 'missing',
-                id: null,
-                snapshot: null,
-            };
-        }
-
-        const componentSnapshot = tryParseJSON(globalThis.csp.__getComponentSnapshot(entityRefState.id, Number(componentType), Number(index)));
-        if (!componentSnapshot) {
-            return {
-                status: 'missing',
-                id: null,
-                snapshot: null,
-            };
-        }
-
-        return {
-            status: 'resolved',
-            id: componentSnapshot.componentId ?? null,
-            snapshot: componentSnapshot,
-        };
-    }
-
-    function toVector3(value) {
-        if (Array.isArray(value) && value.length >= 3) {
-            return [Number(value[0]), Number(value[1]), Number(value[2])];
-        }
-
-        if (isObject(value)) {
-            return [Number(value.x), Number(value.y), Number(value.z)];
-        }
-
-        return null;
-    }
-
-    function toVector4(value) {
-        if (Array.isArray(value) && value.length >= 4) {
-            return [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])];
-        }
-
-        if (isObject(value)) {
-            return [Number(value.x), Number(value.y), Number(value.z), Number(value.w)];
-        }
-
-        return null;
-    }
-
-    function createScriptEntityRef(entityRefState) {
-        function writePosition(value) {
-            if (!globalThis.csp || typeof globalThis.csp.__setEntityPosition !== 'function') {
-                return false;
-            }
-
-            if (!entityRefState.id) {
-                return false;
-            }
-
-            const vector = toVector3(value);
-            if (!vector || !vector.every((component) => Number.isFinite(component))) {
-                return false;
-            }
-
-            const success = !!globalThis.csp.__setEntityPosition(entityRefState.id, vector[0], vector[1], vector[2]);
-            if (success && entityRefState.snapshot) {
-                entityRefState.snapshot.position = [...vector];
-            }
-            return success;
-        }
-
-        function writeRotation(value) {
-            if (!globalThis.csp || typeof globalThis.csp.__setEntityRotation !== 'function') {
-                return false;
-            }
-
-            if (!entityRefState.id) {
-                return false;
-            }
-
-            const vector = toVector4(value);
-            if (!vector || !vector.every((component) => Number.isFinite(component))) {
-                return false;
-            }
-
-            const success = !!globalThis.csp.__setEntityRotation(entityRefState.id, vector[0], vector[1], vector[2], vector[3]);
-            if (success && entityRefState.snapshot) {
-                entityRefState.snapshot.rotation = [...vector];
-            }
-            return success;
-        }
-
-        function writeScale(value) {
-            if (!globalThis.csp || typeof globalThis.csp.__setEntityScale !== 'function') {
-                return false;
-            }
-
-            if (!entityRefState.id) {
-                return false;
-            }
-
-            const vector = toVector3(value);
-            if (!vector || !vector.every((component) => Number.isFinite(component))) {
-                return false;
-            }
-
-            const success = !!globalThis.csp.__setEntityScale(entityRefState.id, vector[0], vector[1], vector[2]);
-            if (success && entityRefState.snapshot) {
-                entityRefState.snapshot.scale = [...vector];
-            }
-            return success;
-        }
-
-        function writePatch(patch) {
-            if (!isObject(patch) || !entityRefState.id) {
-                return false;
-            }
-
-            let didSucceed = true;
-
-            if (Object.prototype.hasOwnProperty.call(patch, 'position')) {
-                didSucceed = writePosition(patch.position) && didSucceed;
-            }
-
-            if (Object.prototype.hasOwnProperty.call(patch, 'rotation')) {
-                didSucceed = writeRotation(patch.rotation) && didSucceed;
-            }
-
-            if (Object.prototype.hasOwnProperty.call(patch, 'scale')) {
-                didSucceed = writeScale(patch.scale) && didSucceed;
-            }
-
-            if (Object.prototype.hasOwnProperty.call(patch, 'name')
-                && globalThis.csp
-                && typeof globalThis.csp.__setEntityName === 'function'
-                && typeof patch.name === 'string') {
-                const success = !!globalThis.csp.__setEntityName(entityRefState.id, patch.name);
-                if (success && entityRefState.snapshot) {
-                    entityRefState.snapshot.name = patch.name;
-                }
-                didSucceed = success && didSucceed;
-            }
-
-            if (Object.prototype.hasOwnProperty.call(patch, 'thirdPartyRef')
-                && globalThis.csp
-                && typeof globalThis.csp.__setEntityThirdPartyRef === 'function'
-                && typeof patch.thirdPartyRef === 'string') {
-                const success = !!globalThis.csp.__setEntityThirdPartyRef(entityRefState.id, patch.thirdPartyRef);
-                if (success && entityRefState.snapshot) {
-                    entityRefState.snapshot.thirdPartyRef = patch.thirdPartyRef;
-                }
-                didSucceed = success && didSucceed;
-            }
-
-            return didSucceed;
-        }
-
-        return {
-            get id() {
-                return entityRefState.id;
-            },
-            get status() {
-                return entityRefState.status;
-            },
-            get snapshot() {
-                return entityRefState.snapshot ? cloneValue(entityRefState.snapshot) : null;
-            },
-            patch(value) {
-                return writePatch(value);
-            },
-            setPosition(value) {
-                return writePosition(value);
-            },
-            setRotation(value) {
-                return writeRotation(value);
-            },
-            setScale(value) {
-                return writeScale(value);
-            },
-            getComponent(componentType, index = 0) {
-                return createComponentRef(entityRefState, componentType, index);
-            },
-            getLightComponent(index = 0) {
-                return createComponentRef(entityRefState, 10, index);
-            },
-        };
-    }
-
-    // --- Signal attribute management ---
-
-    // Resolve a live entity object from TheEntitySystem for a given entity ID.
-    // Returns null when the entity system is unavailable or the entity is not found.
-    function resolveEntityFromSystem(entityId) {
-        if (!entityId) {
-            return null;
-        }
-        if (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function') {
-            return globalThis.TheEntitySystem.getEntityById(entityId) ?? null;
-        }
-        return null;
-    }
-
-    function createSignalAttributes(entry, entityId) {
-        const attrs = {};
-        const schema = entry.schema || {};
-
-        for (const key of sortedKeys(entry.attributes)) {
-            if (key.startsWith('$')) {
-                continue;
-            }
-
-            const rule = schema[key];
-            if (rule && rule.type === 'entity') {
-                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
-                const nextState = resolveEntityRefState(entry.attributes[key], prevState);
-                entry.entityRefStates[key] = nextState;
-                attrs[key] = signal(resolveEntityFromSystem(nextState.id));
-            } else {
-                attrs[key] = signal(entry.attributes[key]);
-            }
-        }
-
-        return attrs;
-    }
-
-    function updateSignalAttributes(entry, entityId) {
-        const schema = entry.schema || {};
-
-        batch(() => {
-            for (const key of sortedKeys(entry.attributes)) {
-                if (key.startsWith('$')) {
-                    continue;
-                }
-
-                const rule = schema[key];
-
-                if (!entry.signalAttributes[key]) {
-                    if (rule && rule.type === 'entity') {
-                        const state = resolveEntityRefState(entry.attributes[key],
-                            entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null });
-                        entry.entityRefStates[key] = state;
-                        entry.signalAttributes[key] = signal(resolveEntityFromSystem(state.id));
-                    } else {
-                        entry.signalAttributes[key] = signal(entry.attributes[key]);
-                    }
-                } else {
-                    if (rule && rule.type === 'entity') {
-                        const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
-                        const nextState = resolveEntityRefState(entry.attributes[key], prevState);
-                        entry.entityRefStates[key] = nextState;
-                        entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);
-                    } else {
-                        entry.signalAttributes[key].value = entry.attributes[key];
-                    }
-                }
-            }
-        });
-    }
-
-    // --- UI tree management ---
-
-    function flattenUIChildren(children, out = []) {
-        for (const child of Array.isArray(children) ? children : []) {
-            if (Array.isArray(child)) {
-                flattenUIChildren(child, out);
-            } else if (child !== null && typeof child !== 'undefined' && child !== false) {
-                out.push(child);
-            }
-        }
-        return out;
-    }
-
-    function normalizeUIEntityId(value) {
-        if (typeof value === 'string') {
-            return value;
-        }
-        if (value && typeof value === 'object') {
-            if (typeof value.id === 'string') {
-                return value.id;
-            }
-            if (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0) {
-                return String(value.id);
-            }
-        }
-        return null;
-    }
-
-    function normalizeUINode(node, entityId, handlerMap, path = 'root') {
-        if (!node || typeof node !== 'object') {
-            return null;
-        }
-
-        const type = typeof node.type === 'string' ? node.type : null;
-        if (!type) {
-            return null;
-        }
-
-        const props = isObject(node.props) ? { ...node.props } : {};
-        const normalized = {
-            type,
-            id: (typeof props.key === 'string' && props.key.length > 0) ? `${path}:${props.key}` : path,
-            props: {},
-            children: [],
-        };
-
-        for (const [key, value] of Object.entries(props)) {
-            if (key === 'key') {
-                continue;
-            }
-
-            if (key === 'onClick' && typeof value === 'function') {
-                const handlerId = `${path}:click`;
-                handlerMap.set(handlerId, value);
-                normalized.props.onClickHandlerId = handlerId;
-                continue;
-            }
-
-            if (key === 'targetEntity' || key === 'entity') {
-                const normalizedEntity = normalizeUIEntityId(value);
-                if (normalizedEntity) {
-                    normalized.props.targetEntityId = normalizedEntity;
-                }
-                continue;
-            }
-
-            if (typeof value === 'function') {
-                continue;
-            }
-
-            if (Array.isArray(value)) {
-                normalized.props[key] = value.map((item) => cloneValue(item));
-            } else if (isObject(value)) {
-                normalized.props[key] = cloneValue(value);
-            } else if (typeof value !== 'undefined') {
-                normalized.props[key] = value;
-            }
-        }
-
-        if (type === 'world' && !normalized.props.targetEntityId) {
-            normalized.props.targetEntityId = entityId;
-        }
-
-        const children = flattenUIChildren(node.children);
-        normalized.children = children
-            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`))
-            .filter((child) => child !== null);
-
-        return normalized;
-    }
-
-    function clearUIHandlers(entry) {
-        entry.uiHandlers.clear();
-        if (entry.pendingUIHandlers) {
-            entry.pendingUIHandlers.clear();
-        }
-    }
-
-    function unmountUI(entityId) {
-        if (globalThis.csp && typeof globalThis.csp.__uiUnmount === 'function') {
-            try {
-                globalThis.csp.__uiUnmount(entityId);
-            } catch (error) {
-                console.error(`NgxCodeComponentRuntime: failed to unmount UI for entity ${entityId}`, error);
-            }
-        }
-    }
-
-    function queueUIFlush(entityId, entry, treeJson, handlerMap) {
-        if (!entry || entry.isDisposing || isDestroying) {
-            return;
-        }
-
-        entry.pendingUITreeJson = treeJson;
-        entry.pendingUIHandlers = handlerMap;
-        entry.uiDirty = true;
-        pendingUIFlushes.add(entityId);
-    }
-
-    function flushPendingUI(entityId, entry) {
-        if (!entry || !entry.uiDirty || entry.isDisposing || isDestroying) {
-            if (entry) {
-                entry.uiDirty = false;
-                entry.pendingUITreeJson = null;
-                if (entry.pendingUIHandlers) {
-                    entry.pendingUIHandlers.clear();
-                }
-            }
-            pendingUIFlushes.delete(entityId);
-            return;
-        }
-
-        entry.uiDirty = false;
-        pendingUIFlushes.delete(entityId);
-
-        entry.uiHandlers = entry.pendingUIHandlers instanceof Map ? entry.pendingUIHandlers : new Map();
-        entry.pendingUIHandlers = new Map();
-
-        const treeJson = typeof entry.pendingUITreeJson === 'string' ? entry.pendingUITreeJson : null;
-        if (!treeJson) {
-            unmountUI(entityId);
-            return;
-        }
-
-        if (globalThis.csp && typeof globalThis.csp.__uiMount === 'function') {
-            try {
-                globalThis.csp.__uiMount(entityId, treeJson);
-            } catch (error) {
-                console.error(`NgxCodeComponentRuntime: failed to mount UI for entity ${entityId}`, error);
-                entry.uiHandlers.clear();
-                unmountUI(entityId);
-            }
-        }
-    }
-
-    function startUIRuntime(entityId, entry) {
-        if (!entry || entry.isDisposing || isDestroying || !entry.module || typeof entry.module.ui !== 'function') {
-            return;
-        }
-
-        if (typeof entry.uiDispose === 'function') {
-            entry.uiDispose();
-            entry.uiDispose = null;
-        }
-
-        entry.uiDispose = effect(() => {
-            if (entry.isDisposing || isDestroying) {
-                return;
-            }
-
-            const previousEntityId = globalThis.__cspCurrentEntityId;
-            globalThis.__cspCurrentEntityId = entityId;
-            try {
-                const nextHandlers = new Map();
-                const rawTree = entry.module.ui({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
-                const normalizedTree = normalizeUINode(rawTree, entityId, nextHandlers);
-
-                if (!normalizedTree) {
-                    queueUIFlush(entityId, entry, null, nextHandlers);
-                    return;
-                }
-
-                queueUIFlush(entityId, entry, JSON.stringify(normalizedTree), nextHandlers);
-            } catch (error) {
-                console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
-                queueUIFlush(entityId, entry, null, new Map());
-            } finally {
-                globalThis.__cspCurrentEntityId = previousEntityId;
-            }
-        });
-    }
-
-    function stopUIRuntime(entityId, entry) {
-        if (!entry) {
-            return;
-        }
-
-        if (typeof entry.uiDispose === 'function') {
-            try {
-                entry.uiDispose();
-            } catch (error) {
-                console.error(`NgxCodeComponentRuntime: ui dispose failed for entity ${entityId}`, error);
-            }
-        }
-        entry.uiDispose = null;
-        pendingUIFlushes.delete(entityId);
-        entry.uiDirty = false;
-        entry.pendingUITreeJson = null;
-        clearUIHandlers(entry);
-        unmountUI(entityId);
-    }
-
-    function dispatchUIAction(entityId, handlerId) {
-        const entry = codeComponents.get(entityId);
-        if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {
-            return false;
-        }
-
-        const handler = entry.uiHandlers.get(handlerId);
-        if (typeof handler !== 'function') {
-            return false;
-        }
-
-        try {
-            const previousEntityId = globalThis.__cspCurrentEntityId;
-            globalThis.__cspCurrentEntityId = entityId;
-            try {
-                handler({
-                    entityId,
-                    type: 'click',
-                    thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,
-                });
-            } finally {
-                globalThis.__cspCurrentEntityId = previousEntityId;
-            }
-            return true;
-        } catch (error) {
-            console.error(`NgxCodeComponentRuntime: UI handler failed for entity ${entityId}`, error);
-            return false;
-        }
-    }
-
-    // --- Effect lifecycle ---
-
-    function disposeAllEffects(entry) {
-        if (!entry) {
-            return;
-        }
-
-        const effects = Array.isArray(entry.effects) ? [...entry.effects] : [];
-        entry.effects = [];
-
-        for (const dispose of effects) {
-            try {
-                dispose();
-            } catch (e) {
-                console.error('NgxCodeComponentRuntime: effect dispose failed', e);
-            }
-        }
-    }
-
-    function removeInputListenersForEntity(entityId) {
-        if (globalThis.__cspInput && typeof globalThis.__cspInput.removeListenersForEntity === 'function') {
-            globalThis.__cspInput.removeListenersForEntity(entityId);
-        }
-    }
-
-    function runScriptTeardown(entityId, entry, reason = 'unspecified') {
-        if (!entry) {
-            return;
-        }
-
-        const teardown = entry.teardown;
-        entry.teardown = null;
-
-        try {
-            if (typeof teardown === 'function') {
-                teardown();
-            }
-        } catch (error) {
-            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
-            console.error(`NgxCodeComponentRuntime: script teardown failed for entity ${entityId} (${scriptPath}) [${reason}]`, error);
-        } finally {
-            removeInputListenersForEntity(entityId);
-        }
-    }
-
-    // --- Script initialization ---
-
-    function ensureThisEntitySignal(entityId, entry) {
-        if (!entry) {
-            return null;
-        }
-
-        const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')
-            ? globalThis.TheEntitySystem.getEntityById(entityId)
-            : null;
-
-        if (!entry.thisEntitySignal) {
-            entry.thisEntitySignal = signal(liveEntity ?? null);
-        } else {
-            entry.thisEntitySignal.value = liveEntity ?? null;
-        }
-
-        return entry.thisEntitySignal;
-    }
-
-    function initializeScript(entityId, entry) {
-        if (!entry || !entry.module || typeof entry.module.script !== 'function') {
-            return;
-        }
-
-        try {
-            ensureThisEntitySignal(entityId, entry);
-
-            globalThis.__cspCurrentEntityId = entityId;
-            try {
-                const teardown = entry.module.script({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
-                entry.teardown = typeof teardown === 'function' ? teardown : null;
-            } finally {
-                globalThis.__cspCurrentEntityId = undefined;
-            }
-        } catch (error) {
-            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
-            const detail = error instanceof Error
-                ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))
-                : String(error);
-            console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId} (${scriptPath})\n${detail}`);
-        }
-    }
-
-    // --- Module import with retry ---
-
-    function tryImportCodeComponentModule(entityId, entry, reason = 'unspecified') {
-        if (!entry || typeof entry.scriptAssetPath !== 'string' || entry.scriptAssetPath.length === 0) {
-            return false;
-        }
-
-        if (entry.importInFlight) {
-            return false;
-        }
-
-        const scriptAssetPath = entry.scriptAssetPath;
-        const importGeneration = (typeof entry.importGeneration === 'number' ? entry.importGeneration : 0) + 1;
-        entry.importGeneration = importGeneration;
-        entry.importInFlight = true;
-
-        import(scriptAssetPath)
-            .then((moduleRef) => {
-                const current = codeComponents.get(entityId);
-                if (!current
-                    || current.scriptAssetPath !== scriptAssetPath
-                    || current.importGeneration !== importGeneration) {
-                    return;
-                }
-
-                current.importInFlight = false;
-                current.retryDelayFrames = 1;
-                current.retryCountdown = 0;
-                current.hasWarnedMissingModule = false;
-                current.module = moduleRef;
-
-                // If reinitializing (e.g. after a hot-reload), tear down any
-                // old effects so they don't accumulate in memory.
-                if (current.initialized) {
-                    current.isDisposing = true;
-                    stopUIRuntime(entityId, current);
-                    disposeAllEffects(current);
-                    current.thisEntitySignal = null;
-                    current.isDisposing = false;
-                    current.initialized = false;
-                }
-
-                if (current.pendingSchemaSync) {
-                    syncCodeComponentSchema(entityId);
-                    pendingSchemaSyncs.add(entityId);
-                }
-
-                current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);
-                current.signalAttributes = createSignalAttributes(current, entityId);
-                ensureThisEntitySignal(entityId, current);
-                current.initialized = true;
-
-                initializeScript(entityId, current);
-                startUIRuntime(entityId, current);
-            })
-            .catch((error) => {
-                const current = codeComponents.get(entityId);
-                if (!current
-                    || current.scriptAssetPath !== scriptAssetPath
-                    || current.importGeneration !== importGeneration) {
-                    return;
-                }
-
-                current.importInFlight = false;
-                const delayFrames = typeof current.retryDelayFrames === 'number' && current.retryDelayFrames > 0
-                    ? Math.min(current.retryDelayFrames * 2, 300)
-                    : 1;
-                current.retryDelayFrames = delayFrames;
-                current.retryCountdown = delayFrames;
-
-                const errorMessage = (error && typeof error.message === 'string') ? error.message : String(error);
-                if (errorMessage.includes('module not found') && !current.hasWarnedMissingModule) {
-                    current.hasWarnedMissingModule = true;
-                    warn(entityId, `module '${scriptAssetPath}' is not available yet; import will be retried automatically.`);
-                }
-                console.error(`NgxCodeComponentRuntime: Failed to import module ${scriptAssetPath} (${reason})`, error);
-            });
-
-        return true;
-    }
-
-    // --- Public API (called from C++) ---
-
-    function syncCodeComponentSchema(entityId) {
-        const entry = codeComponents.get(entityId);
-        if (!entry) {
-            return {};
-        }
-
-        if (!entry.module) {
-            entry.pendingSchemaSync = true;
-            tryImportCodeComponentModule(entityId, entry, 'syncCodeComponentSchema');
-            return {};
-        }
-
-        const previousAttributes = cloneAttributes(entry.attributes);
-        entry.schema = readSchema(entry.module, entityId);
-        entry.attributes = reconcileAttributes(entityId, entry.schema, entry.attributes, previousAttributes);
-        entry.pendingSchemaSync = false;
-
-        if (entry.initialized && entry.signalAttributes) {
-            updateSignalAttributes(entry, entityId);
-        }
-
-        return buildSchemaMetadata(entry.schema);
-    }
-
-    function addCodeComponent(entityId, payload = {}) {
-        const payloadObject = isObject(payload) ? payload : {};
-        const scriptAssetPath = typeof payloadObject.scriptAssetPath === 'string' ? payloadObject.scriptAssetPath : '';
-        const inputAttributes = cloneAttributes(payloadObject.attributes);
-        const existing = codeComponents.get(entityId);
-
-        if (existing && existing.scriptAssetPath === scriptAssetPath) {
-            syncCodeComponentAttributes(entityId, inputAttributes);
-            if (!existing.module && scriptAssetPath.length > 0) {
-                tryImportCodeComponentModule(entityId, existing, 'addCodeComponent-existing');
-            }
-            return true;
-        }
-
-        if (existing) {
-            stopUIRuntime(entityId, existing);
-            disposeAllEffects(existing);
-            existing.thisEntitySignal = null;
-            codeComponents.delete(entityId);
-        }
-
-        const entry = {
-            scriptAssetPath,
-            attributes: inputAttributes,
-            signalAttributes: {},
-            thisEntitySignal: null,
-            teardown: null,
-            module: null,
-            schema: null,
-            initialized: false,
-            pendingSchemaSync: true,
-            importGeneration: 0,
-            importInFlight: false,
-            retryDelayFrames: 1,
-            retryCountdown: 0,
-            hasWarnedMissingModule: false,
-            entityRefStates: {},
-            effects: [],
-            uiDispose: null,
-            uiHandlers: new Map(),
-            pendingUIHandlers: new Map(),
-            pendingUITreeJson: null,
-            uiDirty: false,
-            isDisposing: false,
-        };
-
-        codeComponents.set(entityId, entry);
-
-        if (!scriptAssetPath) {
-            warn(entityId, 'missing scriptAssetPath; component will not be initialized.');
-            return false;
-        }
-
-        tryImportCodeComponentModule(entityId, entry, 'addCodeComponent');
-        return true;
-    }
-
-    function syncCodeComponentAttributes(entityId, attributes = {}) {
-        const entry = codeComponents.get(entityId);
-        if (!entry) {
-            return {};
-        }
-
-        const previousAttributes = cloneAttributes(entry.attributes);
-        entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);
-
-        if (entry.initialized && entry.signalAttributes) {
-            updateSignalAttributes(entry, entityId);
-        }
-
-        return cloneAttributes(entry.attributes);
-    }
-
-    function updateAttributeForEntity(entityId, key, value) {
-        const entry = codeComponents.get(entityId);
-        if (!entry) {
-            return;
-        }
-
-        if (entry.schema) {
-            if (!Object.prototype.hasOwnProperty.call(entry.schema, key)) {
-                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);
-                return;
-            }
-
-            const rule = entry.schema[key];
-            if (!valueMatchesType(rule.type, value)) {
-                warn(entityId, `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; update ignored.`);
-                return;
-            }
-        }
-
-        entry.attributes[key] = cloneValue(value);
-
-        if (entry.initialized && entry.signalAttributes && entry.signalAttributes[key]) {
-            const schema = entry.schema || {};
-            const rule = schema[key];
-            if (rule && rule.type === 'entity') {
-                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };
-                const nextState = resolveEntityRefState(value, prevState);
-                entry.entityRefStates[key] = nextState;
-                entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);
-            } else {
-                entry.signalAttributes[key].value = value;
-            }
-        }
-    }
-
-    function removeCodeComponent(entityId) {
-        const entry = codeComponents.get(entityId);
-        if (!entry) {
-            return;
-        }
-
-        entry.isDisposing = true;
-
-        // Dispose reactive effects before invalidating thisEntity so teardown
-        // does not trigger one final rerun against a null entity.
-        stopUIRuntime(entityId, entry);
-        runScriptTeardown(entityId, entry, 'remove');
-        disposeAllEffects(entry);
-        entry.thisEntitySignal = null;
-        codeComponents.delete(entityId);
-    }
-
-    function tick() {
-        for (const [entityId, entry] of codeComponents) {
-            if (!entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {
-                if (entry.importInFlight) {
-                    continue;
-                }
-
-                if (typeof entry.retryCountdown === 'number' && entry.retryCountdown > 0) {
-                    entry.retryCountdown -= 1;
-                    continue;
-                }
-
-                tryImportCodeComponentModule(entityId, entry, 'tick-retry');
-            }
-        }
-
-        const dirtyUIIds = Array.from(pendingUIFlushes);
-        for (const entityId of dirtyUIIds) {
-            const entry = codeComponents.get(entityId);
-            if (!entry || !entry.initialized) {
-                pendingUIFlushes.delete(entityId);
-                continue;
-            }
-
-            flushPendingUI(entityId, entry);
-        }
-    }
-
-    function drainPendingSchemaSyncs() {
-        const ids = Array.from(pendingSchemaSyncs);
-        pendingSchemaSyncs.clear();
-        return ids;
-    }
-
-    function destroy() {
-        isDestroying = true;
-        for (const [entityId, entry] of codeComponents) {
-            entry.isDisposing = true;
-            stopUIRuntime(entityId, entry);
-            runScriptTeardown(entityId, entry, 'destroy');
-            disposeAllEffects(entry);
-            entry.thisEntitySignal = null;
-        }
-        codeComponents.clear();
-        pendingSchemaSyncs.clear();
-        pendingUIFlushes.clear();
-        isDestroying = false;
-    }
-
-    return {
-        syncCodeComponentSchema,
-        addCodeComponent,
-        syncCodeComponentAttributes,
-        updateAttributeForEntity,
-        removeCodeComponent,
-        dispatchUIAction,
-        tick,
-        drainPendingSchemaSyncs,
-        destroy,
-    };
-}
-
-export default createScriptRegistry;
-)";
-constexpr const char* CODECOMPONENT_BOOTSTRAP_SOURCE = R"(
-import * as __ngxRegistryModule from '/__csp/internal/codecomponent/registry.js';
-const __ngxFactory = (typeof __ngxRegistryModule.createScriptRegistry === 'function')
-    ? __ngxRegistryModule.createScriptRegistry
-    : ((typeof __ngxRegistryModule.default === 'function') ? __ngxRegistryModule.default : null);
-
-if (typeof globalThis.scriptRegistry === 'undefined') {
-    if (__ngxFactory !== null) {
-        globalThis.scriptRegistry = __ngxFactory();
-    } else if (__ngxRegistryModule && typeof __ngxRegistryModule.default === 'object') {
-        globalThis.scriptRegistry = __ngxRegistryModule.default;
-    }
-}
-)";
-
-constexpr const char* CODECOMPONENT_SHUTDOWN_SOURCE = R"(
-if (typeof globalThis.scriptRegistry !== 'undefined') {
-    if (typeof globalThis.scriptRegistry.destroy === 'function') {
-        globalThis.scriptRegistry.destroy();
-    }
-    delete globalThis.scriptRegistry;
-}
-)";
+constexpr const char* CODECOMPONENT_REGISTRY_SOURCE = 
+"\"\n"
+"import { signal, effect, batch } from '@preact/signals-core';\"\n"
+"\n"
+"const codeComponents = new Map();\n"
+"\n"
+"export const useEffect = (callback) => {\n"
+"    const entityId = globalThis.__cspCurrentEntityId;\n"
+"    const dispose = effect(() => {\n"
+"        const previousEntityId = globalThis.__cspCurrentEntityId;\n"
+"        globalThis.__cspCurrentEntityId = entityId;\n"
+"        try {\n"
+"            return callback();\n"
+"        } finally {\n"
+"            globalThis.__cspCurrentEntityId = previousEntityId;\n"
+"        }\n"
+"    });\n"
+"    if (entityId && codeComponents.has(entityId)) {\n"
+"        codeComponents.get(entityId).effects.push(dispose);\n"
+"    }\n"
+"    return dispose;\n"
+"};\n"
+"\n"
+"export function createScriptRegistry() {\n"
+"    codeComponents.clear();\n"
+"    const pendingSchemaSyncs = new Set();\n"
+"    const pendingUIFlushes = new Set();\n"
+"    let isDestroying = false;\n"
+"\n"
+"    function isObject(value) {\n"
+"        return value && typeof value === 'object' && !Array.isArray(value);\n"
+"    }\n"
+"\n"
+"    function cloneValue(value) {\n"
+"        if (Array.isArray(value)) {\n"
+"            return value.map((item) => cloneValue(item));\n"
+"        }\n"
+"\n"
+"        if (isObject(value)) {\n"
+"            const result = {};\n"
+"            for (const key of Object.keys(value)) {\n"
+"                result[key] = cloneValue(value[key]);\n"
+"            }\n"
+"            return result;\n"
+"        }\n"
+"\n"
+"        return value;\n"
+"    }\n"
+"\n"
+"    function cloneAttributes(attributes) {\n"
+"        return isObject(attributes) ? cloneValue(attributes) : {};\n"
+"    }\n"
+"\n"
+"    function sortedKeys(value) {\n"
+"        return Object.keys(isObject(value) ? value : {}).sort();\n"
+"    }\n"
+"\n"
+"    function warn(entityId, message) {\n"
+"        console.warn(`NgxCodeComponentRuntime [${entityId}]: ${message}`);\n"
+"    }\n"
+"\n"
+"    function normalizeSchemaType(rawType) {\n"
+"        if (typeof rawType !== 'string') {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        const lower = rawType.toLowerCase();\n"
+"        if (lower === 'boolean' || lower === 'bool') {\n"
+"            return 'boolean';\n"
+"        }\n"
+"\n"
+"        if (lower === 'integer' || lower === 'int') {\n"
+"            return 'integer';\n"
+"        }\n"
+"\n"
+"        if (lower === 'float' || lower === 'number') {\n"
+"            return 'float';\n"
+"        }\n"
+"\n"
+"        if (lower === 'string') {\n"
+"            return 'string';\n"
+"        }\n"
+"\n"
+"        if (lower === 'entity') {\n"
+"            return 'entity';\n"
+"        }\n"
+"\n"
+"        if (lower === 'modelasset' || lower === 'model_asset') {\n"
+"            return 'modelAsset';\n"
+"        }\n"
+"\n"
+"        return null;\n"
+"    }\n"
+"\n"
+"    function valueMatchesType(type, value) {\n"
+"        if (type === 'boolean') {\n"
+"            return typeof value === 'boolean';\n"
+"        }\n"
+"\n"
+"        if (type === 'integer') {\n"
+"            return typeof value === 'number' && Number.isInteger(value);\n"
+"        }\n"
+"\n"
+"        if (type === 'float') {\n"
+"            return typeof value === 'number' && Number.isFinite(value);\n"
+"        }\n"
+"\n"
+"        if (type === 'string') {\n"
+"            return typeof value === 'string';\n"
+"        }\n"
+"\n"
+"        if (type === 'entity') {\n"
+"            if (typeof value === 'string') {\n"
+"                return true;\n"
+"            }\n"
+"            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {\n"
+"                const rawId = value.id;\n"
+"                if (typeof rawId === 'string' && rawId.length > 0) {\n"
+"                    return true;\n"
+"                }\n"
+"                if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {\n"
+"                    return true;\n"
+"                }\n"
+"            }\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        if (type === 'modelAsset') {\n"
+"            if (value === null || typeof value !== 'object' || Array.isArray(value)) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            return typeof value.assetCollectionId === 'string' && typeof value.assetId === 'string';\n"
+"        }\n"
+"\n"
+"        return false;\n"
+"    }\n"
+"\n"
+"    function describeValueType(value) {\n"
+"        if (value === null) {\n"
+"            return 'null';\n"
+"        }\n"
+"\n"
+"        if (Array.isArray(value)) {\n"
+"            return 'array';\n"
+"        }\n"
+"\n"
+"        if (typeof value === 'number') {\n"
+"            return Number.isInteger(value) ? 'integer' : 'float';\n"
+"        }\n"
+"\n"
+"        return typeof value;\n"
+"    }\n"
+"\n"
+"    function readSchema(moduleRef, entityId) {\n"
+"        if (!moduleRef) {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        let rawSchema;\n"
+"        if (typeof moduleRef.schema !== 'undefined') {\n"
+"            rawSchema = moduleRef.schema;\n"
+"        } else if (typeof moduleRef.attributes !== 'undefined') {\n"
+"            rawSchema = moduleRef.attributes;\n"
+"        } else if (typeof moduleRef.codeComponentSchema !== 'undefined') {\n"
+"            rawSchema = moduleRef.codeComponentSchema;\n"
+"        } else {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        if (!isObject(rawSchema)) {\n"
+"            warn(entityId, 'schema export exists but is not an object; ignoring schema.');\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        const schema = {};\n"
+"        for (const key of sortedKeys(rawSchema)) {\n"
+"            const rawEntry = rawSchema[key];\n"
+"            let rawType;\n"
+"            let hasDefault = false;\n"
+"            let defaultValue;\n"
+"            let min;\n"
+"            let max;\n"
+"            let step;\n"
+"\n"
+"            if (typeof rawEntry === 'string') {\n"
+"                rawType = rawEntry;\n"
+"            } else if (isObject(rawEntry)) {\n"
+"                rawType = rawEntry.type;\n"
+"                if (typeof rawType === 'undefined') {\n"
+"                    rawType = rawEntry.valueType;\n"
+"                }\n"
+"                if (typeof rawType === 'undefined') {\n"
+"                    rawType = rawEntry.propertyType;\n"
+"                }\n"
+"\n"
+"                if (Object.prototype.hasOwnProperty.call(rawEntry, 'default')) {\n"
+"                    hasDefault = true;\n"
+"                    defaultValue = rawEntry.default;\n"
+"                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'defaultValue')) {\n"
+"                    hasDefault = true;\n"
+"                    defaultValue = rawEntry.defaultValue;\n"
+"                } else if (Object.prototype.hasOwnProperty.call(rawEntry, 'value')) {\n"
+"                    hasDefault = true;\n"
+"                    defaultValue = rawEntry.value;\n"
+"                }\n"
+"\n"
+"                if (typeof rawEntry.min === 'number' && Number.isFinite(rawEntry.min)) {\n"
+"                    min = rawEntry.min;\n"
+"                }\n"
+"\n"
+"                if (typeof rawEntry.max === 'number' && Number.isFinite(rawEntry.max)) {\n"
+"                    max = rawEntry.max;\n"
+"                }\n"
+"\n"
+"                if (typeof rawEntry.step === 'number' && Number.isFinite(rawEntry.step) && rawEntry.step > 0) {\n"
+"                    step = rawEntry.step;\n"
+"                }\n"
+"            } else {\n"
+"                warn(entityId, `schema entry '${key}' is invalid and will be ignored.`);\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            const type = normalizeSchemaType(rawType);\n"
+"            if (!type) {\n"
+"                warn(entityId, `schema entry '${key}' has unsupported type '${String(rawType)}' and will be ignored.`);\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (hasDefault && !valueMatchesType(type, defaultValue)) {\n"
+"                warn(entityId,\n"
+"                    `schema entry '${key}' has default of type '${describeValueType(defaultValue)}' but expected '${type}'; default ignored.`);\n"
+"                hasDefault = false;\n"
+"                defaultValue = undefined;\n"
+"            }\n"
+"\n"
+"            schema[key] = { type, hasDefault, defaultValue, min, max, step };\n"
+"        }\n"
+"\n"
+"        return Object.keys(schema).length > 0 ? schema : null;\n"
+"    }\n"
+"\n"
+"    function buildSchemaMetadata(schema) {\n"
+"        if (!schema) {\n"
+"            return {};\n"
+"        }\n"
+"\n"
+"        const result = {};\n"
+"        for (const key of sortedKeys(schema)) {\n"
+"            const rule = schema[key];\n"
+"            const entry = { type: rule.type };\n"
+"            if (typeof rule.min === 'number') {\n"
+"                entry.min = rule.min;\n"
+"            }\n"
+"            if (typeof rule.max === 'number') {\n"
+"                entry.max = rule.max;\n"
+"            }\n"
+"            if (typeof rule.step === 'number') {\n"
+"                entry.step = rule.step;\n"
+"            }\n"
+"            if (rule.hasDefault) {\n"
+"                entry.default = cloneValue(rule.defaultValue);\n"
+"            }\n"
+"            result[key] = entry;\n"
+"        }\n"
+"        return result;\n"
+"    }\n"
+"\n"
+"    function reconcileAttributes(entityId, schema, incomingAttributes, previousAttributes) {\n"
+"        const incoming = cloneAttributes(incomingAttributes);\n"
+"        const previous = cloneAttributes(previousAttributes);\n"
+"\n"
+"        if (!schema) {\n"
+"            return incoming;\n"
+"        }\n"
+"\n"
+"        const next = {};\n"
+"\n"
+"        for (const key of sortedKeys(incoming)) {\n"
+"            if (key.startsWith('$')) {\n"
+"                next[key] = cloneValue(incoming[key]);\n"
+"            } else if (!Object.prototype.hasOwnProperty.call(schema, key)) {\n"
+"                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);\n"
+"            }\n"
+"        }\n"
+"\n"
+"        for (const key of sortedKeys(schema)) {\n"
+"            const rule = schema[key];\n"
+"            const hasIncoming = Object.prototype.hasOwnProperty.call(incoming, key);\n"
+"            const hasPrevious = Object.prototype.hasOwnProperty.call(previous, key);\n"
+"\n"
+"            if (hasIncoming) {\n"
+"                const value = incoming[key];\n"
+"                if (valueMatchesType(rule.type, value)) {\n"
+"                    next[key] = cloneValue(value);\n"
+"                    continue;\n"
+"                }\n"
+"\n"
+"                warn(entityId,\n"
+"                    `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; value ignored.`);\n"
+"            }\n"
+"\n"
+"            if (hasPrevious && valueMatchesType(rule.type, previous[key])) {\n"
+"                next[key] = cloneValue(previous[key]);\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (rule.hasDefault) {\n"
+"                next[key] = cloneValue(rule.defaultValue);\n"
+"            }\n"
+"        }\n"
+"\n"
+"        return next;\n"
+"    }\n"
+"\n"
+"    function tryParseJSON(value) {\n"
+"        if (typeof value !== 'string' || value.length === 0) {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        try {\n"
+"            return JSON.parse(value);\n"
+"        } catch (error) {\n"
+"            return null;\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function resolveEntityRefState(entityId, previousState) {\n"
+"        let normalizedEntityId = entityId;\n"
+"        if (normalizedEntityId !== null && typeof normalizedEntityId === 'object' && !Array.isArray(normalizedEntityId)) {\n"
+"            const rawId = normalizedEntityId.id;\n"
+"            if (typeof rawId === 'string') {\n"
+"                normalizedEntityId = rawId;\n"
+"            } else if (typeof rawId === 'number' && Number.isInteger(rawId) && rawId > 0) {\n"
+"                normalizedEntityId = String(rawId);\n"
+"            }\n"
+"        }\n"
+"        if (typeof normalizedEntityId !== 'string' || normalizedEntityId.length === 0) {\n"
+"            return {\n"
+"                id: null,\n"
+"                status: 'unbound',\n"
+"                snapshot: null,\n"
+"            };\n"
+"        }\n"
+"        const resolvedEntityId = normalizedEntityId;\n"
+"\n"
+"        let snapshot = null;\n"
+"        if (globalThis.csp && typeof globalThis.csp.__getEntitySnapshot === 'function') {\n"
+"            snapshot = tryParseJSON(globalThis.csp.__getEntitySnapshot(resolvedEntityId));\n"
+"        }\n"
+"\n"
+"        return {\n"
+"            id: resolvedEntityId,\n"
+"            status: snapshot ? 'resolved' : 'missing',\n"
+"            snapshot,\n"
+"        };\n"
+"    }\n"
+"\n"
+"    function createComponentRef(entityRefState, componentType, index = 0) {\n"
+"        if (!entityRefState || entityRefState.status !== 'resolved' || !entityRefState.id) {\n"
+"            return {\n"
+"                status: 'missing',\n"
+"                id: null,\n"
+"                snapshot: null,\n"
+"            };\n"
+"        }\n"
+"\n"
+"        if (!globalThis.csp || typeof globalThis.csp.__getComponentSnapshot !== 'function') {\n"
+"            return {\n"
+"                status: 'missing',\n"
+"                id: null,\n"
+"                snapshot: null,\n"
+"            };\n"
+"        }\n"
+"\n"
+"        const componentSnapshot = tryParseJSON(globalThis.csp.__getComponentSnapshot(entityRefState.id, Number(componentType), Number(index)));\n"
+"        if (!componentSnapshot) {\n"
+"            return {\n"
+"                status: 'missing',\n"
+"                id: null,\n"
+"                snapshot: null,\n"
+"            };\n"
+"        }\n"
+"\n"
+"        return {\n"
+"            status: 'resolved',\n"
+"            id: componentSnapshot.componentId ?? null,\n"
+"            snapshot: componentSnapshot,\n"
+"        };\n"
+"    }\n"
+"\n"
+"    function toVector3(value) {\n"
+"        if (Array.isArray(value) && value.length >= 3) {\n"
+"            return [Number(value[0]), Number(value[1]), Number(value[2])];\n"
+"        }\n"
+"\n"
+"        if (isObject(value)) {\n"
+"            return [Number(value.x), Number(value.y), Number(value.z)];\n"
+"        }\n"
+"\n"
+"        return null;\n"
+"    }\n"
+"\n"
+"    function toVector4(value) {\n"
+"        if (Array.isArray(value) && value.length >= 4) {\n"
+"            return [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])];\n"
+"        }\n"
+"\n"
+"        if (isObject(value)) {\n"
+"            return [Number(value.x), Number(value.y), Number(value.z), Number(value.w)];\n"
+"        }\n"
+"\n"
+"        return null;\n"
+"    }\n"
+"\n"
+"    function createScriptEntityRef(entityRefState) {\n"
+"        function writePosition(value) {\n"
+"            if (!globalThis.csp || typeof globalThis.csp.__setEntityPosition !== 'function') {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            if (!entityRefState.id) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const vector = toVector3(value);\n"
+"            if (!vector || !vector.every((component) => Number.isFinite(component))) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const success = !!globalThis.csp.__setEntityPosition(entityRefState.id, vector[0], vector[1], vector[2]);\n"
+"            if (success && entityRefState.snapshot) {\n"
+"                entityRefState.snapshot.position = [...vector];\n"
+"            }\n"
+"            return success;\n"
+"        }\n"
+"\n"
+"        function writeRotation(value) {\n"
+"            if (!globalThis.csp || typeof globalThis.csp.__setEntityRotation !== 'function') {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            if (!entityRefState.id) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const vector = toVector4(value);\n"
+"            if (!vector || !vector.every((component) => Number.isFinite(component))) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const success = !!globalThis.csp.__setEntityRotation(entityRefState.id, vector[0], vector[1], vector[2], vector[3]);\n"
+"            if (success && entityRefState.snapshot) {\n"
+"                entityRefState.snapshot.rotation = [...vector];\n"
+"            }\n"
+"            return success;\n"
+"        }\n"
+"\n"
+"        function writeScale(value) {\n"
+"            if (!globalThis.csp || typeof globalThis.csp.__setEntityScale !== 'function') {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            if (!entityRefState.id) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const vector = toVector3(value);\n"
+"            if (!vector || !vector.every((component) => Number.isFinite(component))) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            const success = !!globalThis.csp.__setEntityScale(entityRefState.id, vector[0], vector[1], vector[2]);\n"
+"            if (success && entityRefState.snapshot) {\n"
+"                entityRefState.snapshot.scale = [...vector];\n"
+"            }\n"
+"            return success;\n"
+"        }\n"
+"\n"
+"        function writePatch(patch) {\n"
+"            if (!isObject(patch) || !entityRefState.id) {\n"
+"                return false;\n"
+"            }\n"
+"\n"
+"            let didSucceed = true;\n"
+"\n"
+"            if (Object.prototype.hasOwnProperty.call(patch, 'position')) {\n"
+"                didSucceed = writePosition(patch.position) && didSucceed;\n"
+"            }\n"
+"\n"
+"            if (Object.prototype.hasOwnProperty.call(patch, 'rotation')) {\n"
+"                didSucceed = writeRotation(patch.rotation) && didSucceed;\n"
+"            }\n"
+"\n"
+"            if (Object.prototype.hasOwnProperty.call(patch, 'scale')) {\n"
+"                didSucceed = writeScale(patch.scale) && didSucceed;\n"
+"            }\n"
+"\n"
+"            if (Object.prototype.hasOwnProperty.call(patch, 'name')\n"
+"                && globalThis.csp\n"
+"                && typeof globalThis.csp.__setEntityName === 'function'\n"
+"                && typeof patch.name === 'string') {\n"
+"                const success = !!globalThis.csp.__setEntityName(entityRefState.id, patch.name);\n"
+"                if (success && entityRefState.snapshot) {\n"
+"                    entityRefState.snapshot.name = patch.name;\n"
+"                }\n"
+"                didSucceed = success && didSucceed;\n"
+"            }\n"
+"\n"
+"            if (Object.prototype.hasOwnProperty.call(patch, 'thirdPartyRef')\n"
+"                && globalThis.csp\n"
+"                && typeof globalThis.csp.__setEntityThirdPartyRef === 'function'\n"
+"                && typeof patch.thirdPartyRef === 'string') {\n"
+"                const success = !!globalThis.csp.__setEntityThirdPartyRef(entityRefState.id, patch.thirdPartyRef);\n"
+"                if (success && entityRefState.snapshot) {\n"
+"                    entityRefState.snapshot.thirdPartyRef = patch.thirdPartyRef;\n"
+"                }\n"
+"                didSucceed = success && didSucceed;\n"
+"            }\n"
+"\n"
+"            return didSucceed;\n"
+"        }\n"
+"\n"
+"        return {\n"
+"            get id() {\n"
+"                return entityRefState.id;\n"
+"            },\n"
+"            get status() {\n"
+"                return entityRefState.status;\n"
+"            },\n"
+"            get snapshot() {\n"
+"                return entityRefState.snapshot ? cloneValue(entityRefState.snapshot) : null;\n"
+"            },\n"
+"            patch(value) {\n"
+"                return writePatch(value);\n"
+"            },\n"
+"            setPosition(value) {\n"
+"                return writePosition(value);\n"
+"            },\n"
+"            setRotation(value) {\n"
+"                return writeRotation(value);\n"
+"            },\n"
+"            setScale(value) {\n"
+"                return writeScale(value);\n"
+"            },\n"
+"            getComponent(componentType, index = 0) {\n"
+"                return createComponentRef(entityRefState, componentType, index);\n"
+"            },\n"
+"            getLightComponent(index = 0) {\n"
+"                return createComponentRef(entityRefState, 10, index);\n"
+"            },\n"
+"        };\n"
+"    }\n"
+"\n"
+"    function resolveEntityFromSystem(entityId) {\n"
+"        if (!entityId) {\n"
+"            return null;\n"
+"        }\n"
+"        if (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function') {\n"
+"            return globalThis.TheEntitySystem.getEntityById(entityId) ?? null;\n"
+"        }\n"
+"        return null;\n"
+"    }\n"
+"\n"
+"    function createSignalAttributes(entry, entityId) {\n"
+"        const attrs = {};\n"
+"        const schema = entry.schema || {};\n"
+"\n"
+"        for (const key of sortedKeys(entry.attributes)) {\n"
+"            if (key.startsWith('$')) {\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            const rule = schema[key];\n"
+"            if (rule && rule.type === 'entity') {\n"
+"                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };\n"
+"                const nextState = resolveEntityRefState(entry.attributes[key], prevState);\n"
+"                entry.entityRefStates[key] = nextState;\n"
+"                attrs[key] = signal(resolveEntityFromSystem(nextState.id));\n"
+"            } else {\n"
+"                attrs[key] = signal(entry.attributes[key]);\n"
+"            }\n"
+"        }\n"
+"\n"
+"        return attrs;\n"
+"    }\n"
+"\n"
+"    function updateSignalAttributes(entry, entityId) {\n"
+"        const schema = entry.schema || {};\n"
+"\n"
+"        batch(() => {\n"
+"            for (const key of sortedKeys(entry.attributes)) {\n"
+"                if (key.startsWith('$')) {\n"
+"                    continue;\n"
+"                }\n"
+"\n"
+"                const rule = schema[key];\n"
+"\n"
+"                if (!entry.signalAttributes[key]) {\n"
+"                    if (rule && rule.type === 'entity') {\n"
+"                        const state = resolveEntityRefState(entry.attributes[key],\n"
+"                            entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null });\n"
+"                        entry.entityRefStates[key] = state;\n"
+"                        entry.signalAttributes[key] = signal(resolveEntityFromSystem(state.id));\n"
+"                    } else {\n"
+"                        entry.signalAttributes[key] = signal(entry.attributes[key]);\n"
+"                    }\n"
+"                } else {\n"
+"                    if (rule && rule.type === 'entity') {\n"
+"                        const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };\n"
+"                        const nextState = resolveEntityRefState(entry.attributes[key], prevState);\n"
+"                        entry.entityRefStates[key] = nextState;\n"
+"                        entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);\n"
+"                    } else {\n"
+"                        entry.signalAttributes[key].value = entry.attributes[key];\n"
+"                    }\n"
+"                }\n"
+"            }\n"
+"        });\n"
+"    }\n"
+"\n"
+"    function flattenUIChildren(children, out = []) {\n"
+"        for (const child of Array.isArray(children) ? children : []) {\n"
+"            if (Array.isArray(child)) {\n"
+"                flattenUIChildren(child, out);\n"
+"            } else if (child !== null && typeof child !== 'undefined' && child !== false) {\n"
+"                out.push(child);\n"
+"            }\n"
+"        }\n"
+"        return out;\n"
+"    }\n"
+"\n"
+"    function normalizeUIEntityId(value) {\n"
+"        if (typeof value === 'string') {\n"
+"            return value;\n"
+"        }\n"
+"        if (value && typeof value === 'object') {\n"
+"            if (typeof value.id === 'string') {\n"
+"                return value.id;\n"
+"            }\n"
+"            if (typeof value.id === 'number' && Number.isInteger(value.id) && value.id > 0) {\n"
+"                return String(value.id);\n"
+"            }\n"
+"        }\n"
+"        return null;\n"
+"    }\n"
+"\n"
+"    function normalizeUINode(node, entityId, handlerMap, path = 'root') {\n"
+"        if (!node || typeof node !== 'object') {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        const type = typeof node.type === 'string' ? node.type : null;\n"
+"        if (!type) {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        const props = isObject(node.props) ? { ...node.props } : {};\n"
+"        const normalized = {\n"
+"            type,\n"
+"            id: (typeof props.key === 'string' && props.key.length > 0) ? `${path}:${props.key}` : path,\n"
+"            props: {},\n"
+"            children: [],\n"
+"        };\n"
+"\n"
+"        for (const [key, value] of Object.entries(props)) {\n"
+"            if (key === 'key') {\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (key === 'onClick' && typeof value === 'function') {\n"
+"                const handlerId = `${path}:click`;\n"
+"                handlerMap.set(handlerId, value);\n"
+"                normalized.props.onClickHandlerId = handlerId;\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (key === 'targetEntity' || key === 'entity') {\n"
+"                const normalizedEntity = normalizeUIEntityId(value);\n"
+"                if (normalizedEntity) {\n"
+"                    normalized.props.targetEntityId = normalizedEntity;\n"
+"                }\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (typeof value === 'function') {\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            if (Array.isArray(value)) {\n"
+"                normalized.props[key] = value.map((item) => cloneValue(item));\n"
+"            } else if (isObject(value)) {\n"
+"                normalized.props[key] = cloneValue(value);\n"
+"            } else if (typeof value !== 'undefined') {\n"
+"                normalized.props[key] = value;\n"
+"            }\n"
+"        }\n"
+"\n"
+"        if (type === 'world' && !normalized.props.targetEntityId) {\n"
+"            normalized.props.targetEntityId = entityId;\n"
+"        }\n"
+"\n"
+"        const children = flattenUIChildren(node.children);\n"
+"        normalized.children = children\n"
+"            .map((child, index) => normalizeUINode(child, entityId, handlerMap, `${normalized.id}.${index}`))\n"
+"            .filter((child) => child !== null);\n"
+"\n"
+"        return normalized;\n"
+"    }\n"
+"\n"
+"    function clearUIHandlers(entry) {\n"
+"        entry.uiHandlers.clear();\n"
+"        if (entry.pendingUIHandlers) {\n"
+"            entry.pendingUIHandlers.clear();\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function unmountUI(entityId) {\n"
+"        if (globalThis.csp && typeof globalThis.csp.__uiUnmount === 'function') {\n"
+"            try {\n"
+"                globalThis.csp.__uiUnmount(entityId);\n"
+"            } catch (error) {\n"
+"                console.error(`NgxCodeComponentRuntime: failed to unmount UI for entity ${entityId}`, error);\n"
+"            }\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function queueUIFlush(entityId, entry, treeJson, handlerMap) {\n"
+"        if (!entry || entry.isDisposing || isDestroying) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        entry.pendingUITreeJson = treeJson;\n"
+"        entry.pendingUIHandlers = handlerMap;\n"
+"        entry.uiDirty = true;\n"
+"        pendingUIFlushes.add(entityId);\n"
+"    }\n"
+"\n"
+"    function flushPendingUI(entityId, entry) {\n"
+"        if (!entry || !entry.uiDirty || entry.isDisposing || isDestroying) {\n"
+"            if (entry) {\n"
+"                entry.uiDirty = false;\n"
+"                entry.pendingUITreeJson = null;\n"
+"                if (entry.pendingUIHandlers) {\n"
+"                    entry.pendingUIHandlers.clear();\n"
+"                }\n"
+"            }\n"
+"            pendingUIFlushes.delete(entityId);\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        entry.uiDirty = false;\n"
+"        pendingUIFlushes.delete(entityId);\n"
+"\n"
+"        entry.uiHandlers = entry.pendingUIHandlers instanceof Map ? entry.pendingUIHandlers : new Map();\n"
+"        entry.pendingUIHandlers = new Map();\n"
+"\n"
+"        const treeJson = typeof entry.pendingUITreeJson === 'string' ? entry.pendingUITreeJson : null;\n"
+"        if (!treeJson) {\n"
+"            unmountUI(entityId);\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        if (globalThis.csp && typeof globalThis.csp.__uiMount === 'function') {\n"
+"            try {\n"
+"                globalThis.csp.__uiMount(entityId, treeJson);\n"
+"            } catch (error) {\n"
+"                console.error(`NgxCodeComponentRuntime: failed to mount UI for entity ${entityId}`, error);\n"
+"                entry.uiHandlers.clear();\n"
+"                unmountUI(entityId);\n"
+"            }\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function startUIRuntime(entityId, entry) {\n"
+"        if (!entry || entry.isDisposing || isDestroying || !entry.module || typeof entry.module.ui !== 'function') {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        if (typeof entry.uiDispose === 'function') {\n"
+"            entry.uiDispose();\n"
+"            entry.uiDispose = null;\n"
+"        }\n"
+"\n"
+"        entry.uiDispose = effect(() => {\n"
+"            if (entry.isDisposing || isDestroying) {\n"
+"                return;\n"
+"            }\n"
+"\n"
+"            const previousEntityId = globalThis.__cspCurrentEntityId;\n"
+"            globalThis.__cspCurrentEntityId = entityId;\n"
+"            try {\n"
+"                const nextHandlers = new Map();\n"
+"                const rawTree = entry.module.ui({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });\n"
+"                const normalizedTree = normalizeUINode(rawTree, entityId, nextHandlers);\n"
+"\n"
+"                if (!normalizedTree) {\n"
+"                    queueUIFlush(entityId, entry, null, nextHandlers);\n"
+"                    return;\n"
+"                }\n"
+"\n"
+"                queueUIFlush(entityId, entry, JSON.stringify(normalizedTree), nextHandlers);\n"
+"            } catch (error) {\n"
+"                console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);\n"
+"                queueUIFlush(entityId, entry, null, new Map());\n"
+"            } finally {\n"
+"                globalThis.__cspCurrentEntityId = previousEntityId;\n"
+"            }\n"
+"        });\n"
+"    }\n"
+"\n"
+"    function stopUIRuntime(entityId, entry) {\n"
+"        if (!entry) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        if (typeof entry.uiDispose === 'function') {\n"
+"            try {\n"
+"                entry.uiDispose();\n"
+"            } catch (error) {\n"
+"                console.error(`NgxCodeComponentRuntime: ui dispose failed for entity ${entityId}`, error);\n"
+"            }\n"
+"        }\n"
+"        entry.uiDispose = null;\n"
+"        pendingUIFlushes.delete(entityId);\n"
+"        entry.uiDirty = false;\n"
+"        entry.pendingUITreeJson = null;\n"
+"        clearUIHandlers(entry);\n"
+"        unmountUI(entityId);\n"
+"    }\n"
+"\n"
+"    function dispatchUIAction(entityId, handlerId) {\n"
+"        const entry = codeComponents.get(entityId);\n"
+"        if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        const handler = entry.uiHandlers.get(handlerId);\n"
+"        if (typeof handler !== 'function') {\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        try {\n"
+"            const previousEntityId = globalThis.__cspCurrentEntityId;\n"
+"            globalThis.__cspCurrentEntityId = entityId;\n"
+"            try {\n"
+"                handler({\n"
+"                    entityId,\n"
+"                    type: 'click',\n"
+"                    thisEntity: entry.thisEntitySignal ? entry.thisEntitySignal.value : null,\n"
+"                });\n"
+"            } finally {\n"
+"                globalThis.__cspCurrentEntityId = previousEntityId;\n"
+"            }\n"
+"            return true;\n"
+"        } catch (error) {\n"
+"            console.error(`NgxCodeComponentRuntime: UI handler failed for entity ${entityId}`, error);\n"
+"            return false;\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function disposeAllEffects(entry) {\n"
+"        if (!entry) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        const effects = Array.isArray(entry.effects) ? [...entry.effects] : [];\n"
+"        entry.effects = [];\n"
+"\n"
+"        for (const dispose of effects) {\n"
+"            try {\n"
+"                dispose();\n"
+"            } catch (e) {\n"
+"                console.error('NgxCodeComponentRuntime: effect dispose failed', e);\n"
+"            }\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function removeInputListenersForEntity(entityId) {\n"
+"        if (globalThis.__cspInput && typeof globalThis.__cspInput.removeListenersForEntity === 'function') {\n"
+"            globalThis.__cspInput.removeListenersForEntity(entityId);\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function runScriptTeardown(entityId, entry, reason = 'unspecified') {\n"
+"        if (!entry) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        const teardown = entry.teardown;\n"
+"        entry.teardown = null;\n"
+"\n"
+"        try {\n"
+"            if (typeof teardown === 'function') {\n"
+"                teardown();\n"
+"            }\n"
+"        } catch (error) {\n"
+"            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';\n"
+"            console.error(`NgxCodeComponentRuntime: script teardown failed for entity ${entityId} (${scriptPath}) [${reason}]`, error);\n"
+"        } finally {\n"
+"            removeInputListenersForEntity(entityId);\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function ensureThisEntitySignal(entityId, entry) {\n"
+"        if (!entry) {\n"
+"            return null;\n"
+"        }\n"
+"\n"
+"        const liveEntity = (globalThis.TheEntitySystem && typeof globalThis.TheEntitySystem.getEntityById === 'function')\n"
+"            ? globalThis.TheEntitySystem.getEntityById(entityId)\n"
+"            : null;\n"
+"\n"
+"        if (!entry.thisEntitySignal) {\n"
+"            entry.thisEntitySignal = signal(liveEntity ?? null);\n"
+"        } else {\n"
+"            entry.thisEntitySignal.value = liveEntity ?? null;\n"
+"        }\n"
+"\n"
+"        return entry.thisEntitySignal;\n"
+"    }\n"
+"\n"
+"    function initializeScript(entityId, entry) {\n"
+"        if (!entry || !entry.module || typeof entry.module.script !== 'function') {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        try {\n"
+"            ensureThisEntitySignal(entityId, entry);\n"
+"\n"
+"            globalThis.__cspCurrentEntityId = entityId;\n"
+"            try {\n"
+"                const teardown = entry.module.script({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });\n"
+"                entry.teardown = typeof teardown === 'function' ? teardown : null;\n"
+"            } finally {\n"
+"                globalThis.__cspCurrentEntityId = undefined;\n"
+"            }\n"
+"        } catch (error) {\n"
+"            const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';\n"
+"            const detail = error instanceof Error\n"
+"                ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))\n"
+"                : String(error);\n"
+"            console.error(`NgxCodeComponentRuntime: script initialization failed for entity ${entityId} (${scriptPath})\\\\n${detail}`);\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function tryImportCodeComponentModule(entityId, entry, reason = 'unspecified') {\n"
+"        if (!entry || typeof entry.scriptAssetPath !== 'string' || entry.scriptAssetPath.length === 0) {\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        if (entry.importInFlight) {\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        const scriptAssetPath = entry.scriptAssetPath;\n"
+"        const importGeneration = (typeof entry.importGeneration === 'number' ? entry.importGeneration : 0) + 1;\n"
+"        entry.importGeneration = importGeneration;\n"
+"        entry.importInFlight = true;\n"
+"\n"
+"        import(scriptAssetPath)\n"
+"            .then((moduleRef) => {\n"
+"                const current = codeComponents.get(entityId);\n"
+"                if (!current\n"
+"                    || current.scriptAssetPath !== scriptAssetPath\n"
+"                    || current.importGeneration !== importGeneration) {\n"
+"                    return;\n"
+"                }\n"
+"\n"
+"                current.importInFlight = false;\n"
+"                current.retryDelayFrames = 1;\n"
+"                current.retryCountdown = 0;\n"
+"                current.hasWarnedMissingModule = false;\n"
+"                current.module = moduleRef;\n"
+"\n"
+"                if (current.initialized) {\n"
+"                    current.isDisposing = true;\n"
+"                    stopUIRuntime(entityId, current);\n"
+"                    disposeAllEffects(current);\n"
+"                    current.thisEntitySignal = null;\n"
+"                    current.isDisposing = false;\n"
+"                    current.initialized = false;\n"
+"                }\n"
+"\n"
+"                if (current.pendingSchemaSync) {\n"
+"                    syncCodeComponentSchema(entityId);\n"
+"                    pendingSchemaSyncs.add(entityId);\n"
+"                }\n"
+"\n"
+"                current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);\n"
+"                current.signalAttributes = createSignalAttributes(current, entityId);\n"
+"                ensureThisEntitySignal(entityId, current);\n"
+"                current.initialized = true;\n"
+"\n"
+"                initializeScript(entityId, current);\n"
+"                startUIRuntime(entityId, current);\n"
+"            })\n"
+"            .catch((error) => {\n"
+"                const current = codeComponents.get(entityId);\n"
+"                if (!current\n"
+"                    || current.scriptAssetPath !== scriptAssetPath\n"
+"                    || current.importGeneration !== importGeneration) {\n"
+"                    return;\n"
+"                }\n"
+"\n"
+"                current.importInFlight = false;\n"
+"                const delayFrames = typeof current.retryDelayFrames === 'number' && current.retryDelayFrames > 0\n"
+"                    ? Math.min(current.retryDelayFrames * 2, 300)\n"
+"                    : 1;\n"
+"                current.retryDelayFrames = delayFrames;\n"
+"                current.retryCountdown = delayFrames;\n"
+"\n"
+"                const errorMessage = (error && typeof error.message === 'string') ? error.message : String(error);\n"
+"                if (errorMessage.includes('module not found') && !current.hasWarnedMissingModule) {\n"
+"                    current.hasWarnedMissingModule = true;\n"
+"                    warn(entityId, `module '${scriptAssetPath}' is not available yet; import will be retried automatically.`);\n"
+"                }\n"
+"                console.error(`NgxCodeComponentRuntime: Failed to import module ${scriptAssetPath} (${reason})`, error);\n"
+"            });\n"
+"\n"
+"        return true;\n"
+"    }\n"
+"\n"
+"    function syncCodeComponentSchema(entityId) {\n"
+"        const entry = codeComponents.get(entityId);\n"
+"        if (!entry) {\n"
+"            return {};\n"
+"        }\n"
+"\n"
+"        if (!entry.module) {\n"
+"            entry.pendingSchemaSync = true;\n"
+"            tryImportCodeComponentModule(entityId, entry, 'syncCodeComponentSchema');\n"
+"            return {};\n"
+"        }\n"
+"\n"
+"        const previousAttributes = cloneAttributes(entry.attributes);\n"
+"        entry.schema = readSchema(entry.module, entityId);\n"
+"        entry.attributes = reconcileAttributes(entityId, entry.schema, entry.attributes, previousAttributes);\n"
+"        entry.pendingSchemaSync = false;\n"
+"\n"
+"        if (entry.initialized && entry.signalAttributes) {\n"
+"            updateSignalAttributes(entry, entityId);\n"
+"        }\n"
+"\n"
+"        return buildSchemaMetadata(entry.schema);\n"
+"    }\n"
+"\n"
+"    function addCodeComponent(entityId, payload = {}) {\n"
+"        const payloadObject = isObject(payload) ? payload : {};\n"
+"        const scriptAssetPath = typeof payloadObject.scriptAssetPath === 'string' ? payloadObject.scriptAssetPath : '';\n"
+"        const inputAttributes = cloneAttributes(payloadObject.attributes);\n"
+"        const existing = codeComponents.get(entityId);\n"
+"\n"
+"        if (existing && existing.scriptAssetPath === scriptAssetPath) {\n"
+"            syncCodeComponentAttributes(entityId, inputAttributes);\n"
+"            if (!existing.module && scriptAssetPath.length > 0) {\n"
+"                tryImportCodeComponentModule(entityId, existing, 'addCodeComponent-existing');\n"
+"            }\n"
+"            return true;\n"
+"        }\n"
+"\n"
+"        if (existing) {\n"
+"            stopUIRuntime(entityId, existing);\n"
+"            disposeAllEffects(existing);\n"
+"            existing.thisEntitySignal = null;\n"
+"            codeComponents.delete(entityId);\n"
+"        }\n"
+"\n"
+"        const entry = {\n"
+"            scriptAssetPath,\n"
+"            attributes: inputAttributes,\n"
+"            signalAttributes: {},\n"
+"            thisEntitySignal: null,\n"
+"            teardown: null,\n"
+"            module: null,\n"
+"            schema: null,\n"
+"            initialized: false,\n"
+"            pendingSchemaSync: true,\n"
+"            importGeneration: 0,\n"
+"            importInFlight: false,\n"
+"            retryDelayFrames: 1,\n"
+"            retryCountdown: 0,\n"
+"            hasWarnedMissingModule: false,\n"
+"            entityRefStates: {},\n"
+"            effects: [],\n"
+"            uiDispose: null,\n"
+"            uiHandlers: new Map(),\n"
+"            pendingUIHandlers: new Map(),\n"
+"            pendingUITreeJson: null,\n"
+"            uiDirty: false,\n"
+"            isDisposing: false,\n"
+"        };\n"
+"\n"
+"        codeComponents.set(entityId, entry);\n"
+"\n"
+"        if (!scriptAssetPath) {\n"
+"            warn(entityId, 'missing scriptAssetPath; component will not be initialized.');\n"
+"            return false;\n"
+"        }\n"
+"\n"
+"        tryImportCodeComponentModule(entityId, entry, 'addCodeComponent');\n"
+"        return true;\n"
+"    }\n"
+"\n"
+"    function syncCodeComponentAttributes(entityId, attributes = {}) {\n"
+"        const entry = codeComponents.get(entityId);\n"
+"        if (!entry) {\n"
+"            return {};\n"
+"        }\n"
+"\n"
+"        const previousAttributes = cloneAttributes(entry.attributes);\n"
+"        entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);\n"
+"\n"
+"        if (entry.initialized && entry.signalAttributes) {\n"
+"            updateSignalAttributes(entry, entityId);\n"
+"        }\n"
+"\n"
+"        return cloneAttributes(entry.attributes);\n"
+"    }\n"
+"\n"
+"    function updateAttributeForEntity(entityId, key, value) {\n"
+"        const entry = codeComponents.get(entityId);\n"
+"        if (!entry) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        if (entry.schema) {\n"
+"            if (!Object.prototype.hasOwnProperty.call(entry.schema, key)) {\n"
+"                warn(entityId, `attribute '${key}' is not declared in schema and will be ignored.`);\n"
+"                return;\n"
+"            }\n"
+"\n"
+"            const rule = entry.schema[key];\n"
+"            if (!valueMatchesType(rule.type, value)) {\n"
+"                warn(entityId, `attribute '${key}' has type '${describeValueType(value)}' but expected '${rule.type}'; update ignored.`);\n"
+"                return;\n"
+"            }\n"
+"        }\n"
+"\n"
+"        entry.attributes[key] = cloneValue(value);\n"
+"\n"
+"        if (entry.initialized && entry.signalAttributes && entry.signalAttributes[key]) {\n"
+"            const schema = entry.schema || {};\n"
+"            const rule = schema[key];\n"
+"            if (rule && rule.type === 'entity') {\n"
+"                const prevState = entry.entityRefStates[key] || { id: null, status: 'unbound', snapshot: null };\n"
+"                const nextState = resolveEntityRefState(value, prevState);\n"
+"                entry.entityRefStates[key] = nextState;\n"
+"                entry.signalAttributes[key].value = resolveEntityFromSystem(nextState.id);\n"
+"            } else {\n"
+"                entry.signalAttributes[key].value = value;\n"
+"            }\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function removeCodeComponent(entityId) {\n"
+"        const entry = codeComponents.get(entityId);\n"
+"        if (!entry) {\n"
+"            return;\n"
+"        }\n"
+"\n"
+"        entry.isDisposing = true;\n"
+"\n"
+"        stopUIRuntime(entityId, entry);\n"
+"        runScriptTeardown(entityId, entry, 'remove');\n"
+"        disposeAllEffects(entry);\n"
+"        entry.thisEntitySignal = null;\n"
+"        codeComponents.delete(entityId);\n"
+"    }\n"
+"\n"
+"    function tick() {\n"
+"        for (const [entityId, entry] of codeComponents) {\n"
+"            if (!entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {\n"
+"                if (entry.importInFlight) {\n"
+"                    continue;\n"
+"                }\n"
+"\n"
+"                if (typeof entry.retryCountdown === 'number' && entry.retryCountdown > 0) {\n"
+"                    entry.retryCountdown -= 1;\n"
+"                    continue;\n"
+"                }\n"
+"\n"
+"                tryImportCodeComponentModule(entityId, entry, 'tick-retry');\n"
+"            }\n"
+"        }\n"
+"\n"
+"        const dirtyUIIds = Array.from(pendingUIFlushes);\n"
+"        for (const entityId of dirtyUIIds) {\n"
+"            const entry = codeComponents.get(entityId);\n"
+"            if (!entry || !entry.initialized) {\n"
+"                pendingUIFlushes.delete(entityId);\n"
+"                continue;\n"
+"            }\n"
+"\n"
+"            flushPendingUI(entityId, entry);\n"
+"        }\n"
+"    }\n"
+"\n"
+"    function drainPendingSchemaSyncs() {\n"
+"        const ids = Array.from(pendingSchemaSyncs);\n"
+"        pendingSchemaSyncs.clear();\n"
+"        return ids;\n"
+"    }\n"
+"\n"
+"    function destroy() {\n"
+"        isDestroying = true;\n"
+"        for (const [entityId, entry] of codeComponents) {\n"
+"            entry.isDisposing = true;\n"
+"            stopUIRuntime(entityId, entry);\n"
+"            runScriptTeardown(entityId, entry, 'destroy');\n"
+"            disposeAllEffects(entry);\n"
+"            entry.thisEntitySignal = null;\n"
+"        }\n"
+"        codeComponents.clear();\n"
+"        pendingSchemaSyncs.clear();\n"
+"        pendingUIFlushes.clear();\n"
+"        isDestroying = false;\n"
+"    }\n"
+"\n"
+"    return {\n"
+"        syncCodeComponentSchema,\n"
+"        addCodeComponent,\n"
+"        syncCodeComponentAttributes,\n"
+"        updateAttributeForEntity,\n"
+"        removeCodeComponent,\n"
+"        dispatchUIAction,\n"
+"        tick,\n"
+"        drainPendingSchemaSyncs,\n"
+"        destroy,\n"
+"    };\n"
+"}\n"
+"\n"
+"export default createScriptRegistry;\n"
+"\"\n";
+
+constexpr const char* CODECOMPONENT_BOOTSTRAP_SOURCE = 
+"import * as __ngxRegistryModule from '/__csp/internal/codecomponent/registry.js';\n"
+"const __ngxFactory = (typeof __ngxRegistryModule.createScriptRegistry === 'function')\n"
+"    ? __ngxRegistryModule.createScriptRegistry\n"
+"    : ((typeof __ngxRegistryModule.default === 'function') ? __ngxRegistryModule.default : null);\n"
+"\n"
+"if (typeof globalThis.scriptRegistry === 'undefined') {\n"
+"    if (__ngxFactory !== null) {\n"
+"        globalThis.scriptRegistry = __ngxFactory();\n"
+"    } else if (__ngxRegistryModule && typeof __ngxRegistryModule.default === 'object') {\n"
+"        globalThis.scriptRegistry = __ngxRegistryModule.default;\n"
+"    }\n"
+"}\n";
+
+constexpr const char* CODECOMPONENT_SHUTDOWN_SOURCE = 
+"if (typeof globalThis.scriptRegistry !== 'undefined') {\n"
+"    if (typeof globalThis.scriptRegistry.destroy === 'function') {\n"
+"        globalThis.scriptRegistry.destroy();\n"
+"    }\n"
+"    delete globalThis.scriptRegistry;\n"
+"}\n";
 
 } // namespace
 
