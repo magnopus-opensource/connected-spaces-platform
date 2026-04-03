@@ -52,8 +52,6 @@ class NgxUIRuntime;
 class CSP_API NgxScriptSystem
 {
 public:
-    typedef std::function<void(const csp::common::String& Text, float FontSize, float& OutWidth, float& OutHeight)> UITextMeasureCallback;
-
     explicit NgxScriptSystem(csp::common::LogSystem& InLogSystem);
     ~NgxScriptSystem();
 
@@ -108,12 +106,6 @@ public:
     // Update the logical viewport size used for screen-space UI layout.
     void SetUIViewportSize(float Width, float Height);
 
-    // Provide a client text measurement callback used by Clay during layout.
-    // The callback receives text, font size, and out-parameters for width and height.
-    // This path is intended for native clients. Web clients should prefer the async
-    // request/result flow via DrainPendingUITextMeasureRequests and SubmitUITextMeasureResults.
-    void SetUITextMeasureCallback(UITextMeasureCallback InCallback);
-
     // Drain pending browser-safe text measurement requests as a JSON array.
     // Each entry has shape: { "text": string, "fontSize": number }.
     csp::common::String DrainPendingUITextMeasureRequests();
@@ -129,12 +121,21 @@ public:
     bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId);
 
     CSP_START_IGNORE
+    typedef std::function<void(const csp::common::String& Text, float FontSize, float& OutWidth, float& OutHeight)> UITextMeasureCallback;
+
+    // Provide a client text measurement callback used by Clay during layout.
+    // The callback receives text, font size, and out-parameters for width and height.
+    // This path is intended for native clients. Web clients should prefer the async
+    // request/result flow via DrainPendingUITextMeasureRequests and SubmitUITextMeasureResults.
+    CSP_NO_EXPORT void SetUITextMeasureCallback(UITextMeasureCallback InCallback);
+
     // Internal runtime hooks.
     CSP_NO_EXPORT bool HasModuleSource(const csp::common::String& ModulePath) const;
     CSP_NO_EXPORT bool EvaluateSnippet(const csp::common::String& ScriptText, const csp::common::String& DebugName);
     CSP_NO_EXPORT void PumpPendingJobs();
     CSP_NO_EXPORT bool AreScriptModulesLoaded() const;
     CSP_NO_EXPORT uint64_t GetContextGeneration() const;
+    CSP_NO_EXPORT bool WasLastEvaluationDeferred() const;
     CSP_NO_EXPORT bool FlushPendingCodeComponentUI();
 
     // Managed by SpaceSystem during space lifecycle.
@@ -209,6 +210,7 @@ private:
     std::atomic<uint64_t> SessionGeneration;
     std::atomic<uint64_t> ContextGeneration;
     std::atomic<bool> ScriptModulesLoaded;
+    std::atomic<bool> LastEvaluationDeferred;
     csp::common::Vector3 LocalPlayerCameraPosition;
     csp::common::Vector4 LocalPlayerCameraRotation;
     csp::common::Vector3 LocalPlayerCameraForward;

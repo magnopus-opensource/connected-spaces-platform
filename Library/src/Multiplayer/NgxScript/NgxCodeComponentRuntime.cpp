@@ -1927,11 +1927,13 @@ bool NgxCodeComponentRuntime::CaptureEntitySnapshots(EntitySnapshotMap& OutSnaps
 
 void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnapshots)
 {
+    bool bAllOperationsApplied = true;
+
     for (const auto& PreviousEntityPair : LastEntitySnapshots)
     {
         if (CurrentSnapshots.find(PreviousEntityPair.first) == CurrentSnapshots.end())
         {
-            RemoveEntityFromRegistry(PreviousEntityPair.first);
+            bAllOperationsApplied = RemoveEntityFromRegistry(PreviousEntityPair.first) && bAllOperationsApplied;
         }
     }
 
@@ -1943,7 +1945,7 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         const auto PreviousSnapshotIt = LastEntitySnapshots.find(EntityId);
         if (PreviousSnapshotIt == LastEntitySnapshots.end())
         {
-            AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot);
+            bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
             continue;
         }
 
@@ -1951,7 +1953,7 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
         if ((CurrentSnapshot.ScriptAssetPath != PreviousSnapshot.ScriptAssetPath) || (CurrentSnapshot.ScopeType != PreviousSnapshot.ScopeType)
             || (CurrentSnapshot.RuntimeMode != PreviousSnapshot.RuntimeMode))
         {
-            AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot);
+            bAllOperationsApplied = AddOrReplaceEntityInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
             continue;
         }
 
@@ -1967,7 +1969,7 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
 
         if (bHasRemovedAttributes)
         {
-            SyncAttributesInRegistry(EntityId, CurrentSnapshot);
+            bAllOperationsApplied = SyncAttributesInRegistry(EntityId, CurrentSnapshot) && bAllOperationsApplied;
             continue;
         }
 
@@ -1976,12 +1978,16 @@ void NgxCodeComponentRuntime::SyncSnapshots(const EntitySnapshotMap& CurrentSnap
             const auto PreviousAttributeIt = PreviousSnapshot.Attributes.find(CurrentAttributePair.first);
             if ((PreviousAttributeIt == PreviousSnapshot.Attributes.end()) || (PreviousAttributeIt->second != CurrentAttributePair.second))
             {
-                UpdateAttributeInRegistry(EntityId, CurrentAttributePair.first, CurrentAttributePair.second);
+                bAllOperationsApplied
+                    = UpdateAttributeInRegistry(EntityId, CurrentAttributePair.first, CurrentAttributePair.second) && bAllOperationsApplied;
             }
         }
     }
 
-    LastEntitySnapshots = CurrentSnapshots;
+    if (bAllOperationsApplied)
+    {
+        LastEntitySnapshots = CurrentSnapshots;
+    }
 }
 
 csp::systems::ESpaceRuntimeMode NgxCodeComponentRuntime::GetRuntimeMode() const
@@ -2063,6 +2069,11 @@ bool NgxCodeComponentRuntime::ExecuteRegistrySnippet(const std::string& Snippet,
 {
     if (!ScriptSystem.EvaluateSnippet(Snippet.c_str(), DebugName))
     {
+        if (ScriptSystem.WasLastEvaluationDeferred())
+        {
+            return false;
+        }
+
         const std::string WarningMessage = fmt::format("NgxCodeComponentRuntime: Failed to evaluate registry snippet '{}'.", DebugName);
         LogSystem.LogMsg(csp::common::LogLevel::Warning, WarningMessage.c_str());
         return false;
@@ -2153,7 +2164,7 @@ void NgxCodeComponentRuntime::DrainPendingSchemaSyncs()
     }
 }
 
-void NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
+bool NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string AttributesLiteral = BuildAttributesObjectLiteral(Snapshot.Attributes);
@@ -2165,10 +2176,10 @@ void NgxCodeComponentRuntime::SyncAttributesInRegistry(uint64_t EntityId, const 
           "    }\n"
           "}\n";
 
-    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-attributes>");
+    return ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-sync-attributes>");
 }
 
-void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
+bool NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, const CodeComponentSnapshot& Snapshot)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string AttributesLiteral = BuildAttributesObjectLiteral(Snapshot.Attributes);
@@ -2177,12 +2188,15 @@ void NgxCodeComponentRuntime::AddOrReplaceEntityInRegistry(uint64_t EntityId, co
         + EscapeJSStringLiteral(EntityIdString) + "', { scriptAssetPath: '" + EscapeJSStringLiteral(Snapshot.ScriptAssetPath)
         + "', attributes: " + AttributesLiteral + " });\n" + "}\n";
 
-    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-add>");
+    if (!ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-add>"))
+    {
+        return false;
+    }
     SyncSchemaInRegistry(EntityId);
-    SyncAttributesInRegistry(EntityId, Snapshot);
+    return SyncAttributesInRegistry(EntityId, Snapshot);
 }
 
-void NgxCodeComponentRuntime::UpdateAttributeInRegistry(uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute)
+bool NgxCodeComponentRuntime::UpdateAttributeInRegistry(uint64_t EntityId, const std::string& Key, const csp::multiplayer::CodeAttribute& Attribute)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string AttributeLiteral = BuildAttributeValueLiteral(Attribute);
@@ -2190,17 +2204,17 @@ void NgxCodeComponentRuntime::UpdateAttributeInRegistry(uint64_t EntityId, const
                                 "    globalThis.scriptRegistry.updateAttributeForEntity('"
         + EscapeJSStringLiteral(EntityIdString) + "', '" + EscapeJSStringLiteral(Key) + "', " + AttributeLiteral + ");\n" + "}\n";
 
-    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-update>");
+    return ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-update>");
 }
 
-void NgxCodeComponentRuntime::RemoveEntityFromRegistry(uint64_t EntityId)
+bool NgxCodeComponentRuntime::RemoveEntityFromRegistry(uint64_t EntityId)
 {
     const std::string EntityIdString = std::to_string(EntityId);
     const std::string Snippet = "if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.removeCodeComponent === 'function') {\n"
                                 "    globalThis.scriptRegistry.removeCodeComponent('"
         + EscapeJSStringLiteral(EntityIdString) + "');\n" + "}\n";
 
-    ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-remove>");
+    return ExecuteRegistrySnippet(Snippet, "<ngx-codecomponent-remove>");
 }
 
 } // namespace csp::systems

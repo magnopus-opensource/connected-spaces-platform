@@ -382,6 +382,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , SessionGeneration(0)
     , ContextGeneration(0)
     , ScriptModulesLoaded(false)
+    , LastEvaluationDeferred(false)
     , UIRuntime(std::make_unique<NgxUIRuntime>(InLogSystem))
     , bAssetDetailBlobChangedListenerRegistered(false)
     , GcTickCounter(0)
@@ -1736,7 +1737,20 @@ bool NgxScriptSystem::IsGenerationCurrent(uint64_t Generation) const { return Se
 
 bool NgxScriptSystem::EvaluateGlobalScript(const std::string& ScriptText, const char* DebugName)
 {
+#ifdef CSP_WASM
+    // Registry/bootstrap sync during foundation tick should never stall the browser
+    // thread waiting for other script work to finish. If the context is busy, let
+    // the caller retry on a later tick instead of hard-freezing startup.
+    std::unique_lock<std::mutex> ContextLock(ContextMutex, std::defer_lock);
+    if (!ContextLock.try_lock())
+    {
+        LastEvaluationDeferred.store(true);
+        return false;
+    }
+#else
     std::scoped_lock ContextLock(ContextMutex);
+#endif
+    LastEvaluationDeferred.store(false);
     if (!Context)
     {
         return false;
@@ -1782,7 +1796,17 @@ bool NgxScriptSystem::EvaluateGlobalScript(const std::string& ScriptText, const 
 
 bool NgxScriptSystem::EvaluateModuleScript(const std::string& ScriptText, const char* DebugName)
 {
+#ifdef CSP_WASM
+    std::unique_lock<std::mutex> ContextLock(ContextMutex, std::defer_lock);
+    if (!ContextLock.try_lock())
+    {
+        LastEvaluationDeferred.store(true);
+        return false;
+    }
+#else
     std::scoped_lock ContextLock(ContextMutex);
+#endif
+    LastEvaluationDeferred.store(false);
     if (!Context)
     {
         return false;
@@ -1858,6 +1882,8 @@ void NgxScriptSystem::PumpPendingJobs() { DrainPendingJobs(); }
 bool NgxScriptSystem::AreScriptModulesLoaded() const { return ScriptModulesLoaded.load(); }
 
 uint64_t NgxScriptSystem::GetContextGeneration() const { return ContextGeneration.load(); }
+
+bool NgxScriptSystem::WasLastEvaluationDeferred() const { return LastEvaluationDeferred.load(); }
 
 bool NgxScriptSystem::TickAnimationFrame(double TimestampMs)
 {
