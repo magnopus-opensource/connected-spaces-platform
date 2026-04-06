@@ -343,6 +343,8 @@ std::string BuildAttributeValueLiteral(const csp::multiplayer::CodeAttribute& At
         return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.EntityQueryValue));
     case csp::multiplayer::CodePropertyType::ModelAsset:
         return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.ModelAssetValue));
+    case csp::multiplayer::CodePropertyType::ImageAsset:
+        return BuildReplicatedValueLiteral(csp::common::ReplicatedValue(Attribute.ImageAssetValue));
     default:
         return "undefined";
     }
@@ -396,6 +398,17 @@ const codeComponents = new Map();
 
 export const useEffect = (callback) => {
     const entityId = globalThis.__cspCurrentEntityId;
+    if (globalThis.__cspUiRenderActive && entityId && codeComponents.has(entityId)) {
+        const entry = codeComponents.get(entityId);
+        const slotIndex = typeof entry.uiEffectCursor === 'number' ? entry.uiEffectCursor : 0;
+        entry.uiEffectCursor = slotIndex + 1;
+        if (!Array.isArray(entry.pendingUiEffectCallbacks)) {
+            entry.pendingUiEffectCallbacks = [];
+        }
+        entry.pendingUiEffectCallbacks[slotIndex] = callback;
+        return () => {};
+    }
+
     const dispose = effect(() => {
         const previousEntityId = globalThis.__cspCurrentEntityId;
         globalThis.__cspCurrentEntityId = entityId;
@@ -414,6 +427,7 @@ export const useEffect = (callback) => {
 export function createScriptRegistry() {
     codeComponents.clear();
     const pendingSchemaSyncs = new Set();
+    const pendingModuleActivations = new Set();
     const pendingUIFlushes = new Set();
     let isDestroying = false;
 
@@ -479,6 +493,10 @@ export function createScriptRegistry() {
             return 'modelAsset';
         }
 
+        if (lower === 'imageasset' || lower === 'image_asset') {
+            return 'imageAsset';
+        }
+
         return null;
     }
 
@@ -524,6 +542,14 @@ export function createScriptRegistry() {
             }
 
             return typeof value.assetCollectionId === 'string' && typeof value.assetId === 'string';
+        }
+
+        if (type === 'imageAsset') {
+            if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+                return false;
+            }
+
+            return typeof value.assetCollectionId === 'string' && typeof value.imageAssetId === 'string';
         }
 
         return false;
@@ -659,6 +685,40 @@ export function createScriptRegistry() {
         return result;
     }
 
+    function getBuiltInDefaultValue(type) {
+        if (type === 'boolean') {
+            return false;
+        }
+
+        if (type === 'integer' || type === 'float') {
+            return 0;
+        }
+
+        if (type === 'string') {
+            return '';
+        }
+
+        if (type === 'entity') {
+            return { id: '' };
+        }
+
+        if (type === 'modelAsset') {
+            return {
+                assetCollectionId: '',
+                assetId: '',
+            };
+        }
+
+        if (type === 'imageAsset') {
+            return {
+                assetCollectionId: '',
+                imageAssetId: '',
+            };
+        }
+
+        return undefined;
+    }
+
     function reconcileAttributes(entityId, schema, incomingAttributes, previousAttributes) {
         const incoming = cloneAttributes(incomingAttributes);
         const previous = cloneAttributes(previousAttributes);
@@ -700,6 +760,12 @@ export function createScriptRegistry() {
 
             if (rule.hasDefault) {
                 next[key] = cloneValue(rule.defaultValue);
+                continue;
+            }
+
+            const builtInDefault = getBuiltInDefaultValue(rule.type);
+            if (typeof builtInDefault !== 'undefined') {
+                next[key] = cloneValue(builtInDefault);
             }
         }
 
@@ -1190,7 +1256,11 @@ export function createScriptRegistry() {
             }
 
             const previousEntityId = globalThis.__cspCurrentEntityId;
+            const previousUiRenderActive = globalThis.__cspUiRenderActive;
+            entry.uiEffectCursor = 0;
+            entry.pendingUiEffectCallbacks = [];
             globalThis.__cspCurrentEntityId = entityId;
+            globalThis.__cspUiRenderActive = true;
             try {
                 const nextHandlers = new Map();
                 const rawTree = entry.module.ui({ attributes: entry.signalAttributes, thisEntity: entry.thisEntitySignal, entityId });
@@ -1206,6 +1276,8 @@ export function createScriptRegistry() {
                 console.error(`NgxCodeComponentRuntime: ui() failed for entity ${entityId}`, error);
                 queueUIFlush(entityId, entry, null, new Map());
             } finally {
+                reconcileUiEffects(entityId, entry);
+                globalThis.__cspUiRenderActive = previousUiRenderActive;
                 globalThis.__cspCurrentEntityId = previousEntityId;
             }
         });
@@ -1227,6 +1299,7 @@ export function createScriptRegistry() {
         pendingUIFlushes.delete(entityId);
         entry.uiDirty = false;
         entry.pendingUITreeJson = null;
+        disposeUiEffects(entry);
         clearUIHandlers(entry);
         unmountUI(entityId);
     }
@@ -1280,6 +1353,80 @@ export function createScriptRegistry() {
                 console.error('NgxCodeComponentRuntime: effect dispose failed', e);
             }
         }
+    }
+
+    function disposeUiEffects(entry) {
+        if (!entry) {
+            return;
+        }
+
+        const slots = Array.isArray(entry.uiEffects) ? [...entry.uiEffects] : [];
+        entry.uiEffects = [];
+        entry.pendingUiEffectCallbacks = [];
+        entry.uiEffectCursor = 0;
+
+        for (const slot of slots) {
+            if (!slot || typeof slot.dispose !== 'function') {
+                continue;
+            }
+
+            try {
+                slot.dispose();
+            } catch (e) {
+                console.error('NgxCodeComponentRuntime: ui effect dispose failed', e);
+            }
+        }
+    }
+
+    function reconcileUiEffects(entityId, entry) {
+        if (!entry) {
+            return;
+        }
+
+        const nextCallbacks = Array.isArray(entry.pendingUiEffectCallbacks) ? entry.pendingUiEffectCallbacks : [];
+        const previousSlots = Array.isArray(entry.uiEffects) ? entry.uiEffects : [];
+        const nextSlots = [];
+
+        for (let index = 0; index < nextCallbacks.length; index += 1) {
+            const callback = nextCallbacks[index];
+            const previousSlot = previousSlots[index];
+
+            if (previousSlot && typeof previousSlot.dispose === 'function') {
+                previousSlot.callback = callback;
+                nextSlots.push(previousSlot);
+                continue;
+            }
+
+            const slot = { callback, dispose: null };
+            slot.dispose = effect(() => {
+                const previousEntityId = globalThis.__cspCurrentEntityId;
+                globalThis.__cspCurrentEntityId = entityId;
+                try {
+                    return slot.callback();
+                } finally {
+                    globalThis.__cspCurrentEntityId = previousEntityId;
+                }
+            });
+
+            nextSlots.push(slot);
+        }
+
+        for (let index = nextCallbacks.length; index < previousSlots.length; index += 1) {
+            const previousSlot = previousSlots[index];
+            if (!previousSlot || typeof previousSlot.dispose !== 'function') {
+                continue;
+            }
+
+            try {
+                previousSlot.dispose();
+            } catch (e) {
+                console.error('NgxCodeComponentRuntime: ui effect dispose failed', e);
+            }
+        }
+
+        entry.uiEffects = nextSlots;
+        entry.pendingUiEffectCallbacks = [];
+        entry.uiEffectCursor = 0;
     }
 
     function removeInputListenersForEntity(entityId) {
@@ -1352,6 +1499,25 @@ export function createScriptRegistry() {
         }
     }
 
+    function activateImportedModule(entityId, entry) {
+        if (!entry || !entry.module || entry.isDisposing || isDestroying) {
+            return;
+        }
+
+        if (entry.pendingSchemaSync) {
+            syncCodeComponentSchema(entityId);
+            pendingSchemaSyncs.add(entityId);
+        }
+
+        entry.attributes = reconcileAttributes(entityId, entry.schema, entry.attributes, entry.attributes);
+        entry.signalAttributes = createSignalAttributes(entry, entityId);
+        ensureThisEntitySignal(entityId, entry);
+        entry.initialized = true;
+
+        initializeScript(entityId, entry);
+        startUIRuntime(entityId, entry);
+    }
+
     // --- Module import with retry ---
 
     function tryImportCodeComponentModule(entityId, entry, reason = 'unspecified') {
@@ -1381,6 +1547,7 @@ export function createScriptRegistry() {
                 current.retryDelayFrames = 1;
                 current.retryCountdown = 0;
                 current.hasWarnedMissingModule = false;
+                current.activationFailed = false;
                 current.module = moduleRef;
 
                 // If reinitializing (e.g. after a hot-reload), tear down any
@@ -1393,19 +1560,7 @@ export function createScriptRegistry() {
                     current.isDisposing = false;
                     current.initialized = false;
                 }
-
-                if (current.pendingSchemaSync) {
-                    syncCodeComponentSchema(entityId);
-                    pendingSchemaSyncs.add(entityId);
-                }
-
-                current.attributes = reconcileAttributes(entityId, current.schema, current.attributes, current.attributes);
-                current.signalAttributes = createSignalAttributes(current, entityId);
-                ensureThisEntitySignal(entityId, current);
-                current.initialized = true;
-
-                initializeScript(entityId, current);
-                startUIRuntime(entityId, current);
+                pendingModuleActivations.add(entityId);
             })
             .catch((error) => {
                 const current = codeComponents.get(entityId);
@@ -1439,6 +1594,10 @@ export function createScriptRegistry() {
         const entry = codeComponents.get(entityId);
         if (!entry) {
             return {};
+        }
+
+        if (entry.activationFailed) {
+            return buildSchemaMetadata(entry.schema);
         }
 
         if (!entry.module) {
@@ -1477,6 +1636,7 @@ export function createScriptRegistry() {
             stopUIRuntime(entityId, existing);
             disposeAllEffects(existing);
             existing.thisEntitySignal = null;
+            pendingModuleActivations.delete(entityId);
             codeComponents.delete(entityId);
         }
 
@@ -1495,12 +1655,16 @@ export function createScriptRegistry() {
             retryDelayFrames: 1,
             retryCountdown: 0,
             hasWarnedMissingModule: false,
+            activationFailed: false,
             entityRefStates: {},
             effects: [],
             uiDispose: null,
             uiHandlers: new Map(),
             pendingUIHandlers: new Map(),
             pendingUITreeJson: null,
+            uiEffects: [],
+            pendingUiEffectCallbacks: [],
+            uiEffectCursor: 0,
             uiDirty: false,
             isDisposing: false,
         };
@@ -1522,6 +1686,10 @@ export function createScriptRegistry() {
             return {};
         }
 
+        if (entry.activationFailed) {
+            return cloneAttributes(entry.attributes);
+        }
+
         const previousAttributes = cloneAttributes(entry.attributes);
         entry.attributes = reconcileAttributes(entityId, entry.schema, attributes, previousAttributes);
 
@@ -1535,6 +1703,10 @@ export function createScriptRegistry() {
     function updateAttributeForEntity(entityId, key, value) {
         const entry = codeComponents.get(entityId);
         if (!entry) {
+            return;
+        }
+
+        if (entry.activationFailed) {
             return;
         }
 
@@ -1581,11 +1753,31 @@ export function createScriptRegistry() {
         runScriptTeardown(entityId, entry, 'remove');
         disposeAllEffects(entry);
         entry.thisEntitySignal = null;
+        pendingModuleActivations.delete(entityId);
         codeComponents.delete(entityId);
     }
 
     function tick() {
         for (const [entityId, entry] of codeComponents) {
+            if (pendingModuleActivations.has(entityId)) {
+                pendingModuleActivations.delete(entityId);
+                try {
+                    activateImportedModule(entityId, entry);
+                } catch (error) {
+                    entry.activationFailed = true;
+                    const scriptPath = entry && entry.scriptAssetPath ? entry.scriptAssetPath : '<unknown>';
+                    const detail = error instanceof Error
+                        ? (typeof error.stack === 'string' && error.stack.length > 0 ? error.stack : String(error))
+                        : String(error);
+                    console.error(`NgxCodeComponentRuntime: module activation failed for entity ${entityId} (${scriptPath})\n${detail}`);
+                    continue;
+                }
+            }
+
+            if (entry.activationFailed) {
+                continue;
+            }
+
             if (!entry.module && typeof entry.scriptAssetPath === 'string' && entry.scriptAssetPath.length > 0) {
                 if (entry.importInFlight) {
                     continue;
@@ -1629,6 +1821,7 @@ export function createScriptRegistry() {
         }
         codeComponents.clear();
         pendingSchemaSyncs.clear();
+        pendingModuleActivations.clear();
         pendingUIFlushes.clear();
         isDestroying = false;
     }

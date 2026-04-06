@@ -184,6 +184,179 @@ bool ApplyPatch(csp::systems::Material& Material, const csp::systems::RuntimeMat
     return false;
 }
 
+bool TryGetTextureInfo(const csp::systems::Material& Material, csp::systems::RuntimeMaterialTextureSlot Slot, csp::systems::TextureInfo& OutTextureInfo)
+{
+    if (Material.GetShaderType() == csp::systems::EShaderType::Standard)
+    {
+        const auto* GLTF = static_cast<const csp::systems::GLTFMaterial*>(&Material);
+        switch (Slot)
+        {
+        case csp::systems::RuntimeMaterialTextureSlot::BaseColor:
+            OutTextureInfo = GLTF->GetBaseColorTexture();
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::MetallicRoughness:
+            OutTextureInfo = GLTF->GetMetallicRoughnessTexture();
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Normal:
+            OutTextureInfo = GLTF->GetNormalTexture();
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Occlusion:
+            OutTextureInfo = GLTF->GetOcclusionTexture();
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Emissive:
+            OutTextureInfo = GLTF->GetEmissiveTexture();
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Color:
+            return false;
+        }
+    }
+
+    if (Material.GetShaderType() == csp::systems::EShaderType::AlphaVideo)
+    {
+        const auto* AlphaVideo = static_cast<const csp::systems::AlphaVideoMaterial*>(&Material);
+        switch (Slot)
+        {
+        case csp::systems::RuntimeMaterialTextureSlot::Color:
+            OutTextureInfo = AlphaVideo->GetColorTexture();
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    return false;
+}
+
+bool SetTextureInfo(csp::systems::Material& Material, csp::systems::RuntimeMaterialTextureSlot Slot, const csp::systems::TextureInfo& TextureInfo)
+{
+    if (Material.GetShaderType() == csp::systems::EShaderType::Standard)
+    {
+        auto* GLTF = static_cast<csp::systems::GLTFMaterial*>(&Material);
+        switch (Slot)
+        {
+        case csp::systems::RuntimeMaterialTextureSlot::BaseColor:
+            GLTF->SetBaseColorTexture(TextureInfo);
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::MetallicRoughness:
+            GLTF->SetMetallicRoughnessTexture(TextureInfo);
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Normal:
+            GLTF->SetNormalTexture(TextureInfo);
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Occlusion:
+            GLTF->SetOcclusionTexture(TextureInfo);
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Emissive:
+            GLTF->SetEmissiveTexture(TextureInfo);
+            return true;
+        case csp::systems::RuntimeMaterialTextureSlot::Color:
+            return false;
+        }
+    }
+
+    if (Material.GetShaderType() == csp::systems::EShaderType::AlphaVideo)
+    {
+        auto* AlphaVideo = static_cast<csp::systems::AlphaVideoMaterial*>(&Material);
+        switch (Slot)
+        {
+        case csp::systems::RuntimeMaterialTextureSlot::Color:
+            AlphaVideo->SetColorTexture(TextureInfo);
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    return false;
+}
+
+bool ApplyTexturePatch(csp::systems::Material& Material, csp::systems::RuntimeMaterialTextureSlot Slot, const csp::systems::RuntimeMaterialTexturePatch& Patch)
+{
+    csp::systems::TextureInfo TextureInfo;
+    if (!TryGetTextureInfo(Material, Slot, TextureInfo))
+    {
+        return false;
+    }
+
+    const bool bHasAnyPatch = Patch.HasIsSet || Patch.HasSourceType || Patch.HasAssetCollectionId || Patch.HasAssetId || Patch.HasEntityComponentId
+        || Patch.HasUVOffset || Patch.HasUVScale || Patch.HasUVRotation || Patch.HasTexCoord || Patch.HasStereoVideoType || Patch.HasIsStereoFlipped;
+    if (!bHasAnyPatch)
+    {
+        return false;
+    }
+
+    auto SourceType = TextureInfo.GetSourceType();
+    csp::common::String AssetCollectionId = TextureInfo.GetAssetCollectionId();
+    csp::common::String AssetId = TextureInfo.GetAssetId();
+    csp::common::String EntityComponentId = TextureInfo.GetEntityComponentId();
+
+    if (Patch.HasSourceType)
+    {
+        if ((Patch.SourceType < static_cast<int32_t>(csp::systems::ETextureResourceType::Component))
+            || (Patch.SourceType > static_cast<int32_t>(csp::systems::ETextureResourceType::ImageAsset)))
+        {
+            return false;
+        }
+
+        SourceType = static_cast<csp::systems::ETextureResourceType>(Patch.SourceType);
+    }
+
+    if (Patch.HasAssetCollectionId)
+    {
+        AssetCollectionId = Patch.AssetCollectionId;
+    }
+
+    if (Patch.HasAssetId)
+    {
+        AssetId = Patch.AssetId;
+    }
+
+    if (Patch.HasEntityComponentId)
+    {
+        EntityComponentId = Patch.EntityComponentId;
+    }
+
+    if (SourceType == csp::systems::ETextureResourceType::ImageAsset)
+    {
+        TextureInfo.SetCollectionAndAssetId(AssetCollectionId, AssetId);
+    }
+    else
+    {
+        TextureInfo.SetEntityComponentId(EntityComponentId);
+    }
+
+    if (Patch.HasUVOffset)
+    {
+        TextureInfo.SetUVOffset(Patch.UVOffset);
+    }
+    if (Patch.HasUVScale)
+    {
+        TextureInfo.SetUVScale(Patch.UVScale);
+    }
+    if (Patch.HasUVRotation)
+    {
+        TextureInfo.SetUVRotation(Patch.UVRotation);
+    }
+    if (Patch.HasTexCoord)
+    {
+        TextureInfo.SetTexCoord(Patch.TexCoord);
+    }
+    if (Patch.HasStereoVideoType)
+    {
+        TextureInfo.SetStereoVideoType(static_cast<csp::multiplayer::StereoVideoType>(Patch.StereoVideoType));
+    }
+    if (Patch.HasIsStereoFlipped)
+    {
+        TextureInfo.SetIsStereoFlipped(Patch.IsStereoFlipped);
+    }
+    if (Patch.HasIsSet)
+    {
+        TextureInfo.SetTexture(Patch.IsSet);
+    }
+
+    return SetTextureInfo(Material, Slot, TextureInfo);
+}
+
 } // namespace
 
 namespace csp::systems
@@ -589,6 +762,64 @@ bool RuntimeMaterialSystem::PatchHandle(const csp::common::String& Handle, const
             }
 
             bPatched = ApplyPatch(*GlobalIt->second, Patch);
+            if (bPatched)
+            {
+                Callback = State.ChangedCallback;
+                MaterialId = Handle;
+            }
+        }
+    }
+
+    if (bPatched && Callback)
+    {
+        Callback(MaterialId, EntityId, ComponentType, ComponentIndex, MaterialPath);
+    }
+
+    return bPatched;
+}
+
+bool RuntimeMaterialSystem::PatchTextureHandle(
+    const csp::common::String& Handle, RuntimeMaterialTextureSlot Slot, const RuntimeMaterialTexturePatch& Patch)
+{
+    if (Handle.IsEmpty())
+    {
+        return false;
+    }
+
+    auto& State = *ImplData;
+    RuntimeMaterialChangedCallbackHandler Callback;
+    csp::common::String MaterialId;
+    csp::common::String MaterialPath;
+    uint64_t EntityId = 0;
+    int32_t ComponentType = -1;
+    int32_t ComponentIndex = -1;
+    bool bPatched = false;
+
+    {
+        std::scoped_lock Lock(State.Mutex);
+
+        if (auto BindingIt = State.Bindings.find(Handle.c_str()); BindingIt != State.Bindings.end() && BindingIt->second.Live)
+        {
+            bPatched = ApplyTexturePatch(*BindingIt->second.Live, Slot, Patch);
+            if (bPatched)
+            {
+                Callback = State.ChangedCallback;
+                MaterialId = BindingIt->second.MaterialId;
+                MaterialPath = BindingIt->second.MaterialPath;
+                EntityId = BindingIt->second.EntityId;
+                ComponentType = BindingIt->second.ComponentType;
+                ComponentIndex = BindingIt->second.ComponentIndex;
+            }
+        }
+        else
+        {
+            auto GlobalIt = State.GlobalLive.find(Handle.c_str());
+            if (GlobalIt == State.GlobalLive.end() || !GlobalIt->second)
+            {
+                return false;
+            }
+
+            bPatched = ApplyTexturePatch(*GlobalIt->second, Slot, Patch);
             if (bPatched)
             {
                 Callback = State.ChangedCallback;

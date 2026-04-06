@@ -44,6 +44,16 @@ enum class RuntimeMaterialStatus
     Resolved
 };
 
+enum class RuntimeMaterialTextureSlot
+{
+    BaseColor,
+    MetallicRoughness,
+    Normal,
+    Occlusion,
+    Emissive,
+    Color
+};
+
 struct RuntimeMaterialState
 {
     RuntimeMaterialStatus Status = RuntimeMaterialStatus::Missing;
@@ -104,6 +114,42 @@ struct RuntimeMaterialPatch
     int32_t ReadAlphaFromChannel = 0;
 };
 
+struct RuntimeMaterialTexturePatch
+{
+    bool HasIsSet = false;
+    bool IsSet = false;
+
+    bool HasSourceType = false;
+    int32_t SourceType = 0;
+
+    bool HasAssetCollectionId = false;
+    csp::common::String AssetCollectionId;
+
+    bool HasAssetId = false;
+    csp::common::String AssetId;
+
+    bool HasEntityComponentId = false;
+    csp::common::String EntityComponentId;
+
+    bool HasUVOffset = false;
+    csp::common::Vector2 UVOffset = csp::common::Vector2::Zero();
+
+    bool HasUVScale = false;
+    csp::common::Vector2 UVScale = csp::common::Vector2::Zero();
+
+    bool HasUVRotation = false;
+    float UVRotation = 0.0f;
+
+    bool HasTexCoord = false;
+    int32_t TexCoord = 0;
+
+    bool HasStereoVideoType = false;
+    int32_t StereoVideoType = 0;
+
+    bool HasIsStereoFlipped = false;
+    bool IsStereoFlipped = false;
+};
+
 typedef std::function<void(const csp::common::String& MaterialId, uint64_t EntityId, int32_t ComponentType, int32_t ComponentIndex,
     const csp::common::String& MaterialPath)> RuntimeMaterialChangedCallbackHandler;
 
@@ -126,6 +172,8 @@ public:
     CSP_NO_EXPORT RuntimeMaterialState ResolveForBinding(uint64_t EntityId, csp::multiplayer::ComponentType ComponentType, int32_t ComponentIndex,
         const csp::common::String& MaterialPath, const csp::common::String& MaterialId);
     CSP_NO_EXPORT bool PatchHandle(const csp::common::String& Handle, const RuntimeMaterialPatch& Patch);
+    CSP_NO_EXPORT bool PatchTextureHandle(
+        const csp::common::String& Handle, RuntimeMaterialTextureSlot Slot, const RuntimeMaterialTexturePatch& Patch);
     CSP_NO_EXPORT bool ResetHandle(const csp::common::String& Handle);
     CSP_NO_EXPORT bool SaveHandle(const csp::common::String& Handle);
 

@@ -365,7 +365,7 @@ public:
     {
         if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID)
         {
-            System->DrainPendingJobs();
+            System->PumpPendingJobs();
         }
     }
 
@@ -383,6 +383,7 @@ NgxScriptSystem::NgxScriptSystem(csp::common::LogSystem& InLogSystem)
     , ContextGeneration(0)
     , ScriptModulesLoaded(false)
     , LastEvaluationDeferred(false)
+    , PendingJobPumpActive(false)
     , UIRuntime(std::make_unique<NgxUIRuntime>(InLogSystem))
     , bAssetDetailBlobChangedListenerRegistered(false)
     , GcTickCounter(0)
@@ -731,10 +732,11 @@ void NgxScriptSystem::SetUITextMeasureCallback(UITextMeasureCallback InCallback)
         return;
     }
 
-    UIRuntime->SetTextMeasureCallback([InCallback = std::move(InCallback)](const csp::common::String& Text, float FontSize) {
+    UIRuntime->SetTextMeasureCallback(
+        [InCallback = std::move(InCallback)](const csp::common::String& Text, float FontSize, const csp::common::String& FontWeight) {
         float Width = 0.0f;
         float Height = 0.0f;
-        InCallback(Text, FontSize, Width, Height);
+        InCallback(Text, FontSize, FontWeight, Width, Height);
         return csp::common::Vector2(Width, Height);
     });
 }
@@ -1462,7 +1464,7 @@ globalThis.__cspDispatchMouseEvent = (event) => {
 
 void NgxScriptSystem::DrainPendingJobs()
 {
-    static constexpr int32_t MAX_PENDING_JOBS_PER_PUMP = 1000;
+    static constexpr int32_t MAX_PENDING_JOBS_PER_PUMP = 64;
 
 #ifdef CSP_WASM
     // Never block the browser thread waiting for another script operation to
@@ -1877,7 +1879,17 @@ bool NgxScriptSystem::EvaluateSnippet(const csp::common::String& ScriptText, con
     return EvaluateGlobalScript(ScriptText.c_str(), DebugNameValue);
 }
 
-void NgxScriptSystem::PumpPendingJobs() { DrainPendingJobs(); }
+void NgxScriptSystem::PumpPendingJobs()
+{
+    bool bExpectedInactive = false;
+    if (!PendingJobPumpActive.compare_exchange_strong(bExpectedInactive, true))
+    {
+        return;
+    }
+
+    DrainPendingJobs();
+    PendingJobPumpActive.store(false);
+}
 
 bool NgxScriptSystem::AreScriptModulesLoaded() const { return ScriptModulesLoaded.load(); }
 
@@ -2095,11 +2107,8 @@ bool NgxScriptSystem::AddCodeComponent(const csp::common::String& EntityId, cons
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-add-bridge>"))
     {
-        PumpPendingJobs();
         return false;
     }
-
-    PumpPendingJobs();
 
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)
@@ -2251,11 +2260,8 @@ bool NgxScriptSystem::UpdateAttributeForEntity(
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-update-attribute-bridge>"))
     {
-        PumpPendingJobs();
         return false;
     }
-
-    PumpPendingJobs();
 
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)
@@ -2300,11 +2306,8 @@ bool NgxScriptSystem::RemoveCodeComponent(const csp::common::String& EntityId)
 
     if (!EvaluateSnippet(Snippet.c_str(), "<ngx-codecomponent-remove-bridge>"))
     {
-        PumpPendingJobs();
         return false;
     }
-
-    PumpPendingJobs();
 
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)

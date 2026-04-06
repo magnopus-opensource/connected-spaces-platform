@@ -22,13 +22,19 @@
 #include "CSP/Multiplayer/Components/CodeSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Assets/Asset.h"
+#include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/GLTFMaterial.h"
+#include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
+#include "CSP/Systems/Assets/TextureInfo.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Events/EventId.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EntityQueryUtils.h"
 #include "Multiplayer/NgxScript/NgxCodeComponentRuntime.h"
 #include "Multiplayer/NgxScript/NgxScriptSystem.h"
+#include "Multiplayer/Script/RuntimeMaterialScriptInterface.h"
+#include "Multiplayer/Script/RuntimeMaterialTextureScriptInterface.h"
 #include "TestHelpers.h"
 
 #include <rapidjson/document.h>
@@ -186,6 +192,29 @@ csp::multiplayer::CodeAttribute::EntityQueryValueType BuildNameEntityQuery(const
     Query["kind"] = "name";
     Query["name"] = Name;
     return Query;
+}
+
+csp::multiplayer::CodeAttribute::ImageAssetValueType BuildImageAssetValue(
+    const csp::common::String& AssetCollectionId, const csp::common::String& ImageAssetId)
+{
+    csp::multiplayer::CodeAttribute::ImageAssetValueType Value;
+    Value["assetCollectionId"] = AssetCollectionId;
+    Value["imageAssetId"] = ImageAssetId;
+    return Value;
+}
+
+const csp::multiplayer::NgxScriptAttribute* FindScriptAttributeByName(
+    const csp::common::List<csp::multiplayer::NgxScriptAttribute>& Attributes, const char* Name)
+{
+    for (size_t Index = 0; Index < Attributes.Size(); ++Index)
+    {
+        if (Attributes[Index].Name == Name)
+        {
+            return &Attributes[Index];
+        }
+    }
+
+    return nullptr;
 }
 
 std::string BuildTagQueryJson(const char* Tag)
@@ -891,6 +920,261 @@ CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeEntityQueryRejec
         csp::common::ReplicatedValue(InvalidSerializedAttribute), ParsedAttribute));
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeImageAssetRoundtripSerializesAndDeserializes)
+{
+    const auto ImageAsset = BuildImageAssetValue("museum-assets", "hero");
+    const csp::multiplayer::CodeAttribute SourceAttribute = csp::multiplayer::CodeAttribute::FromImageAsset(ImageAsset);
+
+    EXPECT_EQ(SourceAttribute.Type, csp::multiplayer::CodePropertyType::ImageAsset);
+
+    csp::multiplayer::CodeAttribute ParsedAttribute;
+    EXPECT_TRUE(csp::multiplayer::CodeAttribute::TryFromReplicatedValue(SourceAttribute.ToReplicatedValue(), ParsedAttribute));
+    EXPECT_EQ(ParsedAttribute.Type, csp::multiplayer::CodePropertyType::ImageAsset);
+    EXPECT_EQ(ParsedAttribute.GetImageAssetValue()["assetCollectionId"].GetString(), "museum-assets");
+    EXPECT_EQ(ParsedAttribute.GetImageAssetValue()["imageAssetId"].GetString(), "hero");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeAttributeImageAssetRejectsInvalidPayload)
+{
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> InvalidImageAsset;
+    InvalidImageAsset["assetCollectionId"] = "museum-assets";
+    InvalidImageAsset["assetId"] = "hero";
+
+    csp::common::Map<csp::common::String, csp::common::ReplicatedValue> InvalidSerializedAttribute;
+    InvalidSerializedAttribute["type"] = static_cast<int64_t>(csp::multiplayer::CodePropertyType::ImageAsset);
+    InvalidSerializedAttribute["imageAssetValue"] = InvalidImageAsset;
+
+    csp::multiplayer::CodeAttribute ParsedAttribute;
+    EXPECT_FALSE(csp::multiplayer::CodeAttribute::TryFromReplicatedValue(
+        csp::common::ReplicatedValue(InvalidSerializedAttribute), ParsedAttribute));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeSpaceComponentScriptAttributesExposeImageAssetDefaults)
+{
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+
+    CodeComponent->SetSchema(R"({
+        "poster": { "type": "imageAsset", "default": { "assetCollectionId": "museum-assets", "imageAssetId": "hero" } },
+        "thumbnail": { "type": "imageAsset" }
+    })");
+
+    const auto Attributes = CodeComponent->GetScriptAttributes();
+    const auto* Poster = FindScriptAttributeByName(Attributes, "poster");
+    const auto* Thumbnail = FindScriptAttributeByName(Attributes, "thumbnail");
+
+    ASSERT_NE(Poster, nullptr);
+    ASSERT_NE(Thumbnail, nullptr);
+    EXPECT_EQ(Poster->Type, csp::multiplayer::ScriptAttributeType::ImageAsset);
+    EXPECT_EQ(Poster->Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::StringMap);
+    EXPECT_EQ(Poster->Value.GetStringMap()["assetCollectionId"].GetString(), "museum-assets");
+    EXPECT_EQ(Poster->Value.GetStringMap()["imageAssetId"].GetString(), "hero");
+
+    EXPECT_EQ(Thumbnail->Type, csp::multiplayer::ScriptAttributeType::ImageAsset);
+    EXPECT_EQ(Thumbnail->Value.GetReplicatedValueType(), csp::common::ReplicatedValueType::StringMap);
+    EXPECT_EQ(Thumbnail->Value.GetStringMap()["assetCollectionId"].GetString(), "");
+    EXPECT_EQ(Thumbnail->Value.GetStringMap()["imageAssetId"].GetString(), "");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RuntimeMaterialSystemTexturePatchSupportsAllSlotsAndChangedCallback)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::RuntimeMaterialSystem RuntimeMaterialSystem(LogSystem);
+
+    csp::systems::GLTFMaterial Material("CRT", "materials", "crt-material");
+    Material.SetBaseColorTexture(csp::systems::TextureInfo("collection-a", "base"));
+    Material.SetMetallicRoughnessTexture(csp::systems::TextureInfo("collection-a", "metallic"));
+    Material.SetNormalTexture(csp::systems::TextureInfo("collection-a", "normal"));
+    Material.SetOcclusionTexture(csp::systems::TextureInfo("collection-a", "occlusion"));
+    Material.SetEmissiveTexture(csp::systems::TextureInfo("collection-a", "emissive"));
+    RuntimeMaterialSystem.SetGLTFForTesting("crt-material", "materials", Material);
+
+    int32_t ChangedCount = 0;
+    csp::common::String LastMaterialId;
+    RuntimeMaterialSystem.SetChangedCallback(
+        [&ChangedCount, &LastMaterialId](const csp::common::String& MaterialId, uint64_t, int32_t, int32_t, const csp::common::String&)
+        {
+            ++ChangedCount;
+            LastMaterialId = MaterialId;
+        });
+
+    const auto State = RuntimeMaterialSystem.Resolve("crt-material");
+    ASSERT_EQ(State.Status, csp::systems::RuntimeMaterialStatus::Resolved);
+
+    struct SlotUpdate
+    {
+        csp::systems::RuntimeMaterialTextureSlot Slot;
+        const char* AssetId;
+    };
+
+    const SlotUpdate Updates[] = {
+        { csp::systems::RuntimeMaterialTextureSlot::BaseColor, "base-updated" },
+        { csp::systems::RuntimeMaterialTextureSlot::MetallicRoughness, "metallic-updated" },
+        { csp::systems::RuntimeMaterialTextureSlot::Normal, "normal-updated" },
+        { csp::systems::RuntimeMaterialTextureSlot::Occlusion, "occlusion-updated" },
+        { csp::systems::RuntimeMaterialTextureSlot::Emissive, "emissive-updated" },
+    };
+
+    for (const auto& Update : Updates)
+    {
+        csp::systems::RuntimeMaterialTexturePatch Patch;
+        Patch.HasIsSet = true;
+        Patch.IsSet = true;
+        Patch.HasSourceType = true;
+        Patch.SourceType = static_cast<int32_t>(csp::systems::ETextureResourceType::ImageAsset);
+        Patch.HasAssetCollectionId = true;
+        Patch.AssetCollectionId = "collection-b";
+        Patch.HasAssetId = true;
+        Patch.AssetId = Update.AssetId;
+        Patch.HasUVOffset = true;
+        Patch.UVOffset = csp::common::Vector2(0.25f, 0.5f);
+        Patch.HasUVScale = true;
+        Patch.UVScale = csp::common::Vector2(1.5f, 2.0f);
+        Patch.HasUVRotation = true;
+        Patch.UVRotation = 0.75f;
+        Patch.HasTexCoord = true;
+        Patch.TexCoord = 2;
+        EXPECT_TRUE(RuntimeMaterialSystem.PatchTextureHandle(State.Handle, Update.Slot, Patch));
+    }
+
+    auto* LiveMaterial = static_cast<csp::systems::GLTFMaterial*>(RuntimeMaterialSystem.Get("crt-material"));
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetBaseColorTexture().GetAssetId(), "base-updated");
+    EXPECT_EQ(LiveMaterial->GetMetallicRoughnessTexture().GetAssetId(), "metallic-updated");
+    EXPECT_EQ(LiveMaterial->GetNormalTexture().GetAssetId(), "normal-updated");
+    EXPECT_EQ(LiveMaterial->GetOcclusionTexture().GetAssetId(), "occlusion-updated");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetId(), "emissive-updated");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVOffset(), csp::common::Vector2(0.25f, 0.5f));
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVScale(), csp::common::Vector2(1.5f, 2.0f));
+    EXPECT_FLOAT_EQ(LiveMaterial->GetEmissiveTexture().GetUVRotation(), 0.75f);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetTexCoord(), 2);
+    EXPECT_EQ(ChangedCount, static_cast<int32_t>(sizeof(Updates) / sizeof(Updates[0])));
+    EXPECT_EQ(LastMaterialId, "crt-material");
+
+    EXPECT_TRUE(RuntimeMaterialSystem.ResetHandle(State.Handle));
+    LiveMaterial = static_cast<csp::systems::GLTFMaterial*>(RuntimeMaterialSystem.Get("crt-material"));
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetId(), "emissive");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVOffset(), csp::common::Vector2::Zero());
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVScale(), csp::common::Vector2::One());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RuntimeMaterialTextureScriptInterfacePatchesBindingTexturesAndResets)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::RuntimeMaterialSystem RuntimeMaterialSystem(LogSystem);
+
+    csp::systems::GLTFMaterial Material("CRT", "materials", "crt-binding");
+    csp::systems::TextureInfo EmissiveTexture("collection-a", "emissive-a");
+    EmissiveTexture.SetUVOffset(csp::common::Vector2(0.1f, 0.2f));
+    Material.SetEmissiveTexture(EmissiveTexture);
+    RuntimeMaterialSystem.SetGLTFForTesting("crt-binding", "materials", Material);
+
+    csp::multiplayer::RuntimeMaterialScriptInterface MaterialInterface(
+        &RuntimeMaterialSystem, 1001, csp::multiplayer::ComponentType::StaticModel, 0, "Screen", "crt-binding");
+
+    auto EmissiveTextureInterface = MaterialInterface.GetEmissiveTexture();
+    ASSERT_NE(EmissiveTextureInterface, nullptr);
+    EXPECT_EQ(MaterialInterface.GetColorTexture(), nullptr);
+    EXPECT_EQ(EmissiveTextureInterface->GetAssetCollectionId(), "collection-a");
+    EXPECT_EQ(EmissiveTextureInterface->GetAssetId(), "emissive-a");
+    const auto InitialUVOffset = EmissiveTextureInterface->GetUVOffset();
+    ASSERT_EQ(InitialUVOffset.size(), 2u);
+    EXPECT_FLOAT_EQ(InitialUVOffset[0], 0.1f);
+    EXPECT_FLOAT_EQ(InitialUVOffset[1], 0.2f);
+
+    EXPECT_TRUE(EmissiveTextureInterface->SetAssetSource("collection-b", "emissive-b"));
+    EmissiveTextureInterface->SetUVOffset({ 0.3f, 0.4f });
+    EmissiveTextureInterface->SetUVScale({ 1.25f, 0.75f });
+    EmissiveTextureInterface->SetUVRotation(1.25f);
+    EmissiveTextureInterface->SetTexCoord(3);
+    EmissiveTextureInterface->SetStereoVideoType(1);
+    EmissiveTextureInterface->SetIsStereoFlipped(true);
+
+    auto BindingState = RuntimeMaterialSystem.ResolveForBinding(1001, csp::multiplayer::ComponentType::StaticModel, 0, "Screen", "crt-binding");
+    auto* LiveMaterial = static_cast<csp::systems::GLTFMaterial*>(BindingState.MaterialRef);
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetCollectionId(), "collection-b");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetId(), "emissive-b");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVOffset(), csp::common::Vector2(0.3f, 0.4f));
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVScale(), csp::common::Vector2(1.25f, 0.75f));
+    EXPECT_FLOAT_EQ(LiveMaterial->GetEmissiveTexture().GetUVRotation(), 1.25f);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetTexCoord(), 3);
+    EXPECT_EQ(static_cast<int32_t>(LiveMaterial->GetEmissiveTexture().GetStereoVideoType()), 1);
+    EXPECT_TRUE(LiveMaterial->GetEmissiveTexture().GetIsStereoFlipped());
+
+    EXPECT_TRUE(EmissiveTextureInterface->SetComponentSource("1001-45"));
+    BindingState = RuntimeMaterialSystem.ResolveForBinding(1001, csp::multiplayer::ComponentType::StaticModel, 0, "Screen", "crt-binding");
+    LiveMaterial = static_cast<csp::systems::GLTFMaterial*>(BindingState.MaterialRef);
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetEntityComponentId(), "1001-45");
+    EXPECT_EQ(static_cast<int32_t>(LiveMaterial->GetEmissiveTexture().GetSourceType()),
+        static_cast<int32_t>(csp::systems::ETextureResourceType::Component));
+
+    EXPECT_TRUE(EmissiveTextureInterface->Clear());
+    EXPECT_FALSE(EmissiveTextureInterface->GetIsSet());
+
+    EXPECT_TRUE(MaterialInterface.Reset());
+    BindingState = RuntimeMaterialSystem.ResolveForBinding(1001, csp::multiplayer::ComponentType::StaticModel, 0, "Screen", "crt-binding");
+    LiveMaterial = static_cast<csp::systems::GLTFMaterial*>(BindingState.MaterialRef);
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetCollectionId(), "collection-a");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetAssetId(), "emissive-a");
+    EXPECT_EQ(LiveMaterial->GetEmissiveTexture().GetUVOffset(), csp::common::Vector2(0.1f, 0.2f));
+    EXPECT_TRUE(LiveMaterial->GetEmissiveTexture().IsSet());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RuntimeMaterialTextureScriptInterfaceExposesAlphaVideoColorTextureOnly)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::RuntimeMaterialSystem RuntimeMaterialSystem(LogSystem);
+
+    csp::systems::AlphaVideoMaterial Material("Billboard", "materials", "alpha-video");
+    Material.SetColorTexture(csp::systems::TextureInfo("collection-a", "frame-a"));
+    RuntimeMaterialSystem.SetAlphaVideoForTesting("alpha-video", "materials", Material);
+
+    csp::multiplayer::RuntimeMaterialScriptInterface MaterialInterface(&RuntimeMaterialSystem, "alpha-video");
+    EXPECT_EQ(MaterialInterface.GetEmissiveTexture(), nullptr);
+
+    auto ColorTextureInterface = MaterialInterface.GetColorTexture();
+    ASSERT_NE(ColorTextureInterface, nullptr);
+    EXPECT_EQ(ColorTextureInterface->GetAssetCollectionId(), "collection-a");
+    EXPECT_EQ(ColorTextureInterface->GetAssetId(), "frame-a");
+
+    EXPECT_TRUE(ColorTextureInterface->SetComponentSource("alpha-component"));
+    auto* LiveMaterial = static_cast<csp::systems::AlphaVideoMaterial*>(RuntimeMaterialSystem.Get("alpha-video"));
+    ASSERT_NE(LiveMaterial, nullptr);
+    EXPECT_EQ(LiveMaterial->GetColorTexture().GetEntityComponentId(), "alpha-component");
+    EXPECT_EQ(static_cast<int32_t>(LiveMaterial->GetColorTexture().GetSourceType()),
+        static_cast<int32_t>(csp::systems::ETextureResourceType::Component));
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, RuntimeMaterialTextureScriptInterfaceCachesPerSlotOnRuntimeMaterial)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::RuntimeMaterialSystem RuntimeMaterialSystem(LogSystem);
+
+    csp::systems::GLTFMaterial Material;
+    Material.SetName("CRT Cache Test");
+    Material.SetMaterialId("crt-cache");
+    RuntimeMaterialSystem.SetGLTFForTesting("crt-cache", "materials", Material);
+
+    csp::multiplayer::RuntimeMaterialScriptInterface MaterialInterface(&RuntimeMaterialSystem, "crt-cache");
+
+    auto FirstEmissiveTexture = MaterialInterface.GetEmissiveTexture();
+    auto SecondEmissiveTexture = MaterialInterface.GetEmissiveTexture();
+    auto FirstBaseColorTexture = MaterialInterface.GetBaseColorTexture();
+    auto SecondBaseColorTexture = MaterialInterface.GetBaseColorTexture();
+
+    ASSERT_NE(FirstEmissiveTexture, nullptr);
+    ASSERT_NE(FirstBaseColorTexture, nullptr);
+    EXPECT_EQ(FirstEmissiveTexture.get(), SecondEmissiveTexture.get());
+    EXPECT_EQ(FirstBaseColorTexture.get(), SecondBaseColorTexture.get());
+    EXPECT_NE(FirstEmissiveTexture.get(), FirstBaseColorTexture.get());
+    EXPECT_EQ(MaterialInterface.GetColorTexture(), nullptr);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, SpaceEntityTagsNormalizeAndDeduplicate)
 {
     csp::multiplayer::SpaceEntity Entity;
@@ -1095,6 +1379,120 @@ export function script() {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentFallbackSchemaSupportsImageAssetDefaultsAndIncrementalValidation)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("image-asset-schema-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("image-asset-schema-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/image-asset-schema-test.js", R"(
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
+export const schema = {
+    poster: { type: 'imageAsset', default: { assetCollectionId: 'museum-assets', imageAssetId: 'hero' } },
+};
+
+export function script() {
+    return ({ attributes }) => {
+        useEffect(() => {
+            const poster = attributes.poster.value || {};
+            const signature = `${poster.assetCollectionId || ''}:${poster.imageAssetId || ''}`;
+            globalThis.__ngxImageAssetObservedCount = (globalThis.__ngxImageAssetObservedCount || 0) + 1;
+            globalThis.__ngxImageAssetIsDefault = signature === 'museum-assets:hero' ? 1 : 0;
+            globalThis.__ngxImageAssetIsGallery = signature === 'gallery-assets:screen-a' ? 1 : 0;
+        });
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/image-asset-schema-test.js");
+    CodeComponent->SetAttribute("poster", csp::multiplayer::CodeAttribute::FromString("not-an-image-asset"));
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    const std::string EntityId = std::to_string(Entity.GetId());
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxImageAssetIsDefault", 0), 1);
+    EXPECT_GE(NgxScriptSystem.GetGlobalIntForTesting("__ngxImageAssetObservedCount", 0), 1);
+
+    EXPECT_TRUE(NgxScriptSystem.UpdateAttributeForEntity(
+        EntityId.c_str(), "poster", R"({"assetCollectionId":"gallery-assets","imageAssetId":"screen-a"})"));
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxImageAssetIsGallery", 0), 1);
+
+    EXPECT_TRUE(NgxScriptSystem.UpdateAttributeForEntity(EntityId.c_str(), "poster", R"({"assetCollectionId":"broken-assets"})"));
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxImageAssetIsGallery", 0), 1);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentRuntimeSyncsNativeImageAssetAttributesIntoJS)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("image-asset-native-sync-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("image-asset-native-sync-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/image-asset-native-sync-test.js", R"(
+import { useEffect } from '/__csp/internal/codecomponent/registry.js';
+
+export const schema = {
+    poster: { type: 'imageAsset' },
+};
+
+export function script() {
+    return ({ attributes }) => {
+        useEffect(() => {
+            const poster = attributes.poster.value || {};
+            globalThis.__ngxNativeImageAssetCollectionMatches = poster.assetCollectionId === 'gallery-assets' ? 1 : 0;
+            globalThis.__ngxNativeImageAssetIdMatches = poster.imageAssetId === 'screen-b' ? 1 : 0;
+        });
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity Entity;
+    auto* CodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(Entity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(CodeComponent, nullptr);
+    CodeComponent->SetScriptAssetPath("/scripts/modules/image-asset-native-sync-test.js");
+    CodeComponent->SetAttribute("poster", csp::multiplayer::CodeAttribute::FromImageAsset(BuildImageAssetValue("gallery-assets", "screen-b")));
+    Engine.AddEntity(&Entity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxNativeImageAssetCollectionMatches", 0), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxNativeImageAssetIdMatches", 0), 1);
+
+    Engine.RemoveEntity(&Entity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentEntityReferenceResolvesWritesAndHandlesDeletion)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
@@ -1155,7 +1553,7 @@ export function script() {
 
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefTickStatusResolved", 0), 1);
     EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxEntityRefDidWrite", 0), 1);
-    EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3 { 7.0f, 8.0f, 9.0f });
+    EXPECT_EQ(TargetEntity.GetPosition(), csp::common::Vector3(7.0f, 8.0f, 9.0f));
 
     Engine.RemoveEntity(&TargetEntity);
     Engine.RemoveEntity(&ScriptEntity);

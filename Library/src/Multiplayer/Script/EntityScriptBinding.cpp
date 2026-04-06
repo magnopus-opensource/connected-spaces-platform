@@ -40,6 +40,7 @@
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
@@ -48,6 +49,7 @@
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/Script/RuntimeMaterialScriptInterface.h"
+#include "Multiplayer/Script/RuntimeMaterialTextureScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
@@ -395,12 +397,38 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieAssetId, "cookieAssetId")
         .PROPERTY_GET_SET(LightSpaceComponent, LightCookieType, "lightCookieType");
 
+    Module->class_<RuntimeMaterialTextureScriptInterface>("RuntimeMaterialTexture")
+        .property<&RuntimeMaterialTextureScriptInterface::GetIsSet>("isSet")
+        .property<&RuntimeMaterialTextureScriptInterface::GetSourceType>("sourceType")
+        .property<&RuntimeMaterialTextureScriptInterface::GetAssetCollectionId>("assetCollectionId")
+        .property<&RuntimeMaterialTextureScriptInterface::GetAssetId>("assetId")
+        .property<&RuntimeMaterialTextureScriptInterface::GetEntityComponentId>("entityComponentId")
+        .property<&RuntimeMaterialTextureScriptInterface::GetUVOffset, &RuntimeMaterialTextureScriptInterface::SetUVOffset>("uvOffset")
+        .property<&RuntimeMaterialTextureScriptInterface::GetUVScale, &RuntimeMaterialTextureScriptInterface::SetUVScale>("uvScale")
+        .property<&RuntimeMaterialTextureScriptInterface::GetUVRotation, &RuntimeMaterialTextureScriptInterface::SetUVRotation>("uvRotation")
+        .property<&RuntimeMaterialTextureScriptInterface::GetTexCoord, &RuntimeMaterialTextureScriptInterface::SetTexCoord>("texCoord")
+        .property<&RuntimeMaterialTextureScriptInterface::GetStereoVideoType, &RuntimeMaterialTextureScriptInterface::SetStereoVideoType>(
+            "stereoVideoType")
+        .property<&RuntimeMaterialTextureScriptInterface::GetIsStereoFlipped, &RuntimeMaterialTextureScriptInterface::SetIsStereoFlipped>(
+            "isStereoFlipped")
+        .fun<&RuntimeMaterialTextureScriptInterface::SetUVOffsetXY>("__setUVOffsetXY")
+        .fun<&RuntimeMaterialTextureScriptInterface::SetUVScaleXY>("__setUVScaleXY")
+        .fun<&RuntimeMaterialTextureScriptInterface::SetAssetSource>("setAssetSource")
+        .fun<&RuntimeMaterialTextureScriptInterface::SetComponentSource>("setComponentSource")
+        .fun<&RuntimeMaterialTextureScriptInterface::Clear>("clear");
+
     Module->class_<RuntimeMaterialScriptInterface>("RuntimeMaterial")
         .property<&RuntimeMaterialScriptInterface::GetStatus>("status")
         .property<&RuntimeMaterialScriptInterface::GetMaterialId>("materialId")
         .property<&RuntimeMaterialScriptInterface::GetMaterialPath>("materialPath")
         .property<&RuntimeMaterialScriptInterface::GetShaderType>("shaderType")
         .property<&RuntimeMaterialScriptInterface::GetName>("name")
+        .property<&RuntimeMaterialScriptInterface::GetBaseColorTexture>("baseColorTexture")
+        .property<&RuntimeMaterialScriptInterface::GetMetallicRoughnessTexture>("metallicRoughnessTexture")
+        .property<&RuntimeMaterialScriptInterface::GetNormalTexture>("normalTexture")
+        .property<&RuntimeMaterialScriptInterface::GetOcclusionTexture>("occlusionTexture")
+        .property<&RuntimeMaterialScriptInterface::GetEmissiveTexture>("emissiveTexture")
+        .property<&RuntimeMaterialScriptInterface::GetColorTexture>("colorTexture")
         .property<&RuntimeMaterialScriptInterface::GetBaseColorFactor, &RuntimeMaterialScriptInterface::SetBaseColorFactor>("baseColorFactor")
         .property<&RuntimeMaterialScriptInterface::GetMetallicFactor, &RuntimeMaterialScriptInterface::SetMetallicFactor>("metallicFactor")
         .property<&RuntimeMaterialScriptInterface::GetRoughnessFactor, &RuntimeMaterialScriptInterface::SetRoughnessFactor>("roughnessFactor")

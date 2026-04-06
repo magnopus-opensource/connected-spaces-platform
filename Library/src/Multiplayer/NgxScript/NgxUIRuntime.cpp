@@ -10,6 +10,7 @@
 #include <rapidjson/writer.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <deque>
 #include <limits>
@@ -149,6 +150,7 @@ struct UINode
     bool Visible;
     bool Enabled;
     float FontSize;
+    std::string FontWeight;
     std::string TextAlign;
     float AspectRatio;
     std::string Text;
@@ -180,6 +182,7 @@ struct UINode
         , Visible(true)
         , Enabled(true)
         , FontSize(16.0f)
+        , FontWeight("normal")
         , TextAlign("left")
         , AspectRatio(0.0f)
         , WorldOffset(0.0f, 0.0f, 0.0f)
@@ -207,6 +210,7 @@ struct UIDrawable
     float Opacity;
     std::string Text;
     float FontSize;
+    std::string FontWeight;
     std::string AssetCollectionId;
     std::string ImageAssetId;
     std::string HandlerId;
@@ -223,6 +227,7 @@ struct UIDrawable
         , CornerRadius(0.0f)
         , Opacity(1.0f)
         , FontSize(16.0f)
+        , FontWeight("normal")
         , Enabled(true)
     {
     }
@@ -245,6 +250,7 @@ struct UITextMeasureRequest
 {
     std::string Text;
     float FontSize;
+    std::string FontWeight;
 };
 
 struct ClayNodeMetadata
@@ -264,6 +270,7 @@ struct ClayNodeMetadata
     float Opacity;
     std::string Text;
     float FontSize;
+    std::string FontWeight;
     std::string AssetCollectionId;
     std::string ImageAssetId;
     std::string HandlerId;
@@ -280,6 +287,12 @@ struct ClayNodeMetadata
         , Enabled(true)
     {
     }
+};
+
+struct ClayTextUserData
+{
+    ClayNodeMetadata* Metadata;
+    std::string FontWeight;
 };
 
 Clay_Color ToClayColor(const UIColor& Color)
@@ -714,18 +727,36 @@ bool DrawablesEqual(const UIDrawable& Left, const UIDrawable& Right)
         && std::fabs(Left.Opacity - Right.Opacity) < 0.01f
         && Left.Text == Right.Text
         && std::fabs(Left.FontSize - Right.FontSize) < 0.01f
+        && Left.FontWeight == Right.FontWeight
         && Left.AssetCollectionId == Right.AssetCollectionId
         && Left.ImageAssetId == Right.ImageAssetId
         && Left.HandlerId == Right.HandlerId
         && Left.Enabled == Right.Enabled;
 }
 
-std::string BuildTextMeasureRequestKey(const std::string& Text, float FontSize)
+std::string NormalizeFontWeight(const std::string& Value)
+{
+    std::string Result;
+    Result.reserve(Value.size());
+    for (char Character : Value)
+    {
+        Result.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(Character))));
+    }
+
+    if (Result == "bold" || Result == "700" || Result == "800" || Result == "900")
+    {
+        return "bold";
+    }
+
+    return "normal";
+}
+
+std::string BuildTextMeasureRequestKey(const std::string& Text, float FontSize, const std::string& FontWeight)
 {
     std::ostringstream Stream;
     Stream.setf(std::ios::fixed, std::ios::floatfield);
     Stream.precision(std::numeric_limits<float>::max_digits10);
-    Stream << FontSize << '\n' << Text;
+    Stream << FontSize << '\n' << NormalizeFontWeight(FontWeight) << '\n' << Text;
     return Stream.str();
 }
 
@@ -761,16 +792,16 @@ struct NgxUIRuntime::Impl
     std::vector<UITextMeasureRequest> PendingTextMeasureRequests;
     std::unordered_set<std::string> PendingTextMeasureRequestKeys;
 
-    void QueueTextMeasureRequest(const std::string& Text, float FontSize)
+    void QueueTextMeasureRequest(const std::string& Text, float FontSize, const std::string& FontWeight)
     {
-        const std::string Key = BuildTextMeasureRequestKey(Text, FontSize);
+        const std::string Key = BuildTextMeasureRequestKey(Text, FontSize, FontWeight);
         if (PendingTextMeasureRequestKeys.find(Key) != PendingTextMeasureRequestKeys.end())
         {
             return;
         }
 
         PendingTextMeasureRequestKeys.insert(Key);
-        PendingTextMeasureRequests.push_back(UITextMeasureRequest { Text, FontSize });
+        PendingTextMeasureRequests.push_back(UITextMeasureRequest { Text, FontSize, NormalizeFontWeight(FontWeight) });
     }
 
     static void ClayErrorThunk(Clay_ErrorData ErrorData)
@@ -813,12 +844,14 @@ struct NgxUIRuntime::Impl
         Dimensions.height = 0.0f;
 
         const float FontSize = Config != NULL && Config->fontSize > 0 ? static_cast<float>(Config->fontSize) : 16.0f;
+        const ClayTextUserData* TextUserData = Config != NULL ? static_cast<const ClayTextUserData*>(Config->userData) : nullptr;
+        const std::string FontWeight = TextUserData != nullptr ? NormalizeFontWeight(TextUserData->FontWeight) : "normal";
         const std::string RawInput
             = Text.chars != nullptr && Text.length > 0 ? std::string(Text.chars, static_cast<size_t>(Text.length)) : std::string();
 
         if (Self != NULL)
         {
-            const std::string Key = BuildTextMeasureRequestKey(RawInput, FontSize);
+            const std::string Key = BuildTextMeasureRequestKey(RawInput, FontSize, FontWeight);
             const std::unordered_map<std::string, csp::common::Vector2>::const_iterator Cached = Self->TextMeasureCache.find(Key);
             if (Cached != Self->TextMeasureCache.end())
             {
@@ -831,7 +864,8 @@ struct NgxUIRuntime::Impl
             if (Self->MeasureCallback)
             {
                 const csp::common::String Input(RawInput.c_str());
-                const csp::common::Vector2 Size = Self->MeasureCallback(Input, FontSize);
+                const csp::common::String Weight(FontWeight.c_str());
+                const csp::common::Vector2 Size = Self->MeasureCallback(Input, FontSize, Weight);
                 Self->TextMeasureCache[Key] = Size;
                 Dimensions.width = Size.X;
                 Dimensions.height = Size.Y;
@@ -846,7 +880,7 @@ struct NgxUIRuntime::Impl
             }
 #endif
 
-            Self->QueueTextMeasureRequest(RawInput, FontSize);
+            Self->QueueTextMeasureRequest(RawInput, FontSize, FontWeight);
         }
 
         if (Self != NULL && !Self->HasWarnedFallbackMeasurement)
@@ -856,7 +890,8 @@ struct NgxUIRuntime::Impl
                 "NgxUIRuntime: Text measurement unavailable; using fallback text sizing until client results are submitted.");
         }
 
-        Dimensions.width = static_cast<float>(Text.length) * FontSize * 0.6f;
+        const float WidthMultiplier = FontWeight == "bold" ? 0.65f : 0.6f;
+        Dimensions.width = static_cast<float>(Text.length) * FontSize * WidthMultiplier;
         Dimensions.height = FontSize * 1.2f;
         return Dimensions;
     }
@@ -1024,6 +1059,25 @@ struct NgxUIRuntime::Impl
             {
                 OutNode.FontSize = ParseNumberOrDefault(Props["fontSize"], OutNode.FontSize);
             }
+            if (Props.HasMember("fontWeight"))
+            {
+                if (Props["fontWeight"].IsString())
+                {
+                    OutNode.FontWeight = NormalizeFontWeight(ParseStringOrDefault(Props["fontWeight"], OutNode.FontWeight));
+                }
+                else if (Props["fontWeight"].IsNumber())
+                {
+                    OutNode.FontWeight = Props["fontWeight"].GetDouble() >= 600.0 ? "bold" : "normal";
+                }
+                else if (Props["fontWeight"].IsBool())
+                {
+                    OutNode.FontWeight = Props["fontWeight"].GetBool() ? "bold" : "normal";
+                }
+            }
+            else if (Props.HasMember("bold"))
+            {
+                OutNode.FontWeight = ParseBoolOrDefault(Props["bold"], false) ? "bold" : "normal";
+            }
             if (Props.HasMember("aspectRatio"))
             {
                 OutNode.AspectRatio = std::max(0.0f, ParseNumberOrDefault(Props["aspectRatio"], OutNode.AspectRatio));
@@ -1154,10 +1208,12 @@ struct NgxUIRuntime::Impl
         return true;
     }
 
-    float MeasureTextWidthForNode(const std::string& Value, float FontSize)
+    float MeasureTextWidthForNode(const std::string& Value, float FontSize, const std::string& FontWeight)
     {
         Clay_TextElementConfig Config = CLAY__DEFAULT_STRUCT;
+        ClayTextUserData UserData { nullptr, NormalizeFontWeight(FontWeight) };
         Config.fontSize = static_cast<uint16_t>(std::max(1.0f, FontSize));
+        Config.userData = &UserData;
         const Clay_Dimensions Dimensions
             = MeasureTextThunk(Clay_StringSlice { static_cast<int32_t>(Value.size()), Value.c_str(), Value.c_str() }, &Config, this);
         return Dimensions.width;
@@ -1178,9 +1234,10 @@ struct NgxUIRuntime::Impl
         switch (Node.Kind)
         {
         case UIWidgetKind::Text:
-            return ApplySizeConstraints(MeasureTextWidthForNode(Node.Text, Node.FontSize), Node.Width);
+            return ApplySizeConstraints(MeasureTextWidthForNode(Node.Text, Node.FontSize, Node.FontWeight), Node.Width);
         case UIWidgetKind::Button:
-            return ApplySizeConstraints(MeasureTextWidthForNode(Node.Text, Node.FontSize) + Node.Padding.Left + Node.Padding.Right, Node.Width);
+            return ApplySizeConstraints(
+                MeasureTextWidthForNode(Node.Text, Node.FontSize, Node.FontWeight) + Node.Padding.Left + Node.Padding.Right, Node.Width);
         case UIWidgetKind::Spacer:
             return 0.0f;
         default:
@@ -1281,6 +1338,7 @@ struct NgxUIRuntime::Impl
         Meta.Opacity = Node.Opacity;
         Meta.Text = Node.Text;
         Meta.FontSize = Node.FontSize;
+        Meta.FontWeight = Node.FontWeight;
         Meta.AssetCollectionId = Node.AssetCollectionId;
         Meta.ImageAssetId = Node.ImageAssetId;
         Meta.HandlerId = Node.HandlerId;
@@ -1288,31 +1346,39 @@ struct NgxUIRuntime::Impl
         return &Meta;
     }
 
-    Clay_TextElementConfig* CreateTextConfig(std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage, const UINode& Node)
+    Clay_TextElementConfig* CreateTextConfig(std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage,
+        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage, const UINode& Node, ClayNodeMetadata* Metadata)
     {
         TextConfigStorage.emplace_back(std::make_unique<Clay_TextElementConfig>());
+        TextUserDataStorage.emplace_back(std::make_unique<ClayTextUserData>());
         Clay_TextElementConfig& TextConfig = *TextConfigStorage.back();
+        ClayTextUserData& TextUserData = *TextUserDataStorage.back();
         std::memset(&TextConfig, 0, sizeof(TextConfig));
         TextConfig.fontSize = static_cast<uint16_t>(std::max(1.0f, Node.FontSize));
         TextConfig.lineHeight = static_cast<uint16_t>(std::max(1.0f, Node.FontSize * 1.2f));
         TextConfig.textColor = ToClayColor(ApplyOpacity(Node.TextColor, Node.Opacity));
         TextConfig.textAlignment = ParseTextAlignment(Node.TextAlign);
+        TextUserData.Metadata = Metadata;
+        TextUserData.FontWeight = NormalizeFontWeight(Node.FontWeight);
+        TextConfig.userData = &TextUserData;
         return &TextConfig;
     }
 
     void EmitButtonLabel(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
-        std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage)
+        std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage,
+        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage)
     {
-        Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, Node);
         UINode LabelNode = Node;
         LabelNode.HandlerId.clear();
         LabelNode.Enabled = false;
-        TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, LabelNode, Node.Id + "__label", UIWidgetKind::Text);
+        ClayNodeMetadata* Metadata = CreateMetadata(MetadataStorage, EntityId, LabelNode, Node.Id + "__label", UIWidgetKind::Text);
+        Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, TextUserDataStorage, LabelNode, Metadata);
         Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
     }
 
     void EmitNodeToClay(const std::string& EntityId, const UINode& Node, std::vector<std::unique_ptr<ClayNodeMetadata>>& MetadataStorage,
-        std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage)
+        std::vector<std::unique_ptr<Clay_TextElementConfig>>& TextConfigStorage,
+        std::vector<std::unique_ptr<ClayTextUserData>>& TextUserDataStorage)
     {
         if (!Node.Visible)
         {
@@ -1321,8 +1387,8 @@ struct NgxUIRuntime::Impl
 
         if (Node.Kind == UIWidgetKind::Text)
         {
-            Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, Node);
-            TextConfig->userData = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind);
+            ClayNodeMetadata* Metadata = CreateMetadata(MetadataStorage, EntityId, Node, Node.Id, Node.Kind);
+            Clay_TextElementConfig* TextConfig = CreateTextConfig(TextConfigStorage, TextUserDataStorage, Node, Metadata);
             Clay__OpenTextElement(ToClayString(Node.Text), TextConfig);
             return;
         }
@@ -1398,13 +1464,13 @@ struct NgxUIRuntime::Impl
 
         if (Node.Kind == UIWidgetKind::Button)
         {
-            EmitButtonLabel(EntityId, Node, MetadataStorage, TextConfigStorage);
+            EmitButtonLabel(EntityId, Node, MetadataStorage, TextConfigStorage, TextUserDataStorage);
         }
         else
         {
             for (size_t Index = 0; Index < Node.Children.size(); ++Index)
             {
-                EmitNodeToClay(EntityId, Node.Children[Index], MetadataStorage, TextConfigStorage);
+                EmitNodeToClay(EntityId, Node.Children[Index], MetadataStorage, TextConfigStorage, TextUserDataStorage);
             }
         }
 
@@ -1416,6 +1482,7 @@ struct NgxUIRuntime::Impl
         std::map<std::string, UIDrawable> Drawables;
         std::vector<std::unique_ptr<ClayNodeMetadata>> MetadataStorage;
         std::vector<std::unique_ptr<Clay_TextElementConfig>> TextConfigStorage;
+        std::vector<std::unique_ptr<ClayTextUserData>> TextUserDataStorage;
         EnsureClayContext();
 
         const float SurfaceWidth = Root.Surface == UISurfaceKind::Screen
@@ -1447,7 +1514,7 @@ struct NgxUIRuntime::Impl
         Host.Children.clear();
         Host.Children.push_back(Root);
 
-        EmitNodeToClay(EntityId, Host, MetadataStorage, TextConfigStorage);
+        EmitNodeToClay(EntityId, Host, MetadataStorage, TextConfigStorage, TextUserDataStorage);
 
         const Clay_RenderCommandArray RenderCommands = Clay_EndLayout();
         std::map<std::string, int32_t> TotalTextCommandCountById;
@@ -1459,7 +1526,8 @@ struct NgxUIRuntime::Impl
                 continue;
             }
 
-            const ClayNodeMetadata& Meta = *static_cast<const ClayNodeMetadata*>(Command->userData);
+            const ClayTextUserData* TextUserData = static_cast<const ClayTextUserData*>(Command->userData);
+            const ClayNodeMetadata& Meta = *TextUserData->Metadata;
             ++TotalTextCommandCountById[Meta.Id];
         }
 
@@ -1472,7 +1540,23 @@ struct NgxUIRuntime::Impl
                 continue;
             }
 
-            const ClayNodeMetadata& Meta = *static_cast<const ClayNodeMetadata*>(Command->userData);
+            const ClayNodeMetadata* MetaPtr = nullptr;
+            if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_TEXT)
+            {
+                const ClayTextUserData* TextUserData = static_cast<const ClayTextUserData*>(Command->userData);
+                MetaPtr = TextUserData != nullptr ? TextUserData->Metadata : nullptr;
+            }
+            else
+            {
+                MetaPtr = static_cast<const ClayNodeMetadata*>(Command->userData);
+            }
+
+            if (MetaPtr == nullptr)
+            {
+                continue;
+            }
+
+            const ClayNodeMetadata& Meta = *MetaPtr;
             if (Meta.Id == Host.Id)
             {
                 continue;
@@ -1497,6 +1581,7 @@ struct NgxUIRuntime::Impl
             Drawable.Opacity = Meta.Opacity;
             Drawable.Text = Meta.Text;
             Drawable.FontSize = Meta.FontSize;
+            Drawable.FontWeight = Meta.FontWeight;
             Drawable.AssetCollectionId = Meta.AssetCollectionId;
             Drawable.ImageAssetId = Meta.ImageAssetId;
             Drawable.HandlerId = Meta.HandlerId;
@@ -1530,6 +1615,7 @@ struct NgxUIRuntime::Impl
                     Drawable.Text.clear();
                 }
                 Drawable.FontSize = static_cast<float>(Command->renderData.text.fontSize);
+                Drawable.FontWeight = Meta.FontWeight;
             }
             else if (Command->commandType == CLAY_RENDER_COMMAND_TYPE_IMAGE)
             {
@@ -1638,6 +1724,7 @@ struct NgxUIRuntime::Impl
         Value.AddMember("opacity", Drawable.Opacity, Allocator);
         Value.AddMember("text", rapidjson::Value(Drawable.Text.c_str(), Allocator), Allocator);
         Value.AddMember("fontSize", Drawable.FontSize, Allocator);
+        Value.AddMember("fontWeight", rapidjson::Value(Drawable.FontWeight.c_str(), Allocator), Allocator);
         Value.AddMember("assetCollectionId", rapidjson::Value(Drawable.AssetCollectionId.c_str(), Allocator), Allocator);
         Value.AddMember("imageAssetId", rapidjson::Value(Drawable.ImageAssetId.c_str(), Allocator), Allocator);
         Value.AddMember("handlerId", rapidjson::Value(Drawable.HandlerId.c_str(), Allocator), Allocator);
@@ -1702,6 +1789,7 @@ std::string NgxUIRuntime::DrainPendingTextMeasureRequestsJson()
         rapidjson::Value Entry(rapidjson::kObjectType);
         Entry.AddMember("text", rapidjson::Value(Request.Text.c_str(), Allocator), Allocator);
         Entry.AddMember("fontSize", Request.FontSize, Allocator);
+        Entry.AddMember("fontWeight", rapidjson::Value(Request.FontWeight.c_str(), Allocator), Allocator);
         Document.PushBack(Entry, Allocator);
     }
 
@@ -1736,9 +1824,12 @@ bool NgxUIRuntime::SubmitTextMeasureResultsJson(const std::string& ResultsJson)
 
         const std::string Text = Entry["text"].GetString();
         const float FontSize = static_cast<float>(Entry["fontSize"].GetDouble());
+        const std::string FontWeight = Entry.HasMember("fontWeight") && Entry["fontWeight"].IsString()
+            ? NormalizeFontWeight(Entry["fontWeight"].GetString())
+            : std::string("normal");
         const float Width = std::max(0.0f, static_cast<float>(Entry["width"].GetDouble()));
         const float Height = std::max(0.0f, static_cast<float>(Entry["height"].GetDouble()));
-        Pimpl->TextMeasureCache[BuildTextMeasureRequestKey(Text, FontSize)] = csp::common::Vector2(Width, Height);
+        Pimpl->TextMeasureCache[BuildTextMeasureRequestKey(Text, FontSize, FontWeight)] = csp::common::Vector2(Width, Height);
         bAppliedAnyResults = true;
     }
 

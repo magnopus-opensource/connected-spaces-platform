@@ -33,6 +33,7 @@ enum class CodePropertyType
     String = 4,
     EntityQuery = 5,
     ModelAsset = 6,
+    ImageAsset = 7,
     Num
 };
 
@@ -41,6 +42,7 @@ class CSP_API CodeAttribute
 public:
     using EntityQueryValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
     using ModelAssetValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
+    using ImageAssetValueType = csp::common::Map<csp::common::String, csp::common::ReplicatedValue>;
 
     CodeAttribute();
 
@@ -50,6 +52,7 @@ public:
     static CodeAttribute FromString(const csp::common::String& Value);
     static CodeAttribute FromEntityQuery(const EntityQueryValueType& Value);
     static CodeAttribute FromModelAsset(const ModelAssetValueType& Value);
+    static CodeAttribute FromImageAsset(const ImageAssetValueType& Value);
 
     static bool IsValidEntityQueryValue(const EntityQueryValueType& Value);
     const EntityQueryValueType& GetEntityQueryValue() const;
@@ -58,6 +61,10 @@ public:
     static bool IsValidModelAssetValue(const ModelAssetValueType& Value);
     const ModelAssetValueType& GetModelAssetValue() const;
     void SetModelAssetValue(const ModelAssetValueType& Value);
+
+    static bool IsValidImageAssetValue(const ImageAssetValueType& Value);
+    const ImageAssetValueType& GetImageAssetValue() const;
+    void SetImageAssetValue(const ImageAssetValueType& Value);
 
     csp::common::ReplicatedValue ToReplicatedValue() const;
     static bool TryFromReplicatedValue(const csp::common::ReplicatedValue& InValue, CodeAttribute& OutAttribute);
@@ -72,6 +79,7 @@ public:
     csp::common::String StringValue;
     EntityQueryValueType EntityQueryValue;
     ModelAssetValueType ModelAssetValue;
+    ImageAssetValueType ImageAssetValue;
 };
 
 } // namespace csp::multiplayer

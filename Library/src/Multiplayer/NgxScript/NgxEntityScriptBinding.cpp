@@ -257,10 +257,112 @@ globalThis.__cspPlayerController.getCameraUp = () =>
 async function __ngxWaitForMaterial(material) {
   for (;;) {
     if (!material || material.status !== "loading") {
+      if (material) {
+        __ngxInstallRuntimeMaterialTextureCaching(Object.getPrototypeOf(material));
+      }
       return material;
     }
     await new Promise((resolve) => requestAnimationFrame(resolve));
   }
+}
+
+function __ngxInstallRuntimeMaterialTextureCaching(proto) {
+  if (!proto || proto.__ngxTextureCachingInstalled) {
+    return;
+  }
+
+  const texturePropertyNames = [
+    "baseColorTexture",
+    "metallicRoughnessTexture",
+    "normalTexture",
+    "occlusionTexture",
+    "emissiveTexture",
+    "colorTexture",
+  ];
+
+  for (const propertyName of texturePropertyNames) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, propertyName);
+    if (!descriptor || typeof descriptor.get !== "function") {
+      continue;
+    }
+
+    const originalGet = descriptor.get;
+    Object.defineProperty(proto, propertyName, {
+      configurable: descriptor.configurable !== false,
+      enumerable: descriptor.enumerable === true,
+      get: function() {
+        if (!Object.prototype.hasOwnProperty.call(this, "__ngxTextureInterfaceCache")) {
+          Object.defineProperty(this, "__ngxTextureInterfaceCache", {
+            value: Object.create(null),
+            configurable: true,
+          });
+        }
+
+        const cache = this.__ngxTextureInterfaceCache;
+        if (Object.prototype.hasOwnProperty.call(cache, propertyName)) {
+          return cache[propertyName];
+        }
+
+        const textureInterface = originalGet.call(this);
+        if (textureInterface) {
+          __ngxInstallRuntimeMaterialTextureVectorCompatibility(Object.getPrototypeOf(textureInterface));
+        }
+        cache[propertyName] = textureInterface ?? null;
+        return cache[propertyName];
+      },
+    });
+  }
+
+  Object.defineProperty(proto, "__ngxTextureCachingInstalled", {
+    value: true,
+    configurable: true,
+  });
+}
+
+function __ngxInstallRuntimeMaterialTextureVectorCompatibility(proto) {
+  if (!proto || proto.__ngxVectorCompatibilityInstalled) {
+    return;
+  }
+
+  const installVectorProperty = (propertyName, internalSetterName) => {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, propertyName);
+    if (!descriptor || typeof descriptor.get !== "function") {
+      return;
+    }
+
+    const originalGet = descriptor.get;
+    const originalSet = typeof descriptor.set === "function" ? descriptor.set : null;
+
+    Object.defineProperty(proto, propertyName, {
+      configurable: descriptor.configurable !== false,
+      enumerable: descriptor.enumerable === true,
+      get: function() {
+        return originalGet.call(this);
+      },
+      set: function(value) {
+        if (
+          Array.isArray(value) &&
+          value.length >= 2 &&
+          typeof this[internalSetterName] === "function"
+        ) {
+          this[internalSetterName](Number(value[0]) || 0, Number(value[1]) || 0);
+          return;
+        }
+
+        if (originalSet) {
+          originalSet.call(this, value);
+        }
+      },
+    });
+  };
+
+  installVectorProperty("uvOffset", "__setUVOffsetXY");
+  installVectorProperty("uvScale", "__setUVScaleXY");
+
+  Object.defineProperty(proto, "__ngxVectorCompatibilityInstalled", {
+    value: true,
+    configurable: true,
+  });
 }
 
 function __ngxInstallMaterialHelpersOnPrototype(proto) {

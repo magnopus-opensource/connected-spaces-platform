@@ -19,6 +19,7 @@
 #include "CSP/Systems/Assets/AlphaVideoMaterial.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
+#include "Multiplayer/Script/RuntimeMaterialTextureScriptInterface.h"
 
 namespace
 {
@@ -99,6 +100,77 @@ std::string RuntimeMaterialScriptInterface::GetName() const
 {
     const auto State = Resolve();
     return State.MaterialRef != nullptr ? State.MaterialRef->GetName().c_str() : "";
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::CreateTextureInterface(
+    csp::systems::RuntimeMaterialTextureSlot Slot) const
+{
+    const size_t SlotIndex = static_cast<size_t>(Slot);
+    if (SlotIndex >= CachedTextureInterfaces.size())
+    {
+        return nullptr;
+    }
+
+    const auto State = Resolve();
+    if (State.Status != csp::systems::RuntimeMaterialStatus::Resolved || State.MaterialRef == nullptr)
+    {
+        return nullptr;
+    }
+
+    const auto ShaderType = State.MaterialRef->GetShaderType();
+    const bool bSupported = (ShaderType == csp::systems::EShaderType::Standard && Slot != csp::systems::RuntimeMaterialTextureSlot::Color)
+        || (ShaderType == csp::systems::EShaderType::AlphaVideo && Slot == csp::systems::RuntimeMaterialTextureSlot::Color);
+    if (!bSupported)
+    {
+        CachedTextureInterfaces[SlotIndex].reset();
+        return nullptr;
+    }
+
+    auto& CachedTextureInterface = CachedTextureInterfaces[SlotIndex];
+    if (!CachedTextureInterface)
+    {
+        if (Kind == RefKind::Binding)
+        {
+            CachedTextureInterface = std::make_shared<RuntimeMaterialTextureScriptInterface>(
+                RuntimeMaterialSystem, Slot, EntityId, ComponentTypeValue, ComponentIndex, MaterialPath, MaterialId);
+        }
+        else
+        {
+            CachedTextureInterface = std::make_shared<RuntimeMaterialTextureScriptInterface>(RuntimeMaterialSystem, Slot, MaterialId);
+        }
+    }
+
+    return CachedTextureInterface;
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetBaseColorTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::BaseColor);
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetMetallicRoughnessTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::MetallicRoughness);
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetNormalTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::Normal);
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetOcclusionTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::Occlusion);
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetEmissiveTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::Emissive);
+}
+
+std::shared_ptr<RuntimeMaterialTextureScriptInterface> RuntimeMaterialScriptInterface::GetColorTexture() const
+{
+    return CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot::Color);
 }
 
 RuntimeMaterialScriptInterface::Vector4 RuntimeMaterialScriptInterface::GetBaseColorFactor() const

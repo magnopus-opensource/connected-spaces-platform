@@ -117,6 +117,8 @@ namespace
 
 constexpr const char* MODEL_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
 constexpr const char* MODEL_ASSET_ASSET_ID_KEY = "assetId";
+constexpr const char* IMAGE_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
+constexpr const char* IMAGE_ASSET_ID_KEY = "imageAssetId";
 
 ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
 {
@@ -155,6 +157,11 @@ ScriptAttributeType SchemaTypeStringToEnum(const char* TypeString)
         return ScriptAttributeType::ModelAsset;
     }
 
+    if ((strcmp(TypeString, "imageAsset") == 0) || (strcmp(TypeString, "imageasset") == 0))
+    {
+        return ScriptAttributeType::ImageAsset;
+    }
+
     return ScriptAttributeType::Invalid;
 }
 
@@ -178,6 +185,8 @@ csp::common::ReplicatedValue ExtractScalarFromCodeAttribute(const CodeAttribute&
         return csp::common::ReplicatedValue(Attr.EntityQueryValue);
     case CodePropertyType::ModelAsset:
         return csp::common::ReplicatedValue(Attr.ModelAssetValue);
+    case CodePropertyType::ImageAsset:
+        return csp::common::ReplicatedValue(Attr.ImageAssetValue);
     default:
         return csp::common::ReplicatedValue();
     }
@@ -269,6 +278,32 @@ bool TryApplySchemaDefault(const rapidjson::Value& Entry, ScriptAttributeType Ty
         return true;
     }
 
+    case ScriptAttributeType::ImageAsset:
+    {
+        if (!DefaultValue.IsObject())
+        {
+            return false;
+        }
+
+        if (!DefaultValue.HasMember(IMAGE_ASSET_COLLECTION_ID_KEY) || !DefaultValue[IMAGE_ASSET_COLLECTION_ID_KEY].IsString())
+        {
+            return false;
+        }
+
+        if (!DefaultValue.HasMember(IMAGE_ASSET_ID_KEY) || !DefaultValue[IMAGE_ASSET_ID_KEY].IsString())
+        {
+            return false;
+        }
+
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ImageAssetMap;
+        ImageAssetMap[IMAGE_ASSET_COLLECTION_ID_KEY]
+            = csp::common::ReplicatedValue(csp::common::String(DefaultValue[IMAGE_ASSET_COLLECTION_ID_KEY].GetString()));
+        ImageAssetMap[IMAGE_ASSET_ID_KEY]
+            = csp::common::ReplicatedValue(csp::common::String(DefaultValue[IMAGE_ASSET_ID_KEY].GetString()));
+        OutAttribute.Value = csp::common::ReplicatedValue(ImageAssetMap);
+        return true;
+    }
+
     default:
         return false;
     }
@@ -308,6 +343,15 @@ void ApplyBuiltInTypeDefault(ScriptAttributeType Type, NgxScriptAttribute& OutAt
         ModelAssetMap[MODEL_ASSET_COLLECTION_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
         ModelAssetMap[MODEL_ASSET_ASSET_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
         OutAttribute.Value = csp::common::ReplicatedValue(ModelAssetMap);
+        break;
+    }
+
+    case ScriptAttributeType::ImageAsset:
+    {
+        csp::common::Map<csp::common::String, csp::common::ReplicatedValue> ImageAssetMap;
+        ImageAssetMap[IMAGE_ASSET_COLLECTION_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
+        ImageAssetMap[IMAGE_ASSET_ID_KEY] = csp::common::ReplicatedValue(csp::common::String(""));
+        OutAttribute.Value = csp::common::ReplicatedValue(ImageAssetMap);
         break;
     }
 

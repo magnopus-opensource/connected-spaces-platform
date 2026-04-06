@@ -107,11 +107,11 @@ public:
     void SetUIViewportSize(float Width, float Height);
 
     // Drain pending browser-safe text measurement requests as a JSON array.
-    // Each entry has shape: { "text": string, "fontSize": number }.
+    // Each entry has shape: { "text": string, "fontSize": number, "fontWeight": string }.
     csp::common::String DrainPendingUITextMeasureRequests();
 
     // Submit measured text results as a JSON array.
-    // Each entry has shape: { "text": string, "fontSize": number, "width": number, "height": number }.
+    // Each entry has shape: { "text": string, "fontSize": number, "fontWeight": string, "width": number, "height": number }.
     bool SubmitUITextMeasureResults(const csp::common::String& ResultsJson);
 
     // Drain pending add/update/remove operations for mounted UI drawables as a JSON array.
@@ -121,10 +121,11 @@ public:
     bool DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId);
 
     CSP_START_IGNORE
-    typedef std::function<void(const csp::common::String& Text, float FontSize, float& OutWidth, float& OutHeight)> UITextMeasureCallback;
+    typedef std::function<void(const csp::common::String& Text, float FontSize, const csp::common::String& FontWeight,
+        float& OutWidth, float& OutHeight)> UITextMeasureCallback;
 
     // Provide a client text measurement callback used by Clay during layout.
-    // The callback receives text, font size, and out-parameters for width and height.
+    // The callback receives text, font size, font weight, and out-parameters for width and height.
     // This path is intended for native clients. Web clients should prefer the async
     // request/result flow via DrainPendingUITextMeasureRequests and SubmitUITextMeasureResults.
     CSP_NO_EXPORT void SetUITextMeasureCallback(UITextMeasureCallback InCallback);
@@ -211,6 +212,7 @@ private:
     std::atomic<uint64_t> ContextGeneration;
     std::atomic<bool> ScriptModulesLoaded;
     std::atomic<bool> LastEvaluationDeferred;
+    std::atomic<bool> PendingJobPumpActive;
     csp::common::Vector3 LocalPlayerCameraPosition;
     csp::common::Vector4 LocalPlayerCameraRotation;
     csp::common::Vector3 LocalPlayerCameraForward;

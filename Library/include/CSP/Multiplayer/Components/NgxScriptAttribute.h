@@ -34,6 +34,7 @@ enum class ScriptAttributeType
     String,
     EntityQuery,
     ModelAsset,
+    ImageAsset,
     Num
 };
 

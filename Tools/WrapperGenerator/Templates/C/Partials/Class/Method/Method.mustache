@@ -227,7 +227,7 @@
         ) {
           {{# parameters }}
             {{# type.is_string }}
-              auto _{{ name }} = new char[{{ name }}.Length() + 1];
+              auto _{{ name }} = static_cast<char*>(std::malloc({{ name }}.Length() + 1));
               std::memcpy(_{{ name }}, {{ name }}.c_str(), {{ name }}.Length());
               _{{ name }}[{{ name }}.Length()] = '\0';
             {{/ type.is_string }}
@@ -465,7 +465,7 @@
           auto _cstr = _result.c_str();
         {{/ is_pointer }}
 
-        auto _resultCopy = new char[_result.Length() + 1];
+        auto _resultCopy = static_cast<char*>(std::malloc(_result.Length() + 1));
         std::memcpy(_resultCopy, _cstr, _result.Length());
         _resultCopy[_result.Length()] = '\0';
 

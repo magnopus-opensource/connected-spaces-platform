@@ -26,6 +26,7 @@ constexpr const char* ATTRIBUTE_FLOAT_VALUE_KEY = "floatValue";
 constexpr const char* ATTRIBUTE_STRING_VALUE_KEY = "stringValue";
 constexpr const char* ATTRIBUTE_ENTITY_QUERY_VALUE_KEY = "entityQueryValue";
 constexpr const char* ATTRIBUTE_MODEL_ASSET_VALUE_KEY = "modelAssetValue";
+constexpr const char* ATTRIBUTE_IMAGE_ASSET_VALUE_KEY = "imageAssetValue";
 
 constexpr const char* ENTITY_QUERY_KIND_KEY = "kind";
 constexpr const char* ENTITY_QUERY_ID_KEY = "id";
@@ -46,9 +47,12 @@ constexpr const char* ENTITY_QUERY_KIND_NOT = "not";
 constexpr int32_t ENTITY_QUERY_MAX_DEPTH = 16;
 constexpr const char* MODEL_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
 constexpr const char* MODEL_ASSET_ASSET_ID_KEY = "assetId";
+constexpr const char* IMAGE_ASSET_COLLECTION_ID_KEY = "assetCollectionId";
+constexpr const char* IMAGE_ASSET_ID_KEY = "imageAssetId";
 
 using EntityQueryValueType = csp::multiplayer::CodeAttribute::EntityQueryValueType;
 using ModelAssetValueType = csp::multiplayer::CodeAttribute::ModelAssetValueType;
+using ImageAssetValueType = csp::multiplayer::CodeAttribute::ImageAssetValueType;
 
 template<typename TValueMap>
 bool TryGetStringField(const TValueMap& Value, const char* Key, csp::common::String& OutValue)
@@ -160,6 +164,13 @@ bool IsValidModelAssetValueImpl(const ModelAssetValueType& Value)
     return TryGetStringField(Value, MODEL_ASSET_COLLECTION_ID_KEY, AssetCollectionId) && TryGetStringField(Value, MODEL_ASSET_ASSET_ID_KEY, AssetId);
 }
 
+bool IsValidImageAssetValueImpl(const ImageAssetValueType& Value)
+{
+    csp::common::String AssetCollectionId;
+    csp::common::String ImageAssetId;
+    return TryGetStringField(Value, IMAGE_ASSET_COLLECTION_ID_KEY, AssetCollectionId) && TryGetStringField(Value, IMAGE_ASSET_ID_KEY, ImageAssetId);
+}
+
 } // namespace
 
 namespace csp::multiplayer
@@ -173,6 +184,7 @@ CodeAttribute::CodeAttribute()
     , StringValue("")
     , EntityQueryValue()
     , ModelAssetValue()
+    , ImageAssetValue()
 {
 }
 
@@ -222,6 +234,13 @@ CodeAttribute CodeAttribute::FromModelAsset(const ModelAssetValueType& Value)
     return Attribute;
 }
 
+CodeAttribute CodeAttribute::FromImageAsset(const ImageAssetValueType& Value)
+{
+    CodeAttribute Attribute;
+    Attribute.SetImageAssetValue(Value);
+    return Attribute;
+}
+
 bool CodeAttribute::IsValidEntityQueryValue(const EntityQueryValueType& Value) { return IsValidEntityQueryValueImpl(Value, 0); }
 
 const CodeAttribute::EntityQueryValueType& CodeAttribute::GetEntityQueryValue() const { return EntityQueryValue; }
@@ -256,6 +275,23 @@ void CodeAttribute::SetModelAssetValue(const ModelAssetValueType& Value)
     ModelAssetValue = Value;
 }
 
+bool CodeAttribute::IsValidImageAssetValue(const ImageAssetValueType& Value) { return IsValidImageAssetValueImpl(Value); }
+
+const CodeAttribute::ImageAssetValueType& CodeAttribute::GetImageAssetValue() const { return ImageAssetValue; }
+
+void CodeAttribute::SetImageAssetValue(const ImageAssetValueType& Value)
+{
+    if (!IsValidImageAssetValue(Value))
+    {
+        Type = CodePropertyType::Invalid;
+        ImageAssetValue = ImageAssetValueType();
+        return;
+    }
+
+    Type = CodePropertyType::ImageAsset;
+    ImageAssetValue = Value;
+}
+
 csp::common::ReplicatedValue CodeAttribute::ToReplicatedValue() const
 {
     csp::common::Map<csp::common::String, csp::common::ReplicatedValue> SerializedValue;
@@ -266,6 +302,7 @@ csp::common::ReplicatedValue CodeAttribute::ToReplicatedValue() const
     SerializedValue[ATTRIBUTE_STRING_VALUE_KEY] = StringValue;
     SerializedValue[ATTRIBUTE_ENTITY_QUERY_VALUE_KEY] = EntityQueryValue;
     SerializedValue[ATTRIBUTE_MODEL_ASSET_VALUE_KEY] = ModelAssetValue;
+    SerializedValue[ATTRIBUTE_IMAGE_ASSET_VALUE_KEY] = ImageAssetValue;
     return csp::common::ReplicatedValue(SerializedValue);
 }
 
@@ -350,6 +387,23 @@ bool CodeAttribute::TryFromReplicatedValue(const csp::common::ReplicatedValue& I
         OutAttribute.ModelAssetValue = ParsedModelAssetValue;
     }
 
+    if (OutAttribute.Type == CodePropertyType::ImageAsset)
+    {
+        const auto ImageAssetValueIt = SerializedValue.Find(ATTRIBUTE_IMAGE_ASSET_VALUE_KEY);
+        if ((ImageAssetValueIt == SerializedValue.end()) || !IsStringMapReplicatedValue(ImageAssetValueIt->second))
+        {
+            return false;
+        }
+
+        const auto& ParsedImageAssetValue = ImageAssetValueIt->second.GetStringMap();
+        if (!IsValidImageAssetValue(ParsedImageAssetValue))
+        {
+            return false;
+        }
+
+        OutAttribute.ImageAssetValue = ParsedImageAssetValue;
+    }
+
     return true;
 }
 
@@ -357,7 +411,7 @@ bool CodeAttribute::operator==(const CodeAttribute& Other) const
 {
     return (Type == Other.Type) && (BooleanValue == Other.BooleanValue) && (IntegerValue == Other.IntegerValue)
         && (FloatValue == Other.FloatValue) && (StringValue == Other.StringValue) && (EntityQueryValue == Other.EntityQueryValue)
-        && (ModelAssetValue == Other.ModelAssetValue);
+        && (ModelAssetValue == Other.ModelAssetValue) && (ImageAssetValue == Other.ImageAssetValue);
 }
 
 bool CodeAttribute::operator!=(const CodeAttribute& Other) const { return !(*this == Other); }

@@ -18,19 +18,23 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Systems/Assets/RuntimeMaterialSystem.h"
 
+#include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace csp::systems
 {
-class RuntimeMaterialSystem;
 struct RuntimeMaterialState;
 struct RuntimeMaterialPatch;
 }
 
 namespace csp::multiplayer
 {
+
+class RuntimeMaterialTextureScriptInterface;
 
 class RuntimeMaterialScriptInterface
 {
@@ -47,6 +51,12 @@ public:
     std::string GetMaterialPath() const;
     int32_t GetShaderType() const;
     std::string GetName() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetBaseColorTexture() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetMetallicRoughnessTexture() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetNormalTexture() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetOcclusionTexture() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetEmissiveTexture() const;
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> GetColorTexture() const;
 
     Vector4 GetBaseColorFactor() const;
     void SetBaseColorFactor(Vector4 Value);
@@ -93,6 +103,7 @@ private:
 
     csp::systems::RuntimeMaterialState Resolve() const;
     bool ApplyPatch(const csp::systems::RuntimeMaterialPatch& Patch);
+    std::shared_ptr<RuntimeMaterialTextureScriptInterface> CreateTextureInterface(csp::systems::RuntimeMaterialTextureSlot Slot) const;
 
     csp::systems::RuntimeMaterialSystem* RuntimeMaterialSystem;
     RefKind Kind;
@@ -101,6 +112,7 @@ private:
     uint64_t EntityId = 0;
     ComponentType ComponentTypeValue = ComponentType::Invalid;
     int32_t ComponentIndex = -1;
+    mutable std::array<std::shared_ptr<RuntimeMaterialTextureScriptInterface>, 6> CachedTextureInterfaces {};
 };
 
 } // namespace csp::multiplayer

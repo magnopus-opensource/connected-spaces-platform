@@ -20,7 +20,7 @@ namespace csp::systems
 class NgxUIRuntime
 {
 public:
-    typedef std::function<csp::common::Vector2(const csp::common::String&, float)> TextMeasureCallback;
+    typedef std::function<csp::common::Vector2(const csp::common::String&, float, const csp::common::String&)> TextMeasureCallback;
 
     explicit NgxUIRuntime(csp::common::LogSystem& InLogSystem);
     ~NgxUIRuntime();
