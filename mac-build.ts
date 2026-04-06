@@ -66,6 +66,42 @@ async function verifyWasmFiles(buildType: string): Promise<boolean> {
   return true;
 }
 
+async function runTypeScriptWrapperGenerator(): Promise<void> {
+  console.log("\nRunning wrapper generator...");
+  if (!await runCommand([
+    "python3",
+    "Tools/WrapperGenerator/WrapperGenerator.py",
+    "--generate_typescript"
+  ])) {
+    throw new Error("Failed to run wrapper generator");
+  }
+}
+
+async function copyTypeScriptArtifacts(): Promise<void> {
+  const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
+  const tsDestPaths = [
+    join("..", "codecomponent", "node_modules", "connected-spaces-platform.web"),
+    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web")
+  ];
+
+  for (const tsDestPath of tsDestPaths) {
+    console.log(`\nCopying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
+    if (!await exists(tsSourcePath)) {
+      throw new Error(`TypeScript source path ${tsSourcePath} does not exist. Wrapper generator may need to be run first.`);
+    }
+    if (await exists(tsDestPath)) {
+      const stat = await Deno.lstat(tsDestPath);
+      if (stat.isFile) {
+        console.warn(`Warning: Destination ${tsDestPath} exists and is a file. Skipping TypeScript copy to this path.`);
+        continue;
+      }
+    }
+    if (!await copyDirectory(tsSourcePath, tsDestPath)) {
+      throw new Error(`Failed to copy TypeScript files to ${tsDestPath}`);
+    }
+  }
+}
+
 type BuildOptions = {
   skipGenerate?: boolean;
   noConfigure?: boolean;
@@ -118,13 +154,7 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
 
   // Step 4: Run wrapper generator
   console.log(`\n[${step}/${totalSteps}] Running wrapper generator...`);
-  if (!await runCommand([
-    "python3",
-    "Tools/WrapperGenerator/WrapperGenerator.py",
-    "--generate_typescript"
-  ])) {
-    throw new Error("Failed to run wrapper generator");
-  }
+  await runTypeScriptWrapperGenerator();
   step++;
 
 
@@ -143,17 +173,8 @@ async function buildProcess(buildType: string, options: BuildOptions = {}) {
   step++;
 
   // Step 6: Copy TypeScript files to both destinations
-  const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
-  const tsDestPaths = [
-    join("..", "codecomponent", "node_modules", "connected-spaces-platform.web"),
-    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web")
-  ];
-  for (const tsDestPath of tsDestPaths) {
-    console.log(`\n[${step}/${totalSteps}] Copying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
-    if (!await copyDirectory(tsSourcePath, tsDestPath)) {
-      throw new Error(`Failed to copy TypeScript files to ${tsDestPath}`);
-    }
-  }
+  console.log(`\n[${step}/${totalSteps}] Copying TypeScript files to destinations...`);
+  await copyTypeScriptArtifacts();
 
   console.log("\nBuild process completed successfully! 🎉");
 }
@@ -180,31 +201,17 @@ async function copyFilesOnly(buildType: string) {
   }
 
   // Step 2: Copy TypeScript files to both destinations
-  const tsSourcePath = join(".", "Tools", "WrapperGenerator", "Output", "TypeScript");
-  const tsDestPaths = [
-    join("..", "codecomponent", "node_modules", "connected-spaces-platform.web"),
-    join("..", "connected-spaces-platform-web-api", "node_modules", "connected-spaces-platform.web")
-  ];
-  for (const tsDestPath of tsDestPaths) {
-    console.log(`\n[2/2] Copying TypeScript files from ${tsSourcePath} to ${tsDestPath}...`);
-    if (!await exists(tsSourcePath)) {
-      throw new Error(`TypeScript source path ${tsSourcePath} does not exist. Wrapper generator may need to be run first.`);
-    }
-    // Check if destination exists and is a file, skip if so
-    if (await exists(tsDestPath)) {
-      const stat = await Deno.lstat(tsDestPath);
-      if (stat.isFile) {
-        console.warn(`Warning: Destination ${tsDestPath} exists and is a file. Skipping TypeScript copy to this path.`);
-        continue;
-      }
-    }
-    if (!await copyDirectory(tsSourcePath, tsDestPath)) {
-      console.warn(`Warning: Failed to copy TypeScript files to ${tsDestPath}`);
-      // Do not throw, just warn and continue
-    }
-  }
+  console.log("\n[2/2] Copying TypeScript files to destinations...");
+  await copyTypeScriptArtifacts();
 
   console.log("\nCopy operations completed successfully! 🎉");
+}
+
+async function generateAndCopyTypeScriptOnly() {
+  console.log("\nGenerating TypeScript wrappers and copying artifacts...");
+  await runTypeScriptWrapperGenerator();
+  await copyTypeScriptArtifacts();
+  console.log("\nTypeScript wrapper generation and copy completed successfully! 🎉");
 }
 
 const buildTypeOption = {
@@ -245,6 +252,19 @@ await new Command()
         skipGenerate: true, 
         noConfigure: true 
       });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("\n❌ Error:", error.message);
+      } else {
+        console.error("\n❌ Error:", String(error));
+      }
+      Deno.exit(1);
+    }
+  })
+  .command("typescript", "Generate TypeScript wrappers and copy them to the target destinations")
+  .action(async () => {
+    try {
+      await generateAndCopyTypeScriptOnly();
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("\n❌ Error:", error.message);
