@@ -69,7 +69,7 @@ if not CSP then
         filter "platforms:macosx"
             system "macosx"
             systemversion "10.15"
-            architecture "x86_64"
+            architecture "ARM64"
         filter "platforms:ios"
             system "ios"
             systemversion "15.0"

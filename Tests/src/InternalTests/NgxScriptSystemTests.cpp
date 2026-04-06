@@ -1914,6 +1914,58 @@ export function script() {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
 }
 
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, ServerCodeComponentRunsOnlyInServerRuntimeMode)
+{
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    csp::systems::NgxCodeComponentRuntime NgxCodeComponentRuntime(LogSystem, NgxScriptSystem);
+    TestRealtimeEngineWithEntities Engine(csp::common::RealtimeEngineType::Offline);
+    TestScriptRunner ScriptRunner;
+
+    NgxScriptSystem.OnEnterSpace("server-scope-runtime-space", &Engine);
+    NgxCodeComponentRuntime.OnEnterSpace("server-scope-runtime-space", &Engine);
+
+    NgxScriptSystem.SetLoadedModuleSourceForTesting("/scripts/modules/runtime-server.js", R"(
+export function script() {
+    return () => {
+        globalThis.__ngxRuntimeServerInitCalls = (globalThis.__ngxRuntimeServerInitCalls || 0) + 1;
+    };
+}
+)");
+
+    csp::multiplayer::SpaceEntity ServerEntity;
+    auto* ServerCodeComponent = static_cast<csp::multiplayer::CodeSpaceComponent*>(ServerEntity.AddComponent(csp::multiplayer::ComponentType::Code));
+    ASSERT_NE(ServerCodeComponent, nullptr);
+    ServerCodeComponent->SetScriptAssetPath("/scripts/modules/runtime-server.js");
+    ServerCodeComponent->SetCodeScopeType(csp::multiplayer::CodeScopeType::Server);
+
+    Engine.AddEntity(&ServerEntity);
+
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeServerInitCalls", 0), 0);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Server);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeServerInitCalls", 0), 1);
+
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Play);
+    ProcessTickEvent();
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxRuntimeServerInitCalls", 0), 1);
+
+    Engine.RemoveEntity(&ServerEntity);
+    ProcessTickEvent();
+    NgxCodeComponentRuntime.OnExitSpace();
+    NgxScriptSystem.OnExitSpace();
+    csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
 CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, CodeComponentsRemainDormantUntilRuntimeModeIsExplicitlySet)
 {
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Unset);

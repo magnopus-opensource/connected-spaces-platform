@@ -2251,7 +2251,7 @@ bool NgxCodeComponentRuntime::ShouldActivateCodeComponent(
         return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Edit;
 
     case csp::multiplayer::CodeScopeType::Server:
-        return false;
+        return GetRuntimeMode() == csp::systems::ESpaceRuntimeMode::Server;
 
     default:
         return false;
