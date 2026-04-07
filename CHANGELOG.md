@@ -44,6 +44,12 @@ All notable changes to this project will be documented in this file. For compile
   (instead of default initialised values), exposed that CSP was naively assuming
   that various optional fields are always set, resulting in `bad_optional_access`
   exceptions being thrown.
+  
+- [OF-1822] fix: Remove several redundant SignalR threads by @MAG-ElliotMorris
+  The SignalR threading library by default, constructs several instances of the scheduler,
+  (and thus several sets of threads) during initialization. These are never cleared on WASM,
+  as emscripten pools all its workers, leading to high memory usage. Also reduce thread count
+  generally under a similar motivation, as we don't need 5 threads.
 
 ## [6.30.0]
 
