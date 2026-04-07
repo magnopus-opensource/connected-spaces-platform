@@ -18,6 +18,29 @@
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
+#include <CSP/Systems/SystemsManager.h>
+#include <CSP/Systems/Users/UserSystem.h>
+
+#include <fmt/format.h>
+
+namespace
+{
+csp::common::Optional<csp::common::String> ConstructAuthorizationHeader()
+{
+    csp::common::Optional<csp::common::String> BearerToken;
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& UserSystem = *SystemsManager.GetUserSystem();
+
+    if (UserSystem.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    {
+        csp::common::String AccessToken = UserSystem.GetLoginState().AccessToken;
+        BearerToken = fmt::format("Bearer {}", AccessToken.c_str()).c_str();
+    }
+
+    return BearerToken;
+}
+} // namespace
 
 namespace csp::web
 {
@@ -37,6 +60,13 @@ void RemoteFileManager::GetFile(
     csp::web::HttpPayload Payload;
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("text/json"));
 
+    auto BearerToken = ConstructAuthorizationHeader();
+
+    if (BearerToken.HasValue())
+    {
+        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+    }
+
     WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
 }
 
@@ -44,6 +74,13 @@ void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::
 {
     csp::web::Uri GetUri(Url);
     csp::web::HttpPayload Payload;
+
+    auto BearerToken = ConstructAuthorizationHeader();
+
+    if (BearerToken.HasValue())
+    {
+        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+    }
 
     WebClient->SendRequest(csp::web::ERequestVerb::HEAD, GetUri, Payload, ResponseHandler, csp::common::CancellationToken::Dummy());
 }

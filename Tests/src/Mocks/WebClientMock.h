@@ -19,6 +19,7 @@
 #include "../../Library/src/Common/Web/HttpRequest.h"
 #include "../../Library/src/Common/Web/HttpResponse.h"
 #include "../../Library/src/Common/Web/WebClient.h"
+#include "../../Library/src/Services/ApiBase/ApiBase.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include <gmock/gmock.h>
 
@@ -27,9 +28,18 @@ class MockHttpResponseHandler : public csp::web::IHttpResponseHandler
 public:
     MockHttpResponseHandler() { }
 
-    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest & Request), (override));
-    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse & Response), (override));
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
     MOCK_METHOD(bool, ShouldDelete, (), (const, override));
+};
+
+class MockApiResponseHandler : public csp::services::ApiResponseHandlerBase
+{
+public:
+    MockApiResponseHandler() { }
+
+    MOCK_METHOD(void, OnHttpProgress, (csp::web::HttpRequest& Request), (override));
+    MOCK_METHOD(void, OnHttpResponse, (csp::web::HttpResponse& Response), (override));
 };
 
 class WebClientMock : public csp::web::WebClient
