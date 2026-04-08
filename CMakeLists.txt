@@ -146,15 +146,7 @@ target_compile_definitions(csp-lib
     LIBASYNC_STATIC
     # We have our own default scheduler to remove the need to additional params
     LIBASYNC_CUSTOM_DEFAULT_SCHEDULER
-    # POCO related macros
-    # Stops POCO including the entire windows.h
-    POCO_NO_WINDOWS_H
-    # For compilers with incomplete floating point support
-    POCO_NO_FPENVIRONMENT
-    # For compilers that don't support wstrings
-    $<$<NOT:$<PLATFORM_ID:Windows>>:POCO_NO_WSTRING>
-    # For systems that don't support shared memory apis
-    POCO_NO_SHAREDMEMORY
+
     # Remove codecvt deprecation warnings for msvc
     $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING>
     # Disable unused POCO features
@@ -165,6 +157,12 @@ target_compile_definitions(csp-lib
     $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_INIFILECONFIGURATION>
     $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_JSONCONFIGURATION>
     $<$<NOT:$<CXX_COMPILER_ID:Emscripten>>:POCO_UTIL_NO_XMLCONFIGURATION>
+
+    # Android + MacOS + iOS
+    $<$<OR:$<PLATFORM_ID:Android>,$<PLATFORM_ID:Darwin>>:POCO_NO_WINDOWS_H>
+    $<$<OR:$<PLATFORM_ID:Android>,$<PLATFORM_ID:Darwin>>:POCO_NO_FPENVIRONMENT>
+    $<$<OR:$<PLATFORM_ID:Android>,$<PLATFORM_ID:Darwin>>:POCO_NO_WSTRING>
+    $<$<OR:$<PLATFORM_ID:Android>,$<PLATFORM_ID:Darwin>>:POCO_NO_SHAREDMEMORY>
 )
 
 # Warnings as errors flag
