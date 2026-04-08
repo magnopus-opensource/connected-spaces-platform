@@ -28,6 +28,7 @@ public:
 	static std::shared_ptr<hub_connection_impl>
 		create(const std::string& url,
 			   std::unique_ptr<hub_protocol>&& hub_protocol,
+			   signalr_client_config client_config,
 			   trace_level trace_level,
 			   const std::shared_ptr<log_writer>& log_writer,
 			   std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,
@@ -56,6 +57,7 @@ public:
 private:
 	hub_connection_impl(const std::string& url,
 						std::unique_ptr<hub_protocol>&& hub_protocol,
+						signalr_client_config client_config,
 						trace_level trace_level,
 						const std::shared_ptr<log_writer>& log_writer,
 						std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,

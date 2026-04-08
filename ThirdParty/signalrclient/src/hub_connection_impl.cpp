@@ -30,6 +30,7 @@ static std::function<void(const char*, const signalr::value&)>
 std::shared_ptr<hub_connection_impl>
 	hub_connection_impl::create(const std::string& url,
 								std::unique_ptr<hub_protocol>&& hub_protocol,
+								signalr_client_config client_config,
 								trace_level trace_level,
 								const std::shared_ptr<log_writer>& log_writer,
 								std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,
@@ -37,7 +38,7 @@ std::shared_ptr<hub_connection_impl>
 								const bool skip_negotiation)
 {
 	auto connection = std::shared_ptr<hub_connection_impl>(
-		new hub_connection_impl(url, std::move(hub_protocol), trace_level, log_writer, http_client_factory, websocket_factory, skip_negotiation));
+		new hub_connection_impl(url, std::move(hub_protocol), std::move(client_config), trace_level, log_writer, http_client_factory, websocket_factory, skip_negotiation));
 
 	connection->initialize();
 
@@ -46,6 +47,7 @@ std::shared_ptr<hub_connection_impl>
 
 hub_connection_impl::hub_connection_impl(const std::string& url,
 										 std::unique_ptr<hub_protocol>&& hub_protocol,
+										 signalr_client_config client_config,
 										 trace_level trace_level,
 										 const std::shared_ptr<log_writer>& log_writer,
 										 std::function<std::shared_ptr<http_client>(const signalr_client_config&)> http_client_factory,
@@ -59,6 +61,7 @@ hub_connection_impl::hub_connection_impl(const std::string& url,
 		  [](std::exception_ptr) noexcept
 		  {
 		  })
+	, m_signalr_client_config(std::move(client_config))
 	, m_protocol(std::move(hub_protocol))
 {
 }

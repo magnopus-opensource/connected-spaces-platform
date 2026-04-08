@@ -59,6 +59,13 @@ namespace signalr
         return *this;
     }
 
+    hub_connection_builder& hub_connection_builder::with_config(const signalr_client_config& config)
+    {
+        m_signalr_client_config = std::unique_ptr<signalr_client_config>(new signalr_client_config(config));
+        
+        return *this;
+    }
+
     hub_connection_builder& hub_connection_builder::with_websocket_factory(std::function<std::shared_ptr<websocket_client>(const signalr_client_config&)> factory)
     {
         m_websocket_factory = factory;
@@ -115,6 +122,8 @@ namespace signalr
             hub_protocol = std::unique_ptr<json_hub_protocol>(new json_hub_protocol());
         }
 
-        return hub_connection(m_url, std::move(hub_protocol), m_log_level, m_logger, m_http_client_factory, m_websocket_factory, m_skip_negotiation);
+        auto client_config = m_signalr_client_config ? *m_signalr_client_config : signalr_client_config();
+
+        return hub_connection(m_url, std::move(hub_protocol), std::move(client_config), m_log_level, m_logger, m_http_client_factory, m_websocket_factory, m_skip_negotiation);
     }
 }
