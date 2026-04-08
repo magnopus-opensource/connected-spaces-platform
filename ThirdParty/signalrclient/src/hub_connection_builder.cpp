@@ -61,6 +61,7 @@ namespace signalr
 
     hub_connection_builder& hub_connection_builder::with_config(const signalr_client_config& config)
     {
+        //This looks like it'd be copying the scheduler and thus spawning threads, but it's not, the client_config is a value type, it copies a shared_ptr.
         m_signalr_client_config = std::unique_ptr<signalr_client_config>(new signalr_client_config(config));
         
         return *this;

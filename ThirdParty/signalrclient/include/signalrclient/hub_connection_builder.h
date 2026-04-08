@@ -46,6 +46,7 @@ namespace signalr
         hub_connection_builder(const std::string& url);
 
         std::string m_url;
+        //Important not to default construct this as if we do, we'd spawn threads only to overwrite them (spawning yet more threads) when we set this.
         std::unique_ptr<signalr_client_config> m_signalr_client_config;
         std::shared_ptr<log_writer> m_logger;
         trace_level m_log_level;
