@@ -123,7 +123,7 @@ namespace signalr
 
         std::thread([=]()
             {
-                std::vector<thread> threads{ 5 };
+                std::vector<thread> threads{ 2 };
 
                 std::unique_lock<std::mutex> lock(internals->m_callback_lock);
 
