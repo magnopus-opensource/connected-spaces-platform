@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. For compile
 
 - [OF-1625] feat: Add enabled property to `CollisionSpaceComponent`. By @mag-lt.
 
-- [OF-1844] feat: Add `Authorization` header to asset requests. By @mag-lt. By @MAG-AdamThorn
+- [OF-1844] feat: Add `Authorization` header to asset requests. By @MAG-AdamThorn
   This change adds content security to our S3 Assets, by ensuring asset requests are authorized. An `Authorization` header has been added to our file Web Requests with the authenticated users bearer token.
 
 ###💫 💥 Code Refactors
