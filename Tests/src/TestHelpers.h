@@ -291,24 +291,31 @@ inline csp::multiplayer::SpaceEntity* CreateTestObject(csp::common::IRealtimeEng
 
 inline std::optional<std::vector<unsigned char>> OpenFile(const std::string& FilePath)
 {
-    auto UploadFilePath = std::filesystem::absolute(FilePath);
-    if (!std::filesystem::exists(UploadFilePath)) {
+    auto AbsoluteFilePath = std::filesystem::absolute(FilePath);
+    if (!std::filesystem::exists(AbsoluteFilePath))
+    {
         return std::nullopt;
     }
 
-    const auto UploadFileSize = std::filesystem::file_size(UploadFilePath);
+    const auto FileSize = std::filesystem::file_size(AbsoluteFilePath);
 
-    std::ifstream UploadFile(UploadFilePath, std::ios::binary);
-    if (!UploadFile) {
+    std::ifstream File(AbsoluteFilePath, std::ios::binary);
+    if (!File)
+    {
         return std::nullopt;
     }
 
-    std::vector<unsigned char> UploadFileData(static_cast<size_t>(UploadFileSize));
+    if (!std::filesystem::is_regular_file(AbsoluteFilePath))
+    {
+        return std::nullopt;
+    }
 
-    if (!UploadFile.read(reinterpret_cast<char*>(UploadFileData.data()),
-                         static_cast<std::streamsize>(UploadFileData.size()))) {
+    std::vector<unsigned char> FileData(static_cast<size_t>(FileSize));
+
+    if (!File.read(reinterpret_cast<char*>(FileData.data()), static_cast<std::streamsize>(FileData.size())))
+    {
         return std::nullopt;
     }
     
-    return UploadFileData;
+    return FileData;
 }
