@@ -10,7 +10,12 @@ class CSP(ConanFile):
     exports_sources = "CMakeLists.txt", "Library/*", "Tests/*", "cmake/*"
 
     def layout(self):
-        cmake_layout(self)
+        # Explicitly set the provided generator
+        # This fixes a bug with the xcode generator where conan doesn't configure correctly and points to the incorrect directory.
+        cmake_layout(
+            self,
+            generator=self.conf.get("tools.cmake.cmaketoolchain:generator", default=None)
+        )
 
     def requirements(self):
         self.requires("rapidjson/cci.20250205")
@@ -57,6 +62,9 @@ class CSP(ConanFile):
         tc.blocks.remove("shared")
         # This allows us to set shared libs through the conan install step and pass to cmake
         tc.cache_variables["CSP_BUILD_SHARED"] = self.options.shared
+
+        # Generate conan presets file
+        tc.user_presets_path = 'ConanPresets.json'
 
         tc.generate()
         
