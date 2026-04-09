@@ -66,10 +66,10 @@ SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t 
     : config(
           [KeepAliveSeconds]
           {
-              auto config = signalr_client_config();
-              config.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
-              config.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
-              return config;
+              auto clientConfig = signalr_client_config();
+              clientConfig.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
+              clientConfig.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
+              return clientConfig;
           }())
     , Connection(hub_connection_builder::create(BaseUri)
               .with_config(config)
