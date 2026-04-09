@@ -63,23 +63,28 @@ public:
 
 SignalRConnection::SignalRConnection(const std::string& BaseUri, const uint32_t KeepAliveSeconds, std::shared_ptr<websocket_client> WebsocketClient,
     csp::common::IAuthContext& AuthContext)
-    : Connection(hub_connection_builder::create(BaseUri)
-                     .with_http_client_factory([&AuthContext](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(AuthContext); })
-                     .with_websocket_factory([WebsocketClient](const signalr_client_config&) { return WebsocketClient; })
-                     .skip_negotiation(true)
-                     .with_messagepack_hub_protocol()
+    : config(
+          [KeepAliveSeconds]
+          {
+              auto clientConfig = signalr_client_config();
+              clientConfig.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
+              clientConfig.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
+              return clientConfig;
+          }())
+    , Connection(hub_connection_builder::create(BaseUri)
+              .with_config(config)
+              .with_http_client_factory([&AuthContext](const signalr_client_config&) { return std::make_shared<CSPHttpClient>(AuthContext); })
+              .with_websocket_factory([WebsocketClient](const signalr_client_config&) { return WebsocketClient; })
+              .skip_negotiation(true)
+              .with_messagepack_hub_protocol()
 #if ENABLE_SIGNALR_LOGGING
-                     .with_logging(std::make_shared<stdout_log_writer>(), trace_level::verbose)
+              .with_logging(std::make_shared<stdout_log_writer>(), trace_level::verbose)
 #else
-                     .with_logging(nullptr, trace_level::error)
+              .with_logging(nullptr, trace_level::error)
 #endif
-                     .build())
+              .build())
     , PendingInvocations(0)
 {
-    config = signalr_client_config();
-    config.set_keepalive_interval(std::chrono::seconds(KeepAliveSeconds));
-    config.set_http_headers({ { "X-DeviceUDID", csp::CSPFoundation::GetDeviceId().c_str() } });
-    Connection.set_client_config(config);
 }
 
 SignalRConnection::~SignalRConnection() { }
