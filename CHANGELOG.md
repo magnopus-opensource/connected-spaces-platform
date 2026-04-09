@@ -17,6 +17,11 @@ All notable changes to this project will be documented in this file. For compile
 - [OF-1848] refac!: Change underlying type of `ComponentType` and all `PropertyKey` enums to ensure compatibility with SignalR wire representation. By @mag-lt
   This is technically a breaking change, but it shouldn't force any client code changes. Explicitly defining the underlying type encodes
   the existing constaints into the type system.
+  
+### 🐛 🔨 Bug Fixes
+
+- [NT-0] fix: Fix tasks dropping in signalR scheduler by @MAG-ElliotMorris
+  Address issue where signalR scheduler can drop tasks in rare instances where scheduler threads are almost completely busy.
 
 ## [6.31.0]
 
