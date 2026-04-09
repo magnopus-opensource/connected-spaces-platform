@@ -79,6 +79,14 @@ source_group(TREE ${CSP_SERVICES_DIR} FILES
 # ------------------------------------------------------------------------------------------------------------------
 # Create csp-lib
 
+option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
+
+if(CSP_BUILD_SHARED)
+  set(CSP_LIB_TYPE SHARED)
+else()
+  set(CSP_LIB_TYPE STATIC)
+endif()
+
 add_library(csp-lib ${CSP_LIB_TYPE})
 
 target_sources(csp-lib
@@ -125,14 +133,6 @@ target_link_libraries(csp-lib
 
 # Public as it is a requiremnt that consumers also be >= c++17
 target_compile_features(csp-lib PUBLIC cxx_std_17)
-
-option(CSP_BUILD_SHARED "Build csp as a shared library" OFF)
-
-if(CSP_BUILD_SHARED)
-  set(CSP_LIB_TYPE SHARED)
-else()
-  set(CSP_LIB_TYPE STATIC)
-endif()
 
 target_compile_definitions(csp-lib
   PRIVATE
@@ -198,13 +198,6 @@ target_compile_options(csp-lib
 	    -Wno-ignored-qualifiers
     >
 )
-
-set_target_properties(csp-lib
-  # Exclude from ALL build
-  PROPERTIES EXCLUDE_FROM_ALL TRUE
-  # Hide in internal folder
-  FOLDER "_internal"
-  )
 
 # Generate version header
 configure_file(

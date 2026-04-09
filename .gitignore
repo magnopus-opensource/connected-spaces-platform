@@ -114,6 +114,8 @@ Tools/CppCheck/*.xml
 
 # Ignore Cmake user file
 CMakeUserPresets.json
+# Ignore conan generated presets file
+ConanPresets.json
 
 # Ignore common build and insall folder names
 build/
