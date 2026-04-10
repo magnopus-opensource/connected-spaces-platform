@@ -15,6 +15,7 @@
  */
 #include "Web/RemoteFileManager.h"
 
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
@@ -25,16 +26,13 @@
 
 namespace
 {
-csp::common::Optional<csp::common::String> ConstructAuthorizationHeader()
+csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(csp::common::IAuthContext* InAuthContext)
 {
     csp::common::Optional<csp::common::String> BearerToken;
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto& UserSystem = *SystemsManager.GetUserSystem();
-
-    if (UserSystem.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    if (InAuthContext && InAuthContext->GetLoginState().State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = UserSystem.GetLoginState().AccessToken;
+        csp::common::String AccessToken = InAuthContext->GetLoginState().AccessToken;
         BearerToken = fmt::format("Bearer {}", AccessToken.c_str()).c_str();
     }
 
@@ -45,8 +43,9 @@ csp::common::Optional<csp::common::String> ConstructAuthorizationHeader()
 namespace csp::web
 {
 
-RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient)
+RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient, csp::common::IAuthContext* InAuthContext)
     : WebClient(InWebClient)
+    , AuthContext(InAuthContext)
 {
 }
 
@@ -60,7 +59,7 @@ void RemoteFileManager::GetFile(
     csp::web::HttpPayload Payload;
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("text/json"));
 
-    auto BearerToken = ConstructAuthorizationHeader();
+    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
 
     if (BearerToken.HasValue())
     {
@@ -75,7 +74,7 @@ void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::
     csp::web::Uri GetUri(Url);
     csp::web::HttpPayload Payload;
 
-    auto BearerToken = ConstructAuthorizationHeader();
+    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
 
     if (BearerToken.HasValue())
     {

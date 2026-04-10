@@ -15,14 +15,11 @@
  */
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "CSP/Systems/Users/UserSystem.h"
+#include "Mocks/AuthContextMock.h"
 #include "Mocks/WebClientMock.h"
 #include "PlatformTestUtils.h"
 #include "TestHelpers.h"
 #include "Web/RemoteFileManager.h"
-
-#include <fmt/format.h>
 
 #include "gtest/gtest.h"
 #include <gmock/gmock.h>
@@ -37,14 +34,13 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetFileSendsCorrectRequestW
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
     const csp::common::String FileUrl = "https://mock.service/assets/test-file.glb";
 
-    EXPECT_CALL(*MockClient, SendRequest)
+    EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
             [&FileUrl](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
                 csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
@@ -63,11 +59,14 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetFileSendsCorrectRequestW
                 EXPECT_FALSE(Headers.count("Authorization")) << "Expected no Authorization header to be present in the request";
             });
 
-    RemoteFileManager FileManager(MockClient);
+    // The LoginState ctor default initialises the state to csp::common::ELoginState::LoggedOut, which is what we want for this test.
+    csp::common::LoginState LoginState;
+
+    EXPECT_CALL(MockContext, GetLoginState).WillOnce(::testing::ReturnRef(LoginState));
+
+    RemoteFileManager FileManager(&MockClient, &MockContext);
 
     FileManager.GetFile(FileUrl, &MockHandler, csp::common::CancellationToken::Dummy());
-
-    delete MockClient;
 
     csp::CSPFoundation::Shutdown();
 }
@@ -80,16 +79,15 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetResponseHeadersSendsCorr
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    csp::common::LogSystem* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
-
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
     const csp::common::String FileUrl = "https://mock.service/assets/test-file.glb";
 
-    EXPECT_CALL(*MockClient, SendRequest)
+    EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
-            [&FileUrl, LogSystem](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
+            [&FileUrl](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
                 csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
             {
                 EXPECT_EQ(Verb, ERequestVerb::HEAD);
@@ -101,11 +99,14 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetResponseHeadersSendsCorr
                 EXPECT_EQ(Headers.size(), 1) << "Expected exactly one header to be present in the request";
             });
 
-    RemoteFileManager FileManager(MockClient);
+    // The LoginState ctor default initialises the state to csp::common::ELoginState::LoggedOut, which is what we want for this test.
+    csp::common::LoginState LoginState;
+
+    EXPECT_CALL(MockContext, GetLoginState).WillOnce(::testing::ReturnRef(LoginState));
+
+    RemoteFileManager FileManager(&MockClient, &MockContext);
 
     FileManager.GetResponseHeaders(FileUrl, &MockHandler);
-
-    delete MockClient;
 
     csp::CSPFoundation::Shutdown();
 }
@@ -117,22 +118,13 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetFileIncludesAuthorizatio
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-
-    // Log in to ensure we have a valid LoginState with an AccessToken. This should result in the Authorization header being included in the HTTP
-    // request.
-    csp::common::String UserId;
-    LogInAsGuest(UserSystem, UserId);
-
-    csp::common::LogSystem* LogSystem = SystemsManager.GetLogSystem();
-
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
     const csp::common::String FileUrl = "https://mock.service/assets/test-file.glb";
 
-    EXPECT_CALL(*MockClient, SendRequest)
+    EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
             [&FileUrl](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
                 csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
@@ -162,12 +154,16 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetFileIncludesAuthorizatio
                     << "Authorization header should start with 'Bearer ', but was: " << BearerToken;
             });
 
-    RemoteFileManager FileManager(MockClient);
+    // Construct a LoginState object with the correct state.
+    csp::common::LoginState LoginState;
+    LoginState.State = csp::common::ELoginState::LoggedIn;
+    LoginState.AccessToken = "MockAccessToken";
+
+    EXPECT_CALL(MockContext, GetLoginState).WillRepeatedly(::testing::ReturnRef(LoginState));
+
+    RemoteFileManager FileManager(&MockClient, &MockContext);
+
     FileManager.GetFile(FileUrl, &MockHandler, csp::common::CancellationToken::Dummy());
-
-    LogOut(UserSystem);
-
-    delete MockClient;
 
     csp::CSPFoundation::Shutdown();
 }
@@ -179,22 +175,13 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetResponseHeadersIncludesA
 {
     InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-
-    // Log in to ensure we have a valid LoginState with an AccessToken. This should result in the Authorization header being included in the HTTP
-    // request.
-    csp::common::String UserId;
-    LogInAsGuest(UserSystem, UserId);
-
-    csp::common::LogSystem* LogSystem = SystemsManager.GetLogSystem();
-
-    WebClientMock* MockClient = new WebClientMock(80, ETransferProtocol::HTTP, LogSystem, true);
+    auto MockClient = WebClientMock(80, ETransferProtocol::HTTP, nullptr, true);
+    auto MockContext = MockAuthContext();
     MockApiResponseHandler MockHandler;
 
     const csp::common::String FileUrl = "https://mock.service/assets/test-file.glb";
 
-    EXPECT_CALL(*MockClient, SendRequest)
+    EXPECT_CALL(MockClient, SendRequest)
         .WillOnce(
             [&FileUrl](ERequestVerb Verb, const Uri& InUri, HttpPayload& Payload, IHttpResponseHandler* /*ResponseCallback*/,
                 csp::common::CancellationToken& /*CancellationToken*/, bool /*AsyncResponse*/)
@@ -222,12 +209,16 @@ CSP_INTERNAL_TEST(CSPEngine, RemoteFileManagerTests, GetResponseHeadersIncludesA
                     << "Authorization header should start with 'Bearer ', but was: " << BearerToken;
             });
 
-    RemoteFileManager FileManager(MockClient);
+    // Construct a LoginState object with the correct state.
+    csp::common::LoginState LoginState;
+    LoginState.State = csp::common::ELoginState::LoggedIn;
+    LoginState.AccessToken = "MockAccessToken";
+
+    EXPECT_CALL(MockContext, GetLoginState).WillRepeatedly(::testing::ReturnRef(LoginState));
+
+    RemoteFileManager FileManager(&MockClient, &MockContext);
+
     FileManager.GetResponseHeaders(FileUrl, &MockHandler);
-
-    LogOut(UserSystem);
-
-    delete MockClient;
 
     csp::CSPFoundation::Shutdown();
 }

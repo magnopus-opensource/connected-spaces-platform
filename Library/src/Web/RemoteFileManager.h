@@ -20,13 +20,18 @@
 #include "Common/Web/WebClient.h"
 #include "Services/PrototypeService/AssetFileDto.h"
 
+namespace csp::common
+{
+class IAuthContext;
+} // namespace csp::common
+
 namespace csp::web
 {
 
 class RemoteFileManager
 {
 public:
-    RemoteFileManager(csp::web::WebClient* InWebClient);
+    RemoteFileManager(csp::web::WebClient* InWebClient, csp::common::IAuthContext* InAuthContext);
     ~RemoteFileManager();
 
     void GetFile(const csp::common::String& FileUrl, csp::services::ResponseHandlerPtr ResponseHandler,
@@ -35,6 +40,7 @@ public:
 
 private:
     csp::web::WebClient* WebClient;
+    csp::common::IAuthContext* AuthContext;
 };
 
 } // namespace csp::web
