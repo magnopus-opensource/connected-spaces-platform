@@ -19,8 +19,6 @@
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
-#include <CSP/Systems/SystemsManager.h>
-#include <CSP/Systems/Users/UserSystem.h>
 
 #include <fmt/format.h>
 
@@ -33,7 +31,7 @@ csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(csp::com
     if (InAuthContext && InAuthContext->GetLoginState().State == csp::common::ELoginState::LoggedIn)
     {
         csp::common::String AccessToken = InAuthContext->GetLoginState().AccessToken;
-        BearerToken = fmt::format("Bearer {}", AccessToken.c_str()).c_str();
+        BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
     }
 
     return BearerToken;
