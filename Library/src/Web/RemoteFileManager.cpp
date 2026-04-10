@@ -24,13 +24,13 @@
 
 namespace
 {
-csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(csp::common::IAuthContext* InAuthContext)
+csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
 {
     csp::common::Optional<csp::common::String> BearerToken;
 
-    if (InAuthContext && InAuthContext->GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    if (InAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
     {
-        csp::common::String AccessToken = InAuthContext->GetLoginState().AccessToken;
+        csp::common::String AccessToken = InAuthContext.GetLoginState().AccessToken;
         BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
     }
 
@@ -41,7 +41,7 @@ csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(csp::com
 namespace csp::web
 {
 
-RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient, csp::common::IAuthContext* InAuthContext)
+RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient, const csp::common::IAuthContext& InAuthContext)
     : WebClient(InWebClient)
     , AuthContext(InAuthContext)
 {

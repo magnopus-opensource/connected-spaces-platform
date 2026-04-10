@@ -88,7 +88,7 @@ TEST_P(GetFile, GetFileSendsCorrectRequest)
 
     EXPECT_CALL(MockContext, GetLoginState).WillRepeatedly(::testing::ReturnRef(LoginState));
 
-    RemoteFileManager FileManager(&MockClient, &MockContext);
+    RemoteFileManager FileManager(&MockClient, MockContext);
 
     FileManager.GetFile(FileUrl, &MockHandler, csp::common::CancellationToken::Dummy());
 
@@ -149,7 +149,7 @@ TEST_P(GetResponseHeaders, GetResponseHeadersSendsCorrectRequest)
 
     EXPECT_CALL(MockContext, GetLoginState).WillRepeatedly(::testing::ReturnRef(LoginState));
 
-    RemoteFileManager FileManager(&MockClient, &MockContext);
+    RemoteFileManager FileManager(&MockClient, MockContext);
 
     FileManager.GetResponseHeaders(FileUrl, &MockHandler);
 
