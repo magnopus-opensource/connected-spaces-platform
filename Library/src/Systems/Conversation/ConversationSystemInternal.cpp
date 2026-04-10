@@ -1160,7 +1160,7 @@ void ConversationSystemInternal::FlushEvents()
         if (TrySendEvent(**It))
         {
             // Event has now been processed, so remove
-            Events.erase(It);
+            It = Events.erase(It);
         }
         else
         {

@@ -339,7 +339,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntityGen
                 {
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error{ "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 
@@ -396,7 +396,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, CreateEntitySen
 
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error { "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 
@@ -504,7 +504,7 @@ CSP_PUBLIC_TEST_WITH_MOCKS(CSPEngine, OnlineRealtimeEngineTests, DestroyEntitySe
 
                     // Fail this method by returning an exception
                     signalr::value Value {};
-                    const auto ExceptionPtr = std::make_exception_ptr(std::exception { "fail" });
+                    const auto ExceptionPtr = std::make_exception_ptr(std::runtime_error { "fail" });
 
                     Callback(signalr::value {}, ExceptionPtr);
 

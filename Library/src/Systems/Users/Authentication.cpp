@@ -56,8 +56,8 @@ namespace
     csp::common::ApplicationSettings MakeApplicationSetting(const csp::services::generated::userservice::ApplicationSettingsDto& Setting)
     {
         csp::common::ApplicationSettings ApplicationSetting;
-        ApplicationSetting.ApplicationName = Setting.HasApplicationName() ? Setting.GetApplicationName() : "";
-        ApplicationSetting.Context = Setting.HasContext() ? Setting.GetContext() : "";
+        ApplicationSetting.ApplicationName = Setting.HasApplicationName() ? Setting.GetApplicationName() : services::utility::string_t { "" };
+        ApplicationSetting.Context = Setting.HasContext() ? Setting.GetContext() : services::utility::string_t { "" };
         ApplicationSetting.AllowAnonymous = Setting.HasAllowAnonymous() ? Setting.GetAllowAnonymous() : false;
         ApplicationSetting.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(ApplicationSetting.Settings) {};
         return ApplicationSetting;
@@ -67,8 +67,8 @@ namespace
     csp::common::SettingsCollection MakeSettingsCollection(const csp::services::generated::userservice::SettingsDto& Setting)
     {
         csp::common::SettingsCollection SettingsCollection;
-        SettingsCollection.UserId = Setting.HasUserId() ? Setting.GetUserId() : "";
-        SettingsCollection.Context = Setting.HasContext() ? Setting.GetContext() : "";
+        SettingsCollection.UserId = Setting.HasUserId() ? Setting.GetUserId() : services::utility::string_t { "" };
+        SettingsCollection.Context = Setting.HasContext() ? Setting.GetContext() : services::utility::string_t { "" };
         SettingsCollection.Settings = Setting.HasSettings() ? csp::common::Convert(Setting.GetSettings()) : decltype(SettingsCollection.Settings) {};
         return SettingsCollection;
     }

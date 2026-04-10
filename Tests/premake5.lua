@@ -25,9 +25,9 @@ if not Tests then
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
             "%{wks.location}/ThirdParty/googlemock/include",
-            "%{wks.location}/ThirdParty/uuid-v4",
+            "%{wks.location}/ThirdParty/sole",
             "%{wks.location}/ThirdParty/tiny-process-library/install/include",
-            "%{wks.location}/MultiplayerTestRunner/include"
+            "%{wks.location}/MultiplayerTestRunner/include",
         }   
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"
@@ -51,6 +51,10 @@ if not Tests then
 		
 		-- We're building LibAsync statically and need this
 		defines { "LIBASYNC_STATIC" }
+
+        defines {
+            'MULTIPLAYER_TEST_RUNNER_PATH="MultiplayerTestRunner"'
+        }       
         
         -- Config for platforms
         filter "platforms:x64"

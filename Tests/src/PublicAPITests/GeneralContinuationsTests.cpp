@@ -201,7 +201,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenUnexpectedExceptio
     EXPECT_CALL(MockUnexpectedHandlerCallable, Call(::testing::_)).Times(1);
 
     csp::systems::continuations::detail::testing::SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(
-        MockExpectedHandlerCallable.AsStdFunction(), MockUnexpectedHandlerCallable.AsStdFunction(), std::exception(""));
+        MockExpectedHandlerCallable.AsStdFunction(), MockUnexpectedHandlerCallable.AsStdFunction(), std::runtime_error(""));
 }
 
 CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestWhenContinuationChainCancelledThenHandlerAndResultCallbackCalled)
