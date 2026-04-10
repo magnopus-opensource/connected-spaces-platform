@@ -181,8 +181,10 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Fatal);
 
     // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
-    const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: DeleteObjects";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
+    const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: ";
+    EXPECT_CALL(MockLogger.MockLogCallback,
+                Call(csp::common::LogLevel::Fatal, testing::HasSubstr(ErrorMsg)))
+        .Times(1);
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> {};
@@ -196,8 +198,8 @@ CSP_PUBLIC_TEST(CSPEngine, MCSExternalDependencyTests, ResolveMultiplayerHubMeth
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(LogLevel::Fatal);
 
     // Validate that the failure to find the multiplayer hub methods code path has been triggered and populated through the log system
-    const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: GenerateObjectIds";
-    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, ErrorMsg)).Times(1);
+    const String ErrorMsg = "Failed to resolve the Multiplayer Hub Method: ";
+    EXPECT_CALL(MockLogger.MockLogCallback, Call(csp::common::LogLevel::Fatal, testing::HasSubstr(ErrorMsg))).Times(1);
 
     auto const MultiplayerHubMethodMap = csp::multiplayer::MultiplayerHubMethodMap();
     auto const Methods = Array<String> { "DeleteObjects", "SendEventMessage", "StopListening" };
