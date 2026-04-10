@@ -72,6 +72,15 @@ protected:
     void TearDown() override;
 };
 
+// For parameterized (data driven) internal tests
+// This is the parameterized equivalent of CSP_INTERNAL_TEST which uses ::testing::Test directly
+template <typename T> class PublicTestBaseInternalWithParam : public ::testing::TestWithParam<T>
+{
+protected:
+    void SetUp() override { ::testing::TestWithParam<T>::SetUp(); }
+    void TearDown() override { ::testing::TestWithParam<T>::TearDown(); }
+};
+
 // If you want to use a new parameterized test structure, you need to explicitly instantiate here (and in the .cpp)
 extern template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;
 extern template class PublicTestBaseWithParam<std::tuple<csp::common::RealtimeEngineType, bool, csp::systems::EResultCode, std::string>>;
