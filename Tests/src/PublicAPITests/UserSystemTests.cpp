@@ -530,27 +530,33 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ValidExpiryLengthInTokenOptionsTest)
     auto* UserSystem = SystemsManager.GetUserSystem();
 
     auto TokenOptions = csp::systems::TokenOptions();
-    TokenOptions.AccessTokenExpiryLength = "00:00:05";
+    TokenOptions.AccessTokenExpiryLength = "00:00:30";
 
-    // Ensure that the token expiry time matched the provided token options
+    std::promise<csp::systems::LoginTokenInfoResult> TokenPromise;
+    std::future<csp::systems::LoginTokenInfoResult> TokenFuture = TokenPromise.get_future();
+
     UserSystem->SetNewLoginTokenReceivedCallback(
-        [](const csp::systems::LoginTokenInfoResult& Result)
+        [&TokenPromise](const csp::systems::LoginTokenInfoResult& Result)
         {
-            EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-            const auto TokenInfo = Result.GetLoginTokenInfo();
-
-            const auto AccessExpiryTime = csp::common::DateTime(TokenInfo.AccessExpiryTime);
-            const auto CurrentTime = csp::common::DateTime::UtcTimeNow();
-
-            // Calculate the delta from the available time points as we do not support duration in DateTime
-            const auto Delta = AccessExpiryTime.GetTimePoint() - CurrentTime.GetTimePoint();
-            EXPECT_LE(Delta, 10s);
+            TokenPromise.set_value(Result);
         });
 
     // Log in
     csp::common::String UserId;
     LogInAsNewTestUser(UserSystem, UserId, true, true, TokenOptions);
+
+    ASSERT_EQ(TokenFuture.wait_for(30s), std::future_status::ready) << "NewLoginTokenReceivedCallback was not invoked";
+
+    const auto Result = TokenFuture.get();
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const auto TokenInfo = Result.GetLoginTokenInfo();
+    const auto AccessExpiryTime = csp::common::DateTime(TokenInfo.AccessExpiryTime);
+    const auto CurrentTime = csp::common::DateTime::UtcTimeNow();
+
+    // Calculate the delta from the available time points as we do not support duration in DateTime
+    const auto Delta = AccessExpiryTime.GetTimePoint() - CurrentTime.GetTimePoint();
+    EXPECT_LE(Delta, 40s);
 
     // Log out
     LogOut(UserSystem);

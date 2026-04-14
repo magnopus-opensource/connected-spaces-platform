@@ -272,8 +272,6 @@ void UserSystem::Login(const csp::common::String& Email, const csp::common::Stri
         {
             if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
             {
-                NotifyRefreshTokenHasChanged();
-
                 csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
                     = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
                 {
@@ -613,8 +611,6 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
     {
         if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            NotifyRefreshTokenHasChanged();
-
             csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ConnectionCallback
                 = [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
             {
