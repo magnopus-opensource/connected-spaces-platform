@@ -15,15 +15,35 @@
  */
 #include "Web/RemoteFileManager.h"
 
+#include "CSP/Common/Interfaces/IAuthContext.h"
 #include "Common/Web/HttpAuth.h"
 #include "Common/Web/HttpPayload.h"
 #include "Common/Web/WebClient.h"
 
+#include <fmt/format.h>
+
+namespace
+{
+csp::common::Optional<csp::common::String> ConstructAuthorizationHeader(const csp::common::IAuthContext& InAuthContext)
+{
+    csp::common::Optional<csp::common::String> BearerToken;
+
+    if (InAuthContext.GetLoginState().State == csp::common::ELoginState::LoggedIn)
+    {
+        csp::common::String AccessToken = InAuthContext.GetLoginState().AccessToken;
+        BearerToken = csp::common::String(fmt::format("Bearer {}", AccessToken.c_str()).c_str());
+    }
+
+    return BearerToken;
+}
+} // namespace
+
 namespace csp::web
 {
 
-RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient)
+RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient, const csp::common::IAuthContext& InAuthContext)
     : WebClient(InWebClient)
+    , AuthContext(InAuthContext)
 {
 }
 
@@ -37,6 +57,13 @@ void RemoteFileManager::GetFile(
     csp::web::HttpPayload Payload;
     Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("text/json"));
 
+    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
+
+    if (BearerToken.HasValue())
+    {
+        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+    }
+
     WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
 }
 
@@ -44,6 +71,13 @@ void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::
 {
     csp::web::Uri GetUri(Url);
     csp::web::HttpPayload Payload;
+
+    auto BearerToken = ConstructAuthorizationHeader(AuthContext);
+
+    if (BearerToken.HasValue())
+    {
+        Payload.AddHeader(CSP_TEXT("Authorization"), *BearerToken);
+    }
 
     WebClient->SendRequest(csp::web::ERequestVerb::HEAD, GetUri, Payload, ResponseHandler, csp::common::CancellationToken::Dummy());
 }
