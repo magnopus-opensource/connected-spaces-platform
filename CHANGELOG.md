@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.33.0]
+
+### 🙈 🙉 🙊 Test Changes
+
+- [NT-0] test: Address issue with flackey ValidExpiryLengthInTokenOptionsTest by MAG-AdamThorn
+  The test ValidExpiryLengthInTokenOptionsTest was failing when run against live services on our CI due to network latency. Adressed the flackiness and also removed calls to `NotifyRefreshTokenHasChanged()` from the UserSystem as this is already being done within the `LoginStateResult::OnResponse()`, resulting in the `UserSystem NewLoginTokenReceivedCallback` callback being fired twice.
+
+
 ## [6.32.0]
 
 ### 🍰 🙌 New Features
