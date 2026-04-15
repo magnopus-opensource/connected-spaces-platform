@@ -26,6 +26,7 @@
 namespace
 {
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
+constexpr const float DefaultVolume = 1.f;
 }
 
 namespace csp::multiplayer
@@ -125,6 +126,14 @@ const auto Schema = ComponentBase::ComponentSchema {
         {
             static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsVirtualVisible),
             true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Volume),
+            DefaultVolume,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::AudioType),
+            static_cast<int64_t>(AudioType::Spatial),
         },
     },
 };
@@ -311,7 +320,7 @@ void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool Value)
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), Value);
 }
 
-/* IAudioSourceComponent */
+/* IAudioControlComponent */
 
 float VideoPlayerSpaceComponent::GetAttenuationRadius() const
 {

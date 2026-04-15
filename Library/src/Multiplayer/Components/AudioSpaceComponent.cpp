@@ -148,7 +148,7 @@ void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& I
     SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
-/* IAudioSourceComponent */
+/* IAudioControlComponent */
 
 float AudioSpaceComponent::GetAttenuationRadius() const { return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)); }
 

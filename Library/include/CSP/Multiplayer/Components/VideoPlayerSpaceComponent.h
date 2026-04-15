@@ -23,7 +23,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/Components/Interfaces/IAudioSourceComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IAudioControlComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
@@ -96,7 +96,7 @@ enum class VideoPlayerPropertyKeys : uint16_t
 ///
 /// You can use it to stream videos from a URL or play videos stored as assets in CSP, allowing users to watch videos directly within the virtual
 /// environment.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IAudioSourceComponent, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
     /// @brief Constructs the video player component, and associates it with the specified Parent space entity.
@@ -237,19 +237,19 @@ public:
     /// @param Value True if the stereo frames are flipped, false for default.
     void SetIsStereoFlipped(bool Value);
 
-    /// \addtogroup IAudioSourceComponent
+    /// \addtogroup IAudioControlComponent
     /// @{
-    /// @copydoc IAudioSourceComponent::GetAudioType()
+    /// @copydoc IAudioControlComponent::GetAudioType()
     AudioType GetAudioType() const override;
-    /// @copydoc IAudioSourceComponent::SetAudioType()
+    /// @copydoc IAudioControlComponent::SetAudioType()
     void SetAudioType(AudioType Value) override;
-    /// @copydoc IAudioSourceComponent::GetAttenuationRadius()
+    /// @copydoc IAudioControlComponent::GetAttenuationRadius()
     float GetAttenuationRadius() const override;
-    /// @copydoc IAudioSourceComponent::SetAttenuationRadius()
+    /// @copydoc IAudioControlComponent::SetAttenuationRadius()
     void SetAttenuationRadius(float Value) override;
-    /// @copydoc IAudioSourceComponent::GetVolume()
+    /// @copydoc IAudioControlComponent::GetVolume()
     float GetVolume() const override;
-    /// @copydoc IAudioSourceComponent::SetVolume()
+    /// @copydoc IAudioControlComponent::SetVolume()
     void SetVolume(float Value) override;
     /// @}
  

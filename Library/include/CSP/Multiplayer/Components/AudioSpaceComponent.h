@@ -20,7 +20,7 @@
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/Components/Interfaces/IAudioSourceComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IAudioControlComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
@@ -59,7 +59,7 @@ enum class AudioPropertyKeys : uint16_t
 ///
 /// This component creates immersive soundscapes by playing audio that reacts to the user's position in the space.
 /// Whether it's background music, sound effects, or voiceovers, the AudioSpaceComponent makes sound more engaging by positioning it in 3D space.
-class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef, public IAudioSourceComponent
+class CSP_API AudioSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
@@ -116,19 +116,19 @@ public:
     /// @param Value The timestamp recorded from the moment when the audio clip started playing, in Unix timestamp format.
     void SetTimeSincePlay(float Value);
 
-    /// \addtogroup IAudioSourceComponent
+    /// \addtogroup IAudioControlComponent
     /// @{
-    /// @copydoc IAudioSourceComponent::GetAudioType()
+    /// @copydoc IAudioControlComponent::GetAudioType()
     AudioType GetAudioType() const override;
-    /// @copydoc IAudioSourceComponent::SetAudioType()
+    /// @copydoc IAudioControlComponent::SetAudioType()
     void SetAudioType(AudioType Value) override;
-    /// @copydoc IAudioSourceComponent::GetAttenuationRadius()
+    /// @copydoc IAudioControlComponent::GetAttenuationRadius()
     float GetAttenuationRadius() const override;
-    /// @copydoc IAudioSourceComponent::SetAttenuationRadius()
+    /// @copydoc IAudioControlComponent::SetAttenuationRadius()
     void SetAttenuationRadius(float Value) override;
-    /// @copydoc IAudioSourceComponent::GetVolume()
+    /// @copydoc IAudioControlComponent::GetVolume()
     float GetVolume() const override;
-    /// @copydoc IAudioSourceComponent::SetVolume()
+    /// @copydoc IAudioControlComponent::SetVolume()
     void SetVolume(float Value) override;
     /// @}
  

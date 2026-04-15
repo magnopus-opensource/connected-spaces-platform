@@ -32,7 +32,7 @@ enum class AudioType
 };
 
 /// @brief Controls the audio properties of a component.
-CSP_INTERFACE class CSP_API IAudioSourceComponent
+CSP_INTERFACE class CSP_API IAudioControlComponent
 {
 public:
     /// @brief Gets the type of the audio of this audio component.
@@ -70,7 +70,7 @@ public:
     virtual void SetVolume(float Value) = 0;
 
 protected:
-    virtual ~IAudioSourceComponent() = default;
+    virtual ~IAudioControlComponent() = default;
 };
 
 } // namespace csp::multiplayer
