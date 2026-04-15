@@ -15,8 +15,8 @@
  */
 
 #include "CreateAvatar.h"
+#include "../Utils.h"
 
-#include "sole.hpp"
 #include <CSP/Common/Optional.h>
 #include <CSP/Multiplayer/OnlineRealtimeEngine.h>
 #include <CSP/Multiplayer/SpaceTransform.h>
@@ -35,8 +35,8 @@ void RunTest(csp::multiplayer::OnlineRealtimeEngine& RealtimeEngine)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& UserSystem = *SystemsManager.GetUserSystem();
 
-    const auto uuid = sole::uuid4();
-    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid.str();
+    const auto uuid = Utils::GetUniqueString();
+    std::string UniqueSpaceName = "MultiplayerTestRunnerSpace" + std::string("-") + uuid;
 
     // Create avater
     csp::common::String UserName = "Player 1";
