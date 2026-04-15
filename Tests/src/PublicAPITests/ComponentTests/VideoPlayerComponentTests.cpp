@@ -242,7 +242,6 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerScriptInterfaceTest)
         video.isEnabled = false;
         video.audioType = 0;
         video.volume = 0.5;
-        video.
 
     )xx";
 
