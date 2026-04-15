@@ -58,4 +58,8 @@ DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVirtualVisi
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsEnabled);
 
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, AudioType, int32_t, AudioType);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, Volume);
+
+
 } // namespace csp::multiplayer
