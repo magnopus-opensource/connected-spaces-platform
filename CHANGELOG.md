@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. For compiled binaries, deployment packages, and version-specific artifacts, please visit our [GitHub Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
+## [6.35.0]
+
+### 🍰 🙌 New Features
+
+- [OB-5310] feat: Added Volume and AudioType properties to `VideoPlayerSpaceComponent`. By @MAG-ME.
+
 ## [6.33.0]
 
 ### 🙈 🙉 🙊 Test Changes
