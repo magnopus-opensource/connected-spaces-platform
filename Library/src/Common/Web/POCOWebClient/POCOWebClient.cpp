@@ -125,6 +125,9 @@ void POCOWebClient::Send(HttpRequest& Request)
         case ERequestVerb::Head:
             Head(Request);
             break;
+        case ERequestVerb::Patch:
+            Patch(Request);
+            break;
         default:
             break;
         }
@@ -381,6 +384,64 @@ void POCOWebClient::Head(HttpRequest& Request)
     }
 
     LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "HEAD", Request, PocoResponse);
+}
+
+void POCOWebClient::Patch(HttpRequest& Request)
+{
+    CSP_PROFILE_SCOPED_FORMAT("PATCH %s", Request.GetUri().GetAsStdString().c_str());
+
+    Poco::URI Uri(Request.GetUri().GetAsStdString());
+
+    // HTTPSessionFactory returns an unmanaged raw pointer - unique_ptr ensures the session is safely cleaned up after use.
+    std::unique_ptr<Poco::Net::HTTPClientSession> ClientSession(Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri));
+    Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PATCH, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
+
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
+        PocoRequest.add(Header.first.c_str(), Header.second.c_str());
+    }
+
+    AddCookie(PocoRequest);
+
+    size_t ContentLength = Request.GetPayload().GetContent().Length();
+    PocoRequest.setContentLength(ContentLength);
+    std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
+    ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
+
+    if (Request.Cancelled())
+    {
+        return;
+    }
+
+    Poco::Net::HTTPResponse PocoResponse;
+    std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
+    Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
+
+    {
+        std::scoped_lock Lock(CookiesMutex);
+
+        PocoResponse.getCookies(*Cookies);
+    }
+
+    std::string ResponseString;
+    Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
+    Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
+    auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
+
+    // Get all response headers
+    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    {
+        std::string Key = Iter->first;
+        std::string Val = Iter->second;
+
+        // Make Key and Val lower-case
+        std::transform(Key.begin(), Key.end(), Key.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::transform(Val.begin(), Val.end(), Val.begin(), [](unsigned char c) { return std::tolower(c); });
+
+        Payload.AddHeader(Key.c_str(), Val.c_str());
+    }
+
+    LogHttpResponseIfLoglevelVeryVerbose(LogSystem, "PATCH", Request, PocoResponse);
 }
 
 void POCOWebClient::ProcessResponseAsync(

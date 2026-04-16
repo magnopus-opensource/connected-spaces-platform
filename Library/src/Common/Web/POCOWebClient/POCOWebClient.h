@@ -72,6 +72,7 @@ protected:
     void Put(HttpRequest& Request);
     void Delete(HttpRequest& Request);
     void Head(HttpRequest& Request);
+    void Patch(HttpRequest& Request);
 
     void ProcessResponseAsync(
         Poco::Net::HTTPClientSession& ClientSession, Poco::Net::HTTPResponse& PocoResponse, std::istream& ResponseStream, HttpRequest& Request);
