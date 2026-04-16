@@ -537,25 +537,18 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
 {
     ResetAuthenticationState();
 
-    // Get provider_base_url and client_id
     ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback = [=](const ProviderDetailsResult& ProviderDetailsRes)
     {
         if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            const auto AuthoriseUrl = ProviderDetailsRes.GetDetails().AuthoriseURL;
-            const auto ProviderClientId = ProviderDetailsRes.GetDetails().ProviderClientId;
+            const auto ProviderRedirectUrl = ProviderDetailsRes.GetDetails().ProviderRedirectURL;
+            
             ThirdPartyAuthStateId = csp::GenerateUUID().c_str();
             ThirdPartyRequestedAuthProvider = AuthProvider;
             ThirdPartyAuthRedirectURL = RedirectURL;
-            const auto AuthProviderFormattedScopes = FormatScopesForURL(ProviderDetailsRes.GetDetails().ProviderAuthScopes);
-
-            auto AuthoriseURL = csp::common::StringFormat(
-                "%s?client_id=%s&scope=%s&state=%s&response_type=code&redirect_uri=%s&prompt=select_account&response_mode=form_post",
-                AuthoriseUrl.c_str(), ProviderClientId.c_str(), AuthProviderFormattedScopes.c_str(), ThirdPartyAuthStateId.c_str(),
-                RedirectURL.c_str());
-
+                        
             StringResult SuccessResult(ProviderDetailsRes.GetResultCode(), ProviderDetailsRes.GetHttpResultCode());
-            SuccessResult.SetValue(AuthoriseURL);
+            SuccessResult.SetValue(ProviderRedirectUrl);
             Callback(SuccessResult);
         }
         else if (ProviderDetailsRes.GetResultCode() != csp::systems::EResultCode::InProgress)
@@ -578,7 +571,8 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(
     CurrentLoginState.State = csp::common::ELoginState::LoginThirdPartyProviderDetailsRequested;
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
-        ->social_providersProviderGet({ ConvertExternalAuthProvidersToString(AuthProvider), csp::CSPFoundation::GetTenant(), {} }, ResponseHandler);
+        ->social_providersProviderGet(
+            { ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), {} }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,
@@ -599,7 +593,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
     // checking that the stored ThirdPartyAuthStateId matches the one passed by the Client as a security safety net suggested by the Auth Providers
     if (ThirdPartyAuthStateId != ThirdPartyStateId)
     {
-        CSP_LOG_MSG(common::LogLevel::Error, "The state ID is not correct"); // intentionally not to explicit about the error for security reasons
+        CSP_LOG_MSG(common::LogLevel::Error, "The state ID is not correct"); // intentionally not too explicit about the error for security reasons
         CurrentLoginState.State = csp::common::ELoginState::Error;
 
         csp::systems::LoginStateResult ErrorResult;

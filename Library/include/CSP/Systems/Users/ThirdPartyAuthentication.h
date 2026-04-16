@@ -38,10 +38,20 @@ enum EThirdPartyAuthenticationProviders
 class CSP_API ThirdPartyProviderDetails
 {
 public:
+    // @brief The name of the provider, e.g. "Google"
     csp::common::String ProviderName;
+
+    // @brief The application client id with the provider
     csp::common::String ProviderClientId;
+
+    // @brief The scopes required to authenticate with this provider
     csp::common::Array<csp::common::String> ProviderAuthScopes;
-    csp::common::String AuthoriseURL;
+
+    // @brief URL of the provider's authentication endpoint
+    csp::common::String ProviderAuthURL;
+
+    // @brief URL of the provider's token endpoint used to initiate the authorization flow
+    csp::common::String ProviderRedirectURL;
 };
 
 /// @brief Result structure for a third party auth provider details request
