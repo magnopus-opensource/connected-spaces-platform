@@ -2317,12 +2317,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = "";
+        AnnotationBufferData.Buffer = nullptr;
         AnnotationBufferData.BufferLength = 0;
         AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = "";
+        AnnotationThumbnailBufferData.Buffer = nullptr;
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("image/png");
 
@@ -2353,12 +2353,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationsPr
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = "";
+        AnnotationBufferData.Buffer = nullptr;
         AnnotationBufferData.BufferLength = 0;
         AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = "";
+        AnnotationThumbnailBufferData.Buffer = nullptr;
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("image/png");
 
@@ -2512,12 +2512,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInv
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = "";
+        AnnotationBufferData.Buffer = nullptr;
         AnnotationBufferData.BufferLength = 0;
         AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = "";
+        AnnotationThumbnailBufferData.Buffer = nullptr;
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("image/png");
 
@@ -2614,12 +2614,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentAnnotationInc
         Data.VerticalFov = 0;
 
         csp::systems::BufferAssetDataSource AnnotationBufferData;
-        AnnotationBufferData.Buffer = "";
+        AnnotationBufferData.Buffer = nullptr;
         AnnotationBufferData.BufferLength = 0;
         AnnotationBufferData.SetMimeType("image/png");
 
         csp::systems::BufferAssetDataSource AnnotationThumbnailBufferData;
-        AnnotationThumbnailBufferData.Buffer = "";
+        AnnotationThumbnailBufferData.Buffer = nullptr;
         AnnotationThumbnailBufferData.BufferLength = 0;
         AnnotationThumbnailBufferData.SetMimeType("image/png");
 

@@ -1,0 +1,99 @@
+{
+  "version": 4,
+  "include": ["./ConanPresets.json"],
+  "configurePresets": [
+    {
+      "name": "default-static",
+      "displayName": "multi config static",
+      "inherits": "conan-default",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF"
+      }
+    },
+    {
+      "name": "default-shared",
+      "displayName": "multi config shared",
+      "inherits": "conan-default",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "release-static",
+      "displayName": "release single config static",
+      "inherits": "conan-release",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF"
+      }
+    },
+    {
+      "name": "release-shared",
+      "displayName": "release single config shared",
+      "inherits": "conan-release",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "debug-static",
+      "displayName": "debug single config static",
+      "inherits": "conan-debug",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "OFF"
+      }
+    },
+    {
+      "name": "debug-shared",
+      "displayName": "debug single config shared",
+      "inherits": "conan-debug",
+      "cacheVariables": {
+        "CSP_BUILD_SHARED": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "multi-release-static",
+      "configurePreset": "default-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "multi-debug-static",
+      "configurePreset": "default-static",
+      "configuration": "Debug"
+    },
+    {
+      "name": "multi-release-shared",
+      "configurePreset": "default-shared",
+      "configuration": "Release"
+    },
+    {
+      "name": "multi-debug-shared",
+      "configurePreset": "default-shared",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-static",
+      "configurePreset": "release-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-shared",
+      "configurePreset": "release-shared",
+      "configuration": "Release"
+    },
+    {
+      "name": "debug-static",
+      "configurePreset": "debug-static",
+      "configuration": "Debug"
+    },
+    {
+      "name": "debug-shared",
+      "configurePreset": "debug-shared",
+      "configuration": "Debug"
+    }
+  ]
+}

@@ -36,6 +36,13 @@ All notable changes to this project will be documented in this file. For compile
 
 ## [6.31.0]
 
+### 🍰 🙌 New Features
+
+- [OF-1830] feat: Inital integration of new build system by MAG-mv
+  This adds the start of our new build system that uses conan and cmake.
+  At this point, only support for local Windows and Mac builds has been added, and had only been tested on 1 machine.
+  This should currently not replace our current build system, feel free to use for testing.
+
 ###🔥 ❗Breaking Changes
 
 - [OF-1771] refac!: Remove `username` as an option for account management by @MAG-ElliotMorris

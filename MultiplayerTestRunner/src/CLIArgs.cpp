@@ -23,7 +23,7 @@
 
 namespace
 {
-constexpr char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
+constexpr const char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
 constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 
 /*
@@ -67,10 +67,10 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
 
 namespace CLIArgs
 {
-RunnerSettings ProcessCLI(int argc, char* argv[])
+RunnerSettings ProcessCLI(int argc, const char* const* argv)
 {
     // Build the CLI
-    constexpr char* AppDescription = "The multiplayer test runner is a CSP test application designed to be spawned and managed cross-process. "
+    constexpr const char* AppDescription = "The multiplayer test runner is a CSP test application designed to be spawned and managed cross-process. "
                                      "Multiple instances of the multiplayer test runner may be launched "
                                      "in order to simulate multiple users interacting with a space simultaneously.";
     CLI::App App(AppDescription);

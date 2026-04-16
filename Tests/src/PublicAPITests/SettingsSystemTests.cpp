@@ -407,16 +407,12 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
     LogInAsNewTestUser(UserSystem, UserId);
 
-    auto UploadFilePath = std::filesystem::absolute("assets/OKO.png");
-    FILE* UploadFile = fopen(UploadFilePath.string().c_str(), "rb");
-    uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-    auto* UploadFileData = new unsigned char[UploadFileSize];
-    fread(UploadFileData, UploadFileSize, 1, UploadFile);
-    fclose(UploadFile);
+    auto UploadFileData = OpenFile("assets/OKO.png");
+    ASSERT_NE(UploadFileData, std::nullopt);
 
     csp::systems::BufferAssetDataSource AvatarPortraitThumbnail;
-    AvatarPortraitThumbnail.Buffer = UploadFileData;
-    AvatarPortraitThumbnail.BufferLength = UploadFileSize;
+    AvatarPortraitThumbnail.Buffer = UploadFileData->data();
+    AvatarPortraitThumbnail.BufferLength = UploadFileData->size();
 
     AvatarPortraitThumbnail.SetMimeType("image/png");
 
@@ -437,10 +433,9 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
     auto DownloadedAssetData = new uint8_t[DownloadedAssetDataSize];
     memcpy(DownloadedAssetData, Download_Result.GetData(), DownloadedAssetDataSize);
 
-    EXPECT_EQ(DownloadedAssetDataSize, UploadFileSize);
-    EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData, UploadFileSize), 0);
+    EXPECT_EQ(DownloadedAssetDataSize, UploadFileData->size());
+    EXPECT_EQ(memcmp(DownloadedAssetData, UploadFileData->data(), UploadFileData->size()), 0);
 
-    delete[] UploadFileData;
     delete[] DownloadedAssetData;
 
     // Log out

@@ -138,8 +138,8 @@ inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocato
     csp::common::String Json = Value.ToJson();
     rapidjson::Document JsonDocument(rapidjson::Type::kObjectType, &Allocator);
     JsonDocument.Parse<0>(Json.c_str());
-
-    return JsonDocument.GetObject();
+    
+    return rapidjson::Value { JsonDocument.GetObj() };
 }
 
 // Serialisation function for types that derive from EnumDtoBase
@@ -303,7 +303,7 @@ template <typename U, typename V> inline void JsonValueToType(const rapidjson::V
 {
     assert(Value.IsObject());
 
-    for (auto& Member : Value.GetObject())
+    for (auto& Member : Value.GetObj())
     {
         U ElementKey;
         V ElementValue;
