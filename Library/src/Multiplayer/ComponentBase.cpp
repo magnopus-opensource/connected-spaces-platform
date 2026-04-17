@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "ComponentBaseKeys.h"
 #include "Multiplayer/RealtimeEngineUtils.h"
+#include "Multiplayer/Script/ComponentScriptHelpers.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <fmt/format.h>
@@ -58,6 +59,11 @@ ComponentBase::ComponentBase(const ComponentSchema& Schema, csp::common::LogSyst
     for (const auto& Property : Schema.Properties)
     {
         Properties[Property.Key] = Property.DefaultValue;
+    }
+
+    if (IsScriptable(Schema))
+    {
+        ScriptInterface = std::make_unique<ComponentScriptInterface>(this);
     }
 }
 

@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -83,7 +82,6 @@ const ComponentSchema& ExternalLinkSpaceComponent::GetSchema() { return Schema; 
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ExternalLinkSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetName() const

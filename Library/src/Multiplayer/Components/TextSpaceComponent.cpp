@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/TextSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -98,7 +97,6 @@ const ComponentSchema& TextSpaceComponent::GetSchema() { return Schema; }
 TextSpaceComponent::TextSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
 
 /* ITransformComponent */

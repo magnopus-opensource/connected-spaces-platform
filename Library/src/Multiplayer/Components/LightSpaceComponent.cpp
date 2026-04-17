@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -113,7 +112,6 @@ const ComponentSchema& LightSpaceComponent::GetSchema() { return Schema; }
 LightSpaceComponent::LightSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new LightSpaceComponentScriptInterface(this));
 }
 
 LightType LightSpaceComponent::GetLightType() const

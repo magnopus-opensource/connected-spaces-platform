@@ -17,7 +17,6 @@
 
 #include "CSP/Multiplayer/ComponentSchema.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "Multiplayer/Script/ComponentBinding/ScreenSharingSpaceComponentScriptInterface.h"
 
 namespace
 {
@@ -94,7 +93,6 @@ const ComponentSchema& ScreenSharingSpaceComponent::GetSchema() { return Schema;
 ScreenSharingSpaceComponent::ScreenSharingSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ScreenSharingSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ScreenSharingSpaceComponent::GetUserId() const

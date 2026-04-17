@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -108,7 +107,6 @@ const ComponentSchema& FogSpaceComponent::GetSchema() { return Schema; }
 FogSpaceComponent::FogSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new FogSpaceComponentScriptInterface(this));
 }
 
 FogMode FogSpaceComponent::GetFogMode() const { return static_cast<FogMode>(GetIntegerProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode))); }

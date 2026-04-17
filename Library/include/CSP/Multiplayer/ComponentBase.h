@@ -90,6 +90,7 @@ class CSP_API ComponentBase
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;
     friend class OnlineRealtimeEngine;
+    friend class ComponentScriptInterface;
     friend class EntityScriptInterface;
 #ifdef CSP_TESTS
     friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;

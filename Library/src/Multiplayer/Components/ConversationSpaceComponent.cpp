@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include "Systems/Conversation/ConversationSystemInternal.h"
@@ -107,7 +106,6 @@ const ComponentSchema& ConversationSpaceComponent::GetSchema() { return Schema; 
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new ConversationSpaceComponentScriptInterface(this));
 }
 
 void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)

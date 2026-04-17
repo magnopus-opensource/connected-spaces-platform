@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 
 #include "CSP/Multiplayer/ComponentSchema.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
 namespace csp::multiplayer
 {
@@ -84,7 +83,6 @@ const ComponentSchema& GaussianSplatSpaceComponent::GetSchema() { return Schema;
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(csp::common::LogSystem* LogSystem, SpaceEntity* Parent)
     : ComponentBase(Schema, LogSystem, Parent)
 {
-    SetScriptInterface(new GaussianSplatSpaceComponentScriptInterface(this));
 }
 
 /* IExternalResourceComponent */
