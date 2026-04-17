@@ -46,6 +46,13 @@ class CSP(ConanFile):
         self.options["poco"].enable_jwt = False
         self.options["poco"].enable_activerecord = False
 
+        # We need to turn of the c++ interface for tinyspline, as this is linked to its javscript (embind) interface
+        # which doesn't play well with our configuration for 2 reasons:
+        # - We use incompatible emscripten link flags with tinyspline
+        # - We use an incompatible emsdk, which causes compile errors with tinyspline
+        self.options["tinyspline"].cxx = False
+
+
         # Enabling boost adds a lot of time to our conan install step
         # + emscripten builds fail to compile with it. Disable it.
         self.options["msgpack-cxx"].use_boost = False

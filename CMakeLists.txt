@@ -126,10 +126,14 @@ target_link_libraries(csp-lib
     Poco::Poco
     Poco::Net
     csp-signalr
-    tinysplinecxx::tinysplinecxx
+    tinyspline::tinyspline
     glm::glm
     csp-quickjs
 )
+
+set(TINYSPLINE_BUILD_TESTS OFF)
+set(TINYSPLINE_BUILD_EXAMPLES OFF)
+set(TINYSPLINE_BUILD_DOCS OFF)
 
 # Public as it is a requiremnt that consumers also be >= c++17
 target_compile_features(csp-lib PUBLIC cxx_std_17)
