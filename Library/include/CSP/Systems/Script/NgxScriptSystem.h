@@ -32,6 +32,11 @@
 #include <unordered_set>
 #include <vector>
 
+namespace csp::multiplayer
+{
+class NgxAssetScriptBinding;
+} // namespace csp::multiplayer
+
 namespace qjs
 {
 class Runtime;
@@ -227,6 +232,7 @@ private:
     csp::common::Vector3 LocalPlayerCameraRightFlat;
     csp::common::Vector3 LocalPlayerCameraUp;
     std::unique_ptr<NgxUIRuntime> UIRuntime;
+    std::unique_ptr<csp::multiplayer::NgxAssetScriptBinding> AssetBinding;
     bool bAssetDetailBlobChangedListenerRegistered;
     uint32_t GcTickCounter;
     std::unique_ptr<NgxScriptTickEventHandler> TickEventHandler;

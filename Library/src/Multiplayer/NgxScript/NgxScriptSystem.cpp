@@ -33,6 +33,7 @@
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EntityQueryUtils.h"
+#include "Multiplayer/NgxScript/NgxAssetScriptBinding.h"
 #include "Multiplayer/NgxScript/NgxEntityScriptBinding.h"
 #include "Multiplayer/NgxScript/NgxUIRuntime.h"
 #include "Multiplayer/NgxScript/signals.h"
@@ -51,7 +52,9 @@
 namespace
 {
 constexpr size_t NGX_SCRIPT_MEMORY_LIMIT_BYTES = 256 * 1024 * 1024;
-constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 4 * 1024 * 1024;
+// 0 disables QuickJS's own stack check; we rely on the WASM linker stack
+// (-sSTACK_SIZE) instead so debug sessions do not abort on deep call chains.
+constexpr size_t NGX_SCRIPT_WASM_MAX_STACK_BYTES = 0;
 
 constexpr const char* PREACT_SIGNALS_CORE_MODULE = "@preact/signals-core";
 constexpr const char* CODECOMPONENT_JSON_RESULT_SLOT = "__cspCodeComponentJsonResult";
@@ -799,29 +802,17 @@ bool NgxScriptSystem::IsUIDebugModeEnabled() const
 
 bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, const csp::common::String& HandlerId, const csp::common::String& EventDataJson)
 {
-    const std::string EntryMessage
-        = fmt::format("NgxScript Trace: DispatchUIAction(entityId='{}', handlerId='{}', eventDataJson='{}') called.",
-            EntityId.c_str(), HandlerId.c_str(), EventDataJson.c_str());
-    LogSystem.LogMsg(csp::common::LogLevel::Log, EntryMessage.c_str());
-
     if (EntityId.IsEmpty() || HandlerId.IsEmpty())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript Trace: DispatchUIAction aborted (empty entityId or handlerId).");
         return false;
     }
 
     const std::string Snippet = fmt::format(
         "(function() {{ "
-        "  if (typeof csp !== 'undefined' && typeof csp.__log === 'function') {{ "
-        "    csp.__log('[NGX UI][dispatch-snippet] entered', 'hasRegistry=' + (!!globalThis.scriptRegistry), 'hasFn=' + (!!(globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function'))); "
-        "  }} "
         "  if (globalThis.scriptRegistry && typeof globalThis.scriptRegistry.dispatchUIAction === 'function') {{ "
         "    globalThis.{} = !!globalThis.scriptRegistry.dispatchUIAction('{}', '{}', {}); "
         "  }} else {{ "
         "    globalThis.{} = false; "
-        "    if (typeof csp !== 'undefined' && typeof csp.__warn === 'function') {{ "
-        "      csp.__warn('[NGX UI][dispatch-snippet] scriptRegistry.dispatchUIAction is not a function'); "
-        "    }} "
         "  }} "
         "}})();",
         CODECOMPONENT_BOOL_RESULT_SLOT, EscapeJSStringLiteral(EntityId.c_str()), EscapeJSStringLiteral(HandlerId.c_str()),
@@ -831,26 +822,20 @@ bool NgxScriptSystem::DispatchUIAction(const csp::common::String& EntityId, cons
     std::scoped_lock ContextLock(ContextMutex);
     if (!Context)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Warning, "NgxScript Trace: DispatchUIAction aborted (no Context).");
         return false;
     }
 
     if (Context->eval(Snippet, "<ngx-dispatch-ui-action>", JS_EVAL_TYPE_GLOBAL).isException())
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript Trace: DispatchUIAction eval threw exception.");
         return false;
     }
 
     try
     {
-        const bool Result = Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
-        const std::string ResultMessage = fmt::format("NgxScript Trace: DispatchUIAction returning {}.", Result);
-        LogSystem.LogMsg(csp::common::LogLevel::Log, ResultMessage.c_str());
-        return Result;
+        return Context->global()[CODECOMPONENT_BOOL_RESULT_SLOT].as<bool>();
     }
     catch (...)
     {
-        LogSystem.LogMsg(csp::common::LogLevel::Error, "NgxScript Trace: DispatchUIAction result read threw exception.");
         return false;
     }
 }
@@ -1016,6 +1001,10 @@ void NgxScriptSystem::TeardownContext()
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: TeardownContext.");
     ClearAllEntityEventListeners();
     std::scoped_lock ContextLock(ContextMutex);
+    if (AssetBinding && Context)
+    {
+        AssetBinding->RejectAndCleanupPendingPromises(Context->ctx);
+    }
     Context.reset();
 }
 
@@ -1513,6 +1502,13 @@ globalThis.__cspDispatchMouseEvent = (event) => {
 
     csp::multiplayer::NgxEntityScriptBinding EntityBinding(ActiveRealtimeEngine, LogSystem, true);
     EntityBinding.BindToContext(*Context);
+
+    if (!AssetBinding)
+    {
+        auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+        AssetBinding = std::make_unique<csp::multiplayer::NgxAssetScriptBinding>(AssetSystem, LogSystem);
+    }
+    AssetBinding->BindToContext(*Context, ActiveSpaceId);
 
     LogSystem.LogMsg(csp::common::LogLevel::Log, "NgxScript Trace: Host bindings installed.");
 }

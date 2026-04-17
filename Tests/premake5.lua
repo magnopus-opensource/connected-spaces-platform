@@ -85,7 +85,7 @@ if not Tests then
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
                 "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
-                "-sINITIAL_MEMORY=33554432",
+                "-sINITIAL_MEMORY=35651584",
                 "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory   
                 "-sPROXY_TO_PTHREAD=1",
                 "-sSTACK_SIZE=20MB",

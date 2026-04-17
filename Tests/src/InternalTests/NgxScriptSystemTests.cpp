@@ -37,6 +37,8 @@
 #include "Multiplayer/Script/RuntimeMaterialTextureScriptInterface.h"
 #include "TestHelpers.h"
 
+#include "Multiplayer/AssetQueryUtils.h"
+
 #include <rapidjson/document.h>
 
 #include <algorithm>
@@ -2920,4 +2922,182 @@ export function ui() {
     NgxCodeComponentRuntime.OnExitSpace();
     NgxScriptSystem.OnExitSpace();
     csp::systems::SpaceSystem::SetRuntimeModeForTesting(csp::systems::ESpaceRuntimeMode::Edit);
+}
+
+// --- AssetQueryUtils unit tests -----------------------------------------------
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, AssetQueryCriteriaExtractsAssetType)
+{
+    const std::string Query = R"({"kind":"assetType","assetType":0})";
+    const auto Criteria = csp::multiplayer::ExtractAssetQueryCriteria(Query);
+
+    ASSERT_TRUE(Criteria.AssetTypes.HasValue());
+    ASSERT_EQ(Criteria.AssetTypes->Size(), 1u);
+    EXPECT_EQ((*Criteria.AssetTypes)[0], csp::systems::EAssetType::IMAGE);
+    EXPECT_FALSE(Criteria.CollectionNames.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, AssetQueryCriteriaExtractsCollectionName)
+{
+    const std::string Query = R"({"kind":"collectionName","name":"hero-images"})";
+    const auto Criteria = csp::multiplayer::ExtractAssetQueryCriteria(Query);
+
+    ASSERT_TRUE(Criteria.CollectionNames.HasValue());
+    ASSERT_EQ(Criteria.CollectionNames->Size(), 1u);
+    EXPECT_EQ(std::string((*Criteria.CollectionNames)[0].c_str()), "hero-images");
+    EXPECT_FALSE(Criteria.AssetTypes.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, AssetQueryCriteriaExtractsAndOperands)
+{
+    const std::string Query = R"({"kind":"and","operands":[{"kind":"assetType","assetType":3},{"kind":"collectionName","name":"models"}]})";
+    const auto Criteria = csp::multiplayer::ExtractAssetQueryCriteria(Query);
+
+    ASSERT_TRUE(Criteria.AssetTypes.HasValue());
+    EXPECT_EQ((*Criteria.AssetTypes)[0], csp::systems::EAssetType::MODEL);
+    ASSERT_TRUE(Criteria.CollectionNames.HasValue());
+    EXPECT_EQ(std::string((*Criteria.CollectionNames)[0].c_str()), "models");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, AssetQueryCriteriaIgnoresUnknownKind)
+{
+    const std::string Query = R"({"kind":"unknown","value":99})";
+    const auto Criteria = csp::multiplayer::ExtractAssetQueryCriteria(Query);
+
+    EXPECT_FALSE(Criteria.AssetTypes.HasValue());
+    EXPECT_FALSE(Criteria.CollectionNames.HasValue());
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EvaluateAssetQueryFiltersImageAssets)
+{
+    csp::systems::Asset ImageAsset;
+    ImageAsset.Id = "img-1";
+    ImageAsset.Type = csp::systems::EAssetType::IMAGE;
+
+    csp::systems::Asset ModelAsset;
+    ModelAsset.Id = "mdl-1";
+    ModelAsset.Type = csp::systems::EAssetType::MODEL;
+
+    const std::vector<csp::systems::Asset> All = { ImageAsset, ModelAsset };
+    const std::string Query = R"({"kind":"assetType","assetType":0})";
+    const auto Result = csp::multiplayer::EvaluateAssetQuery(Query, All, {});
+
+    ASSERT_EQ(Result.size(), 1u);
+    EXPECT_EQ(std::string(Result[0].Id.c_str()), "img-1");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EvaluateAssetQueryAndCombinesFilters)
+{
+    csp::systems::Asset ImageInHeroCollection;
+    ImageInHeroCollection.Id = "hero-img";
+    ImageInHeroCollection.Type = csp::systems::EAssetType::IMAGE;
+    ImageInHeroCollection.AssetCollectionId = "col-hero";
+
+    csp::systems::Asset ImageInOtherCollection;
+    ImageInOtherCollection.Id = "other-img";
+    ImageInOtherCollection.Type = csp::systems::EAssetType::IMAGE;
+    ImageInOtherCollection.AssetCollectionId = "col-other";
+
+    csp::systems::AssetCollection HeroCollection;
+    HeroCollection.Id = "col-hero";
+    HeroCollection.Name = "hero-images";
+
+    const std::vector<csp::systems::Asset> All = { ImageInHeroCollection, ImageInOtherCollection };
+    const std::vector<csp::systems::AssetCollection> Collections = { HeroCollection };
+    const std::string Query = R"({"kind":"and","operands":[{"kind":"assetType","assetType":0},{"kind":"collectionName","name":"hero-images"}]})";
+    const auto Result = csp::multiplayer::EvaluateAssetQuery(Query, All, Collections);
+
+    ASSERT_EQ(Result.size(), 1u);
+    EXPECT_EQ(std::string(Result[0].Id.c_str()), "hero-img");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, EvaluateAssetQueryNotExcludesAssets)
+{
+    csp::systems::Asset ImageAsset;
+    ImageAsset.Id = "img-1";
+    ImageAsset.Type = csp::systems::EAssetType::IMAGE;
+
+    csp::systems::Asset ModelAsset;
+    ModelAsset.Id = "mdl-1";
+    ModelAsset.Type = csp::systems::EAssetType::MODEL;
+
+    const std::vector<csp::systems::Asset> All = { ImageAsset, ModelAsset };
+    const std::string Query = R"({"kind":"not","operand":{"kind":"assetType","assetType":0}})";
+    const auto Result = csp::multiplayer::EvaluateAssetQuery(Query, All, {});
+
+    ASSERT_EQ(Result.size(), 1u);
+    EXPECT_EQ(std::string(Result[0].Id.c_str()), "mdl-1");
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, SerializeAssetsToJsonProducesCorrectShape)
+{
+    csp::systems::Asset Asset;
+    Asset.Id = "asset-abc";
+    Asset.AssetCollectionId = "col-xyz";
+    Asset.Name = "my-image";
+    Asset.Uri = "https://example.com/image.png";
+    Asset.Type = csp::systems::EAssetType::IMAGE;
+
+    const std::string Json = csp::multiplayer::SerializeAssetsToJson({ Asset });
+
+    rapidjson::Document Doc;
+    ASSERT_FALSE(Doc.Parse(Json.c_str()).HasParseError());
+    ASSERT_TRUE(Doc.IsArray());
+    ASSERT_EQ(Doc.Size(), 1u);
+
+    const auto& Entry = Doc[0];
+    EXPECT_EQ(std::string(Entry["id"].GetString()), "asset-abc");
+    EXPECT_EQ(std::string(Entry["assetCollectionId"].GetString()), "col-xyz");
+    EXPECT_EQ(std::string(Entry["name"].GetString()), "my-image");
+    EXPECT_EQ(std::string(Entry["url"].GetString()), "https://example.com/image.png");
+    EXPECT_EQ(Entry["type"].GetInt(), 0);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, TheAssetSystemIsImportableFromCspCore)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("asset-import-test-space", &OfflineEngine);
+    ASSERT_TRUE(NgxScriptSystem.HasActiveContextForTesting());
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+import { TheAssetSystem, EAssetType } from '@csp/code';
+globalThis.__ngxTestAssetSystemDefined = (typeof TheAssetSystem === 'object' && TheAssetSystem !== null) ? 1 : 0;
+globalThis.__ngxTestEAssetTypeImage = EAssetType.IMAGE;
+)"));
+
+    ProcessTickEvent();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTestAssetSystemDefined", -1), 1);
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTestEAssetTypeImage", -1), 0);
+
+    NgxScriptSystem.OnExitSpace();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NgxScriptSystemTests, TheAssetSystemQueryReturnsPromise)
+{
+    csp::common::LogSystem LogSystem;
+    csp::systems::NgxScriptSystem NgxScriptSystem(LogSystem);
+    TestRealtimeEngine OfflineEngine(csp::common::RealtimeEngineType::Offline);
+
+    NgxScriptSystem.OnEnterSpace("asset-query-test-space", &OfflineEngine);
+    ASSERT_TRUE(NgxScriptSystem.HasActiveContextForTesting());
+
+    ASSERT_TRUE(NgxScriptSystem.EvaluateModuleScriptForTesting(R"(
+import { TheAssetSystem, EAssetType } from '@csp/code';
+const result = TheAssetSystem.query({ kind: 'assetType', assetType: EAssetType.IMAGE });
+globalThis.__ngxTestQueryIsPromise = (result instanceof Promise) ? 1 : 0;
+result.then(() => { globalThis.__ngxTestQuerySettled = 1; })
+      .catch(() => { globalThis.__ngxTestQuerySettled = 1; });
+)"));
+
+    ProcessTickEvent();
+    NgxScriptSystem.PumpPendingJobs();
+    ProcessTickEvent();
+
+    EXPECT_EQ(NgxScriptSystem.GetGlobalIntForTesting("__ngxTestQueryIsPromise", -1), 1);
+
+    NgxScriptSystem.OnExitSpace();
 }

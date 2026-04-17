@@ -46,26 +46,10 @@ constexpr const char* CODECOMPONENT_BOOTSTRAP_MODULE = "/__csp/internal/codecomp
 constexpr const char* CODECOMPONENT_SHUTDOWN_MODULE = "/__csp/internal/codecomponent/shutdown.js";
 constexpr const char* CODECOMPONENT_HOOKS_MODULE = "@csp/hooks";
 constexpr const char* CODECOMPONENT_HOOKS_SOURCE = "export { useEffect } from '/__csp/internal/codecomponent/registry.js';\n";
-constexpr const char* CODECOMPONENT_CORE_MODULE = "@csp/core";
 constexpr const char* CODECOMPONENT_INPUT_MODULE = "@csp/code";
 constexpr const char* CODECOMPONENT_UI_MODULE = "@csp/ui";
-constexpr const char* CODECOMPONENT_CORE_SOURCE = R"CORE(
-export { useEffect } from '/__csp/internal/codecomponent/registry.js';
-export const TheEntitySystem = new Proxy({}, {
-    get(_, prop) {
-        const sys = globalThis.TheEntitySystem;
-        if (sys == null) return undefined;
-        const val = sys[prop];
-        return typeof val === 'function' ? val.bind(sys) : val;
-    },
-    set(_, prop, value) {
-        if (globalThis.TheEntitySystem == null) return false;
-        globalThis.TheEntitySystem[prop] = value;
-        return true;
-    },
-});
-)CORE";
 constexpr const char* CODECOMPONENT_INPUT_SOURCE = R"INPUT(
+export { useEffect } from '/__csp/internal/codecomponent/registry.js';
 function getInputDevice(name) {
     const input = globalThis.__cspInput;
     if (!input || !input[name]) {
@@ -122,6 +106,37 @@ export const ThePlayerController = new Proxy({}, {
     set(_, prop, value) {
         if (globalThis.__cspPlayerController == null) return false;
         globalThis.__cspPlayerController[prop] = value;
+        return true;
+    },
+});
+
+export const EAssetType = Object.freeze({
+    IMAGE: 0,
+    THUMBNAIL: 1,
+    SIMULATION: 2,
+    MODEL: 3,
+    VIDEO: 4,
+    SCRIPT_LIBRARY: 5,
+    HOLOCAP_VIDEO: 6,
+    HOLOCAP_AUDIO: 7,
+    AUDIO: 8,
+    GAUSSIAN_SPLAT: 9,
+    MATERIAL: 10,
+    ANNOTATION: 11,
+    ANNOTATION_THUMBNAIL: 12,
+    TEXT: 13,
+});
+
+export const TheAssetSystem = new Proxy({}, {
+    get(_, prop) {
+        const sys = globalThis.__cspAssetSystem;
+        if (sys == null) return undefined;
+        const val = sys[prop];
+        return typeof val === 'function' ? val.bind(sys) : val;
+    },
+    set(_, prop, value) {
+        if (globalThis.__cspAssetSystem == null) return false;
+        globalThis.__cspAssetSystem[prop] = value;
         return true;
     },
 });
@@ -1453,27 +1468,12 @@ export function createScriptRegistry() {
 
     function dispatchUIAction(entityId, handlerId, eventData) {
         const entry = codeComponents.get(entityId);
-        console.log('[NGX UI][runtime] dispatchUIAction called', {
-            entityId,
-            handlerId,
-            hasEntry: !!entry,
-            isDisposing: entry && entry.isDisposing,
-            isDestroying,
-            hasUiHandlers: !!(entry && entry.uiHandlers),
-            uiHandlerCount: entry && entry.uiHandlers ? entry.uiHandlers.size : 0,
-            registeredHandlerIds: entry && entry.uiHandlers ? Array.from(entry.uiHandlers.keys()) : []
-        });
         if (!entry || entry.isDisposing || isDestroying || !entry.uiHandlers || typeof handlerId !== 'string') {
-            console.log('[NGX UI][runtime] dispatchUIAction early-exit (entry/handlers missing)');
             return false;
         }
 
         const handler = entry.uiHandlers.get(handlerId);
         if (typeof handler !== 'function') {
-            console.log('[NGX UI][runtime] dispatchUIAction handler not found', {
-                handlerId,
-                registeredHandlerIds: Array.from(entry.uiHandlers.keys())
-            });
             return false;
         }
 
@@ -2124,7 +2124,6 @@ void NgxCodeComponentRuntime::RegisterBuiltInModules()
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_BOOTSTRAP_MODULE, CODECOMPONENT_BOOTSTRAP_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_SHUTDOWN_MODULE, CODECOMPONENT_SHUTDOWN_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_HOOKS_MODULE, CODECOMPONENT_HOOKS_SOURCE);
-    ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_CORE_MODULE, CODECOMPONENT_CORE_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_INPUT_MODULE, CODECOMPONENT_INPUT_SOURCE);
     ScriptSystem.RegisterStaticModuleSource(CODECOMPONENT_UI_MODULE, CODECOMPONENT_UI_SOURCE);
 }

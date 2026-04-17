@@ -62,14 +62,14 @@ The NGX runtime currently exposes these built-in modules:
 
 - `@csp/hooks`
   - `useEffect`
-- `@csp/core`
-  - `useEffect`
-  - `TheEntitySystem`
 - `@csp/code`
+  - `useEffect`
   - `TheEntitySystem`
   - `keyboard`
   - `mouse`
   - `ThePlayerController`
+  - `EAssetType`
+  - `TheAssetSystem`
 - `@csp/ui`
   - `screen`
   - `world`
@@ -490,7 +490,7 @@ Use `TheEntitySystem` when you need to look up other entities.
 
 ```js
 import { useEffect } from "@csp/hooks";
-import { TheEntitySystem } from "@csp/core";
+import { TheEntitySystem } from "@csp/code";
 
 export const schema = {
   targetName: { type: "string", default: "Target" },
