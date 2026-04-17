@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include <memory>
+
 namespace csp::systems
 {
 
@@ -44,6 +46,8 @@ public:
     void Initialise();
     /// @brief Shuts down and deletes the JavaScript runtime context.
     void Shutdown();
+    
+    CSP_NO_EXPORT static std::shared_ptr<ScriptSystem> MakeInitialised();
 
     /// @brief Attempts to execute a script in a given context.
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
