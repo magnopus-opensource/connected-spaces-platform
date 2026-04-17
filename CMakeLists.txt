@@ -46,9 +46,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES
 find_package(RapidJSON REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Async++ REQUIRED)
-find_package(Poco REQUIRED)
 find_package(tinyspline REQUIRED)
 find_package(glm REQUIRED)
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  find_package(Poco REQUIRED)
+endif()
 
 # Vendored libs
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/signalrclient)
@@ -123,13 +126,20 @@ target_link_libraries(csp-lib
     rapidjson
     fmt::fmt
     Async++
-    Poco::Poco
-    Poco::Net
     csp-signalr
     tinyspline::tinyspline
     glm::glm
     csp-quickjs
 )
+
+# Only include POCO for non-Emscripten builds
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  target_link_libraries(csp-lib
+    PRIVATE
+      Poco::Poco
+      Poco::Net
+  )
+endif()
 
 set(TINYSPLINE_BUILD_TESTS OFF)
 set(TINYSPLINE_BUILD_EXAMPLES OFF)
@@ -145,6 +155,7 @@ target_compile_definitions(csp-lib
     # Platform macros
     $<$<PLATFORM_ID:Windows>:CSP_WINDOWS>
     $<$<PLATFORM_ID:Darwin>:CSP_MACOSX>
+    $<$<PLATFORM_ID:Emscripten>:CSP_WASM>
 
     # We consume libasync statically
     LIBASYNC_STATIC
@@ -263,12 +274,18 @@ if(BUILD_TESTING)
       fmt::fmt
       Async++
       csp-signalr
-
-      # Libs exposed through private includes
-      # We should find a way of hiding these from headers ideally
-      Poco::Poco
-      Poco::Net
   )
+
+  # Only include POCO for non-Emscripten builds
+  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    target_link_libraries(csp-tests
+      PRIVATE
+        # Libs exposed through private includes
+        # We should find a way of hiding these from headers ideally
+        Poco::Poco
+        Poco::Net
+    )
+  endif()
 
   # Set include directories
   target_include_directories(csp-tests

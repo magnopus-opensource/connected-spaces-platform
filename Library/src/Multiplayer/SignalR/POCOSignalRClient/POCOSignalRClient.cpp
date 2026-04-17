@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef CSP_WASM
+
 #include "POCOSignalRClient.h"
 #include "CSP/Common/Systems/Log/LogSystem.h"
 #include <Poco/Net/HTTPRequest.h>
@@ -440,3 +442,4 @@ void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)
 }
 
 } // namespace csp::multiplayer
+#endif
