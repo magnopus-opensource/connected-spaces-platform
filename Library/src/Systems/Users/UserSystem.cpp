@@ -532,8 +532,8 @@ csp::common::Array<EThirdPartyAuthenticationProviders> UserSystem::GetSupportedT
     return Providers;
 }
 
-void UserSystem::GetThirdPartyProviderAuthorizeURL(
-    EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL, StringResultCallback Callback)
+void UserSystem::GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL,
+    const csp::common::Optional<EThirdPartyPlatform>& ClientType, StringResultCallback Callback)
 {
     if (AuthProvider == EThirdPartyAuthenticationProviders::Invalid)
     {
@@ -581,13 +581,20 @@ void UserSystem::GetThirdPartyProviderAuthorizeURL(
         }
     };
 
+    std::optional<csp::common::String> ClientTypeString;
+
+    if (ClientType.HasValue() && *ClientType != csp::systems::EThirdPartyPlatform::None)
+    {
+        ClientTypeString = csp::systems::ThirdPartyPlatformToString(*ClientType).c_str();
+    }
+
     const csp::services::ResponseHandlerPtr ResponseHandler
         = AuthenticationAPI->CreateHandler<ProviderDetailsResultCallback, ProviderDetailsResult, void, chs_user::SocialProviderInfo>(
             ThirdPartyAuthenticationDetailsCallback, nullptr, csp::web::EResponseCodes::ResponseOK);
 
     static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)
         ->social_providersProviderGet(
-            { ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), {} }, ResponseHandler);
+            { ConvertExternalAuthProvidersToString(AuthProvider), RedirectURL, csp::CSPFoundation::GetTenant(), ClientTypeString }, ResponseHandler);
 }
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken, const csp::common::String& ThirdPartyStateId,

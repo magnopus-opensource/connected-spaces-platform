@@ -971,7 +971,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForGoogleTest)
 
     // Retrieve Authorize URL for Google
     auto [ResGoogle] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL, nullptr);
     EXPECT_EQ(ResGoogle.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = ResGoogle.GetValue();
@@ -987,7 +987,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForDiscordTest)
 
     // Retrieve Authorize URL for Discord
     auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = Result.GetValue();
@@ -1003,7 +1003,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthorizeURLForAppleTest)
 
     // Retrieve Authorize URL for Apple
     auto [Result] = AWAIT_PRE(
-        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL);
+        UserSystem, GetThirdPartyProviderAuthorizeURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Apple, RedirectURL, nullptr);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const auto& AuthorizeURL = Result.GetValue();

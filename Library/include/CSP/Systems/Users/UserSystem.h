@@ -163,8 +163,8 @@ public:
     /// @param ClientType csp::common::Optional<EThirdPartyPlatform> : An optional parameter that allows the client to specify their platform for the
     /// third party authentication flow. This is used for some providers to determine the format of the Authorize URL.
     /// @param Callback StringResultCallback : callback that contains the Authorize URL that the Client should be navigating to for step 2.
-    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthorizeURL(
-        EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL, StringResultCallback Callback);
+    CSP_ASYNC_RESULT void GetThirdPartyProviderAuthorizeURL(EThirdPartyAuthenticationProviders AuthProvider, const csp::common::String& RedirectURL,
+        const csp::common::Optional<EThirdPartyPlatform>& ClientType, StringResultCallback Callback);
 
     /// @brief Part two of the 3rd party authentication flow
     /// Note: The steps are as follows:

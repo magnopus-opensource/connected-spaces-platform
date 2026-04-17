@@ -221,14 +221,49 @@ enum class StereoVideoType
 namespace csp::systems
 {
 
-/// @brief Indicates special handling for any thirdparty platform
-/// @note We may remove this soon, as it's deceptive implying these are the only platforms we support.
+/// @brief Indicates the thirdparty platform
 enum class EThirdPartyPlatform
 {
-    NONE,
-    UNREAL,
-    UNITY
+    None,
+    Unreal,
+    Unity,
+    Web
 };
+
+inline std::string ThirdPartyPlatformToString(csp::systems::EThirdPartyPlatform Platform)
+{
+    std::string PlatformString;
+    switch (Platform)
+    {
+    case csp::systems::EThirdPartyPlatform::None:
+    {
+        PlatformString = "None";
+        break;
+    }
+    case csp::systems::EThirdPartyPlatform::Unreal:
+    {
+        PlatformString = "Unreal";
+        break;
+    }
+    case csp::systems::EThirdPartyPlatform::Unity:
+    {
+        PlatformString = "Unity";
+        break;
+    }
+    case csp::systems::EThirdPartyPlatform::Web:
+    {
+        PlatformString = "Web";
+        break;
+    }
+    default:
+    {
+        PlatformString = std::string("Unknown platform. Value") + std::to_string(static_cast<unsigned int>(Platform));
+        break;
+    }
+    }
+
+    return PlatformString;
+}
 
 /// @brief Code to indicate the result of a request.
 /// Request results should be checked for a success by clients before using any other accessors.
