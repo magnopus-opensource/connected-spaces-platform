@@ -49,6 +49,8 @@ conan install . -s build_type=<CONFIG> --build=missing --profile:host=profiles/h
 
 ### Notes
 
+* When switching between different profiles, delete the generated `ConanPresets.json` file in the repository root.
+  Otherwise, you may encounter conflicting preset errors.
 * If using a **multi-config generator**, install dependencies for **both `Debug` and `Release`**.
 * If using the **Xcode generator**, you must explicitly set it:
 
@@ -88,6 +90,13 @@ After this step, the build system will be generated in the `build/` directory.
 
 * Tests are **not supported when building shared libraries**
   → Use a **static build** if you need to run tests
+* If configuring for Emscripten, be sure to append:
+
+```sh
+ -DBUILD_TESTING=OFF
+```
+
+Failing to do so will cause build errors due to Emscripten not supporting dependencies used for testing.
 
 ---
 
