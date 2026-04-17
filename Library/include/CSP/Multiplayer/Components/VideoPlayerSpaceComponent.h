@@ -23,6 +23,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IAudioControlComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
@@ -85,6 +86,8 @@ enum class VideoPlayerPropertyKeys : uint16_t
     IsVirtualVisible,
     StereoVideoType,
     IsStereoFlipped,
+    Volume,
+    AudioType,
     Num
 };
 
@@ -93,7 +96,7 @@ enum class VideoPlayerPropertyKeys : uint16_t
 ///
 /// You can use it to stream videos from a URL or play videos stored as assets in CSP, allowing users to watch videos directly within the virtual
 /// environment.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IAudioControlComponent, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
     /// @brief Constructs the video player component, and associates it with the specified Parent space entity.
@@ -186,16 +189,6 @@ public:
     /// @param Value True if the video will resize automatically, false otherwise.
     void SetIsAutoResize(bool Value);
 
-    /// @brief Gets the radius from this component origin within which the audio of this video can be heard by the user.
-    /// @note Only when the user position is within this radius the audio of the video should be heard.
-    /// @return The radius within which the audio of the video can be heard by the user.
-    float GetAttenuationRadius() const;
-
-    /// @brief Sets the radius from this component origin within which the audio of this video can be heard by the user.
-    /// @note Only when the user position is within this radius the audio of the video should be heard.
-    /// @param Value The radius within which the audio of the video can be heard by the user.
-    void SetAttenuationRadius(float Value);
-
     /// @brief Retrieves the playback state of the video of this component.
     /// @return The playback state of the video.
     VideoPlayerPlaybackState GetPlaybackState() const;
@@ -244,6 +237,22 @@ public:
     /// @param Value True if the stereo frames are flipped, false for default.
     void SetIsStereoFlipped(bool Value);
 
+    /// \addtogroup IAudioControlComponent
+    /// @{
+    /// @copydoc IAudioControlComponent::GetAudioType()
+    AudioType GetAudioType() const override;
+    /// @copydoc IAudioControlComponent::SetAudioType()
+    void SetAudioType(AudioType Value) override;
+    /// @copydoc IAudioControlComponent::GetAttenuationRadius()
+    float GetAttenuationRadius() const override;
+    /// @copydoc IAudioControlComponent::SetAttenuationRadius()
+    void SetAttenuationRadius(float Value) override;
+    /// @copydoc IAudioControlComponent::GetVolume()
+    float GetVolume() const override;
+    /// @copydoc IAudioControlComponent::SetVolume()
+    void SetVolume(float Value) override;
+    /// @}
+ 
     /// \addtogroup IVisibleComponent
     /// @{
     /// @copydoc IVisibleComponent::GetIsVisible()

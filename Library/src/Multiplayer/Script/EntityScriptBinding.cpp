@@ -359,7 +359,9 @@ void BindComponents(qjs::Context::Module* Module)
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVisible, "isVisible")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsARVisible, "isARVisible")
         .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsVirtualVisible, "isVirtualVisible")
-        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsEnabled, "isEnabled");
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, IsEnabled, "isEnabled")
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, AudioType, "audioType")
+        .PROPERTY_GET_SET(VideoPlayerSpaceComponent, Volume, "volume");
 
     Module->class_<AvatarSpaceComponentScriptInterface>("AvatarSpaceComponent")
         .constructor<>()

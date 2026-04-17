@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
-
+#include "CSP/Common/Systems/Log/LogSystem.h"
 #include "CSP/Multiplayer/OnlineRealtimeEngine.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+
 #include "Multiplayer/Component/Schema.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
+
+#include <fmt/format.h>
 
 namespace
 {
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
+constexpr const float DefaultVolume = 1.f;
 }
 
 namespace csp::multiplayer
@@ -122,6 +126,14 @@ const auto Schema = ComponentBase::ComponentSchema {
         {
             static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::IsVirtualVisible),
             true,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::Volume),
+            DefaultVolume,
+        },
+        {
+            static_cast<ComponentBase::PropertyKey>(VideoPlayerPropertyKeys::AudioType),
+            static_cast<int64_t>(AudioType::Spatial),
         },
     },
 };
@@ -264,16 +276,6 @@ float VideoPlayerSpaceComponent::GetTimeSincePlay() const { return GetFloatPrope
 
 void VideoPlayerSpaceComponent::SetTimeSincePlay(float Value) { SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay), Value); }
 
-float VideoPlayerSpaceComponent::GetAttenuationRadius() const
-{
-    return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
-}
-
-void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
-{
-    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
-}
-
 VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() const
 {
     return static_cast<VideoPlayerSourceType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)));
@@ -316,6 +318,45 @@ bool VideoPlayerSpaceComponent::GetIsVirtualVisible() const
 void VideoPlayerSpaceComponent::SetIsVirtualVisible(bool Value)
 {
     SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVirtualVisible), Value);
+}
+
+/* IAudioControlComponent */
+
+float VideoPlayerSpaceComponent::GetAttenuationRadius() const
+{
+    return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
+}
+
+void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
+{
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
+}
+
+AudioType VideoPlayerSpaceComponent::GetAudioType() const
+{
+    return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType)));
+}
+
+void VideoPlayerSpaceComponent::SetAudioType(AudioType Value)
+{
+    SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AudioType), static_cast<int64_t>(Value));
+}
+
+float VideoPlayerSpaceComponent::GetVolume() const { return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume)); }
+
+void VideoPlayerSpaceComponent::SetVolume(float Value)
+{
+    if (Value >= 0.f && Value <= 1.f)
+    {
+        SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Volume), Value);
+    }
+    else
+    {
+        if (LogSystem != nullptr)
+        {
+            LogSystem->LogMsg(csp::common::LogLevel::Error, fmt::format("Invalid value for volume ({:.2f}). Must be from 0.0 to 1.0", Value).c_str());
+        }
+    }
 }
 
 /* IEnableableComponent */

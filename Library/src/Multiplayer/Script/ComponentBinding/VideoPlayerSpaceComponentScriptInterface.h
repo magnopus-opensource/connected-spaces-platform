@@ -59,6 +59,9 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsVirtualVisible);
 
     DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+
+    DECLARE_SCRIPT_PROPERTY(int32_t, AudioType);
+    DECLARE_SCRIPT_PROPERTY(float, Volume);
 };
 
 } // namespace csp::multiplayer
