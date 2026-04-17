@@ -207,7 +207,7 @@ OnlineRealtimeEngine::OnlineRealtimeEngine(MultiplayerConnection& InMultiplayerC
     , NetworkEventBus(&NetworkEventBus)
     , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
 {
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 }
@@ -217,7 +217,7 @@ OnlineRealtimeEngine::~OnlineRealtimeEngine()
     DisableLeaderElection();
     LocalDestroyAllEntities();
 
-    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+    EntityScriptBinding::RemoveBinding(ScriptBinding.get(), *ScriptRunner);
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 

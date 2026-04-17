@@ -267,7 +267,7 @@ private:
     std::recursive_mutex EntitiesLock;
 
     std::unique_ptr<class OfflineSpaceEntityEventHandler> EventHandler;
-    EntityScriptBinding* ScriptBinding;
+    std::unique_ptr<EntityScriptBinding> ScriptBinding;
 
     csp::multiplayer::ComponentSchemaRegistry ComponentRegistry;
 };

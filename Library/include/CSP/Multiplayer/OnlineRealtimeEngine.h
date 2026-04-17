@@ -475,7 +475,7 @@ private:
         LocomotionModel LocomotionModel, EntityCreatedCallback Callback);
     CSP_END_IGNORE
 
-    class EntityScriptBinding* ScriptBinding;
+    std::unique_ptr<class EntityScriptBinding> ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
 
     // Leader election ---------------------------------------------------------

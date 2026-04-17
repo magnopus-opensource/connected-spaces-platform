@@ -117,7 +117,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
     , ScriptRunner { &RemoteScriptRunner }
     , ComponentRegistry { MergeWithLegacyComponents(AdditionalComponents) }
 {
-    ScriptBinding = EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner);
+    ScriptBinding = std::unique_ptr<EntityScriptBinding>(EntityScriptBinding::BindEntitySystem(this, *this->LogSystem, *this->ScriptRunner));
 
     // Is this undefined behaviour? Probably only if we actually use the pointer during construction
     EventHandler = std::make_unique<csp::multiplayer::OfflineSpaceEntityEventHandler>(this);
@@ -127,7 +127,7 @@ OfflineRealtimeEngine::OfflineRealtimeEngine(csp::common::LogSystem& LogSystem, 
 
 OfflineRealtimeEngine::~OfflineRealtimeEngine()
 {
-    EntityScriptBinding::RemoveBinding(ScriptBinding, *ScriptRunner);
+    EntityScriptBinding::RemoveBinding(ScriptBinding.get(), *ScriptRunner);
 
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler.get());
 }
