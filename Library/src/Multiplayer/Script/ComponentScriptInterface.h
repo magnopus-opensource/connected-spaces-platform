@@ -28,7 +28,7 @@ class ComponentBase;
 
 constexpr int64_t INVALID_COMPONENT_ID = -1;
 
-class CSP_API ComponentScriptInterface
+class ComponentScriptInterface
 {
 public:
     using Vector2 = std::vector<float>;
